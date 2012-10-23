@@ -1,0 +1,44 @@
+{% extends "index.html" %} 
+ 
+{% block content %} 
+
+<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+
+
+<div id="content" class="flex">
+  
+  <form action="/configuration/logevents/{{id}}" method="post">
+  {% csrf_token %}
+
+  <table>
+    <tr>
+      <td>Event Type</td> 
+      <td>{{ form.eventType }}</td>
+      <td>{{ form.eventType.errors }}</td>
+    </tr>
+    <tr>
+      <td>Event Detail</td> 
+      <td>{{ form.eventDetail }}</td>
+      <td>{{ form.eventDetail.errors }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Save" /> </td>
+    </tr>
+  </table> 
+
+  
+
+  </form>
+
+</div>
+
+<div id="msg">
+<span style="color: red;" >{{ message }}</span>
+</div>
+
+{% endblock %} 

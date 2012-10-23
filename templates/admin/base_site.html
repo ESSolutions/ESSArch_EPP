@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans 'ESSArch Administration' %}
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="/static/esstools.css" type="text/css" 
+      media="all" />
+<link rel="stylesheet" href="/static/superfish.css" type="text/css" 
+      media="all" />
+{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/static/hoverIntent.js"></script>
+<script type="text/javascript" src="/static/superfish.js"></script>
+
+<script type="text/javascript">
+(function($) {
+    $(document).ready(function(){
+        $('ul.sf-menu').superfish();
+    });
+})(jQuery);
+</script>
+
+{% endblock %}
+
+
+{% block branding %}
+  <div id="header-wrapper">
+    <div id="branding-wrapper">
+      <h2 class="site-name"><a href="/" title="ESSArch">ESSArch</a></h2>
+      <div class='site-slogan'>The preservation platform</div>
+    </div><!-- end branding wrapper -->
+  </div><!-- end header-wrapper -->
+{% endblock %}
+
+{% block nav-global %}
+  
+  {% if user.is_active and not user.is_staff %}
+  <div id="user-tools">
+    {% trans 'Welcome,' %}
+    <strong>{% filter force_escape %}{% firstof user.first_name user.username %}{% endfilter %}</strong>.
+    <a href="/changepassword">{% trans 'Change password' %}</a> /
+    <a href="/logout">{% trans 'Log out' %}</a>
+  </div>
+  {% endif %}
+
+
+  <div id="smenu">
+    <ul id="contents" class="sf-menu"> 
+<!--
+      <li>
+	<a href="#vertical" class="sf-with-ul">{% trans 'INFORMATION PACKAGE' %}</a>
+	<ul>
+          <li><a href="/prepare/new">Prepare new</a></li>
+          <li><a href="/create">Create IP</a></li>
+          <li><a href="/deliver">Deliver IP</a></li>
+	</ul>
+      </li>
+      <li><a href="/logevents" title="Log Events etc ..">LOG EVENTS</a></li>
+-->
+      {% if user.is_staff %}  
+      <li> 
+	<a href="/admin" class="sf-with-ul">ADMINISTRATION</a>
+<!--
+	<ul>
+          <li><a href="/admin/configuration/logevent/">Log Event Types</a></li>
+          <li><a href="/admin/configuration/parameter/">User Parameters</a></li>
+          <li><a href="/admin/ip/informationpackage/">Information Packages</a></li>
+          <li><a href="/configuration/logevents/install_defaults"><i>Install Default Log Events</a></i></li>
+	</ul>
+-->
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+{% endblock %}
+
+{% block breadcrumbs %} <br/> {% endblock %}
+
+
+

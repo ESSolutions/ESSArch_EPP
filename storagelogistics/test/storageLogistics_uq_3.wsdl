@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2008 sp1 (http://www.altova.com) by none (none) -->
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://ESSArch_Instance.ra.se/StorageLogisticsService" targetNamespace="http://ESSArch_Instance.ra.se/StorageLogisticsService">
+	<wsdl:types>
+		<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ESSArch_Instance.ra.se/StorageLogisticsService" elementFormDefault="unqualified">
+			<xs:element name="storagelogisticsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returncode" type="xs:integer" nillable="true"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="storagelogisticsRequest">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="storagemediumid" type="xs:string"/>
+						<xs:element name="eventtype" type="xs:integer"/>
+						<xs:element name="storagemediumlocation" type="xs:string"/>
+						<xs:element name="storagemediumdestination" type="xs:string"/>
+						<xs:element name="useridentifiervalue" type="xs:string"/>
+						<xs:element name="userpassword" type="xs:string"/>
+						<xs:element name="eventdatetime" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+	</wsdl:types>
+	<wsdl:message name="storagelogisticsSoapIn">
+		<wsdl:part name="parameters" element="tns:storagelogisticsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="storagelogisticsSoapOut">
+		<wsdl:part name="parameters" element="tns:storagelogisticsResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="StorageLogisticsService_PortType">
+		<wsdl:operation name="storagelogistics">
+			<wsdl:input message="tns:storagelogisticsSoapIn"/>
+			<wsdl:output message="tns:storagelogisticsSoapOut"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="StorageLogisticsService_Binding" type="tns:StorageLogisticsService_PortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="storagelogistics">
+			<soap:operation soapAction="http://ESSArch_Instance.ra.se/StorageLogisticsService/storagelogistics"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="StorageLogisticsService">
+		<wsdl:documentation>Storage Logistics Web Service. Methods -storagelogistics(storagemediumid, eventtype, storagemediumlocation, storagemediumdestination, useridentifiervalue, userpassword, eventdatetime): Return statuscode value 0=OK, 1=Fail.</wsdl:documentation>
+		<wsdl:port name="StorageLogisticsService_Port" binding="tns:StorageLogisticsService_Binding">
+			<soap:address location="https://192.121.221.69/webservice/StorageLogisticsService"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
