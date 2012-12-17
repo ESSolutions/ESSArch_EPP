@@ -8,6 +8,8 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
+from books.models import Publisher
+
 urlpatterns = patterns('',
     # Configuration URLS:
     url(r'^$', 'configuration.views.index', name='home'),
@@ -26,4 +28,7 @@ urlpatterns = patterns('',
 
     # grappelli admin
     #(r'^grappelli/', include('grappelli.urls')),
+    (r'^publishers/$', ListView.as_view(
+        model=Publisher,
+    )),
 )
