@@ -20,9 +20,9 @@
     Email - essarch@essolutions.se
 '''
 __majorversion__ = "2.5"
-__revision__ = "$Revision: 43 $"
-__date__ = "$Date: 2012-12-17 11:53:07 +0100 (Mon, 17 Dec 2012) $"
-__author__ = "$Author: henrik $"
+__revision__ = "$Revision$"
+__date__ = "$Date$"
+__author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
@@ -36,9 +36,11 @@ class permission(models.Model):
             ("ESSArch_SVAR", "site SVAR"),
             ("ESSArch_HLA", "site HLA"),
             ("ESSArch_Globen", "site Globen"),
+            ("ESSArch_RA-OSLO", "site Oslo"),
             ("essadministrate", "ESSArch admin "),
             ("essaccess", "ESSArch access"),
             ("essingest", "ESSArch ingest"),
+            ("infoclass_0", "Information Class 0"),
             ("infoclass_1", "Information Class 1"),
             ("infoclass_2", "Information Class 2"),
             ("infoclass_3", "Information Class 3"),

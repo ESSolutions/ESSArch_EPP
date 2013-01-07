@@ -21,9 +21,9 @@
     Email - essarch@essolutions.se
 '''
 __majorversion__ = "2.5"
-__revision__ = "$Revision: 43 $"
-__date__ = "$Date: 2012-12-17 11:53:07 +0100 (Mon, 17 Dec 2012) $"
-__author__ = "$Author: henrik $"
+__revision__ = "$Revision$"
+__date__ = "$Date$"
+__author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 ################################################################################
