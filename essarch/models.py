@@ -46,3 +46,102 @@ class permission(models.Model):
             ("infoclass_3", "Information Class 3"),
             ("infoclass_4", "Information Class 4"),
         )
+
+class ArchiveObject(models.Model):
+    ObjectUUID = models.CharField(max_length=36, unique=True)
+    PolicyId = models.IntegerField()
+    ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
+    ObjectPackageName = models.CharField(max_length=255)
+    ObjectSize = models.BigIntegerField()
+    ObjectNumItems = models.IntegerField()
+    ObjectMessageDigestAlgorithm = models.IntegerField()
+    ObjectMessageDigest = models.CharField(max_length=128)
+    ObjectPath = models.CharField(max_length=255)
+    ObjectActive = models.IntegerField()
+    MetaObjectIdentifier = models.CharField(max_length=255)
+    MetaObjectSize = models.BigIntegerField()
+    CMetaMessageDigestAlgorithm = models.IntegerField()
+    CMetaMessageDigest = models.CharField(max_length=128)
+    PMetaMessageDigestAlgorithm = models.IntegerField()
+    PMetaMessageDigest = models.CharField(max_length=128)
+    DataObjectSize = models.BigIntegerField()
+    DataObjectNumItems = models.IntegerField()
+    Status = models.IntegerField()
+    StatusActivity = models.IntegerField()
+    StatusProcess = models.IntegerField()
+    LastEventDate = models.DateTimeField()
+    linkingAgentIdentifierValue = models.CharField(max_length=45)
+    CreateDate = models.DateTimeField()
+    CreateAgentIdentifierValue = models.CharField(max_length=45)
+    EntryDate = models.DateTimeField()
+    EntryAgentIdentifierValue = models.CharField(max_length=45)
+    OAISPackageType = models.IntegerField()
+    preservationLevelValue = models.IntegerField()
+    DELIVERYTYPE = models.CharField(max_length=255)
+    INFORMATIONCLASS = models.IntegerField()
+    Generation = models.IntegerField()
+    LocalDBdatetime = models.DateTimeField()
+    ExtDBdatetime = models.DateTimeField()
+    class Meta:
+        db_table = 'IngestObject'
+
+class ArchiveObjectData(models.Model):
+    #UUID = models.CharField(max_length=36)
+    UUID = models.ForeignKey(ArchiveObject, db_column='UUID', to_field='ObjectUUID')
+    Creator = models.CharField(max_length=255)
+    System = models.CharField(max_length=255)
+    Version = models.CharField(max_length=255)
+    class Meta:
+        db_table = 'Object_data'
+
+class ArchiveObjectMetadata(models.Model):
+    #ObjectUUID = models.CharField(max_length=36)
+    ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID')
+    ObjectIdentifierValue = models.CharField(max_length=255)
+    ObjectMetadataType = models.IntegerField()
+    ObjectMetadataServer = models.IntegerField()
+    ObjectMetadataURL = models.CharField(max_length=255)
+    ObjectMetadataBLOB = models.TextField()
+    linkingAgentIdentifierValue = models.CharField(max_length=45)
+    LocalDBdatetime = models.DateTimeField()
+    ExtDBdatetime = models.DateTimeField()
+    class Meta:
+        db_table = 'IngestObjectMetadata'
+
+class ArchiveObjectRel(models.Model):
+    #AIC_UUID = models.CharField(max_length=36)
+    AIC_UUID = models.ForeignKey(ArchiveObject, db_column='AIC_UUID', related_name='relaic_set', to_field='ObjectUUID')
+    #UUID = models.CharField(max_length=36)
+    UUID = models.ForeignKey(ArchiveObject, db_column='UUID', related_name='reluuid_set', to_field='ObjectUUID')
+    class Meta:
+        db_table = 'Object_rel'
+
+class agentIdentifier(models.Model):
+    agentIdentifierValue = models.CharField(max_length=45)
+    agentName = models.CharField(max_length=45)
+    agentType = models.IntegerField()
+    class Meta:
+        db_table = 'agentIdentifier'
+
+class eventIdentifier(models.Model):
+    eventIdentifierValue = models.CharField(max_length=36, unique=True)
+    eventType = models.IntegerField()
+    eventDateTime = models.DateTimeField()
+    eventDetail = models.CharField(max_length=255)
+    eventApplication = models.CharField(max_length=50)
+    eventVersion = models.CharField(max_length=45)
+    eventOutcome = models.IntegerField()
+    eventOutcomeDetailNote = models.CharField(max_length=255)
+    linkingAgentIdentifierValue = models.CharField(max_length=45)
+    linkingObjectIdentifierValue = models.CharField(max_length=255)
+    class Meta:
+        db_table = 'eventIdentifier'
+
+class eventType_codes(models.Model):
+    code = models.IntegerField()
+    desc_sv = models.CharField(max_length=100)
+    desc_en = models.CharField(max_length=100)
+    localDB = models.IntegerField()
+    externalDB = models.IntegerField()
+    class Meta:
+        db_table = 'eventType_codes'

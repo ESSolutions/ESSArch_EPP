@@ -14,4 +14,5 @@ class PublisherDetailView(DetailView):
         context = super(PublisherDetailView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['book_list'] = Book.objects.all()
+        print 'book_list: %s' % context['book_list']
         return context

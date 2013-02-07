@@ -31,6 +31,8 @@ from django.views.generic import DetailView, ListView
 
 from django.conf import settings
 
+from books.views import PublisherDetailView
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -38,24 +40,23 @@ admin.autodiscover()
 from books.models import Publisher
 
 urlpatterns = patterns('',
-    # Configuration URLS:
+    # Standard URLS:
     url(r'^$', 'configuration.views.index', name='home'),
-    url(r'^logout$', 'configuration.views.logout_view'),
-    url(r'^changepassword$', 'configuration.views.change_password'),
-    #url(r'^configuration/parameters$', 'configuration.views.parameters'),
-    #url(r'^configuration/parameters/(?P<username>\w+)$', 'configuration.views.userparameters'),
-
-
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+#    url(r'^logout$', 'configuration.views.logout_view'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
+    url(r'^admin/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
+    
+    # URLS to include:
+    url(r'^configuration/', include('configuration.urls')),
+    url(r'^controlarea/', include('controlarea.urls')),
+    url(r'^admin/', include(admin.site.urls)),
+    #(r'^grappelli/', include('grappelli.urls')),
 
     # StorageLogistics_ws URLS:
     url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),
 
-    # grappelli admin
-    #(r'^grappelli/', include('grappelli.urls')),
-    (r'^publishers/$', ListView.as_view(
-        model=Publisher,
-    )),
+    url(r'^publishers/$', PublisherDetailView.as_view()),
+    #url(r'^publishers/$', ListView.as_view(model=Publisher,)),
 )

@@ -1,6 +1,7 @@
 from django.db import models
 
 class Publisher(models.Model):
+    uuid = models.CharField(max_length=36, unique=True)
     name = models.CharField(max_length=30)
     address = models.CharField(max_length=50)
     city = models.CharField(max_length=60)
@@ -24,5 +25,5 @@ class Author(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=100)
     authors = models.ManyToManyField('Author')
-    publisher = models.ForeignKey(Publisher)
+    publisher_uuid = models.ForeignKey(Publisher, db_column='publisher_uuid', to_field='uuid')
     publication_date = models.DateField()

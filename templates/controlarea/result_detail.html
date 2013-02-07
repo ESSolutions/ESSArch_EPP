@@ -1,0 +1,29 @@
+{% extends 'index.html' %}
+
+{% block content %}
+	<h2>Result</h2>
+    <p></p>
+    {% if object.uuid %}
+        <h2>IP Object: {{ object.uuid }}</h2>
+    {% else %}
+    	<h2>IP Object: {{ object.ObjectUUID }}</h2>
+    {% endif %}
+    <p></p>
+    <h2>Status code: {{ status_code }}</h2>
+    <p></p>
+    <h2>Status description:</h2>
+    {% for item in status_detail.0 %}
+      	<p>{{ item }}</p>
+    {% endfor %}
+    <h2>Problem description:</h2>
+    {% if status_detail.1 %}
+	    {% for item in status_detail.1 %}
+	      	<p>{{ item }}</p>
+	    {% endfor %}
+    {% else %}
+    	<p>None</p>
+    {% endif %}
+    
+    <p></p>
+    <a href="{% url home %}">Return</a> 
+{% endblock %}

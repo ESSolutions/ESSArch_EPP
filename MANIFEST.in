@@ -1,0 +1,1 @@
+recursive-include *.js *.html *.txt *.gif *.png *.css *.wsdl *.xml *.xsd
