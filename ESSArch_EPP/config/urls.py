@@ -25,11 +25,10 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-#from django.conf.urls.defaults import patterns, url
-from django.conf.urls import patterns, include, url
-from django.views.generic import DetailView, ListView
 
-from django.conf import settings
+from django.conf.urls import patterns, include, url
+
+#from django.conf import settings
 
 from books.views import PublisherDetailView
 
@@ -42,7 +41,6 @@ from books.models import Publisher
 urlpatterns = patterns('',
     # Standard URLS:
     url(r'^$', 'configuration.views.index', name='home'),
-#    url(r'^logout$', 'configuration.views.logout_view'),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
@@ -51,6 +49,8 @@ urlpatterns = patterns('',
     # URLS to include:
     url(r'^configuration/', include('configuration.urls')),
     url(r'^controlarea/', include('controlarea.urls')),
+    url(r'^access/', include('access.urls')),
+    url(r'^ingest/', include('ingest.urls')),
     url(r'^admin/', include(admin.site.urls)),
     #(r'^grappelli/', include('grappelli.urls')),
 
@@ -58,5 +58,4 @@ urlpatterns = patterns('',
     url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),
 
     url(r'^publishers/$', PublisherDetailView.as_view()),
-    #url(r'^publishers/$', ListView.as_view(model=Publisher,)),
 )

@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+
+{% block content %}
+    
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+<br/>
+<small>[posted {{access.posted|timesince}} ago]</small>
+
+<div class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+		<th>Name</th>
+		<th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+    	<tr class="row1">
+    		<td>ReqUUID</td>
+    		<td>{{ access.ReqUUID }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>ReqType</td>
+    		<td>{{ access.ReqType }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>ReqPurpose</td>
+    		<td>{{ access.ReqPurpose }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>User</td>
+    		<td>{{ access.user }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>ObjectIdentifierValue</td>
+    		<td>{{ access.ObjectIdentifierValue }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>StoragemediumID</td>
+    		<td>{{ access.storageMediumID }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Path</td>
+    		<td>{{ access.Path }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Status</td>
+    		<td>{{ access.Status }}</td>
+    	</tr>
+    </tbody>
+  </table>
+</div>
+
+<br/>
+<a href="{% url access_update access.id %}">Edit access request</a> | <a href="{% url access_delete access.id %}">Delete access request</a>
+
+</div>    
+    
+    
+{% endblock %}

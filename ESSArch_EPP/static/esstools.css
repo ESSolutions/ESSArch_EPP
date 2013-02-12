@@ -102,6 +102,8 @@ tr.odd td, tr.even td {
 padding: 0.5em;
 }
 
+.required:after { content:" *";color:red }
+
 a {
 text-decoration: none;
 }

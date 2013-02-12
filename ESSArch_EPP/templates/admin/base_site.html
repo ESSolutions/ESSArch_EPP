@@ -65,7 +65,24 @@
 			  {#}<li><a href="/controlarea/list">{% trans 'ValidateIP' %}</a></li>#}
 			</ul>
 	    </li>
-	 
+
+		<li>
+			<a href="#vertical" class="sf-with-ul" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
+			<ul>
+			  <li><a href="{% url ingest_listobj %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url ingest_create %}">{% trans 'Create new ingest request' %}</a></li>
+			  <li><a href="{% url ingest_list %}">{% trans 'List ingest request queue' %}</a></li>
+			</ul>
+	    </li>
+ 
+		<li>
+			<a href="#vertical" class="sf-with-ul" title="Access information packages etc .." >{% trans 'ACCESS' %}</a>
+			<ul>
+			  <li><a href="{% url access_listobj %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url access_create %}">{% trans 'Create new access request' %}</a></li>
+			  <li><a href="{% url access_list %}">{% trans 'List access request queue' %}</a></li>
+			</ul>
+	    </li>
 
       	{% if user.is_staff %}  
 		<li> 

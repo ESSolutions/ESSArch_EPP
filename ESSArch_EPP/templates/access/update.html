@@ -1,0 +1,26 @@
+{% extends 'index.html' %}
+
+{% block content %}    
+
+<div style="margin:20px">
+
+	<H1>Change access request</H1>
+	<p>
+	<p><i>Please fill in the fields or use prefilled data   (* indicates mandatory field)</i></p>
+	<br>
+
+    <form action="" method="post">
+    	{% csrf_token %}
+		<table id="result_list">
+			<thead>
+			</thead>
+			<tbody>
+        		{{ form.as_table }}    
+			</tbody>
+		</table>
+		<br/>
+        <p><input type="submit" value="Update &rarr;" /></p>
+    </form>
+</div>
+
+{% endblock %}
