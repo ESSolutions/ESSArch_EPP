@@ -1,0 +1,111 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+    
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+<br/>
+<small>[updated {{object.storageMediumDate|timesince}} ago]</small>
+
+<div class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+		<th>Name</th>
+		<th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+    	<tr class="row1">
+    		<td>Medium UUID</td>
+    		<td>{{ object.storageMediumUUID }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Type</td>
+    		<td>{{ MediumType_CHOICES|access:object.storageMedium }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>ID</td>
+    		<td>{{ object.storageMediumID }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>LastUpdate</td>
+    		<td>{{ object.storageMediumDate }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Location</td>
+    		<td>{{ object.storageMediumLocation }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Location Status</td>
+    		<td>{{ MediumLocationStatus_CHOICES|access:object.storageMediumLocationStatus }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>BlockSize</td>
+    		<td>{{ MediumBlockSize_CHOICES|access:object.storageMediumBlockSize }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Used Capacity</td>
+    		<td>{{ object.storageMediumUsedCapacity }} bytes</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Status</td>
+    		<td>{{ MediumStatus_CHOICES|access:object.storageMediumStatus }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Format</td>
+    		<td>{{ MediumFormat_CHOICES|access:object.storageMediumFormat }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Used (mounts)</td>
+    		<td>{{ object.storageMediumMounts }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>linkingAgentIdentifierValue</td>
+    		<td>{{ object.linkingAgentIdentifierValue }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Create Date</td>
+    		<td>{{ object.CreateDate }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>CreateAgentIdentifierValue</td>
+    		<td>{{ object.CreateAgentIdentifierValue }}</td>
+    	</tr>
+    </tbody>
+  </table>
+</div>
+
+<br/>
+<H1>Medium content</H1>
+<br/>
+<div class="results">
+{% if content_list %}
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>IP Object</th>
+                <th>Content location</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for obj in content_list %}
+		      	<tr class="row{% cycle '1' '2' %}">		
+					<td>{{ obj.ObjectIdentifierValue }}</td>
+					<td>{{ obj.contentLocationValue }}</td>
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No objects exists
+{% endif %}
+</div>
+
+<br/>
+<a href="{% url admin_liststoragemedium %}">list storagemedium</a>
+
+</div>    
+    
+{% endblock %}

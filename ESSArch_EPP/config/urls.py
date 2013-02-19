@@ -51,6 +51,8 @@ urlpatterns = patterns('',
     url(r'^controlarea/', include('controlarea.urls')),
     url(r'^access/', include('access.urls')),
     url(r'^ingest/', include('ingest.urls')),
+    url(r'^administration/', include('administration.urls')),
+    url(r'^reports/', include('reports.urls')),
     url(r'^admin/', include(admin.site.urls)),
     #(r'^grappelli/', include('grappelli.urls')),
 

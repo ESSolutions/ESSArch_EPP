@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 '''
 
-from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter
+from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSArchPolicy, ESSConfig, ESSProc
 from django.contrib import admin
 
 # Logevents
@@ -116,23 +116,104 @@ class IPParameterAdmin( admin.ModelAdmin ):
                               'policyid',
                               'receipt_email'
                               )}),
-                #('Reference metadata for files in information package',{
-                #   'classes': ('collapse', 'wide'),
-                #   'fields': (
-                #              'file_id',
-                #              'file_name',
-                #              'file_createdate',
-                #              'file_mime_type',
-                #              'file_format',
-                #              'file_format_size',
-                #              'file_type',
-                #              'file_checksum',
-                #              'file_checksum_type',
-                #              'file_transform_type',
-                #              'file_transform_key'
-                #              )}),
                 )
 
 admin.site.register(IPParameter, IPParameterAdmin)
 
+# ESSArchPolicy
+class ESSArchPolicyAdmin( admin.ModelAdmin ):
+    list_display = ( 'PolicyName', 'PolicyID', 'PolicyStat', 'AISProjectName', 'AISProjectID', 'Mode' )
+    fieldsets = (
+                (None,{
+                   'classes': ('wide'),
+                   'fields': (
+                              'PolicyName',
+                              'PolicyID',
+                              'PolicyStat',
+                              'AISProjectName',
+                              'AISProjectID',
+                              'Mode',
+                              'WaitProjectApproval',
+                              'ChecksumAlgorithm',
+                              'ValidateChecksum',
+                              'ValidateXML',
+                              'ManualControll',
+                              'AIPType',
+                              'AIPpath',
+                              'PreIngestMetadata',
+                              'IngestMetadata',
+                              'INFORMATIONCLASS',
+                              'IngestPath',
+                              'IngestDelete',
+                              )}),
+                ('Storage method 1',{
+                   'classes': ('collapse','wide'),
+                   'fields': (
+                              'sm_1',
+                              'sm_type_1',
+                              'sm_format_1',
+                              'sm_blocksize_1',
+                              'sm_maxCapacity_1',
+                              'sm_minChunkSize_1',
+                              'sm_minContainerSize_1',
+                              'sm_minCapacityWarning_1',
+                              'sm_target_1',
+                              )}),
+                ('Storage method 2',{
+                   'classes': ('collapse','wide'),
+                   'fields': (
+                              'sm_2',
+                              'sm_type_2',
+                              'sm_format_2',
+                              'sm_blocksize_2',
+                              'sm_maxCapacity_2',
+                              'sm_minChunkSize_2',
+                              'sm_minContainerSize_2',
+                              'sm_minCapacityWarning_2',
+                              'sm_target_2',
+                              )}),
+                ('Storage method 3',{
+                   'classes': ('collapse','wide'),
+                   'fields': (
+                              'sm_3',
+                              'sm_type_3',
+                              'sm_format_3',
+                              'sm_blocksize_3',
+                              'sm_maxCapacity_3',
+                              'sm_minChunkSize_3',
+                              'sm_minContainerSize_3',
+                              'sm_minCapacityWarning_3',
+                              'sm_target_3',
+                              )}),
+                ('Storage method 4',{
+                   'classes': ('collapse','wide'),
+                   'fields': (
+                              'sm_4',
+                              'sm_type_4',
+                              'sm_format_4',
+                              'sm_blocksize_4',
+                              'sm_maxCapacity_4',
+                              'sm_minChunkSize_4',
+                              'sm_minContainerSize_4',
+                              'sm_minCapacityWarning_4',
+                              'sm_target_4',
+                              )}),
+                )
 
+admin.site.register(ESSArchPolicy, ESSArchPolicyAdmin)
+
+# ESSConfig (core)
+class ESSConfigAdmin( admin.ModelAdmin ):
+    list_display = ( 'Name', 'Value' )
+    readonly_fields = ('Name',)
+    fields = ('Name', 'Value')
+
+admin.site.register(ESSConfig, ESSConfigAdmin)
+
+# ESSProc (core)
+class ESSProcAdmin( admin.ModelAdmin ):
+    list_display = ( 'Name', 'Status', 'Run', 'PID', 'Pause' )
+    readonly_fields = ('Name',)
+    fields = ('Name', 'Path', 'LogFile', 'Time', 'Status', 'Run', 'PID', 'Pause')
+
+admin.site.register(ESSProc, ESSProcAdmin)

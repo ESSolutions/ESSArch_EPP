@@ -146,6 +146,8 @@ INSTALLED_APPS = (
     'books',
     'access',
     'ingest',
+    'administration',
+    'reports',
 )
 
 # A sample logging configuration. The only tangible logging

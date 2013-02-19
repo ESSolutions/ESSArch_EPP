@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
 
 from models import MyFile
-from essarch.models import ArchiveObject
+from essarch.models import ArchiveObject, PackageType_CHOICES
 from configuration.models import Path, Parameter
 import essarch.ControlAreaFunc as ControlAreaFunc
 
@@ -19,12 +19,13 @@ import ESSMD, os
 from ESSPGM import Check as g_functions
 
 class MyFileList(object):
-    def __init__(self,filelist=None,PreIngestPath='',Cmets_obj=''):
+    def __init__(self,filelist=None,source_path='',gate_path='',mets_obj=''):
         if filelist is None:
             filelist = []
         self.filelist = filelist
-        self.PreIngestPath = PreIngestPath
-        self.Cmets_obj = Cmets_obj
+        self.PreIngestPath = source_path
+        self.gate_path = gate_path
+        self.mets_obj = mets_obj
     def get(self,ip_uuid = None):
         if os.path.isdir(self.PreIngestPath):
             for f in os.listdir(self.PreIngestPath): # /mottag
@@ -33,8 +34,8 @@ class MyFileList(object):
                         if os.path.isdir(os.path.join(os.path.join(self.PreIngestPath, f), ff)): # ff = ip_uuid dir
                             ip = MyFile()
                             ObjectPath = os.path.join(os.path.join(self.PreIngestPath, f), ff)
-                            Cmets_objpath = os.path.join(ObjectPath, self.Cmets_obj)
-                            res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=Cmets_objpath)
+                            mets_objpath = os.path.join(ObjectPath, self.mets_obj)
+                            res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=mets_objpath)
                             ip.directory = ObjectPath
                             ip.media = f.upper()
                             ip.uuid = ''
@@ -50,6 +51,7 @@ class MyFileList(object):
                                     elif altRecordID[0] == 'ENDDATE':
                                         ip.enddate = altRecordID[1]
                                 ip.iptype = res_info[0][3]
+                                ip.state = 'Reception'
                                 if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
                                     ip.uuid = res_info[0][1][5:]
                                 else:
@@ -58,6 +60,48 @@ class MyFileList(object):
                                 self.filelist.append(ip)
                             elif ip.uuid == ip_uuid:
                                 self.filelist = ip
+                        elif os.path.isfile(os.path.join(os.path.join(self.PreIngestPath, f), ff)): # ff = file
+                            ObjectPath = os.path.join(os.path.join(self.PreIngestPath, f), ff)
+                            if ObjectPath[-4:].lower() == '.tar':
+                                ObjectPackageName = ff
+                                ip_uuid_test = ObjectPackageName[:-4]
+                                logs_path = os.path.join( self.gate_path, 'logs' )
+                                if os.path.isdir(logs_path):
+                                    for g in os.listdir(logs_path):
+                                        if os.path.isdir(os.path.join(logs_path, g)): #AIC dir
+                                            if os.path.isdir( os.path.join( os.path.join( logs_path, g ), ip_uuid_test ) ): # ff = ip_uuid dir
+                                                aic_path = os.path.join( logs_path, g )
+                                                aic_uuid = os.path.split(aic_path)[1]
+                                                ip = MyFile()
+                                                mets_objpath = os.path.join(aic_path, self.mets_obj)
+                                                res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=mets_objpath)
+                                                ip.directory = ObjectPath
+                                                ip.media = f.upper()
+                                                ip.uuid = ''
+                                                if error == 0:
+                                                    for agent in res_info[2]:
+                                                        if agent[0] == 'ARCHIVIST' and agent[1] == 'ORGANIZATION':
+                                                            ip.creator = agent[3]
+                                                    ip.label = res_info[0][0]
+                                                    ip.createdate = res_info[1][0]
+                                                    for altRecordID in res_info[3]:
+                                                        if altRecordID[0] == 'STARTDATE':
+                                                            ip.startdate = altRecordID[1]
+                                                        elif altRecordID[0] == 'ENDDATE':
+                                                            ip.enddate = altRecordID[1]
+                                                    ip.iptype = res_info[0][3]
+                                                    ip.state = 'Reception'
+                                                    if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
+                                                        ip.uuid = res_info[0][1][5:]
+                                                    else:
+                                                        ip.uuid = res_info[0][1]
+                                                    ip.aic_uuid = aic_uuid
+                                                if ip_uuid is None:
+                                                    self.filelist.append(ip)
+                                                elif ip.uuid == ip_uuid:
+                                                    self.filelist = ip
+                                                
+                                                    
         return self.filelist
 
     def __iter__(self):
@@ -74,7 +118,8 @@ class CheckinFromReceptionListView(ListView):
     template_name='controlarea/list.html'
     queryset=ArchiveObject.objects.all()
     source_path = Path.objects.get(entity='path_reception').value
-    Cmets_obj = Parameter.objects.get(entity='templatefile_specification').value
+    gate_path = Path.objects.get(entity='path_gate').value
+    Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
     def dispatch(self, *args, **kwargs):
@@ -82,7 +127,7 @@ class CheckinFromReceptionListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromReceptionListView, self).get_context_data(**kwargs)
-        context['filelist'] = MyFileList(PreIngestPath = self.source_path, Cmets_obj = self.Cmets_obj).get()
+        context['filelist'] = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
         context['type'] = 'FromRec'
         context['label'] = 'Select which information package to checkin from reception'
         return context
@@ -95,7 +140,8 @@ class CheckinFromReception(DetailView):
     template_name='controlarea/result_detail.html'
     source_path = Path.objects.get(entity='path_reception').value
     target_path = Path.objects.get(entity='path_control').value
-    Cmets_obj = Parameter.objects.get(entity='templatefile_specification').value
+    gate_path = Path.objects.get(entity='path_gate').value
+    Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
     def dispatch(self, *args, **kwargs):
@@ -103,7 +149,7 @@ class CheckinFromReception(DetailView):
 
     def get_object(self):
         ip_uuid = self.kwargs['ip_uuid']
-        return MyFileList(PreIngestPath = self.source_path,Cmets_obj = self.Cmets_obj).get(ip_uuid=ip_uuid)
+        return MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get(ip_uuid=ip_uuid)
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromReception, self).get_context_data(**kwargs)
@@ -138,7 +184,9 @@ class CheckoutToWorkListView(ListView):
         a_list = context['object_list']
         for a in a_list:
             #for rel_obj in a.relaic_set.all().order_by('UUID__Generation'):
-            for rel_obj in a.reluuid_set.all():
+            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
+            #for rel_obj in a.relaic_set.all():
+            #for rel_obj in a.reluuid_set.all():
                 aic_obj = rel_obj.AIC_UUID
                 ip_obj = rel_obj.UUID
                 ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
@@ -153,6 +201,7 @@ class CheckoutToWorkListView(ListView):
                     ip_obj_metadata = None
                 ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
         context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         return context
 
 class CheckoutToWork(DetailView):
@@ -194,7 +243,7 @@ class CheckinFromWorkListView(ListView):
     """
     model = ArchiveObject
     template_name='controlarea/list.html'
-    queryset=ArchiveObject.objects.filter(StatusProcess=5100).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(StatusProcess__gte=5000,StatusProcess__lte=5100).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
     def dispatch(self, *args, **kwargs):
@@ -208,7 +257,8 @@ class CheckinFromWorkListView(ListView):
         a_list = context['object_list']
         for a in a_list:
             #for rel_obj in a.relaic_set.all().order_by('UUID__Generation'):
-            for rel_obj in a.reluuid_set.all():
+            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5100).order_by('UUID__Generation'):
+            #for rel_obj in a.reluuid_set.all():
                 aic_obj = rel_obj.AIC_UUID
                 ip_obj = rel_obj.UUID
                 ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
@@ -223,6 +273,7 @@ class CheckinFromWorkListView(ListView):
                     ip_obj_metadata = None
                 ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
         context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         return context
 
 class CheckinFromWork(DetailView):
@@ -277,7 +328,8 @@ class DiffCheckListView(ListView):
         ip_list = []
         a_list = context['object_list']
         for a in a_list:
-            for rel_obj in a.reluuid_set.all():
+            #for rel_obj in a.reluuid_set.all():
+            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
                 aic_obj = rel_obj.AIC_UUID
                 ip_obj = rel_obj.UUID
                 ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
@@ -292,6 +344,7 @@ class DiffCheckListView(ListView):
                     ip_obj_metadata = None
                 ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
         context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         return context
 
 class DiffCheckWork(DetailView):
@@ -301,6 +354,7 @@ class DiffCheckWork(DetailView):
     model = ArchiveObject
     template_name='controlarea/result_detail.html'
     target_path = Path.objects.get(entity='path_control').value
+    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
     
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):
@@ -314,8 +368,12 @@ class DiffCheckWork(DetailView):
         ip_0_obj = aic_obj.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation')[:1].get().UUID
         AIC_ObjectPath = os.path.join(self.target_path, aic_obj.ObjectUUID)
         IP_ObjectPath = os.path.join(AIC_ObjectPath, ip_obj.ObjectUUID)
-        METS_ObjectPath = os.path.join(os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID),'%s_Content_METS.xml' % ip_0_obj.ObjectUUID )
-        status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=ip_obj.ObjectUUID,ObjectPath=IP_ObjectPath, METS_ObjectPath=METS_ObjectPath) 
+        #METS_ObjectPath = os.path.join(os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID),'%s_Content_METS.xml' % ip_0_obj.ObjectUUID )
+        METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), self.Cmets_obj )
+        status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=ip_obj.ObjectUUID,
+                                                                          ObjectPath=IP_ObjectPath, 
+                                                                          METS_ObjectPath=METS_ObjectPath,
+                                                                          ) 
         context['status_code'] = status_code
         context['status_detail'] = status_detail
         return context
@@ -339,7 +397,8 @@ class IngestIPListView(ListView):
         ip_list = []
         a_list = context['object_list']
         for a in a_list:
-            for rel_obj in a.reluuid_set.all():
+            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
+            #for rel_obj in a.reluuid_set.all():
                 aic_obj = rel_obj.AIC_UUID
                 ip_obj = rel_obj.UUID
                 ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
@@ -354,6 +413,7 @@ class IngestIPListView(ListView):
                     ip_obj_metadata = None
                 ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
         context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         return context
 
 class IngestIP(DetailView):
@@ -392,27 +452,3 @@ class IngestIP(DetailView):
         context['status_detail'] = status_detail
         return context
 
-class NoteDetail(DetailView):
-    model = ArchiveObject
-    context_object_name='note'
-    template_name='controlarea/detail.html'
-
-class NoteCreate(CreateView):
-    model = ArchiveObject
-    template_name='controlarea/create.html'
-    #context_object_name='note_list'
-    #post_save_redirect=reverse("notes_list")
-
-class NoteUpdate(UpdateView):
-    model = ArchiveObject
-    template_name='controlarea/update.html'
-    #context_object_name='note_list'
-    #post_save_redirect=reverse("notes_list")
-
-class NoteDelete(DeleteView):
-    model = ArchiveObject
-    template_name='controlarea/delete.html'
-    #context_object_name='note_list'
-#
-#    success_url = reverse_lazy('notes_list')
-#    #post_delete_redirect=reverse("notes_list")

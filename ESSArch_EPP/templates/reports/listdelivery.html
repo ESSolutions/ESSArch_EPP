@@ -1,0 +1,64 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>Archivist organisation</th>
+                <th>Delivery's</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for archivist,archivist_num in Creator_list %}
+		      	<tr class="row{% cycle '1' '2' %}">
+					<td>{{ archivist }}</td>
+					<td>{{ archivist_num }}</td>
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</br>
+<div class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+            	<th>Generation</th>
+                <th>Archivist organisation</th>
+                <th>Label</th>
+                <th>Create date</th>
+                <th>Period start date</th>
+                <th>Period end date</th>
+                <th>AIC (UUID)</th>
+                <th>IP (UUID)</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in ip_list %}
+		      	<tr class="row{% cycle '1' '2' %}">
+					<td>IP_{{ ip_obj.Generation }}</td>
+					<td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
+					<td>{{ ip_obj_data.label }}</td>
+					<td>{{ ip_obj.EntryDate }}</td>
+					<td>{{ ip_obj_data.startdate }}</td>
+					<td>{{ ip_obj_data.enddate }}</td>
+					<td>{{ aic_obj.ObjectUUID }}</td>
+					<td>{{ ip_obj.ObjectUUID }}</td>  
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load dictionary_extras %}
 
 {% block content %}
 
@@ -22,6 +23,7 @@
                 <th>Period start date</th>
                 <th>Period end date</th>
                 <th>IP type</th>
+                <th>AIC (UUID)</th>
                 <th>IP (UUID)</th>
                 <th>State</th>
       </tr>
@@ -41,6 +43,7 @@
 					<td>{{ ip.startdate }}</td>
 					<td>{{ ip.enddate }}</td>
 					<td>{{ ip.iptype }}</td>
+					<td>{{ ip.aic_uuid }}</td>
 					<td>{{ ip.uuid }}</td>
 					<td>{{ ip.state }}</td>
 		      	</tr>
@@ -57,12 +60,13 @@
 					{% elif type == 'ToIngest' %}
 						<td><a href="{% url controlarea_ingestip ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
 					{% endif %}
-					<td>{{ ip_obj_data.creator }}</td>
+					<td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
+					<td>{{ ip_obj_data.label }}</td>
+					<td>{{ ip_obj.EntryDate }}</td>
+					<td>{{ ip_obj_data.startdate }}</td>
+					<td>{{ ip_obj_data.enddate }}</td>
+					<td>{{ PackageType_CHOICES|access:ip_obj.OAISPackageType }}</td>
 					<td>{{ aic_obj.ObjectUUID }}</td>
-					<td>{{ 'ip_obj_data.createdate' }}</td>
-					<td>{{ 'ip_obj_data.startdate' }}</td>
-					<td>{{ 'ip_obj_data.enddate' }}</td>
-					<td>{{ ip_obj.OAISPackageType }}</td>
 					<td>{{ ip_obj.ObjectUUID }}</td>
 					<td>{{ ip_obj.StatusProcess }}</td>
 		      	</tr>

@@ -49,6 +49,8 @@ class permission(models.Model):
             ("infoclass_2", "Information Class 2"),
             ("infoclass_3", "Information Class 3"),
             ("infoclass_4", "Information Class 4"),
+            ("list_ingestqueue", "Can list ingest queue"),
+            ("list_accessqueue", "Can list access queue"),
         )
 
 StatusActivity_CHOICES = (
@@ -331,3 +333,125 @@ class IngestQueueForm(forms.ModelForm):
 
 class IngestQueueFormUpdate(IngestQueueForm):
     Status = forms.ChoiceField(choices=ReqStatus_CHOICES)
+    
+MediumType_CHOICES = (
+    (200, 'DISK'),
+    (301, 'IBM-LTO1'),
+    (302, 'IBM-LTO2'),
+    (303, 'IBM-LTO3'),
+    (304, 'IBM-LTO4'),
+    (305, 'IBM-LTO5'),
+)
+
+MediumFormat_CHOICES = (
+    (102, '102 (Media label)'),
+    (103, '103 (AIC support)'),
+)
+
+MediumStatus_CHOICES = (
+    (20, 'Write'),
+    (30, 'Full'),
+)
+
+MediumLocationStatus_CHOICES = (
+    (10, '10'),
+    (20, '20'),
+    (30, '30'),
+    (40, '40'),
+    (50, 'Robot'),
+)
+
+MediumBlockSize_CHOICES = (
+    (128, '64K'),
+    (256, '128K'),
+    (512, '256K'),
+    (1024, '512K'),
+    (2048, '1024K'),
+)
+
+class storageMedium(models.Model):
+    storageMediumUUID = models.CharField(max_length=36)
+    storageMedium = models.IntegerField(choices=MediumType_CHOICES)
+    storageMediumID = models.CharField(max_length=45)
+    storageMediumDate = models.DateTimeField()
+    storageMediumLocation = models.CharField(max_length=45)
+    storageMediumLocationStatus = models.IntegerField(choices=MediumLocationStatus_CHOICES)
+    storageMediumBlockSize = models.IntegerField()
+    storageMediumUsedCapacity = models.BigIntegerField()
+    storageMediumStatus = models.IntegerField(choices=MediumStatus_CHOICES)
+    storageMediumFormat = models.IntegerField(choices=MediumFormat_CHOICES)
+    storageMediumMounts = models.IntegerField()
+    linkingAgentIdentifierValue = models.CharField(max_length=45)
+    CreateDate  = models.DateTimeField()
+    CreateAgentIdentifierValue = models.CharField(max_length=45)
+    LocalDBdatetime = models.DateTimeField()
+    ExtDBdatetime = models.DateTimeField()
+    class Meta:
+        db_table = 'storageMedium'
+
+class storage(models.Model):
+    contentLocation = models.BigIntegerField()
+    ObjectIdentifierValue = models.CharField(max_length=255)
+    contentLocationType = models.IntegerField()
+    contentLocationValue = models.CharField(max_length=45)
+    storageMediumID = models.CharField(max_length=45)
+    LocalDBdatetime = models.DateTimeField()
+    ExtDBdatetime = models.DateTimeField()
+    class Meta:
+        db_table = 'storage'
+
+class robot(models.Model):
+    slot_id = models.IntegerField()
+    drive_id = models.IntegerField()
+    status = models.CharField(max_length=10)
+    t_id = models.CharField(max_length=6)
+    class Meta:
+        db_table = 'robot'
+
+class robotdrives(models.Model):
+    drive_id = models.IntegerField()
+    t_id = models.CharField(max_length=6)
+    slot_id = models.IntegerField()
+    status = models.CharField(max_length=10)
+    num_mounts = models.IntegerField()
+    drive_dev = models.CharField(max_length=15)
+    drive_type = models.CharField(max_length=15)
+    drive_serial = models.CharField(max_length=20)
+    drive_firmware = models.CharField(max_length=20)
+    drive_lock = models.CharField(max_length=36)
+    IdleTime = models.IntegerField()
+    class Meta:
+        db_table = 'robotdrives'
+
+class robotie(models.Model):
+    slot_id = models.IntegerField()
+    drive_id = models.IntegerField()
+    status = models.CharField(max_length=10)
+    t_id = models.CharField(max_length=6)
+    class Meta:
+        db_table = 'robotie'
+
+class robotreq(models.Model):
+    job_prio = models.IntegerField(blank=True)
+    status = models.CharField(max_length=10,blank=True)
+    req_type = models.CharField(max_length=10,blank=True)
+    t_id = models.CharField(max_length=6,blank=True)
+    work_uuid = models.CharField(max_length=36,blank=True)
+    user = models.CharField(max_length=255,blank=True)
+    ReqPurpose = models.CharField(max_length=255)
+    class Meta:
+        db_table = 'robotreq'
+    def get_absolute_url(self):
+        return reverse('admin_listrobot')
+        
+class robotReqQueueForm(forms.ModelForm):
+    required_css_class = 'required'
+    job_prio = forms.IntegerField(label='Priority',required=False, widget = PlainText())
+    status = forms.CharField(label='Status',required=False, widget = PlainText())
+    req_type = forms.CharField(label='ReqType',required=False, widget = PlainText())
+    t_id = forms.CharField(label='MediumID',required=False, widget = PlainText())
+    work_uuid = forms.CharField(label='ReqUUID',required=False, widget = forms.HiddenInput())
+    user = forms.CharField(label='User',required=False, widget = PlainText())
+    class Meta:
+        model=robotreq
+

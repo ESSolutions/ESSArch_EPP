@@ -1,0 +1,57 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div class="results">
+{% if object_list %}
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>Slot ID</th>
+                <th>Drive ID</th>
+                <th>Medium ID</th>
+                <th>Status</th>
+                <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for obj in object_list %}
+		      	<tr class="row{% cycle '1' '2' %}">		
+					<td>{{ obj.slot_id }}</td>
+					<td>{{ obj.drive_id }}</td>
+					<td>{{ obj.t_id }}</td>
+					<td>{{ obj.status }}</td>
+			        {% if admin_user %}
+			            {% if obj.status == 'Mounted' %} 
+			                <td><a href="{% url admin_create_robotreq obj.t_id 3 %}" title="Create unmount request">Force unmount</a></td>
+			            {% elif obj.status == 'ArchTape' %}
+			                <td><a href="{% url admin_create_robotreq obj.t_id 1 %}" title="Create mount request">Manual mount</a></td>
+			            {% else %}
+			                <td>N/A</td>
+			            {% endif %}
+			        {% else %}
+			            <td>N/A</td>
+			        {% endif %}					
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No objects exists
+{% endif %}
+</div>
+
+{% if admin_user %}
+	<br/>
+	<a href="{% url admin_create_robotinventory 1 %}" title="Inventory robot">Inventory robot</a>
+{% endif %}
+
+</div>    
+   
+{% endblock %}

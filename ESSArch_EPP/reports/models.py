@@ -23,29 +23,11 @@ from django.core.urlresolvers import reverse
 #    def get_absolute_url(self):
 #        return reverse('notes_list')
 
-class MyFile(object):
-    media           = ''
-    creator         = ''
-    label           = ''
-    startdate       = ''
-    enddate         = ''
-    createdate      = ''
-    iptype          = ''
-    uuid            = ''
-    aic_uuid        = ''
-    directory       = ''
-    site_profile    = ''
-    state           = ''
-    zone            = ''
-    progress        = 0
-
-class permission(models.Model):
-    class Meta:
-        permissions = (
-            ("CheckinFromReception", "CheckinFromReception"),
-            ("CheckoutToWork", "CheckoutToWork"),
-            ("CheckinFromWork", "CheckinFromWork"),
-            ("CheckoutToGate", "CheckoutToGate"),
-            ("CheckinFromGate", "CheckinFromGate"),
-            ("DiffCheck", "DiffCheck"),
-        )
+#class permission(models.Model):
+#    class Meta:
+#        permissions = (
+#            ("list", "list"),
+#            ("create", "create"),
+#            ("update", "update"),
+#            ("delete", "delete"),
+#        )

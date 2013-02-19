@@ -39,7 +39,10 @@ ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
 def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None,creator=None,system=None,version=None):
     status_code = 0
     status_list = []
-    error_list = [] 
+    error_list = []
+    Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
     if status_code == 0:
         # Try to find filename for logfile with matching creator, system and version.
         logfilepath = ''
@@ -91,6 +94,10 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
         try:
             status_list.append('Copy package structure %s to %s' % (aic_source_path,aic_target_path))
             shutil.copytree(aic_source_path,aic_target_path)
+            # After copy AIC/ip structure remove info.xml metsfile
+            old_mets_filepath = op.join( aic_target_path, Pmets_obj )
+            if op.exists(old_mets_filepath):
+                os.remove(old_mets_filepath)
         except (IOError, os.error), why:
             status_code = 4
             error_list.append('Problem to copy package structure %s to %s, ERROR: %s' % (aic_source_path,aic_target_path,str(why)))
@@ -104,10 +111,65 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
         Package_content = os.path.join(Package_root,'content')
         try:
             status_list.append('Copy %s to package content directory: %s' % (Package,Package_content))
-            shutil.copytree(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
+            if op.isdir(op.join(source_path,Package)):
+                shutil.copytree(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
+            else:
+                shutil.copy2(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
         except (IOError, os.error), why:
             status_code = 5
             error_list.append('Problem to Copy %s to package content directory: %s, ERROR: %s' % (Package,Package_content,str(why)))
+
+    if status_code == 0:
+        METS_agent_list = []
+        METS_altRecordID_list = []
+        METS_LABEL = None
+        EntryAgentIdentifierValue = None
+        EntryDate = ''
+        METS_STARTDATE = None
+        METS_ENDDATE = None
+        Package_root_source = os.path.join(aic_source_path,IP_uuid)
+        #METS_ObjectPath_source = os.path.join(Package_root_source,'info.xml')
+        METS_ObjectPath_source = os.path.join( aic_source_path, Pmets_obj )
+        if os.path.exists(METS_ObjectPath_source):        
+            res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
+            EntryDate = res_info[1][0]
+            for agent in res_info[2]:
+                if agent[0] == 'ARCHIVIST' and agent[1] == 'ORGANIZATION' and agent[2] == None:
+                    EntryAgentIdentifierValue = agent[3]
+                METS_agent_list.append(agent)
+            METS_LABEL = res_info[0][0]
+            #METS_agent_list.append(['CREATOR','INDIVIDUAL',None,AgentIdentifierValue,[]])
+            #METS_agent_list.append(['CREATOR', 'OTHER', 'SOFTWARE', 'ESSArch', ['VERSION=%s' % ProcVersion]])
+            for altRecordID in res_info[3]:
+                if altRecordID[0] == 'STARTDATE':
+                    METS_STARTDATE = altRecordID[1]
+                elif altRecordID[0] == 'ENDDATE':
+                    METS_ENDDATE = altRecordID[1]
+                METS_altRecordID_list.append(altRecordID)
+            status_list.append('Success to get METS agents,altRecords and label from %s' % Pmets_obj)
+        else:
+            status_list.append('%s not found in SIP' % Pmets_obj)
+        #METS_ObjectPath = os.path.join(Package_root,'%s_Content_METS.xml' % IP_uuid)
+        METS_ObjectPath = os.path.join( Package_root, Cmets_obj )
+        #PREMIS_ObjectPath = os.path.join( Package_root, 'administrative_metadata/%s_PREMIS.xml' % IP_uuid )
+        PREMIS_ObjectPath = os.path.join( Package_root, premis_obj )
+        errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
+                                                       METS_ObjectPath=METS_ObjectPath, 
+                                                       ObjectPath=Package_root,
+                                                       altRecordID_default=False,
+                                                       agent_default=False,
+                                                       agent_list=METS_agent_list,
+                                                       altRecordID_list=METS_altRecordID_list,
+                                                       file_list=[],
+                                                       METS_LABEL=METS_LABEL,
+                                                       PREMIS_ObjectPath=PREMIS_ObjectPath,
+                                                       )
+        if errno:
+            status_code = 8
+        for s in why[0]:
+            status_list.append(s)
+        for e in why[1]:   
+            error_list.append(e)
 
     if status_code == 0:
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
@@ -133,11 +195,13 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
             ArchiveObject_new = ArchiveObject()
             setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
             setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
-            setattr(ArchiveObject_new, 'OAISPackageType', 2)
+            setattr(ArchiveObject_new, 'OAISPackageType', 0)
             setattr(ArchiveObject_new, 'Status', 0)
             setattr(ArchiveObject_new, 'StatusActivity', 0)
             setattr(ArchiveObject_new, 'StatusProcess', 5000)
             setattr(ArchiveObject_new, 'Generation', 0)
+            setattr(ArchiveObject_new, 'EntryAgentIdentifierValue', EntryAgentIdentifierValue)
+            setattr(ArchiveObject_new, 'EntryDate', EntryDate)
             ArchiveObject_new.save()
 
             # Add rel AIC - IP to Object_rel DBtable
@@ -148,9 +212,9 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
 
             Object_data_new = ArchiveObjectData()
             setattr(Object_data_new, 'UUID', ArchiveObject_new)
-            setattr(Object_data_new, 'Creator', creator)
-            setattr(Object_data_new, 'System', system)
-            setattr(Object_data_new, 'Version', version)
+            setattr(Object_data_new, 'label', METS_LABEL)
+            setattr(Object_data_new, 'startdate', METS_STARTDATE)
+            setattr(Object_data_new, 'enddate', METS_ENDDATE)
             Object_data_new.save()
         else:
             status_code = 6
@@ -168,45 +232,6 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
             for s in why[1]:
                 error_list.append(s)
 
-    if status_code == 0:
-        METS_agent_list = []
-        METS_altRecordID_list = []
-        METS_LABEL = None
-        Package_root_source = os.path.join(aic_source_path,IP_uuid)
-        METS_ObjectPath_source = os.path.join(Package_root_source,'info.xml')
-        if os.path.exists(METS_ObjectPath_source):        
-            res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
-            for agent in res_info[2]:
-                #if not (agent[0] == 'CREATOR' and agent[2] == 'SOFTWARE'):
-                    METS_agent_list.append(agent)
-            METS_LABEL = res_info[0][0]
-            #METS_agent_list.append(['CREATOR','INDIVIDUAL',None,AgentIdentifierValue,[]])
-            #METS_agent_list.append(['CREATOR', 'OTHER', 'SOFTWARE', 'ESSArch', ['VERSION=%s' % ProcVersion]])
-            for altRecordID in res_info[3]:
-                METS_altRecordID_list.append(altRecordID)
-            status_list.append('Success to get METS agents,altRecords and label from info.xml')
-        else:
-            status_list.append('info.xml not found in SIP')
-        METS_ObjectPath = os.path.join(Package_root,'%s_Content_METS.xml' % IP_uuid)
-        PREMIS_ObjectPath = os.path.join(Package_root,'administrative_metadata/%s_PREMIS.xml' % IP_uuid)
-        errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
-                                                       METS_ObjectPath=METS_ObjectPath, 
-                                                       ObjectPath=Package_root,
-                                                       altRecordID_default=True,
-                                                       agent_default=True,
-                                                       agent_list=METS_agent_list,
-                                                       altRecordID_list=METS_altRecordID_list,
-                                                       file_list=[],
-                                                       METS_LABEL=METS_LABEL,
-                                                       PREMIS_ObjectPath=PREMIS_ObjectPath,
-                                                       )
-        if errno:
-            status_code = 8
-        for s in why[0]:
-            status_list.append(s)
-        for e in why[1]:   
-            error_list.append(e)
-
     return status_code,[status_list,error_list]
 
 def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
@@ -215,6 +240,8 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     error_list = []
     AIC_uuid,IP_uuid = op.split(Package)
     IP_uuid_source = IP_uuid
+    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    #premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
    
     if status_code == 0:
         # IF Checkout object is "DirType" - Copy IP_uuid from controlarea to IP_NEW_uuid in workarea
@@ -224,12 +251,13 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             status_list.append('CheckOut Package: %s from source_path: %s to new Package: %s in target_path: %s' % (Package,source_path,Package_new,target_path))
             try:
                 shutil.copytree(op.join(source_path,Package),op.join(target_path,Package_new))
-                if not op.exists(op.join(op.join(target_path,Package_new),'log.xml')):
-                    shutil.copy2(op.join(source_path,op.join(AIC_uuid,'log.xml')),op.join(op.join(target_path,Package_new),'log.xml'))
-                # After copy IP to new IP remove metsfile
-                old_mets_filepath = op.join(op.join(target_path,Package_new),'%s_Content_METS.xml' % IP_uuid_source)
-                if op.exists(old_mets_filepath):
-                    os.remove(old_mets_filepath)
+#                if not op.exists(op.join(op.join(target_path,Package_new),'log.xml')):
+#                    shutil.copy2(op.join(source_path,op.join(AIC_uuid,'log.xml')),op.join(op.join(target_path,Package_new),'log.xml'))
+#                # After copy IP to new IP remove metsfile
+#                #old_mets_filepath = op.join(op.join(target_path,Package_new),'%s_Content_METS.xml' % IP_uuid_source)
+#                old_mets_filepath = op.join( op.join(target_path,Package_new), Cmets_obj )
+#                if op.exists(old_mets_filepath):
+#                    os.remove(old_mets_filepath)
             except (shutil.Error, IOError, os.error), why:
                 error_list.append('Failed to CheckOut, ERROR: %s' % why)
                 status_code = 1
@@ -264,17 +292,21 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             AIC_Object_qf_IP_source = ArchiveObject.objects.filter(ObjectUUID=AIC_uuid_test).get()
             # Get the newest archiveObject (highest generation number)
             Newest_object = AIC_Object_qf_IP_source.relaic_set.order_by('-UUID__Generation')[:1].get().UUID
+            # Get source_IP
+            source_IP_Object = ArchiveObject.objects.filter(ObjectUUID = IP_uuid_source)[:1].get()
             
             status_list.append('Add new entry to DB for IP_UUID: %s' % (IP_uuid))
             # Add IP to ArchiveObject DBtable
             ArchiveObject_new = ArchiveObject()
             setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
             setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
-            setattr(ArchiveObject_new, 'OAISPackageType', 2)
+            setattr(ArchiveObject_new, 'OAISPackageType', 0)
             setattr(ArchiveObject_new, 'Status', 0)
             setattr(ArchiveObject_new, 'StatusActivity', 0)
             setattr(ArchiveObject_new, 'StatusProcess', 5100)
             setattr(ArchiveObject_new, 'Generation', int(Newest_object.Generation)+1)
+            setattr(ArchiveObject_new, 'EntryAgentIdentifierValue', source_IP_Object.EntryAgentIdentifierValue)
+            setattr(ArchiveObject_new, 'EntryDate', source_IP_Object.EntryDate)
             ArchiveObject_new.save()
 
             # Add rel AIC - IP to Object_rel DBtable
@@ -284,23 +316,22 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             Object_rel.save()
 
             Object_data_qf = ArchiveObjectData.objects.filter(UUID = IP_uuid_source)[:1]
-            
             # Prepare Object data
-            if Object_data_qf is True:
+            if Object_data_qf:
                 Object_data_qf = Object_data_qf.get()
-                Creator = Object_data_qf.Creator
-                System = Object_data_qf.System
-                Version = Object_data_qf.Version
+                label = Object_data_qf.label
+                startdate = Object_data_qf.startdate
+                enddate = Object_data_qf.enddate
             else:
-                Creator = None
-                System = None
-                Version = None
+                label = None
+                startdate = None
+                enddate = None
             # Add Object data to Object_data DBtable
             Object_data = ArchiveObjectData()
             setattr(Object_data, 'UUID', ArchiveObject_new)
-            setattr(Object_data, 'Creator', Creator)
-            setattr(Object_data, 'System', System)
-            setattr(Object_data, 'Version', Version)
+            setattr(Object_data, 'label', label)
+            setattr(Object_data, 'startdate', startdate)
+            setattr(Object_data, 'enddate', enddate)
             Object_data.save()
         else:
             status_list.append('Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid))
@@ -313,6 +344,8 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     error_list = []
     AIC_uuid,IP_uuid = op.split(Package)
     ObjectPath = op.join(target_path,Package)
+    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
 
     if status_code == 0:
         # Import logentrys to database
@@ -352,20 +385,39 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
         setattr(ArchiveObject_upd, 'StatusProcess', 5000)
         # Commit DB updates
         ArchiveObject_upd.save()
+        
+    if status_code == 0:
+        METS_agent_list = []
+        METS_altRecordID_list = []
+        METS_LABEL = None
+        METS_ObjectPath_source = os.path.join( ObjectPath, Cmets_obj )
+        if os.path.exists(METS_ObjectPath_source):        
+            res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
+            for agent in res_info[2]:
+                METS_agent_list.append(agent)
+            METS_LABEL = res_info[0][0]
+            for altRecordID in res_info[3]:
+                METS_altRecordID_list.append(altRecordID)
+            status_list.append('Success to get METS agents,altRecords and label from %s' % Cmets_obj)
+        else:
+            status_list.append('%s not found in SIP' % Cmets_obj)
 
     if status_code == 0:
         # Create new content METS file for IP
-        METS_ObjectPath = os.path.join(ObjectPath,'%s_Content_METS.xml' % IP_uuid)
+        #METS_ObjectPath = os.path.join(ObjectPath,'%s_Content_METS.xml' % IP_uuid)
+        METS_ObjectPath = os.path.join( ObjectPath, Cmets_obj )
         status_list.append('Create new content METS: %s' % METS_ObjectPath)
-        PREMIS_ObjectPath = os.path.join(ObjectPath,'administrative_metadata/%s_PREMIS.xml' % IP_uuid)
+        #PREMIS_ObjectPath = os.path.join(ObjectPath,'administrative_metadata/%s_PREMIS.xml' % IP_uuid)
+        PREMIS_ObjectPath = os.path.join( ObjectPath, premis_obj )
         errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
                                                        METS_ObjectPath=METS_ObjectPath, 
                                                        ObjectPath=ObjectPath,
-                                                       altRecordID_default=True,
-                                                       agent_default=True,
-                                                       agent_list=[],
-                                                       altRecordID_list=[],
+                                                       altRecordID_default=False,
+                                                       agent_default=False,
+                                                       agent_list=METS_agent_list,
+                                                       altRecordID_list=METS_altRecordID_list,
                                                        file_list=[],
+                                                       METS_LABEL=METS_LABEL,
                                                        PREMIS_ObjectPath=PREMIS_ObjectPath,
                                                        )
         if errno:
@@ -409,14 +461,15 @@ def IngestIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
 
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
         if ArchiveObject_qf is False:
-            # Get AIC_uuid if I now IP_uuid
-            AIC_uuid_test = ArchiveObjectRel.objects.filter(UUID=IP_uuid_source).get().AIC_UUID.ObjectUUID
-            # Get AIC_uuid object
-            AIC_Object_qf_IP_source = ArchiveObject.objects.filter(ObjectUUID=AIC_uuid_test).get()
-            # Get the newest archiveObject (highest generation number)
-            Newest_object = AIC_Object_qf_IP_source.relaic_set.order_by('-UUID__Generation')[:1].get().UUID
-            
-            status_list.append('??Add?? new entry to DB for IP_UUID: %s' % (IP_uuid))
+            pass
+#            # Get AIC_uuid if I now IP_uuid
+#            AIC_uuid_test = ArchiveObjectRel.objects.filter(UUID=IP_uuid_source).get().AIC_UUID.ObjectUUID
+#            # Get AIC_uuid object
+#            AIC_Object_qf_IP_source = ArchiveObject.objects.filter(ObjectUUID=AIC_uuid_test).get()
+#            # Get the newest archiveObject (highest generation number)
+#            Newest_object = AIC_Object_qf_IP_source.relaic_set.order_by('-UUID__Generation')[:1].get().UUID
+#            
+#            status_list.append('??Add?? new entry to DB for IP_UUID: %s' % (IP_uuid))
 #            # Add IP to ArchiveObject DBtable
 #            ArchiveObject_new = ArchiveObject()
 #            setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
@@ -427,16 +480,16 @@ def IngestIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
 #            setattr(ArchiveObject_new, 'StatusProcess', 5100)
 #            setattr(ArchiveObject_new, 'Generation', int(Newest_object.Generation)+1)
 #            ArchiveObject_new.save()
-
+#
 #            # Add rel AIC - IP to Object_rel DBtable
 #            Object_rel = ArchiveObjectRel()
 #            setattr(Object_rel, 'AIC_UUID', AIC_Object_qf_IP_source)
 #            setattr(Object_rel, 'UUID', ArchiveObject_new)
 #            Object_rel.save()
-
+#
 #            Object_data_qf = ArchiveObjectData.objects.filter(UUID = IP_uuid_source)[:1]
-            
-            # Prepare Object data
+#            
+#            # Prepare Object data
 #            if Object_data_qf is True:
 #                Object_data_qf = Object_data_qf.get()
 #                Creator = Object_data_qf.Creator
@@ -641,13 +694,17 @@ class Functions:
                         f_checksum = f[2]
                         f_mimetype = f[3]
                         #print 'filename: %s, size: %s, created: %s, checksum: %s, mimetype: %s' % (f_name,f_size,f_created,f_checksum,f_mimetype)
-                        if f_name == 'hashsum.txt':
+                        # Don't add mets.xml
+                        if f_name == self.METS_DocumentID:
                             continue
-                        elif f_name[-10:] == 'premis.xml':
-                            self.ms_files.append(['amdSec', None, 'digiprovMD', 'digiprovMD001', None,
-                                             None, 'ID%s' % str(uuid.uuid1()), 'URL', 'file:%s' % f_name, 'simple',
-                                             f_checksum, 'MD5', f_size, 'text/xml', f_created,
-                                             'PREMIS', None, None])     
+                        # Don't add 'administrative_metadata/premis.xml'
+                        elif f_name == PREMIS_ObjectPath.replace( ObjectPath + '/', '' ):
+                            continue
+                        #elif f_name[-10:] == 'premis.xml':
+                        #    self.ms_files.append(['amdSec', None, 'digiprovMD', 'digiprovMD001', None,
+                        #                     None, 'ID%s' % str(uuid.uuid1()), 'URL', 'file:%s' % f_name, 'simple',
+                        #                     f_checksum, 'MD5', f_size, 'text/xml', f_created,
+                        #                     'PREMIS', None, None])     
                         else:
                             self.ms_files.append(['fileSec', None, None, None, None,
                                                   None, 'ID%s' % str(uuid.uuid1()), 'URL', 'file:%s' % f_name, 'simple',
@@ -694,7 +751,8 @@ class Functions:
                     error_list.append('Problem to write "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
                 
                 # Add PREMISfile to METS filelist
-                f_name = 'administrative_metadata/%s_PREMIS.xml' % self.ObjectIdentifierValue
+                #f_name = 'administrative_metadata/%s_PREMIS.xml' % self.ObjectIdentifierValue
+                f_name = PREMIS_ObjectPath.replace( ObjectPath + '/', '' )
                 f_stat = os.stat(PREMIS_ObjectPath)
                 f_size = f_stat.st_size
                 f_created = datetime.datetime.fromtimestamp(f_stat.st_mtime,pytz.timezone(TimeZone)).replace(microsecond=0).isoformat()
@@ -732,11 +790,11 @@ class Functions:
                                                        METS_RECORDSTATUS = self.METS_RECORDSTATUS, 
                                                        METS_DocumentID = self.METS_DocumentID,
                                                        TimeZone = TimeZone)
-            status_code = errno
-            for s in info_list[0]:
-                status_list.append(s)
-            for e in info_list[1]:
-                error_list.append(e)
+                status_code = errno
+                for s in info_list[0]:
+                    status_list.append(s)
+                for e in info_list[1]:
+                    error_list.append(e)
     
         return status_code,[status_list,error_list]            
 

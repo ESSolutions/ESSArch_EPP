@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import *
 from views import CheckinFromReceptionListView, CheckinFromReception, CheckoutToWorkListView, CheckoutToWork, \
-                  CheckinFromWorkListView, CheckinFromWork, DiffCheckListView, DiffCheckWork, IngestIPListView, IngestIP,\
-                  NoteCreate ,NoteUpdate, NoteDelete, NoteDetail
+                  CheckinFromWorkListView, CheckinFromWork, DiffCheckListView, DiffCheckWork, IngestIPListView, IngestIP
 
 #import views
 
@@ -16,8 +15,4 @@ urlpatterns = patterns('',
     url(r'^diffcheckwork/(?P<pk>\d+)/$', DiffCheckWork.as_view(), name='controlarea_diffcheckwork'),
     url(r'^ingestiplist/$', IngestIPListView.as_view(),name='controlarea_ingestip_list'),
     url(r'^ingestip/(?P<pk>\d+)/$', IngestIP.as_view(), name='controlarea_ingestip'),
-#    url(r'^detail/(?P<pk>\d+)/$', NoteDetail.as_view(), name='notes_detail'),  
-#    url(r'^new/$', NoteCreate.as_view(), name='notes_create'),  
-#    url(r'^update/(?P<pk>\d+)/$', NoteUpdate.as_view(), name='notes_update'),  
-#    url(r'^delete/(?P<pk>\d+)/$', NoteDelete.as_view(), name='notes_delete'),  
 )

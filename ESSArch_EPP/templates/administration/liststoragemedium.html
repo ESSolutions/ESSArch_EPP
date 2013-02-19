@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div class="results">
+{% if object_list %}
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>LastUpdate</th>
+                <th>Location</th>
+                <th>Location Status</th>
+                <th>Used Capacity</th>
+                <th>Used</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for obj in object_list %}
+		      	<tr class="row{% cycle '1' '2' %}">		
+					<td><a href="{% url admin_detailstoragemedium obj.pk %}" title='Detail information'>{{ obj.storageMediumID }}</a></td>
+					<td>{{ MediumType_CHOICES|access:obj.storageMedium }}</td>
+					<td>{{ MediumStatus_CHOICES|access:obj.storageMediumStatus }}</td>
+					<td>{{ obj.storageMediumDate }}</td>
+					<td>{{ obj.storageMediumLocation }}</td>
+					<td>{{ MediumLocationStatus_CHOICES|access:obj.storageMediumLocationStatus }}</td>
+					<td>{{ obj.storageMediumUsedCapacity }}</td>
+					<td>{{ obj.storageMediumMounts }}</td>
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No objects exists
+{% endif %}
+</div>
+
+</div>    
+   
+{% endblock %}

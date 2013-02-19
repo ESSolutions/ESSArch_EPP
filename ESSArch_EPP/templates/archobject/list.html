@@ -1,5 +1,4 @@
 {% extends 'index.html' %}
-
 {% load dictionary_extras %}
 
 {% block content %}
@@ -24,7 +23,9 @@
                 <th>Period start date</th>
                 <th>Period end date</th>
                 <th>IP type</th>
+                <th>AIC (UUID)</th>
                 <th>IP (UUID)</th>
+                <th>Process</th>
                 <th>State</th>
       </tr>
     </thead>
@@ -43,7 +44,9 @@
 					<td>{{ ip.startdate }}</td>
 					<td>{{ ip.enddate }}</td>
 					<td>{{ ip.iptype }}</td>
+					<td>{{ ip.aic_uuid }}</td>
 					<td>{{ ip.uuid }}</td>
+					<td></td>
 					<td>{{ ip.state }}</td>
 		      	</tr>
 	      	{% endfor %}
@@ -61,12 +64,13 @@
 					{% else %}
 						<td>{{ ip_obj.Generation }}</td>
 					{% endif %}
-					<td>{{ ip_obj_data.creator }}</td>
-					<td>{{ aic_obj.ObjectUUID }}</td>
-					<td>{{ 'ip_obj_data.createdate' }}</td>
-					<td>{{ 'ip_obj_data.startdate' }}</td>
-					<td>{{ 'ip_obj_data.enddate' }}</td>
+					<td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
+					<td>{{ ip_obj_data.label }}</td>
+					<td>{{ ip_obj.EntryDate }}</td>
+					<td>{{ ip_obj_data.startdate }}</td>
+					<td>{{ ip_obj_data.enddate }}</td>
 					<td>{{ PackageType_CHOICES|access:ip_obj.OAISPackageType }}</td>
+					<td>{{ aic_obj.ObjectUUID }}</td>
 					{% if type == 'Access' %}
 						<td><a href="{% url access_create_ip_uuid ip_obj.ObjectUUID %}" title="Create access request">{{ ip_obj.ObjectUUID }}</a></td>
 					{% elif type == 'Ingest' %}
@@ -74,6 +78,7 @@
 					{% else %}
 						<td>{{ ip_obj.ObjectUUID }}</td>
 					{% endif %}  
+					<td>{{ StatusProcess_CHOICES|access:ip_obj.StatusProcess }}</td>
 					{% if type == 'Ingest' %}   
 						<td>
 						<form action="{% url ingest_listobjupd ip_obj.pk %}" method="post">

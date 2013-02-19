@@ -83,10 +83,26 @@
 			  <li><a href="{% url access_list %}">{% trans 'List access request queue' %}</a></li>
 			</ul>
 	    </li>
+  
+		<li> 
+			<a href="#vertical" class="sf-with-ul">ADMINISTRATION</a>
+	    	<ul>
+	    		<li><a href="{% url admin_liststoragemedium %}">{% trans 'List media information' %}</a></li>
+	    		<li><a href="{% url admin_listrobot %}">{% trans 'List robot information' %}</a></li>
+	    	</ul>
+		</li>
+		
+		<li> 
+			<a href="#vertical" class="sf-with-ul">REPORTS</a>
+	    	<ul>
+	    		<li><a href="{% url reports_deliveryreport %}">{% trans 'Deliverys report' %}</a></li>
+	    		<li><a href="{% url reports_eventsreport %}">{% trans 'Log Events report' %}</a></li>
+	    	</ul>
+		</li>
 
       	{% if user.is_staff %}  
 		<li> 
-			<a href="/admin" class="sf-with-ul">ADMINISTRATION</a>
+			<a href="/admin" class="sf-with-ul">MANAGEMENT</a>
 	    	<ul>
 		      {#<li><a href="/admin/ip/informationpackage/">Information Packages</a></li>#}
 		      <li><a href="/admin/configuration">Configuration</a></li>

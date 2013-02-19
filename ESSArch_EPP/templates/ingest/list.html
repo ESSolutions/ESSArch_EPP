@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load dictionary_extras %}
 
 {% block content %}
 
@@ -25,11 +26,11 @@
 	    	{% for req_obj in req_list %}
 		      	<tr class="row{% cycle '1' '2' %}">	
 					<td><a href="{% url ingest_detail req_obj.pk %}" title='Detail information'>{{ req_obj.ReqUUID }}</a></td>	
-					<td>{{ req_obj.ReqType }}</td>
+					<td>{{ IngestReqType_CHOICES|access:req_obj.ReqType }}</td>
 					<td>{{ req_obj.ReqPurpose }}</td>
 					<td>{{ req_obj.user }}</td>
 					<td>{{ req_obj.ObjectIdentifierValue }}</td>
-					<td>{{ req_obj.Status }}</td>
+					<td>{{ ReqStatus_CHOICES|access:req_obj.Status }}</td>
 					<td><small>[posted {{req_obj.posted|timesince}} ago]</small></td>
 		      	</tr>
 	      	{% endfor %}
