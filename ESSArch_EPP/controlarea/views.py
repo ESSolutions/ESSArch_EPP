@@ -41,8 +41,8 @@ class MyFileList(object):
                             ip.uuid = ''
                             if error == 0:
                                 for agent in res_info[2]:
-                                    if agent[0] == 'ARCHIVIST' and agent[1] == 'ORGANIZATION':
-                                        ip.creator = agent[3]
+                                    if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
+                                        ip.EntryAgentIdentifierValue = agent[4]
                                 ip.label = res_info[0][0]
                                 ip.createdate = res_info[1][0]
                                 for altRecordID in res_info[3]:
@@ -80,8 +80,8 @@ class MyFileList(object):
                                                 ip.uuid = ''
                                                 if error == 0:
                                                     for agent in res_info[2]:
-                                                        if agent[0] == 'ARCHIVIST' and agent[1] == 'ORGANIZATION':
-                                                            ip.creator = agent[3]
+                                                        if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
+                                                            ip.EntryAgentIdentifierValue = agent[4]
                                                     ip.label = res_info[0][0]
                                                     ip.createdate = res_info[1][0]
                                                     for altRecordID in res_info[3]:
@@ -115,7 +115,7 @@ class CheckinFromReceptionListView(ListView):
     List reception area
     """
     #model = ArchiveObject
-    template_name='controlarea/list.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.all()
     source_path = Path.objects.get(entity='path_reception').value
     gate_path = Path.objects.get(entity='path_gate').value
@@ -169,7 +169,7 @@ class CheckoutToWorkListView(ListView):
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/list.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
@@ -242,7 +242,7 @@ class CheckinFromWorkListView(ListView):
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/list.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(StatusProcess__gte=5000,StatusProcess__lte=5100).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
@@ -314,7 +314,7 @@ class DiffCheckListView(ListView):
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/list.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.DiffCheck'))
@@ -383,7 +383,7 @@ class IngestIPListView(ListView):
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/list.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))

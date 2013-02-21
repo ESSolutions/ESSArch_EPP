@@ -134,8 +134,8 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
             res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
             EntryDate = res_info[1][0]
             for agent in res_info[2]:
-                if agent[0] == 'ARCHIVIST' and agent[1] == 'ORGANIZATION' and agent[2] == None:
-                    EntryAgentIdentifierValue = agent[3]
+                if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION' and agent[3] == None:
+                    EntryAgentIdentifierValue = agent[4]
                 METS_agent_list.append(agent)
             METS_LABEL = res_info[0][0]
             #METS_agent_list.append(['CREATOR','INDIVIDUAL',None,AgentIdentifierValue,[]])
@@ -652,13 +652,13 @@ class Functions:
                 PRESERVATION_ORGANIZATION_note = [IPParameter_obj.preservation_organization_id]
                 PRESERVATION_SOFTWARE = IPParameter_obj.preservation_organization_software
                 PRESERVATION_SOFTWARE_note = [IPParameter_obj.preservation_organization_software_id]
-                self.METS_agent_list.append(['ARCHIVIST','ORGANIZATION',None,ARCHIVIST_ORGANIZATION,ARCHIVIST_ORGANIZATION_note])
-                self.METS_agent_list.append(['ARCHIVIST','OTHER','SOFTWARE',ARCHIVIST_SOFTWARE,ARCHIVIST_SOFTWARE_note])
-                self.METS_agent_list.append(['CREATOR','ORGANIZATION',None,CREATOR_ORGANIZATION,CREATOR_ORGANIZATION_note])
-                self.METS_agent_list.append(['CREATOR','INDIVIDUAL',None,CREATOR_INDIVIDUAL,CREATOR_INDIVIDUAL_note])
-                self.METS_agent_list.append(['CREATOR','OTHER','SOFTWARE',CREATOR_SOFTWARE, CREATOR_SOFTWARE_note])
-                self.METS_agent_list.append(['PRESERVATION','ORGANIZATION',None,PRESERVATION_ORGANIZATION,PRESERVATION_ORGANIZATION_note])
-                self.METS_agent_list.append(['PRESERVATION','OTHER','SOFTWARE',PRESERVATION_SOFTWARE,PRESERVATION_SOFTWARE_note])
+                self.METS_agent_list.append(['ARCHIVIST',None,'ORGANIZATION',None,ARCHIVIST_ORGANIZATION,ARCHIVIST_ORGANIZATION_note])
+                self.METS_agent_list.append(['ARCHIVIST',None,'OTHER','SOFTWARE',ARCHIVIST_SOFTWARE,ARCHIVIST_SOFTWARE_note])
+                self.METS_agent_list.append(['CREATOR',None,'ORGANIZATION',None,CREATOR_ORGANIZATION,CREATOR_ORGANIZATION_note])
+                self.METS_agent_list.append(['CREATOR',None,'INDIVIDUAL',None,CREATOR_INDIVIDUAL,CREATOR_INDIVIDUAL_note])
+                self.METS_agent_list.append(['CREATOR',None,'OTHER','SOFTWARE',CREATOR_SOFTWARE, CREATOR_SOFTWARE_note])
+                self.METS_agent_list.append(['PRESERVATION',None,'ORGANIZATION',None,PRESERVATION_ORGANIZATION,PRESERVATION_ORGANIZATION_note])
+                self.METS_agent_list.append(['PRESERVATION',None,'OTHER','SOFTWARE',PRESERVATION_SOFTWARE,PRESERVATION_SOFTWARE_note])
             self.METS_altRecordID_list = altRecordID_list
             if altRecordID_default is True:
                 DELIVERYTYPE = IPParameter_obj.deliverytype

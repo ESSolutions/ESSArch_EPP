@@ -17,11 +17,11 @@
                 {% else %}
                 	<th>Generation</th>
         	    {% endif %}
-                <th>Creator</th>
+                <th>Archivist organization</th>
                 <th>Label</th>
                 <th>Create date</th>
-                <th>Period start date</th>
-                <th>Period end date</th>
+                <th>Start date</th>
+                <th>End date</th>
                 <th>IP type</th>
                 <th>AIC (UUID)</th>
                 <th>IP (UUID)</th>
@@ -38,7 +38,7 @@
 					{% else %}
 						<td>{{ ip.media }}</td>
 					{% endif %}
-					<td>{{ ip.creator }}</td>
+					<td>{{ ip.EntryAgentIdentifierValue }}</td>
 					<td>{{ ip.label }}</td>
 					<td>{{ ip.createdate }}</td>
 					<td>{{ ip.startdate }}</td>
