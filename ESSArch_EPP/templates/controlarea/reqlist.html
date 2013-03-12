@@ -1,0 +1,44 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div class="results">
+{% if req_list %}
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>ReqUUID</th>
+                <th>ReqType</th>
+                <th>ReqPurpose</th>
+                <th>User</th>
+                <th>Object</th>
+                <th>Posted</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for req_obj in req_list %}
+		      	<tr class="row{% cycle '1' '2' %}">	
+					<td>{{ req_obj.ReqUUID }}</a></td>	
+					<td>{{ ControlAreaReqType_CHOICES|access:req_obj.ReqType }}</td>
+					<td>{{ req_obj.ReqPurpose }}</td>
+					<td>{{ req_obj.user }}</td>
+					<td>{{ req_obj.ObjectIdentifierValue }}</td>
+					<td>{{req_obj.posted }}</td>
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No request exists
+{% endif %}
+</div>
+
+</div>    
+   
+{% endblock %}

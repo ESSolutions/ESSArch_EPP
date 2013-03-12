@@ -29,7 +29,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 #############################################################################
 # Settings for ESSArch Preservation Platform.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -111,7 +111,8 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/ESSArch/app/static",
+    #"/ESSArch/app/static",
+    "/home/henrik/workspace/ESSArch_Django/static",
 )
 
 # List of finder classes that know how to find static files in
@@ -119,6 +120,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -128,6 +130,7 @@ SECRET_KEY = 'olkgd-#9pvgs3pmuwpk4v@)17d$@bij0&t8e#7wybgitrv1r@)'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -136,6 +139,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    #'django.middleware.locale.LocaleMiddleware',
+    #'djangomako.middleware.MakoMiddleware',
+    # Uncomment the next line for simple clickjacking protection:
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -158,16 +166,20 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/ESSArch/app/templates",
+    #"/ESSArch/app/templates",
+    "/home/henrik/workspace/ESSArch_Django/templates"
 )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #'grappelli',
     'django.contrib.admin',
+    # 'django.contrib.admindocs',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -207,7 +219,7 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
-            #'filters': ['require_debug_false'],
+            #'filters': ['require_debug_false'], # change if in production and not in debug mode
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },

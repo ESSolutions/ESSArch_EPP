@@ -27,22 +27,27 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from optparse import OptionParser
-import shutil,os,os.path as op, uuid, errno, log as logtool, ESSMD, ESSPGM, datetime, pytz
+import shutil,os,os.path as op, uuid, errno, essarch.log as logtool, ESSMD, ESSPGM, datetime, pytz, tarfile, sys, logging
 
-from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter
-from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectMetadata, ArchiveObjectRel, eventIdentifier
+from configuration.models import Parameter, SchemaProfile, Path, IPParameter, ChecksumAlgorithm_CHOICES
+from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectRel, eventIdentifier
+from django.utils import timezone
+from lxml import etree
 
-#ioessarch = '/data/ioessarch/logs'
 ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
 #ioessarch = Path.objects.get(entity='path_gate').value
 
-def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None,creator=None,system=None,version=None):
+logger = logging.getLogger('essarch.controlarea')
+
+def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None,creator=None,system=None,version=None,agent_list=[],altRecordID_list=[]):
     status_code = 0
     status_list = []
     error_list = []
     Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
     Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
     premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
+    ip_logfile = Parameter.objects.get(entity='ip_logfile').value
+    
     if status_code == 0:
         # Try to find filename for logfile with matching creator, system and version.
         logfilepath = ''
@@ -53,16 +58,23 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
         if return_code == 0:
             if len(file_list) == 1:
                 logfilepath = os.path.join(ioessarch,file_list[0])
-                status_list.append('Found logfile: %s for package: %s' % (logfilepath,Package))
+                event_info = 'Found logfile: %s for package: %s' % (logfilepath,Package)
+                status_list.append(event_info)
+                logger.info(event_info)
             elif len(file_list) > 1:
                 status_code = 1
-                error_list.append('ObjectIdentifierValue: %s match more then one logfile, logfilelist: %s' % (ObjectIdentifierValue,str(file_list)))
+                event_info = 'ObjectIdentifierValue: %s match more then one logfile, logfilelist: %s' % (ObjectIdentifierValue,str(file_list))
+                error_list.append(event_info)
+                logger.error(event_info)
             else:
                 status_code = 2
-                error_list.append('ObjectIdentifierValue: %s do not match any logfile' % (ObjectIdentifierValue))
+                event_info = 'ObjectIdentifierValue: %s do not match any logfile' % (ObjectIdentifierValue)
+                error_list.append(event_info)
+                logger.error(event_info)
         else:
             status_code = 9
             error_list.append('Status: %s, Error: %s' % (return_code,str(status))) 
+
     if status_code == 0:
         # Try to get IP_uuid and AIC_uuid from logfile
         return_code,status,info_entrys =  logtool.get_logxml_info(logfilepath)
@@ -78,21 +90,26 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
                 #print 'EventIndentifierValue: %s, EventType: %s, EventDateTime: %s, eventDetail: %s, outcome: %s, outcomeDetail: %s, linkingObject: %s' % (i[1],i[2],i[3],i[4],i[5],i[6],i[10])
         else:
             status_code = 3
-            error_list.append('Status: %s, Error: %s' % (return_code,str(status)))
+            event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+            error_list.append(event_info)
+            logger.error(event_info)
 
     if status_code == 0:
         # Check if IP_uuid already exist in database.
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
         if ArchiveObject_qf is True:
             status_code = 6
-            error_list.append('Entry in DB for IP_UUID: %s already exist, abort checkin.' % (IP_uuid))
-
+            event_info = 'Entry in DB for IP_UUID: %s already exist, abort checkin.' % (IP_uuid)
+            error_list.append(event_info)
+            logger.info(event_info)
     if status_code == 0:
         # Copy AIC/IP structure from ioessarch to mottag area.
         aic_source_path = os.path.join(ioessarch,AIC_uuid)
         aic_target_path = os.path.join(target_path,AIC_uuid)
         try:
-            status_list.append('Copy package structure %s to %s' % (aic_source_path,aic_target_path))
+            event_info = 'Copy package structure %s to %s' % (aic_source_path,aic_target_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             shutil.copytree(aic_source_path,aic_target_path)
             # After copy AIC/ip structure remove info.xml metsfile
             old_mets_filepath = op.join( aic_target_path, Pmets_obj )
@@ -100,7 +117,9 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
                 os.remove(old_mets_filepath)
         except (IOError, os.error), why:
             status_code = 4
-            error_list.append('Problem to copy package structure %s to %s, ERROR: %s' % (aic_source_path,aic_target_path,str(why)))
+            event_info = 'Problem to copy package structure %s to %s, ERROR: %s' % (aic_source_path,aic_target_path,str(why))
+            error_list.append(event_info)
+            logger.error(event_info)
 
     if status_code == 0:
         # Copy IP_information/data from CD/USB to "content" directory in AIC/IP structure in mottag area. 
@@ -110,14 +129,18 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
         Package_ro = os.path.join(Package_amd,'repository_operations')
         Package_content = os.path.join(Package_root,'content')
         try:
-            status_list.append('Copy %s to package content directory: %s' % (Package,Package_content))
+            event_info = 'Copy %s to package content directory: %s' % (Package,Package_content)
+            status_list.append(event_info)
+            logger.info(event_info)
             if op.isdir(op.join(source_path,Package)):
                 shutil.copytree(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
             else:
                 shutil.copy2(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
         except (IOError, os.error), why:
             status_code = 5
-            error_list.append('Problem to Copy %s to package content directory: %s, ERROR: %s' % (Package,Package_content,str(why)))
+            event_info = 'Problem to Copy %s to package content directory: %s, ERROR: %s' % (Package,Package_content,str(why))
+            error_list.append(event_info)
+            logger.error(event_info)
 
     if status_code == 0:
         METS_agent_list = []
@@ -128,7 +151,6 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
         METS_STARTDATE = None
         METS_ENDDATE = None
         Package_root_source = os.path.join(aic_source_path,IP_uuid)
-        #METS_ObjectPath_source = os.path.join(Package_root_source,'info.xml')
         METS_ObjectPath_source = os.path.join( aic_source_path, Pmets_obj )
         if os.path.exists(METS_ObjectPath_source):        
             res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
@@ -138,20 +160,31 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
                     EntryAgentIdentifierValue = agent[4]
                 METS_agent_list.append(agent)
             METS_LABEL = res_info[0][0]
-            #METS_agent_list.append(['CREATOR','INDIVIDUAL',None,AgentIdentifierValue,[]])
-            #METS_agent_list.append(['CREATOR', 'OTHER', 'SOFTWARE', 'ESSArch', ['VERSION=%s' % ProcVersion]])
             for altRecordID in res_info[3]:
                 if altRecordID[0] == 'STARTDATE':
                     METS_STARTDATE = altRecordID[1]
                 elif altRecordID[0] == 'ENDDATE':
                     METS_ENDDATE = altRecordID[1]
                 METS_altRecordID_list.append(altRecordID)
-            status_list.append('Success to get METS agents,altRecords and label from %s' % Pmets_obj)
+            event_info = 'Success to get METS agents,altRecords and label from %s' % Pmets_obj
+            status_list.append(event_info)
+            logger.info(event_info)
+            # Add extra agent and altRecordID
+            for agent in agent_list:
+                METS_agent_list.append(agent)
+                event_info = 'Add agent %s to metsfile' % agent
+                status_list.append(event_info)
+                logger.info(event_info)
+            for altRecordID in altRecordID_list:
+                METS_altRecordID_list.append(altRecordID)
+                event_info = 'Add altRecordID %s to metsfile' % altRecordID
+                status_list.append(event_info)
+                logger.info(event_info)
         else:
-            status_list.append('%s not found in SIP' % Pmets_obj)
-        #METS_ObjectPath = os.path.join(Package_root,'%s_Content_METS.xml' % IP_uuid)
+            event_info = '%s not found in SIP' % Pmets_obj
+            status_list.append(event_info)
+            logger.info(event_info)
         METS_ObjectPath = os.path.join( Package_root, Cmets_obj )
-        #PREMIS_ObjectPath = os.path.join( Package_root, 'administrative_metadata/%s_PREMIS.xml' % IP_uuid )
         PREMIS_ObjectPath = os.path.join( Package_root, premis_obj )
         errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
                                                        METS_ObjectPath=METS_ObjectPath, 
@@ -174,7 +207,9 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
     if status_code == 0:
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
         if ArchiveObject_qf is False:
-            status_list.append('Add new entry to DB for AIC_UUID: %s' % (AIC_uuid))
+            event_info = 'Add new entry to DB for AIC_UUID: %s' % (AIC_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
             # Add AIC to ArchiveObject DBtable
             ArchiveObject_aic_new = ArchiveObject()
             setattr(ArchiveObject_aic_new, 'ObjectUUID', AIC_uuid)
@@ -186,11 +221,15 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
             setattr(ArchiveObject_aic_new, 'Generation', 0)
             ArchiveObject_aic_new.save()
         else:
-            status_list.append('Entry in DB for AIC_UUID: %s already exist, skip to update.' % (AIC_uuid))
+            event_info = 'Entry in DB for AIC_UUID: %s already exist, skip to update.' % (AIC_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
 
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
         if ArchiveObject_qf is False:
-            status_list.append('Add new entry to DB for IP_UUID: %s' % (IP_uuid))
+            event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
             # Add IP to ArchiveObject DBtable
             ArchiveObject_new = ArchiveObject()
             setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
@@ -218,19 +257,60 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
             Object_data_new.save()
         else:
             status_code = 6
-            error_list.append('Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid))
+            event_info = 'Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid)
+            error_list.append(event_info)
+            logger.error(event_info)
 
     if status_code == 0:
         # Import logentrys to database
         errno,why = AddLogEventsToDB(info_entrys)
         if errno:
-            error_list.append('Failed to Add log events to DB, ERROR: %s' % why)
+            event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+            error_list.append(event_info)
+            logger.error(event_info)
             status_code = 7
         else:
             for s in why[0]:
                 status_list.append(s)
             for s in why[1]:
                 error_list.append(s)
+
+    if status_code == 0:
+        # Import logentrys from log.xml in tarfile to database
+        ip_tarfilename = op.join(Package_content,op.split(Package)[1])
+        if os.path.isfile(ip_tarfilename):
+            try:
+                tarf = tarfile.open(name=ip_tarfilename,mode='r')
+                logfile_obj = tarf.extractfile('%s/%s' % (IP_uuid,ip_logfile)) # uuid_xxxx/log.xml
+                return_code,status,info_entrys =  logtool.get_logxml_info(logfile_obj)
+                if return_code == 0:
+                    errno,why = AddLogEventsToDB(info_entrys)
+                    if errno:
+                        event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+                        error_list.append(event_info)
+                        logger.error(event_info)
+                        status_code = 10
+                    else:
+                        for s in why[0]:
+                            status_list.append(s)
+                        for s in why[1]:
+                            error_list.append(s)
+                else:
+                    status_code = 11
+                    event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+                    error_list.append(event_info)
+                    logger.info(event_info)
+                tarf.close()
+            except:
+                status_code = 12
+                event_info = 'Problem to get %s from tarfile, error: %s' % (ip_logfile,str(sys.exc_info()))
+                error_list.append(event_info)
+                logger.error(event_info)
+        else:
+            status_code = 13
+            event_info = 'Problem to find tarfile in content directory, failed to get %s' % ip_logfile
+            error_list.append(event_info)
+            logger.error = event_info
 
     return status_code,[status_list,error_list]
 
@@ -240,49 +320,55 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     error_list = []
     AIC_uuid,IP_uuid = op.split(Package)
     IP_uuid_source = IP_uuid
-    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
-    #premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
+    ip_logfile = Parameter.objects.get(entity='ip_logfile').value
    
     if status_code == 0:
         # IF Checkout object is "DirType" - Copy IP_uuid from controlarea to IP_NEW_uuid in workarea
         if op.isdir(op.join(source_path,Package)):
             IP_uuid = uuid.uuid1()
             Package_new = op.join(AIC_uuid,'%s' % IP_uuid)
-            status_list.append('CheckOut Package: %s from source_path: %s to new Package: %s in target_path: %s' % (Package,source_path,Package_new,target_path))
+            event_info = 'CheckOut Package: %s from source_path: %s to new Package: %s in target_path: %s' % (Package,source_path,Package_new,target_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             try:
                 shutil.copytree(op.join(source_path,Package),op.join(target_path,Package_new))
-#                if not op.exists(op.join(op.join(target_path,Package_new),'log.xml')):
-#                    shutil.copy2(op.join(source_path,op.join(AIC_uuid,'log.xml')),op.join(op.join(target_path,Package_new),'log.xml'))
-#                # After copy IP to new IP remove metsfile
-#                #old_mets_filepath = op.join(op.join(target_path,Package_new),'%s_Content_METS.xml' % IP_uuid_source)
-#                old_mets_filepath = op.join( op.join(target_path,Package_new), Cmets_obj )
-#                if op.exists(old_mets_filepath):
-#                    os.remove(old_mets_filepath)
             except (shutil.Error, IOError, os.error), why:
-                error_list.append('Failed to CheckOut, ERROR: %s' % why)
+                event_info = 'Failed to CheckOut, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.info(event_info)
                 status_code = 1
             errno,why = SetPermission(op.join(target_path,Package_new),a_uid,a_gid,a_mode)
             if errno:
-                error_list.append('Failed to SetPermission, ERROR: %s' % why)
+                event_info = 'Failed to SetPermission, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 2
         # ELSE_IF Checkout object is "FileType" - Copy object from controlarea to workarea with same filename. 
         else:
-            status_list.append('CheckOut Package: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path))
+            event_info = 'CheckOut Package: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             try:
                 ensure_dir(op.join(target_path,Package))
                 shutil.copy2(op.join(source_path,Package),op.join(target_path,Package))
             except (shutil.Error, IOError, os.error), why:
-                error_list.append('Failed to CheckOut, ERROR: %s' % why)
+                event_info = 'Failed to CheckOut, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 3
             errno,why = SetPermission(op.join(target_path,Package),a_uid,a_gid,a_mode)
             if errno:
-                error_list.append('Failed to SetPermission, ERROR: %s' % why)
+                event_info = 'Failed to SetPermission, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 4
 
     if status_code == 0 and op.isdir(op.join(source_path,Package)):
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
         if ArchiveObject_qf is False:
-            status_list.append('Missing entry in DB for AIC_UUID: %s' % (AIC_uuid))
+            event_info = 'Missing entry in DB for AIC_UUID: %s' % (AIC_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
 
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
         if ArchiveObject_qf is False:
@@ -295,7 +381,9 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             # Get source_IP
             source_IP_Object = ArchiveObject.objects.filter(ObjectUUID = IP_uuid_source)[:1].get()
             
-            status_list.append('Add new entry to DB for IP_UUID: %s' % (IP_uuid))
+            event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
             # Add IP to ArchiveObject DBtable
             ArchiveObject_new = ArchiveObject()
             setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
@@ -334,8 +422,21 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             setattr(Object_data, 'enddate', enddate)
             Object_data.save()
         else:
-            status_list.append('Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid))
-    
+            event_info = 'Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
+
+    if status_code == 0 and op.isdir(op.join(source_path,Package)):
+        # Export logentrys from database to logfile
+        return_code,return_status_list = logtool.ExportLogEventsToFile(logfilename = op.join(op.join(target_path,Package_new),ip_logfile), 
+                                                                       ip_uuid = IP_uuid, 
+                                                                       aic_uuid = AIC_uuid, 
+                                                                       )
+        for i in return_status_list[0]:
+            status_list.append(i)
+        for i in return_status_list[1]:
+            error_list.append(i)
+        status_code = return_code
     return status_code,[status_list,error_list]
 
 def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
@@ -346,15 +447,18 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     ObjectPath = op.join(target_path,Package)
     Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
     premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
+    ip_logfile = Parameter.objects.get(entity='ip_logfile').value
 
     if status_code == 0:
         # Import logentrys to database
-        logfilepath = op.join(op.join(source_path,Package),'log.xml')
+        logfilepath = op.join(op.join(source_path,Package),ip_logfile)
         return_code,status,info_entrys =  logtool.get_logxml_info(logfilepath)
         if return_code == 0:
             errno,why = AddLogEventsToDB(info_entrys)
             if errno:
-                error_list.append('Failed to Add log events to DB, ERROR: %s' % why)
+                event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 3
             else:
                 for s in why[0]:
@@ -363,19 +467,27 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
                     error_list.append(s)
         else:
             status_code = 4
-            error_list.append('Status: %s, Error: %s' % (return_code,str(status)))
+            event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+            error_list.append(event_info)
+            logger.info(event_info)
 
     if status_code == 0:
         # Move package from workarea to controlarea.
         try:
-            status_list.append('CheckIn Package: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path))
+            event_info = 'CheckIn Package: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             shutil.move(op.join(source_path,Package),op.join(target_path,Package))
             errno,why = SetPermission(op.join(target_path,Package),a_uid,a_gid,a_mode)
             if errno:
-                error_list.append('Failed to SetPermission, ERROR: %s' % why)
+                event_info = 'Failed to SetPermission, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 1
         except (IOError, os.error), why:
-            error_list.append('Failed to CheckIn, ERROR: %s' % why)
+            event_info = 'Failed to CheckIn, ERROR: %s' % why
+            error_list.append(event_info)
+            logger.error(event_info)
             status_code = 2
 
     if status_code == 0:
@@ -398,16 +510,18 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             METS_LABEL = res_info[0][0]
             for altRecordID in res_info[3]:
                 METS_altRecordID_list.append(altRecordID)
-            status_list.append('Success to get METS agents,altRecords and label from %s' % Cmets_obj)
+            event_info = 'Success to get METS agents,altRecords and label from %s' % Cmets_obj
         else:
-            status_list.append('%s not found in SIP' % Cmets_obj)
+            event_info = '%s not found in SIP' % Cmets_obj
+        status_list.append(event_info)
+        logger.info(event_info)
 
     if status_code == 0:
         # Create new content METS file for IP
-        #METS_ObjectPath = os.path.join(ObjectPath,'%s_Content_METS.xml' % IP_uuid)
         METS_ObjectPath = os.path.join( ObjectPath, Cmets_obj )
-        status_list.append('Create new content METS: %s' % METS_ObjectPath)
-        #PREMIS_ObjectPath = os.path.join(ObjectPath,'administrative_metadata/%s_PREMIS.xml' % IP_uuid)
+        event_info = 'Create new content METS: %s' % METS_ObjectPath
+        status_list.append(event_info)
+        logger.info(event_info)
         PREMIS_ObjectPath = os.path.join( ObjectPath, premis_obj )
         errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
                                                        METS_ObjectPath=METS_ObjectPath, 
@@ -430,15 +544,19 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     if status_code == 0:
         # Remove "empty" AIC_Dir from workarea
         try:
-            status_list.append('Try to remove AIC_Dir: %s from source_path: %s' % (AIC_uuid,source_path))
+            event_info = 'Try to remove AIC_Dir: %s from source_path: %s' % (AIC_uuid,source_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             os.rmdir(op.join(source_path,AIC_uuid))
         except (IOError, os.error), why:
-            error_list.append('Failed to remove AIC_Dir, ERROR: %s' % why)
+            event_info = 'Failed to remove AIC_Dir, ERROR: %s' % why
+            error_list.append(event_info)
+            logger.error(event_info)
             status_code = 3
 
     return status_code,[status_list,error_list]
 
-def IngestIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
+def PreserveIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
     status_code = 0
     status_list = []
     error_list = []
@@ -447,79 +565,39 @@ def IngestIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
     if status_code == 0:
         # IF Checkout object is "DirType" - Copy IP_uuid from controlarea to ingestarea
         if op.isdir(op.join(source_path,Package)):
-            status_list.append('Copy IP: %s from controlarea: %s to ingestpath: %s' % (Package,source_path,target_path))
+            event_info = 'Copy IP: %s from controlarea: %s to ingestpath: %s' % (Package,source_path,target_path)
+            status_list.append(event_info)
+            logger.info(event_info)
             try:
                 shutil.copytree(op.join(source_path,Package),op.join(target_path,IP_uuid))
             except (shutil.Error, IOError, os.error), why:
-                error_list.append('Failed to ingest, ERROR: %s' % why)
+                event_info = 'Failed to ingest, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
                 status_code = 1            
 
     if status_code == 0 and op.isdir(op.join(source_path,Package)):
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
         if ArchiveObject_qf is False:
-            status_list.append('Missing entry in DB for AIC_UUID: %s' % (AIC_uuid))
+            event_info = 'Missing entry in DB for AIC_UUID: %s' % (AIC_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
 
         ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
         if ArchiveObject_qf is False:
-            pass
-#            # Get AIC_uuid if I now IP_uuid
-#            AIC_uuid_test = ArchiveObjectRel.objects.filter(UUID=IP_uuid_source).get().AIC_UUID.ObjectUUID
-#            # Get AIC_uuid object
-#            AIC_Object_qf_IP_source = ArchiveObject.objects.filter(ObjectUUID=AIC_uuid_test).get()
-#            # Get the newest archiveObject (highest generation number)
-#            Newest_object = AIC_Object_qf_IP_source.relaic_set.order_by('-UUID__Generation')[:1].get().UUID
-#            
-#            status_list.append('??Add?? new entry to DB for IP_UUID: %s' % (IP_uuid))
-#            # Add IP to ArchiveObject DBtable
-#            ArchiveObject_new = ArchiveObject()
-#            setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
-#            setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
-#            setattr(ArchiveObject_new, 'OAISPackageType', 2)
-#            setattr(ArchiveObject_new, 'Status', 0)
-#            setattr(ArchiveObject_new, 'StatusActivity', 0)
-#            setattr(ArchiveObject_new, 'StatusProcess', 5100)
-#            setattr(ArchiveObject_new, 'Generation', int(Newest_object.Generation)+1)
-#            ArchiveObject_new.save()
-#
-#            # Add rel AIC - IP to Object_rel DBtable
-#            Object_rel = ArchiveObjectRel()
-#            setattr(Object_rel, 'AIC_UUID', AIC_Object_qf_IP_source)
-#            setattr(Object_rel, 'UUID', ArchiveObject_new)
-#            Object_rel.save()
-#
-#            Object_data_qf = ArchiveObjectData.objects.filter(UUID = IP_uuid_source)[:1]
-#            
-#            # Prepare Object data
-#            if Object_data_qf is True:
-#                Object_data_qf = Object_data_qf.get()
-#                Creator = Object_data_qf.Creator
-#                System = Object_data_qf.System
-#                Version = Object_data_qf.Version
-#            else:
-#                Creator = None
-#                System = None
-#                Version = None
-#            # Add Object data to Object_data DBtable
-#            Object_data = ArchiveObjectData()
-#            setattr(Object_data, 'UUID', ArchiveObject_new)
-#            setattr(Object_data, 'Creator', Creator)
-#            setattr(Object_data, 'System', System)
-#            setattr(Object_data, 'Version', Version)
-#            Object_data.save()
-        else:
-            status_list.append('Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid))
-    
+            event_info = 'Missing entry in DB for IP_UUID: %s' % (IP_uuid)
+            status_list.append(event_info)
+            logger.info(event_info)
     return status_code,[status_list,error_list]
 
-def CheckOutToGate(source_path,target_path,Package):
+def CheckOutToGate(source_path,target_path,filelist):
     status_code = 0
     status_list = []
     error_list = []
 
-    if status_code == 0:
-        # Copy file or directorytree to Gateare
+    for Package in filelist:
+        # Copy file or directorytree
         try:
-            status_list.append('Copy: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path))
             if op.isdir(op.join(source_path,Package)):
                 shutil.copytree(op.join(source_path,Package),op.join(target_path,Package))
             else:
@@ -529,16 +607,22 @@ def CheckOutToGate(source_path,target_path,Package):
                     os.makedirs(targetdir)
                 shutil.copy2(op.join(source_path,Package),target)
         except (IOError, os.error), why:
-            error_list.append('Failed to copy, ERROR: %s' % why)
+            event_info = 'Failed to CheckOut: %s from source_path: %s to target_path: %s ERROR: %s' % (Package,source_path,target_path,why),Package
+            error_list.append(event_info)
+            logger.error(event_info)
             status_code = 1
+        else:
+            event_info = 'Success to CheckOut: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path),Package
+            status_list.append(event_info)
+            logger.info(event_info)
+    return status_code,[status_list,error_list]
 
-    if status_code == 0:
-        return 0,status_list
-    else:
-        return 1,error_list
-
-def SetPermission(path,uid=503,gid=503,mode=0770):
+def SetPermission(path,uid=None,gid=None,mode=0770):
     try:
+        if uid is None:
+            uid = os.getuid()
+        if gid is None:
+            gid = os.getgid()
         for root, dirs, files in os.walk(path):
             for momo in dirs:
                 os.chown(os.path.join(root, momo), uid,gid)
@@ -563,11 +647,6 @@ def AddLogEventsToDB(info_entrys):
     status_list = []
     error_list = []
 
-    #for i in info_entrys[0]:
-        #IP_uuid = i[1]
-        #for x in i[2]:
-            #if x[0] == 'aic_object':
-            #    AIC_uuid = x[1]
     for i in info_entrys[1]:
         #print '------------------------------------------------------------------------'
         #print 'EventIndentifierValue: %s, EventType: %s, EventDateTime: %s, eventDetail: %s, outcome: %s, outcomeDetail: %s, linkingObject: %s' % (i[1],i[2],i[3],i[4],i[5],i[6],i[10])
@@ -579,14 +658,14 @@ def AddLogEventsToDB(info_entrys):
         eventVersion = ''
         eventOutcome = i[5]
         eventOutcomeDetailNote = i[6]
-        linkingAgentIdentifierValue = ''
+        linkingAgentIdentifierValue = i[8]
         linkingObjectIdentifierValue = i[10] 
 
-#        eventIdentifier_q = model.meta.Session.query(model.eventIdentifier)
-#        eventIdentifier_qf = eventIdentifier_q.filter(model.eventIdentifier.eventIdentifierValue == eventIdentifierValue).first()
         eventIdentifier_qf = eventIdentifier.objects.filter(eventIdentifierValue = eventIdentifierValue).exists()
         if eventIdentifier_qf is False:
-            status_list.append('Add new entry to DB for eventIdentifierValue: %s' % (eventIdentifierValue))
+            event_info = 'Add new entry to DB for eventIdentifierValue: %s' % (eventIdentifierValue)
+            status_list.append(event_info)
+            logger.info(event_info)
             # Add eventIdentifierValue to eventIdentifier DBtable
             eventIdentifier_new = eventIdentifier()
             setattr(eventIdentifier_new, 'eventIdentifierValue', eventIdentifierValue)
@@ -599,16 +678,66 @@ def AddLogEventsToDB(info_entrys):
             setattr(eventIdentifier_new, 'eventOutcomeDetailNote', eventOutcomeDetailNote)
             setattr(eventIdentifier_new, 'linkingAgentIdentifierValue', linkingAgentIdentifierValue)
             setattr(eventIdentifier_new, 'linkingObjectIdentifierValue', linkingObjectIdentifierValue)
-#            meta.Session.add(eventIdentifier)
             eventIdentifier_new.save()
         else:
-            status_list.append('Entry in DB for eventIdentifierValue: %s already exist, skip to update.' % (eventIdentifierValue))
-
-    # Commit DB updates
-#    meta.Session.commit()
-
+            event_info = 'Entry in DB for eventIdentifierValue: %s already exist, skip to update.' % (eventIdentifierValue)
+            status_list.append(event_info)
+            logger.info(event_info)
     return status_code,[status_list,error_list]
 
+def CreateExchangeRequestFile(ReqUUID,ReqType,ReqPurpose,user,ObjectIdentifierValue,posted,filelist,reqfilename):
+    EL_root = etree.Element('exchange')
+    EL_request = etree.SubElement(EL_root, 'request', attrib={'ReqUUID':ReqUUID,
+                                                              'ReqType':ReqType,
+                                                              'ReqPurpose':ReqPurpose,
+                                                              'user':user,
+                                                              'ObjectIdentifierValue':ObjectIdentifierValue,
+                                                              'posted':posted,
+                                                              })
+    EL_fileSec = etree.SubElement(EL_root,'fileSec')
+    EL_fileGrp = etree.SubElement(EL_fileSec,'fileGrp',attrib={'ID':'fgrp001','USE':'FILES'})
+    for item in filelist:
+        EL_file = etree.SubElement(EL_fileGrp,'file',attrib={'name':item})
+    doc = etree.ElementTree(element=EL_root, file=None)
+    ESSMD.writeToFile(doc,reqfilename)
+
+def GetExchangeRequestFileContent(reqfilename):
+    status_code = 0
+    status_list = []
+    error_list = []
+    res = None
+    if reqfilename:
+        try:
+            DOC  =  etree.ElementTree ( file=reqfilename )
+        except etree.XMLSyntaxError, detail:
+            status_code = 10
+            error_list.append(str(detail))
+        except IOError, detail:
+            status_code = 20
+            error_list.append(str(detail))
+        EL_root = DOC.getroot()
+    
+    if status_code == 0:
+        filelist = []
+    
+        EL_request = EL_root.find("request")
+        a_ReqUUID = EL_request.get('ReqUUID')
+        a_ReqType = EL_request.get('ReqType')
+        a_ReqPurpose = EL_request.get('ReqPurpose')
+        a_user = EL_request.get('user')
+        a_ObjectIdentifierValue = EL_request.get('ObjectIdientifierValue')
+        a_posted = EL_request.get('posted')
+        
+        fileSec = EL_root.find("fileSec")
+        fileGrp_all = fileSec.findall("fileGrp")
+        for fileGrp in fileGrp_all:
+            file_all = fileGrp.findall("file")
+            for EL_file in file_all:
+                a_name = EL_file.get('name')
+                filelist.append(a_name)
+        res = [a_ReqUUID,a_ReqType,a_ReqPurpose,a_user,a_ObjectIdentifierValue,a_posted,filelist]
+    return res,status_code,[status_list,error_list]
+    
 class Functions:
     "Create IP mets"
     ###############################################
@@ -617,10 +746,13 @@ class Functions:
         status_list = []
         error_list = []
 
-        TimeZone = 'Europe/Stockholm'
+        TimeZone = timezone.get_default_timezone_name()
         self.Cmets_objpath = METS_ObjectPath
         self.ObjectIdentifierValue = ObjectIdentifierValue
         IPParameter_obj = IPParameter.objects.filter(type='SIP')[0]
+        
+        ChecksumAlgorithm = 2
+        CA = dict(ChecksumAlgorithm_CHOICES)[ChecksumAlgorithm]
         
         if status_code == 0:
             self.ObjectIdentifierValue = ObjectIdentifierValue
@@ -685,7 +817,7 @@ class Functions:
             # create amdSec / structMap / fileSec
             self.ms_files = file_list
             if ObjectPath is not None:
-                Filetree_list, errno, why = ESSPGM.Check().GetFiletree2(ObjectPath,1)
+                Filetree_list, errno, why = ESSPGM.Check().GetFiletree2(ObjectPath,ChecksumAlgorithm)
                 if not errno:    
                     for f in Filetree_list:
                         f_name = f[0]
@@ -708,7 +840,7 @@ class Functions:
                         else:
                             self.ms_files.append(['fileSec', None, None, None, None,
                                                   None, 'ID%s' % str(uuid.uuid1()), 'URL', 'file:%s' % f_name, 'simple',
-                                                  f_checksum, 'MD5', f_size, f_mimetype, f_created,
+                                                  f_checksum, CA, f_size, f_mimetype, f_created,
                                                   'Datafile', 'digiprovMD001', None])
                         
                         # ms_files example
@@ -722,7 +854,7 @@ class Functions:
                     error_list.append('Problem to get filelist from objectpath: %s, errno: %s, why: %s' % (ObjectPath,errno,str(why)))
             
             # Create PREMISfile
-            if PREMIS_ObjectPath is not None: 
+            if PREMIS_ObjectPath is not None:
                 status_list.append('Create new PREMIS: %s' % PREMIS_ObjectPath)
                 P_ObjectIdentifierValue = self.ObjectIdentifierValue  
                 P_preservationLevelValue = 'full'
@@ -737,32 +869,35 @@ class Functions:
                         F_size = str(res_file[12])
                         F_formatName = res_file[13]
                         F_formatName = ESSPGM.Check().MIMEtype2PREMISformat(res_file[13])
-                        xml_PREMIS = ESSMD.AddPremisFileObject(DOC=xml_PREMIS,FILES=[('simple','','NO/RA',F_objectIdentifierValue,'',[],'0',[[F_messageDigestAlgorithm,F_messageDigest,'ESSArch']],F_size,F_formatName,'',[],[['simple','','AIP',P_ObjectIdentifierValue,'']],[['structural','is part of','SE/ESS',P_ObjectIdentifierValue]])])
-                #xml_PREMIS = ESSMD.AddPremisEvent(xml_PREMIS,[('SE/ESS',str(uuid.uuid1()),'TIFF editering',F_eventDateTime,'TIFF editering','Status: OK',F_eventOutcomeDetailNote,[['SE/RA',agentIdentifierValue]],[['SE/RA',F_objectIdentifierValue]])])
+                        xml_PREMIS = ESSMD.AddPremisFileObject(DOC=xml_PREMIS,FILES=[('simple','','NO/RA',F_objectIdentifierValue,'',[],'0',[[F_messageDigestAlgorithm,F_messageDigest,'ESSArch']],F_size,F_formatName,'',[],[['simple','','AIP',P_ObjectIdentifierValue,'']],[['structural','is part of','NO/RA',P_ObjectIdentifierValue]])])
         
                 xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[('NO/RA','ESSArch','ESSArch E-Arkiv','software')])
-                errno,why = ESSMD.validate(xml_PREMIS)
-                if errno:
-                    status_code = 2
-                    error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
+                #errno,why = ESSMD.validate(xml_PREMIS)
+                #if errno:
+                #    status_code = 2
+                #    error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
                 errno,why = ESSMD.writeToFile(xml_PREMIS,PREMIS_ObjectPath)
                 if errno:
                     status_code = 3
                     error_list.append('Problem to write "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
+                #errno,why = ESSMD.validate(FILENAME = PREMIS_ObjectPath, XMLSchema='http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd')
+                #if errno:
+                #    status_code = 2
+                #    error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
                 
                 # Add PREMISfile to METS filelist
-                #f_name = 'administrative_metadata/%s_PREMIS.xml' % self.ObjectIdentifierValue
                 f_name = PREMIS_ObjectPath.replace( ObjectPath + '/', '' )
                 f_stat = os.stat(PREMIS_ObjectPath)
                 f_size = f_stat.st_size
                 f_created = datetime.datetime.fromtimestamp(f_stat.st_mtime,pytz.timezone(TimeZone)).replace(microsecond=0).isoformat()
-                f_checksum = ESSPGM.Check().calcsum(PREMIS_ObjectPath, 'MD5')
+                f_checksum = ESSPGM.Check().calcsum(PREMIS_ObjectPath, CA)
                 f_mimetype = 'text/xml'            
                 self.ms_files.append(['amdSec', None, 'digiprovMD', 'digiprovMD001', None,
                                      None, 'ID%s' % str(uuid.uuid1()), 'URL', 'file:%s' % f_name, 'simple',
-                                     f_checksum, 'MD5', f_size, 'text/xml', f_created,
+                                     f_checksum, CA, f_size, 'text/xml', f_created,
                                      'PREMIS', None, None,
                                      ])
+                
           
             # define namespaces
             if namespacedef is None:
@@ -795,7 +930,6 @@ class Functions:
                     status_list.append(s)
                 for e in info_list[1]:
                     error_list.append(e)
-    
         return status_code,[status_list,error_list]            
 
 
@@ -818,4 +952,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #Functions().Create_IP_mets(ObjectIdentifierValue='test123', METS_ObjectPath='/tmp/test123/sip.xml', ObjectPath='/tmp/test123',altRecordID_default=True,agent_default=True)

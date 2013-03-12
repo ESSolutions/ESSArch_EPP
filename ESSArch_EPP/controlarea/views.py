@@ -1,22 +1,56 @@
+'''
+    ESSArch - ESSArch is an Electronic Archive system
+    Copyright (C) 2010-2013  ES Solutions AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Contact information:
+    Web - http://www.essolutions.se
+    Email - essarch@essolutions.se
+'''
+__majorversion__ = "2.5"
+__revision__ = "$Revision$"
+__date__ = "$Date$"
+__author__ = "$Author$"
+import re
+__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
 
-from models import MyFile
-from essarch.models import ArchiveObject, PackageType_CHOICES
+from models import MyFile, RequestFile
+from django.db.models import Q
+from essarch.models import ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, \
+                           ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
+                           ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
+                           eventIdentifier, eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter
-import essarch.ControlAreaFunc as ControlAreaFunc
+import ControlAreaFunc
 
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView
 from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
-import ESSMD, os
+import ESSMD, os, uuid
 from ESSPGM import Check as g_functions
+import ESSPGM, pytz, datetime, logging
+
+logger = logging.getLogger('essarch.controlarea')
 
 class MyFileList(object):
     def __init__(self,filelist=None,source_path='',gate_path='',mets_obj=''):
@@ -51,7 +85,8 @@ class MyFileList(object):
                                     elif altRecordID[0] == 'ENDDATE':
                                         ip.enddate = altRecordID[1]
                                 ip.iptype = res_info[0][3]
-                                ip.state = 'Reception'
+                                ip.state = '0'
+                                ip.StatusProcess = 'Reception'
                                 if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
                                     ip.uuid = res_info[0][1][5:]
                                 else:
@@ -90,7 +125,8 @@ class MyFileList(object):
                                                         elif altRecordID[0] == 'ENDDATE':
                                                             ip.enddate = altRecordID[1]
                                                     ip.iptype = res_info[0][3]
-                                                    ip.state = 'Reception'
+                                                    ip.state = '0'
+                                                    ip.StatusProcess = 'Reception'
                                                     if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
                                                         ip.uuid = res_info[0][1][5:]
                                                     else:
@@ -109,6 +145,37 @@ class MyFileList(object):
 
     def __getitem__(self, key):
         return MyFileList(self.filelist[key])
+
+class RequestFileList(object):
+    def __init__(self,reqlist=None,source_path=''):
+        if reqlist is None:
+            reqlist = []
+        self.reqlist = reqlist
+        self.source_path = os.path.join(source_path,'exchange')
+    def get(self):
+        if os.path.isdir(self.source_path):
+            for f in os.listdir(self.source_path): # gate_path/exchange
+                if os.path.isdir(os.path.join(self.source_path, f)): # exchange ReqUUID directory
+                    reqfilename = os.path.join(os.path.join(self.source_path, f),'request.xml')
+                    if os.path.isfile(reqfilename):
+                        res_info,return_status_code,return_status_list = ControlAreaFunc.GetExchangeRequestFileContent(reqfilename)
+                        if return_status_code == 0 and res_info:
+                            req = RequestFile()
+                            req.ReqUUID = res_info[0]
+                            req.ReqType = res_info[1]
+                            req.ReqPurpose = res_info[2]
+                            req.user = res_info[3]
+                            req.ObjectIdentifierValue = res_info[4]
+                            req.posted = res_info[5]
+                            req.filelist = res_info[6]
+                            self.reqlist.append(req)                                                    
+        return self.reqlist
+
+    def __iter__(self):
+        return iter(self.reqlist)
+
+    def __getitem__(self, key):
+        return RequestFileList(self.reqlist[key])
 
 class CheckinFromReceptionListView(ListView):
     """
@@ -132,12 +199,13 @@ class CheckinFromReceptionListView(ListView):
         context['label'] = 'Select which information package to checkin from reception'
         return context
 
-class CheckinFromReception(DetailView):
+class CheckinFromReception(CreateView):
     """
-    Submit and View result from checkin from reception
+    Create checkin request from reception
     """
-    #model = ArchiveObject
-    template_name='controlarea/result_detail.html'
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm_reception
     source_path = Path.objects.get(entity='path_reception').value
     target_path = Path.objects.get(entity='path_control').value
     gate_path = Path.objects.get(entity='path_gate').value
@@ -146,22 +214,85 @@ class CheckinFromReception(DetailView):
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
     def dispatch(self, *args, **kwargs):
         return super(CheckinFromReception, self).dispatch( *args, **kwargs)
-
-    def get_object(self):
-        ip_uuid = self.kwargs['ip_uuid']
-        return MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get(ip_uuid=ip_uuid)
-
-    def get_context_data(self, **kwargs):
-        context = super(CheckinFromReception, self).get_context_data(**kwargs)
-        objectpath = context['object'].directory
-        ObjectIdentifierValue = context['object'].uuid
+    
+    def get_initial(self):
+        initial = super(CheckinFromReception, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 1
+        initial['ReqPurpose'] = ''
+        initial['POLICYID'] = 1
+        initial['INFORMATIONCLASS'] = 1
+        initial['DELIVERYTYPE'] = 'N/A'
+        initial['DELIVERYSPECIFICATION'] = 'N/A'
+        if 'ip_uuid' in self.kwargs:
+            self.ip_obj = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get(ip_uuid=self.kwargs['ip_uuid'])
+            if self.ip_obj:
+                initial['ObjectIdentifierValue'] = self.ip_obj.uuid
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        objectpath = self.ip_obj.directory
+        ObjectIdentifierValue = form.instance.ObjectIdentifierValue
+        altRecordID_list = []
+        POLICYID = form.cleaned_data.get('POLICYID',None)
+        if POLICYID:
+            altRecordID_list.append(['POLICYID',POLICYID])
+        INFORMATIONCLASS = form.cleaned_data.get('INFORMATIONCLASS',None)
+        if INFORMATIONCLASS:
+            altRecordID_list.append(['INFORMATIONCLASS',INFORMATIONCLASS])
+        DELIVERYTYPE = form.cleaned_data.get('DELIVERYTYPE',None)
+        if DELIVERYTYPE:
+            altRecordID_list.append(['DELIVERYTYPE',DELIVERYTYPE])
+        DELIVERYSPECIFICATION = form.cleaned_data.get('DELIVERYSPECIFICATION',None)
+        if DELIVERYSPECIFICATION:
+            altRecordID_list.append(['DELIVERYSPECIFICATION',DELIVERYSPECIFICATION])
         status_code, status_detail = ControlAreaFunc.CheckInFromMottag(self.source_path, 
                                                                        self.target_path, 
                                                                        objectpath, 
                                                                        ObjectIdentifierValue,
+                                                                       altRecordID_list=altRecordID_list,
                                                                        )
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to CheckIn object: %s from reception, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                                form.cleaned_data.get('ReqUUID',None),
+                                                                                                status_detail[1]
+                                                                                                )
+            ESSPGM.Events().create('30000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,ObjectIdentifierValue,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        else:
+            self.object.Status=20
+            event_info = 'Success to CheckIn object: %s from reception, ReqUUID: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                        form.cleaned_data.get('ReqUUID',None),
+                                                                                        )
+            ESSPGM.Events().create('30000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,ObjectIdentifierValue,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromreceptionresult',kwargs={'pk': self.object.pk})
+        return super(CheckinFromReception, self).form_valid(form)
+
+class CheckinFromReceptionResult(DetailView):
+    """
+    View result from checkin from reception
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckinFromReception'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromReceptionResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckinFromReceptionResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
 
 class CheckoutToWorkListView(ListView):
@@ -170,7 +301,7 @@ class CheckoutToWorkListView(ListView):
     """
     model = ArchiveObject
     template_name='archobject/list.html'
-    queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
     def dispatch(self, *args, **kwargs):
@@ -181,50 +312,48 @@ class CheckoutToWorkListView(ListView):
         context['type'] = 'ToWork'
         context['label'] = 'Select which information package to checkout to work area'
         ip_list = []
-        a_list = context['object_list']
-        for a in a_list:
-            #for rel_obj in a.relaic_set.all().order_by('UUID__Generation'):
-            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
-            #for rel_obj in a.relaic_set.all():
-            #for rel_obj in a.reluuid_set.all():
-                aic_obj = rel_obj.AIC_UUID
-                ip_obj = rel_obj.UUID
-                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                if ip_obj_data_list:
-                    ip_obj_data = ip_obj_data_list[0]
-                else:
-                    ip_obj_data = None
-                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                if ip_obj_metadata_list:
-                    ip_obj_metadata = ip_obj_metadata_list[0]
-                else:
-                    ip_obj_metadata = None
-                ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
+        object_list = context['object_list']
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=5000):
+                ip_list.append(ip)
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
 
-class CheckoutToWork(DetailView):
+class CheckoutToWork(CreateView):
     """
-    Submit and View result from checkout to work area
+    Create checkout request to work area
     """
-    model = ArchiveObject
-    template_name='controlarea/result_detail.html'
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm2
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
     def dispatch(self, *args, **kwargs):
         return super(CheckoutToWork, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CheckoutToWork, self).get_context_data(**kwargs)
-        ip_obj = context['object']
-        aic_obj = ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,ip_obj.ObjectUUID)
+    
+    def get_initial(self):
+        initial = super(CheckoutToWork, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 2
+        initial['ReqPurpose'] = ''
+        if 'pk' in self.kwargs:
+            self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
         source_path = Path.objects.get(entity='path_control').value
         target_path_tmp = Path.objects.get(entity='path_work').value
         target_path = os.path.join(target_path_tmp, self.request.user.username)
-        a_uid = 503
-        a_gid = 503
+        a_uid = os.getuid()
+        a_gid = os.getgid()
         a_mode = 0770
         status_code, status_detail = ControlAreaFunc.CheckOutToWork(source_path, 
                                                                     target_path, 
@@ -233,8 +362,44 @@ class CheckoutToWork(DetailView):
                                                                     a_gid, 
                                                                     a_mode,
                                                                     )
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to CheckOut object: %s to workarea, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                              form.cleaned_data.get('ReqUUID',None),
+                                                                                              status_detail[1]
+                                                                                              )
+            ESSPGM.Events().create('31000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        else:
+            self.object.Status=20
+            event_info = 'Success to CheckOut object: %s to workarea, ReqUUID: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                      form.cleaned_data.get('ReqUUID',None),
+                                                                                      )
+            ESSPGM.Events().create('31000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkouttoworkresult',kwargs={'pk': self.object.pk})
+        return super(CheckoutToWork, self).form_valid(form)
+
+class CheckoutToWorkResult(DetailView):
+    """
+    View result from checkout to work area
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutToWorkResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckoutToWorkResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
 
 class CheckinFromWorkListView(ListView):
@@ -243,7 +408,7 @@ class CheckinFromWorkListView(ListView):
     """
     model = ArchiveObject
     template_name='archobject/list.html'
-    queryset=ArchiveObject.objects.filter(StatusProcess__gte=5000,StatusProcess__lte=5100).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5100) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
     def dispatch(self, *args, **kwargs):
@@ -254,49 +419,48 @@ class CheckinFromWorkListView(ListView):
         context['type'] = 'FromWork'
         context['label'] = 'Select which information package to checkin from work area'
         ip_list = []
-        a_list = context['object_list']
-        for a in a_list:
-            #for rel_obj in a.relaic_set.all().order_by('UUID__Generation'):
-            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5100).order_by('UUID__Generation'):
-            #for rel_obj in a.reluuid_set.all():
-                aic_obj = rel_obj.AIC_UUID
-                ip_obj = rel_obj.UUID
-                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                if ip_obj_data_list:
-                    ip_obj_data = ip_obj_data_list[0]
-                else:
-                    ip_obj_data = None
-                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                if ip_obj_metadata_list:
-                    ip_obj_metadata = ip_obj_metadata_list[0]
-                else:
-                    ip_obj_metadata = None
-                ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
+        object_list = context['object_list']
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=5100):
+                ip_list.append(ip)
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
 
-class CheckinFromWork(DetailView):
+class CheckinFromWork(CreateView):
     """
-    Submit and View result from checkin from work area
+    Create checkin request from work area
     """
-    model = ArchiveObject
-    template_name='controlarea/result_detail.html'
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm2
 
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
     def dispatch(self, *args, **kwargs):
         return super(CheckinFromWork, self).dispatch( *args, **kwargs)
     
-    def get_context_data(self, **kwargs):
-        context = super(CheckinFromWork, self).get_context_data(**kwargs)
-        ip_obj = context['object']
-        aic_obj = ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,ip_obj.ObjectUUID)
+    def get_initial(self):
+        initial = super(CheckinFromWork, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 3
+        initial['ReqPurpose'] = ''
+        if 'pk' in self.kwargs:
+            self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
         source_path_tmp = Path.objects.get(entity='path_work').value
         source_path = os.path.join(source_path_tmp, self.request.user.username)
         target_path = Path.objects.get(entity='path_control').value
-        a_uid = 503
-        a_gid = 503
+        a_uid = os.getuid()
+        a_gid = os.getgid()
         a_mode = 0770
         status_code, status_detail = ControlAreaFunc.CheckInFromWork(source_path, 
                                                                      target_path, 
@@ -305,8 +469,159 @@ class CheckinFromWork(DetailView):
                                                                      a_gid, 
                                                                      a_mode,
                                                                      )
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to CheckIn object: %s from workarea, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                               form.cleaned_data.get('ReqUUID',None),
+                                                                                               status_detail[1]
+                                                                                               )
+            ESSPGM.Events().create('32000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        else:
+            self.object.Status=20
+            event_info = 'Success to CheckIn object: %s from workarea, ReqUUID: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                       form.cleaned_data.get('ReqUUID',None),
+                                                                                       )
+            ESSPGM.Events().create('32000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromworkresult',kwargs={'pk': self.object.pk})
+        return super(CheckinFromWork, self).form_valid(form)
+
+class CheckinFromWorkResult(DetailView):
+    """
+    View result from checkin from work area
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckinFromWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromWorkResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckinFromWorkResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context
+
+class CheckoutToGateFromWork(CreateView):
+    """
+    Create checkout request to gate from work
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm_file
+    target_path = Path.objects.get(entity='path_gate').value
+    source_path = Path.objects.get(entity='path_work').value
+    
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutToGateFromWork, self).dispatch( *args, **kwargs)
+    
+    def get_initial(self):
+        initial = super(CheckoutToGateFromWork, self).get_initial()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 6
+        initial['ReqPurpose'] = ''
+        source_path = os.path.join(self.source_path, self.request.user.username)   
+        filelist = []
+        if os.path.exists(self.source_path):
+            filetree = g_functions().GetFiletree(source_path)
+            for file_item in filetree:
+                filelist.append((file_item, file_item))
+        self.form_class.FileSelect_CHOICES = filelist
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        filelist = form.cleaned_data.get('filename',[])
+        ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
+        target_path = os.path.join(self.target_path, 'exchange/%s' % ReqUUID)
+        source_path = os.path.join(self.source_path, self.request.user.username)
+        status_code, tmp_status_detail = ControlAreaFunc.CheckOutToGate(source_path, target_path, filelist)
+        if status_code:
+            self.object.Status=100
+        else:
+            self.object.Status=20
+        status_detail = [[],[]]
+        req_filelist = []
+        for item in tmp_status_detail[0]:
+            event_info = '%s, ReqUUID: %s' % (item[0],form.cleaned_data.get('ReqUUID',None))
+            ESSPGM.Events().create('35000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,item[1],linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            status_detail[0].append(item[0])
+            req_filelist.append(item[1])
+        for item in tmp_status_detail[1]:
+            event_info = '%s, ReqUUID: %s' % (item[0],form.cleaned_data.get('ReqUUID',None))
+            ESSPGM.Events().create('35000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,item[1],linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            status_detail[1].append(item[0])
+            req_filelist.append(item[1])
+        
+        TimeZone = timezone.get_default_timezone_name()
+        loc_timezone=pytz.timezone(TimeZone)
+        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
+        self.object.posted = loc_dt_isoformat
+        ControlAreaFunc.CreateExchangeRequestFile(ReqUUID = form.cleaned_data.get('ReqUUID'), 
+                                                  ReqType = form.cleaned_data.get('ReqType'), 
+                                                  ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
+                                                  user = form.cleaned_data.get('user'), 
+                                                  ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'), 
+                                                  posted = loc_dt_isoformat, 
+                                                  filelist = req_filelist, 
+                                                  reqfilename = os.path.join(target_path,'request.xml'),
+                                                  )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkouttogatefromworkresult',kwargs={'pk': self.object.pk})
+        return super(CheckoutToGateFromWork, self).form_valid(form)
+
+class CheckoutToGateFromWorkResult(DetailView):
+    """
+    View result from checkout to gate area from work
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutToGateFromWorkResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckoutToGateFromWorkResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context
+
+class CheckinFromGateListView(ListView):
+    """
+    List gate "exchange" area
+    """
+    template_name='controlarea/reqlist.html'
+    queryset=ArchiveObject.objects.all()
+    gate_path = Path.objects.get(entity='path_gate').value
+
+    @method_decorator(permission_required('controlarea.CheckinFromGate'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromGateListView, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckinFromGateListView, self).get_context_data(**kwargs)
+        context['req_list'] = RequestFileList(source_path = self.gate_path).get()
+        context['type'] = 'FromGate'
+        context['label'] = 'List exchange requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         return context
 
 class DiffCheckListView(ListView):
@@ -315,7 +630,7 @@ class DiffCheckListView(ListView):
     """
     model = ArchiveObject
     template_name='archobject/list.html'
-    queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):
@@ -326,129 +641,240 @@ class DiffCheckListView(ListView):
         context['type'] = 'DiffCheck'
         context['label'] = 'Select which information package to DiffCheck'
         ip_list = []
-        a_list = context['object_list']
-        for a in a_list:
-            #for rel_obj in a.reluuid_set.all():
-            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
-                aic_obj = rel_obj.AIC_UUID
-                ip_obj = rel_obj.UUID
-                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                if ip_obj_data_list:
-                    ip_obj_data = ip_obj_data_list[0]
-                else:
-                    ip_obj_data = None
-                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                if ip_obj_metadata_list:
-                    ip_obj_metadata = ip_obj_metadata_list[0]
-                else:
-                    ip_obj_metadata = None
-                ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
+        object_list = context['object_list']
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=5000):
+                ip_list.append(ip)
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
 
-class DiffCheckWork(DetailView):
+class DiffCheck(CreateView):
     """
-    Submit and View result from diffcheck in work area
+    Create diffcheck request
     """
-    model = ArchiveObject
-    template_name='controlarea/result_detail.html'
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm2
     target_path = Path.objects.get(entity='path_control').value
     Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
-    
+
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):
-        return super(DiffCheckWork, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(DiffCheckWork, self).get_context_data(**kwargs)
-        ip_obj = context['object']
-        aic_obj = ip_obj.reluuid_set.get().AIC_UUID
+        return super(DiffCheck, self).dispatch( *args, **kwargs)
+    
+    def get_initial(self):
+        initial = super(DiffCheck, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 4
+        initial['ReqPurpose'] = ''
+        if 'pk' in self.kwargs:
+            self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        logger.info('Start to DiffCheck object: %s' % self.ip_obj.ObjectUUID)
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
         # Get IP_0 object
         ip_0_obj = aic_obj.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation')[:1].get().UUID
         AIC_ObjectPath = os.path.join(self.target_path, aic_obj.ObjectUUID)
-        IP_ObjectPath = os.path.join(AIC_ObjectPath, ip_obj.ObjectUUID)
-        #METS_ObjectPath = os.path.join(os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID),'%s_Content_METS.xml' % ip_0_obj.ObjectUUID )
+        IP_ObjectPath = os.path.join(AIC_ObjectPath, self.ip_obj.ObjectUUID)
         METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), self.Cmets_obj )
-        status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=ip_obj.ObjectUUID,
+        status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=self.ip_obj.ObjectUUID,
                                                                           ObjectPath=IP_ObjectPath, 
                                                                           METS_ObjectPath=METS_ObjectPath,
-                                                                          ) 
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
+                                                                          )
+        print status_detail 
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to DiffCheck object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                   form.cleaned_data.get('ReqUUID',None),
+                                                                                   status_detail[1]
+                                                                                   )
+            ESSPGM.Events().create('33000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            logger.error(event_info)
+        else:
+            self.object.Status=20
+            status_summary = ''
+            for st in status_detail[0]:
+                if st.startswith('STATUS -'):
+                    status_summary = st
+            event_info = 'Success to DiffCheck object: %s, ReqUUID: %s, Result: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                       form.cleaned_data.get('ReqUUID',None),
+                                                                                       status_summary
+                                                                                       )
+            ESSPGM.Events().create('33000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            logger.info(event_info)
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_diffcheckresult',kwargs={'pk': self.object.pk})
+        return super(DiffCheck, self).form_valid(form)
+
+class DiffCheckResult(DetailView):
+    """
+    View result from diffcheck
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.DiffCheck'))
+    def dispatch(self, *args, **kwargs):
+        return super(DiffCheckResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(DiffCheckResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
 
-class IngestIPListView(ListView):
+class PreserveIPListView(ListView):
     """
     List control area
     """
     model = ArchiveObject
     template_name='archobject/list.html'
-    queryset=ArchiveObject.objects.filter(StatusProcess=5000).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    @method_decorator(permission_required('controlarea.PreserveIP'))
     def dispatch(self, *args, **kwargs):
-        return super(IngestIPListView, self).dispatch( *args, **kwargs)
+        return super(PreserveIPListView, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(IngestIPListView, self).get_context_data(**kwargs)
+        context = super(PreserveIPListView, self).get_context_data(**kwargs)
         context['type'] = 'ToIngest'
         context['label'] = 'Select which information package to preserve in archive'
         ip_list = []
-        a_list = context['object_list']
-        for a in a_list:
-            for rel_obj in a.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation'):
-            #for rel_obj in a.reluuid_set.all():
-                aic_obj = rel_obj.AIC_UUID
-                ip_obj = rel_obj.UUID
-                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                if ip_obj_data_list:
-                    ip_obj_data = ip_obj_data_list[0]
-                else:
-                    ip_obj_data = None
-                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                if ip_obj_metadata_list:
-                    ip_obj_metadata = ip_obj_metadata_list[0]
-                else:
-                    ip_obj_metadata = None
-                ip_list.append([aic_obj,ip_obj,ip_obj_data,ip_obj_metadata])
+        object_list = context['object_list']
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=5000):
+                ip_list.append(ip)
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
 
-class IngestIP(DetailView):
+class PreserveIP(CreateView):
     """
-    Submit and View result from ingest to ESSArch
+    Create PreserveIP request
     """
-    model = ArchiveObject
-    template_name='controlarea/result_detail.html'
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm2
 
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    @method_decorator(permission_required('controlarea.PreserveIP'))
     def dispatch(self, *args, **kwargs):
-        return super(IngestIP, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(IngestIP, self).get_context_data(**kwargs)
-        ip_obj = context['object']
-        aic_obj = ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,ip_obj.ObjectUUID)
+        return super(PreserveIP, self).dispatch( *args, **kwargs)
+    
+    def get_initial(self):
+        initial = super(PreserveIP, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 5
+        initial['ReqPurpose'] = ''
+        if 'pk' in self.kwargs:
+            self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
         source_path = Path.objects.get(entity='path_control').value
         target_path = Path.objects.get(entity='path_ingest').value
-        #target_path = os.path.join(target_path_tmp, self.request.user.username)
-        a_uid = 503
-        a_gid = 503
+        a_uid = os.getuid()
+        a_gid = os.getgid()
         a_mode = 0770
-        status_code, status_detail = ControlAreaFunc.IngestIP(source_path,
-                                                            target_path, 
-                                                            objectpath, 
-                                                            a_uid, 
-                                                            a_gid, 
-                                                            a_mode,
-                                                            )
-        if status_code == 0:
-            ip_obj.StatusProcess = 0
-            ip_obj.save()
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
+        status_code, status_detail = ControlAreaFunc.PreserveIP(source_path,
+                                                                target_path, 
+                                                                objectpath, 
+                                                                a_uid, 
+                                                                a_gid, 
+                                                                a_mode,
+                                                                )
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to PreserveIP object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                    form.cleaned_data.get('ReqUUID',None),
+                                                                                    status_detail[1]
+                                                                                    )
+            ESSPGM.Events().create('34000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        else:
+            self.object.Status=20
+            IngestQueue_req = IngestQueue()
+            IngestQueue_req.ReqUUID = form.cleaned_data.get('ReqUUID',None)
+            IngestQueue_req.ReqType = 2
+            IngestQueue_req.ReqPurpose = form.cleaned_data.get('ReqPurpose',None)
+            IngestQueue_req.user = form.cleaned_data.get('user',None)
+            IngestQueue_req.ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue',None)
+            IngestQueue_req.Status = 0
+            IngestQueue_req.save()
+            event_info = 'Success to PreserveIP object: %s, ReqUUID: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                          form.cleaned_data.get('ReqUUID',None),
+                                                                          )
+            ESSPGM.Events().create('34000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )            
+            # Update ip_obj with StatusProcess = 0 to enable ingest to discover new IP.
+            self.ip_obj.StatusProcess = 0
+            self.ip_obj.save()
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_preserveipresult',kwargs={'pk': self.object.pk})
+        return super(PreserveIP, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(PreserveIP, self).get_context_data(**kwargs)
+        context['type'] = 'PreserveIP'
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
+        ip_obj_list = ArchiveObject.objects.filter(reluuid_set__AIC_UUID=aic_obj).order_by('Generation')
+        ip_uuid_list = []
+        for ip_obj in ip_obj_list:
+            ip_uuid_list.append(ip_obj.ObjectUUID)
+        event_obj_list = eventIdentifier.objects.filter( linkingObjectIdentifierValue__in = ip_uuid_list ).order_by('linkingObjectIdentifierValue')
+        event_list1 = []
+        event_list2 = []
+        for event_obj in event_obj_list:
+            linking_ip_obj = None
+            for ip_obj in ip_obj_list:
+                if ip_obj.ObjectUUID == event_obj.linkingObjectIdentifierValue:
+                    linking_ip_obj = ip_obj
+            if event_obj.linkingObjectIdentifierValue == self.ip_obj.ObjectUUID:                
+                event_list1.append([event_obj,linking_ip_obj])
+            else:
+                event_list2.append([event_obj,linking_ip_obj])
+        context['event_list1'] = event_list1
+        context['event_list2'] = event_list2
+        context['eventOutcome_CHOICES'] = dict(eventOutcome_CHOICES)
         return context
 
+class PreserveIPResult(DetailView):
+    """
+    View result from PreserveIP
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.PreserveIP'))
+    def dispatch(self, *args, **kwargs):
+        return super(PreserveIPResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(PreserveIPResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context

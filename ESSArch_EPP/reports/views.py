@@ -1,3 +1,30 @@
+'''
+    ESSArch - ESSArch is an Electronic Archive system
+    Copyright (C) 2010-2013  ES Solutions AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Contact information:
+    Web - http://www.essolutions.se
+    Email - essarch@essolutions.se
+'''
+__majorversion__ = "2.5"
+__revision__ = "$Revision$"
+__date__ = "$Date$"
+__author__ = "$Author$"
+import re
+__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -22,8 +49,7 @@ class deliveryReport(ListView):
     model = ArchiveObject
     template_name='reports/listdelivery.html'
     #context_object_name='access_list'
-    #queryset=ArchiveObject.objects.filter(Q(StatusProcess=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
-    queryset=ArchiveObject.objects.filter(StatusProcess=3000).order_by('id','Generation')
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('essarch.list_accessqueue'))
     def dispatch(self, *args, **kwargs):
@@ -34,48 +60,15 @@ class deliveryReport(ListView):
         context['type'] = 'delivery'
         context['label'] = 'Delivery report'
         ip_list = []
-        a_list = context['object_list']
-        for a in a_list: 
-            #rel_obj_list = a.relaic_set.all().order_by('UUID__Generation')
-            rel_obj_list = a.reluuid_set.all()
-            #print 'rel_obj_list: %s' % rel_obj_list
-            if rel_obj_list:
-                #for rel_obj in a.relaic_set.all().order_by('UUID__Generation'):
-                for rel_obj in a.reluuid_set.all():
-                    #print 'rel_obj: %s' % rel_obj
-                    aic_obj = rel_obj.AIC_UUID
-                    ip_obj = rel_obj.UUID
-                    ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                    if ip_obj_data_list:
-                        ip_obj_data = ip_obj_data_list[0]
-                    else:
-                        ip_obj_data = None
-                    ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                    if ip_obj_metadata_list:
-                        ip_obj_metadata = ip_obj_metadata_list[0]
-                    else:
-                        ip_obj_metadata = None
-                    ip_list.append([aic_obj,ip_obj,None,ip_obj_data,ip_obj_metadata])
-            else:
-                aic_obj = None
-                ip_obj = a
-                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
-                if ip_obj_data_list:
-                    ip_obj_data = ip_obj_data_list[0]
-                else:
-                    ip_obj_data = None
-                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
-                if ip_obj_metadata_list:
-                    ip_obj_metadata = ip_obj_metadata_list[0]
-                else:
-                    ip_obj_metadata = None
-                ip_list.append([aic_obj,ip_obj,None,ip_obj_data,ip_obj_metadata])
+        object_list = context['object_list']      
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=3000):
+                ip_list.append(ip)
         context['ip_list'] = ip_list
 
         Creator_list = []
         for aic_obj,ip_obj,test,ip_obj_data,ip_obj_metadata in ip_list:
-            if aic_obj is not None:
-                Creator_list.append(ip_obj.EntryAgentIdentifierValue) 
+            Creator_list.append(ip_obj.EntryAgentIdentifierValue) 
         #print '#####################################: %s' % str(Creator_list)
         Creator_list2 = []
         for i in list(set(Creator_list)):

@@ -36,6 +36,8 @@ import ESSMD,pytz,datetime,uuid,ESSPGM,stat,os,os.path as op
 
 if ESSDB_flag == 1:
     from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter
+    from essarch.models import ArchiveObject, eventIdentifier, PackageType_CHOICES
+    from django.utils import timezone
 
 if ESSDB_flag == 0: ioessarch = 'W:\ioessarch\logs'
 elif ESSDB_flag == 1: ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
@@ -214,7 +216,8 @@ def log(logfile,objectIdentifierValue,eventType,eventDetail,eventOutcome,eventOu
     error_list = []
     res = []
 
-    stockholm=pytz.timezone('Europe/Stockholm')
+    stockholm=timezone.get_default_timezone()
+    IdentifierType = 'NO/RA'
  
     DOC = None
 
@@ -233,8 +236,8 @@ def log(logfile,objectIdentifierValue,eventType,eventDetail,eventOutcome,eventOu
             relation=[]
             if aic_object:
                 significantProperties.append(['aic_object',aic_object])
-                relation.append(['structural','is part of','SE/ESS',aic_object])
-            xml_PREMIS = ESSMD.createPremis(FILE=['simple','','SE/ESS',objectIdentifierValue,'full',significantProperties,'0','tar','','bevarandesystemet',relation])
+                relation.append(['structural','is part of',IdentifierType,aic_object])
+            xml_PREMIS = ESSMD.createPremis(FILE=['simple','',IdentifierType,objectIdentifierValue,'full',significantProperties,'0','tar','','bevarandesystemet',relation])
         else:
             #xml_PREMIS = DOC.getroot()
             xml_PREMIS = DOC
@@ -244,9 +247,9 @@ def log(logfile,objectIdentifierValue,eventType,eventDetail,eventOutcome,eventOu
         #eventOutcomeDetailNote = 'test av event'
         #agentIdentifierValue = 'ESSArch'
         #objectIdentifierValue = 'test object 1'
-        xml_PREMIS = ESSMD.AddPremisEvent(xml_PREMIS,[('SE/ESS',str(uuid.uuid1()),eventType,eventDateTime,eventDetail,eventOutcome,eventOutcomeDetailNote,[['SE/ESS',agentIdentifierValue]],[['SE/ESS',objectIdentifierValue]])])
+        xml_PREMIS = ESSMD.AddPremisEvent(xml_PREMIS,[(IdentifierType,str(uuid.uuid1()),eventType,eventDateTime,eventDetail,eventOutcome,eventOutcomeDetailNote,[[IdentifierType,agentIdentifierValue]],[[IdentifierType,objectIdentifierValue]])])
         if not DOC:
-            xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[('SE/ESS','ESSArch','ESSArch E-Arkiv','software')])
+            xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[(IdentifierType,'ESSArch','ESSArch E-Arkiv','software')])
         #errno,why = ESSMD.validate(xml_PREMIS)
         #if errno:
         #    print 'errno: %s, why: %s' % (str(errno),str(why))
@@ -451,6 +454,214 @@ def get_logxml_info(logfile):
     else:
             return status_code,[status_list,error_list],res
 
+def ExportLogEventsToFile(logfilename, ip_uuid=None, aic_uuid=None, StatusProcess=None, TimeZone=timezone.get_default_timezone_name()):
+    #######################################################################################################################
+    # Export logevents from database to logfile
+    #
+    status_code = 0
+    status_list = []
+    error_list = []
+    ip_obj_list = []
+    
+    if aic_uuid:
+        ip_obj_list = ArchiveObject.objects.filter(reluuid_set__AIC_UUID=aic_uuid).order_by('Generation')
+        if StatusProcess:
+            ip_obj_list = ip_obj_list.filter(StatusProcess=StatusProcess)
+            
+    if ip_uuid and not aic_uuid:
+        ip_obj = ArchiveObject.objects.filter(ObjectUUID = ip_uuid)[:1]
+        if ip_obj:
+            ip_obj = ip_obj.get()
+            ip_obj_list.append(ip_obj)
+    
+    IdentifierType = 'NO/RA'
+    object_list = []
+    event_list = []
+    for ip_obj in ip_obj_list:
+        ip_obj_data = ip_obj.archiveobjectdata_set.all()[:1]
+        significantProperties_list = []
+        significantProperties_list.append(['createdate',ip_obj.EntryDate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+        significantProperties_list.append(['archivist_organization',ip_obj.EntryAgentIdentifierValue])
+        if ip_obj_data:
+            ip_obj_data = ip_obj_data[0]
+            significantProperties_list.append(['label',ip_obj_data.label])
+            significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+            significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
+        significantProperties_list.append(['iptype',dict(PackageType_CHOICES)[ip_obj.OAISPackageType]])
+        significantProperties_list.append(['generation',str(ip_obj.Generation)])
+        object_list.append([IdentifierType,
+                            ip_obj.ObjectIdentifierValue,
+                            significantProperties_list,
+                            '',
+                            '',
+                            '',
+                            '',
+                            'tar',
+                            '',
+                            ])
+        # object_list = [objectIdentifierType,objectIdentifierValue,significantProperties_list,
+        #                messageDigestAlgorithm,messageDigest,messageDigestOriginator,size,
+        #                formatName,formatVersion]
+
+        event_obj_list = eventIdentifier.objects.filter(linkingObjectIdentifierValue = ip_obj.ObjectIdentifierValue).all()
+        for event_obj in event_obj_list:
+            event_list.append([IdentifierType,
+                               event_obj.eventIdentifierValue,
+                               str(event_obj.eventType),
+                               event_obj.eventDateTime.astimezone(pytz.timezone(TimeZone)).isoformat(),
+                               event_obj.eventDetail,
+                               str(event_obj.eventOutcome),
+                               event_obj.eventOutcomeDetailNote,
+                               IdentifierType,
+                               event_obj.linkingAgentIdentifierValue,
+                               IdentifierType,
+                               event_obj.linkingObjectIdentifierValue,
+                               ])
+                # event_list = [eventIdentifierType,eventIdentifierValue,eventType,eventDateTime,eventDetail,
+                #               eventOutcome,eventOutcomeDetailNote,linkingAgentIdentifierType,linkingAgentIdentifierValue,
+                #               linkingObjectIdentifierType,linkingObjectIdentifierValue] 
+     
+    if ip_uuid and aic_uuid:
+        ip_obj = ArchiveObject.objects.filter(ObjectUUID = ip_uuid)[:1]
+        if ip_obj:
+            object_list = []
+            ip_obj = ip_obj.get()
+            ip_obj_data = ip_obj.archiveobjectdata_set.all()[:1]
+            significantProperties_list = []
+            significantProperties_list.append(['createdate',ip_obj.EntryDate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+            significantProperties_list.append(['archivist_organization',ip_obj.EntryAgentIdentifierValue])
+            if ip_obj_data:
+                ip_obj_data = ip_obj_data[0]
+                significantProperties_list.append(['label',ip_obj_data.label])
+                significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+                significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
+            significantProperties_list.append(['iptype',dict(PackageType_CHOICES)[ip_obj.OAISPackageType]])
+            significantProperties_list.append(['generation',str(ip_obj.Generation)])
+            object_list.append([IdentifierType,
+                                ip_obj.ObjectIdentifierValue,
+                                significantProperties_list,
+                                '',
+                                '',
+                                '',
+                                '',
+                                'tar',
+                                '',
+                                ])
+            # object_list = [objectIdentifierType,objectIdentifierValue,significantProperties_list,
+            #                messageDigestAlgorithm,messageDigest,messageDigestOriginator,size,
+            #                formatName,formatVersion]
+       
+    if status_code == 0:             
+        return_code,return_status_list = Create_logfile(logfilename, object_list, event_list, aic_uuid)
+        for i in return_status_list[0]:
+            status_list.append(i)
+        for i in return_status_list[1]:
+            error_list.append(i)
+        status_code = return_code
+
+    return status_code,[status_list,error_list]
+
+def Create_logfile(logfilename,object_list,event_list,aic_object=None):
+    #######################################################################################################################
+    # Create_logfile
+    #
+    # parameters:
+    # logfilename = "/IP_xxxx/log.xml"
+    # aic_object = "e8a239b6-807a-11e2-b920-002215836551"
+    #
+    # object_list = [objectIdentifierType,objectIdentifierValue,significantProperties_list,
+    #                messageDigestAlgorithm,messageDigest,messageDigestOriginator,size,
+    #                formatName,formatVersion]
+    #
+    # event_list = [eventIdentifierType,eventIdentifierValue,eventType,eventDateTime,eventDetail,
+    #               eventOutcome,eventOutcomeDetailNote,linkingAgentIdentifierType,linkingAgentIdentifierValue,
+    #               linkingObjectIdentifierType,linkingObjectIdentifierValue] 
+    #
+    status_code = 0
+    status_list = []
+    error_list = []
+ 
+    if status_code == 0:
+        obj_num = 0
+        for obj in object_list:
+            #print 'obj: %s' % obj
+            objectIdentifierType = obj[0] # 'SE/RA' or 'NO/RA' or 'SE/ESS'
+            objectIdentifierValue = obj[1]
+            significantProperties_list = obj[2]
+            messageDigestAlgorithm = obj[3]
+            messageDigest = obj[4]
+            messageDigestOriginator = obj[5]
+            size = obj[6]
+            formatName = obj[7] # 'tar'
+            formatVersion = obj[8]
+            relation=[]
+            xlink_type = 'simple'
+            xlink_href = ''
+            preservationLevelValue = 'full'
+            compositionLevel = '0'
+            storageMedium = 'Preservation platform ESSArch' # 'bevarandesystemet'
+            if obj_num == 0:
+                if aic_object:
+                    significantProperties_list.append(['aic_object',aic_object])
+                    relation.append(['structural','is part of',objectIdentifierType,aic_object])
+                xml_PREMIS = ESSMD.createPremis(FILE=[xlink_type,
+                                                      xlink_href,
+                                                      objectIdentifierType,
+                                                      objectIdentifierValue,
+                                                      preservationLevelValue,
+                                                      significantProperties_list,
+                                                      compositionLevel,
+                                                      formatName,
+                                                      formatVersion,
+                                                      storageMedium,
+                                                      relation])
+            else:
+                xml_PREMIS = ESSMD.AddPremisFileObject(xml_PREMIS,FILES=[(xlink_type,
+                                                                          xlink_href,
+                                                                          objectIdentifierType,
+                                                                          objectIdentifierValue,
+                                                                          preservationLevelValue,
+                                                                          significantProperties_list,
+                                                                          compositionLevel,
+                                                                          [], #[[messageDigestAlgorithm,messageDigest,messageDigestOriginator]],
+                                                                          size,
+                                                                          formatName,
+                                                                          formatVersion,
+                                                                          '', #[[objectCharacteristicsExtension XML etree.Elemt]],
+                                                                          [['','','','',storageMedium]], #[[xlink_type,xlink_href,contentLocationType,contentLocationValue,storageMedium],...],
+                                                                          relation,
+                                                                          )])
+            obj_num += 1
+
+    if status_code == 0:
+        for event in event_list:
+            #print 'event %s' % event
+            eventIdentifierType = event[0]
+            eventIdentifierValue = event[1]
+            eventType = event[2]
+            eventDateTime = event[3]
+            eventDetail = event[4]
+            eventOutcome = event[5]
+            eventOutcomeDetailNote = event[6]
+            linkingAgentIdentifierType = event[7]
+            linkingAgentIdentifierValue = event[8]
+            linkingObjectIdentifierType = event[9]
+            linkingObjectIdentifierValue = event[10]
+
+            xml_PREMIS = ESSMD.AddPremisEvent(xml_PREMIS,[(eventIdentifierType,eventIdentifierValue,eventType,eventDateTime,eventDetail,eventOutcome,eventOutcomeDetailNote,[[linkingAgentIdentifierType,linkingAgentIdentifierValue]],[[linkingObjectIdentifierType,linkingObjectIdentifierValue]])])
+        #xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[(IdentifierType,'ESSArch','ESSArch E-Arkiv','software')])
+        #errno,why = ESSMD.validate(xml_PREMIS)
+        #if errno:
+        #    print 'errno: %s, why: %s' % (str(errno),str(why))
+        #print etree.tostring(xml_PREMIS,encoding='UTF-8', xml_declaration=True, pretty_print=True)
+        return_code,status = ESSMD.writeToFile(xml_PREMIS,logfilename)
+        if return_code == 0:
+            status_list.append('Success to create logfile: %s' % logfilename)
+        else:
+            status_code = 1
+            error_list.append('errno: %s, why: %s' % (str(return_code),str(status)))
+    return status_code,[status_list,error_list]
+
 def get_logxml_filename(ObjectIdentifierValue=None, creator=None, system= None, version=None, path=ioessarch):
     status_code = 0
     status_list = []
@@ -518,7 +729,7 @@ def get_logxml_filename(ObjectIdentifierValue=None, creator=None, system= None, 
             return status_code,[status_list,error_list],res
 
 def get_arkivuttrekk_info(logfile):
-    stockholm=pytz.timezone('Europe/Stockholm')
+    stockholm=timezone.get_default_timezone()
     status_code = 0
     status_list = []
     error_list = []

@@ -46,7 +46,7 @@
 					<td>{{ ip.iptype }}</td>
 					<td>{{ ip.aic_uuid }}</td>
 					<td>{{ ip.uuid }}</td>
-					<td></td>
+					<td>{{ ip.StatusProcess }}</td>
 					<td>{{ ip.state }}</td>
 		      	</tr>
 	      	{% endfor %}
@@ -58,11 +58,11 @@
 					{% elif type == 'FromWork' %}
 						<td><a href="{% url controlarea_checkinfromwork ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
 					{% elif type == 'DiffCheck' %}
-						<td><a href="{% url controlarea_diffcheckwork ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+						<td><a href="{% url controlarea_diffcheck ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
 					{% elif type == 'ToIngest' %}
-						<td><a href="{% url controlarea_ingestip ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+						<td><a href="{% url controlarea_preserveip ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
 					{% else %}
-						<td>{{ ip_obj.Generation }}</td>
+						<td>IP_{{ ip_obj.Generation }}</td>
 					{% endif %}
 					<td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
 					<td>{{ ip_obj_data.label }}</td>

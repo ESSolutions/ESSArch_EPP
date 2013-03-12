@@ -32,8 +32,8 @@
 {% block branding %}
   <div id="header-wrapper">
     <div id="branding-wrapper">
-      <h2 class="site-name"><a href="/" title="ESSArch">ESSArch</a></h2>
-      <div class='site-slogan'>The preservation platform</div>
+      <h2 class="site-name"><a href="/" title="ESSArch">ESSArch EPP</a></h2>
+      <div class='site-slogan'>(ESSArch Preservation Platform)</div>
     </div><!-- end branding wrapper -->
   </div><!-- end header-wrapper -->
 {% endblock %}
@@ -59,9 +59,10 @@
 			  <li><a href="{% url controlarea_checkinfromreception_list %}">{% trans 'CheckIn from Reception' %}</a></li>
 			  <li><a href="{% url controlarea_checkouttowork_list %}">{% trans 'CheckOut to Workarea' %}</a></li>
 			  <li><a href="{% url controlarea_checkinfromwork_list %}">{% trans 'CheckIn from Workarea' %}</a></li>
-			  {#}<li><a href="/controlarea/list">{% trans 'CheckOut to Gatearea' %}</a></li>#}
+			  <li><a href="{% url controlarea_checkouttogatefromwork %}">{% trans 'CheckOut to Gatearea from work' %}</a></li>
+			  <li><a href="{% url controlarea_checkinfromgate_list %}">{% trans 'CheckIn from Gatearea' %}</a></li>
 			  <li><a href="{% url controlarea_diffcheck_list %}">{% trans 'DiffCheck' %}</a></li>
-			  <li><a href="{% url controlarea_ingestip_list %}">{% trans 'IngestIP' %}</a></li>
+			  <li><a href="{% url controlarea_preserveip_list %}">{% trans 'Preserve Information Package' %}</a></li>
 			  {#}<li><a href="/controlarea/list">{% trans 'ValidateIP' %}</a></li>#}
 			</ul>
 	    </li>

@@ -1,8 +1,92 @@
-{% extends 'base.html' %}
+{% extends 'index.html' %}
+{% load dictionary_extras %}
 
 {% block content %}
+
+<div style="margin:20px">
+
+	<H1>Create controlarea request</H1>
+	<p>
+	<p><i>Please fill in the fields or use prefilled data   (* indicates mandatory field)</i></p>
+	<br>
+
     <form action="" method="post">
-        {{ form.as_p }}    
-        <p><input type="submit" value="Continue &rarr;" /></p>
-    </form>
+    	{% csrf_token %}
+		<table id="result_list">
+			<thead>
+			</thead>
+			<tbody>
+        		{{ form.as_table }}    
+			</tbody>
+		</table>
+		<br/>
+        <p><input type="submit" value="Create &rarr;" /></p>
+    </form>  
+
+{% if type == 'PreserveIP' %}
+	<H1>Events for IP</H1>
+	<div class="results">
+	  <table id="result_list">
+	    <thead>
+	      <tr>
+	                <th>Event UUID</th>
+	    			<th>Type</th>
+				    <th>Date</th>
+				    <th>Outcome</th>
+				    <th>Note</th>
+				    <th>Agent</th>
+				    <th>Generation</th>
+				    <th>Linking Object ID</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		    	{% for event_obj,ip_obj in event_list1 %}
+			      	<tr class="row{% cycle '1' '2' %}">
+						<td>{{ event_obj.eventIdentifierValue }}</td>
+						<td>{{ event_obj.eventType }}</td>
+						<td>{{ event_obj.eventDateTime }}</td>
+						<td>{{ eventOutcome_CHOICES|access:event_obj.eventOutcome }}</td>
+						<td>{{ event_obj.eventOutcomeDetailNote }}</td>
+						<td>{{ event_obj.linkingAgentIdentifierValue }}</td>
+						<td>IP_{{ ip_obj.Generation }}</td>
+						<td>{{ event_obj.linkingObjectIdentifierValue }}</td>
+			      	</tr>
+		      	{% endfor %}
+	    </tbody>
+	  </table>
+	</div>
+	<br/>
+	<H1>Related events for AIC</H1>
+	<div class="results">
+	  <table id="result_list">
+	    <thead>
+	      <tr>
+	                <th>Event UUID</th>
+	    			<th>Type</th>
+				    <th>Date</th>
+				    <th>Outcome</th>
+				    <th>Note</th>
+				    <th>Agent</th>
+				    <th>Generation</th>
+				    <th>Linking Object ID</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		    	{% for event_obj,ip_obj in event_list2 %}
+			      	<tr class="row{% cycle '1' '2' %}">
+						<td>{{ event_obj.eventIdentifierValue }}</td>
+						<td>{{ event_obj.eventType }}</td>
+						<td>{{ event_obj.eventDateTime }}</td>
+						<td>{{ eventOutcome_CHOICES|access:event_obj.eventOutcome }}</td>
+						<td>{{ event_obj.eventOutcomeDetailNote }}</td>
+						<td>{{ event_obj.linkingAgentIdentifierValue }}</td>
+						<td>IP_{{ ip_obj.Generation }}</td>
+						<td>{{ event_obj.linkingObjectIdentifierValue }}</td>
+			      	</tr>
+		      	{% endfor %}
+	    </tbody>
+	  </table>
+	</div>
+{% endif %}
+</div>
 {% endblock %}

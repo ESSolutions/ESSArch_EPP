@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2013  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,10 @@ from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 from django.core.urlresolvers import reverse
 
-# Create your models here.
+###########################################################################
+#
+# ESSArch permission model
+#
 class permission(models.Model):
     class Meta:
         permissions = (
@@ -51,8 +54,35 @@ class permission(models.Model):
             ("infoclass_4", "Information Class 4"),
             ("list_ingestqueue", "Can list ingest queue"),
             ("list_accessqueue", "Can list access queue"),
+            ("list_storageMedium", "Can list storageMedium"),
+            ("list_storage", "Can list storage"),
+            ("list_robot", "Can list robot"),
         )
 
+###########################################################################
+#
+# Custom widgets
+#
+class PlainText(forms.TextInput):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs)
+        if not value=='' and hasattr(self, 'choices'):
+            try:
+                value = int(value)
+            except:
+                value_label = value
+            else:
+                value_label = dict(self.choices)[value]
+        else:
+            value_label = value
+        return mark_safe(u'<input type="hidden" name="%s" %s value="%s" />%s' % (name,flatatt(final_attrs),value,value_label))
+
+###########################################################################
+#
+# Choices for models and forms
+#
 StatusActivity_CHOICES = (
     (0, 'OK'),
     (1, 'New object'),
@@ -113,6 +143,78 @@ PackageType_CHOICES = (
     (4, 'DIP'),
 )
 
+ReqStatus_CHOICES = (
+    (0, 'Pending'),
+    (5, 'Progress'),
+    (20, 'Success'),
+    (100, 'FAIL'),
+)
+
+ControlAreaReqType_CHOICES = (
+    (1, 'CheckIn from Reception'),
+    (2, 'CheckOut to Workarea as a new IP generation'),
+    (3, 'CheckIn from Workarea'),
+    (4, 'DiffCheck'),
+    (5, 'Preserve Information Package'),
+    (6, 'CheckOut to Gatearea from WorkArea'),
+)
+
+AccessReqType_CHOICES = (
+    (3, 'Generate DIP (package)'),
+    (4, 'Generate DIP (package extracted)'),
+    (1, 'Generate DIP (package & package extracted)'),
+    (2, 'Verify StorageMedium'),
+)
+
+IngestReqType_CHOICES = (
+    (1, 'Ingest request'),
+    (2, 'Ingest request without AIS'),
+)
+
+MediumType_CHOICES = (
+    (200, 'DISK'),
+    (301, 'IBM-LTO1'),
+    (302, 'IBM-LTO2'),
+    (303, 'IBM-LTO3'),
+    (304, 'IBM-LTO4'),
+    (305, 'IBM-LTO5'),
+)
+
+MediumFormat_CHOICES = (
+    (102, '102 (Media label)'),
+    (103, '103 (AIC support)'),
+)
+
+MediumStatus_CHOICES = (
+    (20, 'Write'),
+    (30, 'Full'),
+)
+
+MediumLocationStatus_CHOICES = (
+    (10, '10'),
+    (20, '20'),
+    (30, '30'),
+    (40, '40'),
+    (50, 'Robot'),
+)
+
+MediumBlockSize_CHOICES = (
+    (128, '64K'),
+    (256, '128K'),
+    (512, '256K'),
+    (1024, '512K'),
+    (2048, '1024K'),
+)
+
+eventOutcome_CHOICES = (
+    (0, 'OK'),
+    (1, 'Failed'),
+)
+
+###########################################################################
+#
+# General models and forms
+#
 class ArchiveObject(models.Model):
     ObjectUUID = models.CharField(max_length=36, unique=True)
     PolicyId = models.IntegerField()
@@ -152,6 +254,47 @@ class ArchiveObject(models.Model):
         db_table = 'IngestObject'
     def get_absolute_url(self):
         return reverse('ingest_listobj')
+    def get_ip_list(self,StatusProcess=None,StatusProcess__lt=None):
+        ip_list = []
+        # Try to get an list of IP objects related to AIC object "IP_Object"
+        ip_obj_list = ArchiveObject.objects.filter(reluuid_set__AIC_UUID=self).order_by('Generation')
+        if StatusProcess:
+            ip_obj_list = ip_obj_list.filter(StatusProcess=StatusProcess)
+        if StatusProcess__lt:
+            ip_obj_list = ip_obj_list.filter(StatusProcess__lt=StatusProcess__lt)
+        if ip_obj_list:
+            aic_obj = self
+            for ip_obj in ip_obj_list:
+                if not ip_obj.OAISPackageType == 1:
+                    ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
+                    if ip_obj_data_list:
+                        ip_obj_data = ip_obj_data_list[0]
+                    else:
+                        ip_obj_data = None
+                    ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
+                    if ip_obj_metadata_list:
+                        ip_obj_metadata = ip_obj_metadata_list[0]
+                    else:
+                        ip_obj_metadata = None
+                    ip_list.append([aic_obj,ip_obj,None,ip_obj_data,ip_obj_metadata])
+        # Check if object "IP_Object" has an AIC, if not "IP_Object" can be an IP object without AIC.
+        elif not ArchiveObject.objects.filter(relaic_set__UUID=self).exists():
+            aic_obj = None
+            if not self.OAISPackageType == 1:
+                ip_obj = self
+                ip_obj_data_list = ip_obj.archiveobjectdata_set.all()
+                if ip_obj_data_list:
+                    ip_obj_data = ip_obj_data_list[0]
+                else:
+                    ip_obj_data = None
+                ip_obj_metadata_list = ip_obj.archiveobjectmetadata_set.all()
+                if ip_obj_metadata_list:
+                    ip_obj_metadata = ip_obj_metadata_list[0]
+                else:
+                    ip_obj_metadata = None
+                ip_list.append([aic_obj,ip_obj,None,ip_obj_data,ip_obj_metadata])
+                
+        return ip_list
 
 class ArchiveObjectStatusForm(forms.ModelForm):
     required_css_class = 'required'
@@ -227,20 +370,55 @@ class eventType_codes(models.Model):
     class Meta:
         db_table = 'eventType_codes'
 
-ReqStatus_CHOICES = (
-    (0, 'Pending'),
-    (5, 'Progress'),
-    (20, 'Success'),
-    (100, 'FAIL'),
-)
 
-AccessReqType_CHOICES = (
-    (3, 'Generate DIP (package)'),
-    (4, 'Generate DIP (package extracted)'),
-    (1, 'Generate DIP (package & package extracted)'),
-    (2, 'Verify StorageMedium'),
-)
+###########################################################################
+#
+# Controlarea models and forms
+#
+class ControlAreaQueue(models.Model):     
+    ReqUUID = models.CharField(max_length=36)
+    ReqType = models.IntegerField(choices=ControlAreaReqType_CHOICES)
+    ReqPurpose = models.CharField(max_length=255)
+    user = models.CharField(max_length=45)
+    password = models.CharField(max_length=45,blank=True)
+    ObjectIdentifierValue = models.CharField(max_length=255, blank=True)
+    Status = models.IntegerField(blank=True, default=0, choices=ReqStatus_CHOICES)
+    posted = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'ReqControlAreaQueue'
+    
+class ControlAreaForm(forms.ModelForm):
+    required_css_class = 'required'
+    ReqUUID = forms.CharField(label='ReqUUID', widget = PlainText())
+    ObjectIdentifierValue = forms.CharField(label='ObjectIdentifierValue', widget=PlainText())
+    Status = forms.IntegerField(widget = forms.HiddenInput())
+    user = forms.CharField(label='User', widget = PlainText())
+    class Meta:
+        model=ControlAreaQueue   
+        exclude=('password',)
 
+class ControlAreaForm2(ControlAreaForm):
+    ReqType = forms.ChoiceField(label='ReqType',choices=ControlAreaReqType_CHOICES, widget = PlainText())
+
+class ControlAreaForm_file(ControlAreaForm2):
+    ObjectIdentifierValue = forms.CharField(label='ObjectIdentifierValue',required=False, widget = forms.HiddenInput())
+    FileSelect_CHOICES = () 
+    filename = forms.MultipleChoiceField(choices=FileSelect_CHOICES, widget=forms.CheckboxSelectMultiple())
+    def __init__(self, *args, **kwargs):    
+        super(ControlAreaForm_file, self ).__init__(*args, **kwargs)
+        if self.FileSelect_CHOICES:
+            self.fields['filename'].choices = self.FileSelect_CHOICES
+
+class ControlAreaForm_reception(ControlAreaForm2):
+    POLICYID = forms.CharField(label='Archive Policy ID', widget = PlainText())
+    INFORMATIONCLASS = forms.CharField(label='Information Class', widget = PlainText())
+    DELIVERYTYPE = forms.CharField(label='DELIVERYTYPE', widget = PlainText())
+    DELIVERYSPECIFICATION = forms.CharField(label='DELIVERYSPECIFICATION', widget = PlainText())
+    
+###########################################################################
+#
+# Access models and forms
+#
 class AccessQueue(models.Model):     
     ReqUUID = models.CharField(max_length=36)
     ReqType = models.IntegerField(choices=AccessReqType_CHOICES)
@@ -256,17 +434,6 @@ class AccessQueue(models.Model):
         db_table = 'AccessQueue'
     def get_absolute_url(self):
         return reverse('access_list')
-
-class PlainText(forms.TextInput):
-    def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs)
-        if not value=='' and hasattr(self, 'choices'):
-            value_label = dict(self.choices)[value]
-        else:
-            value_label = value
-        return mark_safe(u'<input type="hidden" name="%s" %s value="%s" />%s' % (name,flatatt(final_attrs),value,value_label))
 
 class AccessQueueForm(forms.ModelForm):
     required_css_class = 'required'
@@ -302,11 +469,10 @@ class AccessQueueForm(forms.ModelForm):
 class AccessQueueFormUpdate(AccessQueueForm):
     Status = forms.ChoiceField(choices=ReqStatus_CHOICES)
 
-IngestReqType_CHOICES = (
-    (1, 'Ingest request'),
-    (2, 'Ingest request without AIS'),
-)
-
+###########################################################################
+#
+# Ingest models and forms
+#
 class IngestQueue(models.Model):     
     ReqUUID = models.CharField(max_length=36)
     ReqType = models.IntegerField(choices=IngestReqType_CHOICES)
@@ -333,42 +499,11 @@ class IngestQueueForm(forms.ModelForm):
 
 class IngestQueueFormUpdate(IngestQueueForm):
     Status = forms.ChoiceField(choices=ReqStatus_CHOICES)
-    
-MediumType_CHOICES = (
-    (200, 'DISK'),
-    (301, 'IBM-LTO1'),
-    (302, 'IBM-LTO2'),
-    (303, 'IBM-LTO3'),
-    (304, 'IBM-LTO4'),
-    (305, 'IBM-LTO5'),
-)
 
-MediumFormat_CHOICES = (
-    (102, '102 (Media label)'),
-    (103, '103 (AIC support)'),
-)
-
-MediumStatus_CHOICES = (
-    (20, 'Write'),
-    (30, 'Full'),
-)
-
-MediumLocationStatus_CHOICES = (
-    (10, '10'),
-    (20, '20'),
-    (30, '30'),
-    (40, '40'),
-    (50, 'Robot'),
-)
-
-MediumBlockSize_CHOICES = (
-    (128, '64K'),
-    (256, '128K'),
-    (512, '256K'),
-    (1024, '512K'),
-    (2048, '1024K'),
-)
-
+###########################################################################
+#
+# Administration models and forms
+#
 class storageMedium(models.Model):
     storageMediumUUID = models.CharField(max_length=36)
     storageMedium = models.IntegerField(choices=MediumType_CHOICES)

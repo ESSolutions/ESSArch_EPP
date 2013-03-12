@@ -1,8 +1,8 @@
 #!/usr/bin/env /ESSArch/python27/bin/python
 # -*- coding: UTF-8 -*-
 '''
-    ESSArch Tools - ESSArch is an Electronic Preservation Platform
-    Copyright (C) 2005-2013  ES Solutions AB
+    ESSArch - ESSArch is an Electronic Archive system
+    Copyright (C) 2010-2013  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,12 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
+__majorversion__ = "2.5"
+__revision__ = "$Revision$"
+__date__ = "$Date$"
+__author__ = "$Author$"
+import re
+__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 from django.db import models
 from django.contrib import admin

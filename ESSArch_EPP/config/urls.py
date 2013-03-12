@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2013  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,15 +28,9 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 from django.conf.urls import patterns, include, url
 
-#from django.conf import settings
-
-from books.views import PublisherDetailView
-
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
-
-from books.models import Publisher
 
 urlpatterns = patterns('',
     # Standard URLS:
@@ -58,6 +52,4 @@ urlpatterns = patterns('',
 
     # StorageLogistics_ws URLS:
     url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),
-
-    url(r'^publishers/$', PublisherDetailView.as_view()),
 )

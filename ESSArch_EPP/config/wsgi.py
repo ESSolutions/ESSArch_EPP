@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2013  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,13 +26,13 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 """
-WSGI config for ESSArch.
+WSGI config for ESSArch EPP.
 """
 import os, sys
 
 sys.path.append('/ESSArch/app')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings"
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
