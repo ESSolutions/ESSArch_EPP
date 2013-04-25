@@ -324,7 +324,7 @@ def installdefaultschemaprofiles(request): # default schema profiles for Sweden 
                'mets_namespace': 'http://www.loc.gov/METS/',
                'mets_schemalocation': 'http://xml.ra.se/METS/RA_METS_eARD.xsd',
                'mets_profile': 'http://xml.ra.se/METS/RA_METS_eARD.xml',
-               'premis_namespace': 'http://www.arkivverket.no/standarder/PREMIS',
+               'premis_namespace': 'http://arkivverket.no/standarder/PREMIS',
                'premis_schemalocation': 'http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd',
                'premis_version': '2.0',
                'mods_namespace': 'http://www.loc.gov/mods/v3',

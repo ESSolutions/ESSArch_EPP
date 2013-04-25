@@ -29,9 +29,9 @@
 					<td>{{ obj.status }}</td>
 			        {% if admin_user %}
 			            {% if obj.status == 'Mounted' %} 
-			                <td><a href="{% url admin_create_robotreq obj.t_id 3 %}" title="Create unmount request">Force unmount</a></td>
+			                <td><a href="{% url 'admin_create_robotreq' obj.t_id 3 %}" title="Create unmount request">Force unmount</a></td>
 			            {% elif obj.status == 'ArchTape' %}
-			                <td><a href="{% url admin_create_robotreq obj.t_id 1 %}" title="Create mount request">Manual mount</a></td>
+			                <td><a href="{% url 'admin_create_robotreq' obj.t_id 1 %}" title="Create mount request">Manual mount</a></td>
 			            {% else %}
 			                <td>N/A</td>
 			            {% endif %}
@@ -49,7 +49,7 @@
 
 {% if admin_user %}
 	<br/>
-	<a href="{% url admin_create_robotinventory 1 %}" title="Inventory robot">Inventory robot</a>
+	<a href="{% url 'admin_create_robotinventory' 1 %}" title="Inventory robot">Inventory robot</a>
 {% endif %}
 
 </div>    

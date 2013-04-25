@@ -32,7 +32,7 @@ from django.shortcuts import get_object_or_404
 from models import MyFile, RequestFile
 from django.db.models import Q
 from essarch.models import ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, \
-                           ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
+                           ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, ControlAreaForm_CheckInFromWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
                            eventIdentifier, eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter
@@ -226,6 +226,7 @@ class CheckinFromReception(CreateView):
         initial['INFORMATIONCLASS'] = 1
         initial['DELIVERYTYPE'] = 'N/A'
         initial['DELIVERYSPECIFICATION'] = 'N/A'
+        initial['allow_unknown_filetypes'] = True
         if 'ip_uuid' in self.kwargs:
             self.ip_obj = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get(ip_uuid=self.kwargs['ip_uuid'])
             if self.ip_obj:
@@ -249,11 +250,13 @@ class CheckinFromReception(CreateView):
         DELIVERYSPECIFICATION = form.cleaned_data.get('DELIVERYSPECIFICATION',None)
         if DELIVERYSPECIFICATION:
             altRecordID_list.append(['DELIVERYSPECIFICATION',DELIVERYSPECIFICATION])
+        allow_unknown_filetypes = form.cleaned_data.get('allow_unknown_filetypes',False)
         status_code, status_detail = ControlAreaFunc.CheckInFromMottag(self.source_path, 
                                                                        self.target_path, 
                                                                        objectpath, 
                                                                        ObjectIdentifierValue,
                                                                        altRecordID_list=altRecordID_list,
+                                                                       allow_unknown_filetypes=allow_unknown_filetypes,
                                                                        )
         if status_code:
             self.object.Status=100
@@ -434,7 +437,7 @@ class CheckinFromWork(CreateView):
     """
     model = ControlAreaQueue
     template_name='controlarea/create.html'
-    form_class=ControlAreaForm2
+    form_class=ControlAreaForm_CheckInFromWork
 
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
     def dispatch(self, *args, **kwargs):
@@ -450,6 +453,7 @@ class CheckinFromWork(CreateView):
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
             initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        initial['allow_unknown_filetypes'] = True
         return initial
     
     def form_valid(self, form):
@@ -462,12 +466,14 @@ class CheckinFromWork(CreateView):
         a_uid = os.getuid()
         a_gid = os.getgid()
         a_mode = 0770
+        allow_unknown_filetypes = form.cleaned_data.get('allow_unknown_filetypes',False)
         status_code, status_detail = ControlAreaFunc.CheckInFromWork(source_path, 
                                                                      target_path, 
                                                                      objectpath, 
                                                                      a_uid, 
                                                                      a_gid, 
                                                                      a_mode,
+                                                                     allow_unknown_filetypes,
                                                                      )
         if status_code:
             self.object.Status=100

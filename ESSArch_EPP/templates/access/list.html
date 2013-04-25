@@ -25,7 +25,7 @@
     <tbody>
 	    	{% for req_obj in req_list %}
 		      	<tr class="row{% cycle '1' '2' %}">	
-					<td><a href="{% url access_detail req_obj.pk %}" title='Detail information'>{{ req_obj.ReqUUID }}</a></td>	
+					<td><a href="{% url 'access_detail' req_obj.pk %}" title='Detail information'>{{ req_obj.ReqUUID }}</a></td>	
 					<td>{{ AccessReqType_CHOICES|access:req_obj.ReqType }}</td>
 					<td>{{ req_obj.ReqPurpose }}</td>
 					<td>{{ req_obj.user }}</td>

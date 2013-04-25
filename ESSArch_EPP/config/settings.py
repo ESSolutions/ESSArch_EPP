@@ -32,6 +32,8 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+ALLOWED_HOSTS = ['*']
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -168,6 +170,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'south',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -207,7 +210,7 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
-            #'filters': ['require_debug_false'],
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },

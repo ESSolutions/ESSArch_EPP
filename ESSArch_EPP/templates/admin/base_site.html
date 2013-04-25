@@ -56,13 +56,13 @@
 		<li>
 			<a href="#vertical" class="sf-with-ul" title="Manage information packages etc .." >{% trans 'CONTROL AREA' %}</a>
 			<ul>
-			  <li><a href="{% url controlarea_checkinfromreception_list %}">{% trans 'CheckIn from Reception' %}</a></li>
-			  <li><a href="{% url controlarea_checkouttowork_list %}">{% trans 'CheckOut to Workarea' %}</a></li>
-			  <li><a href="{% url controlarea_checkinfromwork_list %}">{% trans 'CheckIn from Workarea' %}</a></li>
-			  <li><a href="{% url controlarea_checkouttogatefromwork %}">{% trans 'CheckOut to Gatearea from work' %}</a></li>
-			  <li><a href="{% url controlarea_checkinfromgate_list %}">{% trans 'CheckIn from Gatearea' %}</a></li>
-			  <li><a href="{% url controlarea_diffcheck_list %}">{% trans 'DiffCheck' %}</a></li>
-			  <li><a href="{% url controlarea_preserveip_list %}">{% trans 'Preserve Information Package' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromreception_list' %}">{% trans 'CheckIn from Reception' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkouttowork_list' %}">{% trans 'CheckOut to Workarea' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromwork_list' %}">{% trans 'CheckIn from Workarea' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkouttogatefromwork' %}">{% trans 'CheckOut to Gatearea from work' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromgate_list' %}">{% trans 'CheckIn from Gatearea' %}</a></li>
+			  <li><a href="{% url 'controlarea_diffcheck_list' %}">{% trans 'DiffCheck' %}</a></li>
+			  <li><a href="{% url 'controlarea_preserveip_list' %}">{% trans 'Preserve Information Package' %}</a></li>
 			  {#}<li><a href="/controlarea/list">{% trans 'ValidateIP' %}</a></li>#}
 			</ul>
 	    </li>
@@ -70,34 +70,34 @@
 		<li>
 			<a href="#vertical" class="sf-with-ul" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
 			<ul>
-			  <li><a href="{% url ingest_listobj %}">{% trans 'List information packages' %}</a></li>
-			  <li><a href="{% url ingest_create %}">{% trans 'Create new ingest request' %}</a></li>
-			  <li><a href="{% url ingest_list %}">{% trans 'List ingest request queue' %}</a></li>
+			  <li><a href="{% url 'ingest_listobj' %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url 'ingest_create' %}">{% trans 'Create new ingest request' %}</a></li>
+			  <li><a href="{% url 'ingest_list' %}">{% trans 'List ingest request queue' %}</a></li>
 			</ul>
 	    </li>
  
 		<li>
 			<a href="#vertical" class="sf-with-ul" title="Access information packages etc .." >{% trans 'ACCESS' %}</a>
 			<ul>
-			  <li><a href="{% url access_listobj %}">{% trans 'List information packages' %}</a></li>
-			  <li><a href="{% url access_create %}">{% trans 'Create new access request' %}</a></li>
-			  <li><a href="{% url access_list %}">{% trans 'List access request queue' %}</a></li>
+			  <li><a href="{% url 'access_listobj' %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url 'access_create' %}">{% trans 'Create new access request' %}</a></li>
+			  <li><a href="{% url 'access_list' %}">{% trans 'List access request queue' %}</a></li>
 			</ul>
 	    </li>
   
 		<li> 
 			<a href="#vertical" class="sf-with-ul">ADMINISTRATION</a>
 	    	<ul>
-	    		<li><a href="{% url admin_liststoragemedium %}">{% trans 'List media information' %}</a></li>
-	    		<li><a href="{% url admin_listrobot %}">{% trans 'List robot information' %}</a></li>
+	    		<li><a href="{% url 'admin_liststoragemedium' %}">{% trans 'List media information' %}</a></li>
+	    		<li><a href="{% url 'admin_listrobot' %}">{% trans 'List robot information' %}</a></li>
 	    	</ul>
 		</li>
 		
 		<li> 
 			<a href="#vertical" class="sf-with-ul">REPORTS</a>
 	    	<ul>
-	    		<li><a href="{% url reports_deliveryreport %}">{% trans 'Deliverys report' %}</a></li>
-	    		<li><a href="{% url reports_eventsreport %}">{% trans 'Log Events report' %}</a></li>
+	    		<li><a href="{% url 'reports_deliveryreport' %}">{% trans 'Deliverys report' %}</a></li>
+	    		<li><a href="{% url 'reports_eventsreport' %}">{% trans 'Log Events report' %}</a></li>
 	    	</ul>
 		</li>
 

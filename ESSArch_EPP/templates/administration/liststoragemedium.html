@@ -26,7 +26,7 @@
     <tbody>
 	    	{% for obj in object_list %}
 		      	<tr class="row{% cycle '1' '2' %}">		
-					<td><a href="{% url admin_detailstoragemedium obj.pk %}" title='Detail information'>{{ obj.storageMediumID }}</a></td>
+					<td><a href="{% url 'admin_detailstoragemedium' obj.pk %}" title='Detail information'>{{ obj.storageMediumID }}</a></td>
 					<td>{{ MediumType_CHOICES|access:obj.storageMedium }}</td>
 					<td>{{ MediumStatus_CHOICES|access:obj.storageMediumStatus }}</td>
 					<td>{{ obj.storageMediumDate }}</td>

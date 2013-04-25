@@ -32,6 +32,8 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+ALLOWED_HOSTS = ['*']
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -180,6 +182,7 @@ INSTALLED_APPS = (
     #'grappelli',
     'django.contrib.admin',
     # 'django.contrib.admindocs',
+    'south',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -219,7 +222,7 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
-            #'filters': ['require_debug_false'], # change if in production and not in debug mode
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },

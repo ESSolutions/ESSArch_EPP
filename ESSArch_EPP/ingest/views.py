@@ -54,13 +54,9 @@ class ArchObjectListUpdate(ListView, BaseUpdateView):
     def dispatch(self, *args, **kwargs):
         return super(ArchObjectListUpdate, self).dispatch( *args, **kwargs)
 
-    def get_initial(self):
-        initial = super(ArchObjectListUpdate, self).get_initial().copy()
-        initial['StatusActivity'] = self.object.StatusActivity
-        return initial
-
     def get_context_data(self, **kwargs):
-        context = super(ArchObjectListUpdate, self).get_context_data(**kwargs)
+        context = {}
+        context['object_list'] = self.get_queryset()
         context['type'] = 'Ingest'
         context['label'] = 'List of information packages in ingest'
         ip_list = []

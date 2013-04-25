@@ -1027,7 +1027,7 @@ padding: 0 0 0 1.5em;
 }
 
 ul, ul li.leaf {
-list-style-image: url(images/menu-leaf.gif);
+/* list-style-image: url(images/menu-leaf.gif); */
 }
 
 ol {

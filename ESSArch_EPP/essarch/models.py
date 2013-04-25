@@ -52,11 +52,6 @@ class permission(models.Model):
             ("infoclass_2", "Information Class 2"),
             ("infoclass_3", "Information Class 3"),
             ("infoclass_4", "Information Class 4"),
-            ("list_ingestqueue", "Can list ingest queue"),
-            ("list_accessqueue", "Can list access queue"),
-            ("list_storageMedium", "Can list storageMedium"),
-            ("list_storage", "Can list storage"),
-            ("list_robot", "Can list robot"),
         )
 
 ###########################################################################
@@ -91,6 +86,7 @@ StatusActivity_CHOICES = (
     (4, 'Need of assistance'),
     (5, 'Progress'),
     (6, 'Pending writes'),
+    (7, 'ControlArea'),
     (100, 'FAIL'),
 )
 
@@ -216,6 +212,7 @@ eventOutcome_CHOICES = (
 # General models and forms
 #
 class ArchiveObject(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     ObjectUUID = models.CharField(max_length=36, unique=True)
     PolicyId = models.IntegerField()
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
@@ -309,7 +306,7 @@ class ArchiveObjectStatusForm(forms.ModelForm):
         widgets = {'StatusActivity': forms.Select(attrs={'onchange':'submit()'}),}    
 
 class ArchiveObjectData(models.Model):
-    #UUID = models.CharField(max_length=36)
+    id = models.AutoField(big=True,primary_key=True)
     UUID = models.ForeignKey(ArchiveObject, db_column='UUID', to_field='ObjectUUID')
     creator = models.CharField(max_length=255)
     label = models.CharField(max_length=255)
@@ -319,7 +316,7 @@ class ArchiveObjectData(models.Model):
         db_table = 'Object_data'
 
 class ArchiveObjectMetadata(models.Model):
-    #ObjectUUID = models.CharField(max_length=36)
+    id = models.AutoField(big=True,primary_key=True)
     ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID')
     ObjectIdentifierValue = models.CharField(max_length=255)
     ObjectMetadataType = models.IntegerField()
@@ -333,14 +330,14 @@ class ArchiveObjectMetadata(models.Model):
         db_table = 'IngestObjectMetadata'
 
 class ArchiveObjectRel(models.Model):
-    #AIC_UUID = models.CharField(max_length=36)
+    id = models.AutoField(big=True,primary_key=True)
     AIC_UUID = models.ForeignKey(ArchiveObject, db_column='AIC_UUID', related_name='relaic_set', to_field='ObjectUUID')
-    #UUID = models.CharField(max_length=36)
     UUID = models.ForeignKey(ArchiveObject, db_column='UUID', related_name='reluuid_set', to_field='ObjectUUID')
     class Meta:
         db_table = 'Object_rel'
 
 class agentIdentifier(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     agentIdentifierValue = models.CharField(max_length=45)
     agentName = models.CharField(max_length=45)
     agentType = models.IntegerField()
@@ -348,6 +345,7 @@ class agentIdentifier(models.Model):
         db_table = 'agentIdentifier'
 
 class eventIdentifier(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     eventIdentifierValue = models.CharField(max_length=36, unique=True)
     eventType = models.IntegerField()
     eventDateTime = models.DateTimeField()
@@ -362,6 +360,7 @@ class eventIdentifier(models.Model):
         db_table = 'eventIdentifier'
 
 class eventType_codes(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     code = models.IntegerField()
     desc_sv = models.CharField(max_length=100)
     desc_en = models.CharField(max_length=100)
@@ -370,6 +369,73 @@ class eventType_codes(models.Model):
     class Meta:
         db_table = 'eventType_codes'
 
+class IOqueue(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
+    cmd = models.IntegerField()
+    cmdprio = models.IntegerField()
+    work_uuid = models.CharField(max_length=36)
+    ObjectIdentifierValue = models.CharField(max_length=255)
+    ObjectMessageDigest = models.CharField(max_length=128)
+    ObjectPath = models.CharField(max_length=255)
+    storageMedium = models.IntegerField()
+    storageMediumID = models.CharField(max_length=45)
+    sm_list = models.CharField(max_length=255)
+    storageMediumBlockSize = models.IntegerField()
+    storageMediumFormat = models.IntegerField()
+    contentLocationValue = models.IntegerField()
+    storageMediumLocation = models.CharField(max_length=45)
+    t_prefix = models.CharField(max_length=6)
+    WriteSize = models.BigIntegerField()
+    date_created = models.DateTimeField()
+    Status = models.IntegerField()
+    class Meta:
+        db_table = 'IOqueue'
+
+class ESSReg001(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
+    ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID')
+    i000 = models.IntegerField()
+    i001 = models.IntegerField()
+    i002 = models.IntegerField()
+    i003 = models.IntegerField()
+    i004 = models.IntegerField()
+    i005 = models.IntegerField()
+    i006 = models.IntegerField()
+    i007 = models.IntegerField()
+    i008 = models.IntegerField()
+    i009 = models.IntegerField()
+    i010 = models.IntegerField()
+    i011 = models.IntegerField()
+    i012 = models.IntegerField()
+    i013 = models.IntegerField()
+    i014 = models.IntegerField()
+    i015 = models.IntegerField()
+    i016 = models.IntegerField()
+    i017 = models.IntegerField()
+    i018 = models.IntegerField()
+    i019 = models.IntegerField()
+    s000 = models.CharField(max_length=255)
+    s001 = models.CharField(max_length=255)
+    s002 = models.CharField(max_length=255)
+    s003 = models.CharField(max_length=255)
+    s004 = models.CharField(max_length=255)
+    s005 = models.CharField(max_length=255)
+    s006 = models.CharField(max_length=255)
+    s007 = models.CharField(max_length=255)
+    s008 = models.CharField(max_length=255)
+    s009 = models.CharField(max_length=255)
+    s010 = models.CharField(max_length=255)
+    s011 = models.CharField(max_length=255)
+    s012 = models.CharField(max_length=255)
+    s013 = models.CharField(max_length=255)
+    s014 = models.CharField(max_length=255)
+    s015 = models.CharField(max_length=255)
+    s016 = models.CharField(max_length=255)
+    s017 = models.CharField(max_length=255)
+    s018 = models.CharField(max_length=255)
+    s019 = models.CharField(max_length=255)
+    class Meta:
+        db_table = 'ESSReg001'
 
 ###########################################################################
 #
@@ -400,6 +466,9 @@ class ControlAreaForm(forms.ModelForm):
 class ControlAreaForm2(ControlAreaForm):
     ReqType = forms.ChoiceField(label='ReqType',choices=ControlAreaReqType_CHOICES, widget = PlainText())
 
+class ControlAreaForm_CheckInFromWork(ControlAreaForm2):
+    allow_unknown_filetypes = forms.BooleanField(label='Allow unknown filetypes',required=False)
+
 class ControlAreaForm_file(ControlAreaForm2):
     ObjectIdentifierValue = forms.CharField(label='ObjectIdentifierValue',required=False, widget = forms.HiddenInput())
     FileSelect_CHOICES = () 
@@ -414,6 +483,7 @@ class ControlAreaForm_reception(ControlAreaForm2):
     INFORMATIONCLASS = forms.CharField(label='Information Class', widget = PlainText())
     DELIVERYTYPE = forms.CharField(label='DELIVERYTYPE', widget = PlainText())
     DELIVERYSPECIFICATION = forms.CharField(label='DELIVERYSPECIFICATION', widget = PlainText())
+    allow_unknown_filetypes = forms.BooleanField(label='Allow unknown filetypes',required=False)
     
 ###########################################################################
 #
@@ -432,6 +502,9 @@ class AccessQueue(models.Model):
     posted = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'AccessQueue'
+        permissions = (                    
+            ("list_accessqueue", "Can list access queue"),
+        )
     def get_absolute_url(self):
         return reverse('access_list')
 
@@ -484,6 +557,9 @@ class IngestQueue(models.Model):
     posted = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'ReqIngestQueue'
+        permissions = (
+            ("list_ingestqueue", "Can list ingest queue"),
+        )
     def get_absolute_url(self):
         return reverse('ingest_list')
     
@@ -505,6 +581,7 @@ class IngestQueueFormUpdate(IngestQueueForm):
 # Administration models and forms
 #
 class storageMedium(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     storageMediumUUID = models.CharField(max_length=36)
     storageMedium = models.IntegerField(choices=MediumType_CHOICES)
     storageMediumID = models.CharField(max_length=45)
@@ -523,8 +600,12 @@ class storageMedium(models.Model):
     ExtDBdatetime = models.DateTimeField()
     class Meta:
         db_table = 'storageMedium'
-
+        permissions = (
+            ("list_storageMedium", "Can list storageMedium"),
+        )
+        
 class storage(models.Model):
+    id = models.AutoField(big=True,primary_key=True)
     contentLocation = models.BigIntegerField()
     ObjectIdentifierValue = models.CharField(max_length=255)
     contentLocationType = models.IntegerField()
@@ -534,7 +615,10 @@ class storage(models.Model):
     ExtDBdatetime = models.DateTimeField()
     class Meta:
         db_table = 'storage'
-
+        permissions = (
+            ("list_storage", "Can list storage"),
+        )
+        
 class robot(models.Model):
     slot_id = models.IntegerField()
     drive_id = models.IntegerField()
@@ -542,7 +626,10 @@ class robot(models.Model):
     t_id = models.CharField(max_length=6)
     class Meta:
         db_table = 'robot'
-
+        permissions = (
+            ("list_robot", "Can list robot"),
+        )
+        
 class robotdrives(models.Model):
     drive_id = models.IntegerField()
     t_id = models.CharField(max_length=6)

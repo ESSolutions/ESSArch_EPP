@@ -39,7 +39,7 @@ ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
 
 logger = logging.getLogger('essarch.controlarea')
 
-def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None,creator=None,system=None,version=None,agent_list=[],altRecordID_list=[]):
+def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None,creator=None,system=None,version=None,agent_list=[],altRecordID_list=[],allow_unknown_filetypes=False):
     status_code = 0
     status_list = []
     error_list = []
@@ -196,6 +196,7 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
                                                        file_list=[],
                                                        METS_LABEL=METS_LABEL,
                                                        PREMIS_ObjectPath=PREMIS_ObjectPath,
+                                                       allow_unknown_filetypes=allow_unknown_filetypes,
                                                        )
         if errno:
             status_code = 8
@@ -439,7 +440,7 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
         status_code = return_code
     return status_code,[status_list,error_list]
 
-def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
+def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode,allow_unknown_filetypes=False):
     status_code = 0
     status_list = []
     error_list = []
@@ -533,12 +534,13 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
                                                        file_list=[],
                                                        METS_LABEL=METS_LABEL,
                                                        PREMIS_ObjectPath=PREMIS_ObjectPath,
+                                                       allow_unknown_filetypes=allow_unknown_filetypes,
                                                        )
         if errno:
             status_code = 5
         for s in why[0]:
             status_list.append(s)
-        for e in why[1]:   
+        for e in why[1]:
             error_list.append(e)
 
     if status_code == 0:
@@ -741,7 +743,7 @@ def GetExchangeRequestFileContent(reqfilename):
 class Functions:
     "Create IP mets"
     ###############################################
-    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None):
+    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None,allow_unknown_filetypes=False):
         status_code = 0
         status_list = []
         error_list = []
@@ -817,15 +819,18 @@ class Functions:
             # create amdSec / structMap / fileSec
             self.ms_files = file_list
             if ObjectPath is not None:
-                Filetree_list, errno, why = ESSPGM.Check().GetFiletree2(ObjectPath,ChecksumAlgorithm)
-                if not errno:    
+                Filetree_list, errno, [status_list2,error_list2]  = ESSPGM.Check().GetFiletree2(ObjectPath,ChecksumAlgorithm,allow_unknown_filetypes)
+                if not errno:
+                    for ss in status_list2:
+                        status_list.append(ss)
+                    for ee in error_list2:
+                        error_list.append(ee)    
                     for f in Filetree_list:
                         f_name = f[0]
                         f_size = f[1].st_size
                         f_created = datetime.datetime.fromtimestamp(f[1].st_mtime,pytz.timezone(TimeZone)).replace(microsecond=0).isoformat()
                         f_checksum = f[2]
                         f_mimetype = f[3]
-                        #print 'filename: %s, size: %s, created: %s, checksum: %s, mimetype: %s' % (f_name,f_size,f_created,f_checksum,f_mimetype)
                         # Don't add mets.xml
                         if f_name == self.METS_DocumentID:
                             continue
@@ -849,10 +854,12 @@ class Functions:
                         #                 a_CHECKSUM, a_CHECKSUMTYPE, a_SIZE, a_MIMETYPE, a_CREATED,
                         #                 a_MDTYPE/a_USE, a_OTHERMDTYPE/a_ADMID, a_DMDID])
                 else:
-                    #logging.error('Problem to get filelist from objectpath: %s, errno: %s, why: %s' % (ObjectPath,errno,str(why)))
                     status_code = 1
-                    error_list.append('Problem to get filelist from objectpath: %s, errno: %s, why: %s' % (ObjectPath,errno,str(why)))
-            
+                    error_list.append('Problem to get filelist from objectpath: %s, errno: %s' % (ObjectPath,errno))
+                    for ss in status_list2:
+                        status_list.append(ss)
+                    for ee in error_list2:
+                        error_list.append(ee)
             # Create PREMISfile
             if PREMIS_ObjectPath is not None:
                 status_list.append('Create new PREMIS: %s' % PREMIS_ObjectPath)
@@ -872,10 +879,10 @@ class Functions:
                         xml_PREMIS = ESSMD.AddPremisFileObject(DOC=xml_PREMIS,FILES=[('simple','','NO/RA',F_objectIdentifierValue,'',[],'0',[[F_messageDigestAlgorithm,F_messageDigest,'ESSArch']],F_size,F_formatName,'',[],[['simple','','AIP',P_ObjectIdentifierValue,'']],[['structural','is part of','NO/RA',P_ObjectIdentifierValue]])])
         
                 xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[('NO/RA','ESSArch','ESSArch E-Arkiv','software')])
-                #errno,why = ESSMD.validate(xml_PREMIS)
-                #if errno:
-                #    status_code = 2
-                #    error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
+                errno,why = ESSMD.validate(xml_PREMIS)
+                if errno:
+                    status_code = 2
+                    error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
                 errno,why = ESSMD.writeToFile(xml_PREMIS,PREMIS_ObjectPath)
                 if errno:
                     status_code = 3
