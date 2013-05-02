@@ -32,7 +32,8 @@ from views import CheckinFromReceptionListView, CheckinFromReception, CheckinFro
                   CheckoutToGateFromWork, CheckoutToGateFromWorkResult, \
                   CheckinFromGateListView, \
                   DiffCheckListView, DiffCheck, DiffCheckResult, \
-                  PreserveIPListView, PreserveIP, PreserveIPResult
+                  PreserveIPListView, PreserveIP, PreserveIPResult, \
+                  ControlareaDeleteIPListView, ControlareaDeleteIP, ControlareaDeleteIPResult
 
 #import views
 
@@ -55,4 +56,7 @@ urlpatterns = patterns('',
     url(r'^preserveiplist/$', PreserveIPListView.as_view(),name='controlarea_preserveip_list'),
     url(r'^preserveip/(?P<pk>\d+)/$', PreserveIP.as_view(), name='controlarea_preserveip'),
     url(r'^preserveipresult/(?P<pk>\d+)/$', PreserveIPResult.as_view(), name='controlarea_preserveipresult'),
+    url(r'^controlareadeleteiplist/$', ControlareaDeleteIPListView.as_view(),name='controlarea_deleteip_list'),
+    url(r'^controlareadeleteip/(?P<pk>\d+)/$', ControlareaDeleteIP.as_view(), name='controlarea_deleteip'),
+    url(r'^controlareadeleteipresult/(?P<pk>\d+)/$', ControlareaDeleteIPResult.as_view(), name='controlarea_deleteipresult'),
 )

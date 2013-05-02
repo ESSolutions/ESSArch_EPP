@@ -315,7 +315,7 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
 
     return status_code,[status_list,error_list]
 
-def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
+def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode,read_only_access=False):
     status_code = 0
     status_list = []
     error_list = []
@@ -326,13 +326,25 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
     if status_code == 0:
         # IF Checkout object is "DirType" - Copy IP_uuid from controlarea to IP_NEW_uuid in workarea
         if op.isdir(op.join(source_path,Package)):
-            IP_uuid = uuid.uuid1()
-            Package_new = op.join(AIC_uuid,'%s' % IP_uuid)
-            event_info = 'CheckOut Package: %s from source_path: %s to new Package: %s in target_path: %s' % (Package,source_path,Package_new,target_path)
+            if not read_only_access:
+                IP_uuid = uuid.uuid1()
+                Package_new = op.join(AIC_uuid,'%s' % IP_uuid)
+                event_info = 'CheckOut Package: %s from source_path: %s to new Package: %s in target_path: %s' % (Package,source_path,Package_new,target_path)
+            else:
+                Package_new = Package
+                event_info = 'CheckOut Package: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path)
             status_list.append(event_info)
             logger.info(event_info)
             try:
                 shutil.copytree(op.join(source_path,Package),op.join(target_path,Package_new))
+                #
+                # Fix if uuid_Content_METS.xml exists
+                Cmets_objpath = op.join(op.join(target_path,Package_new),'%s_Content_METS.xml' % IP_uuid_source)
+                if os.path.exists(Cmets_objpath):
+                    event_info = 'Rename %s_Content_METS.xml to mets.xml' % IP_uuid_source
+                    status_list.append(event_info)
+                    os.rename( Cmets_objpath , op.join(op.join(target_path,Package_new),'mets.xml') )
+                # Fix end
             except (shutil.Error, IOError, os.error), why:
                 event_info = 'Failed to CheckOut, ERROR: %s' % why
                 error_list.append(event_info)
@@ -423,7 +435,18 @@ def CheckOutToWork(source_path,target_path,Package,a_uid,a_gid,a_mode):
             setattr(Object_data, 'enddate', enddate)
             Object_data.save()
         else:
-            event_info = 'Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid)
+            if not read_only_access:
+                event_info = 'Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid)
+            else:
+                # Update IP in ArchiveObject DBtable
+                ArchiveObject_upd = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid)[:1].get()
+                if ArchiveObject_upd.StatusActivity in [ 7, 8 ]:
+                    setattr(ArchiveObject_upd, 'StatusActivity', 8)
+                    # Commit DB updates
+                    ArchiveObject_upd.save()
+                    event_info = 'Entry in DB for IP_UUID: %s already exist, setting StatusActivity = 8 (WorkArea).' % (IP_uuid)
+                elif ArchiveObject_upd.StatusProcess == 5000:
+                    event_info = 'You have to manual delete this IP: %s from your workarea filesystem when you do not need the information any more!!' % (op.join(target_path,Package_new))
             status_list.append(event_info)
             logger.info(event_info)
 
@@ -617,6 +640,48 @@ def CheckOutToGate(source_path,target_path,filelist):
             event_info = 'Success to CheckOut: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path),Package
             status_list.append(event_info)
             logger.info(event_info)
+    return status_code,[status_list,error_list]
+
+def DeleteIP(source_path,target_path,Package):
+    status_code = 0
+    status_list = []
+    error_list = []
+    AIC_uuid,IP_uuid = op.split(Package)
+   
+    if status_code == 0:
+        remove_list = [op.join(source_path,Package),op.join(target_path,Package)]
+        for remove_item in remove_list:
+            if op.exists(remove_item):
+                try:
+                    if op.isdir(remove_item):
+                        event_info = 'Try to remove directory tree: %s' % (remove_item)
+                        shutil.rmtree(remove_item)
+                    else:
+                        event_info = 'Try to remove file: %s' % (remove_item)
+                        os.remove(remove_item)
+                    status_list.append(event_info)
+                    logger.info(event_info)
+                except (shutil.Error, IOError, os.error), why:
+                    event_info = 'Failed to remove %s, ERROR: %s' % (remove_item,why)
+                    error_list.append(event_info)
+                    logger.error(event_info)
+                    status_code = 1
+
+    if status_code == 0:
+        remove_list = [op.join(source_path,AIC_uuid),op.join(target_path,AIC_uuid)]
+        for remove_item in remove_list:
+            if op.exists(remove_item):
+                try:
+                    event_info = 'Try to remove AIC directory: %s' % (remove_item)
+                    status_list.append(event_info)
+                    logger.info(event_info)
+                    os.rmdir(remove_item)                    
+                except (shutil.Error, IOError, os.error), why:
+                    event_info = 'Failed to remove AIC directory %s, ERROR: %s' % (remove_item,why)
+                    error_list.append(event_info)
+                    logger.error(event_info)
+                    #status_code = 1    
+
     return status_code,[status_list,error_list]
 
 def SetPermission(path,uid=None,gid=None,mode=0770):

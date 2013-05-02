@@ -160,10 +160,14 @@ class AccessCreate(CreateView):
         initial['ReqUUID'] = uuid.uuid1()
         initial['user'] = self.request.user.username
         initial['Status'] = 0
-        initial['ReqType'] = self.request.GET.get('ReqType',4)
-        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
-        path_work = Path.objects.get(entity='path_work').value
-        access_path = op.join( op.join(path_work, self.request.user.username), 'access' )
+        #initial['ReqType'] = self.request.GET.get('ReqType',4)
+        initial['ReqType'] = self.request.GET.get('ReqType',5)
+        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose') 
+        if initial['ReqType'] == 5:
+            access_path = Path.objects.get(entity='path_control').value
+        else:
+            path_work = Path.objects.get(entity='path_work').value
+            access_path = op.join( op.join(path_work, self.request.user.username), 'access' )
         initial['Path'] = self.request.GET.get('Path', access_path)
         if 'ip_uuid' in self.kwargs:
             initial['ObjectIdentifierValue'] = self.kwargs['ip_uuid']

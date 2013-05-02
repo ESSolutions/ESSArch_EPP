@@ -32,7 +32,8 @@ from django.shortcuts import get_object_or_404
 from models import MyFile, RequestFile
 from django.db.models import Q
 from essarch.models import ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, \
-                           ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, ControlAreaForm_CheckInFromWork, \
+                           ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
+                           ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
                            eventIdentifier, eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter
@@ -317,7 +318,7 @@ class CheckoutToWorkListView(ListView):
         ip_list = []
         object_list = context['object_list']
         for obj in object_list: 
-            for ip in obj.get_ip_list(StatusProcess=5000):
+            for ip in obj.get_ip_list(StatusProcess=5000,StatusActivity__in=[ 7, 8 ]):
                 ip_list.append(ip)
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
@@ -330,7 +331,7 @@ class CheckoutToWork(CreateView):
     """
     model = ControlAreaQueue
     template_name='controlarea/create.html'
-    form_class=ControlAreaForm2
+    form_class=ControlAreaForm_CheckoutToWork
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
     def dispatch(self, *args, **kwargs):
@@ -346,6 +347,7 @@ class CheckoutToWork(CreateView):
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
             initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        initial['read_only_access'] = False
         return initial
     
     def form_valid(self, form):
@@ -355,6 +357,7 @@ class CheckoutToWork(CreateView):
         source_path = Path.objects.get(entity='path_control').value
         target_path_tmp = Path.objects.get(entity='path_work').value
         target_path = os.path.join(target_path_tmp, self.request.user.username)
+        read_only_access = form.cleaned_data.get('read_only_access',False)
         a_uid = os.getuid()
         a_gid = os.getgid()
         a_mode = 0770
@@ -364,6 +367,7 @@ class CheckoutToWork(CreateView):
                                                                     a_uid, 
                                                                     a_gid, 
                                                                     a_mode,
+                                                                    read_only_access,
                                                                     )
         if status_code:
             self.object.Status=100
@@ -664,7 +668,7 @@ class DiffCheck(CreateView):
     template_name='controlarea/create.html'
     form_class=ControlAreaForm2
     target_path = Path.objects.get(entity='path_control').value
-    Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    #Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):
@@ -687,15 +691,17 @@ class DiffCheck(CreateView):
         logger.info('Start to DiffCheck object: %s' % self.ip_obj.ObjectUUID)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
         # Get IP_0 object
-        ip_0_obj = aic_obj.relaic_set.filter(UUID__StatusProcess=5000).order_by('UUID__Generation')[:1].get().UUID
+        ip_0_obj = aic_obj.relaic_set.filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity__in=[ 7, 8 ])).order_by('UUID__Generation')[:1].get().UUID
         AIC_ObjectPath = os.path.join(self.target_path, aic_obj.ObjectUUID)
         IP_ObjectPath = os.path.join(AIC_ObjectPath, self.ip_obj.ObjectUUID)
-        METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), self.Cmets_obj )
+        Cmets_obj = ip_0_obj.MetaObjectIdentifier
+        if Cmets_obj == '':
+            Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+        METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), Cmets_obj )
         status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=self.ip_obj.ObjectUUID,
                                                                           ObjectPath=IP_ObjectPath, 
                                                                           METS_ObjectPath=METS_ObjectPath,
                                                                           )
-        print status_detail 
         if status_code:
             self.object.Status=100
             event_info = 'Failed to DiffCheck object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
@@ -884,3 +890,123 @@ class PreserveIPResult(DetailView):
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
+    
+class ControlareaDeleteIPListView(ListView):
+    """
+    List control area
+    """
+    model = ArchiveObject
+    template_name='archobject/list.html'
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess__in=[5000,5100]) | Q(OAISPackageType=1)).order_by('id','Generation')
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(ControlareaDeleteIPListView, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ControlareaDeleteIPListView, self).get_context_data(**kwargs)
+        context['type'] = 'ControlareaDeleteIP'
+        context['label'] = 'Select which information package to delete in control/work area'
+        ip_list = []
+        object_list = context['object_list']
+        aic_obj = None
+        newest_gen = None
+        for obj in object_list: 
+            for ip in obj.get_ip_list( StatusProcess__in=[5000,5100] , StatusActivity__in=[ 7, 8 ] ):
+                if not ip[0] == aic_obj:
+                    Newest_object = ip[0].relaic_set.order_by('-UUID__Generation')[:1].get().UUID
+                    newest_gen = Newest_object.Generation
+                if not ip[1].StatusActivity in [ 7, 8 ] and ip[1].Generation in [0, newest_gen]:
+                    pass
+                else:
+                    ip_list.append(ip)
+        context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
+        return context
+
+class ControlareaDeleteIP(CreateView):
+    """
+    Create delete IP request
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm2
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(ControlareaDeleteIP, self).dispatch( *args, **kwargs)
+    
+    def get_initial(self):
+        initial = super(ControlareaDeleteIP, self).get_initial().copy()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 8
+        initial['ReqPurpose'] = ''
+        if 'pk' in self.kwargs:
+            self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
+        source_path = Path.objects.get(entity='path_control').value
+        target_path_tmp = Path.objects.get(entity='path_work').value
+        target_path = os.path.join(target_path_tmp, self.request.user.username)
+        status_code, status_detail = ControlAreaFunc.DeleteIP(source_path, 
+                                                              target_path, 
+                                                              objectpath, 
+                                                              )
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to delete object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                form.cleaned_data.get('ReqUUID',None),
+                                                                                status_detail[1]
+                                                                                )
+            ESSPGM.Events().create('36000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+        else:
+            self.object.Status=20
+            event_info = 'Success to delete object: %s, ReqUUID: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                        form.cleaned_data.get('ReqUUID',None),
+                                                                        )
+            ESSPGM.Events().create('36000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            if self.ip_obj.StatusProcess in range(0,3001) and self.ip_obj.StatusActivity in [ 7, 8 ]:
+                # ip_obj is archived update StatusActivity = 0
+                self.ip_obj.StatusActivity = 0
+                self.ip_obj.save()
+            else:
+                # Update ip_obj with StatusProcess = 9999 to mark as deleted.
+                self.ip_obj.StatusProcess = 9999
+                self.ip_obj.StatusActivity = 0
+                self.ip_obj.ObjectActive = 0
+                self.ip_obj.save()
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_deleteipresult',kwargs={'pk': self.object.pk})
+        return super(ControlareaDeleteIP, self).form_valid(form)
+
+class ControlareaDeleteIPResult(DetailView):
+    """
+    View result from delete IP
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(ControlareaDeleteIPResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ControlareaDeleteIPResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context
+

@@ -87,6 +87,7 @@ StatusActivity_CHOICES = (
     (5, 'Progress'),
     (6, 'Pending writes'),
     (7, 'ControlArea'),
+    (8, 'WorkArea'),
     (100, 'FAIL'),
 )
 
@@ -129,6 +130,7 @@ StatusProcess_CHOICES = (
     (3000, 'Archived'),
     (5000, 'ControlArea'),
     (5100, 'WorkArea'),
+    (9999, 'Deleted'),
 )
 
 PackageType_CHOICES = (
@@ -148,11 +150,13 @@ ReqStatus_CHOICES = (
 
 ControlAreaReqType_CHOICES = (
     (1, 'CheckIn from Reception'),
-    (2, 'CheckOut to Workarea as a new IP generation'),
+    (2, 'CheckOut to Workarea'),
     (3, 'CheckIn from Workarea'),
     (4, 'DiffCheck'),
     (5, 'Preserve Information Package'),
     (6, 'CheckOut to Gatearea from WorkArea'),
+    (7, 'CheckIn from Gatearea to WorkArea'),
+    (8, 'Delete IP in control/work area'),
 )
 
 AccessReqType_CHOICES = (
@@ -160,6 +164,7 @@ AccessReqType_CHOICES = (
     (4, 'Generate DIP (package extracted)'),
     (1, 'Generate DIP (package & package extracted)'),
     (2, 'Verify StorageMedium'),
+    (5, 'Get AIP to ControlArea'),
 )
 
 IngestReqType_CHOICES = (
@@ -251,11 +256,15 @@ class ArchiveObject(models.Model):
         db_table = 'IngestObject'
     def get_absolute_url(self):
         return reverse('ingest_listobj')
-    def get_ip_list(self,StatusProcess=None,StatusProcess__lt=None):
+    def get_ip_list(self,StatusProcess=None,StatusProcess__lt=None,StatusProcess__in=None,StatusActivity__in=None):
         ip_list = []
         # Try to get an list of IP objects related to AIC object "IP_Object"
         ip_obj_list = ArchiveObject.objects.filter(reluuid_set__AIC_UUID=self).order_by('Generation')
-        if StatusProcess:
+        if StatusProcess__in and StatusActivity__in:
+            ip_obj_list = ip_obj_list.filter(models.Q(StatusProcess__in=StatusProcess__in) | models.Q(StatusActivity__in=StatusActivity__in))
+        elif StatusProcess and StatusActivity__in:
+            ip_obj_list = ip_obj_list.filter(models.Q(StatusProcess=StatusProcess) | models.Q(StatusActivity__in=StatusActivity__in))
+        elif StatusProcess:
             ip_obj_list = ip_obj_list.filter(StatusProcess=StatusProcess)
         if StatusProcess__lt:
             ip_obj_list = ip_obj_list.filter(StatusProcess__lt=StatusProcess__lt)
@@ -465,6 +474,9 @@ class ControlAreaForm(forms.ModelForm):
 
 class ControlAreaForm2(ControlAreaForm):
     ReqType = forms.ChoiceField(label='ReqType',choices=ControlAreaReqType_CHOICES, widget = PlainText())
+
+class ControlAreaForm_CheckoutToWork(ControlAreaForm2):
+    read_only_access = forms.BooleanField(label='Read only access',help_text='Do not create a new IP generation',required=False)
 
 class ControlAreaForm_CheckInFromWork(ControlAreaForm2):
     allow_unknown_filetypes = forms.BooleanField(label='Allow unknown filetypes',required=False)
