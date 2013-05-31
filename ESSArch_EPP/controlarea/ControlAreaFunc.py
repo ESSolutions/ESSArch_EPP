@@ -615,7 +615,7 @@ def PreserveIP(source_path,target_path,Package,a_uid,a_gid,a_mode):
             logger.info(event_info)
     return status_code,[status_list,error_list]
 
-def CheckOutToGate(source_path,target_path,filelist):
+def CopyFilelist(source_path,target_path,filelist):
     status_code = 0
     status_list = []
     error_list = []
@@ -632,12 +632,12 @@ def CheckOutToGate(source_path,target_path,filelist):
                     os.makedirs(targetdir)
                 shutil.copy2(op.join(source_path,Package),target)
         except (IOError, os.error), why:
-            event_info = 'Failed to CheckOut: %s from source_path: %s to target_path: %s ERROR: %s' % (Package,source_path,target_path,why),Package
+            event_info = 'Failed to copy: %s from source_path: %s to target_path: %s ERROR: %s' % (Package,source_path,target_path,why),Package
             error_list.append(event_info)
             logger.error(event_info)
             status_code = 1
         else:
-            event_info = 'Success to CheckOut: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path),Package
+            event_info = 'Success to copy: %s from source_path: %s to target_path: %s' % (Package,source_path,target_path),Package
             status_list.append(event_info)
             logger.info(event_info)
     return status_code,[status_list,error_list]
@@ -670,6 +670,14 @@ def DeleteIP(source_path,target_path,Package):
     if status_code == 0:
         remove_list = [op.join(source_path,AIC_uuid),op.join(target_path,AIC_uuid)]
         for remove_item in remove_list:
+            remove_item_tmpextract = op.join(remove_item,'.tmpextract')
+            if op.exists(remove_item_tmpextract):
+                try:
+                    shutil.rmtree(remove_item_tmpextract)                    
+                except (shutil.Error, IOError, os.error), why:
+                    event_info = 'Warning, problem to remove .tmpextract directory %s, ERROR: %s' % (remove_item_tmpextract,why)
+                    error_list.append(event_info)
+                    logger.error(event_info)                
             if op.exists(remove_item):
                 try:
                     event_info = 'Try to remove AIC directory: %s' % (remove_item)
@@ -677,7 +685,7 @@ def DeleteIP(source_path,target_path,Package):
                     logger.info(event_info)
                     os.rmdir(remove_item)                    
                 except (shutil.Error, IOError, os.error), why:
-                    event_info = 'Failed to remove AIC directory %s, ERROR: %s' % (remove_item,why)
+                    event_info = 'Warning, problem to remove AIC directory %s, ERROR: %s' % (remove_item,why)
                     error_list.append(event_info)
                     logger.error(event_info)
                     #status_code = 1    
@@ -698,10 +706,8 @@ def SetPermission(path,uid=None,gid=None,mode=0770):
                 os.chown(os.path.join(root, momo), uid, gid)
                 os.chmod(os.path.join(root, momo), mode)
     except (IOError, os.error), why:
-        print 'Faild to SetPermission, ERROR: %s' % why
         return 1,[why]
     else:
-        print 'Success to SetPermission.'
         return 0,[]
 
 def ensure_dir(f):

@@ -542,7 +542,7 @@ class CheckoutToGateFromWork(CreateView):
         initial['ReqPurpose'] = ''
         source_path = os.path.join(self.source_path, self.request.user.username)   
         filelist = []
-        if os.path.exists(self.source_path):
+        if os.path.exists(source_path):
             filetree = g_functions().GetFiletree(source_path)
             for file_item in filetree:
                 filelist.append((file_item, file_item))
@@ -555,7 +555,7 @@ class CheckoutToGateFromWork(CreateView):
         ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
         target_path = os.path.join(self.target_path, 'exchange/%s' % ReqUUID)
         source_path = os.path.join(self.source_path, self.request.user.username)
-        status_code, tmp_status_detail = ControlAreaFunc.CheckOutToGate(source_path, target_path, filelist)
+        status_code, tmp_status_detail = ControlAreaFunc.CopyFilelist(source_path, target_path, filelist)
         if status_code:
             self.object.Status=100
         else:
@@ -609,6 +609,101 @@ class CheckoutToGateFromWorkResult(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckoutToGateFromWorkResult, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - ControlArea requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context
+
+class CheckinFromGateToWork(CreateView):
+    """
+    Create checkin request from gate to work
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/create.html'
+    form_class=ControlAreaForm_file
+    target_path = Path.objects.get(entity='path_work').value
+    source_path = Path.objects.get(entity='path_gate').value
+    
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromGateToWork, self).dispatch( *args, **kwargs)
+    
+    def get_initial(self):
+        initial = super(CheckinFromGateToWork, self).get_initial()
+        initial['ReqUUID'] = uuid.uuid1()
+        initial['user'] = self.request.user.username
+        initial['Status'] = 0
+        initial['ReqType'] = 7
+        initial['ReqPurpose'] = ''
+        source_path = os.path.join(self.source_path, 'exchange/%s' % self.request.user.username)   
+        filelist = []
+        if os.path.exists(source_path):
+            filetree = g_functions().GetFiletree(source_path)
+            for file_item in filetree:
+                filelist.append((file_item, file_item))
+        self.form_class.FileSelect_CHOICES = filelist
+        return initial
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        filelist = form.cleaned_data.get('filename',[])
+        ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
+        target_path = os.path.join(self.target_path, '%s/incoming/%s' % (self.request.user.username,ReqUUID))
+        source_path = os.path.join(self.source_path, 'exchange/%s' % self.request.user.username)
+        status_code, tmp_status_detail = ControlAreaFunc.CopyFilelist(source_path, target_path, filelist)
+        if status_code:
+            self.object.Status=100
+        else:
+            self.object.Status=20
+        status_detail = [[],[]]
+        req_filelist = []
+        for item in tmp_status_detail[0]:
+            event_info = '%s, ReqUUID: %s' % (item[0],form.cleaned_data.get('ReqUUID',None))
+            ESSPGM.Events().create('35000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,item[1],linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            status_detail[0].append(item[0])
+            req_filelist.append(item[1])
+        for item in tmp_status_detail[1]:
+            event_info = '%s, ReqUUID: %s' % (item[0],form.cleaned_data.get('ReqUUID',None))
+            ESSPGM.Events().create('35000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,item[1],linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            status_detail[1].append(item[0])
+            req_filelist.append(item[1])
+        
+        TimeZone = timezone.get_default_timezone_name()
+        loc_timezone=pytz.timezone(TimeZone)
+        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
+        self.object.posted = loc_dt_isoformat
+        ControlAreaFunc.CreateExchangeRequestFile(ReqUUID = form.cleaned_data.get('ReqUUID'), 
+                                                  ReqType = form.cleaned_data.get('ReqType'), 
+                                                  ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
+                                                  user = form.cleaned_data.get('user'), 
+                                                  ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'), 
+                                                  posted = loc_dt_isoformat, 
+                                                  filelist = req_filelist, 
+                                                  reqfilename = os.path.join(target_path,'request.xml'),
+                                                  )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromgatetoworkresult',kwargs={'pk': self.object.pk})
+        return super(CheckinFromGateToWork, self).form_valid(form)
+
+class CheckinFromGateToWorkResult(DetailView):
+    """
+    View result from checkin from gate area to work
+    """
+    model = ControlAreaQueue
+    template_name='controlarea/detail.html'
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromGateToWorkResult, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckinFromGateToWorkResult, self).get_context_data(**kwargs)
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)

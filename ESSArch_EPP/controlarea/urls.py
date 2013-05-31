@@ -30,6 +30,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception, CheckinFro
                   CheckoutToWorkListView, CheckoutToWork, CheckoutToWorkResult, \
                   CheckinFromWorkListView, CheckinFromWork, CheckinFromWorkResult, \
                   CheckoutToGateFromWork, CheckoutToGateFromWorkResult, \
+                  CheckinFromGateToWork, CheckinFromGateToWorkResult, \
                   CheckinFromGateListView, \
                   DiffCheckListView, DiffCheck, DiffCheckResult, \
                   PreserveIPListView, PreserveIP, PreserveIPResult, \
@@ -49,6 +50,8 @@ urlpatterns = patterns('',
     url(r'^checkinfromworkresult/(?P<pk>\d+)/$', CheckinFromWorkResult.as_view(), name='controlarea_checkinfromworkresult'),
     url(r'^checkouttogatefromwork/$', CheckoutToGateFromWork.as_view(), name='controlarea_checkouttogatefromwork'),
     url(r'^checkouttogatefromworkresult/(?P<pk>\d+)/$', CheckoutToGateFromWorkResult.as_view(), name='controlarea_checkouttogatefromworkresult'),
+    url(r'^checkinfromgatetowork/$', CheckinFromGateToWork.as_view(), name='controlarea_checkinfromgatetowork'),
+    url(r'^checkinfromgatetoworkresult/(?P<pk>\d+)/$', CheckinFromGateToWorkResult.as_view(), name='controlarea_checkinfromgatetoworkresult'),
     url(r'^checkinfromgatelist/$', CheckinFromGateListView.as_view(),name='controlarea_checkinfromgate_list'),  
     url(r'^diffchecklist/$', DiffCheckListView.as_view(),name='controlarea_diffcheck_list'),
     url(r'^diffcheck/(?P<pk>\d+)/$', DiffCheck.as_view(), name='controlarea_diffcheck'),
