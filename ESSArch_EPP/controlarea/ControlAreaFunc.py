@@ -677,7 +677,15 @@ def DeleteIP(source_path,target_path,Package):
                 except (shutil.Error, IOError, os.error), why:
                     event_info = 'Warning, problem to remove .tmpextract directory %s, ERROR: %s' % (remove_item_tmpextract,why)
                     error_list.append(event_info)
-                    logger.error(event_info)                
+                    logger.error(event_info)  
+            remove_item_AIC_METS = op.join(remove_item,'%s_AIC_METS.xml' % AIC_uuid)
+            if op.exists(remove_item_AIC_METS):
+                try:
+                    os.remove(remove_item_AIC_METS)                    
+                except (shutil.Error, IOError, os.error), why:
+                    event_info = 'Warning, problem to remove %s, ERROR: %s' % (remove_item_AIC_METS,why)
+                    error_list.append(event_info)
+                    logger.error(event_info)                            
             if op.exists(remove_item):
                 try:
                     event_info = 'Try to remove AIC directory: %s' % (remove_item)
