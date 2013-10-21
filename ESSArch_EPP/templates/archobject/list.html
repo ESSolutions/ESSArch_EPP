@@ -76,7 +76,7 @@
 					{% if type == 'Access' %}
 						<td><a href="{% url 'access_create_ip_uuid' ip_obj.ObjectUUID %}" title="Create access request">{{ ip_obj.ObjectUUID }}</a></td>
 					{% elif type == 'Ingest' %}
-						<td><a href="{% url 'ingest_create_ip_uuid' ip_obj.ObjectUUID %}" title="Create ingest request">{{ ip_obj.ObjectUUID }}</a></td>
+						<td><a href="{% url 'ingest_create_ip_uuid' ip_obj.ObjectIdentifierValue %}" title="Create ingest request">{{ ip_obj.ObjectIdentifierValue }}</a></td>
 					{% else %}
 						<td>{{ ip_obj.ObjectUUID }}</td>
 					{% endif %}  

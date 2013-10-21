@@ -43,11 +43,16 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'essarch',                      # Or path to database file if using sqlite3.
+        #'STORAGE_ENGINE': 'MyISAM',           # STORAGE_ENGINE for MySQL database tables, 'MyISAM' or 'INNODB'
+        'NAME': 'essarch',                    # Or path to database file if using sqlite3.
         'USER': 'arkiv',                      # Not used with sqlite3.
-        'PASSWORD': 'password',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'PASSWORD': 'password',               # Not used with sqlite3.
+        'HOST': '',                           # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                           # Set to empty string for default. Not used with sqlite3.
+        # This options for storage_engine have to be set for "south migrate" to work.
+        'OPTIONS': {
+           "init_command": "SET storage_engine=MyISAM",
+        }
     }
 }
 
@@ -182,6 +187,7 @@ INSTALLED_APPS = (
     #'grappelli',
     'django.contrib.admin',
     # 'django.contrib.admindocs',
+    'djcelery',
     'south',
     'configuration',
     'storagelogistics',
@@ -192,6 +198,11 @@ INSTALLED_APPS = (
     'administration',
     'reports',
 )
+
+import djcelery
+djcelery.setup_loader()
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 # Logging configuration.
 LOGGING = {

@@ -32,7 +32,6 @@ from django.db.models import Q
 
 from essarch.models import IngestQueue, IngestQueueForm, IngestQueueFormUpdate, ArchiveObject, \
                            ArchiveObjectStatusForm, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, IngestReqType_CHOICES
-from configuration.models import Path, Parameter
 
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -41,6 +40,9 @@ from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
+from django.contrib.auth import authenticate
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 
 import uuid
 
@@ -117,8 +119,16 @@ class IngestCreate(CreateView):
     template_name='ingest/create.html'
     form_class=IngestQueueForm
 
-    @method_decorator(permission_required('essarch.add_ingestqueue'))
+    #@method_decorator(permission_required('essarch.add_ingestqueue'))
     def dispatch(self, *args, **kwargs):
+        username = self.request.GET.get('username', None)
+        password = self.request.GET.get('password', None)
+        if username and password:
+            self.request.user = authenticate(username=username, password=password)
+        if self.request.user is None:
+            raise PermissionDenied
+        if not self.request.user.has_perm('essarch.add_ingestqueue'):
+            raise PermissionDenied
         return super(IngestCreate, self).dispatch( *args, **kwargs)
     
     def get_initial(self):
@@ -126,11 +136,18 @@ class IngestCreate(CreateView):
         initial['ReqUUID'] = uuid.uuid1()
         initial['user'] = self.request.user.username
         initial['Status'] = 0
-        initial['ReqType'] = self.request.GET.get('ReqType',2)
-        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
+        initial['ReqType'] = self.request.GET.get('ReqType',1)
+        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose','Standard Approve')
         if 'ip_uuid' in self.kwargs:
             initial['ObjectIdentifierValue'] = self.kwargs['ip_uuid']
+        self.autosubmit = self.request.GET.get('autosubmit', '0')
+        self.raw = self.request.GET.get('raw', '0')
         return initial
+    
+    def form_invalid(self, form):
+        if not form.is_valid():
+            self.autosubmit = '0'
+        return super(IngestCreate, self).form_invalid(form)
     
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -143,7 +160,16 @@ class IngestCreate(CreateView):
             num += 1
         if num == 1:
             self.success_url = reverse_lazy('ingest_detail',kwargs={'pk': self.object.pk})
+        if self.autosubmit == '1' and self.raw == '1':
+            #response = HttpResponse("Ingest request: %s for Object: %s Status: OK" % (self.object.ReqUUID, self.object.ObjectIdentifierValue), content_type="text/plain")
+            response = HttpResponse("Ingest request: %s for Object: %s Status: OK" % (self.object.ReqUUID, self.object.ObjectIdentifierValue))
+            return response
         return super(IngestCreate, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(IngestCreate, self).get_context_data(**kwargs)
+        context['autosubmit'] = self.autosubmit
+        return context
         
 class IngestUpdate(UpdateView):
     model = IngestQueue

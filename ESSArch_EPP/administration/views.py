@@ -78,7 +78,7 @@ class storageMediumDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(storageMediumDetail, self).get_context_data(**kwargs)
         storageMediumID = context['object'].storageMediumID
-        content_list = storage.objects.filter(storageMediumID=storageMediumID).order_by('contentLocationValue')
+        content_list = storage.objects.filter(storageMediumID=storageMediumID).order_by('id')
         context['content_list'] = content_list
         context['label'] = 'Detail information - storage medium'
         context['MediumType_CHOICES'] = dict(MediumType_CHOICES)

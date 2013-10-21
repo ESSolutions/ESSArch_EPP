@@ -152,12 +152,15 @@ class RequestFileList(object):
         if reqlist is None:
             reqlist = []
         self.reqlist = reqlist
-        self.source_path = os.path.join(source_path,'exchange')
+        self.source_path = os.path.join(source_path,u'exchange')
     def get(self):
         if os.path.isdir(self.source_path):
             for f in os.listdir(self.source_path): # gate_path/exchange
+                #logger.info('type:%s, f:%s' % (type(f),f))
+                #logger.info('type:%s, source_path:%s' % (type(self.source_path),self.source_path))
+                #logger.info('defaultencoding: %s, filesystemencoding: %s' % (sys.getdefaultencoding(),sys.getfilesystemencoding()))
                 if os.path.isdir(os.path.join(self.source_path, f)): # exchange ReqUUID directory
-                    reqfilename = os.path.join(os.path.join(self.source_path, f),'request.xml')
+                    reqfilename = os.path.join(os.path.join(self.source_path, f),u'request.xml')
                     if os.path.isfile(reqfilename):
                         res_info,return_status_code,return_status_list = ControlAreaFunc.GetExchangeRequestFileContent(reqfilename)
                         if return_status_code == 0 and res_info:
