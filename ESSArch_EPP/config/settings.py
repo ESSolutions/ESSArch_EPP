@@ -176,6 +176,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'south',
+    'djcelery',
+    'djangojs',
+    'eztables',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -185,6 +188,12 @@ INSTALLED_APPS = (
     'administration',
     'reports',
 )
+
+import djcelery
+djcelery.setup_loader()
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 
 # Logging configuration.
 LOGGING = {
@@ -255,6 +264,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 5,
         },
+        'log_file_storagemaintenance': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/storagemaintenance.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
         'log_file_storagelogistics': {
             'level': 'DEBUG',
             #'filters': ['require_debug_false'],
@@ -289,6 +307,11 @@ LOGGING = {
         'essarch.controlarea': {
             'level': 'INFO',
             'handlers': ['log_file_controlarea'],
+            'propagate': True,
+        },
+        'essarch.storagemaintenance': {
+            'level': 'INFO',
+            'handlers': ['log_file_storagemaintenance'],
             'propagate': True,
         },
         'essarch.storagelogistics': {

@@ -1,0 +1,184 @@
+{% extends 'admin/base_site.html' %}
+{% load dictionary_extras %}
+{% load js staticfiles%}
+{% load url from future %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block container %}
+
+<div class="row">
+	<a>{% csrf_token %}</a>
+    <table class="prepare request">
+        <thead>
+            <tr>
+                <th width=210>Parameter</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td class="spacer" colspan="2">&nbsp;</td></tr>
+            <tr class="reqpurpose">
+                <td class="required">Request purpose</td>
+                <td>
+                    <input id="ReqPurpose" type="text"
+                        class="input-xxlarge"
+                        placeholder="Please specify the purpose">
+                </td>
+            </tr>
+            <tr class="tmpmigpath">
+                <td class="required">Temp path</td>
+                <td>
+                    <input id="tmpmigpath" type="text"
+                        class="input-xxlarge"
+                        placeholder="Please specify temporary path for migration">
+                </td>
+            </tr>
+            <tr class="copypath">
+                <td>Copy path</td>
+                <td>
+                    <input id="copypath" type="text"
+                        class="input-xxlarge"
+                        placeholder="Please specify path to save a copy of IP">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    <table class="table search">
+        <thead>
+            <tr>
+                <th>Target</th>
+                <th>Filter text</th>
+                <th>Hide column</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td class="spacer" colspan="3">&nbsp;</td></tr>
+            <tr class="object">
+                <td>Object</td>
+                <td>
+                    <input id="filter-0" type="text"
+                        class="input-xxlarge"
+                        placeholder="object search">
+                </td>
+                <td><input id="filterhide-0" type="checkbox"/></td>
+            </tr>
+            <tr class="objectuuid">
+                <td>ObjectUUID</td>
+                <td>
+                    <input id="filter-1" type="text"
+                        class="input-xxlarge"
+                        placeholder="objectUUID search">
+                </td>
+                <td><input id="filterhide-1" type="checkbox" checked="checked"/></td>
+            </tr>
+            <tr class="statusprocess">
+                <td>Status Process</td>
+                <td>
+                    <input id="filter-2" type="text"
+                        class="input-xxlarge"
+                        placeholder="statusprocess search">
+                </td>
+                <td><input id="filterhide-2" type="checkbox"/></td>
+            </tr>
+            <tr class="statusactivity">
+                <td>Status Activity</td>
+                <td>
+                    <input id="filter-3" type="text"
+                        class="input-xxlarge"
+                        placeholder="statusactivity search">
+                </td>
+                <td><input id="filterhide-3" type="checkbox"/></td>
+            </tr>
+            <tr class="storageMediumID">
+                <td>Current MediumID</td>
+                <td>
+                    <input id="filter-4" type="text"
+                        class="input-xxlarge"
+                        placeholder="medium search">
+                </td>
+                <td><input id="filterhide-4" type="checkbox"/></td>
+            </tr>
+            <tr class="target">
+                <td class="required">Storage Method Target Medium</td>
+                <td>
+                    <input id="filter-5" type="text"
+                        class="input-xxlarge"
+                        placeholder="target search">
+                </td>
+                <td><input id="filterhide-5" type="checkbox" disabled="True"/></td>
+            </tr>
+            <tr class="policy">
+                <td>Policy</td>
+                <td>
+                    <input id="filter-6" type="text"
+                        class="input-xxlarge"
+                        placeholder="policy search">
+                </td>
+                <td><input id="filterhide-6" type="checkbox"/></td>
+            </tr>
+            <tr class="policyid">
+                <td>PolicyID</td>
+                <td>
+                    <input id="filter-7" type="text"
+                        class="input-xxlarge"
+                        placeholder="policyID search">
+                </td>
+                <td><input id="filterhide-7" type="checkbox"/></td>
+            </tr>
+            <tr class="policystat">
+                <td>Policy Status</td>
+                <td>
+                    <input id="filter-8" type="text"
+                        class="input-xxlarge"
+                        placeholder="policystat search">
+                </td>
+                <td><input id="filterhide-8" type="checkbox"/></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    <table id="archiveobject-table" class="span12 display table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>
+            	<th>Object</th>
+            	<th>ObjectUUID</th>
+        		<th>Status Process</th>
+        		<th>Status Activity</th>
+        		<th>Current MediumID</th>
+        		<th>Location</th>
+        		<th>Policy</th>
+        		<th>PolicyID</th>
+        		<th>Policy Status</th>
+        		<th>SM 1</th>
+        		<th>SM 1 target</th>
+        		<th>SM 2</th>
+        		<th>SM 2 target</th>
+        		<th>SM 3</th>
+        		<th>SM 3 target</th>
+        		<th>SM 4</th>
+        		<th>SM 4 target</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+</div>
+
+<!--
+<div class="row">
+    <pre data-url="{% static "administration/js/storagemaintenance.js" %}" class="javascript"/>
+</div>
+-->
+
+{% endblock %}
+
+{% block app-extra-script %}
+    {% js "administration/js/eztables.demo.js" %}
+	{% js "administration/js/storagemaintenance.js" %}
+{% endblock %}

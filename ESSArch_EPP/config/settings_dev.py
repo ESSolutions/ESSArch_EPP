@@ -73,7 +73,7 @@ TIME_ZONE = 'Europe/Stockholm'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'sv-SE'
+#LANGUAGE_CODE = 'sv-SE'
 #LANGUAGE_CODE = 'no-nyn'
 
 SITE_ID = 1
@@ -187,8 +187,11 @@ INSTALLED_APPS = (
     #'grappelli',
     'django.contrib.admin',
     # 'django.contrib.admindocs',
-    'djcelery',
     'south',
+    'djcelery',
+    'django_tables2',
+    'djangojs',
+    'eztables',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -203,6 +206,7 @@ import djcelery
 djcelery.setup_loader()
 
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 
 # Logging configuration.
 LOGGING = {
@@ -273,6 +277,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 5,
         },
+        'log_file_storagemaintenance': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/storagemaintenance.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
         'log_file_storagelogistics': {
             'level': 'DEBUG',
             #'filters': ['require_debug_false'],
@@ -307,6 +320,11 @@ LOGGING = {
         'essarch.controlarea': {
             'level': 'INFO',
             'handlers': ['log_file_controlarea'],
+            'propagate': True,
+        },
+        'essarch.storagemaintenance': {
+            'level': 'INFO',
+            'handlers': ['log_file_storagemaintenance'],
             'propagate': True,
         },
         'essarch.storagelogistics': {

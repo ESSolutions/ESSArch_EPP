@@ -49,6 +49,8 @@ urlpatterns = patterns('',
     url(r'^reports/', include('reports.urls')),
     url(r'^admin/', include(admin.site.urls)),
     #(r'^grappelli/', include('grappelli.urls')),
+    url(r'^js/', include('djangojs.urls')),
+    url(r'^task/', include('djcelery.urls')),
 
     # StorageLogistics_ws URLS:
     url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),

@@ -1,0 +1,88 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+{% load js staticfiles eztables %}
+{% load url from future %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block content %}
+
+
+test
+    {% django_js %}
+    
+    {% datatables_bootstrap_js %}
+{% datatables_js %}
+
+<script>
+
+
+$(document).ready(function() {
+    $('#my-table').dataTable( {
+        "bPaginate": true,
+        "sPaginationType": "bootstrap",
+        "bProcessing": true,
+        "bServerSide": true,
+        "bRegex": true,
+        "sAjaxSource": Django.url('storagemedium-dt'),
+        "aoColumnDefs": [
+          { "sClass": "nowrap",
+            "bSearchable": false,
+            "bSortable": false,
+            "type": "text",
+            "bRegex": true,
+          	"aTargets": [ 0 ] 
+          },
+          { "sClass": "nowrap",
+            "bSearchable": false,
+            "bSortable": false,
+            "type": "text",
+            "bRegex": true,
+          	"aTargets": [ 3 ] 
+          }, 
+        ],
+    } ).columnFilter({ 
+    aoColumns: [
+        { type: "text", bRegex:true },
+        { type: "select",	bRegex:true, 
+        values: [
+        { value: '^(Internet|IE)', label: 'Internet Explorer(any)'},
+        { value: '^Mozilla', label: 'Mozilla(any)'},
+        { value: '^Firefox', label: 'FireFox(any)'}
+        ]
+        },
+        { type: "text", bRegex:true },
+        { type: "text", bRegex:true },
+        { type: "text", bRegex:true },
+        { type: "text", bRegex:true },
+        { type: "text", bRegex:true },
+        { type: "text", bRegex: true }
+    ]});
+} );
+</script>
+
+    <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>LastUpdate</th>
+                <th>Location</th>
+                <th>Location Status</th>
+                <th>Used Capacity</th>
+                <th>Used</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+
+
+
+{% endblock %}
+
+test end
+   
+
+

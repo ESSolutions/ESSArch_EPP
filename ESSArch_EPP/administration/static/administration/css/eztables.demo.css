@@ -1,0 +1,109 @@
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    padding-top: 50px;
+}
+
+#footer {
+    height: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#footer p {
+    margin: 0;
+}
+
+.navbar .brand.logo {
+    background: url(../img/DataTables.png) no-repeat left center;
+    padding-left: 45px;
+    margin-left: 10px;
+}
+
+.row {
+    margin-bottom: 15px;
+}
+
+.subnav .navbar.affix {
+    top: 40px;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+.subnav .navbar.affix .navbar-inner {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    -o-border-radius: 0;
+}
+
+.subnav .navbar.affix .navbar-inner .container {
+    width: 940px;
+}
+
+.table.search {
+   margin-bottom: 5px;
+}
+
+.table.search td, .table.search th {
+   text-align: center;
+}
+
+.table.search td {
+   padding: 0;
+   margin: 0;
+   border-top: 0;
+}
+
+.table.search th {
+   border-bottom: 1px solid black;
+}
+
+.table.search td.spacer {
+   line-height: 5px;
+}
+
+/*
+ * Fix bootstrap .table-striped with colors
+ */
+.table-striped tbody tr.success:nth-child(odd):not(:hover) > td {
+  background-color: #D0E9B5;
+}
+
+.table-striped tbody tr.error:nth-child(odd):not(:hover) > td {
+  background-color: #ebccb5;
+}
+
+.table-striped tbody tr.warning:nth-child(odd):not(:hover) > td {
+  background-color: #faf2b5;
+}
+
+.table-striped tbody tr.info:nth-child(odd):not(:hover) > td {
+  background-color: #c4e3e0;
+}
+
+pre {
+  background: #002b36;
+  color: #839496;
+}
+
+.table tfoot td {
+  padding: 0;
+  margin: 0;
+}
+
+input.fill {
+  width: 99%;
+  margin: 0;
+  padding: 0;
+}

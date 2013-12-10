@@ -1,4 +1,7 @@
 eclipse.preferences.version=1
+encoding//configuration/migrations/0001_initial.py=utf-8
 encoding//controlarea/migrations/0001_initial.py=utf-8
 encoding//essarch/migrations/0001_initial.py=utf-8
+encoding//essarch/migrations/0002_auto__add_unique_storagemedium_storageMediumID__add_unique_storagemedi.py=utf-8
+encoding//storagelogistics/migrations/0001_initial.py=utf-8
 encoding//storagelogistics/views.py=utf-8

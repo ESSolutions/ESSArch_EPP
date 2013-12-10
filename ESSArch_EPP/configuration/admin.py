@@ -83,7 +83,7 @@ class IPParameterAdmin( admin.ModelAdmin ):
                               'deliverytype'
                               )}),
                 ('General metadata for information package',{
-                   'classes': ('collapse','wide'),
+                   'classes': ('collapse','in'),
                    'fields': (
                               'deliveryspecification',
                               'submissionagreement',
@@ -112,7 +112,7 @@ class IPParameterAdmin( admin.ModelAdmin ):
                               'preservation_organization_software_id'
                               )}),
                 ('Additional metadata for information package',{
-                   'classes': ('collapse', 'wide'),
+                   'classes': ('collapse', 'in'),
                    'fields': (
                               'startdate',
                               'enddate',
@@ -153,7 +153,7 @@ class ESSArchPolicyAdmin( admin.ModelAdmin ):
                               'IngestDelete',
                               )}),
                 ('Storage method 1',{
-                   'classes': ('collapse','wide'),
+                   'classes': ('collapse','in'),
                    'fields': (
                               'sm_1',
                               'sm_type_1',
@@ -166,7 +166,7 @@ class ESSArchPolicyAdmin( admin.ModelAdmin ):
                               'sm_target_1',
                               )}),
                 ('Storage method 2',{
-                   'classes': ('collapse','wide'),
+                   'classes': ('collapse','in'),
                    'fields': (
                               'sm_2',
                               'sm_type_2',
@@ -179,7 +179,7 @@ class ESSArchPolicyAdmin( admin.ModelAdmin ):
                               'sm_target_2',
                               )}),
                 ('Storage method 3',{
-                   'classes': ('collapse','wide'),
+                   'classes': ('collapse','in'),
                    'fields': (
                               'sm_3',
                               'sm_type_3',
@@ -192,7 +192,7 @@ class ESSArchPolicyAdmin( admin.ModelAdmin ):
                               'sm_target_3',
                               )}),
                 ('Storage method 4',{
-                   'classes': ('collapse','wide'),
+                   'classes': ('collapse','in'),
                    'fields': (
                               'sm_4',
                               'sm_type_4',

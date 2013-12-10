@@ -30,6 +30,12 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 from django.core.urlresolvers import reverse
+from django.conf import settings
+from configuration.models import ESSArchPolicy
+import django_tables2 as tables
+from django_tables2.utils import A
+from djcelery.models import TaskMeta
+from picklefield.fields import PickledObjectField
 
 ###########################################################################
 #
@@ -73,6 +79,44 @@ class PlainText(forms.TextInput):
         else:
             value_label = value
         return mark_safe(u'<input type="hidden" name="%s" %s value="%s" />%s' % (name,flatatt(final_attrs),value,value_label))
+
+class MultiSelectWidget(forms.SelectMultiple):
+    #css_class = 'multiselect'
+    class Media:
+        css = {
+            'all': (
+                #settings.STATIC_URL + 'js/jquery.uix.multiselect/css/common.css',
+                #settings.STATIC_URL + 'jquery-ui-1.10.3/themes/base/jquery-ui.css',
+                settings.STATIC_URL + 'jquery.uix.multiselect/css/jquery.uix.multiselect.css',
+            )
+        }
+        js = (
+            #settings.STATIC_URL + 'jquery-1.10.2.min.js',
+            #settings.STATIC_URL + 'jquery-ui-1.10.3/ui/minified/jquery-ui.min.js',
+            settings.STATIC_URL + 'jquery.uix.multiselect/js/jquery.uix.multiselect.js',
+        )
+
+    #def add_css_class(self, attrs):
+    #    attrs = attrs or {}
+    #    if 'class' in attrs:
+    #        attrs['class'] += " %s" % self.css_class
+    #    else:
+    #        attrs['class'] = self.css_class
+    #    return attrs
+
+    def __init__(self, language=None, attrs=None):
+        self.language = language or settings.LANGUAGE_CODE[:2]
+        #attrs = self.add_css_class(attrs)
+        super(MultiSelectWidget, self).__init__(attrs=attrs)
+
+    def render(self, name, value, attrs=None):
+        rendered = super(MultiSelectWidget, self).render(name, value, attrs)
+        return rendered + mark_safe(u'''<script type="text/javascript">
+           $(document).ready(function afterReady() {
+                var elem = $('#id_%(name)s');
+                elem.multiselect();
+            });
+            </script>''' % {'name':name})
 
 ###########################################################################
 #
@@ -172,6 +216,10 @@ IngestReqType_CHOICES = (
     (2, 'Ingest request without AIS'),
 )
 
+MigrationReqType_CHOICES = (
+    (1, 'Copy IP to new storage'),
+)
+
 MediumType_CHOICES = (
     (200, 'DISK'),
     (301, 'IBM-LTO1'),
@@ -219,7 +267,8 @@ eventOutcome_CHOICES = (
 class ArchiveObject(models.Model):
     id = models.AutoField(big=True,primary_key=True)
     ObjectUUID = models.CharField(max_length=36, unique=True)
-    PolicyId = models.IntegerField(null=True)
+    #PolicyId = models.IntegerField(null=True)
+    PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
     ObjectPackageName = models.CharField(max_length=255)
     ObjectSize = models.BigIntegerField(null=True)
@@ -331,7 +380,7 @@ class ArchiveObjectMetadata(models.Model):
     ObjectMetadataType = models.IntegerField(null=True)
     ObjectMetadataServer = models.IntegerField(null=True)
     ObjectMetadataURL = models.CharField(max_length=255)
-    ObjectMetadataBLOB = models.TextField()
+    ObjectMetadataBLOB = models.TextField(null=True,default='')
     linkingAgentIdentifierValue = models.CharField(max_length=45)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
@@ -382,18 +431,18 @@ class IOqueue(models.Model):
     id = models.AutoField(big=True,primary_key=True)
     cmd = models.IntegerField(null=True)
     cmdprio = models.IntegerField(null=True)
-    work_uuid = models.CharField(max_length=36)
-    ObjectIdentifierValue = models.CharField(max_length=255)
-    ObjectMessageDigest = models.CharField(max_length=128)
-    ObjectPath = models.CharField(max_length=255)
+    work_uuid = models.CharField(max_length=36,null=True)
+    ObjectIdentifierValue = models.CharField(max_length=255,null=True)
+    ObjectMessageDigest = models.CharField(max_length=128,null=True)
+    ObjectPath = models.CharField(max_length=255,null=True)
     storageMedium = models.IntegerField(null=True)
-    storageMediumID = models.CharField(max_length=45)
-    sm_list = models.CharField(max_length=255)
+    storageMediumID = models.CharField(max_length=45,null=True)
+    sm_list = models.CharField(max_length=255,null=True)
     storageMediumBlockSize = models.IntegerField(null=True)
     storageMediumFormat = models.IntegerField(null=True)
     contentLocationValue = models.IntegerField(null=True)
-    storageMediumLocation = models.CharField(max_length=45)
-    t_prefix = models.CharField(max_length=6)
+    storageMediumLocation = models.CharField(max_length=45,null=True)
+    t_prefix = models.CharField(max_length=6,null=True)
     WriteSize = models.BigIntegerField(null=True)
     date_created = models.DateTimeField(null=True)
     Status = models.IntegerField(null=True)
@@ -423,26 +472,26 @@ class ESSReg001(models.Model):
     i017 = models.IntegerField(null=True)
     i018 = models.IntegerField(null=True)
     i019 = models.IntegerField(null=True)
-    s000 = models.CharField(max_length=255)
-    s001 = models.CharField(max_length=255)
-    s002 = models.CharField(max_length=255)
-    s003 = models.CharField(max_length=255)
-    s004 = models.CharField(max_length=255)
-    s005 = models.CharField(max_length=255)
-    s006 = models.CharField(max_length=255)
-    s007 = models.CharField(max_length=255)
-    s008 = models.CharField(max_length=255)
-    s009 = models.CharField(max_length=255)
-    s010 = models.CharField(max_length=255)
-    s011 = models.CharField(max_length=255)
-    s012 = models.CharField(max_length=255)
-    s013 = models.CharField(max_length=255)
-    s014 = models.CharField(max_length=255)
-    s015 = models.CharField(max_length=255)
-    s016 = models.CharField(max_length=255)
-    s017 = models.CharField(max_length=255)
-    s018 = models.CharField(max_length=255)
-    s019 = models.CharField(max_length=255)
+    s000 = models.CharField(max_length=255,null=True)
+    s001 = models.CharField(max_length=255,null=True)
+    s002 = models.CharField(max_length=255,null=True)
+    s003 = models.CharField(max_length=255,null=True)
+    s004 = models.CharField(max_length=255,null=True)
+    s005 = models.CharField(max_length=255,null=True)
+    s006 = models.CharField(max_length=255,null=True)
+    s007 = models.CharField(max_length=255,null=True)
+    s008 = models.CharField(max_length=255,null=True)
+    s009 = models.CharField(max_length=255,null=True)
+    s010 = models.CharField(max_length=255,null=True)
+    s011 = models.CharField(max_length=255,null=True)
+    s012 = models.CharField(max_length=255,null=True)
+    s013 = models.CharField(max_length=255,null=True)
+    s014 = models.CharField(max_length=255,null=True)
+    s015 = models.CharField(max_length=255,null=True)
+    s016 = models.CharField(max_length=255,null=True)
+    s017 = models.CharField(max_length=255,null=True)
+    s018 = models.CharField(max_length=255,null=True)
+    s019 = models.CharField(max_length=255,null=True)
     class Meta:
         db_table = 'ESSReg001'
 
@@ -487,6 +536,15 @@ class ControlAreaForm_file(ControlAreaForm2):
     filename = forms.MultipleChoiceField(choices=FileSelect_CHOICES, widget=forms.CheckboxSelectMultiple())
     def __init__(self, *args, **kwargs):    
         super(ControlAreaForm_file, self ).__init__(*args, **kwargs)
+        if self.FileSelect_CHOICES:
+            self.fields['filename'].choices = self.FileSelect_CHOICES
+
+class ControlAreaForm_file2(ControlAreaForm2):
+    ObjectIdentifierValue = forms.CharField(label='ObjectIdentifierValue',required=False, widget = forms.HiddenInput())
+    FileSelect_CHOICES = () 
+    filename = forms.MultipleChoiceField(choices=FileSelect_CHOICES, widget=MultiSelectWidget())
+    def __init__(self, *args, **kwargs):    
+        super(ControlAreaForm_file2, self ).__init__(*args, **kwargs)
         if self.FileSelect_CHOICES:
             self.fields['filename'].choices = self.FileSelect_CHOICES
 
@@ -594,11 +652,11 @@ class IngestQueueFormUpdate(IngestQueueForm):
 #
 class storageMedium(models.Model):
     id = models.AutoField(big=True,primary_key=True)
-    storageMediumUUID = models.CharField(max_length=36)
+    storageMediumUUID = models.CharField(max_length=36, unique=True)
     storageMedium = models.IntegerField(null=True, choices=MediumType_CHOICES)
-    storageMediumID = models.CharField(max_length=45)
+    storageMediumID = models.CharField(max_length=45, unique=True)
     storageMediumDate = models.DateTimeField(null=True)
-    storageMediumLocation = models.CharField(max_length=45)
+    storageMediumLocation = models.CharField(max_length=45,null=True)
     storageMediumLocationStatus = models.IntegerField(null=True, choices=MediumLocationStatus_CHOICES)
     storageMediumBlockSize = models.IntegerField(null=True)
     storageMediumUsedCapacity = models.BigIntegerField(null=True)
@@ -615,13 +673,32 @@ class storageMedium(models.Model):
         permissions = (
             ("list_storageMedium", "Can list storageMedium"),
         )
+
+class storageMediumTable(tables.Table):
+    storageMediumUUID = tables.CheckBoxColumn()
+    storageMediumID = tables.LinkColumn('admin_detailstoragemedium',args=[A('pk')],verbose_name="ID")
+    storageMedium = tables.Column(verbose_name="Type")
+    storageMediumStatus = tables.Column(verbose_name="Status")
+    storageMediumDate =  tables.Column(verbose_name="LastUpdate")
+    storageMediumLocation = tables.Column(verbose_name="Location")
+    storageMediumLocationStatus = tables.Column(verbose_name="Location Status")
+    storageMediumUsedCapacity = tables.Column(verbose_name="Used Capacity")
+    storageMediumMounts = tables.Column(verbose_name="Used")
+ 
+    class Meta:
+        model = storageMedium
+        attrs = {"class": "paleblue"}
+        fields = ("storageMediumUUID","storageMediumID","storageMedium","storageMediumStatus","storageMediumDate","storageMediumLocation","storageMediumLocationStatus","storageMediumUsedCapacity","storageMediumMounts")
+
         
 class storage(models.Model):
     id = models.AutoField(big=True,primary_key=True)
     contentLocation = models.BigIntegerField(null=True)
+    ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID', null=True)
     ObjectIdentifierValue = models.CharField(max_length=255)
     contentLocationType = models.IntegerField(null=True)
     contentLocationValue = models.CharField(max_length=45)
+    storageMediumUUID = models.ForeignKey(storageMedium, db_column='storageMediumUUID', to_field='storageMediumUUID', null=True)
     storageMediumID = models.CharField(max_length=45)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
@@ -688,4 +765,64 @@ class robotReqQueueForm(forms.ModelForm):
     user = forms.CharField(label='User',required=False, widget = PlainText())
     class Meta:
         model=robotreq
+        
+###########################################################################
+#
+# Migration models and forms
+#
+class MigrationQueue(models.Model):     
+    ReqUUID = models.CharField(max_length=36)
+    ReqType = models.IntegerField(null=True, choices=MigrationReqType_CHOICES)
+    ReqPurpose = models.CharField(max_length=255)
+    user = models.CharField(max_length=45)
+    password = models.CharField(max_length=45,blank=True)
+    ObjectIdentifierValue = PickledObjectField()
+    TargetMediumID = models.CharField(max_length=45)
+    Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
+    Path = models.CharField(max_length=255)
+    CopyPath = models.CharField(max_length=255,blank=True)
+    task_id = models.CharField(max_length=36,blank=True)
+    #task_id = models.ForeignKey(TaskMeta, db_column='task_id', to_field='task_id', null=True, blank=True)
+    posted = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'MigrationQueue'
+        permissions = (                    
+            ("list_migrationqueue", "Can list migration queue"),
+        )
+    def get_absolute_url(self):
+        return reverse('migration_list')
+
+class MigrationQueueForm(forms.ModelForm):
+    required_css_class = 'required'
+    #ReqUUID = forms.CharField(label='ReqUUID', widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    ReqUUID = forms.CharField(label='ReqUUID', widget = PlainText())
+    #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = forms.CheckboxInput(attrs={'disabled':'disabled'}))
+    #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = forms.Select(attrs={'disabled':'disabled'}))
+    #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = PlainText())
+    ObjectIdentifierValue = forms.CharField(widget=forms.Textarea())
+    Status = forms.IntegerField(widget = forms.HiddenInput())
+    user = forms.CharField(label='User', widget = PlainText())
+#    def clean_Path(self):
+#        data = self.cleaned_data['Path']
+#        print data
+#        if not data == 'hej0077':
+#            raise forms.ValidationError("Wrong Path2222")
+#        return data
+#    def clean(self):
+#        cleaned_data = super(AccessQueueForm, self).clean()
+#        Path = cleaned_data.get('Path')
+#        if not Path == 'hej007':
+#            msg = u"Wrong path!"
+#            self._errors["Path"] = self.error_class([msg])
+#        del cleaned_data['Path']
+#        print 'dir cleaned_data: %s' % dir(cleaned_data)
+#        print 'cleaned_data: %s' % cleaned_data
+#        return cleaned_data
+
+    class Meta:
+        model=MigrationQueue   
+        exclude=('password',)    
+
+class MigrationQueueFormUpdate(MigrationQueueForm):
+    Status = forms.ChoiceField(choices=ReqStatus_CHOICES)
 

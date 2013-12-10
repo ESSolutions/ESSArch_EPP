@@ -1,32 +1,99 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
+{% load js staticfiles eztables %}
+{% load url from future %}
 
 {% block title %}
 {% trans 'ESSArch Administration' %}
 {% endblock %}
 
 {% block extrastyle %}
-<link rel="stylesheet" href="/static/esstools.css" type="text/css" 
-      media="all" />
-<link rel="stylesheet" href="/static/superfish.css" type="text/css" 
-      media="all" />
+<!--
+<link rel="stylesheet" href="/static/superfish/css/superfish.css" type="text/css" media="all" />
+<link rel="stylesheet" href="/static/jquery-ui-1.10.3/themes/base/jquery-ui.css" type="text/css" media="all" />
+<link rel="stylesheet" href="/static/bootstrap3/css/bootstrap.min.css" type="text/css" media="all" />
+<link rel="stylesheet" href="/static/django_tables2/themes/paleblue/css/screen.css" type="text/css" media="all" />
+<link rel="stylesheet" href="/static/essarch.css" type="text/css" media="all" />
+{% datatables_bootstrap_css %}
+
+
+{% css "administration/css/eztables.demo.css" %}
+ {% css "administration/css/solarized_dark.css" %}
+-->
+
+    {% css "superfish/css/superfish.css" %}
+    {% css "administration/css/bootstrap.min.css" %}
+    {% datatables_bootstrap_css %}
+    {% css "TableTools/media/css/TableTools.css" %}
+    {% css "essarch.css" %}
+    
+	{% block app-extra-style %}{% endblock %}
+
+    {% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
+    
+    
+
 {% endblock %}
 
 {% block extrahead %}
-<script type="text/javascript" src="/static/admin/js/core.js"></script>
-<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/static/hoverIntent.js"></script>
-<script type="text/javascript" src="/static/superfish.js"></script>
+<!--
+<script type="text/javascript" src="/static/jquery-1.10.2.min.js"></script> 
+<script type="text/javascript" src="/static/bootstrap3/js/bootstrap.min.js"></script> 
+<script type="text/javascript" src="/static/jquery-ui-1.10.3/ui/minified/jquery-ui.min.js"></script> 
+<script type="text/javascript" src="/static/superfish/js/hoverIntent.js"></script>
+<script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
 
-<script type="text/javascript">
-(function($) {
-    $(document).ready(function(){
-        $('ul.sf-menu').superfish();
-    });
-})(jQuery);
+
+
+    	 
+
+
+
+
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+	{% js_lib "bootstrap.min.js" %}
+	{% js_lib "highlight.pack.js" %}
+	{% js "js/eztables.demo.js" %} 
+{% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
+-->
+
+<!--
+<script>
+	jQuery(document).ready(function() {
+		jQuery('ul.sf-menu').superfish({
+			delay:       0,                            // one second delay on mouseout
+			speed:       'fast',                          // faster animation speed
+		});
+	});
 </script>
 
+
+<script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
+<script>
+	//jQuery(document).ready(function() {
+	django.jQuery(document).ready(function() {
+		django.jQuery('ul.sf-menu').superfish({
+			delay:       0,                            // one second delay on mouseout
+			speed:       'fast',                          // faster animation speed
+		});
+	});
+</script>
+-->
 {% endblock %}
+
+
+
+
+
+    
+    
+  
+<!--
+	 {% js_lib "bootstrap.min.js" %}
+	{% js_lib "highlight.pack.js" %}
+	{% js "js/eztables.demo.js" %} 
+{% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
+-->
 
 
 {% block branding %}
@@ -54,7 +121,7 @@
 	<ul id="contents" class="sf-menu">
 
 		<li>
-			<a href="#vertical" class="sf-with-ul" title="Manage information packages etc .." >{% trans 'CONTROL AREA' %}</a>
+			<a href="#vertical" title="Manage information packages etc .." >{% trans 'CONTROL AREA' %}</a>
 			<ul>
 			  <li><a href="{% url 'controlarea_checkinfromreception_list' %}">{% trans 'CheckIn from Reception' %}</a></li>
 			  <li><a href="{% url 'controlarea_checkouttowork_list' %}">{% trans 'CheckOut to Workarea' %}</a></li>
@@ -70,7 +137,7 @@
 	    </li>
 
 		<li>
-			<a href="#vertical" class="sf-with-ul" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
+			<a href="#vertical" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
 			<ul>
 			  <li><a href="{% url 'ingest_listobj' %}">{% trans 'List information packages' %}</a></li>
 			  <li><a href="{% url 'ingest_create' %}">{% trans 'Create new ingest request' %}</a></li>
@@ -79,7 +146,7 @@
 	    </li>
  
 		<li>
-			<a href="#vertical" class="sf-with-ul" title="Access information packages etc .." >{% trans 'ACCESS' %}</a>
+			<a href="#vertical" title="Access information packages etc .." >{% trans 'ACCESS' %}</a>
 			<ul>
 			  <li><a href="{% url 'access_listobj' %}">{% trans 'List information packages' %}</a></li>
 			  <li><a href="{% url 'access_create' %}">{% trans 'Create new access request' %}</a></li>
@@ -88,15 +155,17 @@
 	    </li>
   
 		<li> 
-			<a href="#vertical" class="sf-with-ul">ADMINISTRATION</a>
+			<a href="#vertical">ADMINISTRATION</a>
 	    	<ul>
 	    		<li><a href="{% url 'admin_liststoragemedium' %}">{% trans 'List media information' %}</a></li>
 	    		<li><a href="{% url 'admin_listrobot' %}">{% trans 'List robot information' %}</a></li>
+	    		<li><a href="{% url 'admin_storagemaintenance' %}">{% trans 'Storage Maintenance' %}</a></li>
+	    		<li><a href="{% url 'migration_list' %}">{% trans 'Storage Maintenance list' %}</a></li>
 	    	</ul>
 		</li>
 		
 		<li> 
-			<a href="#vertical" class="sf-with-ul">REPORTS</a>
+			<a href="#vertical">REPORTS</a>
 	    	<ul>
 	    		<li><a href="{% url 'reports_deliveryreport' %}">{% trans 'Deliverys report' %}</a></li>
 	    		<li><a href="{% url 'reports_eventsreport' %}">{% trans 'Log Events report' %}</a></li>
@@ -105,7 +174,7 @@
 
       	{% if user.is_staff %}  
 		<li> 
-			<a href="/admin" class="sf-with-ul">MANAGEMENT</a>
+			<a href="/admin">MANAGEMENT</a>
 	    	<ul>
 		      {#<li><a href="/admin/ip/informationpackage/">Information Packages</a></li>#}
 		      <li><a href="/admin/configuration">Configuration</a></li>
@@ -124,7 +193,36 @@
   </div>
 {% endblock %}
 
+<!--
 {% block breadcrumbs %} <br/> {% endblock %}
+-->
 
+{% block content %}
+    <div id="main-container" class="container">
+    {% block container %}{% endblock %}
+    </div>
+{% endblock %}
 
-
+{% block extra-script %}
+    <!--
+    {% django_js %}
+    <script type="text/javascript" src="/static/jquery-1.10.2.min.js"></script>
+    -->
+    {% django_js %}
+    {% js "superfish/js/superfish.min.js" %}
+	<script>
+		jQuery(document).ready(function() {
+			jQuery('ul.sf-menu').superfish({
+				delay:       0,                            // one second delay on mouseout
+				speed:       'fast',                          // faster animation speed
+			});
+		});
+	</script>
+    {% js_lib "bootstrap.min.js" %}
+    {% datatables_js %}
+    {% datatables_bootstrap_js %}
+    {% js "TableTools/media/js/TableTools.min.js" %}
+    {% js_lib "highlight.pack.js" %}
+    {% js_lib "jquery.dataTables.columnFilter.js" %}
+    {% block app-extra-script %}{% endblock %}
+{% endblock %}
