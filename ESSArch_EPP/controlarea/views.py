@@ -75,6 +75,7 @@ class MyFileList(object):
                             ip.media = f.upper()
                             ip.uuid = ''
                             if error == 0:
+                                logger.warning('IP/directory: %s found in reception, this directory should not exists in reception, reception should only contain IP tarfiles.' % ObjectPath)
                                 for agent in res_info[2]:
                                     if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
                                         ip.EntryAgentIdentifierValue = agent[4]
@@ -92,6 +93,8 @@ class MyFileList(object):
                                     ip.uuid = res_info[0][1][5:]
                                 else:
                                     ip.uuid = res_info[0][1]
+                            else:
+                                logger.error('IP/directory: %s found in reception, this directory should not exists in reception, reception should only contain IP tarfiles. Problem to read metsfile: %s error: %s' % (ObjectPath,mets_objpath,str(why)))
                             if ip_uuid is None:
                                 self.filelist.append(ip)
                             elif ip.uuid == ip_uuid:
@@ -101,11 +104,14 @@ class MyFileList(object):
                             if ObjectPath[-4:].lower() == '.tar':
                                 ObjectPackageName = ff
                                 ip_uuid_test = ObjectPackageName[:-4]
+                                ip_uuid_test_flag = 0
+                                #logger.info('IP: %s found in reception, start to check if an IP directory with name: "%s" exists in some AIC in "gate area"' % (ObjectPath, ip_uuid_test))
                                 logs_path = os.path.join( self.gate_path, 'logs' )
                                 if os.path.isdir(logs_path):
                                     for g in os.listdir(logs_path):
                                         if os.path.isdir(os.path.join(logs_path, g)): #AIC dir
                                             if os.path.isdir( os.path.join( os.path.join( logs_path, g ), ip_uuid_test ) ): # ff = ip_uuid dir
+                                                ip_uuid_test_flag = 1                                            
                                                 aic_path = os.path.join( logs_path, g )
                                                 aic_uuid = os.path.split(aic_path)[1]
                                                 ip = MyFile()
@@ -115,6 +121,7 @@ class MyFileList(object):
                                                 ip.media = f.upper()
                                                 ip.uuid = ''
                                                 if error == 0:
+                                                    logger.info('IP: %s found in reception and success to read metsfile: %s in "gate area"' % (ObjectPath, mets_objpath))
                                                     for agent in res_info[2]:
                                                         if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
                                                             ip.EntryAgentIdentifierValue = agent[4]
@@ -133,12 +140,16 @@ class MyFileList(object):
                                                     else:
                                                         ip.uuid = res_info[0][1]
                                                     ip.aic_uuid = aic_uuid
+                                                else:
+                                                    logger.error('IP: %s found in reception, problem to read metsfile: %s in "gate area", error: %s' % (ObjectPath, mets_objpath, str(why)))
                                                 if ip_uuid is None:
                                                     self.filelist.append(ip)
                                                 elif ip.uuid == ip_uuid:
                                                     self.filelist = ip
-                                                
-                                                    
+                                    if ip_uuid_test_flag == 0:
+                                        logger.error('IP: %s found in reception, IP directory with name: "%s" do not exists in any AIC in "gate area" (%s)' % (ObjectPath, ip_uuid_test, logs_path))       
+                                else:
+                                    logger.error('path: %s do not exists' % logs_path)                    
         return self.filelist
 
     def __iter__(self):

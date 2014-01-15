@@ -1,0 +1,90 @@
+{% extends 'admin/base_site.html' %}
+{% load js staticfiles %}
+{% load url from future %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block container %}
+
+
+<H1>{{ label }}</H1>
+<br/>
+
+<div class="row">
+    <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>pk</th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>LastUpdate</th>
+                <th>Location</th>
+                <th>Location Status</th>
+                <th>Used Capacity</th>
+                <th>Used</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+</div>
+
+
+
+{% endblock %}
+
+{% block app-extra-script %}
+<script>
+$(document).ready(function() {
+	$('#my-table').dataTable( {
+	    "bPaginate": true,
+        "sPaginationType": "bootstrap",
+        "bProcessing": true,
+        "bServerSide": true,
+        "iDisplayLength": 10,
+        "oLanguage": {
+            "sLengthMenu": 'Display <select>'+
+                '<option value="10">10</option>'+
+                '<option value="25">25</option>'+
+                '<option value="50">50</option>'+
+                '<option value="100">100</option>'+
+                '<option value="250">250</option>'+
+                '<option value="500">500</option>'+
+                '<option value="1000">1000</option>'+
+                '<option value="-1">All</option>'+
+                '</select> records'
+        },
+        "sAjaxSource": Django.url('storagemedium-dt'),
+        "aoColumnDefs": [
+    	  { 'bVisible': false, 
+    	  	'aTargets': [ 0 ] 
+    	  },
+          { "sClass": "nowrap",
+            "bSearchable": false,
+            "bSortable": true,
+            "type": "text",
+            "bRegex": true,
+          	"aTargets": [ 1 ] 
+          },
+          { "sClass": "nowrap",
+            "bSearchable": false,
+            "bSortable": true,
+            "type": "text",
+            "bRegex": true,
+          	"aTargets": [ 4 ] 
+          }, 
+        ],
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            $('td:eq(0)', nRow).html('<a href="/administration/detailstoragemedium/' + aData[0] + '/">' +
+                aData[1] + '</a>');
+            return nRow;
+        },
+    } );
+    $('#my-table_filter').attr('title', 'Global serach in columns: ID, Location');
+} );
+</script>
+{% endblock %}
+   
+
+

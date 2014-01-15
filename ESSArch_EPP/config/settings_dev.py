@@ -62,6 +62,34 @@ EMAIL_PORT = 25
 SERVER_EMAIL = 'ESSArch@localhost' # from
 DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
 
+# django-log-files-viewer
+#LOG_FILES_DIR = '/ESSArch/log'
+#LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
+#LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s(?P<type>[A-Z]+)\s(?P<message>.+)'
+
+# ESS Django process
+#LOG_FILES_NAME_1 = ['celery_worker1','controlarea','ESSArch_db','ESSArch','storageLogistics','storagemaintenance','Tools']
+#LOG_FILES_RE_1 = '(?P<type>[A-Z]+)\s(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s(?P<module>[a-zA-Z]+)\s(?P<process>[0-9]+)\s(?P<thread>[0-9]+)\s(?P<message>.+)'
+
+# ESS core process
+#LOG_FILES_NAME_2 = ['AccessEngine','AIPChecksum','AIPCreator','AIPPurge','AIPValidate','AIPWriter','AIPWriter_2','db_sync_ais','ESSlogging','ESSpreingest',
+ #                   'FTPServer','IOEngine_2','IOEngine','SIPReceiver','SIPRemove','SIPValidateAIS','SIPValidateApproval','SIPValidateFormat','TLD']
+#LOG_FILES_RE_2 = '(?P<date>\d{2} [a-zA-Z]+ \d{4} \d{2}:\d{2}:\d{2})\s(?P<type>[\/\-\w]+)\s(?P<message>.+)'
+
+#format': '%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s'
+    # Is a regex to parse your log file against. It completely depends of your Django logging settings.
+    # And table column names (in a parsed logfile) depend from group names you provide in the regexp.
+    # E.g. for Django logging server to parse with this regexp you need to have log, as in example
+    # django_log_file_viewer/testdata/testing.log file.
+
+    # to produce this log I've added this formatter to my website.
+    
+    #'formatters': {
+    #    'verbose': {
+    #        'format': '%(asctime)s [%(levelname)s] %(message)s'
+    #    },
+    #},
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -200,6 +228,7 @@ INSTALLED_APPS = (
     'ingest',
     'administration',
     'reports',
+    'django-log-file-viewer',
 )
 
 import djcelery
@@ -295,6 +324,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 1000,
         },
+        'log_file_administration': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/administration.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
     },
     'loggers': {
         'django': {
@@ -330,6 +368,11 @@ LOGGING = {
         'essarch.storagelogistics': {
             'level': 'INFO',
             'handlers': ['log_file_storagelogistics'],
+            'propagate': True,
+        },
+        'essarch.administration': {
+            'level': 'INFO',
+            'handlers': ['log_file_administration'],
             'propagate': True,
         },
     },

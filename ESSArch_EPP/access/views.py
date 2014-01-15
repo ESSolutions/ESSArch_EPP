@@ -34,16 +34,64 @@ from essarch.models import AccessQueue, AccessQueueForm, AccessQueueFormUpdate, 
 from configuration.models import Path, Parameter
 
 from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
+from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
+from essarch.libs import DatatablesView
+
 import uuid, os.path as op
 
-class ArchObjectList(ListView):
+class ArchObjectList(TemplateView):
+    template_name = 'access/archiveobject_list.html'
+
+    @method_decorator(permission_required('essarch.list_accessqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(ArchObjectList, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ArchObjectList, self).get_context_data(**kwargs)
+        context['label'] = 'List of archived information packages'
+        #context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
+        #context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
+        #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
+        return context
+
+class ArchObjectDatatablesView(DatatablesView):
+    model = ArchiveObject
+    fields = (
+        "id",
+        "ObjectIdentifierValue",
+        "Generation",    
+        "EntryAgentIdentifierValue",
+        "archiveobjectdata__label",
+        "EntryDate",
+        "archiveobjectdata__startdate",            
+        "archiveobjectdata__enddate",            
+        "OAISPackageType",
+        "reluuid_set__AIC_UUID__ObjectIdentifierValue",
+        #"reluuid_set__UUID__ObjectIdentifierValue",
+        #"relaic_set__AIC_UUID__ObjectIdentifierValue",        
+        "ObjectUUID",
+        "StatusProcess",
+        "StatusActivity",
+    )
+
+    def sort_col_9(self, direction):
+        '''sort for col_9'''
+        #return ('%sreluuid_set__AIC_UUID__ObjectIdentifierValue' % direction, '%sGeneration' % direction)
+        #return ('%sid' % direction, '%sreluuid_set__AIC_UUID__ObjectIdentifierValue' % direction, '%sObjectUUID' % direction, '%sGeneration' % direction)
+        #return ('%sGeneration' % direction, '%sreluuid_set__AIC_UUID__ObjectIdentifierValue' % direction, '%sObjectUUID' % direction )
+        return ('%sid' % direction , '%sGeneration' % direction, '%sreluuid_set__AIC_UUID__ObjectIdentifierValue' % direction, '%sObjectUUID' % direction)
+
+    def sort_col_9(self, direction):
+        '''sort for col_10'''
+        return ('%sid' % direction , '%sGeneration' % direction, '%sObjectUUID' % direction)
+
+class ArchObjectList2(ListView):
     """
     List ArchiveObject
     """

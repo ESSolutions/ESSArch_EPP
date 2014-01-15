@@ -1,0 +1,146 @@
+{% extends 'admin/base_site.html' %}
+{% load js staticfiles %}
+{% load url from future %}
+{% load dictionary_extras %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block container %}
+    
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+<br/>
+<small>[updated {{object.storageMediumDate|timesince}} ago]</small>
+
+<div class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+		<th>Name</th>
+		<th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+    	<tr class="row1">
+    		<td>Medium UUID</td>
+    		<td>{{ object.storageMediumUUID }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Type</td>
+    		<td>{{ MediumType_CHOICES|access:object.storageMedium }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>ID</td>
+    		<td id="storageMediumID">{{ object.storageMediumID }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>LastUpdate</td>
+    		<td>{{ object.storageMediumDate }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Location</td>
+    		<td>{{ object.storageMediumLocation }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Location Status</td>
+    		<td>{{ MediumLocationStatus_CHOICES|access:object.storageMediumLocationStatus }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>BlockSize</td>
+    		<td>{{ MediumBlockSize_CHOICES|access:object.storageMediumBlockSize }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Used Capacity</td>
+    		<td>{{ object.storageMediumUsedCapacity }} bytes</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Status</td>
+    		<td>{{ MediumStatus_CHOICES|access:object.storageMediumStatus }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>Format</td>
+    		<td>{{ MediumFormat_CHOICES|access:object.storageMediumFormat }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Used (mounts)</td>
+    		<td>{{ object.storageMediumMounts }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>linkingAgentIdentifierValue</td>
+    		<td>{{ object.linkingAgentIdentifierValue }}</td>
+    	</tr>
+    	<tr class="row1">
+    		<td>Create Date</td>
+    		<td>{{ object.CreateDate }}</td>
+    	</tr>
+    	<tr class="row2">
+    		<td>CreateAgentIdentifierValue</td>
+    		<td>{{ object.CreateAgentIdentifierValue }}</td>
+    	</tr>
+    </tbody>
+  </table>
+</div>
+
+<br/>
+<H1>Medium content</H1>
+<br/>
+
+
+<div class="row">
+    <table id="storage-objects-table" class="span12 display table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>               
+                <th id="test1233">pk</th>
+                <th>IP Object</th>
+                <th>Content location</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+</div>
+
+<br/>
+<a href="{% url 'admin_liststoragemedium' %}">list storagemedium</a>
+
+</div>
+
+{% endblock %}
+
+{% block app-extra-script %}
+<script>
+$(document).ready(function() {
+	$('#storage-objects-table').dataTable( {
+	    "bPaginate": true,
+        "sPaginationType": "bootstrap",
+        "bProcessing": true,
+        "bServerSide": true,
+        "iDisplayLength": 10,
+        "oLanguage": {
+            "sLengthMenu": 'Display <select>'+
+                '<option value="10">10</option>'+
+                '<option value="25">25</option>'+
+                '<option value="50">50</option>'+
+                '<option value="100">100</option>'+
+                '<option value="250">250</option>'+
+                '<option value="500">500</option>'+
+                '<option value="1000">1000</option>'+
+                '<option value="-1">All</option>'+
+                '</select> records'
+        },
+        "sAjaxSource": Django.url('storage-dt'),
+        "fnServerParams": function ( aoData ) {
+            aoData.push( { 
+            	"name": "storageMediumID", "value": $('#storageMediumID').text() } );
+        },
+        "aoColumnDefs": [
+    	  { 'bVisible': false, 
+    	  	'aTargets': [ 0 ] 
+    	  }, 
+        ],
+        //"oSearch": { "sSearch": "test" }, 
+    } );
+    $('#storage-objects-table_filter').attr('title', 'Global serach in columns: IP Object, Content location');
+} );
+</script>
+{% endblock %}

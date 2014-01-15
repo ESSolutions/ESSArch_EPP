@@ -220,6 +220,22 @@ MigrationReqType_CHOICES = (
     (1, 'Copy IP to new storage'),
 )
 
+RobotReqType_CHOICES = (
+    (50, 'Mount tape'),
+    (51, 'Unmount tape'),
+    (52, 'Unmount tape (force)'),
+    (1, 'Robot inventory'),
+)
+
+#RobotReqStatus_CHOICES = (
+#    ('0', 'Pending'),
+#    ('5', 'Progress'),
+#    ('20', 'Success'),
+#    ('100', 'FAIL'),
+#    ('pending', 'Mount/Unmount Pending'),
+#    ('mounting', 'Mount/Unmount Progress'),
+#)
+
 MediumType_CHOICES = (
     (200, 'DISK'),
     (301, 'IBM-LTO1'),
@@ -742,29 +758,67 @@ class robotie(models.Model):
     class Meta:
         db_table = 'robotie'
 
-class robotreq(models.Model):
-    job_prio = models.IntegerField(null=True, blank=True)
-    status = models.CharField(max_length=10,blank=True)
-    req_type = models.CharField(max_length=10,blank=True)
-    t_id = models.CharField(max_length=6,blank=True)
-    work_uuid = models.CharField(max_length=36,blank=True)
-    user = models.CharField(max_length=255,blank=True)
+#class robotreq(models.Model):
+#    job_prio = models.IntegerField(null=True, blank=True)
+#    status = models.CharField(max_length=10, choices=RobotReqStatus_CHOICES)
+#    #req_type = models.CharField(max_length=10,blank=True, choices=RobotReqType_CHOICES)
+#    req_type = models.CharField(max_length=10, choices=RobotReqType_CHOICES)
+#    #req_type = models.CharField(choices=RobotReqType_CHOICES)
+#    t_id = models.CharField(max_length=6,blank=True)
+#    work_uuid = models.CharField(max_length=36,blank=True)
+#    user = models.CharField(max_length=255,blank=True)
+#    ReqPurpose = models.CharField(max_length=255)
+#    class Meta:
+#        db_table = 'robotreq'
+#    def get_absolute_url(self):
+#        return reverse('admin_listrobot')
+#        
+#class robotReqQueueForm(forms.ModelForm):
+#    required_css_class = 'required'
+#    work_uuid = forms.CharField(label='ReqUUID', required=False, widget = PlainText())
+#    t_id = forms.CharField(label='MediumID', required=False, widget = PlainText())
+#    status = forms.CharField(label='Status', widget = forms.HiddenInput())
+#    user = forms.CharField(label='User', widget = PlainText())
+#    class Meta:
+#        model=robotreq
+#        fields = ['work_uuid', 'req_type', 'ReqPurpose', 'user', 'status', 't_id']
+#        exclude=('job_prio',)
+#
+#class robotReqQueueFormUpdate(robotReqQueueForm):
+#    status = forms.ChoiceField(label='Status', choices=RobotReqStatus_CHOICES)
+
+class robotQueue(models.Model):     
+    ReqUUID = models.CharField(max_length=36)
+    ReqType = models.IntegerField(null=True, choices=RobotReqType_CHOICES)
     ReqPurpose = models.CharField(max_length=255)
+    user = models.CharField(max_length=45)
+    password = models.CharField(max_length=45,blank=True)
+    MediumID = models.CharField(max_length=45,blank=True)
+    Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
+    task_id = models.CharField(max_length=36,blank=True)
+    posted = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = 'robotreq'
+        db_table = 'robotQueue'
+        permissions = (                    
+            ("list_robotqueue", "Can list robot queue"),
+        )
     def get_absolute_url(self):
         return reverse('admin_listrobot')
-        
-class robotReqQueueForm(forms.ModelForm):
+
+class robotQueueForm(forms.ModelForm):
     required_css_class = 'required'
-    job_prio = forms.IntegerField(label='Priority',required=False, widget = PlainText())
-    status = forms.CharField(label='Status',required=False, widget = PlainText())
-    req_type = forms.CharField(label='ReqType',required=False, widget = PlainText())
-    t_id = forms.CharField(label='MediumID',required=False, widget = PlainText())
-    work_uuid = forms.CharField(label='ReqUUID',required=False, widget = forms.HiddenInput())
-    user = forms.CharField(label='User',required=False, widget = PlainText())
+    ReqUUID = forms.CharField(label='ReqUUID', widget = PlainText())
+    Status = forms.IntegerField(widget = forms.HiddenInput())
+    user = forms.CharField(label='User', widget = PlainText())
+    task_id = forms.CharField(required = False, widget = PlainText())
+    ais_flag = forms.BooleanField(label='Update related objects from AIS',required=False)
+
     class Meta:
-        model=robotreq
+        model=robotQueue   
+        exclude=('password',)    
+
+class robotQueueFormUpdate(robotQueueForm):
+    Status = forms.ChoiceField(choices=ReqStatus_CHOICES)  
         
 ###########################################################################
 #

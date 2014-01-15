@@ -282,6 +282,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 1000,
         },
+        'log_file_administration': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/administration.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
     },
     'loggers': {
         'django': {
@@ -317,6 +326,11 @@ LOGGING = {
         'essarch.storagelogistics': {
             'level': 'INFO',
             'handlers': ['log_file_storagelogistics'],
+            'propagate': True,
+        },
+        'essarch.administration': {
+            'level': 'INFO',
+            'handlers': ['log_file_administration'],
             'propagate': True,
         },
     },

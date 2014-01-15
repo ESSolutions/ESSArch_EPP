@@ -7,6 +7,9 @@
 
 {% block container %}
 
+<H1>{{ label }}</H1>
+<br/>
+
 <div class="row">
 	<a>{% csrf_token %}</a>
     <table class="prepare request">
@@ -80,6 +83,7 @@
                 <td>
                     <input id="filter-2" type="text"
                         class="input-xxlarge"
+                        value="3000"
                         placeholder="statusprocess search">
                 </td>
                 <td><input id="filterhide-2" type="checkbox"/></td>
@@ -89,6 +93,7 @@
                 <td>
                     <input id="filter-3" type="text"
                         class="input-xxlarge"
+                        value="0"
                         placeholder="statusactivity search">
                 </td>
                 <td><input id="filterhide-3" type="checkbox"/></td>
@@ -179,6 +184,26 @@
 {% endblock %}
 
 {% block app-extra-script %}
+    {% js "TableTools/media/js/TableTools.min.js" %}
     {% js "administration/js/eztables.demo.js" %}
 	{% js "administration/js/storagemaintenance.js" %}
+<!--
+<script>
+$(document).ready(function() {
+	function deffnFilterColumn(i) {
+    	var oTable = $('#archiveobject-table').dataTable();
+    	oTable.fnFilter(
+            $("#filter-"+i).val(),
+            i
+        );
+        alert('setdef:'+i+' value:'+$("#filter-"+i).val())
+    }
+	var test = $('#filter-3').attr('value');
+	if (test) {
+		deffnFilterColumn('2')
+    	//alert('filter-2'+test)
+   }
+} );
+</script>
+-->
 {% endblock %}

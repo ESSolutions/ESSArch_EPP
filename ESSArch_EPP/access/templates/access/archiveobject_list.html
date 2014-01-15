@@ -1,0 +1,88 @@
+{% extends 'admin/base_site.html' %}
+{% load js staticfiles %}
+{% load url from future %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block container %}
+
+
+<H1>{{ label }}</H1>
+<br/>
+
+<div class="row">
+    <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>pk</th>
+            	<th>Object</th>
+            	<th>Generation</th>
+                <th>Archivist organization</th>
+                <th>Label</th>
+                <th>Create date</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>IP type</th>
+                <th>AIC (UUID)</th>
+                <th>IP (UUID)</th>
+                <th>Process</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+</div>
+
+
+
+{% endblock %}
+
+{% block app-extra-script %}
+<script>
+$(document).ready(function() {
+	$('#my-table').dataTable( {
+	    "bPaginate": true,
+        "sPaginationType": "bootstrap",
+        "bProcessing": true,
+        "bServerSide": true,
+        "iDisplayLength": 10,
+        "oLanguage": {
+            "sLengthMenu": 'Display <select>'+
+                '<option value="10">10</option>'+
+                '<option value="25">25</option>'+
+                '<option value="50">50</option>'+
+                '<option value="100">100</option>'+
+                '<option value="250">250</option>'+
+                '<option value="500">500</option>'+
+                '<option value="1000">1000</option>'+
+                '<option value="-1">All</option>'+
+                '</select> records'
+        },
+        "sAjaxSource": Django.url('archobject-dt'),
+        "aoColumnDefs": [
+    	  { 'bVisible': false, 
+    	  	'aTargets': [ 0 ] 
+    	  },
+          { "sClass": "nowrap",
+          	"aTargets": [ 1 ] 
+          },
+        ],
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            if ( aData[8] == "AIP" && aData[11] == "Archived" && aData[12] == "OK" ) {
+            	$('td:eq(0)', nRow).html('<a href="/access/new/' + aData[10] + '/">' + aData[1] + '</a>');
+            }
+            if ( aData[8] == 'AIC' && aData[2] == 0 ) {
+            	$('td:eq(1)', nRow).html('-');
+            }
+            else {
+            	$('td:eq(1)', nRow).html('IP_' + aData[2]);
+            }
+        },
+    } );
+	$('#my-table_filter').attr('title', 'Global search in columns: Object, Archivist organization, Label, AIC(UUID), IP(UUID)');
+} );
+</script>
+{% endblock %}
+
+

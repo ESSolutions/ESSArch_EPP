@@ -58,3 +58,25 @@ from django.core.urlresolvers import reverse
 #            ("update", "update"),
 #            ("delete", "delete"),
 #        )
+
+class robot_info(object):
+    drives = 0
+    slots = 0
+
+class robot_drive(object):
+    drive_id = 0
+    slot_id = 0
+    volume_id = ''
+    status = ''
+    
+class robot_slot(object):
+    slot_id = 0
+    volume_id = ''
+    volume_ver = ''
+    status = ''
+    
+class robot_export(object):
+    slot_id = 0
+    volume_id = ''
+    volume_ver = ''
+    status = ''

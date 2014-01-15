@@ -21,6 +21,7 @@
             //$("#regex-"+i)[0].checked,
             //false
         );
+    	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
     	oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
     }
 
@@ -66,7 +67,8 @@
             "aoColumnDefs": [
                  { 'bVisible': false, 'aTargets': [ 1 ] }
             ],
-            "sDom": 'T<"clear">lfrtip',
+            //"sDom": 'T<"clear">lfrtip',
+            "sDom": 'lTrtip',
             "oTableTools": {
             	"sSwfPath": "/static/TableTools/media/swf/copy_csv_xls_pdf.swf",
             	"sRowSelect": "multi",
@@ -184,7 +186,11 @@
         //$("#global-filter").keyup( fnFilterGlobal );
         //$("#global-regex").click( fnFilterGlobal );
         for (var i=0; i<9; i++) {
-            $("#filter-"+i).keyup(createFilter(i));
+            $("#filter-"+i).keyup(createFilter(i)); 
+            // Set initial default values
+            if ($("#filter-"+i).val()) {
+            	fnFilterColumn(i)
+            }
             //$("#regex-"+i).click(createFilter(i));
             //$("#filterhide-"+i).click(createFilterHide(i));
             $("#filterhide-"+i).click(createFilter(i));

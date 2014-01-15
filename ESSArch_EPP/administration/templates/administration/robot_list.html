@@ -1,0 +1,97 @@
+{% extends 'index.html' %}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+
+<H6>Robot request queue:</H6>
+
+<div class="results">
+{% if robotreq_list %}
+  <table id="result_list2">
+    <thead>
+      <tr>
+                <th>ReqUUID</th>
+                <th>ReqType</th>
+                <th>ReqPurpose</th>
+                <th>User</th>
+                <th>MediumID</th>
+                <th>State</th>
+                <th>Posted</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for req_obj in robotreq_list %}
+		      	<tr class="row{% cycle '1' '2' %}">	
+					<td><a href="{% url 'robotreq_detail' req_obj.pk %}" title='Detail information'>{{ req_obj.ReqUUID }}</a></td>	
+					<td>{{ ReqType_CHOICES|access:req_obj.ReqType }}</td>
+					<td>{{ req_obj.ReqPurpose }}</td>
+					<td>{{ req_obj.user }}</td>
+					<td>{{ req_obj.MediumID }}</td>
+					<td>{{ ReqStatus_CHOICES|access:req_obj.Status }}</td>
+					<td><small>[posted {{req_obj.posted|timesince}} ago]</small></td>
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No request exists
+{% endif %}
+</div>
+
+<br/>
+
+<div class="results">
+{% if object_list %}
+  <table id="result_list">
+    <thead>
+      <tr>
+                <th>Slot ID</th>
+                <th>Drive ID</th>
+                <th>Medium ID</th>
+                <th>Status</th>
+                <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+	    	{% for obj in object_list %}
+		      	<tr class="row{% cycle '1' '2' %}">		
+					<td>{{ obj.slot_id }}</td>
+					<td>{{ obj.drive_id }}</td>
+					<td>{{ obj.t_id }}</td>
+					<td>{{ obj.status }}</td>
+			        {% if admin_user %}
+			            {% if obj.status == 'Mounted' %} 
+			                <td><a href="{% url 'admin_robotreq_create_mediumid' obj.t_id 3 %}" title="Create unmount request">Force unmount</a></td>
+			            {% elif obj.status == 'ArchTape' %}
+			                <td><a href="{% url 'admin_robotreq_create_mediumid' obj.t_id 1 %}" title="Create mount request">Manual mount</a></td>
+			            {% else %}
+			                <td>N/A</td>
+			            {% endif %}
+			        {% else %}
+			            <td>N/A</td>
+			        {% endif %}					
+		      	</tr>
+	      	{% endfor %}
+    </tbody>
+  </table>
+{% else %}
+	No objects exists
+{% endif %}
+</div>
+
+{% if admin_user %}
+	<br/>
+	<a href="{% url 'admin_robotreq_create' %}" title="Inventory robot">Inventory robot</a>
+{% endif %}
+
+<br/>
+
+
+
+</div>    
+   
+{% endblock %}

@@ -19,19 +19,16 @@
 
 {% css "administration/css/eztables.demo.css" %}
  {% css "administration/css/solarized_dark.css" %}
+ {% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
 -->
 
     {% css "superfish/css/superfish.css" %}
-    {% css "administration/css/bootstrap.min.css" %}
+    {% css "bootstrap/css/bootstrap.min.css" %}
     {% datatables_bootstrap_css %}
     {% css "TableTools/media/css/TableTools.css" %}
-    {% css "essarch.css" %}
+    {% css "css/essarch.css" %}
     
 	{% block app-extra-style %}{% endblock %}
-
-    {% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
-    
-    
 
 {% endblock %}
 
@@ -207,6 +204,9 @@
     <!--
     {% django_js %}
     <script type="text/javascript" src="/static/jquery-1.10.2.min.js"></script>
+    {% js_lib "highlight.pack.js" %}
+    {% js "js/libs2/jquery.dataTables.columnFilter.js" %}
+    {% js "TableTools/media/js/TableTools.min.js" %}
     -->
     {% django_js %}
     {% js "superfish/js/superfish.min.js" %}
@@ -218,11 +218,9 @@
 			});
 		});
 	</script>
-    {% js_lib "bootstrap.min.js" %}
+    {% js "bootstrap/js/bootstrap.min.js" %}
     {% datatables_js %}
     {% datatables_bootstrap_js %}
-    {% js "TableTools/media/js/TableTools.min.js" %}
-    {% js_lib "highlight.pack.js" %}
-    {% js_lib "jquery.dataTables.columnFilter.js" %}
+
     {% block app-extra-script %}{% endblock %}
 {% endblock %}

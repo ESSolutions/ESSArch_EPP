@@ -25,74 +25,37 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.db.models import Q
-from django.db import models
+from operator import or_, and_
 
 from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
-                           storage, robot, robotreq, robotReqQueueForm, ArchiveObject, ControlAreaQueue, ControlAreaForm_file2, \
+                           storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
                            MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate
-from configuration.models import Path, Parameter, ESSArchPolicy
 
-from djcelery.models import TaskMeta
 
-from administration.tasks import MigrationTask
+from administration.tasks import MigrationTask, RobotInventoryTask
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, BaseUpdateView
-from django.utils import timezone
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
-from django.core.paginator import Paginator
-from django.views.generic import View
-from django.views.generic.list import MultipleObjectMixin
+
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 
 from django_tables2 import RequestConfig
-from eztables.views import DatatablesView, get_real_field
-from eztables.forms import DatatablesForm
 
-from operator import or_
+from essarch.libs import DatatablesView
 
-import uuid, os.path as op, ESSPGM, ESSMD
+import uuid, ESSPGM
 
-from lxml import etree
-
-#: SQLite unsupported field types for regex lookups
-UNSUPPORTED_REGEX_FIELDS = (
-    models.IntegerField,
-    #models.BooleanField,
-    #models.NullBooleanField,
-    #models.FloatField,
-    #models.DecimalField,
-    models.DateTimeField,
-)
-
-RE_FORMATTED = re.compile(r'\{(\w+)\}')
-
-from django.db import transaction
-
-@transaction.commit_manually
-def flush_transaction():
-    """
-    Flush the current transaction so we don't read stale data
-
-    Use in long running processes to make sure fresh data is read from
-    the database.  This is a problem with MySQL and the default
-    transaction mode.  You can fix it by setting
-    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
-    this function at the appropriate moment
-    """
-    transaction.commit()
-
-class storageMediumList(ListView):
+class storageMediumList3(ListView):
     """
     List storageMedium
     """
@@ -116,7 +79,7 @@ class storageMediumDetail(DetailView):
     storageMedium details
     """
     model = storageMedium
-    template_name='administration/detail.html'
+    template_name='administration/storagemedium_detail.html'
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
@@ -135,6 +98,21 @@ class storageMediumDetail(DetailView):
         context['MediumBlockSize_CHOICES'] = dict(MediumBlockSize_CHOICES)
         return context
 
+class storageDatatablesView(DatatablesView):
+    model = storage
+    fields = (
+        "id", 
+        "ObjectIdentifierValue",
+        "contentLocationValue",
+    )
+    def get_queryset(self):
+        '''Apply search filter to QuerySet'''
+        qs = super(DatatablesView, self).get_queryset()
+        storageMediumID = self.request.GET.get('storageMediumID',None)
+        if storageMediumID:
+            qs = qs.filter(storageMediumID=storageMediumID)
+        return qs
+
 def storageMediumList2(request):
     """
     List storageMedium
@@ -148,12 +126,25 @@ def storageMediumList2(request):
     context['label'] = 'List of storagemedium'
     return render(request, template_name, context)
 
-class storageMediumList3(TemplateView):
-    template_name = 'administration/liststoragemedium3.html'
+class storageMediumList(TemplateView):
+    template_name = 'administration/storagemedium_list.html'
+
+    @method_decorator(permission_required('essarch.list_storageMedium'))
+    def dispatch(self, *args, **kwargs):
+        return super(storageMediumList, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(storageMediumList, self).get_context_data(**kwargs)
+        context['label'] = 'List of storagemedium'
+        #context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
+        #context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
+        #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
+        return context
 
 class storageMediumDatatablesView(DatatablesView):
     model = storageMedium
     fields = (
+        "id",
         "storageMediumID",
         "storageMedium",
         "storageMediumStatus",
@@ -163,57 +154,7 @@ class storageMediumDatatablesView(DatatablesView):
         "storageMediumUsedCapacity",
         "storageMediumMounts",
     )
-    def process_dt_response(self, data):
-        self.form = DatatablesForm(data)
-        if self.form.is_valid():
-            #self.object_list = self.get_queryset().values(*self.get_db_fields())
-            self.object_list = []
-            for obj in self.get_queryset():
-                obj_dict = {}
-                for db_field in self.get_db_fields():
-                    # We need to take special care here to allow get_FOO_display()
-                    # methods on a model to be used if available.
-                    field = obj._meta.get_field(db_field)
-                    display = getattr(obj, 'get_%s_display' % db_field, None)
-                    if field.choices and display:
-                        value = display()
-                    else:
-                        value = getattr(obj, db_field, None)
-                    obj_dict[db_field] = value
-                self.object_list.append(obj_dict)
-            return self.render_to_response(self.form)
-        else:
-            return HttpResponseBadRequest()
     
-    def can_regex(self, field):
-        '''Test if a given field supports regex lookups'''
-        from django.conf import settings
-        if settings.DATABASES['default']['ENGINE'].endswith('sqlite3'):
-            return not isinstance(get_real_field(self.model, field), UNSUPPORTED_REGEX_FIELDS)
-        elif settings.DATABASES['default']['ENGINE'].endswith('mysql'):
-            return not isinstance(get_real_field(self.model, field), UNSUPPORTED_REGEX_FIELDS)
-
-        else:
-            return True
-    
-    def global_search(self, queryset):
-        '''Filter a queryset with global search'''
-        search = self.dt_data['sSearch']
-        if search:
-            if self.dt_data['bRegex']:
-                criterions = [Q(**{'%s__iregex' % field: search}) for field in self.get_db_fields() if self.can_regex(field)]
-                if len(criterions) > 0:
-                    search = reduce(or_, criterions)
-                    queryset = queryset.filter(search)
-            else:
-                for term in search.split():
-                    #criterions = (Q(**{'%s__icontains' % field: term}) for field in self.get_db_fields())
-                    criterions = (Q(**{'%s__icontains' % field: term}) for field in self.get_db_fields() if self.can_regex(field))
-                    search = reduce(or_, criterions)
-                    print search
-                    queryset = queryset.filter(search)
-        return queryset
-
 class storageList(ListView):
     """
     List storage "content"
@@ -232,7 +173,7 @@ class storageList(ListView):
     
 class robotList(ListView):
     model = robot
-    template_name='administration/listrobot.html'
+    template_name='administration/robot_list.html'
     
     @method_decorator(permission_required('essarch.list_robot'))
     def dispatch(self, *args, **kwargs):
@@ -242,12 +183,15 @@ class robotList(ListView):
         context = super(robotList, self).get_context_data(**kwargs)
         context['label'] = 'List of robot content'
         context['admin_user'] = True
+        context['robotreq_list'] = robotQueue.objects.filter(Q(Status__lt=20) | Q(Status=100))   # Status<20
+        context['ReqType_CHOICES'] = dict(RobotReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
 
 class robotReqCreate(CreateView):
-    model = robotreq
-    template_name='administration/create.html'
-    form_class=robotReqQueueForm
+    model = robotQueue
+    template_name='administration/robotreq_form.html'
+    form_class=robotQueueForm
 
     @method_decorator(permission_required('essarch.list_robot'))
     def dispatch(self, *args, **kwargs):
@@ -256,25 +200,86 @@ class robotReqCreate(CreateView):
     def get_initial(self):
         initial = super(robotReqCreate, self).get_initial().copy()
         if 'storageMediumID' in self.kwargs:
-            initial['t_id'] = self.kwargs['storageMediumID']
+            initial['MediumID'] = self.kwargs['storageMediumID']
         if 'command' in self.kwargs:
             command = self.kwargs['command']
             if command == '1':
-                initial['req_type'] = 'Mount'
-                initial['work_uuid'] = 'Manual'
+                initial['ReqType'] = 50
+                initial['ReqUUID'] = 'Manual'
             elif command == '3':
-                initial['req_type'] = 'F_Unmount'
-        initial['job_prio'] = 1
-        initial['status'] = 'pending'
+                initial['ReqType'] = 52
+                initial['ReqUUID'] = 'Manual'
+            initial['Status'] = 0
+        else:
+            initial['ReqType'] = self.request.GET.get('ReqType',1)
+            initial['ReqUUID'] = uuid.uuid1()
+            initial['Status'] = 0
+            initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
+            initial['ais_flag'] = True
         initial['user'] = self.request.user.username
         return initial
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        
+        #self.object.pk = None 
+        #self.object.user = self.request.user.username
+        #self.object.ObjectIdentifierValue = self.obj_list
+        #self.object.ReqUUID = uuid.uuid1()
+        ais_flag = form.cleaned_data.get('ais_flag',False)
+        self.object.save()
+        if not self.object.ReqType in [50,51,52]:
+            req_pk = self.object.pk
+            result = RobotInventoryTask.delay_or_eager(req_pk=req_pk,CentralDB=ais_flag)
+            task_id = result.task_id
+            self.object.task_id = task_id
+            self.object.save()
+        return super(robotReqCreate, self).form_valid(form)
+
+class robotReqDetail(DetailView):
+    """
+    Detail View result
+    """
+    model = robotQueue
+    context_object_name='req'
+    template_name='administration/robotreq_detail.html'
+
+    @method_decorator(permission_required('essarch.list_migrationqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(robotReqDetail, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(robotReqDetail, self).get_context_data(**kwargs)
+        context['label'] = 'Detail information - robot requests'
+        context['ReqType_CHOICES'] = dict(RobotReqType_CHOICES)
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
+        return context
+
+class robotReqUpdate(UpdateView):
+    model = robotQueue
+    template_name='administration/robotreq_update.html'
+    form_class=robotQueueFormUpdate
+    
+    @method_decorator(permission_required('essarch.change_migrationqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(robotReqUpdate, self).dispatch( *args, **kwargs)
+
+class robotReqDelete(DeleteView):
+    model = robotQueue
+    template_name='administration/robotreq_delete.html'
+    context_object_name='req'
+    success_url = reverse_lazy('admin_listrobot')
+
+    @method_decorator(permission_required('essarch.delete_migrationqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(robotReqDelete, self).dispatch( *args, **kwargs)
 
 class robotInventory(DetailView):
     """
     Submit and View result from robot inventory
     """
     #model = ArchiveObject
-    template_name='administration/result_detail.html'
+    template_name='administration/robotinventory_detail.html'
 
     @method_decorator(permission_required('essarch.list_robot'))
     def dispatch(self, *args, **kwargs):
@@ -314,86 +319,29 @@ class robotInventory(DetailView):
         if not status_code:
             status_code = ESSPGM.Robot().GetVolserDB(CentralDB=CentralDB, set_storageMediumLocation=set_storageMediumLocation)
         status_detail = [[],[]]
+        if status_code == 0:
+            status_code = 'OK'
         context['status_code'] = status_code
         context['status_detail'] = status_detail
+        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
     
 
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'
 
+    @method_decorator(permission_required('essarch.list_storageMedium'))
+    def dispatch(self, *args, **kwargs):
+        return super(StorageMaintenance, self).dispatch( *args, **kwargs)
 
-def get_real_field_obj(model, field_name):
-    '''
-    Get the real field from a model given its name.
-
-    Handle nested models recursively (aka. ``__`` lookups)
-    '''
-    parts = field_name.split('__')
-    field = model._meta.get_field(parts[0])
-    if len(parts) == 1:
-        #return model._meta.get_field(field_name)
-        return model, field_name, model._meta.get_field(field_name)
-    elif isinstance(field, models.ForeignKey):
-        return get_real_field_obj(field.rel.to, '__'.join(parts[1:]))
-    #elif isinstance(field, models.related.RelatedObject):
-    #    return get_real_field(field.field.rel.to, '__'.join(parts[1:]))
-    else:
-        raise Exception('Unhandled field: %s' % field_name)
-
-def get_real_field(model, field_name):
-    '''
-    Get the real field from a model given its name.
-
-    Handle nested models recursively (aka. ``__`` lookups)
-    '''
-    parts = field_name.split('__')
-    field = model._meta.get_field_by_name(parts[0])[0]
-    if len(parts) == 1:
-        return model._meta.get_field_by_name(field_name)[0]
-    elif isinstance(field, models.ForeignKey):
-        return get_real_field(field.rel.to, '__'.join(parts[1:]))
-    elif isinstance(field, models.related.RelatedObject):
-        return None
-    else:
-        raise Exception('Unhandled field: %s' % field_name)
+    def get_context_data(self, **kwargs):
+        context = super(StorageMaintenance, self).get_context_data(**kwargs)
+        context['label'] = 'Storage maintenance'
+        return context
     
-def get_field_choices(obj, fields):
-    '''
-    Get the choices for fields.
-
-    Handle nested models recursively (aka. ``__`` lookups)
-    '''
-    field_choices_dict = {}
-    if obj:
-        obj = obj[0]
-        for db_field in fields:
-            field = get_real_field(obj,db_field)
-            field_choices = getattr(field,'choices',None)
-            if field_choices:
-                #print 'found choices: %s' % str(field.choices)
-                field_choices_dict[db_field] = field_choices
-    return field_choices_dict
-
-def get_object_list_display(object_list, field_choices_dict):
-    '''
-    Get object_list_display
-    '''
-    object_list_display = []
-    for obj in object_list:
-        obj_dict_display = {'test':'hej'}
-        for field in obj:
-            if field in field_choices_dict:
-                #print 'field: %s, key: %s' % (field, obj[field])
-                #print 'field_choices_dict: %s' % str(field_choices_dict)
-                obj_dict_display[field] = dict(field_choices_dict[field])[obj[field]]
-            else:
-                obj_dict_display[field] = obj[field]
-        object_list_display.append(obj_dict_display)
-    return object_list_display
-
 class StorageMaintenanceDatatablesView(DatatablesView):
     model = ArchiveObject
+    #queryset = ArchiveObject.objects.filter(StatusProcess=30001).all()
     fields = (
         'ObjectIdentifierValue',
         'ObjectUUID',
@@ -416,68 +364,6 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         'PolicyId__sm_target_4',
     )   
 
-    def process_dt_response(self, data):
-        self.form = DatatablesForm(data)
-        if self.form.is_valid():
-            flush_transaction()
-            self.object_list = self.get_queryset().values(*self.get_db_fields())
-            #print 'get_queryset: %s' % str(self.get_queryset)
-            self.field_choices_dict = get_field_choices(self.get_queryset()[:1], self.get_db_fields())
-            #field_choices_dict={}
-            #print '####################################################################################################################'
-            #print '###object_list: %s, type: %s' % (self.object_list, type(self.object_list))
-            #self.object_list = get_object_list_display(self.object_list, field_choices_dict)
-            #print '********************************************************************************************************************'
-            #print '***object_list: %s, type: %s' % (self.object_list, type(self.object_list))
-            #print 'object_list: %s' % str(object_list)
-            #print 'field_choices_dict: %s' % str(field_choices_dict)
-            #print 'object_list_display: %s' % str(object_list_display)
-            #self.object_list = self.get_queryset().values(*self.get_db_fields())
-            #self.object_list = self.object_list_display
-            return self.render_to_response(self.form)
-        else:
-            return HttpResponseBadRequest()
-    
-    def get_page(self, form):
-        '''Get the requested page'''
-        page_size = form.cleaned_data['iDisplayLength']
-        start_index = form.cleaned_data['iDisplayStart']
-        if page_size == -1:
-            page_size = self.object_list.count()
-            if page_size == 0: page_size = 1
-        paginator = Paginator(self.object_list, page_size)
-        num_page = (start_index / page_size) + 1
-        return paginator.page(num_page)
-    
-    def can_regex(self, field):
-        '''Test if a given field supports regex lookups'''
-        from django.conf import settings
-        if settings.DATABASES['default']['ENGINE'].endswith('sqlite3'):
-            return not isinstance(get_real_field(self.model, field), UNSUPPORTED_REGEX_FIELDS)
-        elif settings.DATABASES['default']['ENGINE'].endswith('mysql'):
-            return not isinstance(get_real_field(self.model, field), UNSUPPORTED_REGEX_FIELDS)
-
-        else:
-            return True
-    
-    def global_search(self, queryset):
-        '''Filter a queryset with global search'''
-        search = self.dt_data['sSearch']
-        if search:
-            if self.dt_data['bRegex']:
-                criterions = [Q(**{'%s__iregex' % field: search}) for field in self.get_db_fields() if self.can_regex(field)]
-                if len(criterions) > 0:
-                    search = reduce(or_, criterions)
-                    queryset = queryset.filter(search)
-            else:
-                for term in search.split():
-                    #criterions = (Q(**{'%s__icontains' % field: term}) for field in self.get_db_fields())
-                    criterions = (Q(**{'%s__icontains' % field: term}) for field in self.get_db_fields() if self.can_regex(field))
-                    search = reduce(or_, criterions)
-                    print search
-                    queryset = queryset.filter(search)
-        return queryset
-
     def sort_col_4(self, direction):
         '''sort for col_5'''
         return ('%sstorage__storageMediumUUID__storageMediumID' % direction, '%sstorage__id' % direction)
@@ -496,72 +382,6 @@ class StorageMaintenanceDatatablesView(DatatablesView):
             search2 = Q(ObjectUUID__in = exclude_list)
             queryset = queryset.exclude(search2)
         return queryset
-
-    def render_to_response(self, form, **kwargs):
-        '''Render Datatables expected JSON format'''
-        page = self.get_page(form)
-        #print 'page_type_object_list: %s' % type(page.object_list)
-        page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
-        data = {
-            'iTotalRecords': page.paginator.count,
-            'iTotalDisplayRecords': page.paginator.count,
-            'sEcho': form.cleaned_data['sEcho'],
-            'aaData': self.get_rows(page.object_list),
-            #'aaData': self.get_rows(object_list),
-        }
-        return self.json_response(data)
-
-class MigrateView(MultipleObjectMixin, View):
-    '''
-    MigrateView
-    '''
-
-    def post(self, request, *args, **kwargs):
-        print request.POST
-        q_dict = request.POST
-        obj_list = q_dict.get('tableData',None)
-        target_medium = q_dict.get('target',None)
-        obj_list = obj_list.split('\r\n')[:-1]
-        #print 'obj_list: %s' % str(obj_list)
-        #print 'target_medium: %s' % target_medium
-        EL_root = etree.Element('needcopies')    
-
-        for obj in obj_list:
-            EL_object = etree.SubElement(EL_root, 'object', attrib={'id':obj,
-                                                                    'target':target_medium,
-                                                                    })
-        doc = etree.ElementTree(element=EL_root, file=None)
-        ESSMD.writeToFile(doc,'/ESSArch/log/needcopies/needcopies.xml')
-
-        data = {
-            'iTotalRecords': 0,
-            'iTotalDisplayRecords': 0,
-            'sEcho': 'test123echo',
-            'aaData': 'testdata',
-        }
-        #return self.process_dt_response(request.POST)
-        return self.json_response(data)
-
-    def get(self, request, *args, **kwargs):
-        print request.GET
-        #return self.process_dt_response(request.GET)
-
-    def render_to_response(self, form, **kwargs):
-        '''Render Datatables expected JSON format'''
-        page = self.get_page(form)
-        data = {
-            'iTotalRecords': page.paginator.count,
-            'iTotalDisplayRecords': page.paginator.count,
-            'sEcho': form.cleaned_data['sEcho'],
-            'aaData': self.get_rows(page.object_list),
-        }
-        return self.json_response(data)
-
-    def json_response(self, data):
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder),
-            mimetype='application/json'
-        )
     
 class MigrationList(ListView):
     """

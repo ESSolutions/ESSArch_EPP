@@ -8,6 +8,24 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Deleting model 'robotreq'
+        db.delete_table('robotreq')
+
+        # Adding model 'robotQueue'
+        db.create_table('robotQueue', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('ReqUUID', self.gf('django.db.models.fields.CharField')(max_length=36)),
+            ('ReqType', self.gf('django.db.models.fields.IntegerField')(null=True)),
+            ('ReqPurpose', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('user', self.gf('django.db.models.fields.CharField')(max_length=45)),
+            ('password', self.gf('django.db.models.fields.CharField')(max_length=45, blank=True)),
+            ('MediumID', self.gf('django.db.models.fields.CharField')(max_length=45)),
+            ('Status', self.gf('django.db.models.fields.IntegerField')(default=0, null=True, blank=True)),
+            ('task_id', self.gf('django.db.models.fields.CharField')(max_length=36, blank=True)),
+            ('posted', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal(u'essarch', ['robotQueue'])
+
         # Adding model 'MigrationQueue'
         db.create_table('MigrationQueue', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -126,6 +144,22 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing index on 'ArchiveObject', fields ['PolicyId']
         db.delete_index('IngestObject', ['PolicyId'])
+
+        # Adding model 'robotreq'
+        db.create_table('robotreq', (
+            ('ReqPurpose', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=10, blank=True)),
+            ('t_id', self.gf('django.db.models.fields.CharField')(max_length=6, blank=True)),
+            ('user', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('req_type', self.gf('django.db.models.fields.CharField')(max_length=10, blank=True)),
+            ('work_uuid', self.gf('django.db.models.fields.CharField')(max_length=36, blank=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('job_prio', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+        ))
+        db.send_create_signal(u'essarch', ['robotreq'])
+
+        # Deleting model 'robotQueue'
+        db.delete_table('robotQueue')
 
         # Deleting model 'MigrationQueue'
         db.delete_table('MigrationQueue')
@@ -534,16 +568,18 @@ class Migration(SchemaMigration):
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             't_id': ('django.db.models.fields.CharField', [], {'max_length': '6'})
         },
-        u'essarch.robotreq': {
-            'Meta': {'object_name': 'robotreq', 'db_table': "'robotreq'"},
+        u'essarch.robotqueue': {
+            'MediumID': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
+            'Meta': {'object_name': 'robotQueue', 'db_table': "'robotQueue'"},
             'ReqPurpose': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'ReqType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
+            'ReqUUID': ('django.db.models.fields.CharField', [], {'max_length': '36'}),
+            'Status': ('django.db.models.fields.IntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'job_prio': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'req_type': ('django.db.models.fields.CharField', [], {'max_length': '10', 'blank': 'True'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10', 'blank': 'True'}),
-            't_id': ('django.db.models.fields.CharField', [], {'max_length': '6', 'blank': 'True'}),
-            'user': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'work_uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'})
+            'password': ('django.db.models.fields.CharField', [], {'max_length': '45', 'blank': 'True'}),
+            'posted': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'task_id': ('django.db.models.fields.CharField', [], {'max_length': '36', 'blank': 'True'}),
+            'user': ('django.db.models.fields.CharField', [], {'max_length': '45'})
         },
         u'essarch.storage': {
             'ExtDBdatetime': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
