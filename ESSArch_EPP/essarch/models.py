@@ -32,8 +32,8 @@ from django.forms.util import flatatt
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from configuration.models import ESSArchPolicy
-import django_tables2 as tables
-from django_tables2.utils import A
+#import django_tables2 as tables
+#from django_tables2.utils import A
 from djcelery.models import TaskMeta
 from picklefield.fields import PickledObjectField
 
@@ -690,21 +690,21 @@ class storageMedium(models.Model):
             ("list_storageMedium", "Can list storageMedium"),
         )
 
-class storageMediumTable(tables.Table):
-    storageMediumUUID = tables.CheckBoxColumn()
-    storageMediumID = tables.LinkColumn('admin_detailstoragemedium',args=[A('pk')],verbose_name="ID")
-    storageMedium = tables.Column(verbose_name="Type")
-    storageMediumStatus = tables.Column(verbose_name="Status")
-    storageMediumDate =  tables.Column(verbose_name="LastUpdate")
-    storageMediumLocation = tables.Column(verbose_name="Location")
-    storageMediumLocationStatus = tables.Column(verbose_name="Location Status")
-    storageMediumUsedCapacity = tables.Column(verbose_name="Used Capacity")
-    storageMediumMounts = tables.Column(verbose_name="Used")
- 
-    class Meta:
-        model = storageMedium
-        attrs = {"class": "paleblue"}
-        fields = ("storageMediumUUID","storageMediumID","storageMedium","storageMediumStatus","storageMediumDate","storageMediumLocation","storageMediumLocationStatus","storageMediumUsedCapacity","storageMediumMounts")
+#class storageMediumTable(tables.Table):
+#    storageMediumUUID = tables.CheckBoxColumn()
+#    storageMediumID = tables.LinkColumn('admin_detailstoragemedium',args=[A('pk')],verbose_name="ID")
+#    storageMedium = tables.Column(verbose_name="Type")
+#    storageMediumStatus = tables.Column(verbose_name="Status")
+#    storageMediumDate =  tables.Column(verbose_name="LastUpdate")
+#    storageMediumLocation = tables.Column(verbose_name="Location")
+#    storageMediumLocationStatus = tables.Column(verbose_name="Location Status")
+#    storageMediumUsedCapacity = tables.Column(verbose_name="Used Capacity")
+#    storageMediumMounts = tables.Column(verbose_name="Used")
+# 
+#    class Meta:
+#        model = storageMedium
+#        attrs = {"class": "paleblue"}
+#        fields = ("storageMediumUUID","storageMediumID","storageMedium","storageMediumStatus","storageMediumDate","storageMediumLocation","storageMediumLocationStatus","storageMediumUsedCapacity","storageMediumMounts")
 
         
 class storage(models.Model):

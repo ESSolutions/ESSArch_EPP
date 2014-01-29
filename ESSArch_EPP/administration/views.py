@@ -30,7 +30,8 @@ from django.shortcuts import render
 from django.db.models import Q
 from operator import or_, and_
 
-from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
+#from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
+from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
                            storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
                            MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate
 
@@ -49,7 +50,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 
-from django_tables2 import RequestConfig
+#from django_tables2 import RequestConfig
 
 from essarch.libs import DatatablesView
 
@@ -113,18 +114,18 @@ class storageDatatablesView(DatatablesView):
             qs = qs.filter(storageMediumID=storageMediumID)
         return qs
 
-def storageMediumList2(request):
-    """
-    List storageMedium
-    """
-    model = storageMedium
-    table = storageMediumTable(model.objects.all())
-    RequestConfig(request).configure(table)
-    template_name='administration/liststoragemedium2.html'
-    context = {}
-    context['table'] = table
-    context['label'] = 'List of storagemedium'
-    return render(request, template_name, context)
+#def storageMediumList2(request):
+#    """
+#    List storageMedium
+#    """
+#    model = storageMedium
+#    table = storageMediumTable(model.objects.all())
+#    RequestConfig(request).configure(table)
+#    template_name='administration/liststoragemedium2.html'
+#    context = {}
+#    context['table'] = table
+#    context['label'] = 'List of storagemedium'
+#    return render(request, template_name, context)
 
 class storageMediumList(TemplateView):
     template_name = 'administration/storagemedium_list.html'

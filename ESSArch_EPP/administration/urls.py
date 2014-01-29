@@ -31,7 +31,7 @@ from views import (
     storageMediumDatatablesView,
     storageMediumDetail,
     storageDatatablesView,  
-    storageMediumList2, 
+    #storageMediumList2, 
     storageMediumList3,  
     storageList, 
     robotList, 
