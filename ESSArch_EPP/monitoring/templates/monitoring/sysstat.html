@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+
+{% block app-extrahead %}
+	<meta http-equiv="refresh" content="60" > 
+{% endblock %}
+
+{% block container %}
+<div class="row">
+    <div class="span12">
+   		<h2>{{ essarch_info }} - Status <span style="font-size: small;">at {{ time_checked|date:"Y-m-d H:i"}}</span></h2>
+    </div>
+    <div class="span6">
+        <h2>Processes:</h2>
+        {% if process %}
+       	    {% for proc in process %}
+                <p {% if proc.alarm = 1 or proc.Status = "0" %}class="highlight"{% elif proc.alarm = 0 %}class="highlight-green"{% endif %}>{{ proc.Name }}: {{ proc.Status }}</p>
+            {% endfor %}
+        {% endif %}
+        <h2>Proc logfile alarms:</h2>
+        {% if proc_alarm %}
+       	    {% for proc in proc_alarm %}
+                <p {% if proc.alarm = 1 %}class="highlight"{% elif proc.alarm = 0 %}class="highlight-green"{% endif %}>{{ proc.alarm_sub }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight-green">None</p>
+        {% endif %}
+
+    </div>
+    <div class="span6">
+		<h2>Storage media overview</h2>    	        
+        <h4>Archive tapes online:</h4>
+        {% if media_arch %}
+       	    {% for ms in media_arch %}
+                <p>{{ ms }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight-green">None</p>
+        {% endif %}
+        
+        <h4>Add new tapes starting with:</h4>
+        {% if media_add %}
+       	    {% for ms in media_add %}
+                <p class="highlight">{{ ms }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight-green">None</p>
+        {% endif %}
+        
+        <h4>Write tapes:</h4>
+        {% if media_write %}
+       	    {% for ms in media_write %}
+                <p class="highlight-green">{{ ms }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight-green">None</p>
+        {% endif %}
+
+        <h4>Empty tapes:</h4>
+        {% if media_empty %}
+       	    {% for ms in media_empty %}
+                <p class="highlight-green">{{ ms }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight">None</p>
+        {% endif %}
+
+        <h4>Error tapes:</h4>
+        {% if media_error %}
+       	    {% for ms in media_error %}
+                <p class="highlight">{{ ms }}</p>
+            {% endfor %}
+        {% else %}
+        	<p class="highlight-green">None</p>
+        {% endif %}        
+        
+    </div>
+</div>
+{% endblock %}
+

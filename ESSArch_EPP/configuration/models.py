@@ -30,6 +30,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 from django.db import models
 from django.contrib import admin
+from picklefield.fields import PickledObjectField
 
 import datetime
 import sys
@@ -312,6 +313,17 @@ class ESSArchPolicy(models.Model):
         db_table = 'ESSArchPolicy'
         verbose_name = 'Archive policy'
 
+class sm(object):
+    id                  = 0
+    type                = 200
+    format              = 103
+    blocksize           = 1024
+    maxCapacity         = 0
+    minChunkSize        = 0
+    minContainerSize    = 0
+    minCapacityWarning  = 0
+    target              = ''
+
 class ESSConfig(models.Model):
     Name = models.CharField(max_length=60)
     Value = models.CharField(max_length=70,blank=True)
@@ -324,11 +336,15 @@ class ESSProc(models.Model):
     Name = models.CharField(max_length=45)
     Path = models.CharField(max_length=60)
     LogFile = models.CharField(max_length=60)
+    expected_pids = models.IntegerField(default=1)
     Time = models.CharField(max_length=4)
     Status = models.CharField(max_length=10)
     Run = models.CharField(max_length=10)
     PID = models.IntegerField()
+    child_pids = PickledObjectField(null=True)
     Pause = models.IntegerField()
+    checked = models.DateTimeField(default='2014-01-01 00:01')
+    alarm = models.IntegerField(default=0)
     class Meta:
         db_table = 'ESSProc'
         verbose_name = 'Worker processes (core)'

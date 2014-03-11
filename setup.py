@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB
+    Copyright (C) 2010-2014  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,18 +33,22 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-setup(
-    name='ESSArch-GUI',
-    version=__version__,
-    description='ESSArch GUI',
-    author='Henrik Ek',
-    author_email='henrik@essolutions.se',
-    url='http://www.essolutions.se',
-    install_requires=[
-        "lxml>=2.2.8",
-        "pytz>=2010o",
-    ],
-    packages=find_packages(),
-    include_package_data=True,
-    zip_safe=False,
-)
+__shortname__ = 'EPP'
+__description__ = 'ESSArch Preservation Platform'
+
+if __name__ == '__main__':
+    setup(
+        name='EPP',
+        version=__version__,
+        description='ESSArch Preservation Platform',
+        author='Henrik Ek',
+        author_email='henrik@essolutions.se',
+        url='http://www.essolutions.se',
+        install_requires=[
+            "lxml>=2.2.8",
+            "pytz>=2010o",
+        ],
+        packages=find_packages(),
+        include_package_data=True,
+        zip_safe=False,
+    )

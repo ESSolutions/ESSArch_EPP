@@ -34,7 +34,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Standard URLS:
-    url(r'^$', 'configuration.views.index', name='home'),
+    #url(r'^$', 'configuration.views.index', name='home'),
+    url(r'^$', 'monitoring.views.sysstat', name='home'),
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
@@ -52,6 +53,7 @@ urlpatterns = patterns('',
     #(r'^grappelli/', include('grappelli.urls')),
     url(r'^js/', include('djangojs.urls')),
     url(r'^task/', include('djcelery.urls')),
+    url(r'^monitoring/', include('monitoring.urls')),
 
     # StorageLogistics_ws URLS:
     url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),

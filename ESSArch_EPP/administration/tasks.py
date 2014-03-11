@@ -468,7 +468,10 @@ class RobotInventoryTask(JobtasticTask):
                 robot_obj.t_id = rs.volume_id
                 robot_obj.drive_id = '99'    
                 if TapeExistFlag:
-                    robot_obj.status = 'ArchTape'
+                    if storageMedium_objs[0].storageMediumStatus == 20:
+                        robot_obj.status = 'WriteTape'
+                    else:
+                        robot_obj.status = 'ArchTape'
                     timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                     timestamp_dst = timestamp_utc.astimezone(self.tz)
                     if ExtDBupdate == 1:
@@ -564,13 +567,13 @@ class RobotInventoryTask(JobtasticTask):
                             robot_slot_list.append(robot_slot_obj)
                         else:                                               #If robot slot is Import/Export slot (Not used)
                             e_el = re_word.split(result_row)
-                            logger.debug('Export/Import Element: %s' % e_el)
+                            logger.info('Export/Import Element: %s' % e_el)
                             robot_export_obj = robot_export()
-                            robot_export_obj.slot_id = s_el[3]
-                            robot_export_obj.status = s_el[6]
+                            robot_export_obj.slot_id = e_el[3]
+                            robot_export_obj.status = e_el[6]
                             if robot_export_obj.status == 'Full':
-                                robot_export_obj.volume_id = s_el[8][:6]
-                                robot_export_obj.volume_ver = s_el[8][6:]
+                                robot_export_obj.volume_id = e_el[8][:6]
+                                robot_export_obj.volume_ver = e_el[8][6:]
                             robot_export_list.append(robot_export_obj)
                     result_row = ''
                     continue

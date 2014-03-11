@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
             ('ReqPurpose', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('user', self.gf('django.db.models.fields.CharField')(max_length=45)),
             ('password', self.gf('django.db.models.fields.CharField')(max_length=45, blank=True)),
-            ('MediumID', self.gf('django.db.models.fields.CharField')(max_length=45)),
+            ('MediumID', self.gf('django.db.models.fields.CharField')(max_length=45, blank=True)),
             ('Status', self.gf('django.db.models.fields.IntegerField')(default=0, null=True, blank=True)),
             ('task_id', self.gf('django.db.models.fields.CharField')(max_length=36, blank=True)),
             ('posted', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -44,96 +44,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'essarch', ['MigrationQueue'])
 
-
-        # Changing field 'ArchiveObjectMetadata.ObjectMetadataBLOB'
-        db.alter_column('IngestObjectMetadata', 'ObjectMetadataBLOB', self.gf('django.db.models.fields.TextField')(null=True))
-
-        # Changing field 'IOqueue.sm_list'
-        db.alter_column('IOqueue', 'sm_list', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'IOqueue.storageMediumID'
-        db.alter_column('IOqueue', 'storageMediumID', self.gf('django.db.models.fields.CharField')(max_length=45, null=True))
-
-        # Changing field 'IOqueue.ObjectPath'
-        db.alter_column('IOqueue', 'ObjectPath', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'IOqueue.ObjectMessageDigest'
-        db.alter_column('IOqueue', 'ObjectMessageDigest', self.gf('django.db.models.fields.CharField')(max_length=128, null=True))
-
-        # Changing field 'IOqueue.ObjectIdentifierValue'
-        db.alter_column('IOqueue', 'ObjectIdentifierValue', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'IOqueue.storageMediumLocation'
-        db.alter_column('IOqueue', 'storageMediumLocation', self.gf('django.db.models.fields.CharField')(max_length=45, null=True))
-
-        # Changing field 'IOqueue.t_prefix'
-        db.alter_column('IOqueue', 't_prefix', self.gf('django.db.models.fields.CharField')(max_length=6, null=True))
-
-        # Changing field 'IOqueue.work_uuid'
-        db.alter_column('IOqueue', 'work_uuid', self.gf('django.db.models.fields.CharField')(max_length=36, null=True))
-
-        # Changing field 'ESSReg001.s018'
-        db.alter_column('ESSReg001', 's018', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s019'
-        db.alter_column('ESSReg001', 's019', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s012'
-        db.alter_column('ESSReg001', 's012', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s013'
-        db.alter_column('ESSReg001', 's013', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s010'
-        db.alter_column('ESSReg001', 's010', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s011'
-        db.alter_column('ESSReg001', 's011', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s016'
-        db.alter_column('ESSReg001', 's016', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s017'
-        db.alter_column('ESSReg001', 's017', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s014'
-        db.alter_column('ESSReg001', 's014', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s015'
-        db.alter_column('ESSReg001', 's015', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s005'
-        db.alter_column('ESSReg001', 's005', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s004'
-        db.alter_column('ESSReg001', 's004', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s007'
-        db.alter_column('ESSReg001', 's007', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s006'
-        db.alter_column('ESSReg001', 's006', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s001'
-        db.alter_column('ESSReg001', 's001', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s000'
-        db.alter_column('ESSReg001', 's000', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s003'
-        db.alter_column('ESSReg001', 's003', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s002'
-        db.alter_column('ESSReg001', 's002', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s009'
-        db.alter_column('ESSReg001', 's009', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'ESSReg001.s008'
-        db.alter_column('ESSReg001', 's008', self.gf('django.db.models.fields.CharField')(max_length=255, null=True))
-
-        # Changing field 'storageMedium.storageMediumLocation'
-        db.alter_column('storageMedium', 'storageMediumLocation', self.gf('django.db.models.fields.CharField')(max_length=45, null=True))
 
         # Changing field 'ArchiveObject.PolicyId'
         db.alter_column('IngestObject', 'PolicyId', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['configuration.ESSArchPolicy'], to_field='PolicyID', db_column='PolicyId'))
@@ -164,96 +74,6 @@ class Migration(SchemaMigration):
         # Deleting model 'MigrationQueue'
         db.delete_table('MigrationQueue')
 
-
-        # Changing field 'ArchiveObjectMetadata.ObjectMetadataBLOB'
-        db.alter_column('IngestObjectMetadata', 'ObjectMetadataBLOB', self.gf('django.db.models.fields.TextField')(default=''))
-
-        # Changing field 'IOqueue.sm_list'
-        db.alter_column('IOqueue', 'sm_list', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'IOqueue.storageMediumID'
-        db.alter_column('IOqueue', 'storageMediumID', self.gf('django.db.models.fields.CharField')(default='', max_length=45))
-
-        # Changing field 'IOqueue.ObjectPath'
-        db.alter_column('IOqueue', 'ObjectPath', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'IOqueue.ObjectMessageDigest'
-        db.alter_column('IOqueue', 'ObjectMessageDigest', self.gf('django.db.models.fields.CharField')(default='', max_length=128))
-
-        # Changing field 'IOqueue.ObjectIdentifierValue'
-        db.alter_column('IOqueue', 'ObjectIdentifierValue', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'IOqueue.storageMediumLocation'
-        db.alter_column('IOqueue', 'storageMediumLocation', self.gf('django.db.models.fields.CharField')(default='', max_length=45))
-
-        # Changing field 'IOqueue.t_prefix'
-        db.alter_column('IOqueue', 't_prefix', self.gf('django.db.models.fields.CharField')(default='', max_length=6))
-
-        # Changing field 'IOqueue.work_uuid'
-        db.alter_column('IOqueue', 'work_uuid', self.gf('django.db.models.fields.CharField')(default='', max_length=36))
-
-        # Changing field 'ESSReg001.s018'
-        db.alter_column('ESSReg001', 's018', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s019'
-        db.alter_column('ESSReg001', 's019', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s012'
-        db.alter_column('ESSReg001', 's012', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s013'
-        db.alter_column('ESSReg001', 's013', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s010'
-        db.alter_column('ESSReg001', 's010', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s011'
-        db.alter_column('ESSReg001', 's011', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s016'
-        db.alter_column('ESSReg001', 's016', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s017'
-        db.alter_column('ESSReg001', 's017', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s014'
-        db.alter_column('ESSReg001', 's014', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s015'
-        db.alter_column('ESSReg001', 's015', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s005'
-        db.alter_column('ESSReg001', 's005', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s004'
-        db.alter_column('ESSReg001', 's004', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s007'
-        db.alter_column('ESSReg001', 's007', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s006'
-        db.alter_column('ESSReg001', 's006', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s001'
-        db.alter_column('ESSReg001', 's001', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s000'
-        db.alter_column('ESSReg001', 's000', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s003'
-        db.alter_column('ESSReg001', 's003', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s002'
-        db.alter_column('ESSReg001', 's002', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s009'
-        db.alter_column('ESSReg001', 's009', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'ESSReg001.s008'
-        db.alter_column('ESSReg001', 's008', self.gf('django.db.models.fields.CharField')(default='', max_length=255))
-
-        # Changing field 'storageMedium.storageMediumLocation'
-        db.alter_column('storageMedium', 'storageMediumLocation', self.gf('django.db.models.fields.CharField')(default='', max_length=45))
 
         # Changing field 'ArchiveObject.PolicyId'
         db.alter_column('IngestObject', 'PolicyId', self.gf('django.db.models.fields.IntegerField')(null=True))
@@ -390,7 +210,7 @@ class Migration(SchemaMigration):
             'LocalDBdatetime': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'Meta': {'object_name': 'ArchiveObjectMetadata', 'db_table': "'IngestObjectMetadata'"},
             'ObjectIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'ObjectMetadataBLOB': ('django.db.models.fields.TextField', [], {'default': "''", 'null': 'True'}),
+            'ObjectMetadataBLOB': ('django.db.models.fields.TextField', [], {}),
             'ObjectMetadataServer': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'ObjectMetadataType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'ObjectMetadataURL': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
@@ -440,26 +260,26 @@ class Migration(SchemaMigration):
             'i018': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'i019': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            's000': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's001': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's002': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's003': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's004': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's005': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's006': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's007': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's008': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's009': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's010': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's011': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's012': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's013': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's014': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's015': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's016': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's017': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's018': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            's019': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'})
+            's000': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's001': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's002': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's003': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's004': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's005': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's006': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's007': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's008': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's009': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's010': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's011': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's012': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's013': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's014': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's015': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's016': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's017': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's018': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            's019': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         u'essarch.eventidentifier': {
             'Meta': {'object_name': 'eventIdentifier', 'db_table': "'eventIdentifier'"},
@@ -498,9 +318,9 @@ class Migration(SchemaMigration):
         },
         u'essarch.ioqueue': {
             'Meta': {'object_name': 'IOqueue', 'db_table': "'IOqueue'"},
-            'ObjectIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
-            'ObjectMessageDigest': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True'}),
-            'ObjectPath': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
+            'ObjectIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'ObjectMessageDigest': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
+            'ObjectPath': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'Status': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'WriteSize': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'cmd': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
@@ -508,14 +328,14 @@ class Migration(SchemaMigration):
             'contentLocationValue': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'sm_list': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
+            'sm_list': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'storageMedium': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumBlockSize': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumFormat': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'storageMediumID': ('django.db.models.fields.CharField', [], {'max_length': '45', 'null': 'True'}),
-            'storageMediumLocation': ('django.db.models.fields.CharField', [], {'max_length': '45', 'null': 'True'}),
-            't_prefix': ('django.db.models.fields.CharField', [], {'max_length': '6', 'null': 'True'}),
-            'work_uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'null': 'True'})
+            'storageMediumID': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
+            'storageMediumLocation': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
+            't_prefix': ('django.db.models.fields.CharField', [], {'max_length': '6'}),
+            'work_uuid': ('django.db.models.fields.CharField', [], {'max_length': '36'})
         },
         u'essarch.migrationqueue': {
             'CopyPath': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
@@ -569,7 +389,7 @@ class Migration(SchemaMigration):
             't_id': ('django.db.models.fields.CharField', [], {'max_length': '6'})
         },
         u'essarch.robotqueue': {
-            'MediumID': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
+            'MediumID': ('django.db.models.fields.CharField', [], {'max_length': '45', 'blank': 'True'}),
             'Meta': {'object_name': 'robotQueue', 'db_table': "'robotQueue'"},
             'ReqPurpose': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'ReqType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
@@ -607,7 +427,7 @@ class Migration(SchemaMigration):
             'storageMediumDate': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'storageMediumFormat': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumID': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '45'}),
-            'storageMediumLocation': ('django.db.models.fields.CharField', [], {'max_length': '45', 'null': 'True'}),
+            'storageMediumLocation': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'storageMediumLocationStatus': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumMounts': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumStatus': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),

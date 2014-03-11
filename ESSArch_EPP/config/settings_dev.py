@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''
     ESSArch - ESSArch is an Electronic Archive system
     Copyright (C) 2010-2013  ES Solutions AB
@@ -23,19 +24,23 @@ __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
 __author__ = "$Author$"
-import re
+import re, os
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 #############################################################################
 # Settings for ESSArch Preservation Platform.
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = False
+
+SITE_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..').replace('\\', '/')
 
 ALLOWED_HOSTS = ['*']
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
+    ('Henrik', 'henrik@essolutions.se'),
 )
 
 MANAGERS = ADMINS
@@ -57,10 +62,15 @@ DATABASES = {
 }
 
 # Email configuration
-EMAIL_HOST = 'localhost'
+#EMAIL_HOST = 'localhost'
+EMAIL_HOST = '192.168.0.51'
 EMAIL_PORT = 25
 SERVER_EMAIL = 'ESSArch@localhost' # from
-DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
+#SERVER_EMAIL = 'ESSArch@essolutions.se' # from
+#DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
+DEFAULT_FROM_EMAIL = 'ESSArch_Default@essolutions.se'
+#EMAIL_USE_TLS = True
+EMAIL_SUBJECT_PREFIX = "[ESSArch] "
 
 # django-log-files-viewer
 #LOG_FILES_DIR = '/ESSArch/log'
@@ -101,8 +111,10 @@ TIME_ZONE = 'Europe/Stockholm'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-#LANGUAGE_CODE = 'sv-SE'
-#LANGUAGE_CODE = 'no-nyn'
+#LANGUAGE_CODE = 'en'    #English
+#LANGUAGE_CODE = 'sv'    #Swedish
+#LANGUAGE_CODE = 'nn'    #Norwegian Nynorsk
+#LANGUAGE_CODE = 'nb'    #Norwegian Bokmal
 
 SITE_ID = 1
 
@@ -119,7 +131,8 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/ESSArch/app/test/media'
+#MEDIA_ROOT = '/ESSArch/app/test/media'
+MEDIA_ROOT = os.path.join(SITE_ROOT, 'assets')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -131,7 +144,8 @@ MEDIA_URL = ''
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 #STATIC_ROOT = '/ESSArch/app/static_root'
-STATIC_ROOT = '/home/henrik/workspace/ESSArch_Django/static_root'
+#STATIC_ROOT = '/home/henrik/workspace/ESSArch_Django/static_root'
+STATIC_ROOT = os.path.join(SITE_ROOT, 'static_root')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -148,7 +162,8 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #"/ESSArch/app/static",
-    "/home/henrik/workspace/ESSArch_Django/static",
+    #"/home/henrik/workspace/ESSArch_Django/static",
+    os.path.join(SITE_ROOT, 'static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -179,7 +194,6 @@ MIDDLEWARE_CLASSES = (
     #'djangomako.middleware.MakoMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -203,7 +217,8 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #"/ESSArch/app/templates",
-    "/home/henrik/workspace/ESSArch_Django/templates"
+    #"/home/henrik/workspace/ESSArch_Django/templates"
+    os.path.join(SITE_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
@@ -230,6 +245,7 @@ INSTALLED_APPS = (
     'administration',
     'reports',
     'django-log-file-viewer',
+    'monitoring',
 )
 
 import djcelery
@@ -237,6 +253,34 @@ djcelery.setup_loader()
 
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
+
+from celery.schedules import crontab
+from datetime import timedelta
+
+CELERYBEAT_SCHEDULE = {
+    "CheckProcesses-every-30-seconds": {
+        "task": "monitoring.tasks.CheckProcessTask",
+        "schedule": timedelta(seconds=30),
+        "kwargs": {
+                'process_list':["/ESSArch/bin/IOEngine.pyc", "/ESSArch/bin/FTPServer.pyc", "/ESSArch/bin/AccessEngine.pyc","/ESSArch/bin/ESSlogging.pyc", "/ESSArch/bin/db_sync_ais.pyc", "/ESSArch/bin/TLD.pyc", "/ESSArch/bin/AIPPurge.pyc", "/ESSArch/bin/AIPWriter.pyc", "/ESSArch/bin/SIPRemove.pyc", "/ESSArch/bin/AIPValidate.pyc", "/ESSArch/bin/AIPChecksum.pyc", "/ESSArch/bin/AIPCreator.pyc","/ESSArch/bin/SIPValidateFormat.pyc","/ESSArch/bin/SIPValidateApproval.pyc","/ESSArch/bin/SIPValidateAIS.pyc","/ESSArch/bin/SIPReceiver.pyc"],
+        }
+    },
+    "CheckProcFiles-every-60-seconds": {
+        "task": "monitoring.tasks.CheckProcFilesTask",
+        "schedule": timedelta(seconds=60),
+        "kwargs": {
+                'proc_log_path':"/ESSArch/log/proc",
+        }
+    },
+    "CheckStorageMediums-everyday-07:00": {
+        "task": "monitoring.tasks.CheckStorageMediumsTask",
+        "schedule": crontab(hour=7,minute=0),
+        "kwargs": {
+                'email':"admin",
+        }
+    },
+}
 
 # Logging configuration.
 LOGGING = {
@@ -334,6 +378,20 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 1000,
         },
+        'log_file_monitoring': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/monitoring.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
+        'dblog': {
+            'level': 'INFO',
+            # Reference to handler in log.py below
+            'class': 'monitoring.log.DbLogHandler',
+        },
     },
     'loggers': {
         'django': {
@@ -374,6 +432,16 @@ LOGGING = {
         'essarch.administration': {
             'level': 'INFO',
             'handlers': ['log_file_administration'],
+            'propagate': True,
+        },
+        'essarch.monitoring': {
+            'level': 'INFO',
+            'handlers': ['log_file_monitoring'],
+            'propagate': True,
+        },
+        'essarch.dblog': {
+            'level': 'ERROR',
+            'handlers': ['dblog'],
             'propagate': True,
         },
     },

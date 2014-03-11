@@ -76,6 +76,8 @@
 	});
 </script>
 -->
+
+	{% block app-extrahead %}{% endblock %}
 {% endblock %}
 
 
@@ -129,7 +131,6 @@
 			  <li><a href="{% url 'controlarea_diffcheck_list' %}">{% trans 'DiffCheck' %}</a></li>
 			  <li><a href="{% url 'controlarea_preserveip_list' %}">{% trans 'Preserve Information Package' %}</a></li>
 			  <li><a href="{% url 'controlarea_deleteip_list' %}">{% trans 'Delete IP in Controlarea' %}</a></li>
-			  {#}<li><a href="/controlarea/list">{% trans 'ValidateIP' %}</a></li>#}
 			</ul>
 	    </li>
 
@@ -169,7 +170,7 @@
 	    	</ul>
 		</li>
 
-      	{% if user.is_staff %}  
+      	{% if user.is_staff %}
 		<li> 
 			<a href="/admin">MANAGEMENT</a>
 	    	<ul>
@@ -186,6 +187,12 @@
 	    	</ul>
 		</li>
       	{% endif %}
+		<li> 
+			<a href="#vertical">HELP</a>
+	    	<ul>
+	    		<li><a href="{% url 'monitoring_sysinfo' %}">{% trans 'System information' %}</a></li>
+	    	</ul>
+		</li>
     </ul>
   </div>
 {% endblock %}

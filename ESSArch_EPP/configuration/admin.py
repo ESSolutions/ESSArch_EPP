@@ -218,8 +218,8 @@ admin.site.register(ESSConfig, ESSConfigAdmin)
 
 # ESSProc (core)
 class ESSProcAdmin( admin.ModelAdmin ):
-    list_display = ( 'Name', 'Status', 'Run', 'PID', 'Pause' )
+    list_display = ( 'Name', 'PID', 'child_pids', 'expected_pids', 'Status', 'Run' , 'Pause','alarm')
     readonly_fields = ('Name',)
-    fields = ('Name', 'Path', 'LogFile', 'Time', 'Status', 'Run', 'PID', 'Pause')
+    fields = ('Name', 'Path', 'LogFile', 'Time', 'PID', 'expected_pids', 'Status', 'Run', 'Pause','alarm')
 
 admin.site.register(ESSProc, ESSProcAdmin)

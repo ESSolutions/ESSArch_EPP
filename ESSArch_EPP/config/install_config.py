@@ -443,6 +443,7 @@ def installdefaultESSConfig(): # default ESSConfig
                     (u'OS',u'FEDORA'),
                     (u'smtp_server',u''),
                     (u'email_from',u'e-archive@essarch.org'),
+                    (u'monitoring_email',u''),
     )
 
     for row in ESSConfig_list:

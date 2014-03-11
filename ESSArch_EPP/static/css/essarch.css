@@ -19,7 +19,7 @@ body {
 .site-name {
 	display: inline; 
 	font-weight: bold;
-		font-size: 25px;
+	font-size: 25px;
 	margin-left: 15px;
 	position: relative;
 	font-family: Verdana, Tahoma;
@@ -58,7 +58,16 @@ body {
 
 /* Text */
 .required:after { 
-	content:" *";color:red 
+	content:" *";
+	color:red 
+}
+.highlight {
+	background-color:maroon;
+	color:white;
+}
+.highlight-green {
+	background-color:green;
+	color:white;
 }
 
 
