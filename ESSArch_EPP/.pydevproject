@@ -10,7 +10,6 @@
 </pydev_variables_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/ESSArch_Django</path>
-<path>/${PROJECT_DIR_NAME}/src</path>
 </pydev_pathproperty>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
 <path>/home/henrik/workspace/ESSArch_Process/src</path>
