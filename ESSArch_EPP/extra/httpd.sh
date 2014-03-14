@@ -12,7 +12,7 @@
 . /etc/rc.d/init.d/functions 	#SUSE11 comment out the this row
 
 
-Start httpd in the en_US.UTF-8 locale by default.
+# Start httpd in the en_US.UTF-8 locale by default.
 HTTPD_LANG=en_US.UTF-8
 
 # This will prevent initlog from swallowing up a pass-phrase prompt if

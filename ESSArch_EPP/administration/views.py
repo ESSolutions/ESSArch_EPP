@@ -194,7 +194,7 @@ class robotReqCreate(CreateView):
     template_name='administration/robotreq_form.html'
     form_class=robotQueueForm
 
-    @method_decorator(permission_required('essarch.list_robot'))
+    @method_decorator(permission_required('essarch.add_robot'))
     def dispatch(self, *args, **kwargs):
         return super(robotReqCreate, self).dispatch( *args, **kwargs)
     
@@ -245,7 +245,7 @@ class robotReqDetail(DetailView):
     context_object_name='req'
     template_name='administration/robotreq_detail.html'
 
-    @method_decorator(permission_required('essarch.list_migrationqueue'))
+    @method_decorator(permission_required('essarch.list_robot'))
     def dispatch(self, *args, **kwargs):
         return super(robotReqDetail, self).dispatch( *args, **kwargs)
 
@@ -261,7 +261,7 @@ class robotReqUpdate(UpdateView):
     template_name='administration/robotreq_update.html'
     form_class=robotQueueFormUpdate
     
-    @method_decorator(permission_required('essarch.change_migrationqueue'))
+    @method_decorator(permission_required('essarch.change_robot'))
     def dispatch(self, *args, **kwargs):
         return super(robotReqUpdate, self).dispatch( *args, **kwargs)
 
@@ -271,7 +271,7 @@ class robotReqDelete(DeleteView):
     context_object_name='req'
     success_url = reverse_lazy('admin_listrobot')
 
-    @method_decorator(permission_required('essarch.delete_migrationqueue'))
+    @method_decorator(permission_required('essarch.delete_delete'))
     def dispatch(self, *args, **kwargs):
         return super(robotReqDelete, self).dispatch( *args, **kwargs)
 

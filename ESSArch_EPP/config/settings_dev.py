@@ -40,7 +40,7 @@ ALLOWED_HOSTS = ['*']
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
-    ('Henrik', 'henrik@essolutions.se'),
+    # ('Henrik', 'henrik@essolutions.se'),
 )
 
 MANAGERS = ADMINS
@@ -62,13 +62,13 @@ DATABASES = {
 }
 
 # Email configuration
-#EMAIL_HOST = 'localhost'
-EMAIL_HOST = '192.168.0.51'
+EMAIL_HOST = 'localhost'
+#EMAIL_HOST = '192.168.0.51'
 EMAIL_PORT = 25
 SERVER_EMAIL = 'ESSArch@localhost' # from
 #SERVER_EMAIL = 'ESSArch@essolutions.se' # from
 #DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
-DEFAULT_FROM_EMAIL = 'ESSArch_Default@essolutions.se'
+#DEFAULT_FROM_EMAIL = 'ESSArch_Default@essolutions.se'
 #EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = "[ESSArch] "
 
@@ -244,7 +244,7 @@ INSTALLED_APPS = (
     'ingest',
     'administration',
     'reports',
-    'django-log-file-viewer',
+    'logfileviewer',
     'monitoring',
 )
 

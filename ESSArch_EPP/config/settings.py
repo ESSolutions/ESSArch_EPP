@@ -63,7 +63,7 @@ DATABASES = {
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25
 SERVER_EMAIL = 'ESSArch@localhost' # from
-DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
+#DEFAULT_FROM_EMAIL = 'ESSArch_Default@localhost'
 EMAIL_SUBJECT_PREFIX = "[ESSArch] "
 
 # Local time zone for this installation. Choices can be found here:
@@ -197,7 +197,7 @@ INSTALLED_APPS = (
     'ingest',
     'administration',
     'reports',
-    'django-log-file-viewer',
+    'logfileviewer',
     'monitoring',
 )
 

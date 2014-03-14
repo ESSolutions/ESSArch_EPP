@@ -74,23 +74,30 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list.exclude(codename__in=exclude_for_user):
         usergroup.permissions.add(permission_obj)
 
-    ct_essarch_robot = ContentType.objects.get(app_label='essarch', model='robot')
-    permission_list = ['list_robot']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_robot).all()
+
+    # robot permissions
+    permission_list = ['add_robot','change_robot','delete_robot','list_robot']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='robot').all()
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
 
-    ct_essarch_storage = ContentType.objects.get(app_label='essarch', model='storage')
-    permission_list = ['list_storage']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_storage).all()
+    # storage permissions
+    permission_list = ['add_storage','change_storage','delete_storage','list_storage']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='storage').all()
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
 
-    ct_essarch_storageMedium = ContentType.objects.get(app_label='essarch', model='storageMedium')
-    permission_list = ['list_storageMedium']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_storageMedium).all()
+    # storageMedium permissions
+    permission_list = ['add_storageMedium','change_storageMedium','delete_storageMedium','list_storageMedium']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='storageMedium').all()
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
@@ -170,17 +177,78 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
 
-    ct_configuration_essconfig = ContentType.objects.get(app_label='configuration', model='essconfig')
+    # essconfig permissions
     permission_list = ['add_essconfig','change_essconfig','delete_essconfig']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_essconfig).all()
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='essconfig').all()
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
 
-    ct_configuration_essproc = ContentType.objects.get(app_label='configuration', model='essproc')
+
+    # essproc permissions
     permission_list = ['add_essproc','change_essproc','delete_essproc']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_essproc).all()
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='essproc').all()
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
+
+    # monitoring permissions
+    permission_list = ['add_monitoringobject','change_monitoringobject','delete_monitoringobject','list_monitoringobject']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='monitoring', 
+                                                    content_type__model='monitoringobject').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    
+    permission_list = ['add_log','change_log','delete_log']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='monitoring', 
+                                                    content_type__model='log').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+    
+
+    # djcelery permissions
+    permission_list = ['add_intervalschedule','change_intervalschedule','delete_intervalschedule']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='intervalschedule').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    permission_list = ['add_crontabschedule','change_crontabschedule','delete_crontabschedule']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='crontabschedule').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    permission_list = ['add_periodictask','change_','delete_periodictask']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='periodictask').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # logfileviewer permissions
+    permission_list = ['add_intervalschedule','change_intervalschedule','delete_intervalschedule']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='logfileviewer', 
+                                                    content_type__model='logfile').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # migrationqueue permissions
+    permission_list = ['add_migrationqueue','change_migrationqueue','delete_migrationqueue','list_migrationqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='migrationqueue').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
 
     try:
         myuser = User.objects.get(username='admin')
@@ -443,7 +511,6 @@ def installdefaultESSConfig(): # default ESSConfig
                     (u'OS',u'FEDORA'),
                     (u'smtp_server',u''),
                     (u'email_from',u'e-archive@essarch.org'),
-                    (u'monitoring_email',u''),
     )
 
     for row in ESSConfig_list:
@@ -630,22 +697,22 @@ def installdefaultESSArchPolicy(): # default ESSArchPolicy
 
 def installdefaultESSProc(): # default ESSProc
 
-    ESSProc_list=(('1','SIPReceiver','/ESSArch/bin/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',30,0,0,0,0),
-                   ('3','SIPValidateAIS','/ESSArch/bin/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',5,0,0,0,0),
-                   ('4','SIPValidateApproval','/ESSArch/bin/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',5,0,0,0,0),
-                   ('5','SIPValidateFormat','/ESSArch/bin/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',5,0,0,0,0),
-                   ('6','AIPCreator','/ESSArch/bin/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',5,0,0,0,0),
-                   ('7','AIPChecksum','/ESSArch/bin/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',5,0,0,0,0),
-                   ('8','AIPValidate','/ESSArch/bin/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',5,0,0,0,0),
-                   ('9','SIPRemove','/ESSArch/bin/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',5,0,0,0,0),
-                   ('10','AIPWriter','/ESSArch/bin/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',15,0,0,0,0),
-                   ('11','AIPPurge','/ESSArch/bin/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',5,0,0,0,0),
-                   ('12','TLD','/ESSArch/bin/TLD.pyc','/ESSArch/log/TLD.log',5,0,0,0,0),
-                   ('13','IOEngine','/ESSArch/bin/IOEngine.pyc','/ESSArch/log/IOEngine.log',5,0,0,0,0),
-                   ('14','db_sync_ais','/ESSArch/bin/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',10,0,0,0,0),
-                   ('16','ESSlogging','/ESSArch/bin/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',5,0,0,0,0),
-                   ('17','AccessEngine','/ESSArch/bin/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',5,0,0,0,0),
-                   ('18','FTPServer','/ESSArch/bin/FTPServer.pyc','/ESSArch/log/FTPServer.log',5,0,0,0,0),
+    ESSProc_list=(('1','SIPReceiver','/ESSArch/bin/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
+                   ('3','SIPValidateAIS','/ESSArch/bin/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
+                   ('4','SIPValidateApproval','/ESSArch/bin/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
+                   ('5','SIPValidateFormat','/ESSArch/bin/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
+                   ('6','AIPCreator','/ESSArch/bin/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
+                   ('7','AIPChecksum','/ESSArch/bin/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
+                   ('8','AIPValidate','/ESSArch/bin/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
+                   ('9','SIPRemove','/ESSArch/bin/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
+                   ('10','AIPWriter','/ESSArch/bin/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
+                   ('11','AIPPurge','/ESSArch/bin/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
+                   ('12','TLD','/ESSArch/bin/TLD.pyc','/ESSArch/log/TLD.log',2,5,0,0,0,0),
+                   ('13','IOEngine','/ESSArch/bin/IOEngine.pyc','/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
+                   ('14','db_sync_ais','/ESSArch/bin/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
+                   ('16','ESSlogging','/ESSArch/bin/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
+                   ('17','AccessEngine','/ESSArch/bin/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
+                   ('18','FTPServer','/ESSArch/bin/FTPServer.pyc','/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
     )
     for row in ESSProc_list:
         if not ESSProc.objects.filter(Name=row[1]).exists():
@@ -655,11 +722,12 @@ def installdefaultESSProc(): # default ESSProc
             ESSProc_obj.Name=row[1]
             ESSProc_obj.Path=row[2]
             ESSProc_obj.LogFile=row[3]
-            ESSProc_obj.Time=row[4]
-            ESSProc_obj.Status=row[5]
-            ESSProc_obj.Run=row[6]
-            ESSProc_obj.PID=row[7]
-            ESSProc_obj.Pause=row[8]
+            ESSProc_obj.expected_pids=row[4]
+            ESSProc_obj.Time=row[5]
+            ESSProc_obj.Status=row[6]
+            ESSProc_obj.Run=row[7]
+            ESSProc_obj.PID=row[8]
+            ESSProc_obj.Pause=row[9]
             ESSProc_obj.save()
 
 def installdefaultparameters(): # default config parameters
