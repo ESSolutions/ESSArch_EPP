@@ -167,6 +167,11 @@ class CheckProcFilesTask(JobtasticTask):
                 tasks.append(item)
         tasks_todo = list(tasks)
         num_tasks = len(tasks)
+        
+        # Delete MonitoringObject if key not exists in tasks
+        for MonitoringObject_obj in MonitoringObject.objects.all():
+            if not MonitoringObject_obj.key in tasks:
+                MonitoringObject_obj.delete()
 
         # Let folks know we started
         self.update_progress(0, num_tasks)

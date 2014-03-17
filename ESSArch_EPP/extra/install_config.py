@@ -226,7 +226,7 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
 
-    permission_list = ['add_periodictask','change_','delete_periodictask']
+    permission_list = ['add_periodictask','change_periodictask','delete_periodictask']
     permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
                                                     content_type__app_label='djcelery', 
                                                     content_type__model='periodictask').all()
@@ -234,7 +234,7 @@ def createdefaultusers(): # default users, groups and permissions
         sysgroup.permissions.add(permission_obj)
 
     # logfileviewer permissions
-    permission_list = ['add_intervalschedule','change_intervalschedule','delete_intervalschedule']
+    permission_list = ['add_logfile','change_logfile','delete_logfile']
     permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
                                                     content_type__app_label='logfileviewer', 
                                                     content_type__model='logfile').all()
@@ -400,7 +400,8 @@ def installdefaultschemaprofiles(): # default schema profiles for Sweden and Nor
     if site_profile == "NO" :
         dct = {
                'mets_namespace': 'http://www.loc.gov/METS/',
-               'mets_schemalocation': 'http://xml.ra.se/METS/RA_METS_eARD.xsd',
+               #'mets_schemalocation': 'http://xml.ra.se/METS/RA_METS_eARD.xsd',
+               'mets_schemalocation': 'http://schema.arkivverket.no/METS/mets.xsd',
                'mets_profile': 'http://xml.ra.se/METS/RA_METS_eARD.xml',
                'premis_namespace': 'http://arkivverket.no/standarder/PREMIS',
                'premis_schemalocation': 'http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd',
