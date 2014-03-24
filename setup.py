@@ -20,7 +20,6 @@
     Email - essarch@essolutions.se
 '''
 
-
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"

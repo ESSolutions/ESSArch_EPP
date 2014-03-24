@@ -34,6 +34,7 @@
                 <td>
                     <input id="tmpmigpath" type="text"
                         class="input-xxlarge"
+                        value="/disk2/tmp_mig"
                         placeholder="Please specify temporary path for migration">
                 </td>
             </tr>
@@ -56,6 +57,7 @@
                 <th>Target</th>
                 <th>Filter text</th>
                 <th>Hide column</th>
+                <th>Regex</th>
             </tr>
         </thead>
         <tbody>
@@ -68,6 +70,7 @@
                         placeholder="object search">
                 </td>
                 <td><input id="filterhide-0" type="checkbox"/></td>
+                <td><input id="regex-0" type="checkbox"/></td>
             </tr>
             <tr class="objectuuid">
                 <td>ObjectUUID</td>
@@ -77,6 +80,7 @@
                         placeholder="objectUUID search">
                 </td>
                 <td><input id="filterhide-1" type="checkbox" checked="checked"/></td>
+                <td><input id="regex-1" type="checkbox"/></td>
             </tr>
             <tr class="statusprocess">
                 <td>Status Process</td>
@@ -87,6 +91,7 @@
                         placeholder="statusprocess search">
                 </td>
                 <td><input id="filterhide-2" type="checkbox"/></td>
+                <td><input id="regex-2" type="checkbox"/></td>
             </tr>
             <tr class="statusactivity">
                 <td>Status Activity</td>
@@ -97,24 +102,29 @@
                         placeholder="statusactivity search">
                 </td>
                 <td><input id="filterhide-3" type="checkbox"/></td>
+                <td><input id="regex-3" type="checkbox"/></td>
             </tr>
             <tr class="storageMediumID">
                 <td>Current MediumID</td>
                 <td>
                     <input id="filter-4" type="text"
                         class="input-xxlarge"
-                        placeholder="medium search">
+                        placeholder="medium search"
+                        title="Specify a media or a range of media, such as ESA[000-010]">
                 </td>
                 <td><input id="filterhide-4" type="checkbox"/></td>
+                <td><input id="regex-4" checked="True" type="checkbox"/></td>
             </tr>
             <tr class="target">
                 <td class="required">Storage Method Target Medium</td>
                 <td>
                     <input id="filter-5" type="text"
                         class="input-xxlarge"
-                        placeholder="target search">
+                        placeholder="target search"
+                        title='Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods'>
                 </td>
                 <td><input id="filterhide-5" type="checkbox" disabled="True"/></td>
+                <td><input id="regex-5" type="checkbox" disabled="True"/></td>
             </tr>
             <tr class="policy">
                 <td>Policy</td>
@@ -124,6 +134,7 @@
                         placeholder="policy search">
                 </td>
                 <td><input id="filterhide-6" type="checkbox"/></td>
+                <td><input id="regex-6" type="checkbox"/></td>
             </tr>
             <tr class="policyid">
                 <td>PolicyID</td>
@@ -133,6 +144,7 @@
                         placeholder="policyID search">
                 </td>
                 <td><input id="filterhide-7" type="checkbox"/></td>
+                <td><input id="regex-7" type="checkbox"/></td>
             </tr>
             <tr class="policystat">
                 <td>Policy Status</td>
@@ -142,6 +154,7 @@
                         placeholder="policystat search">
                 </td>
                 <td><input id="filterhide-8" type="checkbox"/></td>
+                <td><input id="regex-8" type="checkbox"/></td>
             </tr>
         </tbody>
     </table>

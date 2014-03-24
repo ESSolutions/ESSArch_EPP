@@ -375,11 +375,20 @@ class StorageMaintenanceDatatablesView(DatatablesView):
     
     def search_col_5(self, search, queryset):
         '''exclude filter for search terms'''
+        #print 'search: %s' % search
         for term in search.split():
+            #print 'term: %s' % term
             exclude_list = []
-            #for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term, ObjectUUID__isnull=False).values_list('ObjectUUID', flat=True):
-            for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term).values_list('ObjectUUID', flat=True):
-                exclude_list.append(x)
+            if term.startswith('/'):
+                #print 'term/: %s' % term
+                #print 'exclude_list_before: %s' % exclude_list
+                for x in storage.objects.filter(contentLocationValue = term, ObjectUUID__isnull=False).values_list('ObjectUUID', flat=True):
+                    exclude_list.append(x)
+                #print 'exclude_list_after: %s' % exclude_list
+            else:
+                for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term, ObjectUUID__isnull=False).values_list('ObjectUUID', flat=True):
+                #for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term).values_list('ObjectUUID', flat=True):
+                    exclude_list.append(x)
             search2 = Q(ObjectUUID__in = exclude_list)
             queryset = queryset.exclude(search2)
         return queryset
@@ -428,6 +437,7 @@ class MigrationCreate(CreateView):
     template_name = 'administration/migreq_create.html'
     form_class = MigrationQueueForm
     obj_list = None
+    target_list = None
 
     @method_decorator(permission_required('essarch.add_migrationqueue'))
     def dispatch(self, *args, **kwargs):
@@ -444,11 +454,18 @@ class MigrationCreate(CreateView):
         if form.is_valid():
             #print 'Form is valid!!!'
             #print request.POST
+            # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue',None)
             if request.is_ajax():    
                 self.obj_list = obj_list.split('\r\n')[:-1]
             else:
                 self.obj_list = obj_list.split(' ')
+            # Convert TargetMediumID to list and remove "+"
+            target_list = self.request.POST.get('TargetMediumID',None)
+            self.target_list = target_list.split(' ')
+            for c, target_item in enumerate(self.target_list):
+                if target_item.startswith('+'):
+                    self.target_list[c] = target_item[1:]
             return self.form_valid(form)
         else:
             #print 'Form Not valid problem!!!'
@@ -491,6 +508,7 @@ class MigrationCreate(CreateView):
         self.object.pk = None 
         self.object.user = self.request.user.username
         self.object.ObjectIdentifierValue = self.obj_list
+        self.object.TargetMediumID = self.target_list
         self.object.ReqUUID = uuid.uuid1()
         self.object.save()
         req_pk = self.object.pk

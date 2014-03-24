@@ -831,7 +831,7 @@ class MigrationQueue(models.Model):
     user = models.CharField(max_length=45)
     password = models.CharField(max_length=45,blank=True)
     ObjectIdentifierValue = PickledObjectField()
-    TargetMediumID = models.CharField(max_length=45)
+    TargetMediumID = PickledObjectField()
     Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
     Path = models.CharField(max_length=255)
     CopyPath = models.CharField(max_length=255,blank=True)
@@ -854,6 +854,7 @@ class MigrationQueueForm(forms.ModelForm):
     #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = forms.Select(attrs={'disabled':'disabled'}))
     #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = PlainText())
     ObjectIdentifierValue = forms.CharField(widget=forms.Textarea())
+    TargetMediumID = forms.CharField(widget=forms.Textarea())
     Status = forms.IntegerField(widget = forms.HiddenInput())
     user = forms.CharField(label='User', widget = PlainText())
 #    def clean_Path(self):

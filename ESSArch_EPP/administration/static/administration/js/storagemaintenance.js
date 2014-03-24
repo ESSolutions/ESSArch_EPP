@@ -17,8 +17,8 @@
     	var oTable = $table.dataTable();
     	oTable.fnFilter(
             $("#filter-"+i).val(),
-            i
-            //$("#regex-"+i)[0].checked,
+            i,
+            $("#regex-"+i)[0].checked
             //false
         );
     	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
@@ -65,7 +65,8 @@
             "sAjaxSource": Django.url('storagemaintenance-dt'),
             //"fnRowCallback": Demo.colorRow,
             "aoColumnDefs": [
-                 { 'bVisible': false, 'aTargets': [ 1 ] }
+                 { 'bVisible': false, 'aTargets': [ 1 ] },
+                 { 'bRegex': true, 'aTargets': [ 4 ] }
             ],
             //"sDom": 'T<"clear">lfrtip',
             "sDom": 'lTrtip',
