@@ -25,14 +25,14 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 from views import (
     storageMediumList, 
     storageMediumDatatablesView,
     storageMediumDetail,
     storageDatatablesView,  
     #storageMediumList2, 
-    storageMediumList3,  
+    #storageMediumList3,  
     storageList, 
     robotList, 
     robotReqCreate,
@@ -47,6 +47,7 @@ from views import (
     MigrationCreate,
     MigrationUpdate,
     MigrationDelete,
+    DeactivateMedia,
 )
 
 #import views
@@ -57,7 +58,7 @@ urlpatterns = patterns('',
     url(r'^detailstoragemedium/(?P<pk>\d+)/$', storageMediumDetail.as_view(), name='admin_detailstoragemedium'),
     url(r'^storagedt$', storageDatatablesView.as_view(), name='storage-dt'),
     #url(r'^liststoragemedium2/$', storageMediumList2,name='admin_liststoragemedium2'),
-    url(r'^liststoragemedium3$', storageMediumList3.as_view(), name='admin_liststoragemedium3'),
+    #url(r'^liststoragemedium3$', storageMediumList3.as_view(), name='admin_liststoragemedium3'),
     url(r'^liststorage/$', storageList.as_view(),name='admin_liststorage'),
     url(r'^listrobot/$', robotList.as_view(),name='admin_listrobot'),
     url(r'^newrobotreq/$', robotReqCreate.as_view(), name='admin_robotreq_create'),
@@ -75,4 +76,5 @@ urlpatterns = patterns('',
     url(r'^migredetail/(?P<pk>\d+)/$', MigrationDetail.as_view(), name='migration_detail'),
     url(r'^migrequpdate/(?P<pk>\d+)/$', MigrationUpdate.as_view(), name='migration_update'),
     url(r'^migreqdelete/(?P<pk>\d+)/$', MigrationDelete.as_view(), name='migration_delete'),  
+    url(r'^deactivatemediacreate/$', DeactivateMedia.as_view(), name='deactivatemedia_create'),
 )

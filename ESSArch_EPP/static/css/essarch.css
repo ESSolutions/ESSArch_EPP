@@ -8,6 +8,14 @@ body {
 	margin-left: 20px;
 }
 
+.collapse.in {
+    overflow: visible;
+}
+
+.login .form-row #id_username, .login .form-row #id_password {
+    height: 30px;
+}
+
 /* Django header and logo */
 #header {
 	height: 78px;

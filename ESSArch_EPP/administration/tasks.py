@@ -481,27 +481,34 @@ class RobotInventoryTask(JobtasticTask):
                     
                 robot_obj = robot.objects.get(slot_id=rs.slot_id)
                 robot_obj.t_id = rs.volume_id
-                robot_obj.drive_id = '99'    
+                robot_obj.drive_id = '99'
+                UpdateTapeLocationFlag = 0    
                 if TapeExistFlag:
-                    if storageMedium_objs[0].storageMediumStatus == 20:
+                    if storageMedium_objs[0].storageMediumStatus == 0:
+                        robot_obj.status = 'InactiveTape'
+                        UpdateTapeLocationFlag = 0
+                    elif storageMedium_objs[0].storageMediumStatus == 20:
                         robot_obj.status = 'WriteTape'
+                        UpdateTapeLocationFlag = 1
                     else:
                         robot_obj.status = 'ArchTape'
-                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                    timestamp_dst = timestamp_utc.astimezone(self.tz)
-                    if ExtDBupdate == 1:
-                        ext_storageMediumTable = 'storageMedium'
-                    else:
-                        ext_storageMediumTable = ''
-                    errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table='storageMedium',
-                                                                     ext_table=ext_storageMediumTable,
-                                                                     AgentIdentifierValue=AgentIdentifierValue,
-                                                                     storageMediumID=rs.volume_id,
-                                                                     storageMediumLocation=MediumLocation,
-                                                                     storageMediumLocationStatus=50,
-                                                                     storageMediumDate=timestamp_utc)
-                    if errno:
-                        logger.error('Failed to update location for MediumID: %s , error: %s' % (rs.volume_id,str(why)))
+                        UpdateTapeLocationFlag = 1
+                    if UpdateTapeLocationFlag == 1:
+                        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                        timestamp_dst = timestamp_utc.astimezone(self.tz)
+                        if ExtDBupdate == 1:
+                            ext_storageMediumTable = 'storageMedium'
+                        else:
+                            ext_storageMediumTable = ''
+                        errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table='storageMedium',
+                                                                         ext_table=ext_storageMediumTable,
+                                                                         AgentIdentifierValue=AgentIdentifierValue,
+                                                                         storageMediumID=rs.volume_id,
+                                                                         storageMediumLocation=MediumLocation,
+                                                                         storageMediumLocationStatus=50,
+                                                                         storageMediumDate=timestamp_utc)
+                        if errno:
+                            logger.error('Failed to update location for MediumID: %s , error: %s' % (rs.volume_id,str(why)))
                 else:
                     robot_obj.status = 'Ready'
                 robot_obj.save()

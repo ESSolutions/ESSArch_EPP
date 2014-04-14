@@ -33,14 +33,15 @@ from operator import or_, and_
 #from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
 from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
                            storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
-                           MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate
+                           MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
 
+from configuration.models import sm
 
 from administration.tasks import MigrationTask, RobotInventoryTask
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
@@ -52,11 +53,11 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 #from django_tables2 import RequestConfig
 
-from essarch.libs import DatatablesView
+from essarch.libs import DatatablesView, flush_transaction, DatatablesForm, get_field_choices, get_object_list_display
 
-import uuid, ESSPGM
+import uuid, ESSPGM, logging
 
-class storageMediumList3(ListView):
+class storageMediumList3_old(ListView):
     """
     List storageMedium
     """
@@ -271,7 +272,7 @@ class robotReqDelete(DeleteView):
     context_object_name='req'
     success_url = reverse_lazy('admin_listrobot')
 
-    @method_decorator(permission_required('essarch.delete_delete'))
+    @method_decorator(permission_required('essarch.delete_robot'))
     def dispatch(self, *args, **kwargs):
         return super(robotReqDelete, self).dispatch( *args, **kwargs)
 
@@ -342,7 +343,9 @@ class StorageMaintenance(TemplateView):
     
 class StorageMaintenanceDatatablesView(DatatablesView):
     model = ArchiveObject
-    #queryset = ArchiveObject.objects.filter(StatusProcess=30001).all()
+    #queryset = ArchiveObject.objects.exclude(Q(storage__storageMediumUUID__storageMediumStatus = 0))
+    #queryset = ArchiveObject.objects.exclude(storage__storageMediumUUID__storageMediumStatus = 0)
+    #queryset = ArchiveObject.objects.extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0'])
     fields = (
         'ObjectIdentifierValue',
         'ObjectUUID',
@@ -363,7 +366,29 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         'PolicyId__sm_target_3',
         '{PolicyId__sm_type_4} ({PolicyId__sm_4})',
         'PolicyId__sm_target_4',
+        
+        'storage__storageMediumUUID__storageMediumDate',
+        'storage__storageMediumUUID__storageMediumStatus',
     )   
+
+    def process_dt_response(self, data):
+        self.form = DatatablesForm(data)
+        if self.form.is_valid():
+            flush_transaction()
+            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
+            self.object_list_with_writetapes = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
+            self.object_list = []
+            for obj in self.object_list_with_writetapes:
+                if not obj['storage__storageMediumUUID__storageMediumStatus'] == 20:
+                    self.object_list.append(obj)
+            
+            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` IN (%s)"],params=['0',]).values(*self.get_db_fields())
+            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` IN (%s,%s)"],params=['0','20']).values(*self.get_db_fields())
+            #print 'self.object_list : %s' % self.object_list 
+            self.field_choices_dict = get_field_choices(self.get_queryset()[:1], self.get_db_fields())
+            return self.render_to_response(self.form)
+        else:
+            return HttpResponseBadRequest()
 
     def sort_col_4(self, direction):
         '''sort for col_5'''
@@ -392,6 +417,206 @@ class StorageMaintenanceDatatablesView(DatatablesView):
             search2 = Q(ObjectUUID__in = exclude_list)
             queryset = queryset.exclude(search2)
         return queryset
+
+    def get_deactivate_list(self):
+        # Create unique obj_list
+        obj_list = []
+        for obj in self.object_list_with_writetapes:
+        #for obj in self.object_list:
+            if not any(d['ObjectUUID'] == obj['ObjectUUID'] for d in obj_list):
+                obj_list.append(obj)
+        
+        # Add sm_list(sm+storage) to obj_list 
+        for num, obj in enumerate(obj_list):
+            sm_objs = []
+            for i in [1,2,3,4]:
+                sm_obj = sm()
+                sm_obj.id = i
+                sm_obj.status = obj['PolicyId__sm_%s' % i]
+                sm_obj.type = obj['PolicyId__sm_type_%s' % i]
+                #sm_obj.format = getattr(ep_obj,'sm_format_%s' % i)
+                #sm_obj.blocksize = getattr(ep_obj,'sm_blocksize_%s' % i)
+                #sm_obj.maxCapacity = getattr(ep_obj,'sm_maxCapacity_%s' % i)
+                #sm_obj.minChunkSize = getattr(ep_obj,'sm_minChunkSize_%s' % i)
+                #sm_obj.minContainerSize = getattr(ep_obj,'sm_minContainerSize_%s' % i)
+                #sm_obj.minCapacityWarning = getattr(ep_obj,'sm_minCapacityWarning_%s' % i)
+                sm_obj.target = obj['PolicyId__sm_target_%s' % i]
+                sm_objs.append(sm_obj)
+            
+            sm_list = []
+            for sm_obj in sm_objs:
+                storage_list = []
+                if sm_obj.status == 1:
+                    for d in self.object_list_with_writetapes:
+                        if d['storage__storageMediumUUID__storageMediumID'] is not None:
+                            if (sm_obj.type in range(300,306) and
+                                d['storage__storageMediumUUID__storageMediumID'].startswith(sm_obj.target) and
+                                d['ObjectUUID'] == obj['ObjectUUID']
+                                ) or\
+                               (sm_obj.type == 200 and
+                                d['storage__storageMediumUUID__storageMediumID'] == 'disk' and
+                                d['ObjectUUID'] == obj['ObjectUUID']
+                                ):
+                                    storage_list.append({'storageMediumUUID__storageMediumID': d['storage__storageMediumUUID__storageMediumID'],
+                                                         'storageMediumUUID__storageMedium': sm_obj.type,
+                                                         'storageMediumUUID__storageMediumDate': d['storage__storageMediumUUID__storageMediumDate'],
+                                                         'contentLocationValue': d['storage__contentLocationValue'],
+                                                         'ObjectUUID__ObjectIdentifierValue': obj['ObjectIdentifierValue'],
+                                                         'ObjectUUID__ObjectUUID': obj['ObjectUUID'],
+                                                         })
+                                    #print 'd - storage__storageMediumUUID__storageMediumID: %s' % d['storage__storageMediumUUID__storageMediumID']
+                                    #print 'o - storage__storageMediumUUID__storageMediumID: %s' % obj['storage__storageMediumUUID__storageMediumID']
+                    #print 'ObjectUUID: %s, target:%s , s_count:%s' % (obj['ObjectUUID'],sm_obj.target,len(storage_list))
+                    sm_list.append({'id': sm_obj.id,
+                                    'status': sm_obj.status,
+                                    'type': sm_obj.type,
+                                    'target': sm_obj.target,
+                                    'storage_list': storage_list})
+                
+
+            obj_list[num]['sm_list'] = sm_list
+        
+        # Create redundant storage list
+        redundant_storage_list = {}
+        for obj in obj_list:
+            for sm_obj in obj['sm_list']:
+                active_storage_obj = None
+                if len(sm_obj['storage_list']) > 1:
+                    #print '##################################################################################### %s, count:%s' % (sm_obj['storage_list'],len(sm_obj['storage_list']))
+                    for storage_obj in sm_obj['storage_list']:
+                        if active_storage_obj is None:
+                            active_storage_obj = storage_obj
+                        elif storage_obj['storageMediumUUID__storageMediumDate'] > active_storage_obj['storageMediumUUID__storageMediumDate']:
+                            active_storage_obj = storage_obj
+                    for storage_obj in sm_obj['storage_list']:
+                        if storage_obj['storageMediumUUID__storageMediumDate'] < active_storage_obj['storageMediumUUID__storageMediumDate']:
+                            if not storage_obj['storageMediumUUID__storageMediumID'] in redundant_storage_list.keys():
+                                redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']] = []
+                            redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']].append(storage_obj)
+
+        # Create deactivate_media_list and need_to_migrate_dict
+        deactivate_media_list = []
+        need_to_migrate_list = []
+        #need_to_migrate_dict = {}
+        for storageMediumID in redundant_storage_list.keys():
+            storage_list = storage.objects.exclude(storageMediumUUID__storageMediumStatus=0).filter(storageMediumUUID__storageMediumID=storageMediumID).values('storageMediumUUID__storageMediumID',
+                                                                                                          'storageMediumUUID__storageMedium',
+                                                                                                          'storageMediumUUID__storageMediumDate',
+                                                                                                          'contentLocationValue',
+                                                                                                          'ObjectUUID__ObjectIdentifierValue',
+                                                                                                          'ObjectUUID__ObjectUUID',
+                                                                                                          )
+            storage_list2 = list(storage_list)
+            for storage_values in storage_list:
+                #print 'storage_list_len loop: %s' % len(storage_list)
+                for redundant_storage_values in redundant_storage_list[storageMediumID]:
+                    if storage_values == redundant_storage_values:
+                        #print 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyfound ObjectUUID: %s, storageMediumID: %s, contentLocationValue: %s' % (redundant_storage_values['ObjectUUID__ObjectUUID'],storageMediumID,redundant_storage_values['contentLocationValue'])
+                        #print 'storage_list2_len before: %s' % len(storage_list2)
+                        #print 'storage_values: %s' % storage_values
+                        if storage_values in storage_list2:
+                            storage_list2.remove(storage_values)
+                            #print 'remove %s' % storage_values
+                        #else:
+                            #print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!not found!, skip remove %s' % storage_values
+                        #print 'storage_list2_len after: %s' % len(storage_list2)
+                        #pass
+            if len(storage_list2) == 0:
+                deactivate_media_list.append([storageMediumID])
+            else:
+                #need_to_migrate_dict[storageMediumID] = storage_list2
+                for m in storage_list2:
+                    tmp_list = []
+                    keys = ['storageMediumUUID__storageMediumID',
+                          'storageMediumUUID__storageMedium',
+                          'storageMediumUUID__storageMediumDate',
+                          'contentLocationValue',
+                          'ObjectUUID__ObjectIdentifierValue',
+                          'ObjectUUID__ObjectUUID']
+                    for key in keys:
+                        tmp_list.append(m[key])
+                    need_to_migrate_list.append(tmp_list)
+                                               
+        #print '#####################################obj_list: %s count: %s' % (obj_list,len(obj_list))
+        #print '*************************************redundant_list: %s count: %s' % (redundant_storage_list,len(redundant_storage_list))
+        #print '*************************************redundant_list: %s count: %s, storage_count: %s' % (redundant_storage_list,len(redundant_storage_list),len(redundant_storage_list['ESA001']))
+        #deactivate_media_list.append(['ESA001'])
+        #print 'deactivate_media_list: %s' % deactivate_media_list
+        #print 'need_to_migrate_list: %s' % need_to_migrate_list
+        return deactivate_media_list, need_to_migrate_list
+        
+
+    def render_to_response(self, form, **kwargs):
+        '''Render Datatables expected JSON format'''
+        page = self.get_page(form)
+        #print 'page_type_object_list: %s' % type(page.object_list)
+        page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
+        deactivate_media_list, need_to_migrate_list = self.get_deactivate_list()
+        data = {
+            'iTotalRecords': page.paginator.count,
+            'iTotalDisplayRecords': page.paginator.count,
+            'sEcho': form.cleaned_data['sEcho'],
+            'aaData': self.get_rows(page.object_list),
+            'deactivate_media_list': deactivate_media_list,
+            'need_to_migrate_list': need_to_migrate_list,
+        }
+        return self.json_response(data)
+
+class DeactivateMedia(FormView):
+    template_name = 'administration/migreq_create.html'
+    form_class = DeactivateMediaForm
+    success_url = '/'
+
+    @method_decorator(permission_required('essarch.add_migrationqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(DeactivateMedia, self).dispatch( *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests, instantiating a form instance with the passed
+        POST variables and then checked for validity.
+        """
+        self.object = None
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            if request.is_ajax():
+                return HttpResponseBadRequest()
+            else:
+                return self.form_invalid(form)
+    
+    def form_valid(self, form):
+        logger = logging.getLogger('essarch.storagemaintenance')
+        ReqPurpose = form.cleaned_data['ReqPurpose']
+        if self.request.is_ajax():
+            MediumList = []
+            for o in json.loads(form.cleaned_data['MediumList']):
+                MediumList.append(o[0])
+        else:
+            MediumList = form.cleaned_data['MediumList'].split(' ')
+        #print 'MediumList: %s' % MediumList
+        storageMedium_objs = storageMedium.objects.filter(storageMediumID__in=MediumList)
+        #print len(storageMedium_objs)
+        for storageMedium_obj in storageMedium_objs:
+            logger.info('Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose))
+            storageMedium_obj.storageMediumStatus =  0
+            storageMedium_obj.save()
+        if self.request.is_ajax():
+            '''Render Datatables expected JSON format'''
+            data = {
+                'sEcho': 'OK',
+            }
+            return self.json_response(data)
+        else:
+            return super(DeactivateMedia, self).form_valid(form)
+
+    def json_response(self, data):
+        return HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder),
+            mimetype='application/json'
+        )
     
 class MigrationList(ListView):
     """
@@ -448,6 +673,7 @@ class MigrationCreate(CreateView):
         Handles POST requests, instantiating a form instance with the passed
         POST variables and then checked for validity.
         """
+        logger = logging.getLogger('essarch.storagemaintenance')
         self.object = None
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -455,9 +681,17 @@ class MigrationCreate(CreateView):
             #print 'Form is valid!!!'
             #print request.POST
             # Convert ObjectIdentifierValue to list
-            obj_list = self.request.POST.get('ObjectIdentifierValue',None)
-            if request.is_ajax():    
-                self.obj_list = obj_list.split('\r\n')[:-1]
+            obj_list = self.request.POST.get('ObjectIdentifierValue','')
+            if request.is_ajax():
+                self.obj_list = []
+                try:
+                    for o in json.loads(obj_list):
+                        self.obj_list.append(o[1])
+                except ValueError,detail:
+                    logger.warning('Problem to parse json: %s, detail:%s' % (obj_list,detail))    
+                #self.obj_list = obj_list.split('\r\n')[:-1]
+                #print 'self.obj_list: %s' % self.obj_list
+                #return HttpResponseBadRequest()
             else:
                 self.obj_list = obj_list.split(' ')
             # Convert TargetMediumID to list and remove "+"
@@ -551,6 +785,3 @@ class MigrationDelete(DeleteView):
     @method_decorator(permission_required('essarch.delete_migrationqueue'))
     def dispatch(self, *args, **kwargs):
         return super(MigrationDelete, self).dispatch( *args, **kwargs)
-    
-    
-    

@@ -25,7 +25,7 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 from views import CheckinFromReceptionListView, CheckinFromReception, CheckinFromReceptionResult, \
                   CheckoutToWorkListView, CheckoutToWork, CheckoutToWorkResult, \
                   CheckinFromWorkListView, CheckinFromWork, CheckinFromWorkResult, \

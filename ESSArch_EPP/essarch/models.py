@@ -36,6 +36,7 @@ from configuration.models import ESSArchPolicy
 #from django_tables2.utils import A
 from djcelery.models import TaskMeta
 from picklefield.fields import PickledObjectField
+from essarch.fields import BigAutoField
 
 ###########################################################################
 #
@@ -251,8 +252,10 @@ MediumFormat_CHOICES = (
 )
 
 MediumStatus_CHOICES = (
+    (0, 'Inactive'),
     (20, 'Write'),
     (30, 'Full'),
+    (100, 'FAIL'),
 )
 
 MediumLocationStatus_CHOICES = (
@@ -281,7 +284,8 @@ eventOutcome_CHOICES = (
 # General models and forms
 #
 class ArchiveObject(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     ObjectUUID = models.CharField(max_length=36, unique=True)
     #PolicyId = models.IntegerField(null=True)
     PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
@@ -380,7 +384,8 @@ class ArchiveObjectStatusForm(forms.ModelForm):
         widgets = {'StatusActivity': forms.Select(attrs={'onchange':'submit()'}),}    
 
 class ArchiveObjectData(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     UUID = models.ForeignKey(ArchiveObject, db_column='UUID', to_field='ObjectUUID')
     creator = models.CharField(max_length=255)
     label = models.CharField(max_length=255)
@@ -390,7 +395,8 @@ class ArchiveObjectData(models.Model):
         db_table = 'Object_data'
 
 class ArchiveObjectMetadata(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID')
     ObjectIdentifierValue = models.CharField(max_length=255)
     ObjectMetadataType = models.IntegerField(null=True)
@@ -404,14 +410,16 @@ class ArchiveObjectMetadata(models.Model):
         db_table = 'IngestObjectMetadata'
 
 class ArchiveObjectRel(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     AIC_UUID = models.ForeignKey(ArchiveObject, db_column='AIC_UUID', related_name='relaic_set', to_field='ObjectUUID')
     UUID = models.ForeignKey(ArchiveObject, db_column='UUID', related_name='reluuid_set', to_field='ObjectUUID')
     class Meta:
         db_table = 'Object_rel'
 
 class agentIdentifier(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     agentIdentifierValue = models.CharField(max_length=45)
     agentName = models.CharField(max_length=45)
     agentType = models.IntegerField(null=True)
@@ -419,7 +427,8 @@ class agentIdentifier(models.Model):
         db_table = 'agentIdentifier'
 
 class eventIdentifier(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     eventIdentifierValue = models.CharField(max_length=36, unique=True)
     eventType = models.IntegerField(null=True)
     eventDateTime = models.DateTimeField(null=True)
@@ -434,7 +443,8 @@ class eventIdentifier(models.Model):
         db_table = 'eventIdentifier'
 
 class eventType_codes(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     code = models.IntegerField(null=True)
     desc_sv = models.CharField(max_length=100)
     desc_en = models.CharField(max_length=100)
@@ -444,7 +454,8 @@ class eventType_codes(models.Model):
         db_table = 'eventType_codes'
 
 class IOqueue(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     cmd = models.IntegerField(null=True)
     cmdprio = models.IntegerField(null=True)
     work_uuid = models.CharField(max_length=36)
@@ -466,7 +477,8 @@ class IOqueue(models.Model):
         db_table = 'IOqueue'
 
 class ESSReg001(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID')
     i000 = models.IntegerField(null=True)
     i001 = models.IntegerField(null=True)
@@ -667,7 +679,8 @@ class IngestQueueFormUpdate(IngestQueueForm):
 # Administration models and forms
 #
 class storageMedium(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     storageMediumUUID = models.CharField(max_length=36, unique=True)
     storageMedium = models.IntegerField(null=True, choices=MediumType_CHOICES)
     storageMediumID = models.CharField(max_length=45, unique=True)
@@ -708,7 +721,8 @@ class storageMedium(models.Model):
 
         
 class storage(models.Model):
-    id = models.AutoField(big=True,primary_key=True)
+    #id = models.AutoField(big=True,primary_key=True)
+    id = BigAutoField(primary_key=True)
     contentLocation = models.BigIntegerField(null=True)
     ObjectUUID = models.ForeignKey(ArchiveObject, db_column='ObjectUUID', to_field='ObjectUUID', null=True)
     ObjectIdentifierValue = models.CharField(max_length=255)
@@ -881,3 +895,8 @@ class MigrationQueueForm(forms.ModelForm):
 class MigrationQueueFormUpdate(MigrationQueueForm):
     Status = forms.ChoiceField(choices=ReqStatus_CHOICES)
 
+class DeactivateMediaForm(forms.Form):
+    ReqPurpose = forms.CharField(max_length=255)
+    MediumList = forms.CharField(widget=forms.Textarea())
+    class Meta:
+        model=MigrationQueue 

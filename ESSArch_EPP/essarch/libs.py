@@ -30,6 +30,7 @@ from django.db.models import Q
 from django.db import models
 from django.db import transaction
 from django.core.paginator import Paginator
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseBadRequest
 
 from operator import or_
@@ -145,7 +146,8 @@ class DatatablesView(DatatablesView):
         page_size = form.cleaned_data['iDisplayLength']
         start_index = form.cleaned_data['iDisplayStart']
         if page_size == -1:
-            page_size = self.object_list.count()
+            #page_size = self.object_list.count()
+            page_size = len(self.object_list)
             if page_size == 0: page_size = 1
         paginator = Paginator(self.object_list, page_size)
         num_page = (start_index / page_size) + 1
@@ -192,3 +194,4 @@ class DatatablesView(DatatablesView):
             #'aaData': self.get_rows(object_list),
         }
         return self.json_response(data)
+

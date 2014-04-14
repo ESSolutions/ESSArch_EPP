@@ -25,19 +25,37 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
-from views import AccessList, AccessDetail, AccessCreate ,AccessUpdate, AccessDelete, ArchObjectList, ArchObjectDatatablesView
 
-#import views
+###########################################################################
+#
+# Custom fields
+#
+from django.db.models import fields
+from south.modelsinspector import add_introspection_rules
+from django.core import exceptions
 
-urlpatterns = patterns('',   
-    url(r'^listobj/$', ArchObjectList.as_view(),name='access_listobj'),
-    url(r'^archobjectdt$', ArchObjectDatatablesView.as_view(), name='archobject-dt'),
-    url(r'^list/$', AccessList.as_view(),name='access_list'),
-    url(r'^detail/(?P<pk>\d+)/$', AccessDetail.as_view(), name='access_detail'),
-    url(r'^new$', AccessCreate.as_view(), name='access_create_parameter'),
-    url(r'^new/$', AccessCreate.as_view(), name='access_create'),
-    url(r'^new/(?P<ip_uuid>[^&]*)/$', AccessCreate.as_view(), name='access_create_ip_uuid'),
-    url(r'^update/(?P<pk>\d+)/$', AccessUpdate.as_view(), name='access_update'),
-    url(r'^delete/(?P<pk>\d+)/$', AccessDelete.as_view(), name='access_delete'),  
-)
+class BigAutoField(fields.AutoField):
+
+    def db_type(self, connection):
+        if 'mysql' in connection.__class__.__module__:
+            return "bigint AUTO_INCREMENT"
+        elif 'oracle' in connection.__class__.__module__:
+            return "NUMBER(19)"
+        elif 'postgres' in connection.__class__.__module__:
+            return "bigserial"
+        else:
+            raise NotImplemented
+    
+    def get_internal_type(self):
+        return "BigAutoField"
+    
+    def to_python(self, value):
+        if value is None:
+            return value
+        try:
+            return long(value)
+        except (TypeError, ValueError):
+            raise exceptions.ValidationError(
+                _("This value must be a long integer."))
+
+add_introspection_rules([], ["^essarch\.fields\.BigAutoField"])

@@ -309,7 +309,7 @@ class CheckStorageMediumsTask(JobtasticTask):
                 AddTape_list.append(target)
 
         # Populating ErrorTape_list
-        error_tape_objs = storageMedium.objects.filter(storageMediumStatus__gt=30)
+        error_tape_objs = storageMedium.objects.exclude(storageMediumStatus=0).filter(storageMediumStatus__gt=30)
         for error_tape_obj in error_tape_objs:
             slot_id = None
             for task in tasks:

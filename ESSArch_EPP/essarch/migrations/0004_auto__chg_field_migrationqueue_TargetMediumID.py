@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -9,13 +9,90 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
+        # Changing field 'agentIdentifier.id'
+        db.alter_column('agentIdentifier', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `agentIdentifier` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'ArchiveObjectRel.id'
+        db.alter_column('Object_rel', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `Object_rel` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'eventIdentifier.id'
+        db.alter_column('eventIdentifier', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `eventIdentifier` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'ArchiveObjectMetadata.id'
+        db.alter_column('IngestObjectMetadata', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `IngestObjectMetadata` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'IOqueue.id'
+        db.alter_column('IOqueue', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `IOqueue` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'ESSReg001.id'
+        db.alter_column('ESSReg001', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `ESSReg001` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'ArchiveObjectData.id'
+        db.alter_column('Object_data', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `Object_data` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
         # Changing field 'MigrationQueue.TargetMediumID'
         db.alter_column('MigrationQueue', 'TargetMediumID', self.gf('picklefield.fields.PickledObjectField')())
 
+        # Changing field 'eventType_codes.id'
+        db.alter_column('eventType_codes', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `eventType_codes` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'storageMedium.id'
+        db.alter_column('storageMedium', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `storageMedium` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'ArchiveObject.id'
+        db.alter_column('IngestObject', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `IngestObject` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
+        # Changing field 'storage.id'
+        db.alter_column('storage', 'id', self.gf('essarch.fields.BigAutoField')(primary_key=True))
+        db.execute("ALTER TABLE `storage` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT", [])
+
     def backwards(self, orm):
+
+        # Changing field 'agentIdentifier.id'
+        db.alter_column('agentIdentifier', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'ArchiveObjectRel.id'
+        db.alter_column('Object_rel', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'eventIdentifier.id'
+        db.alter_column('eventIdentifier', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'ArchiveObjectMetadata.id'
+        db.alter_column('IngestObjectMetadata', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'IOqueue.id'
+        db.alter_column('IOqueue', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'ESSReg001.id'
+        db.alter_column('ESSReg001', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'ArchiveObjectData.id'
+        db.alter_column('Object_data', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
 
         # Changing field 'MigrationQueue.TargetMediumID'
         db.alter_column('MigrationQueue', 'TargetMediumID', self.gf('django.db.models.fields.CharField')(max_length=45))
+
+        # Changing field 'eventType_codes.id'
+        db.alter_column('eventType_codes', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'storageMedium.id'
+        db.alter_column('storageMedium', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'ArchiveObject.id'
+        db.alter_column('IngestObject', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
+
+        # Changing field 'storage.id'
+        db.alter_column('storage', 'id', self.gf('django.db.models.fields.AutoField')(primary_key=True))
 
     models = {
         u'configuration.essarchpolicy': {
@@ -95,7 +172,7 @@ class Migration(SchemaMigration):
             'agentIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'agentName': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'agentType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'})
         },
         u'essarch.archiveobject': {
             'CMetaMessageDigest': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
@@ -131,7 +208,7 @@ class Migration(SchemaMigration):
             'Status': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'StatusActivity': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'StatusProcess': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'linkingAgentIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'preservationLevelValue': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
         },
@@ -140,7 +217,7 @@ class Migration(SchemaMigration):
             'UUID': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['essarch.ArchiveObject']", 'to_field': "'ObjectUUID'", 'db_column': "'UUID'"}),
             'creator': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'enddate': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'startdate': ('django.db.models.fields.DateTimeField', [], {'null': 'True'})
         },
@@ -154,14 +231,14 @@ class Migration(SchemaMigration):
             'ObjectMetadataType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'ObjectMetadataURL': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'ObjectUUID': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['essarch.ArchiveObject']", 'to_field': "'ObjectUUID'", 'db_column': "'ObjectUUID'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'linkingAgentIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '45'})
         },
         u'essarch.archiveobjectrel': {
             'AIC_UUID': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'relaic_set'", 'to_field': "'ObjectUUID'", 'db_column': "'AIC_UUID'", 'to': u"orm['essarch.ArchiveObject']"}),
             'Meta': {'object_name': 'ArchiveObjectRel', 'db_table': "'Object_rel'"},
             'UUID': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reluuid_set'", 'to_field': "'ObjectUUID'", 'db_column': "'UUID'", 'to': u"orm['essarch.ArchiveObject']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'})
         },
         u'essarch.controlareaqueue': {
             'Meta': {'object_name': 'ControlAreaQueue', 'db_table': "'ReqControlAreaQueue'"},
@@ -198,7 +275,7 @@ class Migration(SchemaMigration):
             'i017': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'i018': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'i019': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             's000': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             's001': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             's002': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
@@ -230,7 +307,7 @@ class Migration(SchemaMigration):
             'eventOutcomeDetailNote': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'eventType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'eventVersion': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'linkingAgentIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'linkingObjectIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
@@ -240,7 +317,7 @@ class Migration(SchemaMigration):
             'desc_en': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'desc_sv': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'externalDB': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'localDB': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
         },
         u'essarch.ingestqueue': {
@@ -266,7 +343,7 @@ class Migration(SchemaMigration):
             'cmdprio': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'contentLocationValue': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'sm_list': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'storageMedium': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumBlockSize': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
@@ -349,7 +426,7 @@ class Migration(SchemaMigration):
             'contentLocation': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'contentLocationType': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'contentLocationValue': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'storageMediumID': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'storageMediumUUID': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['essarch.storageMedium']", 'to_field': "'storageMediumUUID'", 'null': 'True', 'db_column': "'storageMediumUUID'"})
         },
@@ -359,7 +436,7 @@ class Migration(SchemaMigration):
             'ExtDBdatetime': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'LocalDBdatetime': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'Meta': {'object_name': 'storageMedium', 'db_table': "'storageMedium'"},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id': ('essarch.fields.BigAutoField', [], {'primary_key': 'True'}),
             'linkingAgentIdentifierValue': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             'storageMedium': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'storageMediumBlockSize': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),

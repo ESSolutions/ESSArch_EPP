@@ -31,6 +31,7 @@ import os, thread, multiprocessing, datetime, time, logging, sys, shutil, stat, 
 from django.utils import timezone
 
 from essarch.models import storage, storageMedium, ArchiveObject, robotQueue
+from essarch.libs import flush_transaction
 
 class Functions:
     tz = timezone.get_default_timezone()
@@ -139,6 +140,7 @@ class Functions:
             ########################################################
             # Verify tape position and check write/tape size
             ########################################################
+            flush_transaction()
             storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
             self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
             #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -160,6 +162,7 @@ class Functions:
                 self.Mount_exitcode, self.t_id, self.tapedev, self.t_pos = ESSPGM.Robot().MountWritePos2(t_type=self.t_type, t_block=self.t_block, t_format=self.t_format, t_prefix=self.t_prefix, t_location=self.t_location, full_t_id=self.t_id, work_uuid=self.uuid)
                 if self.Mount_exitcode==0:
                     logger.info('Succedd to mount write tape id: ' + self.t_id + ' dev: ' + self.tapedev + ' pos: ' + str(self.t_pos))
+                    flush_transaction()
                     storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
                     self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
                     #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -224,7 +227,8 @@ class Functions:
                     storage_obj.storageMediumID = self.t_id
                     storage_obj.storageMediumUUID = storageMedium_obj
                     storage_obj.ObjectUUID = ArchiveObject_obj
-                    storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    #storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    storage_obj.LocalDBdatetime = self.timestamp_utc
                     storage_obj.save()
                     #res,errno,why = ESSDB.DB().action(self.StorageTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
                     #                                                           'contentLocationType','300',
@@ -240,7 +244,8 @@ class Functions:
                                                                                                   'storageMediumID',self.t_id))
                         if ext_errno: logger.error('Failed to insert to External DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(ext_why))
                         else:
-                            storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            storage_obj.ExtDBdatetime = self.timestamp_utc
                             storage_obj.save()
                             #res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
                             #                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
@@ -251,9 +256,11 @@ class Functions:
                     ##########################
                     # Update StorageMediumTable
                     storageMedium_obj.storageMediumUsedCapacity = self.new_t_size
-                    storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                    #storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                    storageMedium_obj.storageMediumDate = self.timestamp_utc
                     storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                    storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    storageMedium_obj.LocalDBdatetime = self.timestamp_utc
                     storageMedium_obj.save()
                     #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_t_size,
                     #                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
@@ -269,7 +276,8 @@ class Functions:
                                                                                                        ('storageMediumID',self.t_id))
                         if ext_errno: logger.error('Failed to update External DB: ' + str(self.t_id) + ' error: ' + str(ext_why))
                         else:
-                            storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            storageMedium_obj.ExtDBdatetime = self.timestamp_utc
                             storageMedium_obj.save()
                             #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID',self.t_id))
                             #if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
@@ -314,6 +322,7 @@ class Functions:
                     self.Mount_exitcode, self.t_id, self.tapedev, self.t_pos = ESSPGM.Robot().MountWritePos2(t_type=self.t_type, t_block=self.t_block, t_format=self.t_format, t_prefix=self.t_prefix, t_location=self.t_location, full_t_id=self.t_id, work_uuid=self.uuid)
                     if self.Mount_exitcode==0:
                         logger.info('Succedd to mount write tape id: ' + self.t_id + ' dev: ' + self.tapedev + ' pos: ' + str(self.t_pos))
+                        flush_transaction()
                         storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
                         self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
                         #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -351,7 +360,8 @@ class Functions:
                                 storage_obj.storageMediumID = self.t_id
                                 storage_obj.storageMediumUUID = storageMedium_obj
                                 storage_obj.ObjectUUID = ArchiveObject_obj
-                                storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                #storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                storage_obj.LocalDBdatetime = self.timestamp_utc
                                 storage_obj.save()
                                 #res,errno,why = ESSDB.DB().action(self.StorageTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
                                 #                                                           'contentLocationType','300',
@@ -367,7 +377,8 @@ class Functions:
                                                                                                               'storageMediumID',self.t_id))
                                     if ext_errno: logger.error('Failed to insert to External DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(ext_why))
                                     else:
-                                        storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        storage_obj.ExtDBdatetime = self.timestamp_utc
                                         storage_obj.save()
                                         #res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
                                         #                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
@@ -378,9 +389,11 @@ class Functions:
                                 ##########################
                                 # Update StorageMediumTable
                                 storageMedium_obj.storageMediumUsedCapacity = self.new_t_size
-                                storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                                #storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                                storageMedium_obj.storageMediumDate = self.timestamp_utc
                                 storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                storageMedium_obj.LocalDBdatetime = self.timestamp_utc
                                 storageMedium_obj.save()
                                 #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_t_size,
                                 #                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
@@ -396,7 +409,8 @@ class Functions:
                                                                                                                    ('storageMediumID',self.t_id))
                                     if ext_errno: logger.error('Failed to update External DB: ' + str(self.t_id) + ' error: ' + str(ext_why))
                                     else:
-                                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc
                                         storageMedium_obj.save()
                                         #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID',self.t_id))
                                         #if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
@@ -773,6 +787,7 @@ class Functions:
             logger.info('WriteSize not defined, setting write size for object: ' + self.ObjectIdentifierValue + ' WriteSize: ' + str(self.WriteSize))
         # Check if StorageMediumID 'disk' exist, if exist get current target size.
         try:
+            flush_transaction()
             storageMedium_obj = storageMedium.objects.get(storageMediumID='disk')
         except storageMedium.DoesNotExist, why:
             logger.error('Problem to access DB_storageMediumID disk for IOuuid: ' + str(self.uuid))
@@ -821,7 +836,8 @@ class Functions:
                 storage_obj.storageMediumID = 'disk'
                 storage_obj.storageMediumUUID = storageMedium_obj
                 storage_obj.ObjectUUID = ArchiveObject_obj
-                storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                #storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                storage_obj.LocalDBdatetime = self.timestamp_utc
                 storage_obj.save()
 
 #                res,errno,why = ESSDB.DB().action(self.StorageTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
@@ -838,7 +854,8 @@ class Functions:
                                                                                               'storageMediumID','disk'))
                     if ext_errno: logger.error('Failed to insert to External DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(ext_why))
                     else:
-                        storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        storage_obj.ExtDBdatetime = self.timestamp_utc
                         storage_obj.save()
 #                        res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
 #                                                                                  ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
@@ -849,9 +866,11 @@ class Functions:
                 ##########################
                 # Update StorageMediumTable
                 storageMedium_obj.storageMediumUsedCapacity = self.new_target_size
-                storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                #storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.storageMediumDate = self.timestamp_utc
                 storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.LocalDBdatetime = self.timestamp_utc
                 storageMedium_obj.save()           
 #                res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_target_size,
 #                                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
@@ -867,7 +886,8 @@ class Functions:
                                                                                                    ('storageMediumID','disk'))
                     if ext_errno: logger.error('Failed to update External DB: ' + str('disk') + ' error: ' + str(ext_why))
                     else:
-                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc
                         storageMedium_obj.save()
 #                        res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID','disk'))
 #                        if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))

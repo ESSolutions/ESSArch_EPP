@@ -170,7 +170,8 @@ class DB:
         IOqueue_obj.sm_list = sm_list
         IOqueue_obj.t_prefix = self.t_prefix
         IOqueue_obj.WriteSize = self.WriteSize
-        IOqueue_obj.date_created = self.timestamp_utc.replace(tzinfo=None)
+        #IOqueue_obj.date_created = self.timestamp_utc.replace(tzinfo=None)
+        IOqueue_obj.date_created = self.timestamp_utc
         IOqueue_obj.Status = self.Status
         IOqueue_obj.save() 
 #        self.res,self.errno,self.why=ESSDB.DB().action('IOqueue','INS',('cmd',self.cmd,
@@ -235,7 +236,8 @@ class DB:
         IOqueue_obj.storageMediumLocation = self.storageMediumLocation
         IOqueue_obj.t_prefix = self.t_prefix
         IOqueue_obj.WriteSize = self.WriteSize
-        IOqueue_obj.date_created = self.timestamp_utc.replace(tzinfo=None)
+        #IOqueue_obj.date_created = self.timestamp_utc.replace(tzinfo=None)
+        IOqueue_obj.date_created = self.timestamp_utc
         IOqueue_obj.Status = self.Status
         IOqueue_obj.save()
 
@@ -1116,7 +1118,7 @@ class Check:
         else: 
             logging.info('Start quick verify storageMediumID: ' + str(self.storageMediumID))
         if ObjectIdentifierValue and not storageMediumID:
-            self.sql = "SELECT a.id,a.ObjectIdentifierValue,a.ObjectMessageDigest,b.contentLocationValue,b.storageMediumID,b.contentLocationType,c.storageMediumUUID,c.storageMedium,c.storageMediumLocation,c.storageMediumLocationStatus,c.storageMediumBlockSize,c.storageMediumStatus,c.storageMediumFormat FROM %s a, %s b, %s c WHERE a.ObjectIdentifierValue = b.ObjectIdentifierValue AND b.storageMediumID = c.storageMediumID AND c.storageMediumLocation = '%s' AND c.storageMediumLocationStatus = 50 AND NOT c.storageMediumStatus = 200 AND a.ObjectIdentifierValue = '%s' ORDER BY ABS(b.contentLocationValue);" % (self.IngestTable,self.StorageTable,self.StorageMediumTable,self.storageMediumLocation,ObjectIdentifierValue)
+            self.sql = "SELECT a.id,a.ObjectIdentifierValue,a.ObjectMessageDigest,b.contentLocationValue,b.storageMediumID,b.contentLocationType,c.storageMediumUUID,c.storageMedium,c.storageMediumLocation,c.storageMediumLocationStatus,c.storageMediumBlockSize,c.storageMediumStatus,c.storageMediumFormat FROM %s a, %s b, %s c WHERE a.ObjectIdentifierValue = b.ObjectIdentifierValue AND b.storageMediumID = c.storageMediumID AND c.storageMediumLocation = '%s' AND c.storageMediumLocationStatus = 50 AND NOT c.storageMediumStatus = 0 AND NOT c.storageMediumStatus = 200 AND a.ObjectIdentifierValue = '%s' ORDER BY ABS(b.contentLocationValue);" % (self.IngestTable,self.StorageTable,self.StorageMediumTable,self.storageMediumLocation,ObjectIdentifierValue)
         elif ObjectIdentifierValue and storageMediumID:
             self.sql = "SELECT a.id,a.ObjectIdentifierValue,a.ObjectMessageDigest,b.contentLocationValue,b.storageMediumID,b.contentLocationType,c.storageMediumUUID,c.storageMedium,c.storageMediumLocation,c.storageMediumLocationStatus,c.storageMediumBlockSize,c.storageMediumStatus,c.storageMediumFormat FROM %s a, %s b, %s c WHERE a.ObjectIdentifierValue = b.ObjectIdentifierValue AND b.storageMediumID = c.storageMediumID AND c.storageMediumLocation = '%s' AND c.storageMediumLocationStatus = 50 AND NOT c.storageMediumStatus = 200 AND a.ObjectIdentifierValue = '%s' AND b.storageMediumID = '%s' ORDER BY ABS(b.contentLocationValue);" % (self.IngestTable,self.StorageTable,self.StorageMediumTable,self.storageMediumLocation,ObjectIdentifierValue,storageMediumID)
         elif storageMediumID:
@@ -1926,7 +1928,8 @@ class Robot:
                 storageMedium_obj = storageMedium()
                 storageMedium_obj.storageMedium = t_type
                 storageMedium_obj.storageMediumID = self.t_id
-                storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                #storageMedium_obj.storageMediumDate = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.storageMediumDate = self.timestamp_utc
                 storageMedium_obj.storageMediumLocation = t_location
                 storageMedium_obj.storageMediumLocationStatus = 50
                 storageMedium_obj.storageMediumBlockSize = t_block
@@ -1935,10 +1938,12 @@ class Robot:
                 storageMedium_obj.storageMediumFormat = t_format
                 storageMedium_obj.storageMediumMounts = 1
                 storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                storageMedium_obj.CreateDate = self.timestamp_utc.replace(tzinfo=None)
+                #storageMedium_obj.CreateDate = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.CreateDate = self.timestamp_utc
                 storageMedium_obj.CreateAgentIdentifierValue = AgentIdentifierValue
                 storageMedium_obj.storageMediumUUID = self.uuid
-                storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.LocalDBdatetime = self.timestamp_utc
                 storageMedium_obj.save()                                                        
 #                res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'INS',('storageMedium',t_type,
 #                                                                                 'storageMediumID',self.t_id,
@@ -1974,7 +1979,8 @@ class Robot:
                                                                                                     'StorageMediumGuid',self.uuid))
                     if ext_errno: logging.error('Failed to insert to External DB: ' + str(self.t_id) + ' (ESSPGM) error: ' + str(ext_why))
                     else:
-                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                        storageMedium_obj.ExtDBdatetime = self.timestamp_utc
                         storageMedium_obj.save()   
 #                        res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
 #                                                                                        ('storageMediumID',self.t_id))
@@ -2233,7 +2239,8 @@ class Events:
             eventIdentifier_obj = eventIdentifier()
             eventIdentifier_obj.eventIdentifierValue = self.uuid
             eventIdentifier_obj.eventType = eventType
-            eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+            #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+            eventIdentifier_obj.eventDateTime = self.timestamp_utc
             eventIdentifier_obj.eventDetail = eventDetail
             eventIdentifier_obj.eventApplication = eventApplication
             eventIdentifier_obj.eventVersion = eventVersion
@@ -2265,7 +2272,8 @@ class Events:
             eventIdentifier_obj = eventIdentifier()
             eventIdentifier_obj.eventIdentifierValue = self.uuid
             eventIdentifier_obj.eventType = eventType
-            eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+            #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+            eventIdentifier_obj.eventDateTime = self.timestamp_utc
             eventIdentifier_obj.eventDetail = eventDetail
             eventIdentifier_obj.eventApplication = eventApplication
             eventIdentifier_obj.eventVersion = eventVersion

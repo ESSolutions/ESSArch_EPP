@@ -329,10 +329,14 @@ class Robot:
             logger.info('Unmount tape: ' + volser + ' Successful')
             ESSPGM.Events().create('2010','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(self.drive_id),2,storageMediumID=volser)
             ESSDB.DB().action('robotdrives','UPD',('status','Ready','t_id','','slot_id','0','drive_lock',''),('drive_id',self.drive_id))
-            if ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumID','storageMediumStatus'),('storageMediumID',volser))[0][1] == 20:
-                ESSDB.DB().action('robot','UPD',('status','WriteTape','drive_id','99'),('slot_id',robot_db[0]))
-            elif ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumID','storageMediumStatus'),('storageMediumID',volser)):
-                ESSDB.DB().action('robot','UPD',('status','ArchTape','drive_id','99'),('slot_id',robot_db[0]))
+            StorageMedium_list = ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumID','storageMediumStatus'),('storageMediumID',volser))
+            if len(StorageMedium_list) > 0:
+                if StorageMedium_list[0][1] == 0:
+                    ESSDB.DB().action('robot','UPD',('status','InactiveTape','drive_id','99'),('slot_id',robot_db[0]))
+                elif StorageMedium_list[0][1] == 20:
+                    ESSDB.DB().action('robot','UPD',('status','WriteTape','drive_id','99'),('slot_id',robot_db[0]))
+                else:
+                    ESSDB.DB().action('robot','UPD',('status','ArchTape','drive_id','99'),('slot_id',robot_db[0]))
             else:
                 ESSDB.DB().action('robot','UPD',('status','Ready','drive_id','99'),('slot_id',robot_db[0]))
         else:

@@ -28,7 +28,6 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
 from django.core.urlresolvers import reverse
 
-
 #class Notes(models.Model):
 #    title   = models.CharField(max_length=255,help_text='Ange en title')
 #    FRESHMAN = 'FR'

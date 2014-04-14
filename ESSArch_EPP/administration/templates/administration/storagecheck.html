@@ -51,11 +51,6 @@
 </div>
 
 <div class="row">
-	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#archiveobject-filters">-</button>
-	<span>Filters</span>
-</div>
-
-<div id="archiveobject-filters" class="row collapse in">
     <table class="table search">
         <thead>
             <tr>
@@ -166,11 +161,6 @@
 </div>
 
 <div class="row">
-	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#archiveobject-selection">-</button>
-	<span>Selection list</span>
-</div>
-
-<div id="archiveobject-selection" class="row collapse in">
     <table id="archiveobject-table" class="span12 display table table-bordered table-condensed table-striped">
         <thead>
             <tr>
@@ -198,46 +188,6 @@
     </table>
 </div>
 
-
-<div class="row">
-	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#deactivate_media">-</button>
-	<span>Deactivate storage medium</span>
-</div>
-
-<div id="deactivate_media" class="row collapse in">
-    <table id="deactivate_media-table" class="span12 display table table-bordered table-condensed table-striped">
-        <thead>
-            <tr>
-            	<th>MediumID</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot></tfoot>
-    </table>
-</div>
-
-<div class="row">
-	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#need_to_migrate">-</button>
-	<span>Need to migrate</span>
-</div>
-
-<div id="need_to_migrate" class="row collapse in">
-    <table id="need_to_migrate-table" class="span12 display table table-bordered table-condensed table-striped">
-        <thead>
-            <tr>
-            	<th>MediumID</th>
-            	<th>storageMedium</th>
-            	<th>storageMediumDate</th>
-            	<th>Location</th>
-            	<th>ObjectIdentifierValue</th>
-            	<th>ObjectUUID</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot></tfoot>
-    </table>
-</div>
-
 <!--
 <div class="row">
     <pre data-url="{% static "administration/js/storagemaintenance.js" %}" class="javascript"/>
@@ -249,17 +199,7 @@
 {% block app-extra-script %}
     {% js "TableTools/media/js/TableTools.min.js" %}
     {% js "administration/js/eztables.demo.js" %}
-	{% js "administration/js/storagemaintenance.js" %}
-
-	<script>	
-		$(".btn[data-toggle='collapse']").click(function()
-			{
-	    		$(this).text(function(i,old)
-    				{
-	        			return old=='+' ?  '-' : '+';
-	    		});
-		});
-	</script>
+	{% js "administration/js/storagecheck.js" %}
 <!--
 <script>
 $(document).ready(function() {
