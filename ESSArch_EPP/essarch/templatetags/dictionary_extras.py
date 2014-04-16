@@ -50,4 +50,10 @@ def access2(value, arg):
     if arg is None:
         return None
     else:
-        return value[arg]
+        try:
+            key_value = value[arg]
+        except KeyError:
+            return '#KeyError#'
+        else:
+            return key_value        
+        #return value[arg]

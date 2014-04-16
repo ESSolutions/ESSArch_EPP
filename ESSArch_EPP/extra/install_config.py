@@ -29,7 +29,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 # own models etc
-from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSArchPolicy, ESSProc
+from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSArchPolicy, ESSProc, DefaultValue
 from essarch.models import eventType_codes, robotdrives, storageMedium
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -101,6 +101,14 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
+
+    # defaultvalue permissions
+    permission_list = ['add_defaultvalue','change_defaultvalue','delete_defaultvalue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration',
+                                                    content_type__model='defaultvalue').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
 
     ct_essarch_accessqueue = ContentType.objects.get(app_label='essarch', model='accessqueue')
     permission_list = ['list_accessqueue','add_accessqueue','change_accessqueue','delete_accessqueue']
@@ -730,6 +738,21 @@ def installdefaultESSProc(): # default ESSProc
             ESSProc_obj.PID=row[8]
             ESSProc_obj.Pause=row[9]
             ESSProc_obj.save()
+
+def installdefaultdefaultvalues(): # default default values
+
+    dct = {
+           'administration_storagemaintenance__temp_path': '/ESSArch/essarch_temp',
+           'administration_storagemaintenance__copy_path': '',   
+           }
+
+    # create according to model with two fields
+    for key in dct :
+        if not DefaultValue.objects.filter(entity=key).exists():
+            print "Adding entry to DefaultValue for %s" % key
+            le = DefaultValue( entity=key, value=dct[key] )
+            le.save()
+    return 0
 
 def installdefaultparameters(): # default config parameters
     

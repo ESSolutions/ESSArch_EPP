@@ -28,7 +28,7 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSArchPolicy, ESSConfig, ESSProc
+from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSArchPolicy, ESSConfig, ESSProc, DefaultValue
 from django.contrib import admin
 
 # Logevents
@@ -223,3 +223,12 @@ class ESSProcAdmin( admin.ModelAdmin ):
     fields = ('Name', 'Path', 'LogFile', 'Time', 'PID', 'expected_pids', 'Status', 'Run', 'Pause','alarm')
 
 admin.site.register(ESSProc, ESSProcAdmin)
+
+# Default value
+class DefaultValueAdmin( admin.ModelAdmin ):
+    list_display = ( 'entity', 'value' )
+    search_fields = ( 'entity', )
+    readonly_fields = ('entity',)
+    fields = ('entity', 'value')
+
+admin.site.register(DefaultValue, DefaultValueAdmin)

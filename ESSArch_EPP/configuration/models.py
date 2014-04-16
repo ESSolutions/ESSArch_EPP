@@ -348,3 +348,29 @@ class ESSProc(models.Model):
     class Meta:
         db_table = 'ESSProc'
         verbose_name = 'Worker processes (core)'
+        
+# Default value
+class DefaultValueQuerySet(models.query.QuerySet):
+    def get_value_object(self):
+        class Struct:
+            def __init__(self, **entries):
+                self.__dict__.update(entries)
+        return Struct(**dict(self.values_list('entity','value')))
+
+class DefaultValueManager(models.Manager):
+    def get_query_set(self):
+        return DefaultValueQuerySet(self.model)
+
+    def __getattr__(self, attr, *args):
+        if attr.startswith("_"): # or at least "__"
+            raise AttributeError
+        return getattr(self.get_query_set(), attr, *args) 
+
+class DefaultValue(models.Model):
+    entity      = models.CharField( max_length = 255, unique=True )
+    value       = models.CharField( max_length = 255 )
+    objects     = DefaultValueManager()
+    
+    class Meta:
+        ordering = ["entity"]
+        verbose_name = 'Default value'

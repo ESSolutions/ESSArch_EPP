@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,42 +8,35 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'ESSProc.expected_pids'
-        db.add_column('ESSProc', 'expected_pids',
-                      self.gf('django.db.models.fields.IntegerField')(default=1),
-                      keep_default=False)
-
-        # Adding field 'ESSProc.child_pids'
-        db.add_column('ESSProc', 'child_pids',
-                      self.gf('picklefield.fields.PickledObjectField')(null=True),
-                      keep_default=False)
+        # Adding model 'DefaultValue'
+        db.create_table(u'configuration_defaultvalue', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('entity', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
+        ))
+        db.send_create_signal(u'configuration', ['DefaultValue'])
 
         # Adding field 'ESSProc.checked'
         db.add_column('ESSProc', 'checked',
                       self.gf('django.db.models.fields.DateTimeField')(default='2014-01-01 00:01'),
                       keep_default=False)
 
-        # Adding field 'ESSProc.alarm'
-        db.add_column('ESSProc', 'alarm',
-                      self.gf('django.db.models.fields.IntegerField')(default=0),
-                      keep_default=False)
-
 
     def backwards(self, orm):
-        # Deleting field 'ESSProc.expected_pids'
-        db.delete_column('ESSProc', 'expected_pids')
-
-        # Deleting field 'ESSProc.child_pids'
-        db.delete_column('ESSProc', 'child_pids')
+        # Deleting model 'DefaultValue'
+        db.delete_table(u'configuration_defaultvalue')
 
         # Deleting field 'ESSProc.checked'
         db.delete_column('ESSProc', 'checked')
 
-        # Deleting field 'ESSProc.alarm'
-        db.delete_column('ESSProc', 'alarm')
-
 
     models = {
+        u'configuration.defaultvalue': {
+            'Meta': {'ordering': "['entity']", 'object_name': 'DefaultValue'},
+            'entity': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'value': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
         u'configuration.essarchpolicy': {
             'AIPType': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'AIPpath': ('django.db.models.fields.CharField', [], {'default': "'/ESSArch/work'", 'max_length': '255'}),
@@ -120,10 +113,10 @@ class Migration(SchemaMigration):
             'Status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'Time': ('django.db.models.fields.CharField', [], {'max_length': '4'}),
             'alarm': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'checked': ('django.db.models.fields.DateTimeField', [], {'default': "'2014-01-01 00:01'"}),
             'child_pids': ('picklefield.fields.PickledObjectField', [], {'null': 'True'}),
             'expected_pids': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            #'monitoring': ('django.db.models.fields.DateTimeField', [], {'default': "'2014-01-01 00:00'"})
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         u'configuration.ipparameter': {
             'Meta': {'ordering': "['type']", 'object_name': 'IPParameter'},

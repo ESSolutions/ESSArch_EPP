@@ -35,7 +35,7 @@ from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOIC
                            storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
                            MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
 
-from configuration.models import sm
+from configuration.models import sm, DefaultValue
 
 from administration.tasks import MigrationTask, RobotInventoryTask
 
@@ -339,6 +339,8 @@ class StorageMaintenance(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StorageMaintenance, self).get_context_data(**kwargs)
         context['label'] = 'Storage maintenance'
+        context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').values_list('entity','value'))
+        #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
     
 class StorageMaintenanceDatatablesView(DatatablesView):

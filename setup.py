@@ -27,7 +27,6 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-
 try:
     from setuptools import setup, find_packages
 except ImportError:
