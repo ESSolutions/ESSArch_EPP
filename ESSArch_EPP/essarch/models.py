@@ -45,12 +45,12 @@ from essarch.fields import BigAutoField
 class permission(models.Model):
     class Meta:
         permissions = (
-            ("ESSArch_Marieberg", "site Marieberg"),
-            ("ESSArch_MKC", "site MKC"),
-            ("ESSArch_SVAR", "site SVAR"),
-            ("ESSArch_HLA", "site HLA"),
-            ("ESSArch_Globen", "site Globen"),
-            ("ESSArch_RA-OSLO", "site Oslo"),
+            #("ESSArch_Marieberg", "site Marieberg"),
+            #("ESSArch_MKC", "site MKC"),
+            #("ESSArch_SVAR", "site SVAR"),
+            #("ESSArch_HLA", "site HLA"),
+            #("ESSArch_Globen", "site Globen"),
+            #("ESSArch_RA-OSLO", "site Oslo"),
             ("essadministrate", "ESSArch admin "),
             ("essaccess", "ESSArch access"),
             ("essingest", "ESSArch ingest"),

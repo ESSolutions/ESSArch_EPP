@@ -120,9 +120,10 @@ class Migration(SchemaMigration):
             'Status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'Time': ('django.db.models.fields.CharField', [], {'max_length': '4'}),
             'alarm': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'checked': ('django.db.models.fields.DateTimeField', [], {'default': "'2014-01-01 00:01'"}),
             'child_pids': ('picklefield.fields.PickledObjectField', [], {'null': 'True'}),
             'expected_pids': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
             #'monitoring': ('django.db.models.fields.DateTimeField', [], {'default': "'2014-01-01 00:00'"})
         },
         u'configuration.ipparameter': {

@@ -36,8 +36,8 @@ from django.contrib.contenttypes.models import ContentType
 
 import sys,datetime
 
-site_name = u'Site-X' # RA-OSLO , RA-Marieberg
-medium_location = u'Media_%s' % site_name # IT_OSLO, IS_Marieberg
+site_name = u'Site-X' # RA-OSLO , Marieberg, MKC, SVAR, HLA
+medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG
 site_profile = "SE" # SE or NO
 
 install_site = u'ESSArch_%s' % site_name 

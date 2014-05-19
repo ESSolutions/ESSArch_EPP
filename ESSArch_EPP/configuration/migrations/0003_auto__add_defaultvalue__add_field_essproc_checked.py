@@ -16,18 +16,18 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'configuration', ['DefaultValue'])
 
-        # Adding field 'ESSProc.checked'
-        db.add_column('ESSProc', 'checked',
-                      self.gf('django.db.models.fields.DateTimeField')(default='2014-01-01 00:01'),
-                      keep_default=False)
+#        # Adding field 'ESSProc.checked'
+#        db.add_column('ESSProc', 'checked',
+#                      self.gf('django.db.models.fields.DateTimeField')(default='2014-01-01 00:01'),
+#                      keep_default=False)
 
 
     def backwards(self, orm):
         # Deleting model 'DefaultValue'
         db.delete_table(u'configuration_defaultvalue')
 
-        # Deleting field 'ESSProc.checked'
-        db.delete_column('ESSProc', 'checked')
+#        # Deleting field 'ESSProc.checked'
+#        db.delete_column('ESSProc', 'checked')
 
 
     models = {

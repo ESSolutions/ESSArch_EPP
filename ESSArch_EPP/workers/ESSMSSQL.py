@@ -31,13 +31,19 @@ import pyodbc,sys,time,string
 
 #DBhost = '192.168.100.150'		#Prod AIS
 #DBuser = 'RA2B_ES21rcH'			#Prod AIS
-#DBpasswd = '@Rk1s3S2ArcH'		#Prod AIS
+#DBpasswd = 'x'		#Prod AIS
 #DBname = 'Arkis2Balder'			#Prod AIS
+#DBport = '1433'
+#DBTDS_Version = '7.2'
+#DBdriver = 'SQL Server'     # must match entry in /etc/unixODBC/odbcinst.ini
 
-DBhost = '192.168.100.196'		#Test AIS 2008
+DBhost = '10.100.9.2'		#Test AIS 2008
 DBuser = 'RA2B_ES21rcH'			#Test AIS 2008
-DBpasswd = 'A75deKGn85Bt'		#Test AIS 2008
+DBpasswd = 'x'		#Test AIS 2008
 DBname = 'Arkis2Balder'			#Test AIS 2008
+DBport = '1433'
+DBTDS_Version = '7.2'
+DBdriver = 'SQL Server'     # must match entry in /etc/unixODBC/odbcinst.ini
 
 #DBlogin_timeout = 30
 DBquery_timeout = 60
@@ -346,7 +352,15 @@ class DB:
         try:
             #self.db=pymssql.connect(host=DBhost,user=DBuser,password=DBpasswd,database=DBname,timeout=DBquery_timeout,login_timeout=DBlogin_timeout)
             #self.db=pymssql.connect(host=DBhost,user=DBuser,password=DBpasswd,database=DBname)
-            self.db=pyodbc.connect(DRIVER='SQL Server',server=DBhost,uid=DBuser,pwd=DBpasswd,database=DBname,timeout=DBquery_timeout)
+            self.db=pyodbc.connect(
+                       DRIVER=DBdriver,
+                       SERVER=DBhost,
+                       UID=DBuser,
+                       PWD=DBpasswd,
+                       DATABASE=DBname,
+                       TIMEOUT=DBquery_timeout,
+                       TDS_Version=DBTDS_Version,
+                       PORT=DBport)
             self.cursor = self.db.cursor()
             #self.cursor.setinputsizes(10500)
             self.cursor.execute(sql)
