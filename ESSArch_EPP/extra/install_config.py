@@ -248,6 +248,7 @@ def createdefaultusers(): # default users, groups and permissions
                                                     content_type__model='logfile').all()
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
+        admingroup.permissions.add(permission_obj)
 
     # migrationqueue permissions
     permission_list = ['add_migrationqueue','change_migrationqueue','delete_migrationqueue','list_migrationqueue']
@@ -566,7 +567,7 @@ def installdefaultstorageMedium(): # default storageMedium
         storageMedium_obj.storageMediumLocation=medium_location
         storageMedium_obj.storageMediumLocationStatus=50
         storageMedium_obj.storageMediumBlockSize=128
-        storageMedium_obj.storageMediumStatus=30
+        storageMedium_obj.storageMediumStatus=20
         storageMedium_obj.storageMediumUsedCapacity=0
         storageMedium_obj.storageMediumFormat=103
         storageMedium_obj.storageMediumMounts=0
@@ -743,7 +744,8 @@ def installdefaultdefaultvalues(): # default default values
 
     dct = {
            'administration_storagemaintenance__temp_path': '/ESSArch/essarch_temp',
-           'administration_storagemaintenance__copy_path': '',   
+           'administration_storagemaintenance__copy_path': '',
+           'access_new__ReqType': '5',
            }
 
     # create according to model with two fields
@@ -798,6 +800,7 @@ def installdefaultparameters(): # default config parameters
     installdefaultpaths()            # default paths
     installdefaultschemaprofiles()   # default schema profiles for Sweden or Norway
     installogdefaults()              # default logevents
+    installdefaultdefaultvalues()    # default values
     installIPParameter()             # default metadata for IP
     installdefaulteventType_codes()  # default eventType_codes
     installdefaultESSConfig()        # default ESSConfig

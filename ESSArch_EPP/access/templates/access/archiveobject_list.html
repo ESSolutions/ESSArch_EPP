@@ -70,7 +70,7 @@ $(document).ready(function() {
         ],
         "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
             if ( aData[8] == "AIP" && aData[11] == "Archived" && aData[12] == "OK" ) {
-            	$('td:eq(0)', nRow).html('<a href="/access/new/' + aData[10] + '/">' + aData[1] + '</a>');
+            	$('td:eq(0)', nRow).html('<a href="/access/new/' + aData[1] + '/">' + aData[1] + '</a>');
             }
             if ( aData[8] == 'AIC' && aData[2] == 0 ) {
             	$('td:eq(1)', nRow).html('-');

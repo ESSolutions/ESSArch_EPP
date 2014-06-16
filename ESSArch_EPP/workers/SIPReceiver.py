@@ -32,6 +32,7 @@ import os, shutil, thread, datetime, time, logging, sys, csv, tarfile, stat, ESS
 from essarch.models import IngestQueue, ArchiveObject
 from configuration.models import ESSArchPolicy
 from django.utils import timezone
+from django import db
 
 class WorkingThread:
     tz=timezone.get_default_timezone()
@@ -251,7 +252,10 @@ class WorkingThread:
                                     if self.ok:
                                         ############################################
                                         # Create eARD METS sip.xml from PREMISfile
-                                        ESSMD.PREMIS2METS(SIProotpath,self.ObjectIdentifierValue,AgentIdentifierValue,altRecordID_dict,Mets_filepath)
+                                        errno,why = ESSMD.PREMIS2METS(SIProotpath,self.ObjectIdentifierValue,AgentIdentifierValue,altRecordID_dict,Mets_filepath)
+                                        if errno:
+                                            logging.error('Problem to convert PREMIS to METS for ObjectIdentifierValue: %s, why: %s, errno: %s' % (self.ObjectIdentifierValue, why, errno))
+                                            self.ok = 0
                                         errno,why = ESSMD.validate(FILENAME=Mets_filepath)
                                         if errno:
                                             logging.error('Problem to validate METS for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
@@ -681,7 +685,7 @@ class WorkingThread:
                                 elif os.path.split(self.path)[1] == 'user':
                                     #ReqIngestQueue_q = model.meta.Session.query(model.ReqIngestQueue)
                                     #DbRows_ReqIngest = ReqIngestQueue_q.filter(model.ReqIngestQueue.Status==0).all()
-                                    DbRows_ReqIngest = IngestQueue.objects.filter( Status=5 ).all()
+                                    DbRows_ReqIngest = IngestQueue.objects.filter( Status=0 ).all()
                                     if DbRows_ReqIngest:
                                         for DbRow_ReqIngest in DbRows_ReqIngest:
                                             user_Req = DbRow_ReqIngest.user
@@ -939,6 +943,7 @@ class WorkingThread:
                 logger.error('Unexpected error: %s' % (str(sys.exc_info())))
                 #print "Unexpected error:", sys.exc_info()[0], sys.exc_info()[1]
                 raise
+            db.close_old_connections()
             self.mLock.release()
             #time.sleep(int(self.Time))
             time.sleep(1)

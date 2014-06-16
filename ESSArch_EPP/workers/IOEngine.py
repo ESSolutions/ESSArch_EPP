@@ -32,6 +32,7 @@ from django.utils import timezone
 
 from essarch.models import storage, storageMedium, ArchiveObject, robotQueue
 from essarch.libs import flush_transaction
+from django import db
 
 class Functions:
     tz = timezone.get_default_timezone()
@@ -1270,6 +1271,7 @@ class WorkingThread:
                                 self.TapeIOpool.apply_async(WriteTapeProc, (self.select_t_prefix[0],self.ActiveTapeIOs,ProcName))
                                 logging.info('Apply new write IO process for tape prefix: %s, (ActiveTapeIOs: %s)' % (str(self.select_t_prefix[0]),str(self.ActiveTapeIOs))) 
             logger.debug('TapeIOpool_cache: %r',self.TapeIOpool._cache)
+            db.close_old_connections()
             time.sleep(1)
             self.mLock.release()
         time.sleep(10)

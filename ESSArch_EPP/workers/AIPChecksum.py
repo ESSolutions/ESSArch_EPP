@@ -31,6 +31,7 @@ import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, 
 from configuration.models import SchemaProfile, ChecksumAlgorithm_CHOICES, Parameter
 from essarch.models import ArchiveObject
 from django.db.models import Q
+from django import db
 from django.utils import timezone
 
 class WorkingThread:
@@ -368,6 +369,7 @@ class WorkingThread:
                             else:
                                 res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                 if errno: logging.error('Failed to update Local DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(why))
+                db.close_old_connections()
                 self.mLock.release()
                 time.sleep(int(self.Time))
         self.mDieFlag=0

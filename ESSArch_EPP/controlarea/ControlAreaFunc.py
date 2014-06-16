@@ -34,7 +34,9 @@ from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectRel, e
 from django.utils import timezone
 from lxml import etree
 
-ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
+#TODO lobby in sweden and logs in Norway
+ioessarch = '%s/lobby' % Path.objects.get(entity='path_gate').value
+#ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
 #ioessarch = Path.objects.get(entity='path_gate').value
 
 logger = logging.getLogger('essarch.controlarea')
@@ -48,13 +50,17 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
     premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
     ip_logfile = Parameter.objects.get(entity='ip_logfile').value
     
+    #TODO Norge ChecksumAlgorithm=2 and Sweden ChecksumAlgorithm=1
+    ChecksumAlgorithm=1
+    
     if status_code == 0:
         # Try to find filename for logfile with matching creator, system and version.
         logfilepath = ''
         return_code,status,file_list = logtool.get_logxml_filename(ObjectIdentifierValue=ObjectIdentifierValue,
                                                                    creator=creator,
                                                                    system=system,
-                                                                   version=version)
+                                                                   version=version,
+                                                                   path=ioessarch)
         if return_code == 0:
             if len(file_list) == 1:
                 logfilepath = os.path.join(ioessarch,file_list[0])
@@ -197,6 +203,7 @@ def CheckInFromMottag(source_path,target_path,Package,ObjectIdentifierValue=None
                                                        METS_LABEL=METS_LABEL,
                                                        PREMIS_ObjectPath=PREMIS_ObjectPath,
                                                        allow_unknown_filetypes=allow_unknown_filetypes,
+                                                       ChecksumAlgorithm=ChecksumAlgorithm,
                                                        )
         if errno:
             status_code = 8
@@ -472,6 +479,9 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode,allow_unk
     Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
     premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
     ip_logfile = Parameter.objects.get(entity='ip_logfile').value
+    
+    #TODO Norge ChecksumAlgorithm=2 and Sweden ChecksumAlgorithm=1
+    ChecksumAlgorithm=1
 
     if status_code == 0:
         # Import logentrys to database
@@ -558,6 +568,7 @@ def CheckInFromWork(source_path,target_path,Package,a_uid,a_gid,a_mode,allow_unk
                                                        METS_LABEL=METS_LABEL,
                                                        PREMIS_ObjectPath=PREMIS_ObjectPath,
                                                        allow_unknown_filetypes=allow_unknown_filetypes,
+                                                       ChecksumAlgorithm=ChecksumAlgorithm,
                                                        )
         if errno:
             status_code = 5
@@ -822,7 +833,7 @@ def GetExchangeRequestFileContent(reqfilename):
 class Functions:
     "Create IP mets"
     ###############################################
-    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None,allow_unknown_filetypes=False):
+    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None,allow_unknown_filetypes=False,ChecksumAlgorithm=2):
         status_code = 0
         status_list = []
         error_list = []
@@ -832,7 +843,7 @@ class Functions:
         self.ObjectIdentifierValue = ObjectIdentifierValue
         IPParameter_obj = IPParameter.objects.filter(type='SIP')[0]
         
-        ChecksumAlgorithm = 2
+        #ChecksumAlgorithm = 2
         CA = dict(ChecksumAlgorithm_CHOICES)[ChecksumAlgorithm]
         
         if status_code == 0:

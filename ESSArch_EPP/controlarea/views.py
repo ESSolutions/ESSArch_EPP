@@ -106,7 +106,9 @@ class MyFileList(object):
                                 ip_uuid_test = ObjectPackageName[:-4]
                                 ip_uuid_test_flag = 0
                                 #logger.info('IP: %s found in reception, start to check if an IP directory with name: "%s" exists in some AIC in "gate area"' % (ObjectPath, ip_uuid_test))
-                                logs_path = os.path.join( self.gate_path, 'logs' )
+                                #TODO lobby in sweden and logs in Norway
+                                #logs_path = os.path.join( self.gate_path, 'logs' )
+                                logs_path = os.path.join( self.gate_path, 'lobby' )
                                 if os.path.isdir(logs_path):
                                     for g in os.listdir(logs_path):
                                         if os.path.isdir(os.path.join(logs_path, g)): #AIC dir
@@ -965,7 +967,7 @@ class PreserveIP(CreateView):
         ip_uuid_list = []
         for ip_obj in ip_obj_list:
             ip_uuid_list.append(ip_obj.ObjectUUID)
-        event_obj_list = eventIdentifier.objects.filter( linkingObjectIdentifierValue__in = ip_uuid_list ).order_by('linkingObjectIdentifierValue')
+        event_obj_list = eventIdentifier.objects.filter( linkingObjectIdentifierValue__in = ip_uuid_list ).order_by('linkingObjectIdentifierValue', 'eventDateTime')
         event_list1 = []
         event_list2 = []
         for event_obj in event_obj_list:

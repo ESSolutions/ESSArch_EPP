@@ -11,9 +11,9 @@
 
 ### BEGIN INIT INFO
 # Provides:          celeryd
-# Required-Start:    $network $local_fs $remote_fs
-# Required-Stop:     $network $local_fs $remote_fs
-# Default-Start:     2 3 4 5
+# Required-Start:    $all
+# Required-Stop:     $network $local_fs $remote_fs $portmap
+# Default-Start:     2 3 5
 # Default-Stop:      0 1 6
 # Short-Description: celery task worker daemon
 ### END INIT INFO
@@ -230,7 +230,7 @@ _get_pids() {
 
 
 _chuid () {
-    su "$CELERYD_USER" -c "$CELERYD_MULTI $*"
+    su -m "$CELERYD_USER" -c "$CELERYD_MULTI $*"
 }
 
 

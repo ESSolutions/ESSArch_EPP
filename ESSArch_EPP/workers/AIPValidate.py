@@ -29,6 +29,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, ESSMD, ESSmetablob, string
 from configuration.models import ChecksumAlgorithm_CHOICES
 from django.utils import timezone
+from django import db
 
 class WorkingThread:
     "Thread is working in the background"
@@ -459,6 +460,7 @@ class WorkingThread:
                             else:
                                 res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                 if errno: logging.error('Failed to update Local DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(why))
+                db.close_old_connections()
                 self.mLock.release()
                 time.sleep(int(self.Time))
         self.mDieFlag=0

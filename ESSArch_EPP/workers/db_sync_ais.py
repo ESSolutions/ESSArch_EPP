@@ -31,6 +31,7 @@ from optparse import OptionParser
 from django.utils import timezone
 from essarch.models import storageMedium, storage, ArchiveObject
 from configuration.models import ESSArchPolicy
+from django import db
 
 class work:
     TimeZone = timezone.get_default_timezone_name()
@@ -395,6 +396,7 @@ class work:
             work().sync_IngestObject(startDateTime,stopDateTime)
             work().sync_eventIdentifier(startDateTime,stopDateTime)
             work().sync_IngestObjectMetadata(startDateTime,stopDateTime)
+            db.close_old_connections()
         else:
             logging.info('Skip to update centralDB')
 

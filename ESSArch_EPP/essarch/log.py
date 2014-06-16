@@ -485,8 +485,10 @@ def ExportLogEventsToFile(logfilename, ip_uuid=None, aic_uuid=None, StatusProces
         if ip_obj_data:
             ip_obj_data = ip_obj_data[0]
             significantProperties_list.append(['label',ip_obj_data.label])
-            significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
-            significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
+            if not ip_obj_data.startdate is None:
+                significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+            if not ip_obj_data.enddate is None:
+                significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
         significantProperties_list.append(['iptype',dict(PackageType_CHOICES)[ip_obj.OAISPackageType]])
         significantProperties_list.append(['generation',str(ip_obj.Generation)])
         object_list.append([IdentifierType,
@@ -533,8 +535,10 @@ def ExportLogEventsToFile(logfilename, ip_uuid=None, aic_uuid=None, StatusProces
             if ip_obj_data:
                 ip_obj_data = ip_obj_data[0]
                 significantProperties_list.append(['label',ip_obj_data.label])
-                significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
-                significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
+                if not ip_obj_data.startdate is None:
+                    significantProperties_list.append(['startdate',ip_obj_data.startdate.astimezone(pytz.timezone(TimeZone)).isoformat()])
+                if not ip_obj_data.enddate is None:
+                    significantProperties_list.append(['enddate',ip_obj_data.enddate.astimezone(pytz.timezone(TimeZone)).isoformat()])    
             significantProperties_list.append(['iptype',dict(PackageType_CHOICES)[ip_obj.OAISPackageType]])
             significantProperties_list.append(['generation',str(ip_obj.Generation)])
             object_list.append([IdentifierType,

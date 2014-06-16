@@ -10,4 +10,6 @@ encoding//essarch/migrations/0004_auto__chg_field_migrationqueue_TargetMediumID.
 encoding//storagelogistics/migrations/0001_initial.py=utf-8
 encoding//storagelogistics/views.py=utf-8
 encoding//workers/AIPWriter.py=iso-8859-1
+encoding//workers/ESSDB.py=iso-8859-1
+encoding//workers/ESSmetablob.py=iso-8859-1
 encoding//workers/IOEngine.py=iso-8859-1

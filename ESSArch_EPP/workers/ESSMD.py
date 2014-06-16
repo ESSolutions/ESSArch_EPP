@@ -2278,6 +2278,8 @@ def PREMIS2METS(SIPpath,ObjectIdentifierValue,AgentIdentifierValue,altRecordID_d
     PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
     ProcVersion = '2.2'
     tz=timezone.get_default_timezone()
+    error_list = []
+    error_code = 0
     ok=1
     ###########################################################
     # get policy info
@@ -2286,6 +2288,12 @@ def PREMIS2METS(SIPpath,ObjectIdentifierValue,AgentIdentifierValue,altRecordID_d
     if errno:
         logging.error('Failed to access Local DB, error: ' + str(why))
         ok = 0
+    if ok:
+        if len(PolicyDB) == 0:
+            logging.error('POLICYID: %s for object: %s is not valid' % (altRecordID_dict['POLICYID'], ObjectIdentifierValue))
+            error_list.append('POLICYID: %s for object: %s is not valid' % (altRecordID_dict['POLICYID'], ObjectIdentifierValue))
+            error_code = 1
+            ok = 0
     if ok:
         ###########################################################
         # set variables
@@ -2473,6 +2481,8 @@ def PREMIS2METS(SIPpath,ObjectIdentifierValue,AgentIdentifierValue,altRecordID_d
         METSfile_fileobj.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         _mets.export(METSfile_fileobj,0,namespace_="mets:",namespacedef_=namespacedef)
         METSfile_fileobj.close()
+    
+    return error_code,error_list
         
 
 "Create PREMISfile from METSfile"

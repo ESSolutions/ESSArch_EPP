@@ -31,6 +31,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, ESSMD
 from configuration.models import ChecksumAlgorithm_CHOICES
+from django import db
 
 class WorkingThread:
     "Thread is working in the background"
@@ -407,6 +408,7 @@ class WorkingThread:
                         self.event_info = 'Failed to validate SIP package: ' + self.ObjectIdentifierValue
                         logging.error(self.event_info)
                         ESSPGM.Events().create('1025','','ESSArch SIPValidateFormat',ProcVersion,'1',self.event_info,self.DBmode,self.ObjectIdentifierValue)
+            db.close_old_connections()
             self.mLock.release()
             time.sleep(int(self.Time))
         self.mDieFlag=0

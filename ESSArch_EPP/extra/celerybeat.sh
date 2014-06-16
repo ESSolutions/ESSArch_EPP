@@ -10,9 +10,9 @@
 
 ### BEGIN INIT INFO
 # Provides:          celerybeat
-# Required-Start:    $network $local_fs $remote_fs
-# Required-Stop:     $network $local_fs $remote_fs
-# Default-Start:     2 3 4 5
+# Required-Start:    $all
+# Required-Stop:     $network $local_fs $remote_fs $portmap
+# Default-Start:     2 3 5
 # Default-Stop:      0 1 6
 # Short-Description: celery periodic task scheduler
 ### END INIT INFO
@@ -248,7 +248,7 @@ stop_beat () {
 }
 
 _chuid () {
-    su "$CELERYBEAT_USER" -c "$CELERYBEAT $*"
+    su -m "$CELERYBEAT_USER" -c "$CELERYBEAT $*"
 }
 
 start_beat () {

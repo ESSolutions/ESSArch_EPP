@@ -29,6 +29,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, shutil
 from configuration.models import Path
 from essarch.models import ArchiveObject
+from django import db
 
 class WorkingThread:
     "Thread is working in the background"
@@ -107,7 +108,8 @@ class WorkingThread:
                             if not os.path.exists(self.AICmets_objpath):
                                 logging.warning('AIC mets object not found, %s' % self.AICmets_objpath)
                                 self.AICmets_objpath = None
-                        self.AIC_GatePath = os.path.join(os.path.join(self.GatePath,'logs'),self.AIC_UUID)
+                        #TODO parameter for "logs" / "lobby"
+                        self.AIC_GatePath = os.path.join(os.path.join(self.GatePath,'lobby'),self.AIC_UUID)
                         if not os.path.exists(self.AIC_GatePath):
                             logging.warning('AIC not found in gate area, %s' % self.AIC_GatePath)
                             self.AIC_GatePath = None
@@ -162,6 +164,7 @@ class WorkingThread:
                             logging.error('Failed to update DB status for AIP: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(why))
                         else:
                             ESSPGM.Events().create('1150','','ESSArch AIPPurge',ProcVersion,'0','',2,self.ObjectIdentifierValue)
+                db.close_old_connections()
                 self.mLock.release()
                 time.sleep(int(self.Time))
         self.mDieFlag=0

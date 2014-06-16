@@ -31,7 +31,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from essarch.models import AccessQueue, AccessQueueForm, AccessQueueFormUpdate, ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, AccessReqType_CHOICES
-from configuration.models import Path, Parameter
+from configuration.models import Path, DefaultValue, Parameter
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView
@@ -209,7 +209,17 @@ class AccessCreate(CreateView):
         initial['user'] = self.request.user.username
         initial['Status'] = 0
         #initial['ReqType'] = self.request.GET.get('ReqType',4)
-        initial['ReqType'] = self.request.GET.get('ReqType',5)
+        default_ReqType = 5
+        try:
+            ReqType_obj = DefaultValue.objects.get(entity='access_new__ReqType')
+        except DefaultValue.DoesNotExist:
+            pass
+        else:
+            try:
+                default_ReqType = int(ReqType_obj.value)
+            except ValueError:
+                pass
+        initial['ReqType'] = self.request.GET.get('ReqType',default_ReqType)
         initial['ReqPurpose'] = self.request.GET.get('ReqPurpose') 
         if initial['ReqType'] == 5:
             access_path = Path.objects.get(entity='path_control').value

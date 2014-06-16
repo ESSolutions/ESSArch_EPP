@@ -34,6 +34,7 @@ from Queue import Empty
 from lxml import etree
 from django.utils import timezone
 from essarch.models import robotQueue
+from django import db
 
 
 class WorkingThread:
@@ -237,6 +238,7 @@ class WorkingThread:
                             logger.info('Tape ' + self.t_id + ' is not mounted')
                             #ESSDB.DB().action('robotreq','DEL',('id',self.id))
                             self.item.delete()
+                db.close_old_connections()
                 self.mLock.release()
                 time.sleep(int(self.Time))
         self.mDieFlag=0

@@ -31,6 +31,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import sys, time, logging,  ESSDB, ESSPGM
 
 from essarch.models import IngestQueue
+from django import db
 
 class Proc:
     ###############################################
@@ -236,5 +237,6 @@ if __name__ == '__main__':
             ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
             logging.info('Stopping ' + ProcName)
             break
+        db.close_old_connections()
         time.sleep(int(Time))
 # ./SIPValidatexApproval.py 

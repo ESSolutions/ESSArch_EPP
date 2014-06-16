@@ -27,7 +27,7 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-import hashlib, subprocess, ESSDB,  ESSMSSQL, ESSMD, logging, time, datetime, os, stat, re, tarfile, urllib, uuid, db_sync_ais, csv, smtplib, email.charset, pytz, mimetypes, sys
+import hashlib, subprocess, ESSDB,  ESSMSSQL, ESSMD, logging, time, datetime, os, stat, re, tarfile, urllib, uuid, db_sync_ais, csv, smtplib, email.charset, pytz, mimetypes, sys, _mysql_exceptions, MySQLdb
 from xml.dom.minidom import Document
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -2234,21 +2234,30 @@ class Events:
             return 2
         ##########################################################
         #Update local eventDB for archive object 
-        if self.updateDB[0] and ObjectIdentifierValue: 
-            eventOutcomeDetailNote_MySQL = ESSDB.escape_string(eventOutcomeDetailNote)
-            eventIdentifier_obj = eventIdentifier()
-            eventIdentifier_obj.eventIdentifierValue = self.uuid
-            eventIdentifier_obj.eventType = eventType
-            #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
-            eventIdentifier_obj.eventDateTime = self.timestamp_utc
-            eventIdentifier_obj.eventDetail = eventDetail
-            eventIdentifier_obj.eventApplication = eventApplication
-            eventIdentifier_obj.eventVersion = eventVersion
-            eventIdentifier_obj.eventOutcome = eventOutcome
-            eventIdentifier_obj.eventOutcomeDetailNote = eventOutcomeDetailNote_MySQL
-            eventIdentifier_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
-            eventIdentifier_obj.linkingObjectIdentifierValue = ObjectIdentifierValue
-            eventIdentifier_obj.save()
+        if self.updateDB[0] and ObjectIdentifierValue:
+            try: 
+                eventOutcomeDetailNote_MySQL = ESSDB.escape_string(eventOutcomeDetailNote)
+                eventIdentifier_obj = eventIdentifier()
+                eventIdentifier_obj.eventIdentifierValue = self.uuid
+                eventIdentifier_obj.eventType = eventType
+                #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+                eventIdentifier_obj.eventDateTime = self.timestamp_utc
+                eventIdentifier_obj.eventDetail = eventDetail
+                eventIdentifier_obj.eventApplication = eventApplication
+                eventIdentifier_obj.eventVersion = eventVersion
+                eventIdentifier_obj.eventOutcome = eventOutcome
+                eventIdentifier_obj.eventOutcomeDetailNote = eventOutcomeDetailNote_MySQL
+                eventIdentifier_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
+                eventIdentifier_obj.linkingObjectIdentifierValue = ObjectIdentifierValue
+                eventIdentifier_obj.save()
+            #except _mysql_exceptions.Warning,why:
+            except (MySQLdb.Warning), (why):
+                if why.startswith("Data truncated for column 'eventOutcomeDetailNote' at row 1"):
+                    logging.warning('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why))
+                    return 5
+                else:
+                    logging.error('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why)) 
+                    return 10
 #            res,errno,why=ESSDB.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.uuid,
 #                                                                     'eventType',eventType,
 #                                                                     'eventDateTime',self.timestamp_utc.replace(tzinfo=None),
@@ -2282,6 +2291,7 @@ class Events:
             eventIdentifier_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
             eventIdentifier_obj.linkingObjectIdentifierValue = storageMediumID
             eventIdentifier_obj.save()
+
 #            res,errno,why=ESSDB.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.uuid,
 #                                                                     'eventType',eventType,
 #                                                                     'eventDateTime',self.timestamp_utc.replace(tzinfo=None),

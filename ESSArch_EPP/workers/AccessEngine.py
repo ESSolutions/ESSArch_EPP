@@ -30,6 +30,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import thread, multiprocessing, time, logging, sys, ESSDB, ESSPGM, ESSlogging
 
 from essarch.models import AccessQueue, ArchiveObject
+from django import db
 
 class Functions:
     def GenerateDIPProc(self,ReqUUID):
@@ -110,7 +111,7 @@ class Functions:
                     ESSPGM.Events().create('2203',DbRow.ReqPurpose,'ESSArch Access',ProcVersion,'0',event_info,2,storageMediumID=DbRow.storageMediumID)
                 DbRow.Status = 20
                 DbRow.save()
-                
+            db.close_old_connections()
         except:
             logger.error('Unexpected error: %s %s' % (sys.exc_info()[0], sys.exc_info()[1]))
             print "Unexpected error:", sys.exc_info()[0], sys.exc_info()[1]
@@ -167,6 +168,7 @@ class WorkingThread:
                         AccessQueue_DbRow.save()
                         self.ProcPool.apply_async(GenerateDIPProc, (AccessQueue_DbRow.ReqUUID,))
             logger.debug('ProcPool_cache: %r',self.ProcPool._cache)
+            db.close_old_connections()
             time.sleep(5)
             self.mLock.release()
         time.sleep(10)

@@ -33,6 +33,7 @@ import sys, os, datetime, time, logging, uuid, ESSDB, ESSMSSQL, ESSPGM, ESSloggi
 from configuration.models import ESSArchPolicy
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django import db
 
 
 ################# Only for test ##################
@@ -479,5 +480,6 @@ if __name__ == '__main__':
             ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
             logging.info('Stopping ' + ProcName)
             break
+        db.close_old_connections()
         time.sleep(int(Time))
 # ./SIPValidateAIS.py 

@@ -31,6 +31,7 @@ import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, ESSlogging, type
 
 from essarch.models import IngestQueue, ESSReg001, ArchiveObject
 from django.db.models import Q
+from django import db
 
 class WorkingThread:
     "Thread is working in the background"
@@ -642,6 +643,7 @@ class WorkingThread:
                 ESSDB.DB().action('ESSProc','UPD',('Pause','0'),('Name','AIPCreator'))
                 ESSDB.DB().action('ESSProc','UPD',('Pause','0'),('Name','AIPChecksum'))
                 ESSDB.DB().action('ESSProc','UPD',('Pause','0'),('Name','AIPValidate'))
+            db.close_old_connections()
             self.mLock.release()
             time.sleep(int(self.Time))
         self.RunFlag=0

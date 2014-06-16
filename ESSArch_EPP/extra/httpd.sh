@@ -1,5 +1,14 @@
 #!/bin/bash
 #
+### BEGIN INIT INFO
+# Provides:          httpd
+# Required-Start:    $all
+# Required-Stop:     $network $local_fs $remote_fs
+# Default-Start:     2 3 5
+# Default-Stop:      0 1 6
+# Short-Description: Apache httpd server daemon
+### END INIT INFO
+#
 # httpd        Startup script for the Apache HTTP Server
 #
 # chkconfig: - 85 15

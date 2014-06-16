@@ -188,6 +188,7 @@ PackageType_CHOICES = (
 
 ReqStatus_CHOICES = (
     (0, 'Pending'),
+    (2, 'Initiate'),
     (5, 'Progress'),
     (20, 'Success'),
     (100, 'FAIL'),

@@ -28,6 +28,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, tarfile, ESSMD
 from django.utils import timezone
+from django import db
 from configuration.models import Parameter
 
 class WorkingThread:
@@ -502,6 +503,7 @@ class WorkingThread:
                         self.event_info = 'Failed to create AIP package: ' + self.p_obj
                         logging.error(self.event_info)
                         ESSPGM.Events().create('1030','','ESSArch AIPCreator',ProcVersion,'1',self.event_info,2,self.ObjectIdentifierValue)
+            db.close_old_connections()
             self.mLock.release()
             time.sleep(int(self.Time))
         self.mDieFlag=0
