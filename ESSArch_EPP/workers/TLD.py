@@ -415,6 +415,7 @@ class Robot:
                         # Tape is locked. Set IdleTime to 9999. 
                         self.IdleTime = 9999
                         ESSDB.DB().action(self.RobotDrivesTable,'UPD',('IdleTime',self.IdleTime),('drive_id',self.drive_id))
+            db.close_old_connections()
             time.sleep(1)
         logger.info('Idle Unmount Process stopped')
 

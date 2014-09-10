@@ -34,6 +34,7 @@ from email.mime.text import MIMEText
 from django.utils import timezone
 from essarch.models import ArchiveObject, robotQueue, IOqueue, eventIdentifier, storageMedium
 from configuration.models import Parameter
+from django import db
 
 Debug = 0
 
@@ -2199,6 +2200,7 @@ class Events:
 
     def create(self,eventType,eventDetail,eventApplication,eventVersion,eventOutcome,eventOutcomeDetailNote,UpdateMode,ObjectIdentifierValue=None,storageMediumID=None,eventDateTime=None,linkingAgentIdentifierValue=None,storageMediumLocation=None,storageMediumDestination=None,RelatedEventIdentifierValue=None):
         # UpdateMode 0=MASTER, 1=SLAVE, 2=AIS
+        db.close_old_connections()
         self.uuid=str(uuid.uuid1())
         if eventDateTime:
             if type(eventDateTime) == datetime.datetime:
@@ -2278,19 +2280,27 @@ class Events:
         ##########################################################
         #Update local eventDB for storagemedium object
         elif self.updateDB[0] and storageMediumID:
-            eventIdentifier_obj = eventIdentifier()
-            eventIdentifier_obj.eventIdentifierValue = self.uuid
-            eventIdentifier_obj.eventType = eventType
-            #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
-            eventIdentifier_obj.eventDateTime = self.timestamp_utc
-            eventIdentifier_obj.eventDetail = eventDetail
-            eventIdentifier_obj.eventApplication = eventApplication
-            eventIdentifier_obj.eventVersion = eventVersion
-            eventIdentifier_obj.eventOutcome = eventOutcome
-            eventIdentifier_obj.eventOutcomeDetailNote = eventOutcomeDetailNote
-            eventIdentifier_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
-            eventIdentifier_obj.linkingObjectIdentifierValue = storageMediumID
-            eventIdentifier_obj.save()
+            try:
+                eventIdentifier_obj = eventIdentifier()
+                eventIdentifier_obj.eventIdentifierValue = self.uuid
+                eventIdentifier_obj.eventType = eventType
+                #eventIdentifier_obj.eventDateTime = self.timestamp_utc.replace(tzinfo=None)
+                eventIdentifier_obj.eventDateTime = self.timestamp_utc
+                eventIdentifier_obj.eventDetail = eventDetail
+                eventIdentifier_obj.eventApplication = eventApplication
+                eventIdentifier_obj.eventVersion = eventVersion
+                eventIdentifier_obj.eventOutcome = eventOutcome
+                eventIdentifier_obj.eventOutcomeDetailNote = eventOutcomeDetailNote
+                eventIdentifier_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
+                eventIdentifier_obj.linkingObjectIdentifierValue = storageMediumID
+                eventIdentifier_obj.save()
+            except (MySQLdb.Warning), (why):
+                if why.startswith("Data truncated for column 'eventOutcomeDetailNote' at row 1"):
+                    logging.warning('Problem to insert to local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why))
+                    return 5
+                else:
+                    logging.error('Problem to insert to local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why)) 
+                    return 11
 
 #            res,errno,why=ESSDB.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.uuid,
 #                                                                     'eventType',eventType,

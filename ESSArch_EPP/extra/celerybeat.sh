@@ -7,7 +7,9 @@
 # :Configuration file: /etc/default/celerybeat or /etc/default/celeryd
 #
 # See http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html#generic-init-scripts
-
+#
+# chkconfig: - 84 15
+#
 ### BEGIN INIT INFO
 # Provides:          celerybeat
 # Required-Start:    $all
@@ -16,10 +18,11 @@
 # Default-Stop:      0 1 6
 # Short-Description: celery periodic task scheduler
 ### END INIT INFO
-
+#
 # Cannot use set -e/bash -e since the kill -0 command will abort
 # abnormally in the absence of a valid process ID.
 #set -e
+LOCK_FILE=/var/lock/subsys/celerybeat
 VERSION=10.0
 echo "celery init v${VERSION}."
 
@@ -242,6 +245,9 @@ stop_beat () {
     echo -n "Stopping ${SCRIPT_NAME}... "
     if [ -f "$CELERYBEAT_PID_FILE" ]; then
         wait_pid $(cat "$CELERYBEAT_PID_FILE")
+        if [ -n "$LOCK_FILE" ] ; then
+            rm -f $LOCK_FILE
+        fi
     else
         echo "NOT RUNNING"
     fi
@@ -255,6 +261,9 @@ start_beat () {
     echo "Starting ${SCRIPT_NAME}..."
     _chuid $CELERY_APP_ARG $CELERYBEAT_OPTS $DAEMON_OPTS --detach \
                 --pidfile="$CELERYBEAT_PID_FILE"
+    if [ -n "$LOCK_FILE" ] ; then
+        touch $LOCK_FILE
+    fi
 }
 
 

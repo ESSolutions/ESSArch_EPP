@@ -7,8 +7,9 @@
 # :Configuration file: /etc/default/celeryd
 #
 # See http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html#generic-init-scripts
-
-
+#
+# chkconfig: - 84 15
+#
 ### BEGIN INIT INFO
 # Provides:          celeryd
 # Required-Start:    $all
@@ -28,6 +29,7 @@
 #
 # You can then configure this by manipulating /etc/default/little-worker.
 #
+LOCK_FILE=/var/lock/subsys/celeryd
 VERSION=10.0
 echo "celery init v${VERSION}."
 if [ $(id -u) -ne 0 ]; then
@@ -244,6 +246,9 @@ start_workers () {
                  --loglevel="$CELERYD_LOG_LEVEL"    \
                  $CELERY_APP_ARG                    \
                  $CELERYD_OPTS
+    if [ -n "$LOCK_FILE" ] ; then
+        touch $LOCK_FILE
+    fi
 }
 
 
@@ -254,6 +259,9 @@ dryrun () {
 
 stop_workers () {
     _chuid stopwait $CELERYD_NODES --pidfile="$CELERYD_PID_FILE"
+    if [ -n "$LOCK_FILE" ] ; then
+        rm -f $LOCK_FILE
+    fi
 }
 
 

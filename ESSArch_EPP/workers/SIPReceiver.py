@@ -698,7 +698,7 @@ class WorkingThread:
                                                 logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_name,trg_name,ObjectIdentifierValue_Req, why))
                                             else:
                                                 logging.info('Success to move %s to %s, ObjectIdentifierValue: %s' % (src_name,trg_name,ObjectIdentifierValue_Req))
-                                                DbRow_ReqIngest.Status = 1
+                                                DbRow_ReqIngest.Status = 2
                                                 #model.meta.Session.commit()
                                                 DbRow_ReqIngest.save()
                                 if self.objectstatus == 0:

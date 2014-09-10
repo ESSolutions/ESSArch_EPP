@@ -122,7 +122,7 @@ class Proc:
 #                    ReqIngestQueue_q = model.meta.Session.query(model.ReqIngestQueue)
 #                    DbRow = ReqIngestQueue_q.filter(and_(model.ReqIngestQueue.ObjectIdentifierValue==self.ObjectIdentifierValue, \
 #                                                         model.ReqIngestQueue.Status<=1)).first()
-                    DbRow = IngestQueue.objects.filter( ObjectIdentifierValue=self.ObjectIdentifierValue, Status__lte=1 )[:1]
+                    DbRow = IngestQueue.objects.filter( ObjectIdentifierValue=self.ObjectIdentifierValue, Status__lte=2 )[:1]
                     if DbRow:
                         DbRow = DbRow.get()
                         ###################################################################

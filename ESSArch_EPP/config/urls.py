@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
     url(r'^admin/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
+    url(r'^changepassword$', 'configuration.views.change_password'),
     
     # URLS to include:
     url(r'^configuration/', include('configuration.urls')),

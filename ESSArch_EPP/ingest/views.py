@@ -138,6 +138,7 @@ class IngestCreate(CreateView):
         initial['Status'] = 0
         initial['ReqType'] = self.request.GET.get('ReqType',1)
         initial['ReqPurpose'] = self.request.GET.get('ReqPurpose','Standard Approve')
+        initial['ObjectIdentifierValue'] = self.request.GET.get('ObjectIdentifierValue','')
         if 'ip_uuid' in self.kwargs:
             initial['ObjectIdentifierValue'] = self.kwargs['ip_uuid']
         self.autosubmit = self.request.GET.get('autosubmit', '0')
