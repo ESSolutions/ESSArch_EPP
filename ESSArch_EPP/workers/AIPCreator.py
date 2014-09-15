@@ -97,7 +97,8 @@ class WorkingThread:
                     self.p_obj = self.ObjectIdentifierValue + '.tar'
                     self.p_objpath = os.path.join(self.AIPpath,self.p_obj)
                     #self.Cmets_obj = self.ObjectIdentifierValue + '_Content_METS.xml'
-                    self.Cmets_obj = Cmets_obj.replace('{uuid}',self.ObjectIdentifierValue)
+                    #self.Cmets_obj = Cmets_obj.replace('{uuid}',self.ObjectIdentifierValue)
+                    self.Cmets_obj = Cmets_obj.replace('{objid}',self.ObjectIdentifierValue)
                     self.SIProotpath = os.path.join(self.SIPpath,self.ObjectIdentifierValue)
                     if self.metatype in [4]:
                         self.Cmets_objpath = os.path.join(self.SIProotpath,self.Cmets_obj)

@@ -39,8 +39,9 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, BaseUp
 from django.utils import timezone
 
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth import authenticate
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 
@@ -60,7 +61,7 @@ class ArchObjectListUpdate(ListView, BaseUpdateView):
         context = {}
         context['object_list'] = self.get_queryset()
         context['type'] = 'Ingest'
-        context['label'] = 'List of information packages in ingest'
+        context['label'] = 'INGEST - List information packages'
         ip_list = []
         object_list = context['object_list']      
         for obj in object_list: 
@@ -90,7 +91,7 @@ class IngestList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(IngestList, self).get_context_data(**kwargs)
-        context['label'] = 'List of ingest requests'
+        context['label'] = 'INGEST - List ingest request queue'
         context['IngestReqType_CHOICES'] = dict(IngestReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
@@ -128,7 +129,8 @@ class IngestCreate(CreateView):
         if self.request.user is None:
             raise PermissionDenied
         if not self.request.user.has_perm('essarch.add_ingestqueue'):
-            raise PermissionDenied
+            #raise PermissionDenied
+            return redirect_to_login(self.request.get_full_path())
         return super(IngestCreate, self).dispatch( *args, **kwargs)
     
     def get_initial(self):

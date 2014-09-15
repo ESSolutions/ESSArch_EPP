@@ -581,7 +581,6 @@ def getSchemaLocation(DOC=None,FILENAME=None,NS='http://xml.ra.se/PREMIS',PREFIX
 
     EL_root = DOC.getroot()
     
-    xlink_NS = "{%s}" % EL_root.nsmap['xlink']
     xsi_NS = "{%s}" % EL_root.nsmap['xsi']
     all_schemaLocations = DOC.findall("[@%sschemaLocation]" % xsi_NS)
     for schemaLocation in all_schemaLocations:

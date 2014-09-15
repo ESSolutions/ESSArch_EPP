@@ -65,3 +65,9 @@ class permission(models.Model):
             ("DiffCheck", "DiffCheck"),
             ("PreserveIP", "PreserveIP"),
         )
+
+class controlarea(models.Model):
+    class Meta:
+        permissions = (                    
+            ("list_controlarea", "Can list controlarea"),
+        )

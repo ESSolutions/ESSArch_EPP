@@ -58,7 +58,7 @@ class deliveryReport(ListView):
     def get_context_data(self, **kwargs):
         context = super(deliveryReport, self).get_context_data(**kwargs)
         context['type'] = 'delivery'
-        context['label'] = 'Delivery report'
+        context['label'] = 'REPORTS - Delivery report'
         ip_list = []
         object_list = context['object_list']      
         for obj in object_list: 
@@ -95,7 +95,7 @@ class eventsReport(ListView):
     def get_context_data(self, **kwargs):
         context = super(eventsReport, self).get_context_data(**kwargs)
         context['type'] = 'event'
-        context['label'] = 'Events report'
+        context['label'] = 'REPORTS - Log Events report'
         eventobject_list = context['object_list']
         
         event_list = []

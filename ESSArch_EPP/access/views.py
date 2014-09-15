@@ -54,7 +54,7 @@ class ArchObjectList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ArchObjectList, self).get_context_data(**kwargs)
-        context['label'] = 'List of archived information packages'
+        context['label'] = 'ACCESS - List information packages'
         #context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
         #context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
         #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
@@ -108,7 +108,7 @@ class ArchObjectList2(ListView):
     def get_context_data(self, **kwargs):
         context = super(ArchObjectList, self).get_context_data(**kwargs)
         context['type'] = 'Access'
-        context['label'] = 'List of archived information packages'
+        context['label'] = 'ACCESS - List information packages'
         ip_list = []
         object_list = context['object_list']       
         for obj in object_list: 
@@ -170,7 +170,7 @@ class AccessList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(AccessList, self).get_context_data(**kwargs)
-        context['label'] = 'List of access requests'
+        context['label'] = 'ACCESS - List access request queue'
         context['AccessReqType_CHOICES'] = dict(AccessReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context

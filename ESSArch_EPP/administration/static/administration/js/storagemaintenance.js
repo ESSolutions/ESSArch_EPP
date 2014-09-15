@@ -123,16 +123,16 @@
             	"sSwfPath": "/static/TableTools/media/swf/copy_csv_xls_pdf.swf",
             	"sRowSelect": "multi",
         		"aButtons": [
-	             	"select_all",
-	             	"select_none",
-	                {
-	                    "sExtends":    "copy",
-	                    "bSelectedOnly": "true"
-	                },
-	                {
-	                    "sExtends":    "pdf",
-	                    "bSelectedOnly": "true"
-	                },
+//	             	"select_all",
+//	             	"select_none",
+//	                {
+//	                    "sExtends":    "copy",
+//	                    "bSelectedOnly": "true"
+//	                },
+//	                {
+//	                    "sExtends":    "pdf",
+//	                    "bSelectedOnly": "true"
+//	                },
 		         ]
             }
         });
@@ -183,14 +183,14 @@
         		"aButtons": [
 	             	"select_all",
 	             	"select_none",
-	                {
-	                    "sExtends":    "copy",
-	                    "bSelectedOnly": "true"
-	                },
-	                {
-	                    "sExtends":    "pdf",
-	                    "bSelectedOnly": "true"
-	                },
+//	                {
+//	                    "sExtends":    "copy",
+//	                    "bSelectedOnly": "true"
+//	                },
+//	                {
+//	                    "sExtends":    "pdf",
+//	                    "bSelectedOnly": "true"
+//	                },
 //	                {
 //	                    "sExtends":    "text",
 //	                    "sButtonText": "testknapp",

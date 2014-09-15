@@ -70,7 +70,7 @@ class storageMediumList3_old(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(storageMediumList, self).get_context_data(**kwargs)
-        context['label'] = 'List of storagemedium'
+        context['label'] = 'ADMINISTRATION - List media information'
         context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
         context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
         context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
@@ -137,7 +137,7 @@ class storageMediumList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(storageMediumList, self).get_context_data(**kwargs)
-        context['label'] = 'List of storagemedium'
+        context['label'] = 'ADMINISTRATION - List media information'
         #context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
         #context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
         #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
@@ -170,7 +170,7 @@ class storageList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(storageList, self).get_context_data(**kwargs)
-        context['label'] = 'List of storage content'
+        context['label'] = 'ADMINISTRATION - List media content'
         return context
     
 class robotList(ListView):
@@ -183,7 +183,7 @@ class robotList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(robotList, self).get_context_data(**kwargs)
-        context['label'] = 'List of robot content'
+        context['label'] = 'ADMINISTRATION - List robot information'
         context['admin_user'] = True
         context['robotreq_list'] = robotQueue.objects.filter(Q(Status__lt=20) | Q(Status=100))   # Status<20
         context['ReqType_CHOICES'] = dict(RobotReqType_CHOICES)
@@ -338,7 +338,7 @@ class StorageMaintenance(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StorageMaintenance, self).get_context_data(**kwargs)
-        context['label'] = 'Storage maintenance'
+        context['label'] = 'ADMINISTRATION - Storage Maintenance'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
@@ -635,7 +635,7 @@ class MigrationList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MigrationList, self).get_context_data(**kwargs)
-        context['label'] = 'List of migration requests'
+        context['label'] = 'ADMINISTRATION - Storage Maintenance list'
         context['MigrationReqType_CHOICES'] = dict(MigrationReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
@@ -654,7 +654,7 @@ class MigrationDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(MigrationDetail, self).get_context_data(**kwargs)
-        context['label'] = 'Detail information - migration requests'
+        context['label'] = 'ADMINISTRATION - Storage Mainenance request'
         context['MigrationReqType_CHOICES'] = dict(MigrationReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context

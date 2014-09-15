@@ -58,3 +58,9 @@ from django.core.urlresolvers import reverse
 #            ("update", "update"),
 #            ("delete", "delete"),
 #        )
+
+class reports(models.Model):
+    class Meta:
+        permissions = (                    
+            ("list_reports", "Can list reports"),
+        )

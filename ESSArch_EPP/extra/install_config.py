@@ -51,16 +51,35 @@ def createdefaultusers(): # default users, groups and permissions
     sysgroup, created = Group.objects.get_or_create(name='SysAdmin')
     sysgroup.permissions.clear()
 
-
-    ct_controlarea_permission = ContentType.objects.get(app_label='controlarea', model='permission') 
+    # controlarea permissions 
     permission_list = ['add_permission','change_permission','delete_permission',
                        'CheckinFromReception','CheckoutToWork','CheckinFromWork',
                        'CheckoutToGate','CheckinFromGate','DiffCheck','PreserveIP']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_controlarea_permission).all()
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='controlarea',
+                                                    content_type__model='permission').all()
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
 
+    permission_list = ['add_controlarea','change_controlarea','delete_controlarea','list_controlarea']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='controlarea',
+                                                    content_type__model='controlarea').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # reports permissions
+    permission_list = ['add_reports','change_reports','delete_reports','list_reports']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='reports',
+                                                    content_type__model='reports').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # essarch permissions
     ct_essarch_permission = ContentType.objects.get(app_label='essarch', model='permission')
     if not Permission.objects.filter(codename=install_site, name=site_name, content_type=ct_essarch_permission).exists():
         Permission.objects.create(codename=install_site,name=site_name,content_type=ct_essarch_permission)
@@ -73,7 +92,6 @@ def createdefaultusers(): # default users, groups and permissions
         admingroup.permissions.add(permission_obj)
     for permission_obj in permission_obj_list.exclude(codename__in=exclude_for_user):
         usergroup.permissions.add(permission_obj)
-
 
     # robot permissions
     permission_list = ['add_robot','change_robot','delete_robot','list_robot']

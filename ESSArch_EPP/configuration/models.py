@@ -265,7 +265,7 @@ class ESSArchPolicy(models.Model):
     ChecksumAlgorithm   = models.IntegerField('Checksum algorithm', choices=ChecksumAlgorithm_CHOICES,default=1)
     ValidateChecksum    = models.IntegerField('Validate checksum', choices=enabled_disabled_CHOICES,default=1)
     ValidateXML         = models.IntegerField('Validate XML', choices=enabled_disabled_CHOICES,default=1)
-    ManualControll      = models.IntegerField('Manual Controll', choices=enabled_disabled_CHOICES,default=0)
+    ManualControll      = models.IntegerField('Manual Control', choices=enabled_disabled_CHOICES,default=0)
     AIPType             = models.IntegerField('AIP type', choices=AIPType_Policy_CHOICES,default=1)
     AIPpath             = models.CharField('Temp work directory', max_length=255,default='/ESSArch/work')
     PreIngestMetadata   = models.IntegerField('Pre ingest metadata',choices=PreIngestMetadata_Policy_CHOICES,default=0)

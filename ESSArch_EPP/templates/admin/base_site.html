@@ -118,7 +118,7 @@
 
   <div id="smenu">
 	<ul id="contents" class="sf-menu">
-
+	    {% if perms.controlarea.list_controlarea %}
 		<li>
 			<a href="#vertical" title="Manage information packages etc .." >{% trans 'CONTROL AREA' %}</a>
 			<ul>
@@ -133,7 +133,7 @@
 			  <li><a href="{% url 'controlarea_deleteip_list' %}">{% trans 'Delete IP in Controlarea' %}</a></li>
 			</ul>
 	    </li>
-
+		{% endif %}
 		<li>
 			<a href="#vertical" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
 			<ul>
@@ -161,21 +161,23 @@
 	    		<li><a href="{% url 'migration_list' %}">{% trans 'Storage Maintenance list' %}</a></li>
 	    	</ul>
 		</li>
-		
+	    {% if perms.reports.list_reports %}		
 		<li> 
 			<a href="#vertical">REPORTS</a>
 	    	<ul>
-	    		<li><a href="{% url 'reports_deliveryreport' %}">{% trans 'Deliverys report' %}</a></li>
+	    		<li><a href="{% url 'reports_deliveryreport' %}">{% trans 'Delivery report' %}</a></li>
 	    		<li><a href="{% url 'reports_eventsreport' %}">{% trans 'Log Events report' %}</a></li>
 	    	</ul>
 		</li>
-
+      	{% endif %}
       	{% if user.is_staff %}
 		<li> 
-			<a href="/admin">MANAGEMENT</a>
+			<a href="#vertical">MANAGEMENT</a>
 	    	<ul>
 		      {#<li><a href="/admin/ip/informationpackage/">Information Packages</a></li>#}
-		      <li><a href="/admin/configuration">Configuration</a></li>
+		      <li><a href="/admin">Site administration</a></li>
+		      {% if perms.auth %}  <li><a href="/admin/auth">User administration</a></li>  {% endif %}
+		      {% if perms.configuration %}  <li><a href="/admin/configuration">Configuration</a></li>  {% endif %}
 		      {#<li><a href="/admin/configuration/parameter/">Parameters</a></li>#}
 		      {#<li><a href="/admin/configuration/logevent/">Log Event Types</a></li>#}
 		      {#<li><a href="/admin/configuration/schemaprofile/">Schema Profiles</a></li>#}
