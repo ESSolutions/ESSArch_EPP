@@ -487,6 +487,7 @@ def installdefaulteventType_codes(): # default eventType_codes
                           (1303,u'Ingest Order Complete',u'',1,0),
                           (2000,u'Montering av band i bandspelare i robot',u'',1,0),
                           (2010,u'Avmontering av band fråbandspelare i robot',u'',1,0),
+                          (2090,u'Deactivate storage medium',u'',1,0),
                           (2201,u'Media quickverify Order Request',u'',1,0),
                           (2202,u'Media quickverify Order Accept',u'',1,0),
                           (2203,u'Media quickverify Order Complete',u'',1,0),

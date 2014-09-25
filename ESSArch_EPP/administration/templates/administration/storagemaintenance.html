@@ -116,7 +116,7 @@
                     <input id="filter-4" type="text"
                         class="input-xxlarge"
                         placeholder="medium search"
-                        title="Specify a media or a range of media, such as ESA[000-010]">
+                        title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;When deactivating media where the target prefix changed from eg ASA to XSA enter -ASA+XSA">
                 </td>
                 <td><input id="filterhide-4" type="checkbox"/></td>
                 <td><input id="regex-4" checked="True" type="checkbox"/></td>
@@ -127,7 +127,7 @@
                     <input id="filter-5" type="text"
                         class="input-xxlarge"
                         placeholder="target search"
-                        title='Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods'>
+                        title='Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods.&#013;When deactivating media please leave this field empty'>
                 </td>
                 <td><input id="filterhide-5" type="checkbox" disabled="True"/></td>
                 <td><input id="regex-5" type="checkbox" disabled="True"/></td>
@@ -227,8 +227,7 @@
         <thead>
             <tr>
             	<th>MediumID</th>
-            	<th>storageMedium</th>
-            	<th>storageMediumDate</th>
+            	<th>CreateDate</th>
             	<th>Location</th>
             	<th>ObjectIdentifierValue</th>
             	<th>ObjectUUID</th>

@@ -35,7 +35,7 @@ from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOIC
                            storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
                            MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
 
-from configuration.models import sm, DefaultValue
+from configuration.models import sm, DefaultValue, ESSConfig
 
 from administration.tasks import MigrationTask, RobotInventoryTask
 
@@ -46,16 +46,22 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
+from eztables.views import RE_FORMATTED
+
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 
+from django.utils import timezone
+
 #from django_tables2 import RequestConfig
 
 from essarch.libs import DatatablesView, flush_transaction, DatatablesForm, get_field_choices, get_object_list_display
 
-import uuid, ESSPGM, logging
+import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
+
+ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 
 class storageMediumList3_old(ListView):
     """
@@ -150,6 +156,7 @@ class storageMediumDatatablesView(DatatablesView):
         "storageMediumID",
         "storageMedium",
         "storageMediumStatus",
+        "CreateDate",
         "storageMediumDate",
         "storageMediumLocation",
         "storageMediumLocationStatus",
@@ -369,7 +376,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         '{PolicyId__sm_type_4} ({PolicyId__sm_4})',
         'PolicyId__sm_target_4',
         
-        'storage__storageMediumUUID__storageMediumDate',
+        #'storage__storageMediumUUID__storageMediumDate',
+        'storage__storageMediumUUID__CreateDate',
         'storage__storageMediumUUID__storageMediumStatus',
     )   
 
@@ -399,7 +407,24 @@ class StorageMaintenanceDatatablesView(DatatablesView):
     def sort_col_5(self, direction):
         '''sort for col_6'''
         return ('%sstorage__id' % direction, '%sstorage__storageMediumUUID__storageMediumID' % direction)
-    
+
+    def search_col_4(self, search, queryset):
+        idx=4
+        field = self.get_field(idx)
+        fields = RE_FORMATTED.findall(field) if RE_FORMATTED.match(field) else [field]
+        if not search.startswith('-'):
+            if self.dt_data['bRegex_%s' % idx]:
+                criterions = [Q(**{'%s__iregex' % field: search}) for field in fields if self.can_regex(field)]
+                if len(criterions) > 0:
+                    search = reduce(or_, criterions)
+                    queryset = queryset.filter(search)
+            else:
+                for term in search.split():
+                    criterions = (Q(**{'%s__icontains' % field: term}) for field in fields)
+                    search = reduce(or_, criterions)
+                    queryset = queryset.filter(search)
+        return queryset
+
     def search_col_5(self, search, queryset):
         '''exclude filter for search terms'''
         #print 'search: %s' % search
@@ -421,6 +446,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         return queryset
 
     def get_deactivate_list(self):
+        logger = logging.getLogger('essarch.storagemaintenance')
+        #
         # Create unique obj_list
         obj_list = []
         for obj in self.object_list_with_writetapes:
@@ -430,22 +457,50 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         
         # Add sm_list(sm+storage) to obj_list 
         for num, obj in enumerate(obj_list):
-            sm_objs = []
-            for i in [1,2,3,4]:
-                sm_obj = sm()
-                sm_obj.id = i
-                sm_obj.status = obj['PolicyId__sm_%s' % i]
-                sm_obj.type = obj['PolicyId__sm_type_%s' % i]
-                #sm_obj.format = getattr(ep_obj,'sm_format_%s' % i)
-                #sm_obj.blocksize = getattr(ep_obj,'sm_blocksize_%s' % i)
-                #sm_obj.maxCapacity = getattr(ep_obj,'sm_maxCapacity_%s' % i)
-                #sm_obj.minChunkSize = getattr(ep_obj,'sm_minChunkSize_%s' % i)
-                #sm_obj.minContainerSize = getattr(ep_obj,'sm_minContainerSize_%s' % i)
-                #sm_obj.minCapacityWarning = getattr(ep_obj,'sm_minCapacityWarning_%s' % i)
-                sm_obj.target = obj['PolicyId__sm_target_%s' % i]
-                sm_objs.append(sm_obj)
             
+            #Prepare storage method list
+            sm_objs = []
+
+            current_mediumid_search = self.dt_data['sSearch_%s' % '4']
+            logger.debug('col4 serach: %s' % current_mediumid_search)
+
+            # Check whether the criteria for replacement of media target prefix is met
+            if len(current_mediumid_search) == 8 and current_mediumid_search.startswith('-') and current_mediumid_search.__contains__('+'):
+                media_target_replace_flag = 1
+                # add corresponding new target medium prefix
+                sm_obj = sm()
+                sm_obj.id = 1
+                sm_obj.status = 1
+                sm_obj.type = 300
+                sm_obj.target = current_mediumid_search[5:8]
+                sm_objs.append(sm_obj)
+                # add old target medium prefix
+                sm_obj = sm()
+                sm_obj.id = 2
+                sm_obj.status = 0 # Set status to 0 for SM when items on this target medium is replaced
+                sm_obj.type = 300
+                sm_obj.target = current_mediumid_search[1:4]
+                sm_objs.append(sm_obj)
+            else:
+                media_target_replace_flag = 0    
+                for i in [1,2,3,4]:
+                    sm_obj = sm()
+                    sm_obj.id = i
+                    sm_obj.status = obj['PolicyId__sm_%s' % i]
+                    sm_obj.type = obj['PolicyId__sm_type_%s' % i]
+                    #sm_obj.format = getattr(ep_obj,'sm_format_%s' % i)
+                    #sm_obj.blocksize = getattr(ep_obj,'sm_blocksize_%s' % i)
+                    #sm_obj.maxCapacity = getattr(ep_obj,'sm_maxCapacity_%s' % i)
+                    #sm_obj.minChunkSize = getattr(ep_obj,'sm_minChunkSize_%s' % i)
+                    #sm_obj.minContainerSize = getattr(ep_obj,'sm_minContainerSize_%s' % i)
+                    #sm_obj.minCapacityWarning = getattr(ep_obj,'sm_minCapacityWarning_%s' % i)
+                    sm_obj.target = obj['PolicyId__sm_target_%s' % i]
+                    sm_objs.append(sm_obj)
+                            
             sm_list = []
+            if media_target_replace_flag:
+                storage_list = []
+                
             for sm_obj in sm_objs:
                 storage_list = []
                 if sm_obj.status == 1:
@@ -455,13 +510,18 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                                 d['storage__storageMediumUUID__storageMediumID'].startswith(sm_obj.target) and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ) or\
+                                (media_target_replace_flag and sm_obj.type == 300 and
+                                d['storage__storageMediumUUID__storageMediumID'].startswith(current_mediumid_search[1:4]) and
+                                d['ObjectUUID'] == obj['ObjectUUID']
+                                ) or\
                                (sm_obj.type == 200 and
                                 d['storage__storageMediumUUID__storageMediumID'] == 'disk' and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ):
                                     storage_list.append({'storageMediumUUID__storageMediumID': d['storage__storageMediumUUID__storageMediumID'],
-                                                         'storageMediumUUID__storageMedium': sm_obj.type,
-                                                         'storageMediumUUID__storageMediumDate': d['storage__storageMediumUUID__storageMediumDate'],
+                                                         #'storageMediumUUID__storageMedium': sm_obj.type,
+                                                         #'storageMediumUUID__storageMediumDate': d['storage__storageMediumUUID__storageMediumDate'],
+                                                         'storageMediumUUID__CreateDate': d['storage__storageMediumUUID__CreateDate'],
                                                          'contentLocationValue': d['storage__contentLocationValue'],
                                                          'ObjectUUID__ObjectIdentifierValue': obj['ObjectIdentifierValue'],
                                                          'ObjectUUID__ObjectUUID': obj['ObjectUUID'],
@@ -471,10 +531,12 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                     #print 'ObjectUUID: %s, target:%s , s_count:%s' % (obj['ObjectUUID'],sm_obj.target,len(storage_list))
                     sm_list.append({'id': sm_obj.id,
                                     'status': sm_obj.status,
-                                    'type': sm_obj.type,
+                                    #'type': sm_obj.type,
                                     'target': sm_obj.target,
                                     'storage_list': storage_list})
                 
+            for x in sm_list:
+                logger.debug('sm_list_x: %s' % repr(x))
 
             obj_list[num]['sm_list'] = sm_list
         
@@ -488,13 +550,17 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                     for storage_obj in sm_obj['storage_list']:
                         if active_storage_obj is None:
                             active_storage_obj = storage_obj
-                        elif storage_obj['storageMediumUUID__storageMediumDate'] > active_storage_obj['storageMediumUUID__storageMediumDate']:
+                        #elif storage_obj['storageMediumUUID__storageMediumDate'] > active_storage_obj['storageMediumUUID__storageMediumDate']:
+                        elif storage_obj['storageMediumUUID__CreateDate'] > active_storage_obj['storageMediumUUID__CreateDate']:
                             active_storage_obj = storage_obj
                     for storage_obj in sm_obj['storage_list']:
-                        if storage_obj['storageMediumUUID__storageMediumDate'] < active_storage_obj['storageMediumUUID__storageMediumDate']:
+                        #if storage_obj['storageMediumUUID__storageMediumDate'] < active_storage_obj['storageMediumUUID__storageMediumDate']:
+                        if storage_obj['storageMediumUUID__CreateDate'] < active_storage_obj['storageMediumUUID__CreateDate']:
                             if not storage_obj['storageMediumUUID__storageMediumID'] in redundant_storage_list.keys():
                                 redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']] = []
                             redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']].append(storage_obj)
+        
+        logger.debug('redundant_storage_list: %s' % repr(redundant_storage_list))
 
         # Create deactivate_media_list and need_to_migrate_dict
         deactivate_media_list = []
@@ -502,8 +568,9 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         #need_to_migrate_dict = {}
         for storageMediumID in redundant_storage_list.keys():
             storage_list = storage.objects.exclude(storageMediumUUID__storageMediumStatus=0).filter(storageMediumUUID__storageMediumID=storageMediumID).values('storageMediumUUID__storageMediumID',
-                                                                                                          'storageMediumUUID__storageMedium',
-                                                                                                          'storageMediumUUID__storageMediumDate',
+                                                                                                          #'storageMediumUUID__storageMedium',
+                                                                                                          #'storageMediumUUID__storageMediumDate',
+                                                                                                          'storageMediumUUID__CreateDate',
                                                                                                           'contentLocationValue',
                                                                                                           'ObjectUUID__ObjectIdentifierValue',
                                                                                                           'ObjectUUID__ObjectUUID',
@@ -530,8 +597,9 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                 for m in storage_list2:
                     tmp_list = []
                     keys = ['storageMediumUUID__storageMediumID',
-                          'storageMediumUUID__storageMedium',
-                          'storageMediumUUID__storageMediumDate',
+                          #'storageMediumUUID__storageMedium',
+                          #'storageMediumUUID__storageMediumDate',
+                          'storageMediumUUID__CreateDate',
                           'contentLocationValue',
                           'ObjectUUID__ObjectIdentifierValue',
                           'ObjectUUID__ObjectUUID']
@@ -590,6 +658,8 @@ class DeactivateMedia(FormView):
                 return self.form_invalid(form)
     
     def form_valid(self, form):
+        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        timestamp_dst = timestamp_utc.astimezone(timezone.get_default_timezone())
         logger = logging.getLogger('essarch.storagemaintenance')
         ReqPurpose = form.cleaned_data['ReqPurpose']
         if self.request.is_ajax():
@@ -602,9 +672,19 @@ class DeactivateMedia(FormView):
         storageMedium_objs = storageMedium.objects.filter(storageMediumID__in=MediumList)
         #print len(storageMedium_objs)
         for storageMedium_obj in storageMedium_objs:
-            logger.info('Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose))
             storageMedium_obj.storageMediumStatus =  0
-            storageMedium_obj.save()
+            storageMedium_obj.LocalDBdatetime = timestamp_utc
+            storageMedium_obj.save(update_fields=['storageMediumStatus','LocalDBdatetime'])
+            event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
+            logger.info(event_info)
+            ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
+            if ExtDBupdate:
+                ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
+                                                                                                                                ('storageMediumID',storageMedium_obj.storageMediumID))
+                if ext_errno: logger.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
+                else:
+                    storageMedium_obj.ExtDBdatetime = timestamp_utc
+                    storageMedium_obj.save(update_fields=['ExtDBdatetime'])            
         if self.request.is_ajax():
             '''Render Datatables expected JSON format'''
             data = {

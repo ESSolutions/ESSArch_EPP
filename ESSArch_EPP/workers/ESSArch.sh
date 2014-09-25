@@ -25,19 +25,31 @@ case "$1" in
         if [ -n "$LOCK_FILE" ] ; then
             touch $LOCK_FILE
         fi        
-        ;;
+    ;;
     stop)
         echo "Shutting down ESSArch"
         su - arch -c "$PythonBin $ESSArchStopStart -q" 
         if [ -n "$LOCK_FILE" ] ; then
             rm -f $LOCK_FILE
         fi
-        ;;
+    ;;
     status)
         echo "Checking ESSArch procs"
-        ;;
+    ;;
+    restart)
+        echo "Shutting down ESSArch"
+        su - arch -c "$PythonBin $ESSArchStopStart -q" 
+        if [ -n "$LOCK_FILE" ] ; then
+            rm -f $LOCK_FILE
+        fi
+        echo "Starting ESSArch"
+        su - arch -c "$PythonBin $ESSArchStopStart -s"
+        if [ -n "$LOCK_FILE" ] ; then
+            touch $LOCK_FILE
+        fi                
+    ;;
     *)
-        echo "Usage: $0 {start|stop}"
+        echo "Usage: $0 {start|stop|restart}"
         exit 1
         ;;
 esac

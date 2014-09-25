@@ -225,14 +225,18 @@ class MigrationTask(JobtasticTask):
                         if IOqueue_obj_list.exists():
                             DbRow_IOqueue = IOqueue_obj_list[0]
                             if DbRow_IOqueue.Status==20:
-                                event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ReqUUID) + ' for: ' + str(ObjectIdentifierValue)
+                                #event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ReqUUID) + ' for: ' + str(ObjectIdentifierValue)
+                                event_info = 'Succeeded WriteReq IO_uuid: %s for: %s to target: %s' % (str(self.ReqUUID),ObjectIdentifierValue,DbRow_IOqueue.t_prefix)
                                 logger.info(event_info)
+                                ESSPGM.Events().create('1101','migrate','Storage maintenance',__version__,'0',event_info,2,ObjectIdentifierValue)
                                 # Delete request row in database
                                 DbRow_IOqueue.delete()
                                 break
                             elif  DbRow_IOqueue.Status>20:
-                                event_info = 'Problem WriteReq IO_uuid: ' + str(self.ReqUUID) + ' for: ' + str(ObjectIdentifierValue)
+                                event_info = 'Problem WriteReq IO_uuid: %s for: %s to target: %s' % (str(self.ReqUUID),ObjectIdentifierValue,DbRow_IOqueue.t_prefix)
+                                #event_info = 'Problem WriteReq IO_uuid: ' + str(self.ReqUUID) + ' for: ' + str(ObjectIdentifierValue)
                                 logger.error(event_info)
+                                ESSPGM.Events().create('1101','migrate','Storage maintenance',__version__,'1',event_info,2,ObjectIdentifierValue)
                                 return 1
                             elif loop_num == 15:
                                 event_info = 'Writerequest for object: %s RequUID: %s Status: %s' % (ObjectIdentifierValue, self.ReqUUID, DbRow_IOqueue.Status)

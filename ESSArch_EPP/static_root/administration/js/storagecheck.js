@@ -74,14 +74,14 @@
             	"sSwfPath": "/static/TableTools/media/swf/copy_csv_xls_pdf.swf",
             	"sRowSelect": "multi",
         		"aButtons": [
-	                {
-	                    "sExtends":    "copy",
-	                    "bSelectedOnly": "true"
-	                },
-	                {
-	                    "sExtends":    "pdf",
-	                    "bSelectedOnly": "true"
-	                },
+//	                {
+//	                    "sExtends":    "copy",
+//	                    "bSelectedOnly": "true"
+//	                },
+//	                {
+//	                    "sExtends":    "pdf",
+//	                    "bSelectedOnly": "true"
+//	                },
 //	                {
 //	                    "sExtends":    "text",
 //	                    "sButtonText": "testknapp",

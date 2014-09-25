@@ -30,7 +30,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, thread, multiprocessing, datetime, time, logging, sys, shutil, stat, ESSDB, ESSMSSQL, ESSPGM, operator,subprocess, ESSlogging, pytz
 from django.utils import timezone
 
-from essarch.models import storage, storageMedium, ArchiveObject, robotQueue
+from essarch.models import storage, storageMedium, ArchiveObject, robotQueue, robotdrives
 from essarch.libs import flush_transaction
 from django import db
 
@@ -50,6 +50,7 @@ class Functions:
         #print 'self.writeworklist:',self.writeworklist
         self.numwriteobjects = len(self.writeworklist)
         for self.item in self.writeworklist:
+            db.close_old_connections()
             self.ObjectIdentifierValue = self.item[0]
             ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue=self.ObjectIdentifierValue)
             self.cmd = self.item[1]
@@ -149,14 +150,11 @@ class Functions:
                 logger.info('Tape id: %s has reached maximum configured tape size: %s bytes. IOuuid: %s',self.t_id,str(self.sm_maxCapacity),str(self.uuid))
                 ###################################################
                 # Release lock for tapedrive
-                ###################################################
-                self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
-                if self.robotdrive:
-                    self.drive_id = self.robotdrive[0][0]
-                    logger.info('Release drivelock for: ' + str(self.uuid))
-                    ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
+                res, errno = Functions().ReleaseTapeLock(self.uuid)
+                if errno == 0:
+                    logger.info(res)
                 else:
-                    logger.error('Missing drivelock for: ' + str(self.uuid))
+                    logger.error(res)                                        
                 ###################################################
                 # Verify tapeid and full mark and mount a new tape
                 ###################################################
@@ -247,7 +245,7 @@ class Functions:
                         else:
                             #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                             storage_obj.ExtDBdatetime = self.timestamp_utc
-                            storage_obj.save()
+                            storage_obj.save(update_fields=['ExtDBdatetime'])
                             #res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
                             #                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
                             #                                                           'contentLocationType','300','AND',
@@ -262,7 +260,7 @@ class Functions:
                     storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
                     #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                     storageMedium_obj.LocalDBdatetime = self.timestamp_utc
-                    storageMedium_obj.save()
+                    storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])
                     #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_t_size,
                     #                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
                     #                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue,
@@ -279,11 +277,11 @@ class Functions:
                         else:
                             #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                             storageMedium_obj.ExtDBdatetime = self.timestamp_utc
-                            storageMedium_obj.save()
+                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
                             #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID',self.t_id))
                             #if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
                     if storage.objects.filter(ObjectUUID__ObjectIdentifierValue=self.ObjectIdentifierValue, storageMediumUUID__storageMediumID=self.t_id).exists():
-                    #if ESSDB.DB().action(self.StorageTable,'GET',('id',),('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND','storageMediumID',self.t_id)):
+                    #if ESSDB.DB().action(self.StorageTable,'GET',('id',),('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND','storageMediumID',self.t_id)):                        
                         self.stopTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
                         self.writetime = self.stopTime-self.startTime
                         self.writesize = int(self.WriteSize)/1048576
@@ -293,30 +291,24 @@ class Functions:
                         ESSDB.DB().action('IOqueue','UPD',('Status','20'),('work_uuid',self.uuid))
                         ###################################################
                         # Release lock for tapedrive
-                        ###################################################
-                        self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
-                        if self.robotdrive:
-                            self.drive_id = self.robotdrive[0][0]
-                            logger.info('Release drivelock for: ' + str(self.uuid))
-                            ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
+                        res, errno = Functions().ReleaseTapeLock(self.uuid)
+                        if errno == 0:
+                            logger.info(res)
                         else:
-                            logger.error('Missing drivelock for: ' + str(self.uuid))
+                            logger.error(res)                                        
+
                 #elif self.cmdres[0]==28: # 28=full tape with python tar
                 elif self.Write_cmdres[0]==2: # 2=full tape with SUSE tar
                     #Tape is full
                     #Hardclose writeobject (Only used with "FunctionThread().WritePackage")
                     #self.cmdres = writer().hardclose(self.writeobject)
-
                     ###################################################
                     # Release lock for tapedrive
-                    ###################################################
-                    self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
-                    if self.robotdrive:
-                        self.drive_id = self.robotdrive[0][0]
-                        logger.info('Release drivelock for: ' + str(self.uuid))
-                        ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
+                    res, errno = Functions().ReleaseTapeLock(self.uuid)
+                    if errno == 0:
+                        logger.info(res)
                     else:
-                        logger.error('Missing drivelock for: ' + str(self.uuid))
+                        logger.error(res)                                        
                     ########################################################
                     # Tape is full quickverify tape and then mount a new write tape
                     ########################################################
@@ -380,7 +372,7 @@ class Functions:
                                     else:
                                         #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                         storage_obj.ExtDBdatetime = self.timestamp_utc
-                                        storage_obj.save()
+                                        storage_obj.save(update_fields=['ExtDBdatetime'])
                                         #res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
                                         #                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
                                         #                                                           'contentLocationType','300','AND',
@@ -395,7 +387,7 @@ class Functions:
                                 storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
                                 #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                 storageMedium_obj.LocalDBdatetime = self.timestamp_utc
-                                storageMedium_obj.save()
+                                storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])
                                 #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_t_size,
                                 #                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
                                 #                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue,
@@ -412,7 +404,7 @@ class Functions:
                                     else:
                                         #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                         storageMedium_obj.ExtDBdatetime = self.timestamp_utc
-                                        storageMedium_obj.save()
+                                        storageMedium_obj.save(update_fields=['ExtDBdatetime'])
                                         #res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID',self.t_id))
                                         #if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
 
@@ -427,14 +419,11 @@ class Functions:
                                     ESSDB.DB().action('IOqueue','UPD',('Status','20'),('work_uuid',self.uuid))
                                     ###################################################
                                     # Release lock for tapedrive
-                                    ###################################################
-                                    self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
-                                    if self.robotdrive:
-                                        self.drive_id = self.robotdrive[0][0]
-                                        logger.info('Release drivelock for: ' + str(self.uuid))
-                                        ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
+                                    res, errno = Functions().ReleaseTapeLock(self.uuid)
+                                    if errno == 0:
+                                        logger.info(res)
                                     else:
-                                        logger.error('Missing drivelock for: ' + str(self.uuid))
+                                        logger.error(res)                                        
                             else:
                                 logger.error('Problem to write a copy of '+self.ObjectIdentifierValue+' to tape ' + self.t_id + ' , work_uuid: ' + str(self.uuid))
                                 ESSDB.DB().action('IOqueue','UPD',('Status','101'),('work_uuid',self.uuid))
@@ -717,6 +706,7 @@ class Functions:
     ###############################################
     def WriteDiskProc(self,uuid,ObjectIdentifierValue,ObjectPath,WriteSize,sm_list):
         self.run = 1
+        db.close_old_connections()
         self.process_name = multiprocessing.current_process().name
         self.process_pid = multiprocessing.current_process().pid
         self.StorageTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageTable'))[0][0]
@@ -857,7 +847,7 @@ class Functions:
                     else:
                         #storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                         storage_obj.ExtDBdatetime = self.timestamp_utc
-                        storage_obj.save()
+                        storage_obj.save(update_fields=['ExtDBdatetime'])
 #                        res,errno,why = ESSDB.DB().action(self.StorageTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
 #                                                                                  ('ObjectIdentifierValue',self.ObjectIdentifierValue,'AND',
 #                                                                                   'contentLocationType','200','AND',
@@ -872,7 +862,7 @@ class Functions:
                 storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
                 #storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                 storageMedium_obj.LocalDBdatetime = self.timestamp_utc
-                storageMedium_obj.save()           
+                storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])           
 #                res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumUsedCapacity',self.new_target_size,
 #                                                                                 'storageMediumDate',self.timestamp_utc.replace(tzinfo=None),
 #                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue,
@@ -889,7 +879,7 @@ class Functions:
                     else:
                         #storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                         storageMedium_obj.ExtDBdatetime = self.timestamp_utc
-                        storageMedium_obj.save()
+                        storageMedium_obj.save(update_fields=['ExtDBdatetime'])
 #                        res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID','disk'))
 #                        if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
                 if storage.objects.filter(ObjectUUID__ObjectIdentifierValue=self.ObjectIdentifierValue, storageMediumUUID__storageMediumID='disk').exists():
@@ -1074,17 +1064,33 @@ class Functions:
         ###################################################
         # Release lock for tapedrive
         ###################################################
-        self.uuid = lock_uuid
-        self.RobotDrivesTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','RobotDrivesTable'))[0][0]
-        self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
-        if self.robotdrive:
-            self.drive_id = self.robotdrive[0][0]
-            res = 'Release drivelock for: ' + str(self.uuid)
+        res = 'Missing drivelock for: %s' % lock_uuid
+        exitstatus = 1
+        flush_transaction()
+        robotdrives_objs = robotdrives.objects.filter(drive_lock=lock_uuid)
+        for robotdrives_obj in robotdrives_objs:
+            robotdrives_obj.drive_lock=''
+            robotdrives_obj.save(update_fields=['drive_lock'])
+            res = 'Release drivelock for: %s' % lock_uuid
             exitstatus = 0
-            ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
-        else:
-            res = 'Missing drivelock for: ' + str(self.uuid)
-            exitstatus = 1
+#        time.sleep(5)
+#        flush_transaction()
+#        robotdrives_objs = robotdrives.objects.filter(drive_lock=lock_uuid)
+#        for robotdrives_obj in robotdrives_objs:
+#            logger.warning('second try to remove lock_uuid: %s' % lock_uuid)
+#            robotdrives_obj.drive_lock=''
+#            robotdrives_obj.save(update_fields=['drive_lock'])
+#    
+#        self.RobotDrivesTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','RobotDrivesTable'))[0][0]
+#        self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id',),('drive_lock',self.uuid))
+#        if self.robotdrive:
+#            self.drive_id = self.robotdrive[0][0]
+#            res = 'Release drivelock for: ' + str(self.uuid)
+#            exitstatus = 0
+#            ESSDB.DB().action(self.RobotDrivesTable,'UPD',('drive_lock',''),('drive_id',self.drive_id))
+#        else:
+#            res = 'Missing drivelock for: ' + str(self.uuid)
+#            exitstatus = 1
         return res, exitstatus 
 
 def WriteDiskProc(uuid,ObjectIdentifierValue,ObjectPath,WriteSize,sm_list):
@@ -1123,6 +1129,7 @@ class WorkingThread:
         while 1:
             if self.mDieFlag==1: break      # Request for death
             self.mLock.acquire()
+            db.close_old_connections()
             self.Disk_stop = 0
             for self.worker in self.DiskIOpool._pool: 
                 if not self.worker.is_alive(): 

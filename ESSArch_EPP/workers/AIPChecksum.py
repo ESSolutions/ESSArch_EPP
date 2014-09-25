@@ -113,7 +113,8 @@ class WorkingThread:
                         if self.metatype in [4]:
                             #self.Cmets_obj = '%s/%s_Content_METS.xml' % (self.ObjectIdentifierValue,self.ObjectIdentifierValue)
                             #self.Cmets_objpath = os.path.join(self.SIPpath,self.Cmets_obj)
-                            self.Cmets_obj = Cmets_obj.replace('{uuid}',self.ObjectIdentifierValue)
+                            #self.Cmets_obj = Cmets_obj.replace('{uuid}',self.ObjectIdentifierValue)
+                            self.Cmets_obj = Cmets_obj.replace('{objid}',self.ObjectIdentifierValue)
                             self.Cmets_objpath = os.path.join(self.SIProotpath,self.Cmets_obj)
                         elif self.metatype in [1,2,3]:
                             self.Cmets_obj = '%s_Content_METS.xml' % (self.ObjectIdentifierValue)

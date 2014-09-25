@@ -45,7 +45,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 
-import uuid
+import uuid, urlparse
 
 class ArchObjectListUpdate(ListView, BaseUpdateView):
     model = ArchiveObject
@@ -139,7 +139,11 @@ class IngestCreate(CreateView):
         initial['user'] = self.request.user.username
         initial['Status'] = 0
         initial['ReqType'] = self.request.GET.get('ReqType',1)
-        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose','Standard Approve')
+        qs = self.request.META.get('QUERY_STRING')
+        try:
+            initial['ReqPurpose'] = urlparse.parse_qs(qs).get('ReqPurpose',['Standard Approve'])[0].decode('utf-8')
+        except UnicodeDecodeError:
+            initial['ReqPurpose'] = urlparse.parse_qs(qs).get('ReqPurpose',['Standard Approve'])[0].decode('unicode-escape')
         initial['ObjectIdentifierValue'] = self.request.GET.get('ObjectIdentifierValue','')
         if 'ip_uuid' in self.kwargs:
             initial['ObjectIdentifierValue'] = self.kwargs['ip_uuid']

@@ -254,7 +254,7 @@ class WorkingThread:
                                     elif self.res_ioqueue:
                                         self.IOstatus = int(self.res_ioqueue[0][0])
                                         if self.IOstatus == 20:
-                                            self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s010) + ' for: ' + str(self.ObjectIdentifierValue)
+                                            self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s010) + ' for: ' + str(self.ObjectIdentifierValue)
                                             logger.info(self.event_info)
                                             ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                             res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i010',3),
@@ -305,7 +305,7 @@ class WorkingThread:
                                     elif self.res_ioqueue:
                                         self.IOstatus = int(self.res_ioqueue[0][0])
                                         if self.IOstatus == 20:
-                                            self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s011) + ' for: ' + str(self.ObjectIdentifierValue)
+                                            self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s011) + ' for: ' + str(self.ObjectIdentifierValue)
                                             logger.info(self.event_info)
                                             ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                             res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i011',3),
@@ -356,7 +356,7 @@ class WorkingThread:
                                     elif self.res_ioqueue:
                                         self.IOstatus = int(self.res_ioqueue[0][0])
                                         if self.IOstatus == 20:
-                                            self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s012) + ' for: ' + str(self.ObjectIdentifierValue)
+                                            self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s012) + ' for: ' + str(self.ObjectIdentifierValue)
                                             logger.info(self.event_info)
                                             ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                             res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i012',3),
@@ -407,7 +407,7 @@ class WorkingThread:
                                     elif self.res_ioqueue:
                                         self.IOstatus = int(self.res_ioqueue[0][0])
                                         if self.IOstatus == 20:
-                                            self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s013) + ' for: ' + str(self.ObjectIdentifierValue)
+                                            self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s013) + ' for: ' + str(self.ObjectIdentifierValue)
                                             logger.info(self.event_info)
                                             ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                             res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i013',3),
@@ -494,7 +494,7 @@ class WorkingThread:
                             if errno == 0 or errno == '08S01': 
                                 if errno == '08S01':
                                     logger.warning('Failed to update central DB status for AIPB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(why))
-                                self.event_info = 'Succedd to write AIP: %s to all Storage Methods (%s,%s,%s,%s)' % (self.ObjectIdentifierValue,str(self.ESSReg001_i010),str(self.ESSReg001_i011),str(self.ESSReg001_i012),str(self.ESSReg001_i013))
+                                self.event_info = 'Succeeded to write AIP: %s to all Storage Methods (%s,%s,%s,%s)' % (self.ObjectIdentifierValue,str(self.ESSReg001_i010),str(self.ESSReg001_i011),str(self.ESSReg001_i012),str(self.ESSReg001_i013))
                                 logger.info(self.event_info)
                                 ESSPGM.Events().create('1100','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                 ESSDB.DB().action('ESSReg001','DEL',('ObjectUUID',self.ObjectUUID))
@@ -559,7 +559,7 @@ class WorkingThread:
                                 elif self.res_ioqueue:
                                     self.IOstatus = int(self.res_ioqueue[0][0])
                                     if self.IOstatus == 20:
-                                        self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s010) + ' for: ' + str(self.ObjectIdentifierValue)
+                                        self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s010) + ' for: ' + str(self.ObjectIdentifierValue)
                                         logger.info(self.event_info)
                                         ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                         res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i010',3),
@@ -572,7 +572,7 @@ class WorkingThread:
                                 elif self.res_ioqueue:
                                     self.IOstatus = int(self.res_ioqueue[0][0])
                                     if self.IOstatus == 20:
-                                        self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s011) + ' for: ' + str(self.ObjectIdentifierValue)
+                                        self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s011) + ' for: ' + str(self.ObjectIdentifierValue)
                                         logger.info(self.event_info)
                                         ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                         res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i011',3),
@@ -585,7 +585,7 @@ class WorkingThread:
                                 elif self.res_ioqueue:
                                     self.IOstatus = int(self.res_ioqueue[0][0])
                                     if self.IOstatus == 20:
-                                        self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s012) + ' for: ' + str(self.ObjectIdentifierValue)
+                                        self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s012) + ' for: ' + str(self.ObjectIdentifierValue)
                                         logger.info(self.event_info)
                                         ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                         res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i012',3),
@@ -598,7 +598,7 @@ class WorkingThread:
                                 elif self.res_ioqueue:
                                     self.IOstatus = int(self.res_ioqueue[0][0])
                                     if self.IOstatus == 20:
-                                        self.event_info = 'Succedd WriteReq IO_uuid: ' + str(self.ESSReg001_s013) + ' for: ' + str(self.ObjectIdentifierValue)
+                                        self.event_info = 'Succeeded WriteReq IO_uuid: ' + str(self.ESSReg001_s013) + ' for: ' + str(self.ObjectIdentifierValue)
                                         logger.info(self.event_info)
                                         ESSPGM.Events().create('1101','','ESSArch AIPWriter',ProcVersion,'0',self.event_info,2,self.ObjectIdentifierValue)
                                         res,errno,why = ESSDB.DB().action('ESSReg001','UPD',('i013',3),
