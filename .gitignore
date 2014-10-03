@@ -1,0 +1,7 @@
+*.py[co]
+*.pyo
+*~
+dist/
+ESSArch_EPP.egg-info/
+MANIFEST
+.settings/

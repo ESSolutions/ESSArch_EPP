@@ -20,13 +20,12 @@
     Email - essarch@essolutions.se
 '''
 
-
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+import versioneer
+versioneer.VCS = 'git'
+versioneer.versionfile_source = 'ESSArch-EPP/_version.py'
+versioneer.versionfile_build = None
+versioneer.tag_prefix = '' # tags are like 1.2.0
+versioneer.parentdir_prefix = 'ESSArch-EPP-'
 
 try:
     from setuptools import setup, find_packages
@@ -35,20 +34,49 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-__shortname__ = 'EPP'
+__shortname__ = 'ESSArch-EPP'
 __description__ = 'ESSArch Preservation Platform'
 
 if __name__ == '__main__':
     setup(
-        name='EPP',
-        version=__version__,
+        name='ESSArch-EPP',
+        version=versioneer.get_version(),
+        cmdclass=versioneer.get_cmdclass(),
         description='ESSArch Preservation Platform',
         author='Henrik Ek',
         author_email='henrik@essolutions.se',
         url='http://www.essolutions.se',
         install_requires=[
-            "lxml>=2.2.8",
-            "pytz>=2010o",
+            "MySQL-python>=1.2.3",
+            "pyodbc>=3.0.7",
+            "pytz>=2013.9",
+            "psutil>=1.2.1",
+            "billiard>=3.3.0.16",
+            "anyjson>=0.3.3",
+            "amqp>=1.4.3",
+            "kombu>=3.0.12",
+            "pycparser>=2.10",
+            "cffi>=0.8.6",
+            "six>=1.7.3",
+            "cryptography>=0.3",
+            "pyOpenSSL>=0.14",
+            "pysendfile>=2.0.1",
+            "nose>=2.0.1",
+            "lxml>=3.1.0",
+            "pyftpdlib>=1.4.0",
+            "Django>=1.6.2",
+            "django-picklefield>=0.3.1",
+            "argparse>=1.2.1",
+            "httplib2>=0.7.5",
+            "Jinja2>=2.6",
+            "Soapbox>=0.3.7",
+            "South>=0.8.4",
+            "django.js>=0.8.1",
+            "django-eztables>=0.3.2",
+            "celery>=3.1.9",
+            "django-celery>=3.1.9",
+            "jobtastic>=0.2.2",
+            "logfileviewer>=0.6.2",
         ],
         packages=find_packages(),
         include_package_data=True,
