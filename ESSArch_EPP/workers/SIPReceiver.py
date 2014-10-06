@@ -177,7 +177,10 @@ class WorkingThread:
     
                                         if self.extOBJdbget and ext_errno == 0:
                                             altRecordID_dict['POLICYID'] = self.extOBJdbget[0][0]
-                                            altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8]
+                                            try:
+                                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('utf-8')
+                                            except UnicodeDecodeError:
+                                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('unicode-escape')
                                         else:
                                             logging.error('Problem to get ProjectGroupCode from AIS, ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, ext_why))
                                             self.ok = 0
@@ -936,7 +939,7 @@ class WorkingThread:
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
 #                                        if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-                    time.sleep(int(self.Time))
+                time.sleep(int(self.Time))
                 #model.meta.Session.close()
             except:
                 #logger.error('Unexpected error: %s %s' % (sys.exc_info()[0], sys.exc_info()[1]))
@@ -946,7 +949,7 @@ class WorkingThread:
             db.close_old_connections()
             self.mLock.release()
             #time.sleep(int(self.Time))
-            time.sleep(1)
+            #time.sleep(1)
         self.RunFlag=0
         self.mDieFlag=0
 
