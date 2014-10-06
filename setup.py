@@ -22,10 +22,10 @@
 
 import versioneer
 versioneer.VCS = 'git'
-versioneer.versionfile_source = 'ESSArch-EPP/_version.py'
+versioneer.versionfile_source = 'ESSArch_EPP/_version.py'
 versioneer.versionfile_build = None
 versioneer.tag_prefix = '' # tags are like 1.2.0
-versioneer.parentdir_prefix = 'ESSArch-EPP-'
+versioneer.parentdir_prefix = 'ESSArch_EPP-'
 
 try:
     from setuptools import setup, find_packages
@@ -34,12 +34,9 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-__shortname__ = 'ESSArch-EPP'
-__description__ = 'ESSArch Preservation Platform'
-
 if __name__ == '__main__':
     setup(
-        name='ESSArch-EPP',
+        name='ESSArch_EPP',
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
         description='ESSArch Preservation Platform',
@@ -61,7 +58,7 @@ if __name__ == '__main__':
             "cryptography>=0.3",
             "pyOpenSSL>=0.14",
             "pysendfile>=2.0.1",
-            "nose>=2.0.1",
+            "nose>=1.1.2",
             "lxml>=3.1.0",
             "pyftpdlib>=1.4.0",
             "Django>=1.6.2",

@@ -6,7 +6,7 @@ from django.conf import settings
 from monitoring.models import Log, MonitoringObject
 from monitoring.tasks import CheckStorageMediumsTask
 from configuration.models import ESSProc
-import setup
+import ESSArch_EPP as epp
 
 @login_required
 def sysstat(request):
@@ -16,7 +16,7 @@ def sysstat(request):
     context = {}
 
     # Versions    
-    context['essarch_info'] = '%s (%s) %s' % (setup.__shortname__, setup.__description__, setup.__version__)
+    context['essarch_info'] = '%s (%s) %s' % (epp.__shortname__, epp.__description__, epp.__version__)
 
     #StorageMedium status
     media_status = CheckStorageMediumsTask.delay_or_fail(email=None)
@@ -72,7 +72,7 @@ def sysinfo(request):
     for name, shell_command in SHELL_COMMANDS:
         context[name] = run_shell_command(shell_command, cwd)
     
-    context['essarch_info'] = '%s (%s) %s' % (setup.__shortname__, setup.__description__, setup.__version__)
+    context['essarch_info'] = '%s (%s) %s' % (epp.__shortname__, epp.__description__, epp.__version__)
 
     # Settings Flags
     context['settings_flags'] = []
