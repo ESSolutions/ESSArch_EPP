@@ -29,23 +29,29 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 #import pymssql,_mssql,sys,time,string
 import pyodbc,sys,time,string
 
-#DBhost = '192.168.100.150'		#Prod AIS
-#DBuser = 'RA2B_ES21rcH'			#Prod AIS
-#DBpasswd = 'x'		#Prod AIS
-#DBname = 'Arkis2Balder'			#Prod AIS
-#DBport = '1433'
-#DBTDS_Version = '7.2'
-#DBdriver = 'SQL Server'     # must match entry in /etc/unixODBC/odbcinst.ini
+from django.conf import settings
 
-DBhost = '10.100.9.2'		#Test AIS 2008
-DBuser = 'RA2B_ES21rcH'			#Test AIS 2008
-DBpasswd = 'x'		#Test AIS 2008
-DBname = 'Arkis2Balder'			#Test AIS 2008
-DBport = '1433'
-DBTDS_Version = '7.2'
-DBdriver = 'SQL Server'     # must match entry in /etc/unixODBC/odbcinst.ini
+DBuser = ''
+DATABASES_dict = getattr(settings,'DATABASES_AIS',{})
+if DATABASES_dict:
+    default_db = DATABASES_dict.get('default',{})
+    if default_db:
+        DBuser = default_db.get('USER','RA2B_ES21rcH')
+        DBpasswd = default_db.get('PASSWORD','x')
+        DBname = default_db.get('NAME','Arkis2Balder')
+        DBhost = default_db.get('HOST','10.100.9.2')
+        DBport = default_db.get('PORT','1433')
+        DBTDS_Version = default_db.get('TDS','7.2')
+        DBdriver = default_db.get('DRIVER','SQL Server')     # must match entry in /etc/unixODBC/odbcinst.ini
+if not DBuser:
+    DBhost = '10.100.9.2'        
+    DBuser = 'RA2B_ES21rcH'         
+    DBpasswd = 'x'   
+    DBname = 'Arkis2Balder'        
+    DBport = '1433'
+    DBTDS_Version = '7.2'
+    DBdriver = 'SQL Server'     # must match entry in /etc/unixODBC/odbcinst.ini
 
-#DBlogin_timeout = 30
 DBquery_timeout = 60
 
 Debug = 0

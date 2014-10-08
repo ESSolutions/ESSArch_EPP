@@ -30,7 +30,9 @@ WSGI config for ESSArch EPP.
 """
 import os, sys
 
-sys.path.append('/ESSArch/app')
+sys.path.append('/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP')
+sys.path.append('/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers')
+sys.path.append('/ESSArch/config')
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings"
 

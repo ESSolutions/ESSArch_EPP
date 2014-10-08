@@ -1,3 +1,3 @@
-recursive-include * *.js *.html *.txt *.gif *.png *.css *.wsdl *.xml *.xsd
+recursive-include * *.js *.html *.txt *.gif *.png *.css *.wsdl *.xml *.xsd *.sh
 include versioneer.py
 include ESSArch_EPP/_version.py

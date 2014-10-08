@@ -43,7 +43,7 @@ lockfile=/var/lock/subsys/httpd
 RETVAL=0
 export PATH=$PATH:/usr/sbin:/ESSArch/pd/python/bin
 export LD_LIBRARY_PATH=/ESSArch/pd/python/lib:/ESSArch/pd/libxslt/lib:/ESSArch/pd/libxml/lib
-export PYTHONPATH=/ESSArch/bin
+export PYTHONPATH=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP:/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers:/ESSArch/config
 export PYTHON_EGG_CACHE=/ESSArch/pd/.python-eggs
 
 export LANG='en_US.UTF-8'

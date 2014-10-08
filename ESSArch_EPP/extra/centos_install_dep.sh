@@ -30,4 +30,6 @@ pcre-devel \
 lzo \
 lzo-devel \
 xz \
-bzip2-devel
+bzip2-devel \
+sqlite-devel \
+libffi-devel

@@ -27,18 +27,27 @@ versioneer.versionfile_build = None
 versioneer.tag_prefix = '' # tags are like 1.2.0
 versioneer.parentdir_prefix = 'ESSArch_EPP-'
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
+from setuptools import find_packages, setup  
+from setuptools.command.install import install as _install  
+
+def _post_install():  
+    print 'Running inside _post_install'
+
+class my_install(_install):  
+    def run(self):
+        _install.run(self)
+
+        # the second parameter, [], can be replaced with a set of parameters if _post_install needs any
+        self.execute(_post_install, [],  
+                     msg="Running post install task")
+
 
 if __name__ == '__main__':
+    cmdclass=versioneer.get_cmdclass()
+    cmdclass.update({'install': my_install})
     setup(
         name='ESSArch_EPP',
         version=versioneer.get_version(),
-        cmdclass=versioneer.get_cmdclass(),
         description='ESSArch Preservation Platform',
         author='Henrik Ek',
         author_email='henrik@essolutions.se',
@@ -78,4 +87,5 @@ if __name__ == '__main__':
         packages=find_packages(),
         include_package_data=True,
         zip_safe=False,
+        cmdclass=cmdclass,
     )

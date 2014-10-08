@@ -14,7 +14,7 @@
 ### END INIT INFO
 
 PythonBin=/ESSArch/pd/python/bin/python2.7
-ESSArchStopStart=/ESSArch/bin/ESSArchStopStart.pyc
+ESSArchStopStart=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/ESSArchStopStart.pyc
 test -x $PythonBin || exit 5
 LOCK_FILE=/var/lock/subsys/essarch
 

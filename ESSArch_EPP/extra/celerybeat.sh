@@ -43,7 +43,7 @@ SCRIPT_NAME="$(basename "$SCRIPT_FILE")"
 
 export LD_LIBRARY_PATH=/ESSArch/pd/python/lib:/ESSArch/pd/libxslt/lib:/ESSArch/pd/libxml/lib:/ESSArch/pd/libmpeg2/lib:/usr/local/lib
 #export DJANGO_SETTINGS_MODULE=config.settings
-export PYTHONPATH=/ESSArch/app:/ESSArch/bin
+export PYTHONPATH=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP:/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers:/ESSArch/config
 
 # /etc/init.d/celerybeat: start and stop the celery periodic task scheduler daemon.
 
@@ -98,10 +98,10 @@ scripts=""
 #    . /etc/default/celeryd
 #fi
 
-if test -f /ESSArch/app/config/celeryd; then
-    scripts="/ESSArch/app/config/celeryd"
+if test -f /ESSArch/config/celeryd; then
+    scripts="/ESSArch/config/celeryd"
     #_config_sanity /ESSArch/app/config/celeryd
-    . /ESSArch/app/config/celeryd
+    . /ESSArch/config/celeryd
 fi
 
 

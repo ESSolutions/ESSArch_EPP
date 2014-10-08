@@ -61,6 +61,18 @@ DATABASES = {
     }
 }
 
+DATABASES_AIS = {
+    'default': {
+        'DRIVER': 'SQL Server', # must match entry in /etc/unixODBC/odbcinst.ini
+        'NAME': 'Arkis2Balder',
+        'USER': 'RA2B_ES21rcH',
+        'PASSWORD': 'x',
+        'HOST': '10.100.9.2',                        
+        'PORT': '1433',
+        'TDS': '7.2',
+    }
+}
+
 # Email configuration
 EMAIL_HOST = 'localhost'
 #EMAIL_HOST = '192.168.0.51'
@@ -258,12 +270,19 @@ CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
 from celery.schedules import crontab
 from datetime import timedelta
 
+process_list=["IOEngine.pyc", "FTPServer.pyc", "AccessEngine.pyc","ESSlogging.pyc", "db_sync_ais.pyc", "TLD.pyc", "AIPPurge.pyc", 
+                    "AIPWriter.pyc", "SIPRemove.pyc", "AIPValidate.pyc", "AIPChecksum.pyc", "AIPCreator.pyc","SIPValidateFormat.pyc",
+                    "SIPValidateApproval.pyc","SIPValidateAIS.pyc","SIPReceiver.pyc"]
+WORKERS_ROOT = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
+for i,p in enumerate(process_list):
+    process_list[i]=os.path.join(WORKERS_ROOT,p)
+
 CELERYBEAT_SCHEDULE = {
     "CheckProcesses-every-30-seconds": {
         "task": "monitoring.tasks.CheckProcessTask",
         "schedule": timedelta(seconds=30),
         "kwargs": {
-                'process_list':["/ESSArch/bin/IOEngine.pyc", "/ESSArch/bin/FTPServer.pyc", "/ESSArch/bin/AccessEngine.pyc","/ESSArch/bin/ESSlogging.pyc", "/ESSArch/bin/db_sync_ais.pyc", "/ESSArch/bin/TLD.pyc", "/ESSArch/bin/AIPPurge.pyc", "/ESSArch/bin/AIPWriter.pyc", "/ESSArch/bin/SIPRemove.pyc", "/ESSArch/bin/AIPValidate.pyc", "/ESSArch/bin/AIPChecksum.pyc", "/ESSArch/bin/AIPCreator.pyc","/ESSArch/bin/SIPValidateFormat.pyc","/ESSArch/bin/SIPValidateApproval.pyc","/ESSArch/bin/SIPValidateAIS.pyc","/ESSArch/bin/SIPReceiver.pyc"],
+                'process_list':process_list,
         }
     },
     "CheckProcFiles-every-60-seconds": {
@@ -446,3 +465,8 @@ LOGGING = {
         },
     },
 }
+
+try:
+    from local_settings import *
+except ImportError, exp:
+    pass

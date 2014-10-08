@@ -29,9 +29,21 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import MySQLdb 
 
-DBuser = 'arkiv'
-DBpasswd = 'password'
-DBname = 'essarch'
+from django.conf import settings
+
+DBuser = ''
+DATABASES_dict = getattr(settings,'DATABASES',{})
+if DATABASES_dict:
+    default_db = DATABASES_dict.get('default',{})
+    if default_db.get('ENGINE','').find('mysql') > -1:
+        DBuser = default_db.get('USER','arkiv')
+        DBpasswd = default_db.get('PASSWORD','password')
+        DBname = default_db.get('NAME','essarch')
+if not DBuser:
+    DBuser = 'arkiv'
+    DBpasswd = 'password'
+    DBname = 'essarch'
+
 Debug = 0
 
 class DB:

@@ -66,8 +66,8 @@ class LogEvent(models.Model):
 
 # Parameters
 class Parameter(models.Model):
-    entity      = models.CharField( max_length = 60, unique=True )
-    value       = models.CharField( max_length = 70 )
+    entity      = models.CharField( max_length = 255, unique=True )
+    value       = models.CharField( max_length = 255 )
     
     class Meta:
         ordering = ["entity"]
@@ -85,8 +85,8 @@ class Parameter(models.Model):
 
 # Paths
 class Path(models.Model):
-    entity  = models.CharField( max_length = 60, unique=True )
-    value   = models.CharField( max_length = 70 )
+    entity  = models.CharField( max_length = 255, unique=True )
+    value   = models.CharField( max_length = 255 )
 
     class Meta:
         ordering = ["entity"]
@@ -94,8 +94,8 @@ class Path(models.Model):
  
 # XML schemas and namespaces
 class SchemaProfile(models.Model):
-    entity      = models.CharField( max_length = 60, unique=True )
-    value       = models.CharField( max_length = 70 )
+    entity      = models.CharField( max_length = 255, unique=True )
+    value       = models.CharField( max_length = 255 )
     
     class Meta:
         ordering = ["entity"]
@@ -226,6 +226,7 @@ MediumType_CHOICES = (
     (303, 'IBM-LTO3'),
     (304, 'IBM-LTO4'),
     (305, 'IBM-LTO5'),
+    #(306, 'IBM-LTO6'),
 )
 
 MediumFormat_CHOICES = (
@@ -325,17 +326,17 @@ class sm(object):
     target              = ''
 
 class ESSConfig(models.Model):
-    Name = models.CharField(max_length=60)
-    Value = models.CharField(max_length=70,blank=True)
+    Name = models.CharField(max_length=255)
+    Value = models.CharField(max_length=255,blank=True)
     Status = models.CharField(max_length=10,blank=True)
     class Meta:
         db_table = 'ESSConfig'
         verbose_name = 'Parameter (core)'
 
 class ESSProc(models.Model):
-    Name = models.CharField(max_length=45)
-    Path = models.CharField(max_length=60)
-    LogFile = models.CharField(max_length=60)
+    Name = models.CharField(max_length=255)
+    Path = models.CharField(max_length=255)
+    LogFile = models.CharField(max_length=255)
     expected_pids = models.IntegerField(default=1)
     Time = models.CharField(max_length=4)
     Status = models.CharField(max_length=10)
