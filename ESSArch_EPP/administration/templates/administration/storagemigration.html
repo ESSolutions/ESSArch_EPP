@@ -47,6 +47,15 @@
                         placeholder="Please specify path to save a copy of IP">
                 </td>
             </tr>
+             <tr class="target">
+                <td class="required">Storage Method Target Medium</td>
+                <td>
+                    <input id="targetmedium" type="text"
+                        class="input-xxlarge"
+                        placeholder="target search"
+                        title='Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods.&#013;When deactivating media please leave this field empty'>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -121,17 +130,7 @@
                 <td><input id="filterhide-4" type="checkbox"/></td>
                 <td><input id="regex-4" checked="True" type="checkbox"/></td>
             </tr>
-            <tr class="target">
-                <td class="required">Storage Method Target Medium</td>
-                <td>
-                    <input id="filter-5" type="text"
-                        class="input-xxlarge"
-                        placeholder="target search"
-                        title='Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods.&#013;When deactivating media please leave this field empty'>
-                </td>
-                <td><input id="filterhide-5" type="checkbox" disabled="True"/></td>
-                <td><input id="regex-5" type="checkbox" disabled="True"/></td>
-            </tr>
+           
             <tr class="policy">
                 <td>Policy</td>
                 <td>
