@@ -336,17 +336,17 @@ class robotInventory(DetailView):
         return context
     
 
-class StorageMaintenance(TemplateView):
-    template_name = 'administration/storagemaintenance.html'
+class StorageMigration(TemplateView):
+    template_name = 'administration/storagemigration.html'
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
-        return super(StorageMaintenance, self).dispatch( *args, **kwargs)
+        return super(StorageMigration, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(StorageMaintenance, self).get_context_data(**kwargs)
-        context['label'] = 'ADMINISTRATION - Storage Maintenance'
-        context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').values_list('entity','value'))
+        context = super(StorageMigration, self).get_context_data(**kwargs)
+        context['label'] = 'ADMINISTRATION - Storage Migration'
+        context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
     
