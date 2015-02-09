@@ -60,10 +60,8 @@
     <table class="table search">
         <thead>
             <tr>
-                <th>Target</th>
+                <th>Source</th>
                 <th>Filter text</th>
-                <th>Hide column</th>
-                <th>Regex</th>
             </tr>
         </thead>
         <tbody>
@@ -75,8 +73,6 @@
                         class="input-xxlarge"
                         placeholder="object search">
                 </td>
-                <td><input id="filterhide-0" type="checkbox"/></td>
-                <td><input id="regex-0" type="checkbox"/></td>
             </tr>
             <tr class="objectuuid">
                 <td>ObjectUUID</td>
@@ -85,8 +81,6 @@
                         class="input-xxlarge"
                         placeholder="objectUUID search">
                 </td>
-                <td><input id="filterhide-1" type="checkbox" checked="checked"/></td>
-                <td><input id="regex-1" type="checkbox"/></td>
             </tr>
             <tr class="statusprocess">
                 <td>Status Process</td>
@@ -96,8 +90,6 @@
                         value="3000"
                         placeholder="statusprocess search">
                 </td>
-                <td><input id="filterhide-2" type="checkbox"/></td>
-                <td><input id="regex-2" type="checkbox"/></td>
             </tr>
             <tr class="statusactivity">
                 <td>Status Activity</td>
@@ -107,8 +99,6 @@
                         value="0"
                         placeholder="statusactivity search">
                 </td>
-                <td><input id="filterhide-3" type="checkbox"/></td>
-                <td><input id="regex-3" type="checkbox"/></td>
             </tr>
             <tr class="storageMediumID">
                 <td>Current MediumID</td>
@@ -118,8 +108,6 @@
                         placeholder="medium search"
                         title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;When deactivating media where the target prefix changed from eg ASA to XSA enter -ASA+XSA">
                 </td>
-                <td><input id="filterhide-4" type="checkbox"/></td>
-                <td><input id="regex-4" checked="True" type="checkbox"/></td>
             </tr>
            
             <tr class="policy">
@@ -129,8 +117,6 @@
                         class="input-xxlarge"
                         placeholder="policy search">
                 </td>
-                <td><input id="filterhide-6" type="checkbox"/></td>
-                <td><input id="regex-6" type="checkbox"/></td>
             </tr>
             <tr class="policyid">
                 <td>PolicyID</td>
@@ -139,8 +125,6 @@
                         class="input-xxlarge"
                         placeholder="policyID search">
                 </td>
-                <td><input id="filterhide-7" type="checkbox"/></td>
-                <td><input id="regex-7" type="checkbox"/></td>
             </tr>
             <tr class="policystat">
                 <td>Policy Status</td>
@@ -149,11 +133,18 @@
                         class="input-xxlarge"
                         placeholder="policystat search">
                 </td>
-                <td><input id="filterhide-8" type="checkbox"/></td>
-                <td><input id="regex-8" type="checkbox"/></td>
             </tr>
             </tr>
-             <tr class="target">
+        </tbody>
+    </table>
+</div>       
+<div class="row">
+	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#storagemediumtarget">-</button>
+	<span>Target</span>
+</div>
+<div id="storagemediumtarget" class="row collapse in">
+             <table class="table search">
+             <tr>
                 <td class="required">Storage Method Target Medium</td>
                 <td>
                     <input id="targetmedium" type="text"
@@ -165,7 +156,6 @@
         </tbody>
     </table>
 </div>
-
 <div class="row">
 	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#archiveobject-selection">-</button>
 	<span>Selection list</span>
