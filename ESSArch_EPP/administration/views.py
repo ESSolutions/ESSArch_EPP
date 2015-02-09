@@ -731,7 +731,7 @@ class MigrationList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MigrationList, self).get_context_data(**kwargs)
-        context['label'] = 'ADMINISTRATION - Storage Maintenance list'
+        context['label'] = 'ADMINISTRATION - Storage Migration  list'
         context['MigrationReqType_CHOICES'] = dict(MigrationReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
