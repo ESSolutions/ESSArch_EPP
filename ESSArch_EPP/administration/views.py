@@ -35,7 +35,7 @@ from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOIC
                            storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
                            MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
 
-from configuration.models import sm, DefaultValue, ESSConfig
+from configuration.models import sm, DefaultValue, ESSConfig, ESSArchPolicy
 
 from administration.tasks import MigrationTask, RobotInventoryTask
 
@@ -348,6 +348,7 @@ class StorageMigration(TemplateView):
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
+        context['PolicyIDlist'] =ESSArchPolicy.objects.all()
         return context
 
 class StorageMaintenance(TemplateView):

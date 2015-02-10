@@ -130,9 +130,11 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                    <input id="filter-7" type="text"
-                        class="input-xxlarge"
-                        placeholder="policyID search">
+                	<select name="policyID">
+                	{% for p in policyIDlist %}
+					<option value={{p}}>{{p}}</option>
+					{% endfor %}
+					</select>
                 </td>
             </tr>
 
@@ -235,7 +237,9 @@ $(document).ready(function() {
 } );
 </script>
 -->
-<script>
+
+<!--  selected fields will be colored blue.-->
+<script> 
 $(document).ready(function() {
     var selected = [];
  
