@@ -13,18 +13,18 @@
         );
     }
 
-    function fnFilterColumn(i) {
-        $table.dataTable().fnFilter(
-            $("#filter-"+i).val(),
+function fnFilterColumn(i) {
+       $table.dataTable().fnFilter(
+         $("#filter-"+i).val(),
             i,
-            $("#regex-"+i)[0].checked,
-            false
+           $("#regex-"+i)[0].checked,
+           false
         );
     }
 
     function createFilter(i) {
-        return function() { fnFilterColumn(i); };
-    }
+       return function() { fnFilterColumn(i); };
+   }
 
     $(function(){
         $table.dataTable({

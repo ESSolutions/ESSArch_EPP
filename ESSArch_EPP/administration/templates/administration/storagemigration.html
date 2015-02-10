@@ -36,7 +36,7 @@
                         class="input-xxlarge"
                         value="{{ DefaultValue.administration_storagemigration__temp_path }}"
                         placeholder="Please specify temporary path for migration">
-                </td>
+                </td> 
             </tr>
             <tr class="copypath">
                 <td>Copy path</td>
@@ -46,7 +46,8 @@
                         value="{{ DefaultValue.administration_storagemigration__copy_path }}"
                         placeholder="Please specify path to save a copy of IP">
                 </td>
-
+                <td>Copy only: <input id="copyonly" type="checkbox">
+                </td>
         </tbody>
     </table>
 </div>
@@ -118,6 +119,14 @@
                         placeholder="policy search">
                 </td>
             </tr>
+            <tr class="policystat">
+                <td>Policy Status</td>
+                <td>
+                    <input id="filter-8" type="text"
+                        class="input-xxlarge"
+                        placeholder="policystat search">
+                </td>
+            </tr>            
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
@@ -126,15 +135,8 @@
                         placeholder="policyID search">
                 </td>
             </tr>
-            <tr class="policystat">
-                <td>Policy Status</td>
-                <td>
-                    <input id="filter-8" type="text"
-                        class="input-xxlarge"
-                        placeholder="policystat search">
-                </td>
-            </tr>
-            </tr>
+
+            
         </tbody>
     </table>
 </div>       
@@ -233,4 +235,33 @@ $(document).ready(function() {
 } );
 </script>
 -->
+<script>
+$(document).ready(function() {
+    var selected = [];
+ 
+    $("#archiveobject-table").dataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": Django.url('storagemaintenance-dt'),
+        "rowCallback": function( row, data ) {
+            if ( $.inArray(data.DT_RowId, selected) !== -1 ) {
+                $(row).addClass('selected');
+            }
+        }
+    });
+ 
+    $('#archiveobject-table tbody').on('click', 'tr', function () {
+        var id = this.id;
+        var index = $.inArray(id, selected);
+ 
+        if ( index === -1 ) {
+            selected.push( id );
+        } else {
+            selected.splice( index, 1 );
+        }
+ 
+        $(this).toggleClass('selected');
+    } );
+} );
+</script>
 {% endblock %}
