@@ -348,8 +348,15 @@ class StorageMigration(TemplateView):
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
-        context['PolicyIDlist'] =ESSArchPolicy.objects.all()
+        context['PolicyIDlist'] = self.get_enabled_policy_list()
         return context
+    
+    def get_enabled_policy_list(self, *args, **kwargs):
+        enabled_policy_list = []
+        return enabled_policy_list
+    def get_enabled_target_list(self, *args, **kwargs):
+        enabled_target_list= []
+        return enabled_target_list
 
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'
@@ -364,9 +371,7 @@ class StorageMaintenance(TemplateView):
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
-
-
-  
+     
 class StorageMaintenanceDatatablesView(DatatablesView):
     model = ArchiveObject
     #queryset = ArchiveObject.objects.exclude(Q(storage__storageMediumUUID__storageMediumStatus = 0))
@@ -793,7 +798,7 @@ class MigrationCreate(CreateView):
                 #return HttpResponseBadRequest()
             else:
                 self.obj_list = obj_list.split(' ')
-            # Convert TargetMediumID to list and remove "+"
+            # Convert TargetMediumID to list and remove "+" ## Convert to dropdown answer.
             target_list = self.request.POST.get('TargetMediumID',None)
             self.target_list = target_list.split(' ')
             for c, target_item in enumerate(self.target_list):
