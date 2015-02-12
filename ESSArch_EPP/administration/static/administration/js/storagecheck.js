@@ -151,6 +151,10 @@
 			                                	"value": $('#copypath').val()
 			                                },
 			                                {
+			                                	"name": "CopyOnlyFlag", 
+			                                	"value": $('#copyonlyflag').val()
+			                                },
+			                                {
 			                                	"name": "ReqUUID", 
 			                                	"value": 'x'
 			                                },

@@ -54,7 +54,7 @@ class MigrationTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self, obj_list, mig_pk):
+    def calculate_result(self, obj_list, mig_pk): # insert copyOnlyFlag
         logger = logging.getLogger('essarch.storagemaintenance')
         migtask = MigrationQueue.objects.get(pk=mig_pk)
         if obj_list == migtask.ObjectIdentifierValue:
@@ -72,7 +72,7 @@ class MigrationTask(JobtasticTask):
         # Create all tasks
         for counter, task in enumerate(tasks):
             #result = self.createcopytest(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath)
-            result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath)
+            result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
             if result == 0:
                 if task == tasks_todo.pop(0):
                     event_info = 'Success to copy ObjectUUID: %s' % task
@@ -109,7 +109,7 @@ class MigrationTask(JobtasticTask):
         
         return 0
 
-    def createcopy(self, ObjectUUID, TargetMediumID, TmpPath, CopyPath):
+    def createcopy(self, ObjectUUID, TargetMediumID, TmpPath, CopyPath, CopyOnlyFlag):
         logger = logging.getLogger('essarch.storagemaintenance')
         MediumLocation = ESSConfig.objects.get(Name='storageMediumLocation').Value
             
@@ -169,6 +169,8 @@ class MigrationTask(JobtasticTask):
             time.sleep(1)
         
         # Prepare write request
+        if self.CopyOnlyFlag == True:
+            return 0
         self.ObjectUUID = arch_obj.ObjectUUID
         self.Pmets_objpath = os.path.join(TmpPath,ObjectIdentifierValue + '_Package_METS.xml')
         self.ObjectPath = os.path.join(TmpPath,ObjectIdentifierValue + '.tar')

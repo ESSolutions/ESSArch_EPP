@@ -767,6 +767,7 @@ class MigrationCreate(CreateView):
     form_class = MigrationQueueForm
     obj_list = None
     target_list = None
+    copy_only_flag = None
 
     @method_decorator(permission_required('essarch.add_migrationqueue'))
     def dispatch(self, *args, **kwargs):
@@ -784,6 +785,8 @@ class MigrationCreate(CreateView):
         if form.is_valid():
             #print 'Form is valid!!!'
             #print request.POST
+            #CopyOnlyFlag
+            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
@@ -848,6 +851,7 @@ class MigrationCreate(CreateView):
         self.object.ObjectIdentifierValue = self.obj_list
         self.object.TargetMediumID = self.target_list
         self.object.ReqUUID = uuid.uuid1()
+        self.object.CopyOnlyFlag = self.copy_only_flag
         self.object.save()
         req_pk = self.object.pk
         result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk)
