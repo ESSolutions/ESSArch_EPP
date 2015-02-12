@@ -130,10 +130,10 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select name="policyID">
-                	{% for p in policyIDlist %}
-					<option value={{p}}>{{p}}</option>
-					{% endfor %}
+                	<select id="filter-5" name="policyID">
+                	<!-- enabled PolicyIDList -->
+					<option value="selectedPolicyID">PolicyID1</option>
+					<option value="selectedPolicyID">PolicyID2</option>
 					</select>
                 </td>
             </tr>
