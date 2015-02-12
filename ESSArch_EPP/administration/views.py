@@ -786,7 +786,7 @@ class MigrationCreate(CreateView):
             #print 'Form is valid!!!'
             #print request.POST
             #CopyOnlyFlag
-            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
+            #self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
