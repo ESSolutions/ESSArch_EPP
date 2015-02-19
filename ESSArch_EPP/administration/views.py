@@ -348,15 +348,39 @@ class StorageMigration(TemplateView):
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
-        context['PolicyIDlist'] = self.get_enabled_policy_list()
+        context['PolicyIDlist'] = self.get_enabled_policy_json()
         return context
     
-    def get_enabled_policy_list(self, *args, **kwargs):
-        enabled_policy_list = []
-        return enabled_policy_list
-    def get_enabled_target_list(self, *args, **kwargs):
-        enabled_target_list= []
-        return enabled_target_list
+    def get_enabled_policy_json(self, *args, **kwargs):
+        allPolicies = ESSArchPolicy.objects.all()
+        enabled_policies = []
+        policy_selection_list =[]
+        for p in allPolicies:
+            if p.PolicyStat == 1:
+                    enabled_policies.append(p)
+        i = 0
+        while (i > len(enabled_policies)):
+            Policy = object()
+            a = enabled_policies[i]
+            Policy_ID = a.PolicyID
+            Policy_Name = a.PolicyName
+            targetlist = []
+            Policy.append(Policy_ID)
+            Policy.append(Policy_Name)
+            if a.sm_1 == True and 299 <a.sm_type_1 <400:
+                        targetlist.append(a.sm_target_1)
+            if a.sm_2 == True and 299 <a.sm_type_2 <400:
+                        targetlist.append(a.sm_target_2)
+            if a.sm_3 == True and 299 <a.sm_type_3 <400:
+                        targetlist.append(a.sm_target_3)
+            if a.sm_4 == True and 299 <a.sm_type_4 <400:
+                        targetlist.append(a.sm_target_4)            
+            Policy.append(targetlist)
+            policy_selection_list.append(Policy)
+            i = i +1
+        enabled_policy_json = json.dumps(policy_selection_list)
+        return enabled_policy_json
+
 
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'

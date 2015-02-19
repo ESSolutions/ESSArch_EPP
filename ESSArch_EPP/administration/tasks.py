@@ -54,7 +54,7 @@ class MigrationTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self, obj_list, mig_pk): # insert copyOnlyFlag
+    def calculate_result(self, obj_list, mig_pk,CopyOnlyFlag): # insert copyOnlyFlag
         logger = logging.getLogger('essarch.storagemaintenance')
         migtask = MigrationQueue.objects.get(pk=mig_pk)
         if obj_list == migtask.ObjectIdentifierValue:
@@ -170,7 +170,9 @@ class MigrationTask(JobtasticTask):
         
         # Prepare write request
         if self.CopyOnlyFlag == True:
-            return 0
+                shutil.move(self.ObjectPath,self.copy_ObjectPath)
+                shutil.move(self.Pmets_objpath,self.copy_Pmets_objpath)
+                return 0
         self.ObjectUUID = arch_obj.ObjectUUID
         self.Pmets_objpath = os.path.join(TmpPath,ObjectIdentifierValue + '_Package_METS.xml')
         self.ObjectPath = os.path.join(TmpPath,ObjectIdentifierValue + '.tar')

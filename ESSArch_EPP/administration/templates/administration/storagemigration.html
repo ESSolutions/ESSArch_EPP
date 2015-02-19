@@ -168,7 +168,7 @@
 </div>
 
 <div id="archiveobject-selection" class="row collapse in">
-    <table id="archiveobject-table" class="span12 display table table-bordered table-condensed table-striped">
+    <table id="archiveobject-table" class="span12 display table table-bordered table-condensed "> <!--  removed table-striped -->
         <thead>
             <tr>
             	<th>Object</th>
@@ -239,35 +239,9 @@ $(document).ready(function() {
 } );
 </script>
 -->
-
-<!--  selected fields will be colored blue.-->
-<script> 
-$(document).ready(function() {
-    var selected = [];
- 
-    $("#archiveobject-table").dataTable({
-        "processing": true,
-        "serverSide": true,
-        "ajax": Django.url('storagemaintenance-dt'),
-        "rowCallback": function( row, data ) {
-            if ( $.inArray(data.DT_RowId, selected) !== -1 ) {
-                $(row).addClass('selected');
-            }
-        }
-    });
- 
-    $('#archiveobject-table tbody').on('click', 'tr', function () {
-        var id = this.id;
-        var index = $.inArray(id, selected);
- 
-        if ( index === -1 ) {
-            selected.push( id );
-        } else {
-            selected.splice( index, 1 );
-        }
- 
-        $(this).toggleClass('selected');
-    } );
-} );
+<script>
+var targetChoices = JSON.parse(PolicyIDlist):
+	
 </script>
+
 {% endblock %}

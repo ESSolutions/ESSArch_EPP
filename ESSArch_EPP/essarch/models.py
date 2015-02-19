@@ -850,7 +850,7 @@ class MigrationQueue(models.Model):
     Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
     Path = models.CharField(max_length=255)
     CopyPath = models.CharField(max_length=255,blank=True)
-    CopyOnlyFlag =  models.BooleanField()
+    #CopyOnlyFlag =  models.BooleanField()
     task_id = models.CharField(max_length=36,blank=True)
     #task_id = models.ForeignKey(TaskMeta, db_column='task_id', to_field='task_id', null=True, blank=True)
     posted = models.DateTimeField(auto_now_add=True)
@@ -871,7 +871,7 @@ class MigrationQueueForm(forms.ModelForm):
     #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = PlainText())
     ObjectIdentifierValue = forms.CharField(widget=forms.Textarea())
     TargetMediumID = forms.CharField(widget=forms.Textarea())
-    CopyOnlyFlag = forms.BooleanField(widget=forms.HiddenInput)
+    #CopyOnlyFlag = forms.BooleanField(widget=forms.HiddenInput)
     Status = forms.IntegerField(widget = forms.HiddenInput())
     user = forms.CharField(label='User', widget = PlainText())
 #    def clean_Path(self):

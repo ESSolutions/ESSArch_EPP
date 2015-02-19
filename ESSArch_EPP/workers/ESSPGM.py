@@ -2253,7 +2253,7 @@ class Events:
                 eventIdentifier_obj.linkingObjectIdentifierValue = ObjectIdentifierValue
                 eventIdentifier_obj.save()
             #except _mysql_exceptions.Warning,why:
-            except (MySQLdb.Warning), (why):
+            except (MySQLdb.Warning, why):
                 if why.startswith("Data truncated for column 'eventOutcomeDetailNote' at row 1"):
                     logging.warning('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why))
                     return 5
