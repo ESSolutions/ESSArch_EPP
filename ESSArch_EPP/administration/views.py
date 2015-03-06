@@ -42,6 +42,7 @@ from administration.tasks import MigrationTask, RobotInventoryTask
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView
+from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 
 from django.utils.decorators import method_decorator
@@ -350,9 +351,19 @@ class StorageMigration(TemplateView):
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
-        context['EnabledPolicies'] = self.get_enabled_policies()
         return context
     
+
+    
+    
+
+        
+class TargetPrePopulation(View):
+
+    @method_decorator(permission_required('essarch.list_storageMedium'))
+    def dispatch(self, *args, **kwargs):
+        return super(StorageMigration, self).dispatch( *args, **kwargs)
+        
     def get_enabled_policies(self, *args, **kwargs):
         allPolicies = ESSArchPolicy.objects.all()
         enabled_policies = []
@@ -381,15 +392,20 @@ class StorageMigration(TemplateView):
             policy_selection_list.append(Policy)
             i = i +1
         
-        return policy_selection_list
-    
-    
-    def json_response(self, request):#data
+        return policy_selection_list  
+
+    def json_response(self, request):
         data = self.get_enabled_policies()
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
             mimetype='application/json'
         )
+    def render_to_response(self):
+        
+        return self.json_response(request)  
+    
+    
+    
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'
 
