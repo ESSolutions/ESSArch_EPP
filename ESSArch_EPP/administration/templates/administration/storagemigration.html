@@ -131,10 +131,14 @@
                 <td>PolicyID</td>
                 <td>
                 	<select id="filter-7" name="policyID">
-                	<!-- enabled PolicyIDList -->
-					<option value="selectedPolicyID">PolicyID1</option>
-					<option value="selectedPolicyID">PolicyID2</option>
-					</select>
+                	<!-- EnabledPolicies -->
+                                {% for p in EnabledPolicies %}
+                                       <option value={{p.Policy_ID}}>{{ p.Policy_ID }},{{p.Policy_Name}}</option>
+                                {% endfor %}
+                    </select>
+                </td>
+                <td>
+                     <textarea rows="4" cols="50">{{EnabledPolicies}}</textarea>
                 </td>
             </tr>
 
@@ -239,15 +243,6 @@ $(document).ready(function() {
 } );
 </script>
 -->
-<script>
 
-var targetChoices = JSON.parse({{PolicyIDlist}}):
-	
-function PolicyIDselection(targetChoices){
-
-	for 
-}	
-	
-</script>
 
 {% endblock %}

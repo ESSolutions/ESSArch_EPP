@@ -871,7 +871,7 @@ class MigrationQueueForm(forms.ModelForm):
     #ReqType = forms.ChoiceField(label='ReqType', choices=ReqType_CHOICES , widget = PlainText())
     ObjectIdentifierValue = forms.CharField(widget=forms.Textarea())
     TargetMediumID = forms.CharField(widget=forms.Textarea())
-    #CopyOnlyFlag = forms.BooleanField(widget=forms.HiddenInput)
+    CopyOnlyFlag = forms.BooleanField(widget=forms.HiddenInput)
     Status = forms.IntegerField(widget = forms.HiddenInput())
     user = forms.CharField(label='User', widget = PlainText())
 #    def clean_Path(self):

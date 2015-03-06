@@ -19,6 +19,7 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
+from django.core.context_processors import request
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
@@ -344,18 +345,19 @@ class StorageMigration(TemplateView):
         return super(StorageMigration, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+
         context = super(StorageMigration, self).get_context_data(**kwargs)
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
-        context['PolicyIDlist'] = self.get_enabled_policy_json()
+        context['EnabledPolicies'] = self.get_enabled_policies()
         return context
     
-    def get_enabled_policy_json(self, *args, **kwargs):
+    def get_enabled_policies(self, *args, **kwargs):
         allPolicies = ESSArchPolicy.objects.all()
         enabled_policies = []
         policy_selection_list =[]
-        for p in allPolicies:
+        for p in allPolicies: 
             if p.PolicyStat == 1:
                     enabled_policies.append(p)
         i = 0
@@ -378,10 +380,16 @@ class StorageMigration(TemplateView):
             Policy.append(targetlist)
             policy_selection_list.append(Policy)
             i = i +1
-        enabled_policy_json = json.dumps(policy_selection_list)
-        return enabled_policy_json
-
-
+        
+        return policy_selection_list
+    
+    
+    def json_response(self, request):#data
+        data = self.get_enabled_policies()
+        return HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder),
+            mimetype='application/json'
+        )
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'
 
@@ -810,7 +818,7 @@ class MigrationCreate(CreateView):
             #print 'Form is valid!!!'
             #print request.POST
             #CopyOnlyFlag
-            #self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
+            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
@@ -830,7 +838,8 @@ class MigrationCreate(CreateView):
             self.target_list = target_list.split(' ')
             for c, target_item in enumerate(self.target_list):
                 if target_item.startswith('+'):
-                    self.target_list[c] = target_item[1:]
+                    self.target_list[c] = target_item[1:] 
+            self.copy_only_flag = self.request.POST.get('copyonlyflag', None)
             return self.form_valid(form)
         else:
             #print 'Form Not valid problem!!!'
