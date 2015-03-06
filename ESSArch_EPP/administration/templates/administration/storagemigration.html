@@ -130,7 +130,7 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" name="policyID">
+                	<select id="filter-7" name="policyID" onchange=populatecheckboxes()>
                 	<!-- EnabledPolicies -->
                                 {% for p in EnabledPolicies %}
                                        <option value={{p.Policy_ID}}>{{ p.Policy_ID }},{{p.Policy_Name}}</option>
@@ -156,11 +156,12 @@
              <tr>
                 <td class="required">Storage Method Target Medium</td>
 					<td>
+					   <div id="targetfield">
                     <input id="filter-5" type="checkbox" name="targetmedium"> ESA
                     <input id="filter-5" type="checkbox" name="targetmedium"> ESB
                     <input id="filter-5" type="checkbox"  name="targetmedium"> ESC
                     <input id="filter-5" type="checkbox"  name="targetmedium"> ESD
-                      
+                      </div>
                 </td>
             </tr>
         </tbody>
@@ -224,6 +225,37 @@
 	    		});
 		});
 	</script>
+	
+<script>
+
+var enabledPolicies = []
+
+function populatecheckboxes(){
+
+	text2 = "";
+	targets = [];
+	var selectedPolicy = document.getElementById("filter-7").value;
+
+	for (i=0; i< enabledPolicies.length; i++){
+
+	    if (selectedPolicy == enabledPolicies[i].PolicyID){
+		
+		targets = enabledPolicies[i].targetlist
+		}
+	}
+
+	for (i = 0; i < targets.length; i++) {
+
+		text2 += "<input type='checkbox' name='filter-5' checked='True' value=" + targets[i] +">" + targets[i] +"<br>"
+	}
+	    
+	    document.getElementById("targetfield").innerHTML = text2;
+
+	}
+
+
+
+</script>
 <!--
 <script>
 $(document).ready(function() {
