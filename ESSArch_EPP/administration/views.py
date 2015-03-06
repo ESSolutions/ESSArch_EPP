@@ -362,7 +362,7 @@ class TargetPrePopulation(View):
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
-        return super(StorageMigration, self).dispatch( *args, **kwargs)
+        return super(TargetPrePopulation, self).dispatch( *args, **kwargs)
         
     def get_enabled_policies(self, *args, **kwargs):
         allPolicies = ESSArchPolicy.objects.all()
