@@ -353,11 +353,8 @@ class StorageMigration(TemplateView):
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
     
-
     
-    
-
-        
+            
 class TargetPrePopulation(View):
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
