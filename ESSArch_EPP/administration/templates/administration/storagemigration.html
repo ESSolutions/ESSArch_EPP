@@ -130,7 +130,7 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" name="policyID" > <!--  onload=populatePolicyID()       onchange=populatecheckboxes() -->
+                	<select id="filter-7" name="policyID"  onchange=populatecheckboxes() >
 
 
                 	<!-- EnabledPolicies -->
@@ -138,8 +138,8 @@
                     </select>
                 </td>
                 <td>
-                   <button id="jsonselector" onclick=tryjson()>Try json!</button> <a href="{% url 'admin_migrationtarget' %}"><button>A link!</button></a>
-                     <textarea id="jsonpresentation" rows="4" cols="50"></textarea>
+
+                   
                 </td>
             </tr>
 
@@ -151,17 +151,15 @@
 	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#storagemediumtarget">-</button>
 	<span>Target</span>
 </div>
-<!-- 'Specify a target prefix or add a "+" sign in front of the target, eg +ESA +ESB +/diskstorage to enter multiple storage methods.&#013;When deactivating media please leave this field empty' -->
+
 <div id="storagemediumtarget" class="row collapse in">
              <table class="table search">
              <tr>
                 <td class="required">Storage Method Target Medium</td>
+                
 					<td>
 					   <div id="targetfield">
-                    <input id="filter-5" type="checkbox" name="targetmedium"> ESA
-                    <input id="filter-5" type="checkbox" name="targetmedium"> ESB
-                    <input id="filter-5" type="checkbox"  name="targetmedium"> ESC
-                    <input id="filter-5" type="checkbox"  name="targetmedium"> ESD
+
                       </div>
                 </td>
             </tr>
@@ -226,32 +224,26 @@
 	    		});
 		});
 	</script>
-	
+
 <script>
 
 
-var fakejson = [
+var enabledPolicies = {};
 
-{PolicyID : "PolicyID1",PolicyName:"PolicyName1", targetlist:["target1","target2","target3"]},
-{PolicyID : "PolicyID2",PolicyName:"PolicyName2", targetlist:["target4","target5","target6"]},
-{PolicyID : "PolicyID3",PolicyName:"PolicyName3", targetlist:["target7","target8","target9"]},
-{PolicyID : "PolicyID4",PolicyName:"PolicyName4", targetlist:["target10","target11","target12"]},
+$.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
 
-];
+	 enabledPolicies = enabledPolicies1;
+	 populatePolicyID();
+	 populatecheckboxes();
+	});
 
-var enabledPolicies = "{% url 'admin_migrationtarget' %}"
-
-function tryjson(){
-
-	document.getElementById('jsonpresentation').innerHTML = enabledPolicies;
-}
 
 
 function populatePolicyID(){
 
 
 
-	text1 = "";
+	var text1 = "";
 
 
 	for (i = 0; i < enabledPolicies.length; i++) {
@@ -265,10 +257,11 @@ function populatePolicyID(){
 
 function populatecheckboxes(){
 
-	text2 = "";
+	var text2 = "";
 	targets = [];
 	var selectedPolicy = document.getElementById("filter-7").value;
 
+	
 	for (i=0; i< enabledPolicies.length; i++){
 
 	    if (selectedPolicy == enabledPolicies[i].PolicyID){
@@ -279,9 +272,9 @@ function populatecheckboxes(){
 
 	for (i = 0; i < targets.length; i++) {
 
-		text2 += "<input type='checkbox' id='filter-5' name='targetmedium' checked='True' value=" + targets[i] +">" + targets[i] +"<br>"
+		text2 += "<input type='checkbox' id='filter-5' name='targetmedium' checked='True' value=" + targets[i] +">" + " " +targets[i] + " "
 	}
-	    
+	   
 	    document.getElementById("targetfield").innerHTML = text2;
 
 	}

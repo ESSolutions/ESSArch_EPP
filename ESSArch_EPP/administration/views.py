@@ -20,6 +20,7 @@
     Email - essarch@essolutions.se
 '''
 from django.core.context_processors import request
+from _elementtree import tostring
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
@@ -359,24 +360,29 @@ class TargetPrePopulation(View):
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
+        print '111111111111111111111'
         return super(TargetPrePopulation, self).dispatch( *args, **kwargs)
         
     def get_enabled_policies(self, *args, **kwargs):
+        print '4444444444444444444444444444444444444'
         allPolicies = ESSArchPolicy.objects.all()
         enabled_policies = []
         policy_selection_list =[]
         for p in allPolicies: 
             if p.PolicyStat == 1:
                     enabled_policies.append(p)
+                    print 'vi kom hit'
         i = 0
-        while (i > len(enabled_policies)):
-            Policy = object()
+        while (i < len(enabled_policies)):
+            
             a = enabled_policies[i]
-            Policy_ID = a.PolicyID
-            Policy_Name = a.PolicyName
+            print 'aaaaaaaa: %s' % a
+            Policy ={}
+            Policy['PolicyID'] = a.PolicyID
+            Policy['PolicyName'] =  a.PolicyName
+            
             targetlist = []
-            Policy.append(Policy_ID)
-            Policy.append(Policy_Name)
+
             if a.sm_1 == True and 299 <a.sm_type_1 <400:
                         targetlist.append(a.sm_target_1)
             if a.sm_2 == True and 299 <a.sm_type_2 <400:
@@ -385,20 +391,21 @@ class TargetPrePopulation(View):
                         targetlist.append(a.sm_target_3)
             if a.sm_4 == True and 299 <a.sm_type_4 <400:
                         targetlist.append(a.sm_target_4)            
-            Policy.append(targetlist)
+            Policy['targetlist'] = targetlist
             policy_selection_list.append(Policy)
             i = i +1
         
         return policy_selection_list  
 
     def json_response(self, request):
+        print '333333333333333333333333333333333'
         data = self.get_enabled_policies()
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
             mimetype='application/json'
         )
-    def render_to_response(self):
-        
+    def get(self, request, *args, **kwargs):
+        print '2222222222222222222222222222222222'
         return self.json_response(request)  
     
     
