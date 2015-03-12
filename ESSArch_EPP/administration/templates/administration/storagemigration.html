@@ -46,7 +46,7 @@
                         value="{{ DefaultValue.administration_storagemigration__copy_path }}"
                         placeholder="Please specify path to save a copy of IP">
                 </td>
-                <td>No media migration: <input id="copyonlyflag" value="True" type="checkbox">
+                <td>No media migration: <input id="copyonlyflag" type="checkbox"  onchange=removeTarget()>
                 </td>
         </tbody>
     </table>
@@ -153,9 +153,10 @@
 </div>
 
 <div id="storagemediumtarget" class="row collapse in">
-             <table class="table search">
+             <table>
+             
              <tr>
-                <td class="required">Storage Method Target Medium</td>
+                <td>Storage Method Target Medium</td><td></td><td></td><td></td>
                 
 					<td>
 					   <div id="targetfield">
@@ -163,6 +164,7 @@
                       </div>
                 </td>
             </tr>
+            
         </tbody>
     </table>
 </div>
@@ -245,7 +247,6 @@ function populatePolicyID(){
 
 	var text1 = "";
 
-
 	for (i = 0; i < enabledPolicies.length; i++) {
 	    text1 += "<option value=" + enabledPolicies[i].PolicyID + ">" + enabledPolicies[i].PolicyID + "," + enabledPolicies[i].PolicyName + "</option>"
 	}
@@ -256,28 +257,42 @@ function populatePolicyID(){
 	}
 
 function populatecheckboxes(){
-
-	var text2 = "";
-	targets = [];
-	var selectedPolicy = document.getElementById("filter-7").value;
+	if (document.getElementById("copyonlyflag").checked == false){
+		var text2 = "";
+		targets = [];
+		var selectedPolicy = document.getElementById("filter-7").value;
 
 	
-	for (i=0; i< enabledPolicies.length; i++){
+		for (i=0; i< enabledPolicies.length; i++){
 
-	    if (selectedPolicy == enabledPolicies[i].PolicyID){
+	   	 if (selectedPolicy == enabledPolicies[i].PolicyID){
 		
-		targets = enabledPolicies[i].targetlist
+			targets = enabledPolicies[i].targetlist
+			}
 		}
-	}
 
-	for (i = 0; i < targets.length; i++) {
+		for (i = 0; i < targets.length; i++) {
 
-		text2 += "<input type='checkbox' id='filter-5' name='targetmedium' checked='True' value=" + targets[i] +">" + " " +targets[i] + " "
-	}
+			text2 += "<input type='checkbox' id='filter-5' name='targetmedium' checked='True' value=" + targets[i] +">" + " " +targets[i] + " "
+		}
 	   
-	    document.getElementById("targetfield").innerHTML = text2;
-
+	    	document.getElementById("targetfield").innerHTML = text2;
 	}
+	
+	}
+	
+function removeTarget(){
+	
+	var noMigration = "NO MEDIA MIGRATION";
+	
+	if (document.getElementById("copyonlyflag").checked == true){
+		document.getElementById("targetfield").innerHTML = noMigration;
+	}
+	else{
+		populatecheckboxes()
+	}
+		
+}
 <!-- list updating script goes here-->
 </script>
 <!--
