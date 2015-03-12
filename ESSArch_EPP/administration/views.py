@@ -360,11 +360,11 @@ class TargetPrePopulation(View):
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
-        print '111111111111111111111'
+    
         return super(TargetPrePopulation, self).dispatch( *args, **kwargs)
         
     def get_enabled_policies(self, *args, **kwargs):
-        print '4444444444444444444444444444444444444'
+        
         allPolicies = ESSArchPolicy.objects.all()
         enabled_policies = []
         policy_selection_list =[]
@@ -376,7 +376,7 @@ class TargetPrePopulation(View):
         while (i < len(enabled_policies)):
             
             a = enabled_policies[i]
-            print 'aaaaaaaa: %s' % a
+
             Policy ={}
             Policy['PolicyID'] = a.PolicyID
             Policy['PolicyName'] =  a.PolicyName
@@ -398,14 +398,14 @@ class TargetPrePopulation(View):
         return policy_selection_list  
 
     def json_response(self, request):
-        print '333333333333333333333333333333333'
+        
         data = self.get_enabled_policies()
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
             mimetype='application/json'
         )
     def get(self, request, *args, **kwargs):
-        print '2222222222222222222222222222222222'
+        
         return self.json_response(request)  
     
     
