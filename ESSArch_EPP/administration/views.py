@@ -371,7 +371,7 @@ class TargetPrePopulation(View):
         for p in allPolicies: 
             if p.PolicyStat == 1:
                     enabled_policies.append(p)
-                    print 'vi kom hit'
+
         i = 0
         while (i < len(enabled_policies)):
             
@@ -888,7 +888,8 @@ class MigrationCreate(CreateView):
         initial['user'] = self.request.user.username
         initial['Status'] = 0
         initial['ReqType'] = self.request.GET.get('ReqType',1)
-        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose') 
+        initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
+        initial['CopyOnlyFlag'] = self.request.GET.get('CopyOnlyFlag')
         #if initial['ReqType'] == 1:
         #    migration_path = Path.objects.get(entity='path_control').value
         #initial['Path'] = self.request.GET.get('Path', migration_path)

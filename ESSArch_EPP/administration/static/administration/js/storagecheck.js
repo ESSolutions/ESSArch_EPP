@@ -114,7 +114,7 @@
 	                        //oSetDT._iDisplayLength = 1000;
 	                        //oSetDT.oApi._fnCalculateEnd( oSetDT );
 	                        //oSetDT.oApi._fnDraw( oSetDT );
-	                        if (confirm ('Do you really want to start migration to target '+data+'?')){
+	                        if (confirm ('Do you really want to start migration? Target: '+data+'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
 		                            "data": [		                                    

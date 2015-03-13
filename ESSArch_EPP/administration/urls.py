@@ -19,7 +19,7 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-from administration.views import StorageMigration
+
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
