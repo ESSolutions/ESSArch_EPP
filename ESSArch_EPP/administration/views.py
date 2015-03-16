@@ -838,7 +838,7 @@ class MigrationCreate(CreateView):
             #print 'Form is valid!!!'
             #print request.POST
             #CopyOnlyFlag
-            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
+            self.copy_only_flag = self.request.POST.get('copyonlyflag',None)
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
@@ -853,8 +853,9 @@ class MigrationCreate(CreateView):
                 #return HttpResponseBadRequest()
             else:
                 self.obj_list = obj_list.split(' ')
-            # Convert TargetMediumID to list and remove "+" ## Convert to dropdown answer.
-            target_list = self.request.POST.get('TargetMediumID',None)
+            # Convert TargetMediumID to list and remove "+" ## Convert to checkbox answer.
+            target_list = self.request.POST.get('filter-5',None)
+            print(target_list)
             self.target_list = target_list.split(' ')
             for c, target_item in enumerate(self.target_list):
                 if target_item.startswith('+'):
@@ -889,7 +890,7 @@ class MigrationCreate(CreateView):
         initial['Status'] = 0
         initial['ReqType'] = self.request.GET.get('ReqType',1)
         initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
-        initial['CopyOnlyFlag'] = self.request.GET.get('CopyOnlyFlag')
+        initial['CopyOnlyFlag'] = self.request.GET.get('copyonlyflag')
         #if initial['ReqType'] == 1:
         #    migration_path = Path.objects.get(entity='path_control').value
         #initial['Path'] = self.request.GET.get('Path', migration_path)

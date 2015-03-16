@@ -130,7 +130,7 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" name="policyID"  onchange=populatecheckboxes() >
+                	<select id="filter-7" onchange=populatecheckboxes() >
 
 
                 	<!-- EnabledPolicies -->
@@ -273,7 +273,7 @@ function populatecheckboxes(){
 
 		for (i = 0; i < targets.length; i++) {
 
-			text2 += "<input type='checkbox' id='filter-5' name='targetmedium' checked='True' value=" + targets[i] +">" + " " +targets[i] + " "
+			text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " "
 		}
 	   
 	    	document.getElementById("targetfield").innerHTML = text2;
