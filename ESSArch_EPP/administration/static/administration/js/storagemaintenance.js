@@ -225,7 +225,7 @@
 	                        //alert('aaData:'+aaData+'end')
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
-	                        if (confirm ('Do you really want to start migration to target '+data+'?')){
+	                        if (confirm ('Do you really want to start migration? Target: '+data+'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
 		                            "data": [		                                    

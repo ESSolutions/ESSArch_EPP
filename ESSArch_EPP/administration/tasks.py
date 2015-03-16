@@ -170,8 +170,8 @@ class MigrationTask(JobtasticTask):
         
         # Prepare write request
         if self.CopyOnlyFlag == True:
-                shutil.move(self.ObjectPath,self.copy_ObjectPath)
-                shutil.move(self.Pmets_objpath,self.copy_Pmets_objpath)
+                shutil.move(self.ObjectPath, self.copy_ObjectPath)
+                shutil.move(self.Pmets_objpath, self.copy_Pmets_objpath)
                 return 0
         self.ObjectUUID = arch_obj.ObjectUUID
         self.Pmets_objpath = os.path.join(TmpPath,ObjectIdentifierValue + '_Package_METS.xml')

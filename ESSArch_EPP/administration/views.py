@@ -908,7 +908,7 @@ class MigrationCreate(CreateView):
         self.object.CopyOnlyFlag = self.copy_only_flag
         self.object.save()
         req_pk = self.object.pk
-        result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk)
+        result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk) # self.copy_only_flag
         task_id = result.task_id
         self.object.task_id = task_id
         self.object.save()
