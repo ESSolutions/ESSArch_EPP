@@ -179,7 +179,6 @@
 	                    	var CompleteUrl = "/administration/migredetail/"
 	                    	var req_pk = json.req_pk;
 	                    	var task_id = json.task_id;
-	                    	var copyonlyflag = json.copyonlyflag;
 		                    alert( 'Success to create migration request' );
 		                    window.location.replace(CompleteUrl + json.req_pk);
 		                    //window.location.href = CompleteUrl + json.req_pk;

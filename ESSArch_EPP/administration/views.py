@@ -838,7 +838,7 @@ class MigrationCreate(CreateView):
             #print 'Form is valid!!!'
             #print request.POST
             #CopyOnlyFlag
-            self.copy_only_flag = self.request.POST.get('copyonlyflag',None)
+            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
@@ -854,13 +854,13 @@ class MigrationCreate(CreateView):
             else:
                 self.obj_list = obj_list.split(' ')
             # Convert TargetMediumID to list and remove "+" ## Convert to checkbox answer.
-            target_list = self.request.POST.get('filter-5',None)
+            target_list = self.request.POST.get('TargetMediumID',None)
             print(target_list)
             self.target_list = target_list.split(' ')
             for c, target_item in enumerate(self.target_list):
                 if target_item.startswith('+'):
                     self.target_list[c] = target_item[1:] 
-            self.copy_only_flag = self.request.POST.get('copyonlyflag', None)
+            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag', None)
             return self.form_valid(form)
         else:
             #print 'Form Not valid problem!!!'
