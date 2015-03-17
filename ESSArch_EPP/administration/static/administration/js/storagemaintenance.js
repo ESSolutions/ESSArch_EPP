@@ -17,12 +17,12 @@
     	var oTable = $table.dataTable();
     	oTable.fnFilter(
             $("#filter-"+i).val(),
-            i,
-            $("#regex-"+i)[0].checked
+            i
+            //$("#regex-"+i)[0].checked
             //false
         );
     	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
-    	oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
+    	// oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
     }
 
     function createFilter(i) {
@@ -302,7 +302,10 @@
         //$("#global-filter").keyup( fnFilterGlobal );
         //$("#global-regex").click( fnFilterGlobal );
         for (var i=0; i<9; i++) {
-            $("#filter-"+i).keyup(createFilter(i)); 
+            $("#filter-"+i).keyup(createFilter(i));
+            if(i == 7){
+            	$("#filter-"+i).change(createFilter(i));	
+            }
             // Set initial default values
             if ($("#filter-"+i).val()) {
             	fnFilterColumn(i)
