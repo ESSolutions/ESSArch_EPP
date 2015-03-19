@@ -26,7 +26,7 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, ESSMD, uuid
+import os, thread, multiprocessing, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, ESSMD, uuid
 
 from configuration.models import SchemaProfile, ChecksumAlgorithm_CHOICES, Parameter
 from essarch.models import ArchiveObject

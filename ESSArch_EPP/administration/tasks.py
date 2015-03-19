@@ -32,7 +32,7 @@ from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, IOqueue, 
 from administration.models import robot_info, robot_drive, robot_slot, robot_export
 from django.utils import timezone
 
-#logger = logging.getLogger('essarch.storagemaintenance')
+logger = logging.getLogger('essarch.storagemaintenance')
 
 class MigrationTask(JobtasticTask):
     """
@@ -54,7 +54,7 @@ class MigrationTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self, obj_list, mig_pk,CopyOnlyFlag): # insert copyOnlyFlag
+    def calculate_result(self, obj_list, mig_pk): 
         logger = logging.getLogger('essarch.storagemaintenance')
         migtask = MigrationQueue.objects.get(pk=mig_pk)
         if obj_list == migtask.ObjectIdentifierValue:
@@ -71,8 +71,9 @@ class MigrationTask(JobtasticTask):
            
         # Create all tasks
         for counter, task in enumerate(tasks):
-            #result = self.createcopytest(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath)
-            result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
+            result = self.createcopytest(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
+            #result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
+            print(migtask.CopyOnlyFlag)
             if result == 0:
                 if task == tasks_todo.pop(0):
                     event_info = 'Success to copy ObjectUUID: %s' % task
@@ -90,12 +91,17 @@ class MigrationTask(JobtasticTask):
         migtask.Status = 20
         migtask.save()
                 
-    def createcopytest(self, ObjectUUID, TargetMediumID, TmpPath, CopyPath):
+    def createcopytest(self, ObjectUUID, TargetMediumID, TmpPath, CopyPath, CopyOnlyFlag):
         logger = logging.getLogger('essarch.storagemaintenance')
-        MediumLocation = ESSConfig.objects.get(Name='storageMediumLocation').Value
+        # MediumLocation = ESSConfig.objects.get(Name='storageMediumLocation').Value
+        print CopyOnlyFlag
+        if CopyOnlyFlag == True:
+            event_info = 'object %s copied to %s' % (ObjectUUID, CopyPath)
+            logger(event_info)
             
-        event_info = 'Migrate object: %s to new media target: %s' % (ObjectUUID, TargetMediumID)
-        logger.info(event_info)
+        else:
+            event_info = 'Migrate object: %s to new media target: %s' % (ObjectUUID, TargetMediumID)
+            logger.info(event_info)
         
         arch_obj_list = ArchiveObject.objects.filter(ObjectUUID=ObjectUUID)
         if arch_obj_list.exists():

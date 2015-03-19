@@ -831,14 +831,12 @@ class MigrationCreate(CreateView):
         POST variables and then checked for validity.
         """
         logger = logging.getLogger('essarch.storagemaintenance')
+        print("hit kom vi")
         self.object = None
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         if form.is_valid():
-            #print 'Form is valid!!!'
-            #print request.POST
-            #CopyOnlyFlag
-            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag',None)
+
             # Convert ObjectIdentifierValue to list
             obj_list = self.request.POST.get('ObjectIdentifierValue','')
             if request.is_ajax():
@@ -854,13 +852,14 @@ class MigrationCreate(CreateView):
             else:
                 self.obj_list = obj_list.split(' ')
             # Convert TargetMediumID to list and remove "+" ## Convert to checkbox answer.
-            target_list = self.request.POST.get('TargetMediumID',None)
-            print(target_list)
-            self.target_list = target_list.split(' ')
-            for c, target_item in enumerate(self.target_list):
-                if target_item.startswith('+'):
-                    self.target_list[c] = target_item[1:] 
+            self.target_list = self.request.POST.get('TargetMediumID',None)
+            print(self.target_list)
+            # for c, target_item in enumerate(self.target_list):
+                    # self.target_list[c] = target_item[1:]
+
+            # Copy OnlyFlag       
             self.copy_only_flag = self.request.POST.get('CopyOnlyFlag', None)
+
             return self.form_valid(form)
         else:
             #print 'Form Not valid problem!!!'
@@ -890,7 +889,7 @@ class MigrationCreate(CreateView):
         initial['Status'] = 0
         initial['ReqType'] = self.request.GET.get('ReqType',1)
         initial['ReqPurpose'] = self.request.GET.get('ReqPurpose')
-        initial['CopyOnlyFlag'] = self.request.GET.get('copyonlyflag')
+        initial['CopyOnlyFlag'] = self.request.GET.get('CopyOnlyFlag')
         #if initial['ReqType'] == 1:
         #    migration_path = Path.objects.get(entity='path_control').value
         #initial['Path'] = self.request.GET.get('Path', migration_path)
@@ -900,7 +899,7 @@ class MigrationCreate(CreateView):
     
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        
+        print( self.object.CopyOnlyFlag)
         self.object.pk = None 
         self.object.user = self.request.user.username
         self.object.ObjectIdentifierValue = self.obj_list
@@ -909,7 +908,8 @@ class MigrationCreate(CreateView):
         self.object.CopyOnlyFlag = self.copy_only_flag
         self.object.save()
         req_pk = self.object.pk
-        result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk) # self.copy_only_flag
+        print(self.object)
+        result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk)
         task_id = result.task_id
         self.object.task_id = task_id
         self.object.save()

@@ -109,6 +109,12 @@
 	                        //var oSetDT = this.s.dt;
 	                        //var data=oSetDT.aoData;
 	                        var data = $('#filter-5').val();
+	                        var copyflag = if (document.getElementById("copyonlyflag").checked == false)
+	                        { copyflag = false;
+	                        }
+	                        else{
+	                        	copyflag = true;
+	                        }
 	                        //var csr = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 	                        //oSetDT._iDisplayStart = 0;
 	                        //oSetDT._iDisplayLength = 1000;
@@ -152,7 +158,7 @@
 			                                },
 			                                {
 			                                	"name": "CopyOnlyFlag", 
-			                                	"value": $('#copyonlyflag').val()
+			                                	"value": copyflag
 			                                },
 			                                {
 			                                	"name": "ReqUUID", 

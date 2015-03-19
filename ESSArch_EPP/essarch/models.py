@@ -19,6 +19,7 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
+from celery.worker.strategy import default
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
@@ -850,7 +851,7 @@ class MigrationQueue(models.Model):
     Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
     Path = models.CharField(max_length=255)
     CopyPath = models.CharField(max_length=255,blank=True)
-    #CopyOnlyFlag =  models.BooleanField()
+    CopyOnlyFlag =  models.BooleanField(default = False)
     task_id = models.CharField(max_length=36,blank=True)
     #task_id = models.ForeignKey(TaskMeta, db_column='task_id', to_field='task_id', null=True, blank=True)
     posted = models.DateTimeField(auto_now_add=True)
