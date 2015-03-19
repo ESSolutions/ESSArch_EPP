@@ -109,6 +109,7 @@
 	                        //var oSetDT = this.s.dt;
 	                        //var data=oSetDT.aoData;
 	                        var data = $('#filter-5').val();
+	                       
 	                        var copyflag = if (document.getElementById("copyonlyflag").checked == false)
 	                        { copyflag = false;
 	                        }
