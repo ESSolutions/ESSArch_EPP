@@ -163,6 +163,11 @@
 
                       </div>
                 </td>
+                <td>
+                <div>
+                			<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Enable Plus
+                </div>
+                </td>
             </tr>
             
         </tbody>
@@ -272,8 +277,12 @@ function populatecheckboxes(){
 		}
 
 		for (i = 0; i < targets.length; i++) {
-
-			text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " " + "<input type='checkbox' id='filter-5'  value=" + "+"+ targets[i] + ">" + " "+ "+" +targets[i] + " "
+			if(document.getElementById("enablePlus").checked == false){
+				text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " "
+			}
+			else{
+				text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " " + "<input type='checkbox' id='filter-5'  value=" + "+"+ targets[i] + ">" + " "+ "+" +targets[i] + " "
+			}
 		}
 	   
 	    	document.getElementById("targetfield").innerHTML = text2;
@@ -283,7 +292,7 @@ function populatecheckboxes(){
 	
 function removeTarget(){
 	
-	var noMigration = "<select  id='filter-5'><option value='notarget'>  NO MEDIA MIGRATION</option></select>";
+	var noMigration = "<input type='checkbox'  id='filter-5' checked='true' value='notarget' onchange=adjustCopyOnlyFlag()>  NO MEDIA MIGRATION";
 	
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
@@ -293,7 +302,12 @@ function removeTarget(){
 	}
 		
 }
-<!-- list updating script goes here-->
+
+function adjustCopyOnlyFlag(){
+	document.getElementById("copyonlyflag").checked = false;
+	populatecheckboxes();
+}
+
 </script>
 <!--
 <script>
