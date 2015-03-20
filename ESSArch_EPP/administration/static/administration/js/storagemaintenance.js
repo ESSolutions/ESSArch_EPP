@@ -42,7 +42,7 @@
     function createFilterHide(i) {
         return function() { fnShowHide(i); };
     }
-    
+   
     function DeactivateMediaTable(json) {
         $('#deactivate_media-table').dataTable({
         	"sPaginationType": "bootstrap",
@@ -225,7 +225,7 @@
 	                        //alert('aaData:'+aaData+'end')
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
-	                        if (confirm ('Do you really want to start migration? Target: '+data+'?')){
+	                        if (confirm ('Do you really want to start migration? Target: '+data+ '?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
 		                            "data": [		                                    

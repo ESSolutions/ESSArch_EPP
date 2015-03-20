@@ -164,8 +164,13 @@
                       </div>
                 </td>
                 <td>
-                <div>
-                			<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Enable Plus
+                	<div id="plusField">
+                	</div>
+                </td>
+                <td></td><td></td>
+                <td>
+                <div id="enablePlusBoxField">
+                		<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force extra copies
                 </div>
                 </td>
             </tr>
@@ -264,6 +269,7 @@ function populatePolicyID(){
 function populatecheckboxes(){
 	if (document.getElementById("copyonlyflag").checked == false){
 		var text2 = "";
+		var text3 = "";
 		targets = [];
 		var selectedPolicy = document.getElementById("filter-7").value;
 
@@ -277,27 +283,38 @@ function populatecheckboxes(){
 		}
 
 		for (i = 0; i < targets.length; i++) {
-			if(document.getElementById("enablePlus").checked == false){
-				text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " "
-			}
-			else{
-				text2 += "<input type='checkbox' id='filter-5' checked='true' value=" + targets[i] +">" + " " +targets[i] + " " + "<input type='checkbox' id='filter-5'  value=" + "+"+ targets[i] + ">" + " "+ "+" +targets[i] + " "
-			}
+		
+				text2 += "<input type='checkbox' id='filter-5' name='target-" + i +"' checked='true' value=" + targets[i] +">" + " " + targets[i] + " ";
+			
 		}
 	   
 	    	document.getElementById("targetfield").innerHTML = text2;
+	    	
+	    if(document.getElementById("enablePlus").checked == true){
+	    	for (i = 0; i < targets.length; i++) {
+	    		var targetNumber = targets.length + 1 + i ;
+	    		text3 +=  "<input type='checkbox' id='filter-5'  name='target-" + targetNumber + "' value=" + "+"+ targets[i] + ">" + " " + "+" +targets[i] + " ";
+	    	}	    	
+	    	}
+	    	else{
+    		text3 = "";
+	    	}
+	    	document.getElementById("plusField").innerHTML = text3;
+	    }
 	}
 	
-	}
+	
 	
 function removeTarget(){
 	
-	var noMigration = "<input type='checkbox'  id='filter-5' checked='true' value='notarget' onchange=adjustCopyOnlyFlag()>  NO MEDIA MIGRATION";
+	var noMigration = "<input type='checkbox'  id='filter-5' name ='target-0' checked='true' value='notarget' onchange=adjustCopyOnlyFlag()>  NO MEDIA MIGRATION";
 	
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
+		document.getElementById("enablePlusBoxField").innerHTML = "";
 	}
 	else{
+		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force extra copies";
 		populatecheckboxes()
 	}
 		

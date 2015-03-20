@@ -42,6 +42,15 @@
     function createFilterHide(i) {
         return function() { fnShowHide(i); };
     }
+    function getCopySelection(){
+    	
+    	copySelection = false
+    	if (document.getElementById("copyonlyflag").checked == true)
+        { copySelection = true;
+        }
+        return copySelection
+    }
+
 
     $(function(){
         $table.dataTable({
@@ -108,14 +117,9 @@
 	                        //var oSettings = oTable.fnSettings();
 	                        //var oSetDT = this.s.dt;
 	                        //var data=oSetDT.aoData;
-	                        var data = $('#filter-5').val();
+	                        var data = $('input[name=target]:checked').val();
 	                       
-	                        var copyflag = if (document.getElementById("copyonlyflag").checked == false)
-	                        { copyflag = false;
-	                        }
-	                        else{
-	                        	copyflag = true;
-	                        }
+	                        var copyflag = getCopySelection()
 	                        //var csr = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 	                        //oSetDT._iDisplayStart = 0;
 	                        //oSetDT._iDisplayLength = 1000;
