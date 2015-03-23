@@ -170,7 +170,7 @@
                 <td></td><td></td>
                 <td>
                 <div id="enablePlusBoxField">
-                		<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force extra copies
+                		<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.
                 </div>
                 </td>
             </tr>
@@ -267,9 +267,10 @@ function populatePolicyID(){
 	}
 
 function populatecheckboxes(){
+	
+	var text2 = "<input type='text' id='filter-5'  value='" 
 	if (document.getElementById("copyonlyflag").checked == false){
-		var text2 = "";
-		var text3 = "";
+		
 		targets = [];
 		var selectedPolicy = document.getElementById("filter-7").value;
 
@@ -281,26 +282,24 @@ function populatecheckboxes(){
 			targets = enabledPolicies[i].targetlist
 			}
 		}
-		text2 = "<input type='text' id='filter-5'  value='" 
-				
+						
 		for (i = 0; i < targets.length; i++) {
 				
 				
-				text2 +=  targets[i];
+				text2 +=  targets[i] + " ";
 			
 		}
-	   		text2 += "'>";
-	    	document.getElementById("targetfield").innerHTML = text2;
+	   		
 	    	
 	    if(document.getElementById("enablePlus").checked == true){
+	    	
 	    	for (i = 0; i < targets.length; i++) {
-	    		text3 +=  "<input type='text' id='filter-5'  value=" + "+"+ targets[i] + ">" + " " + "+" +targets[i] + " ";
+	    		text2 += "+"+ targets[i];
 	    	}	    	
 	    	}
-	    	else{
-    		text3 = "";
-	    	}
-	    	document.getElementById("targetfield").innerHTML = document.getElementById("targetfield").innerHTML + text3;
+
+	         text2 += "'>";
+	    	document.getElementById("targetfield").innerHTML = text2;
 	    }
 	}
 	
@@ -315,10 +314,9 @@ function removeTarget(){
 		document.getElementById("enablePlusBoxField").innerHTML = "";
 	}
 	else{
-		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force extra copies";
+		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
-	}
-		
+	}	
 }
 
 function adjustCopyOnlyFlag(){

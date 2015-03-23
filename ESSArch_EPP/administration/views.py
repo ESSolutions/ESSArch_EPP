@@ -852,10 +852,11 @@ class MigrationCreate(CreateView):
             else:
                 self.obj_list = obj_list.split(' ')
             # Convert TargetMediumID to list and remove "+" ## Convert to checkbox answer.
-            self.target_list = self.request.POST.get('TargetMediumID',None)
-            print(self.target_list)
-            # for c, target_item in enumerate(self.target_list):
-                    # self.target_list[c] = target_item[1:]
+            target_list = self.request.POST.get('TargetMediumID',None)
+            self.target_list = target_list.split(' ')
+            for c, target_item in enumerate(self.target_list):
+                if target_item.startswith('+'):
+                    self.target_list[c] = target_item[1:]
 
             # Copy OnlyFlag       
             self.copy_only_flag = self.request.POST.get('CopyOnlyFlag', None)
