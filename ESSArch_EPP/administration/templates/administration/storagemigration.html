@@ -281,25 +281,26 @@ function populatecheckboxes(){
 			targets = enabledPolicies[i].targetlist
 			}
 		}
-
+		text2 = "<input type='text' id='filter-5'  value='" 
+				
 		for (i = 0; i < targets.length; i++) {
-		
-				text2 += "<input type='checkbox' id='filter-5' name='target-" + i +"' checked='true' value=" + targets[i] +">" + " " + targets[i] + " ";
+				
+				
+				text2 +=  targets[i];
 			
 		}
-	   
+	   		text2 += "'>";
 	    	document.getElementById("targetfield").innerHTML = text2;
 	    	
 	    if(document.getElementById("enablePlus").checked == true){
 	    	for (i = 0; i < targets.length; i++) {
-	    		var targetNumber = targets.length + 1 + i ;
-	    		text3 +=  "<input type='checkbox' id='filter-5'  name='target-" + targetNumber + "' value=" + "+"+ targets[i] + ">" + " " + "+" +targets[i] + " ";
+	    		text3 +=  "<input type='text' id='filter-5'  value=" + "+"+ targets[i] + ">" + " " + "+" +targets[i] + " ";
 	    	}	    	
 	    	}
 	    	else{
     		text3 = "";
 	    	}
-	    	document.getElementById("plusField").innerHTML = text3;
+	    	document.getElementById("targetfield").innerHTML = document.getElementById("targetfield").innerHTML + text3;
 	    }
 	}
 	
@@ -307,7 +308,7 @@ function populatecheckboxes(){
 	
 function removeTarget(){
 	
-	var noMigration = "<input type='checkbox'  id='filter-5' name ='target-0' checked='true' value='notarget' onchange=adjustCopyOnlyFlag()>  NO MEDIA MIGRATION";
+	var noMigration = "<input type='text'  id='filter-5' value=' NO MEDIA MIGRATION' onchange=adjustCopyOnlyFlag()> ";
 	
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
