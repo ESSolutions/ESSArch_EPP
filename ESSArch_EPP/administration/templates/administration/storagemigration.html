@@ -164,7 +164,7 @@
                       </div>
                 </td>
                 <td>
-      
+                <div id="noMigrationVarning"></div>
                 </td>
                 <td></td><td></td>
                 <td>
@@ -304,13 +304,15 @@ function populatecheckboxes(){
 	
 function removeTarget(){
 	
-	var noMigration = "<input type='text'  id='filter-5' value=' NO MEDIA MIGRATION' onchange=adjustCopyOnlyFlag()> ";
+	var noMigration =  'NO MEDIA MIGRATION' ;
 	
 	if (document.getElementById("copyonlyflag").checked == true){
-		document.getElementById("targetfield").innerHTML = noMigration;
+		document.getElementById("filter-5").value = noMigration;
+		document.getElementById("noMigrationVarning").innerHTML = noMigration;
 		document.getElementById("enablePlusBoxField").innerHTML = "";
 	}
 	else{
+		document.getElementById("noMigrationVarning").innerHTML = "";
 		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
 	}	
@@ -318,8 +320,7 @@ function removeTarget(){
 
 function adjustCopyOnlyFlag(){
 	document.getElementById("copyonlyflag").checked = false;
-	document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.";
-	populatecheckboxes();
+	removeTarget();
 }
 
 </script>
