@@ -160,12 +160,11 @@
                 
 					<td>
 					   <div id="targetfield">
-
+							<input type='text'  id='filter-5'>
                       </div>
                 </td>
                 <td>
-                	<div id="plusField">
-                	</div>
+      
                 </td>
                 <td></td><td></td>
                 <td>
@@ -268,7 +267,7 @@ function populatePolicyID(){
 
 function populatecheckboxes(){
 	
-	var text2 = "<input type='text' id='filter-5'  value='" 
+	var targetvalue = ""
 	if (document.getElementById("copyonlyflag").checked == false){
 		
 		targets = [];
@@ -283,23 +282,21 @@ function populatecheckboxes(){
 			}
 		}
 						
-		for (i = 0; i < targets.length; i++) {
+		for (i = 0; i < targets.length; i++){
 				
-				
-				text2 +=  targets[i] + " ";
+				targetvalue += targets[i] + " ";
 			
 		}
-	   		
-	    	
+	   			    	
 	    if(document.getElementById("enablePlus").checked == true){
 	    	
 	    	for (i = 0; i < targets.length; i++) {
-	    		text2 += "+"+ targets[i];
+	    		targetvalue += "+" + targets[i] + " ";
 	    	}	    	
 	    	}
-
-	         text2 += "'>";
-	    	document.getElementById("targetfield").innerHTML = text2;
+			
+	    document.getElementById("filter-5").value = targetvalue;
+	    	
 	    }
 	}
 	
@@ -321,6 +318,7 @@ function removeTarget(){
 
 function adjustCopyOnlyFlag(){
 	document.getElementById("copyonlyflag").checked = false;
+	document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.";
 	populatecheckboxes();
 }
 
