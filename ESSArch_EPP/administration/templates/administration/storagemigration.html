@@ -160,16 +160,18 @@
                 
 					<td>
 					   <div id="targetfield">
-							<input type='text'  id='filter-5'>
+							
                       </div>
                 </td>
                 <td>
-                <div id="noMigrationVarning"></div>
+                <div id="filter-5-storage">
+                <input type='hidden'  id='filter-5'>
+                </div>
                 </td>
                 <td></td><td></td>
                 <td>
                 <div id="enablePlusBoxField">
-                		<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.
+                		<input type='checkbox' id='enablePlus' onchange=updateFilter5()> Force additional copies on the same target medium.
                 </div>
                 </td>
             </tr>
@@ -267,7 +269,7 @@ function populatePolicyID(){
 
 function populatecheckboxes(){
 	
-	var targetvalue = ""
+	var targetcheckboxes = "";
 	if (document.getElementById("copyonlyflag").checked == false){
 		
 		targets = [];
@@ -284,44 +286,47 @@ function populatecheckboxes(){
 						
 		for (i = 0; i < targets.length; i++){
 				
-				targetvalue += targets[i] + " ";
+				targetcheckboxes += "<input type='checkbox' id='target" + i + "value=" + targets[i] + "checked  onchange=updateFilter5()>" + " " + targets[i]  + " ";
 			
 		}
-	   			    	
-	    if(document.getElementById("enablePlus").checked == true){
-	    	
-	    	for (i = 0; i < targets.length; i++) {
-	    		targetvalue += "+" + targets[i] + " ";
-	    	}	    	
-	    	}
-			
-	    document.getElementById("filter-5").value = targetvalue;
-	    	
+		document.getElementById("targetfield").innerHTML = targetcheckboxes;	    		    	
 	    }
 	}
 	
+function updateFilter5(){
 	
+	var plusIsEnabled = document.getElementById("enablePlus").checked
+	var targetvalue = "";
+	document.getElementById("filter-5").value = targetvalue;
+	 
+	for(i=0; i < 10; i++){
+		  
+		 if(document.getElementById("target" + i ).checked == true){
+			 if(plusIsEnabled == true){
+				 targetvalue += "+";
+			 }
+			 targetvalue +=document.getElementById("target" + i ).value + " ";
+		 }
+	 }
+	
+	document.getElementById("filter-5").value = targetvalue;
+}
 	
 function removeTarget(){
 	
 	var noMigration =  'NO MEDIA MIGRATION' ;
 	
 	if (document.getElementById("copyonlyflag").checked == true){
-		document.getElementById("filter-5").value = noMigration;
-		document.getElementById("noMigrationVarning").innerHTML = noMigration;
+		document.getElementById("targetfield").innerHTML = noMigration;
 		document.getElementById("enablePlusBoxField").innerHTML = "";
 	}
-	else{
-		document.getElementById("noMigrationVarning").innerHTML = "";
-		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=populatecheckboxes()> Force additional copies on the same target medium.";		
+	else{;
+		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=updateFilter5()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
 	}	
 }
 
-function adjustCopyOnlyFlag(){
-	document.getElementById("copyonlyflag").checked = false;
-	removeTarget();
-}
+
 
 </script>
 <!--
