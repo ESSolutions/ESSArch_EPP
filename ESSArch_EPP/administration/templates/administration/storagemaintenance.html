@@ -10,7 +10,7 @@
 <H1>{{ label }}</H1>
 <br/>
 
-<table id="archiveobject-table" ></table>
+
 <div class="row">
 	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#need_to_migrate">-</button>
 	<span>Need to migrate</span>
@@ -71,11 +71,7 @@
 	    		});
 		});
 	
-   $.getJSON( "{% url 'storagemaintenance-dt' %}", function(migrationlists1) {
 
-	   console.dir(migrationlists1);
-
-			});
 		
 		
 	</script>
