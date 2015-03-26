@@ -163,7 +163,7 @@
                 $.getJSON( sSource, aoData, function (json) {
                 	//Here you can do whatever you want with the additional data
                     console.dir(json);
-                    //$('#deactivate_media').html(json.deactivate_media_list);
+                    //$('#deactivate_media').html(json.deactivate+*_media_list);
                     DeactivateMediaTable(json);
                     NeedToMigrateTable(json);
                     //Call the standard callback to redraw the table
@@ -302,10 +302,17 @@
         //$("#global-filter").keyup( fnFilterGlobal );
         //$("#global-regex").click( fnFilterGlobal );
         for (var i=0; i<9; i++) {
-            $("#filter-"+i).keyup(createFilter(i));
+        	
             if(i == 7){
-            	$("#filter-"+i).change(createFilter(i));	
+            	$("#filter-"+i).change(createFilter(i));
             }
+            else if(i == 5){
+            	$("#filter-"+i).change(createFilter(i));
+            }
+            else{
+            	$("#filter-"+i).keyup(createFilter(i));
+            }
+           
             // Set initial default values
             if ($("#filter-"+i).val()) {
             	fnFilterColumn(i)

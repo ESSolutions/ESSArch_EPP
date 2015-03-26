@@ -140,7 +140,7 @@
                 <td>
 
                    
-                </td>
+                </td>§
             </tr>
 
             
@@ -165,13 +165,13 @@
                 </td>
                 <td>
                 <div id="filter-5-storage">
-                <input type='hidden'  id='filter-5'>
+                <input type='hidden'  id='filter-5' oninput=oTable.fnFilter(targetrecord,5);>
                 </div>
                 </td>
                 <td></td><td></td>
                 <td>
                 <div id="enablePlusBoxField">
-                		<input type='checkbox' id='enablePlus' onchange=updateFilter5()> Force additional copies on the same target medium.
+                		<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.
                 </div>
                 </td>
             </tr>
@@ -242,12 +242,14 @@
 
 
 var enabledPolicies = {};
+var targets = [];
 
 $.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
 
 	 enabledPolicies = enabledPolicies1;
 	 populatePolicyID();
 	 populatecheckboxes();
+	 updateFilter5()
 	});
 
 
@@ -272,7 +274,7 @@ function populatecheckboxes(){
 	var targetcheckboxes = "";
 	if (document.getElementById("copyonlyflag").checked == false){
 		
-		targets = [];
+		
 		var selectedPolicy = document.getElementById("filter-7").value;
 
 	
@@ -286,30 +288,35 @@ function populatecheckboxes(){
 						
 		for (i = 0; i < targets.length; i++){
 				
-				targetcheckboxes += "<input type='checkbox' id='target" + i + "value=" + targets[i] + "checked  onchange=updateFilter5()>" + " " + targets[i]  + " ";
+				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " " 
 			
 		}
-		document.getElementById("targetfield").innerHTML = targetcheckboxes;	    		    	
+		document.getElementById("targetfield").innerHTML = targetcheckboxes;
+		updateFilter5();
 	    }
 	}
 	
 function updateFilter5(){
 	
-	var plusIsEnabled = document.getElementById("enablePlus").checked
-	var targetvalue = "";
-	document.getElementById("filter-5").value = targetvalue;
-	 
-	for(i=0; i < 10; i++){
-		  
-		 if(document.getElementById("target" + i ).checked == true){
-			 if(plusIsEnabled == true){
-				 targetvalue += "+";
-			 }
-			 targetvalue +=document.getElementById("target" + i ).value + " ";
-		 }
-	 }
+	var targetrecord = "";
 	
-	document.getElementById("filter-5").value = targetvalue;
+    for(i= 0;i < targets.length; i++){
+    	var whichcheckbox = "target" + i;
+    	
+    	var checked = document.getElementById(whichcheckbox).checked
+    	
+    	if( checked == true){
+    		if(document.getElementById('enablePlus').checked == true){
+    			targetrecord += "+";
+    		}
+    		
+    		targetrecord += targets[i];
+    		targetrecord += " ";
+    	}
+    	
+    }
+    	//document.getElementById("filter-5").value = targetrecord;
+    	$('#filter-5').val(targetrecord).trigger('change');
 }
 	
 function removeTarget(){
@@ -321,7 +328,7 @@ function removeTarget(){
 		document.getElementById("enablePlusBoxField").innerHTML = "";
 	}
 	else{;
-		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onchange=updateFilter5()> Force additional copies on the same target medium.";		
+		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
 	}	
 }
