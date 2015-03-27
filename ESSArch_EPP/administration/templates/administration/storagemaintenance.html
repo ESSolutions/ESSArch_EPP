@@ -10,6 +10,68 @@
 <H1>{{ label }}</H1>
 <br/>
 
+<div class="row">
+	<a>{% csrf_token %}</a>
+    <table class="prepare request">
+        <thead>
+            <tr>
+                <th width=210>Parameter</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td class="spacer" colspan="2">&nbsp;</td></tr>
+            <tr class="reqpurpose">
+                <td class="required">Request purpose</td>
+                <td>
+                    <input id="ReqPurpose" type="text"
+                        class="input-xxlarge"
+                        placeholder="Please specify the purpose">
+                </td>
+
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#deactivate_media-filters">-</button>
+	<span>Filters</span>
+</div>
+
+<div id="deactivate_media-filters" class="row collapse in">
+    <table class="table search">
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>Filter text</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr class="storageMediumID">
+                <td>Current MediumID</td>
+                <td>
+                    <input id="filter-4" type="text"
+                        class="input-xxlarge"
+                        placeholder="medium search"
+                        title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;When deactivating media where the target prefix changed from eg ASA to XSA enter -ASA+XSA">
+                </td>
+            </tr>
+                  
+            <tr class="policyid">
+                <td>PolicyID</td>
+                <td>
+                	<select id="filter-7" >
+
+
+                	<!-- EnabledPolicies -->
+
+                    </select>
+                </td>
+            </tr>          
+        </tbody>
+    </table>
+</div>       
 
 <div class="row">
 	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#need_to_migrate">-</button>
@@ -41,7 +103,23 @@
     <table id="deactivate_media-table" class="span12 display table table-bordered table-condensed">
         <thead>
             <tr>
-            	<th>MediumID</th>
+            	<th>Object</th>
+            	<th>ObjectUUID</th>
+        		<th>Status Process</th>
+        		<th>Status Activity</th>
+        		<th>Current MediumID</th>
+        		<th>Location</th>
+        		<th>Policy</th>
+        		<th>PolicyID</th>
+        		<th>Policy Status</th>
+        		<th>SM 1</th>
+        		<th>SM 1 target</th>
+        		<th>SM 2</th>
+        		<th>SM 2 target</th>
+        		<th>SM 3</th>
+        		<th>SM 3 target</th>
+        		<th>SM 4</th>
+        		<th>SM 4 target</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -71,7 +149,32 @@
 	    		});
 		});
 	
+		var enabledPolicies = {};
+		var targets = [];
 
+		$.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
+
+			 enabledPolicies = enabledPolicies1;
+			 populatePolicyID();
+
+			});
+
+
+
+		function populatePolicyID(){
+
+
+
+			var text1 = "";
+
+			for (i = 0; i < enabledPolicies.length; i++) {
+			    text1 += "<option value=" + enabledPolicies[i].PolicyID + ">" + enabledPolicies[i].PolicyID + "," + enabledPolicies[i].PolicyName + "</option>"
+			}
+
+			document.getElementById('filter-7').innerHTML = text1;
+
+
+			}
 		
 		
 	</script>

@@ -535,7 +535,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
             #Prepare storage method list
             sm_objs = []
 
-            current_mediumid_search = self.dt_data['sSearch_%s' % '4']
+            #current_mediumid_search = self.dt_data['sSearch_%s' % '4']
+            current_mediumid_search = self.dt_data.get('sSearch_%s' % '4','xxx')
             logger.debug('col4 serach: %s' % current_mediumid_search)
 
             # Check whether the criteria for replacement of media target prefix is met
@@ -665,7 +666,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                         #print 'storage_list2_len after: %s' % len(storage_list2)
                         #pass
             if len(storage_list2) == 0:
-                deactivate_media_list.append([storageMediumID])
+                #deactivate_media_list.append([storageMediumID])
+                deactivate_media_list.append(['','','','',storageMediumID,'','','','','','','','','','','',''])
             else:
                 #need_to_migrate_dict[storageMediumID] = storage_list2
                 for m in storage_list2:
