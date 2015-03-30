@@ -51,7 +51,8 @@
             <tr class="storageMediumID">
                 <td>Previous MediumID</td>
                 <td>
-                    <input id="filter-4" type="text"
+                    <input id="previousmediaimput" type="text" 
+                        onkeyup=updateFilter4()
                         class="input-xxlarge"
                         placeholder="medium search"
                         title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;When deactivating media where the target prefix changed from eg ASA to XSA enter -ASA+XSA">
@@ -61,16 +62,18 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" onchange=populatecheckboxes() >
+                	<select id="filter-7" onchange=populateprefixselection() >
 					 </select>
 					</tr>
 					<tr>
 					<td>Current Band Prefix</td>
 					<td>
-			     <div id="targetfield">	
-                </div>
-                <div id="filter-5-storage">
-                <input type='hidden'  id='filter-5' >
+			     <select  id="prefixselection" onchange=updateFilter4()>
+                </select>
+                </td>
+                <td>
+                <div id="filter-4-storage">
+                <input type='text'  id='filter-4' >
                 </div>
                 </td>
             </tr>          
@@ -161,8 +164,8 @@
 
 			 enabledPolicies = enabledPolicies1;
 			 populatePolicyID();
-			 populatecheckboxes();
-			 updateFilter5()
+			 populateprefixselection();
+			 updateFilter4()
 			});
 
 
@@ -182,9 +185,9 @@
 
 			}
 
-		function populatecheckboxes(){
+		function populateprefixselection(){
 			
-			var targetcheckboxes = "";
+			var prefixes = "<option value='noprefix'> No prefix selected</option>";
 			
 				
 				
@@ -201,32 +204,38 @@
 								
 				for (i = 0; i < targets.length; i++){
 						
-						targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " " 
+						prefixes += "<option value=" +  targets[i]  + ">" + " " +  targets[i] + " " +"</option>"
 					
 				}
-				document.getElementById("targetfield").innerHTML = targetcheckboxes;
-				updateFilter5();
+				document.getElementById("prefixselection").innerHTML = prefixes;
+				updateFilter4();
 			    
 			}
 			
-		function updateFilter5(){
+		function updateFilter4(){
+			var previousInput  = document.getElementById("previousmediaimput").value;
+			var selectedPrefix = document.getElementById("prefixselection").value;
+			var selectedprefixrecord = "";
 			
-			var targetrecord = "";
+		     if(selectedPrefix == "noprefix" && previousInput.length > 1){
+		    	 alert("Current Band Prefix must be choosen")
+		     }
 			
-		    for(i= 0;i < targets.length; i++){
-		    	var whichcheckbox = "target" + i;
-		    	
-		    	var checked = document.getElementById(whichcheckbox).checked
-		    	
-		    	if( checked == true){
-		    		
-					targetrecord += targets[i];
-		    		targetrecord += " ";
-		    	}
-		    	
-		    }
-		    	
-		    	$('#filter-5').val(targetrecord).trigger('change');
+		     if(selectedPrefix =="noprefix"){
+		    	 selectedprefixrecord = "";
+		     }
+		     else{
+		    	 if(previousInput.length > 1){
+		    		 selectedprefixrecord = "-" + previousInput + "+" + selectedPrefix;
+		    	 }
+		    	 else{
+		    		 selectedprefixrecord = selectedPrefix;
+		    	 }
+		     }
+			
+			
+			
+			$('#filter-4').val(selectedprefixrecord).trigger('change');
 		}
 			
 
