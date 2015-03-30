@@ -165,7 +165,7 @@
                 </td>
                 <td>
                 <div id="filter-5-storage">
-                <input type='hidden'  id='filter-5' oninput=oTable.fnFilter(targetrecord,5);>
+                <input type='hidden'  id='filter-5' >
                 </div>
                 </td>
                 <td></td><td></td>
@@ -315,7 +315,7 @@ function updateFilter5(){
     	}
     	
     }
-    	//document.getElementById("filter-5").value = targetrecord;
+    	
     	$('#filter-5').val(targetrecord).trigger('change');
 }
 	

@@ -49,7 +49,7 @@
         <tbody>
 
             <tr class="storageMediumID">
-                <td>Current MediumID</td>
+                <td>Previous MediumID</td>
                 <td>
                     <input id="filter-4" type="text"
                         class="input-xxlarge"
@@ -61,12 +61,17 @@
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" >
-
-
-                	<!-- EnabledPolicies -->
-
-                    </select>
+                	<select id="filter-7" onchange=populatecheckboxes() >
+					 </select>
+					</tr>
+					<tr>
+					<td>Current Band Prefix</td>
+					<td>
+			     <div id="targetfield">	
+                </div>
+                <div id="filter-5-storage">
+                <input type='hidden'  id='filter-5' >
+                </div>
                 </td>
             </tr>          
         </tbody>
@@ -156,7 +161,8 @@
 
 			 enabledPolicies = enabledPolicies1;
 			 populatePolicyID();
-
+			 populatecheckboxes();
+			 updateFilter5()
 			});
 
 
@@ -175,8 +181,57 @@
 
 
 			}
-		
-		
+
+		function populatecheckboxes(){
+			
+			var targetcheckboxes = "";
+			
+				
+				
+				var selectedPolicy = document.getElementById("filter-7").value;
+
+			
+				for (i=0; i< enabledPolicies.length; i++){
+
+			   	 if (selectedPolicy == enabledPolicies[i].PolicyID){
+				
+					targets = enabledPolicies[i].targetlist
+					}
+				}
+								
+				for (i = 0; i < targets.length; i++){
+						
+						targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " " 
+					
+				}
+				document.getElementById("targetfield").innerHTML = targetcheckboxes;
+				updateFilter5();
+			    
+			}
+			
+		function updateFilter5(){
+			
+			var targetrecord = "";
+			
+		    for(i= 0;i < targets.length; i++){
+		    	var whichcheckbox = "target" + i;
+		    	
+		    	var checked = document.getElementById(whichcheckbox).checked
+		    	
+		    	if( checked == true){
+		    		
+					targetrecord += targets[i];
+		    		targetrecord += " ";
+		    	}
+		    	
+		    }
+		    	
+		    	$('#filter-5').val(targetrecord).trigger('change');
+		}
+			
+
+
+
 	</script>
 <!--
 <script>
