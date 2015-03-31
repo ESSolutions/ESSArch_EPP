@@ -8,9 +8,10 @@
         $table.dataTable().fnFilter(
             $("#global-filter").val(),
             null,
-            $("#global-regex")[0].checked,
+            i,
+            $("#regex-"+i)[0].checked,
             false
-        );
+         );
     }
 
     function fnFilterColumn(i) {
@@ -18,7 +19,7 @@
     	oTable.fnFilter(
             $("#filter-"+i).val(),
             i
-            //$("#regex-"+i)[0].checked
+           //$("#regex-"+i)[0].checked
             //false
         );
     	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
