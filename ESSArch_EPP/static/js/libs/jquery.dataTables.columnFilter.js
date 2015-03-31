@@ -669,7 +669,7 @@
             $(aoFilterCells).each(function (index) {//fix for ColVis
                 i = index;
                 var aoColumn = { type: "text",
-                    bRegex: false,
+                    bRegex: false,  
                     bSmart: true,
                     iMaxLenght: -1,
                     iFilterLength: 0

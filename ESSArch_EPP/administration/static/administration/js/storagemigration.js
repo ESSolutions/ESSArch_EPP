@@ -172,6 +172,7 @@
             },
             "aoColumnDefs": [
                  { 'bVisible': false, 'aTargets': [ 1 ] },
+                
                  { 'bRegex': true, 'aTargets': [ 4 ] }
             ],
             //"sDom": 'T<"clear">lfrtip',
@@ -204,7 +205,7 @@
 //	                },
 	                {
 	                    "sExtends":    "ajax",
-	                    "sButtonText": "Start mmigration",
+	                    "sButtonText": "Start migration",
 	                    "bSelectedOnly": "true",
 	                    "bHeader" : false,
 	                    //"mColumns": [1,],
