@@ -71,8 +71,8 @@ class MigrationTask(JobtasticTask):
            
         # Create all tasks
         for counter, task in enumerate(tasks):
-            result = self.createcopytest(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
-            #result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
+            #result = self.createcopytest(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
+            result = self.createcopy(task, migtask.TargetMediumID, migtask.Path, migtask.CopyPath, migtask.CopyOnlyFlag)
             print(migtask.CopyOnlyFlag)
             if result == 0:
                 if task == tasks_todo.pop(0):
@@ -176,8 +176,23 @@ class MigrationTask(JobtasticTask):
         
         # Prepare write request
         if self.CopyOnlyFlag == True:
-                shutil.move(self.ObjectPath, self.copy_ObjectPath)
-                shutil.move(self.Pmets_objpath, self.copy_Pmets_objpath)
+            self.startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+            event_info = 'Try to move ObjectPath: %s to %s and move PackageMets: %s to %s' % (self.ObjectPath, self.copy_ObjectPath, self.Pmets_objpath, self.copy_Pmets_objpath)
+            logger.info(event_info)
+            try:
+                shutil.move(self.ObjectPath,self.copy_ObjectPath)
+                shutil.move(self.Pmets_objpath,self.copy_Pmets_objpath)
+            except (IOError,os.error), why:
+                event_info = 'Problem to move ObjectPath: ' + self.ObjectPath + ' and ' + self.Pmets_objpath
+                logger.error(event_info)
+                return 1
+            else:
+                self.stopTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+                self.ProcTime = self.stopTime-self.startTime
+                if self.ProcTime.seconds < 1: self.ProcTime = datetime.timedelta(seconds=1)   #Fix min time to 1 second if it is zero.
+                self.ProcMBperSEC = int(self.WriteSize)/int(self.ProcTime.seconds)
+                event_info = 'Succeeded to move ObjectPath: ' + self.ObjectPath + ' , ' + str(self.ProcMBperSEC) + ' MB/Sec and Time: ' + str(self.ProcTime)
+                logger.info(event_info)
                 return 0
         self.ObjectUUID = arch_obj.ObjectUUID
         self.Pmets_objpath = os.path.join(TmpPath,ObjectIdentifierValue + '_Package_METS.xml')
