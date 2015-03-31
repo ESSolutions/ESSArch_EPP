@@ -254,7 +254,7 @@
             if(i == 7){
             	$("#filter-"+i).change(createFilter(i));
             }
-            else if(i == 5){
+            else if(i == 4){
             	$("#filter-"+i).change(createFilter(i));
             }
             else{

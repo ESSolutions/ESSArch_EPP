@@ -49,13 +49,13 @@
         <tbody>
 
             <tr class="storageMediumID">
-                <td>Previous MediumID</td>
+                <td>Previous Medium Prefix</td>
                 <td>
                     <input id="previousmediaimput" type="text" 
                         onkeyup=updateFilter4()
                         class="input-xxlarge"
-                        placeholder="medium search"
-                        title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;When deactivating media where the target prefix changed from eg ASA to XSA enter -ASA+XSA">
+                        placeholder="Please specify previous medium prefix. For tape AAA001, write AAA"
+                        title="Please specify previous medium prefix. For tape AAA001, write AAA">
                 </td>
             </tr>
                   
@@ -66,7 +66,7 @@
 					 </select>
 					</tr>
 					<tr>
-					<td>Current Band Prefix</td>
+					<td>Current Medium Prefix</td>
 					<td>
 			     <select  id="prefixselection" onchange=updateFilter4()>
                 </select>
