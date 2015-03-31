@@ -15,10 +15,22 @@
     }
 
     function fnFilterColumn(i) {
+    	
+    	var regextest = false;
+    	if($("#regex-" + i).length == 0){
+    		if(i==4){
+        		regextest = true;
+    	    }
+    	}
+    	else{
+    		regextest = $("#regex-"+i)[0].checked;
+    	}
+    	
     	var oTable = $table.dataTable();
     	oTable.fnFilter(
             $("#filter-"+i).val(),
-            i
+            i,
+            regextest
             //$("#filter-"+i)
             //$("#regex-"+i)[0].checked
            //$('#col'+i+'_regex').prop('checked'),
