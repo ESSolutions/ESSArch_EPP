@@ -47,19 +47,7 @@
             </tr>
         </thead>
         <tbody>
-
-            <tr class="storageMediumID">
-                <td>Previous Medium Prefix</td>
-                <td>
-                    <input id="previousmediaimput" type="text" 
-                        onkeyup=updateFilter4()
-                        class="input-xxlarge"
-                        placeholder="Please specify previous medium prefix. For tape AAA001, write AAA"
-                        title="Please specify previous medium prefix. For tape AAA001, write AAA">
-                </td>
-            </tr>
-                  
-            <tr class="policyid">
+         <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
                 	<select id="filter-7" onchange=populateprefixselection() >
@@ -75,6 +63,16 @@
                 <div id="filter-4-storage">
                 <input type='text'  id='filter-4' >
                 </div>
+                </td>
+            </tr>
+                        <tr class="storageMediumID">
+                <td>Previous Medium Prefix</td>
+                <td>
+                    <input id="previousmediaimput" type="text" 
+                        onkeyup=updateFilter4()
+                        class="input-xxlarge"
+                        placeholder="Please specify previous medium prefix. For tape AAA001, write AAA"
+                        title="Please specify previous medium prefix. For tape AAA001, write AAA">
                 </td>
             </tr>          
         </tbody>
