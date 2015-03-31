@@ -68,7 +68,7 @@
 					<tr>
 					<td>Current Medium Prefix</td>
 					<td>
-			     <select  id="prefixselection" onchange=updateFilter4()>
+			     <select  id="prefixselection" onchange=prefixSelectionAction()>
                 </select>
                 </td>
                 <td>
@@ -207,10 +207,17 @@
 						prefixes += "<option value=" +  targets[i]  + ">" + " " +  targets[i] + " " +"</option>"
 					
 				}
+				document.getElementById("previousmediaimput").value = "";
 				document.getElementById("prefixselection").innerHTML = prefixes;
 				updateFilter4();
 			    
 			}
+		
+		function prefixSelectionAction(){
+			
+			document.getElementById("previousmediaimput").value = "";
+			updateFilter4();
+		}
 			
 		function updateFilter4(){
 			var previousInput  = document.getElementById("previousmediaimput").value;
