@@ -18,9 +18,9 @@
     	var oTable = $table.dataTable();
     	oTable.fnFilter(
             $("#filter-"+i).val(),
-            i
-           //$("#regex-"+i)[0].checked
-            //false
+            i,
+           $("#regex-4").checked = true,
+            false
         );
     	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
     	// oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
