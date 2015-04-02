@@ -762,8 +762,8 @@ def installdefaultESSProc(): # default ESSProc
 def installdefaultdefaultvalues(): # default default values
 
     dct = {
-           'administration_storagemaintenance__temp_path': '/ESSArch/essarch_temp',
-           'administration_storagemaintenance__copy_path': '',
+           'administration_storagemigration__temp_path': '/ESSArch/essarch_temp',
+           'administration_storagemigration__copy_path': '',
            'access_new__ReqType': '5',
            }
 
