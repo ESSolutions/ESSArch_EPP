@@ -84,6 +84,10 @@
 		                            ],
 		                            "success": function () {
 		                                alert( "Success to deactivate media" );
+		                                //fnReloadAjax();
+		                                //fnDraw();
+		                                //$('#deactivate_media-table').dataTable.ajax.reload();
+		                                //DeactivateMediaTable.dataTable.ajax.reload();
 		                            },
 		                            "dataType": "json",
 		                            "type": "POST",
@@ -232,6 +236,11 @@
 		                            ],
 		                            "success": function () {
 		                                alert( "Success to deactivate media" );
+		                                //oConfig.ajax.reload();
+		                                //$('#filter-4').trigger('change');
+		                                var oTable = $table.dataTable();
+		                                oTable.fnDraw();
+		                                
 		                            },
 		                            "dataType": "json",
 		                            "type": "POST",
