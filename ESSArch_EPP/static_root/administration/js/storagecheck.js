@@ -42,6 +42,15 @@
     function createFilterHide(i) {
         return function() { fnShowHide(i); };
     }
+    function getCopySelection(){
+    	
+    	copySelection = false
+    	if (document.getElementById("copyonlyflag").checked == true)
+        { copySelection = true;
+        }
+        return copySelection
+    }
+
 
     $(function(){
         $table.dataTable({
@@ -108,13 +117,15 @@
 	                        //var oSettings = oTable.fnSettings();
 	                        //var oSetDT = this.s.dt;
 	                        //var data=oSetDT.aoData;
-	                        var data = $('#filter-5').val();
+	                        var data = $('input[name=target]:checked').val();
+	                       
+	                        var copyflag = getCopySelection()
 	                        //var csr = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 	                        //oSetDT._iDisplayStart = 0;
 	                        //oSetDT._iDisplayLength = 1000;
 	                        //oSetDT.oApi._fnCalculateEnd( oSetDT );
 	                        //oSetDT.oApi._fnDraw( oSetDT );
-	                        if (confirm ('Do you really want to start migration to target '+data+'?')){
+	                        if (confirm ('Do you really want to start migration to target: '+data+'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
 		                            "data": [		                                    
@@ -149,6 +160,10 @@
 			                                {
 			                                	"name": "CopyPath", 
 			                                	"value": $('#copypath').val()
+			                                },
+			                                {
+			                                	"name": "CopyOnlyFlag", 
+			                                	"value": copyflag
 			                                },
 			                                {
 			                                	"name": "ReqUUID", 
