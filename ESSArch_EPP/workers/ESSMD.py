@@ -2085,7 +2085,8 @@ def RES2PREMIS(AIPpath, ID='xxx', PREMISfile=None, eARD=False):
             if DEBUG: print 'F_compressionScheme: ###%s###' % F_compressionScheme
 
             if DEBUG: print 'f12: ###%s###' % RESobject[11]
-            colorSpace_dict = dict({0 : 'WhiteIsZero',
+            colorSpace_dict = dict({-1 : 'BlackIsZero',
+                                    0 : 'WhiteIsZero',
                                     1 : 'BlackIsZero',
                                     2 : 'RGB',
                                     3 : 'RGB Palette',
