@@ -581,7 +581,7 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                 if sm_obj.status == 1:
                     for d in self.object_list_with_writetapes:
                         if d['storage__storageMediumUUID__storageMediumID'] is not None:
-                            if (sm_obj.type in range(300,306) and
+                            if (sm_obj.type in range(300,330) and
                                 d['storage__storageMediumUUID__storageMediumID'].startswith(sm_obj.target) and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ) or\

@@ -226,7 +226,9 @@ MediumType_CHOICES = (
     (303, 'IBM-LTO3'),
     (304, 'IBM-LTO4'),
     (305, 'IBM-LTO5'),
-    #(306, 'IBM-LTO6'),
+    (306, 'IBM-LTO6'),
+    (325, 'HP-LTO5'),
+    (326, 'HP-LTO6'),
 )
 
 MediumFormat_CHOICES = (

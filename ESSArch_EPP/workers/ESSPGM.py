@@ -135,7 +135,7 @@ class DB:
     ###############################################
     def CreateWriteReq(self, AIPpath, ObjectUUID, ObjectIdentifierValue, ObjectSize, MetaObjectSize, sm_list):
         #sm_list = [self.sm_type,self.sm_format,self.sm_blocksize,self.sm_maxCapacity,self.sm_minChunkSize,self.sm_minContainerSize,self.sm_target,self.sm_location]
-        if sm_list[0] in range(300,309): 
+        if sm_list[0] in range(300,330): 
             self.cmd = 10
             self.t_prefix = sm_list[6]
         elif sm_list[0] in range(200,201):
@@ -199,7 +199,7 @@ class DB:
     ###############################################
     def CreateReadReq(self, DIPpath, ObjectUUID, ObjectIdentifierValue, ObjectMessageDigest, sm_list):
         #sm_list = [self.sm_type,self.sm_format,self.sm_blocksize,self.sm_maxCapacity,self.sm_minChunkSize,self.sm_minContainerSize,self.sm_target,self.sm_location,self.contentLocationValue]
-        if sm_list[0] in range(300,309):
+        if sm_list[0] in range(300,330):
             self.cmd = 20
             self.storageMediumID = sm_list[6]
         elif sm_list[0] in range(200,201):
