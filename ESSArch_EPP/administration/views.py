@@ -860,8 +860,9 @@ class MigrationCreate(CreateView):
                 if target_item.startswith('+'):
                     self.target_list[c] = target_item[1:]
 
-            # Copy OnlyFlag       
-            self.copy_only_flag = self.request.POST.get('CopyOnlyFlag', None)
+#            # Copy OnlyFlag       
+#           self.copy_only_flag = self.request.POST.get('CopyOnlyFlag', None)
+#           print 'copy_only_flag: %s %s' % (str(self.copy_only_flag), type(self.copy_only_flag))
 
             return self.form_valid(form)
         else:
@@ -902,13 +903,16 @@ class MigrationCreate(CreateView):
     
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        print( self.object.CopyOnlyFlag)
+        #print( self.object.CopyOnlyFlag)
         self.object.pk = None 
         self.object.user = self.request.user.username
         self.object.ObjectIdentifierValue = self.obj_list
         self.object.TargetMediumID = self.target_list
         self.object.ReqUUID = uuid.uuid1()
-        self.object.CopyOnlyFlag = self.copy_only_flag
+        #self.object.CopyOnlyFlag = self.copy_only_flag
+        self.object.CopyOnlyFlag = form.cleaned_data.get('CopyOnlyFlag',False)
+        print 'copy_only_flagrrr: %s %s' % (str(form.cleaned_data.get('CopyOnlyFlag',False)), type(form.cleaned_data.get('CopyOnlyFlag',False)))
+        #print 'copy_only_flagrrr: %s %s' % (str(form.cleaned_data('CopyOnlyFlag',False)), type(form.cleaned_data('CopyOnlyFlag',False)))
         self.object.save()
         req_pk = self.object.pk
         print(self.object)

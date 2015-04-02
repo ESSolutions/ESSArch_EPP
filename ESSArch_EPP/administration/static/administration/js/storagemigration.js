@@ -241,7 +241,8 @@
 	                        //alert('aaData:'+aaData+'end')
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
-	                        if (confirm ('Do you really want to start migration? Target: '+data+ '?')){
+
+	                        if (confirm ('Do you really want to start migration to target: '+data +'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
 		                            "data": [		                                    
@@ -279,7 +280,7 @@
 			                                },
 			                                {
 			                                	"name": "CopyOnlyFlag", 
-			                                	"value": $('#copyonlyflag').val()
+			                                	"value": $('#copyonlyflag').prop('checked')? 1 : ''
 			                                },
 			                                {
 			                                	"name": "ReqUUID", 

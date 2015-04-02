@@ -48,6 +48,7 @@
                 </td>
                 <td>No media migration: <input id="copyonlyflag"  type="checkbox"  onchange=removeTarget()>
                 </td>
+
         </tbody>
     </table>
 </div>
@@ -272,7 +273,7 @@ function populatecheckboxes(){
 						
 		for (i = 0; i < targets.length; i++){
 				
-				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " " 
+				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " "
 			
 		}
 		document.getElementById("targetfield").innerHTML = targetcheckboxes;
@@ -285,21 +286,20 @@ function updateFilter5(){
 	var targetrecord = "";
 	
     for(i= 0;i < targets.length; i++){
-    	var whichcheckbox = "target" + i;
     	
+    	var whichcheckbox = "target" + i;
     	var checked = document.getElementById(whichcheckbox).checked
     	
     	if( checked == true){
+        	if(targetrecord.length > 0){
+        		targetrecord += " ";
+        	}
     		if(document.getElementById('enablePlus').checked == true){
     			targetrecord += "+";
     		}
-    		
     		targetrecord += targets[i];
-    		targetrecord += " ";
     	}
-    	
     }
-    	
     	$('#filter-5').val(targetrecord).trigger('change');
 }
 	
@@ -307,13 +307,20 @@ function removeTarget(){
 	
 	var noMigration =  'NO MEDIA MIGRATION' ;
 	
+	
+	
+	
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
 		document.getElementById("enablePlusBoxField").innerHTML = "";
+		
+		
 	}
 	else{;
-		document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.";		
+	    
+	     document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
+		
 	}	
 }
 
