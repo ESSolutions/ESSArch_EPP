@@ -299,7 +299,7 @@ LOGGING = {
         'log_file_db': {
             'level': 'DEBUG',
             #'filters': ['require_debug_false'],
-            'class' : 'logging.handlers.RotatingFileHandler',
+            'class' : 'essarch.custom_handlers.GroupWriteRotatingFileHandler',
             'formatter': 'verbose',
             'filename': '/ESSArch/log/ESSArch_db.log',
             'maxBytes': 1024*1024*5, # 5MB

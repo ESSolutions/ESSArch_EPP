@@ -2774,6 +2774,370 @@ def Create_IP_mets(ObjectIdentifierValue,METS_ObjectPath,agent_list=[],altRecord
     
     return status_code,[status_list,error_list]    
 
+class metsRoot(object):
+    format = 2    #example: 1='eArd', 2='E-ARK' 
+    a_LABEL = None  #example 'description for IP'
+    a_PROFILE = "http://webb.eark/package/METS/IP_CS.xml"
+    a_TYPE = 'SIP'     #example 'SIP','AIP','AIU','AIC','DIP'
+    a_OBJID = None  #example "UUID:550e8400-e29b-41d4-a716-446655440004" or 'RAID:%s' % ObjectIdentifierValue
+    a_ID = None #default: 'ID%s' % str(uuid.uuid1())
+    namespacedef = 'xmlns:mets="%s"' % METS_NAMESPACE
+    namespacedef += ' xmlns:xlink="%s"' % XLINK_NAMESPACE
+    namespacedef += ' xmlns:xsi="%s"' % XSI_NAMESPACE
+    namespacedef += ' xsi:schemaLocation="%s %s"' % (METS_NAMESPACE, METS_SCHEMALOCATION)
+    #                example:
+    #                METS_NAMESPACE = "http://www.loc.gov/METS/"
+    #                METS_SCHEMALOCATION = "http://xml.ra.se/METS/RA_METS_eARD.xsd"
+    #                XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+    #                XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
+    #                namespacedef = 'xmlns:mets="%s"' % METS_NAMESPACE
+    #                namespacedef += ' xmlns:xlink="%s"' % XLINK_NAMESPACE
+    #                namespacedef += ' xmlns:xsi="%s"' % XSI_NAMESPACE
+    #                namespacedef += ' xsi:schemaLocation="%s %s"' % (METS_NAMESPACE, METS_SCHEMALOCATION)
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            getattr(self, key) 
+            setattr(self, key, kwargs[key])
+
+class metsHdr(object):
+    a_CREATEDATE = None     #default curent timestamp
+    a_RECORDSTATUS = None   #example: 'NEW'
+    metsDocumentID = None #example: 'filename for metsdocument - IP.xml'
+    TimeZone = timezone.get_default_timezone_name()
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            getattr(self, key) 
+            setattr(self, key, kwargs[key])
+
+class metsStructFile(object):
+    Sec_NAME = 'fileSec'    #example 'fileSec','admSec' or 'dmdSec'
+    Sec_ID = None
+    Grp_NAME = None     #example 'digiprovMD'
+    Grp_ID = None       #example 'digiprovMD001'
+    Struct_LABEL = 'Content'    #example - format 1: 'Datafiles', 'Content Description' - format 2: 'Content', 'Documentation', 'Metadata' 
+    a_ID = None #default: 'ID%s' % str(uuid.uuid1())
+    a_LOCTYPE = 'URL'
+    a_href = None #example 'file:filx.txt'
+    a_type = 'simple'
+    a_CHECKSUM = None
+    a_CHECKSUMTYPE = None #example 'MD5', 'SHA-256'
+    a_SIZE = None
+    a_MIMETYPE = None     #example 'text/xml'
+    a_CREATED = None
+    a_MDTYPE = None #example 'PREMIS'
+    a_USE = 'Datafile' #example 'Datafile'
+    a_OTHERMDTYPE = None
+    a_ADMID = None #example 'digiprovMD001'
+    a_DMDID = None
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            getattr(self, key) 
+            setattr(self, key, kwargs[key])
+
+class metsAgent(object):
+    a_ROLE = None   #example 'ARCHIVIST'
+    a_OTHERROLE = None
+    a_TYPE = None   #example 'ORGANIZATION'
+    a_OTHERTYPE = None  #example 'SOFTWARE'
+    name = None
+    note = []
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            getattr(self, key) 
+            setattr(self, key, kwargs[key])
+
+class metsAltRecordID(object):
+    a_TYPE = None   #example 'DELIVERYTYPE'
+    value = None  #example 'Database'
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            getattr(self, key) 
+            setattr(self, key, kwargs[key])
+    
+def CreateMetsHdr2(metsHdr=metsHdr(), agent_list=[],altRecordID_list=[]):
+    # create mets header
+    loc_timezone=pytz.timezone(metsHdr.TimeZone)
+    if metsHdr.a_CREATEDATE is None:
+        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
+    else:
+        loc_dt_isoformat = metsHdr.a_CREATEDATE
+    _metsHdr = m.metsHdrType(CREATEDATE=loc_dt_isoformat,RECORDSTATUS=metsHdr.a_RECORDSTATUS)
+    for agent in agent_list:
+        #agent=metsAgent()
+        _metsHdr.add_agent(m.agentType(ROLE=agent.a_ROLE, OTHERROLE=agent.a_OTHERROLE , TYPE=agent.a_TYPE, OTHERTYPE=agent.a_OTHERTYPE, name=agent.name, note=agent.note))
+    for altRecordID in altRecordID_list:
+        #altRecordID=metsAltRecordID()
+        _metsHdr.add_altRecordID(m.altRecordIDType(TYPE=altRecordID.a_TYPE,valueOf_=altRecordID.value))
+    _metsHdr.set_metsDocumentID(m.metsDocumentIDType(valueOf_= metsHdr.metsDocumentID))
+    return _metsHdr
+
+def CreateMetsFileInfo2(file_list=[], metsRoot=metsRoot()):
+    # create amdSec / structMap / fileSec
+    _dmdSec = []
+    _amdSec = None
+    if metsRoot.format == 1:
+        div_root = m.divType(LABEL="Package")
+        div_ContentDesc = m.divType(LABEL="Content Description")
+        div_Datafiles = m.divType(LABEL="Datafiles")
+        div_root.add_div(div_ContentDesc)
+        div_root.add_div(div_Datafiles)
+        _structMap = m.structMapType(div=div_root)
+    elif metsRoot.format == 2:
+        div_root = m.divType(LABEL="Package")
+        div_Content = m.divType(LABEL="Content")
+        div_Documentation = m.divType(LABEL="Documentation")
+        div_Metadata = m.divType(LABEL="Metadata")
+        div_root.add_div(div_Content)
+        div_root.add_div(div_Documentation)
+        div_root.add_div(div_Metadata)
+        _structMap = m.structMapType(div=div_root,LABEL="Simple grouping")
+
+    _fileSec = m.fileSecType()
+    if metsRoot.format == 1:
+        _fileGrp = m.fileGrpType(ID="fgrp001", USE='FILES')
+    elif metsRoot.format == 2:
+        _fileGrp = m.fileGrpType(ID='ID%s' % str(uuid.uuid1()))
+    _fileSec.add_fileGrp(_fileGrp)
+
+    if hasattr(file_list,'itervalues'):
+        file_list_iter = file_list.itervalues()
+    else:
+        file_list_iter = file_list
+        
+    for item in file_list_iter:
+        #item = metsStructFile()
+        if item.a_ID is None:
+            item.a_ID = 'ID%s' % str(uuid.uuid1())
+        if item.Sec_NAME == 'fileSec':
+            # add entry to fileSec
+            _file = m.fileType(
+                             ID=item.a_ID,
+                             SIZE=item.a_SIZE,
+                             CREATED=item.a_CREATED,
+                             MIMETYPE = item.a_MIMETYPE,
+                             CHECKSUMTYPE = item.a_CHECKSUMTYPE,
+                             CHECKSUM = item.a_CHECKSUM,
+                             ADMID = item.a_ADMID,
+                             DMDID = item.a_DMDID,
+                             USE = item.a_USE,
+                              )
+            _FLocat = m.FLocatType(
+                             LOCTYPE=item.a_LOCTYPE,
+                             type_=item.a_type,
+                             href=item.a_href,
+                              )
+
+            _file.set_FLocat(_FLocat)
+            _fileGrp.add_file(_file)
+
+            # add entry to structMap
+            #print 'locals: %s' % locals()
+            if 'div_%s' % item.Struct_LABEL in locals():
+                #print 'found content: %s' % item.Struct_LABEL
+                locals()['div_%s' % item.Struct_LABEL].add_fptr(m.fptrType(FILEID=item.a_ID))
+            else:
+                #print 'found content: %s' % item.Struct_LABEL
+                div_root.add_fptr(m.fptrType(FILEID=item.a_ID))
+
+        elif item.Sec_NAME == 'amdSec':
+            if metsRoot.format == 1:
+                # add admSec001 if it not exists
+                if _amdSec is None:
+                    _amdSec = m.amdSecType(ID='amdSec001')
+            elif metsRoot.format == 2:
+                # add admSec_x if it not exists
+                if _amdSec is None:
+                    _amdSec = m.amdSecType(ID='ID%s' % str(uuid.uuid1()))
+            # add entry to amdSec
+            _mdRef = m.mdRefType(
+                                 ID=item.a_ID, 
+                                 SIZE=item.a_SIZE, 
+                                 CREATED=item.a_CREATED,
+                                 MIMETYPE=item.a_MIMETYPE,
+                                 CHECKSUMTYPE=item.a_CHECKSUMTYPE,
+                                 CHECKSUM=item.a_CHECKSUM, 
+                                 LOCTYPE=item.a_LOCTYPE,
+                                 type_=item.a_type, 
+                                 href=item.a_href,
+                                 MDTYPE=item.a_MDTYPE, 
+                                 OTHERMDTYPE=item.a_OTHERMDTYPE, 
+                                )
+            if item.Grp_ID is None:
+                _mdSec = m.mdSecType(ID='ID%s' % str(uuid.uuid1()), mdRef=_mdRef)
+            else:
+                _mdSec = m.mdSecType(ID=item.Grp_ID, mdRef=_mdRef)
+            if item.Grp_NAME == 'techMD':
+                _amdSec.add_techMD(_mdSec)
+            elif item.Grp_NAME == 'digiprovMD':
+                _amdSec.add_digiprovMD(_mdSec)
+
+            # add entry to structMap
+            if 'div_%s' % item.Struct_LABEL in locals():
+                locals()['div_%s' % item.Struct_LABEL].add_fptr(m.fptrType(FILEID=item.a_ID))
+            else:
+                div_root.add_fptr(m.fptrType(FILEID=item.a_ID))            
+            if metsRoot.format == 2:
+                # add mdSec:ID as ADMID to root div in structMap
+                if div_root.ADMID is None:
+                    div_root.ADMID = _mdSec.ID
+                else:
+                    div_root.ADMID = '%s %s' % (div_root.ADMID, _mdSec.ID)    
+
+        elif item.Sec_NAME == 'dmdSec':
+            # add entry to mdSec
+            _mdRef = m.mdRefType(
+                                 ID=item.a_ID, 
+                                 SIZE=item.a_SIZE, 
+                                 CREATED=item.a_CREATED,
+                                 MIMETYPE=item.a_MIMETYPE,
+                                 CHECKSUMTYPE=item.a_CHECKSUMTYPE,
+                                 CHECKSUM=item.a_CHECKSUM, 
+                                 LOCTYPE=item.a_LOCTYPE,
+                                 type_=item.a_type, 
+                                 href=item.a_href,
+                                 MDTYPE=item.a_MDTYPE, 
+                                 OTHERMDTYPE=item.a_OTHERMDTYPE, 
+                                )
+            if item.Grp_ID is None:
+                _mdSec = m.mdSecType(ID='ID%s' % str(uuid.uuid1()), mdRef=_mdRef)
+            else:
+                _mdSec = m.mdSecType(ID=item.Grp_ID, mdRef=_mdRef)
+            _dmdSec.append(_mdSec)
+
+            # add entry to structMap
+            if 'div_%s' % item.Struct_LABEL in locals():
+                locals()['div_%s' % item.Struct_LABEL].add_fptr(m.fptrType(FILEID=item.a_ID))
+            else:
+                div_root.add_fptr(m.fptrType(FILEID=item.a_ID))
+            # add mdSec:ID as DMDID to root div in structMap
+            if div_root.DMDID is None:
+                div_root.DMDID = _mdSec.ID
+            else:
+                div_root.DMDID = '%s %s' % (div_root.DMDID, _mdSec.ID)            
+
+    if _amdSec is not None:
+        if metsRoot.format == 1:
+            # if _amdSec exists update ADMID with 'admSec001' for div_ContentDesc and div_Datafiles
+            div_ContentDesc.ADMID = _amdSec.ID
+            div_Datafiles.ADMID = _amdSec.ID
+        #elif metsRoot.format == 2:
+        #    # if _amdSec exists update ADMID with 'IDx' for div_ContentDesc and div_Datafiles
+        #    div_root.ADMID = _amdSec.ID    
+
+    return _dmdSec, _amdSec, _fileSec, _structMap
+
+"Create IP mets"
+###############################################
+def Create_IP_mets2(METS_ObjectPath,metsRoot=metsRoot(),metsHdr=metsHdr(),agent_list=[],altRecordID_list=[],file_list=[]):
+    '''
+    #######################################################################################################################
+    # Create_IP_mets
+    #
+    # parameters:
+    # METS_ObjectPath = 'path to new metsfile'                    example: '/path/sip.xml'
+    # metsRoot object:
+    #                        format = 2    #example: 1='eArd', 2='E-ARK' 
+    #                        a_LABEL = None  #example 'description for IP'
+    #                        a_PROFILE = "http://webb.eark/package/METS/IP_CS.xml"
+    #                        a_TYPE = 'SIP'     #example 'SIP','AIP','AIU','AIC','DIP'
+    #                        a_OBJID = None  #example "UUID:550e8400-e29b-41d4-a716-446655440004" or 'RAID:%s' % ObjectIdentifierValue
+    #                        a_ID = 'ID%s' % str(uuid.uuid1())
+    #                        namespacedef = default values from schemaprofile
+    #                            example:
+    #                                        METS_NAMESPACE = "http://www.loc.gov/METS/"
+    #                                        METS_SCHEMALOCATION = "http://xml.ra.se/METS/RA_METS_eARD.xsd"
+    #                                        XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+    #                                        XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
+    #                                        namespacedef = 'xmlns:mets="%s"' % METS_NAMESPACE
+    #                                        namespacedef += ' xmlns:xlink="%s"' % XLINK_NAMESPACE
+    #                                        namespacedef += ' xmlns:xsi="%s"' % XSI_NAMESPACE
+    #                                        namespacedef += ' xsi:schemaLocation="%s %s"' % (METS_NAMESPACE, METS_SCHEMALOCATION)
+    # metsHdr object:
+    #                        a_CREATEDATE = None #default curent timestamp
+    #                        a_RECORDSTATUS = None   #example: 'NEW'
+    #                        metsDocumentID = None #default value: 'filename for metsdocument - IP.xml'
+    #                        TimeZone = timezone.get_default_timezone_name()
+    # agent_list = [metsAgent,...] - list of one or many metsAgent object 
+    #        metsAgent object:
+    #                        a_ROLE = None   #example 'ARCHIVIST'
+    #                        a_OTHERROLE = None
+    #                        a_TYPE = None   #example 'ORGANIZATION'
+    #                        a_OTHERTYPE = None  #example 'SOFTWARE'
+    #                        name = None    #example 'ES Solutions AB'
+    #                        note = []    #example ['ORG:11122334455']
+    # altRecordID_list = [metsAltRecordID,...] - list of one or many metsAltRecordID object
+    #        metsAltRecordID object:
+    #                         a_TYPE = None   #example 'DELIVERYTYPE'
+    #                        value = None  #example 'Database'
+    # file_list = [metsStructFile,...] - list of one or many metsStructFile object
+    #        metsStructFile object:
+    #                        Sec_NAME = 'fileSec'    #example 'fileSec','admSec' or 'dmdSec'
+    #                        Sec_ID = None
+    #                        Grp_NAME = None     #example 'digiprovMD'
+    #                        Grp_ID = None       #example 'digiprovMD001'
+    #                        Struct_LABEL = 'Content'    #example - format 1: 'Datafiles', 'Content Description' - format 2: 'Content', 'Documentation', 'Metadata' 
+    #                        a_ID = 'ID%s' % str(uuid.uuid1())
+    #                        a_LOCTYPE = 'URL'
+    #                        a_href = None #example 'file:filx.txt'
+    #                        a_type = 'simple'
+    #                        a_CHECKSUM = None
+    #                        a_CHECKSUMTYPE = None #example 'MD5', 'SHA-256'
+    #                        a_SIZE = None
+    #                        a_MIMETYPE = None     #example 'text/xml'
+    #                        a_CREATED = None
+    #                        a_MDTYPE = None #example 'PREMIS'
+    #                        a_USE = None #example 'Datafile'
+    #                        a_OTHERMDTYPE = None
+    #                        a_ADMID = None #example 'digiprovMD001'
+    #                        a_DMDID = None
+    '''
+
+    status_code = 0
+    status_list = []
+    error_list = [] 
+    
+    if status_code == 0:
+        # create mets root
+        if metsRoot.a_ID is None:
+            metsRoot.a_ID = 'ID%s' % str(uuid.uuid1())
+        _mets = m.mets(PROFILE=metsRoot.a_PROFILE, 
+                       LABEL=metsRoot.a_LABEL,  
+                       TYPE=metsRoot.a_TYPE, 
+                       OBJID=metsRoot.a_OBJID, 
+                       ID=metsRoot.a_ID, 
+                       )
+        _mets.dmdSec
+        # create mets header
+        if metsHdr.metsDocumentID is None:
+            metsHdr.metsDocumentID = os.path.split(METS_ObjectPath)[1]
+            
+        _metsHdr = CreateMetsHdr2(
+                                 metsHdr=metsHdr,
+                                 agent_list=agent_list,
+                                 altRecordID_list=altRecordID_list,
+                                 )
+        _mets.set_metsHdr(_metsHdr)
+        
+        # create amdSec / structMap / fileSec
+        _dmdSec, _amdSec, _fileSec, _structMap = CreateMetsFileInfo2(file_list=file_list, metsRoot=metsRoot)
+        for _dmdSec_item in _dmdSec:
+            _mets.add_dmdSec(_dmdSec_item)
+        if _amdSec is not None:
+            _mets.add_amdSec(_amdSec)
+        if _fileSec is not None:
+            _mets.set_fileSec(_fileSec)
+        if _structMap is not None:
+            _mets.add_structMap(_structMap)
+  
+        # write mets to file
+        mets_fileobj = open(METS_ObjectPath,'w')
+        mets_fileobj.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        _mets.export(mets_fileobj,0,namespace_="mets:",namespacedef_=metsRoot.namespacedef)
+        mets_fileobj.close()    
+    
+    return status_code,[status_list,error_list]    
+
 def main4():
     AgentIdentifierValue = 'ESSArch_Marieberg'
     ObjectIdentifierValue = 'A0007600' 

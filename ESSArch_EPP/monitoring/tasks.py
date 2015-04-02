@@ -52,7 +52,7 @@ class CheckProcessTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 10
+    time_limit = 60
 
     def calculate_result(self, process_list):
         tasks = process_list
@@ -63,7 +63,9 @@ class CheckProcessTask(JobtasticTask):
         self.update_progress(0, num_tasks)
 
         # Get ps list from OS        
+        logger.info('Try to get process list from OS')
         ps_dict = self.get_ps_dict(process_list)
+        logger.info('Succeeded to get process list from OS')
            
         # Create all tasks
         for counter, task in enumerate(tasks):
@@ -78,7 +80,7 @@ class CheckProcessTask(JobtasticTask):
                     for ps_obj in ps_objs:
                         if ps_obj.pid == ESSProc_obj.PID:
                             logger.debug('PID: %s' % ps_obj.pid)
-                        elif ps_obj.ppid == ESSProc_obj.PID:
+                        elif ps_obj.ppid() == ESSProc_obj.PID:
                             children_pids.append(ps_obj.pid)
                         elif ESSProc_obj.alarm == 0:
                             # Found unknown processes
@@ -136,7 +138,7 @@ class CheckProcessTask(JobtasticTask):
             process_dict[process_item] = []
         for p in psutil.process_iter():
             for process_item in process_list:
-                if process_item in p.cmdline:
+                if process_item in p.cmdline():
                     process_dict[process_item].append(p)
         return process_dict
 
@@ -157,7 +159,7 @@ class CheckProcFilesTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 10
+    time_limit = 60
 
     def calculate_result(self, proc_log_path):
         
@@ -230,7 +232,7 @@ class CheckStorageMediumsTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 10
+    time_limit = 60
 
     def calculate_result(self, email='admin'):
         

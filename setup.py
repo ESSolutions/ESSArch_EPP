@@ -56,7 +56,7 @@ if __name__ == '__main__':
             "MySQL-python>=1.2.3",
             "pyodbc>=3.0.7",
             "pytz>=2013.9",
-            "psutil>=1.2.1",
+            "psutil>=2.1.3",
             "billiard>=3.3.0.16",
             "anyjson>=0.3.3",
             "amqp>=1.4.3",
