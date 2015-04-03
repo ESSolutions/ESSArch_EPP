@@ -606,7 +606,7 @@ class RobotInventoryTask(JobtasticTask):
                         robot_drive_obj.status = dt_el[4]
                         if robot_drive_obj.status == 'Full':
                             robot_drive_obj.slot_id = dt_el[7]
-                            robot_drive_obj.volume_id = dt_el[10]
+                            robot_drive_obj.volume_id = dt_el[10][:6]
                         robot_drive_list.append(robot_drive_obj)
                     if re.match('      Storage Element',result_row):         #Grep Robot slot status
                         if not re.search('EXPORT',result_row):

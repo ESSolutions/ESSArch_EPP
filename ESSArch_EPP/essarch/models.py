@@ -746,7 +746,7 @@ class storage(models.Model):
 class robot(models.Model):
     slot_id = models.IntegerField(null=True)
     drive_id = models.IntegerField(null=True)
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=45)
     t_id = models.CharField(max_length=6)
     class Meta:
         db_table = 'robot'
