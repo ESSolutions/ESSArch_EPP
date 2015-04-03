@@ -726,22 +726,22 @@ def installdefaultESSArchPolicy(): # default ESSArchPolicy
 
 def installdefaultESSProc(): # default ESSProc
 
-    ESSProc_list=(('1','SIPReceiver','/ESSArch/bin/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
-                   ('3','SIPValidateAIS','/ESSArch/bin/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
-                   ('4','SIPValidateApproval','/ESSArch/bin/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
-                   ('5','SIPValidateFormat','/ESSArch/bin/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
-                   ('6','AIPCreator','/ESSArch/bin/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
-                   ('7','AIPChecksum','/ESSArch/bin/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
-                   ('8','AIPValidate','/ESSArch/bin/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
-                   ('9','SIPRemove','/ESSArch/bin/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
-                   ('10','AIPWriter','/ESSArch/bin/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
-                   ('11','AIPPurge','/ESSArch/bin/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
-                   ('12','TLD','/ESSArch/bin/TLD.pyc','/ESSArch/log/TLD.log',2,5,0,0,0,0),
-                   ('13','IOEngine','/ESSArch/bin/IOEngine.pyc','/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
-                   ('14','db_sync_ais','/ESSArch/bin/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
-                   ('16','ESSlogging','/ESSArch/bin/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
-                   ('17','AccessEngine','/ESSArch/bin/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
-                   ('18','FTPServer','/ESSArch/bin/FTPServer.pyc','/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
+    ESSProc_list=(('1','SIPReceiver','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
+                   ('3','SIPValidateAIS','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
+                   ('4','SIPValidateApproval','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
+                   ('5','SIPValidateFormat','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
+                   ('6','AIPCreator','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
+                   ('7','AIPChecksum','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
+                   ('8','AIPValidate','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
+                   ('9','SIPRemove','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
+                   ('10','AIPWriter','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
+                   ('11','AIPPurge','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
+                   ('12','TLD','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/TLD.pyc','/ESSArch/log/TLD.log',2,5,0,0,0,0),
+                   ('13','IOEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/IOEngine.pyc','/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
+                   ('14','db_sync_ais','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
+                   ('16','ESSlogging','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
+                   ('17','AccessEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
+                   ('18','FTPServer','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/FTPServer.pyc','/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
     )
     for row in ESSProc_list:
         if not ESSProc.objects.filter(Name=row[1]).exists():
