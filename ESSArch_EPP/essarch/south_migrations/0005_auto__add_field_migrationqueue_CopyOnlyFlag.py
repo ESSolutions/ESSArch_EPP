@@ -8,6 +8,9 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+
+        # Changing field 'robot.status'
+        db.alter_column('robot', 'status', self.gf('django.db.models.fields.CharField')(max_length=45))
         # Adding field 'MigrationQueue.CopyOnlyFlag'
         db.add_column('MigrationQueue', 'CopyOnlyFlag',
                       self.gf('django.db.models.fields.BooleanField')(default=False),
@@ -15,6 +18,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+
+        # Changing field 'robot.status'
+        db.alter_column('robot', 'status', self.gf('django.db.models.fields.CharField')(max_length=10))
         # Deleting field 'MigrationQueue.CopyOnlyFlag'
         db.delete_column('MigrationQueue', 'CopyOnlyFlag')
 
@@ -304,7 +310,7 @@ class Migration(SchemaMigration):
             'drive_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'slot_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '45'}),
             't_id': ('django.db.models.fields.CharField', [], {'max_length': '6'})
         },
         u'essarch.robotdrives': {
