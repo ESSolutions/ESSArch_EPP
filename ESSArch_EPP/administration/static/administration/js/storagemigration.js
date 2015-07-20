@@ -296,7 +296,7 @@
 		                            "type": "POST",
 		                            "cache": false,
 		                            "error": function () {
-		                                alert( "Failed to create migration request" );
+		                                alert( "Problem to create migration request. Please fill out all mandatory fields." );
 		                            }
 		                        } );
 	                        }
