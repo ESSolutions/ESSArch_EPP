@@ -60,7 +60,8 @@ from django.utils import timezone
 
 #from django_tables2 import RequestConfig
 
-from essarch.libs import DatatablesView, flush_transaction, DatatablesForm, get_field_choices, get_object_list_display
+#from essarch.libs import DatatablesView, flush_transaction, DatatablesForm, get_field_choices, get_object_list_display
+from essarch.libs import DatatablesView, DatatablesForm, get_field_choices, get_object_list_display
 
 import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
 
@@ -458,7 +459,7 @@ class StorageMaintenanceDatatablesView(DatatablesView):
     def process_dt_response(self, data):
         self.form = DatatablesForm(data)
         if self.form.is_valid():
-            flush_transaction()
+            #flush_transaction()
             #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
             self.object_list_with_writetapes = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
             self.object_list = []

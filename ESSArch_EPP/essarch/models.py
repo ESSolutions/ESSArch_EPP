@@ -29,10 +29,10 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
 from django import forms
 from django.utils.safestring import mark_safe
-from django.forms.util import flatatt
+from django.forms.utils import flatatt
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from configuration.models import ESSArchPolicy
+from configuration.models import ESSArchPolicy, ArchivePolicy
 #import django_tables2 as tables
 #from django_tables2.utils import A
 from djcelery.models import TaskMeta
@@ -293,7 +293,8 @@ class ArchiveObject(models.Model):
     id = BigAutoField(primary_key=True)
     ObjectUUID = models.CharField(max_length=36, unique=True)
     #PolicyId = models.IntegerField(null=True)
-    PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
+    #PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
+    PolicyId = models.ForeignKey(ArchivePolicy, db_column='PolicyId', to_field='PolicyID', default=0)
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
     ObjectPackageName = models.CharField(max_length=255)
     ObjectSize = models.BigIntegerField(null=True)
@@ -328,6 +329,8 @@ class ArchiveObject(models.Model):
     ExtDBdatetime = models.DateTimeField(null=True)
     class Meta:
         db_table = 'IngestObject'
+    def __unicode__(self):
+        return self.ObjectIdentifierValue
     def get_absolute_url(self):
         return reverse('ingest_listobj')
     def get_ip_list(self,StatusProcess=None,StatusProcess__lt=None,StatusProcess__in=None,StatusActivity__in=None):

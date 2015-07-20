@@ -24,6 +24,17 @@ body {
 	overflow:visible;
 }
 
+#branding {
+        float: none;
+        line-height: 45px;
+}
+
+#user-tools {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+}
+
 .site-name {
 	display: inline; 
 	font-weight: bold;

@@ -38,6 +38,8 @@ from operator import or_
 from eztables.views import DatatablesView
 from eztables.forms import DatatablesForm
 
+import os, stat, hashlib
+
 #: SQLite unsupported field types for regex lookups
 UNSUPPORTED_REGEX_FIELDS = (
     models.IntegerField,
@@ -50,18 +52,18 @@ UNSUPPORTED_REGEX_FIELDS = (
 
 RE_FORMATTED = re.compile(r'\{(\w+)\}')
 
-@transaction.commit_manually
-def flush_transaction():
-    """
-    Flush the current transaction so we don't read stale data
-
-    Use in long running processes to make sure fresh data is read from
-    the database.  This is a problem with MySQL and the default
-    transaction mode.  You can fix it by setting
-    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
-    this function at the appropriate moment
-    """
-    transaction.commit()
+#@transaction.commit_manually
+#def flush_transaction():
+#    """
+#    Flush the current transaction so we don't read stale data
+#
+#    Use in long running processes to make sure fresh data is read from
+#    the database.  This is a problem with MySQL and the default
+#    transaction mode.  You can fix it by setting
+#    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
+#    this function at the appropriate moment
+#    """
+#    transaction.commit()
     
 def get_real_field(model, field_name):
     '''
@@ -75,8 +77,8 @@ def get_real_field(model, field_name):
         return model._meta.get_field_by_name(field_name)[0]
     elif isinstance(field, models.ForeignKey):
         return get_real_field(field.rel.to, '__'.join(parts[1:]))
-    elif isinstance(field, models.related.RelatedObject):
-        return get_real_field(field.model,'__'.join(parts[1:]))
+    elif isinstance(field, models.fields.related.ForeignObjectRel):
+        return get_real_field(field.related_model,'__'.join(parts[1:]))
     else:
         raise Exception('Unhandled field: %s' % field_name)
     
@@ -116,13 +118,56 @@ def get_object_list_display(object_list, field_choices_dict):
                 obj_dict_display[field] = obj[field]
         object_list_display.append(obj_dict_display)
     return object_list_display
+
+def GetSize(path):
+    """ Check size of file or directory """
+    f_size = 0
+    f_stat = os.stat(path)
+    if stat.S_ISDIR(f_stat.st_mode):                 # It's a director
+        for f_name in os.listdir(path):
+            f_path = os.path.join(path,f_name)
+            f_stat = os.stat(f_path)
+            if stat.S_ISREG(f_stat.st_mode):                   # It's a file
+                f_size += f_stat.st_size
+            elif stat.S_ISDIR(f_stat.st_mode):                 # It's a directory
+                f_size += GetSize(f_path)
+    else:
+        f_size += f_stat.st_size
+    return f_size
+
+def calcsum(filepath,checksumtype='MD5'):
+    """Return checksum for a file."""
+    if type(checksumtype) in [str,unicode]:
+        checksumtype = checksumtype.lower()
+    if checksumtype in ['md5',1]:
+        h = hashlib.md5()
+    elif checksumtype in ['sha256','sha-256',2]:
+        h = hashlib.sha256()
+    else:
+        h = hashlib.md5()
+    chunk = 1048576
+    f = open(filepath, "rb")
+    s = f.read(chunk)
+    while s != "":
+        h.update(s)
+        s = f.read(chunk)
+    f.close()
+    return h.hexdigest()
+
+class ESSArchSMError(Exception):
+    def __init__(self, value):
+        self.value = value
+        #Exception.__init__(self, value)
+        super(ESSArchSMError, self).__init__(value)
+#    def __str__(self):
+#        return repr(self.value)
     
 class DatatablesView(DatatablesView):
 
     def process_dt_response(self, data):
         self.form = DatatablesForm(data)
         if self.form.is_valid():
-            flush_transaction()
+            #flush_transaction()
             self.object_list = self.get_queryset().values(*self.get_db_fields())
             #print 'get_queryset: %s' % str(self.get_queryset)
             self.field_choices_dict = get_field_choices(self.get_queryset()[:1], self.get_db_fields())

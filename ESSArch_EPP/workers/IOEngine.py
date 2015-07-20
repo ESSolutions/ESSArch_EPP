@@ -31,7 +31,7 @@ import os, thread, multiprocessing, datetime, time, logging, sys, shutil, stat, 
 from django.utils import timezone
 
 from essarch.models import storage, storageMedium, ArchiveObject, robotQueue, robotdrives
-from essarch.libs import flush_transaction
+#from essarch.libs import flush_transaction
 from django import db
 
 class Functions:
@@ -142,7 +142,7 @@ class Functions:
             ########################################################
             # Verify tape position and check write/tape size
             ########################################################
-            flush_transaction()
+            #flush_transaction()
             storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
             self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
             #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -161,7 +161,7 @@ class Functions:
                 self.Mount_exitcode, self.t_id, self.tapedev, self.t_pos = ESSPGM.Robot().MountWritePos2(t_type=self.t_type, t_block=self.t_block, t_format=self.t_format, t_prefix=self.t_prefix, t_location=self.t_location, full_t_id=self.t_id, work_uuid=self.uuid)
                 if self.Mount_exitcode==0:
                     logger.info('Succedd to mount write tape id: ' + self.t_id + ' dev: ' + self.tapedev + ' pos: ' + str(self.t_pos))
-                    flush_transaction()
+                    #flush_transaction()
                     storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
                     self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
                     #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -315,7 +315,7 @@ class Functions:
                     self.Mount_exitcode, self.t_id, self.tapedev, self.t_pos = ESSPGM.Robot().MountWritePos2(t_type=self.t_type, t_block=self.t_block, t_format=self.t_format, t_prefix=self.t_prefix, t_location=self.t_location, full_t_id=self.t_id, work_uuid=self.uuid)
                     if self.Mount_exitcode==0:
                         logger.info('Succedd to mount write tape id: ' + self.t_id + ' dev: ' + self.tapedev + ' pos: ' + str(self.t_pos))
-                        flush_transaction()
+                        #flush_transaction()
                         storageMedium_obj = storageMedium.objects.get(storageMediumID=self.t_id)
                         self.new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(self.WriteSize)
                         #self.new_t_size=int(ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumUsedCapacity',),('storageMediumID',self.t_id))[0][0]) + int(self.WriteSize)
@@ -778,7 +778,7 @@ class Functions:
             logger.info('WriteSize not defined, setting write size for object: ' + self.ObjectIdentifierValue + ' WriteSize: ' + str(self.WriteSize))
         # Check if StorageMediumID 'disk' exist, if exist get current target size.
         try:
-            flush_transaction()
+            #flush_transaction()
             storageMedium_obj = storageMedium.objects.get(storageMediumID='disk')
         except storageMedium.DoesNotExist, why:
             logger.error('Problem to access DB_storageMediumID disk for IOuuid: ' + str(self.uuid))
@@ -1066,7 +1066,7 @@ class Functions:
         ###################################################
         res = 'Missing drivelock for: %s' % lock_uuid
         exitstatus = 1
-        flush_transaction()
+        #flush_transaction()
         robotdrives_objs = robotdrives.objects.filter(drive_lock=lock_uuid)
         for robotdrives_obj in robotdrives_objs:
             robotdrives_obj.drive_lock=''

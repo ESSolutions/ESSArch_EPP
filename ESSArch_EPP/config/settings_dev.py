@@ -258,6 +258,10 @@ INSTALLED_APPS = (
     'reports',
     'logfileviewer',
     'monitoring',
+    'nested_inline',
+    #'filetransfer',
+    'Storage',
+    'StorageMethodDisk',
 )
 
 import djcelery
@@ -266,6 +270,8 @@ djcelery.setup_loader()
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
+CELERY_DEFAULT_QUEUE = 'default'
+TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
 
 from celery.schedules import crontab
 from datetime import timedelta
@@ -411,6 +417,24 @@ LOGGING = {
             # Reference to handler in log.py below
             'class': 'monitoring.log.DbLogHandler',
         },
+        'log_file_filetransfer': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/filetransfer.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
+        'log_file_StorageMethodDisk': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/StorageMethodDisk.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
     },
     'loggers': {
         'django': {
@@ -461,6 +485,16 @@ LOGGING = {
         'essarch.dblog': {
             'level': 'ERROR',
             'handlers': ['dblog'],
+            'propagate': True,
+        },
+        'essarch.filetransfer': {
+            'level': 'INFO',
+            'handlers': ['log_file_filetransfer'],
+            'propagate': True,
+        },
+        'StorageMethodDisk': {
+            'level': 'INFO',
+            'handlers': ['log_file_StorageMethodDisk'],
             'propagate': True,
         },
     },

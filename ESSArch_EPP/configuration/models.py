@@ -34,6 +34,7 @@ from picklefield.fields import PickledObjectField
 
 import datetime
 import sys
+import uuid
 
 # Logevents
 class LogEvent(models.Model):
@@ -182,6 +183,13 @@ enabled_disabled_CHOICES = (
     (1, 'Enabled'),
 )
 
+StorageTarget_Status_CHOICES = (
+    (0, 'Disabled'),
+    (1, 'Enabled'),
+    (2, 'ReadOnly'),
+    (3, 'Migrate'),
+)
+
 Mode_Policy_CHOICES = (
     (0, 'Master'),
     (2, 'AIS'),
@@ -221,6 +229,7 @@ INFORMATIONCLASS_Policy_CHOICES = (
 
 MediumType_CHOICES = (
     (200, 'DISK'),
+    (300, 'TAPE'),
     (301, 'IBM-LTO1'),
     (302, 'IBM-LTO2'),
     (303, 'IBM-LTO3'),
@@ -229,6 +238,9 @@ MediumType_CHOICES = (
     (306, 'IBM-LTO6'),
     (325, 'HP-LTO5'),
     (326, 'HP-LTO6'),
+    (400, 'CAS'),
+    (401, 'HDFS'),
+    (402, 'HDFS-REST'),
 )
 
 MediumFormat_CHOICES = (
@@ -315,6 +327,75 @@ class ESSArchPolicy(models.Model):
     class Meta:
         db_table = 'ESSArchPolicy'
         verbose_name = 'Archive policy'
+
+class ArchivePolicy(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #PolicyID = models.UUIDField(default=uuid.uuid4, unique=True)
+    PolicyID = models.CharField('Policy ID', max_length=32, unique=True)
+    PolicyName = models.CharField('Policy Name', max_length=255)
+    PolicyStat = models.IntegerField('Policy Status', choices=enabled_disabled_CHOICES, default=0)
+    AISProjectName = models.CharField('AIS Policy Name', max_length=255, blank=True)
+    AISProjectID = models.CharField('AIS Policy ID', max_length=255, blank=True)
+    Mode = models.IntegerField(choices=Mode_Policy_CHOICES, default=0)
+    WaitProjectApproval = models.IntegerField('Wait for approval', choices=WaitProjectApprobal_Policy_CHOICES, default=2)
+    ChecksumAlgorithm = models.IntegerField('Checksum algorithm', choices=ChecksumAlgorithm_CHOICES,default=1)
+    ValidateChecksum = models.IntegerField('Validate checksum', choices=enabled_disabled_CHOICES,default=1)
+    ValidateXML = models.IntegerField('Validate XML', choices=enabled_disabled_CHOICES,default=1)
+    ManualControll = models.IntegerField('Manual Control', choices=enabled_disabled_CHOICES,default=0)
+    AIPType = models.IntegerField('AIP type', choices=AIPType_Policy_CHOICES,default=1)
+    AIPpath = models.CharField('Temp work directory', max_length=255,default='/ESSArch/work')
+    PreIngestMetadata = models.IntegerField('Pre ingest metadata',choices=PreIngestMetadata_Policy_CHOICES,default=0)
+    IngestMetadata = models.IntegerField('Ingest metadata', choices=IngestMetadata_Policy_CHOICES,default=4)
+    INFORMATIONCLASS = models.IntegerField('Information class', choices=INFORMATIONCLASS_Policy_CHOICES, default=0)
+    IngestPath = models.CharField('Ingest directory', max_length=255,default='/ESSArch/ingest')
+    IngestDelete = models.IntegerField('Delete SIP after success to create AIP', choices=enabled_disabled_CHOICES,default=1)
+
+    def __unicode__(self):
+        if len(self.PolicyName): return self.PolicyName
+        else: return unicode(self.PolicyID)
+
+class StorageMethod(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('Name', max_length=255, blank=True)
+    status = models.IntegerField('Storage method status', choices=enabled_disabled_CHOICES,default=0)
+    type = models.IntegerField('Type', choices=MediumType_CHOICES,default=200)
+    archivepolicy = models.ForeignKey('ArchivePolicy')
+
+    def __unicode__(self):
+        if len(self.name): return self.name
+        else: return unicode(self.id)
+
+class StorageTarget(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('Name', max_length=255, blank=True)
+    status = models.IntegerField('Storage target status', choices=StorageTarget_Status_CHOICES,default=0)
+    target = models.ForeignKey('StorageTargets')
+    storagemethod = models.ForeignKey('StorageMethod')
+    class Meta:
+        verbose_name = 'Target'
+        
+    def __unicode__(self):
+        if len(self.name): return self.name
+        else: return unicode(self.id)
+
+class StorageTargets(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('Name', max_length=255, unique=True)
+    status = models.IntegerField('Storage target status', choices=enabled_disabled_CHOICES,default=1)
+    type = models.IntegerField('Type', choices=MediumType_CHOICES,default=200)
+    format = models.IntegerField('Format', choices=MediumFormat_CHOICES,default=103)
+    blocksize = models.BigIntegerField('BlockSize (tape)', choices=MediumBlockSize_CHOICES,default=1024)
+    maxCapacity = models.BigIntegerField('Max capacity (0=Disabled)', default=0)
+    minChunkSize = models.BigIntegerField('Min chunk size', choices=minChunkSize_CHOICES, default=0)
+    minContainerSize = models.BigIntegerField('Min container size (0=Disabled)', choices=minContainerSize_CHOICES, default=0)
+    minCapacityWarning = models.BigIntegerField('Min capacity warning (0=Disabled)', default=0)
+    target = models.CharField('Target (URL, path or barcodeprefix)', max_length=255)
+    class Meta:
+        verbose_name = 'Storage Target'
+
+    def __unicode__(self):
+        if len(self.name): return self.name
+        else: return unicode(self.id)
 
 class sm(object):
     id                  = 0

@@ -6,10 +6,10 @@
 
 {% block container %}
 <div class="row">
-    <div class="span12">
+    <div class="col-md-12">
    		<h2>ESSArch Preservation Platform - System information <span style="font-size: small;">at {{ time_checked|date:"Y-m-d H:i"}}</span></h2>
     </div>
-    <div class="span6">
+    <div class="col-md-6">
         {% if hostname %}<p><strong>Hostname:</strong> {{ hostname }}</p>{% endif %}
         {% if essarch_info %}<p><strong>ESSArch:</strong> {{ essarch_info }}</p>{% endif %}
         <h2>Settings Flags</h2>
@@ -30,7 +30,7 @@
             </div>
         {% endif %}
     </div>
-    <div class="span6">
+    <div class="col-md-6">
 <!--
         <h2>Recent Log Entries</h2>
         {% if error_msgs %}

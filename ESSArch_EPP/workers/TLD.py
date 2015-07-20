@@ -34,7 +34,7 @@ from lxml import etree
 from django.utils import timezone
 from essarch.models import robotQueue, robotdrives, robot
 from django import db
-from essarch.libs import flush_transaction
+#from essarch.libs import flush_transaction
 
 class WorkingThread:
     tz=timezone.get_default_timezone()
@@ -336,12 +336,12 @@ class Robot:
                         break
                 except Empty:
                     pass
-                flush_transaction()
+                #flush_transaction()
                 robotdrives_objs = robotdrives.objects.filter(status='Mounted')
                 if robotdrives_objs:
                     #################################################
                     # Found mounted tape
-                    flush_transaction()
+                    #flush_transaction()
                     self.nummountreq = robotQueue.objects.filter(ReqType=50, Status=0).count()
                     for robotdrives_obj in robotdrives_objs:
                         if len(robotdrives_obj.drive_lock) == 0: 
@@ -376,7 +376,7 @@ class Robot:
                                 robotQueue_obj.MediumID = robotdrives_obj.t_id
                                 robotQueue_obj.save()
                                 while 1:
-                                    flush_transaction()
+                                    #flush_transaction()
                                     robot_objs = robot.objects.filter(t_id=robotdrives_obj.t_id, drive_id='99')
                                     if robot_objs:
                                         logger.info('Success to unmount tape: ' + str(robotdrives_obj.t_id))
