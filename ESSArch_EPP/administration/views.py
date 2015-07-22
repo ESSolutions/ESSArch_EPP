@@ -754,6 +754,7 @@ class DeactivateMedia(FormView):
             event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
             logger.info(event_info)
             ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
+			
             if ExtDBupdate:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
                                                                                                                                 ('storageMediumID',storageMedium_obj.storageMediumID))
