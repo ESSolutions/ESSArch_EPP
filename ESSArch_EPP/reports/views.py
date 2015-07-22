@@ -101,7 +101,7 @@ class eventsReport(ListView):
         event_list = []
         for i in eventobject_list:
             event_list.append(i.eventType)
-			event_list-append(i.eventIdentifierValue)
+            event_list.append(i.eventIdentifierValue)
         #print '#####################################: %s' % str(event_list)
         event_list2 = []
         for i in list(set(event_list)):
