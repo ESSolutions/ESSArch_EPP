@@ -100,12 +100,12 @@ class eventsReport(ListView):
         
         event_list = []
         for i in eventobject_list:
-            event_list.append(i.eventType)
+            event_list.append(i.eventType,i.eventDetail)
         
         #print '#####################################: %s' % str(event_list)
         event_list2 = []
         for i in list(set(event_list)):
-            event_list2.append([i, i.eventDetail, event_list.count(i)])
+            event_list2.append([i,eventlist[i].eventDetail, event_list.count(i)])
         #print '#####################################: %s' % str(event_list2)
 
         context['event_list'] = sorted(event_list2)
