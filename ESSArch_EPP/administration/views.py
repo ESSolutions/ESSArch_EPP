@@ -692,7 +692,7 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         return deactivate_media_list, need_to_migrate_list
         
 
-    def render_to_response(self, form, **kwargs):
+    def render_to_response(self, form, **kwargs): #Paginator
         '''Render Datatables expected JSON format'''
         page = self.get_page(form)
         #print 'page_type_object_list: %s' % type(page.object_list)
