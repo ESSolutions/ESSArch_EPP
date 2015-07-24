@@ -241,7 +241,9 @@
 	                        //alert('aaData:'+aaData+'end')
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
-
+							if (document.getElementById("copyonlyflag").checked == true){
+								data = "Copy  Only"
+							}
 	                        if (confirm ('Do you really want to start migration to target: '+data +'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
