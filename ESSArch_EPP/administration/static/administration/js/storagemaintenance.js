@@ -144,7 +144,7 @@
     
     $(function(){
         $table.dataTable({
-            "bPaginate": false,
+            "bPaginate": true,
             "sPaginationType": "bootstrap",
             "bProcessing": true,
             "bServerSide": true,
