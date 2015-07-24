@@ -699,8 +699,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
         deactivate_media_list, need_to_migrate_list = self.get_deactivate_list()
         data = {
-            'iTotalRecords': deactivate_media_list.count(), #page.paginator.count
-            'iTotalDisplayRecords': deactivate_media_list.count(), #page.paginator.count
+            'iTotalRecords': len(deactivate_media_list), #page.paginator.count
+            'iTotalDisplayRecords': len(deactivate_media_list), #page.paginator.count
             'sEcho': form.cleaned_data['sEcho'],
             'aaData': self.get_rows(page.object_list),
             'deactivate_media_list': deactivate_media_list,
