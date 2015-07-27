@@ -99,6 +99,7 @@ class eventsReport(ListView):
         eventobject_list = context['object_list']
         
         event_list = []
+		b = object()
         for i in eventobject_list:
             b.eventType = i.eventType
             b.eventDetail = i.eventDetail
