@@ -245,7 +245,7 @@
 							if (document.getElementById("copyonlyflag").checked == true){
 								data = "Copy  Only"
 								if ($('#copypath').val() == ""){
-									prompt(" You have to tell us the Copy Path")
+									confirm(" You have to tell us the Copy Path")
 								}
 								
 							}
