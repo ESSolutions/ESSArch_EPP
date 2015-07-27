@@ -244,7 +244,7 @@
 	                        var data = $('#filter-5').val();
 							if (document.getElementById("copyonlyflag").checked == true){
 								data = "Copy  Only"
-								prompt(stringify(document.getElementById("copypath")))
+								prompt($('#copypath').val())
 								
 							}
 	                        if (confirm ('Do you really want to start migration to target: '+data +'?')){
