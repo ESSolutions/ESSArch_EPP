@@ -1,5 +1,4 @@
 #!/usr/bin/env /ESSArch/pd/python/bin/python
-
 '''
     ESSArch - ESSArch is an Electronic Archive system
     Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
@@ -31,13 +30,13 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import sys, time, logging,  ESSDB, ESSPGM
 
 from essarch.models import IngestQueue
+from configuration.models import ArchivePolicy
 from django import db
 
 class Proc:
     ###############################################
-    def ObjectValidate(self,InTable,PolicyTable):
+    def ObjectValidate(self,InTable):
         self.IngestTable = InTable 
-        self.PolicyTable = PolicyTable 
         if ExtDBupdate:
             self.ext_IngestTable = self.IngestTable
         else:
@@ -50,16 +49,15 @@ class Proc:
         for self.obj in self.dbget:
             self.ObjectUUID = self.obj[0]
             self.ObjectIdentifierValue = self.obj[1]
-            self.PolicyId = self.obj[2]
+            PolicyID = self.obj[2]
             self.StatusProcess = self.obj[3]
-            self.policydb,errno,why = ESSDB.DB().action(self.PolicyTable,'GET3',('WaitProjectApproval',),('PolicyID',self.PolicyId))
-            if errno: 
-                logging.error('Failed to access Local DB, error: ' + str(why))
-            if self.policydb == (): 
-                logging.error('Missing PolicyID: %s in db' % str(self.PolicyId))
+            ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1, PolicyID=PolicyID)[:1]
+            if not ArchivePolicy_objs: 
+                logging.error('Missing PolicyID: %s in db' % str(PolicyID))
             else:
-                logging.info('StatusProcess %s, ObjectIdentifierValue %s, WaitForApproval: %s' % (self.StatusProcess,self.ObjectIdentifierValue,self.policydb[0][0]))
-                if self.policydb[0][0] == 1:
+                ArchivePolicy_obj = ArchivePolicy_objs.get()
+                logging.info('StatusProcess %s, ObjectIdentifierValue %s, WaitForApproval: %s' % (self.StatusProcess,self.ObjectIdentifierValue,ArchivePolicy_obj.WaitProjectApproval))
+                if ArchivePolicy_obj.WaitProjectApproval == 1:
                     #Check....
                     self.extOBJ = 0 
                     self.PrjDBget,errno,why = ESSDB.DB().action('ExtPrjDB','GET3',('DataObjectSize',
@@ -106,7 +104,7 @@ class Proc:
                         else: 
                             ESSPGM.Events().create('1020','','ESSArch SIPValidateApproval',ProcVersion,'0','',2,self.ObjectIdentifierValue)
                         logging.info('Change to StatusProcess 24, ObjectIdentifierValue '+str(self.ObjectIdentifierValue))
-                elif self.policydb[0][0] == 2:
+                elif ArchivePolicy_obj.WaitProjectApproval == 2:
                     ###################################################################
                     # Check if Object exist in ReqIngestQueue
                     ###################################################################
@@ -164,7 +162,6 @@ class Proc:
 # Dep:
 # Table: ESSProc with Name: ESSObjectValidate, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Table: ExtPrjDB with status from webservice "extobjectupdate"
 # Arg: -d = Debug on
 #######################################################################################################
@@ -226,13 +223,11 @@ if __name__ == '__main__':
     while 1:
         #if Debug: logging.info('Check')
         InTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-        PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
         AgentIdentifierValue = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','AgentIdentifierValue'))[0][0]
         ExtDBupdate = int(ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','ExtDBupdate'))[0][0])
         #if Debug:
         #   logging.info('InTable: '+str(InTable))
-        #   logging.info('PolicyTable: '+str(PolicyTable))
-        Proc().ObjectValidate(InTable,PolicyTable)
+        Proc().ObjectValidate(InTable)
         if ESSDB.DB().action('ESSProc','GET',('Run',),('Name',ProcName))[0][0] == '0': 
             ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
             logging.info('Stopping ' + ProcName)

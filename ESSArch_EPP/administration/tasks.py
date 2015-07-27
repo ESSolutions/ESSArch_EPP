@@ -28,7 +28,8 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from jobtastic import JobtasticTask
 import ESSPGM, datetime, uuid, time, os, shutil, logging, subprocess, db_sync_ais, pytz
 from configuration.models import ESSConfig
-from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, IOqueue, robotQueue, robot, robotdrives, storageMedium
+from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, IOqueue, robotQueue, robot, robotdrives
+from Storage.models import storageMedium
 from administration.models import robot_info, robot_drive, robot_slot, robot_export
 from django.utils import timezone
 
@@ -517,13 +518,13 @@ class RobotInventoryTask(JobtasticTask):
                 UpdateTapeLocationFlag = 0    
                 if TapeExistFlag:
                     if storageMedium_objs[0].storageMediumStatus == 0:
-                        robot_obj.status = 'InactiveTape'
+                        robot_obj.status = 'Inactive'
                         UpdateTapeLocationFlag = 0
                     elif storageMedium_objs[0].storageMediumStatus == 20:
-                        robot_obj.status = 'WriteTape'
+                        robot_obj.status = 'Write'
                         UpdateTapeLocationFlag = 1
                     else:
-                        robot_obj.status = 'ArchTape'
+                        robot_obj.status = 'Full'
                         UpdateTapeLocationFlag = 1
                     if UpdateTapeLocationFlag == 1:
                         timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
@@ -542,7 +543,7 @@ class RobotInventoryTask(JobtasticTask):
                         if errno:
                             logger.error('Failed to update location for MediumID: %s , error: %s' % (rs.volume_id,str(why)))
                 else:
-                    robot_obj.status = 'Ready'
+                    robot_obj.status = 'Empty'
                 robot_obj.save()
 
             elif rs.status == 'Empty':

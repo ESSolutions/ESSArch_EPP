@@ -28,7 +28,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from configuration.models import StorageMethod, StorageTarget, StorageTargets
-from essarch.models import ArchiveObject
+from essarch.models import ArchiveObject, AccessQueue
 from picklefield.fields import PickledObjectField
 import uuid
 
@@ -158,6 +158,7 @@ class IOQueue(models.Model):
     storagetarget = models.ForeignKey(StorageTargets, blank=True, null=True)
     storagemedium = models.ForeignKey(storageMedium, blank=True, null=True)
     storage = models.ForeignKey(storage, blank=True, null=True)
+    accessqueue = models.ForeignKey(AccessQueue, blank=True, null=True)
     class Meta:
         permissions = (
             ("list_IOQueue", "Can list IOQueue"),

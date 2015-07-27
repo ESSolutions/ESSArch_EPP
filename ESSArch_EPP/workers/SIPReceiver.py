@@ -30,7 +30,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, shutil, thread, datetime, time, logging, sys, csv, tarfile, stat, ESSDB, ESSMSSQL, ESSPGM, ESSlogging, ESSMD, pytz
 
 from essarch.models import IngestQueue, ArchiveObject
-from configuration.models import ESSArchPolicy
+from configuration.models import ArchivePolicy
 from django.utils import timezone
 from django import db
 
@@ -58,27 +58,24 @@ class WorkingThread:
                 self.ext_IngestTable = self.IngestTable
             else:
                 self.ext_IngestTable = ''
-            self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
             self.StorageTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageTable'))[0][0]
             self.StorageMediumTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageMediumTable'))[0][0]
             self.RobotDrivesTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','RobotDrivesTable'))[0][0]
             self.MediumLocation = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','storageMediumLocation'))[0][0]
 
             try:
-                #q_ESSArchPolicy = model.meta.Session.query(model.ESSArchPolicy)
-                #DbRows = q_ESSArchPolicy.filter(model.ESSArchPolicy.PolicyStat==1).all()
-                DbRows = ESSArchPolicy.objects.filter(PolicyStat = 1).all()
-                for DbRow in DbRows:
-                    #DbRow.PolicyID
-                    #DbRow.Mode
-                    #DbRow.IngestPath
+                ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat = 1).all()
+                for ArchivePolicy_obj in ArchivePolicy_objs:
+                    #ArchivePolicy_obj.PolicyID
+                    #ArchivePolicy_obj.Mode
+                    #ArchivePolicy_obj.IngestPath
                     #########################################################
                     # PreIngestMetadata 1 = RES SIP
-                    if DbRow.PreIngestMetadata == 1:
+                    if ArchivePolicy_obj.PreIngestMetadata == 1:
                         try:
-                            dir_list = os.listdir(DbRow.IngestPath)
+                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
                         except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (DbRow.IngestPath, str(sys.exc_info())))
+                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
                             dir_list = []
                         for self.ObjectIdentifierValue in dir_list:
                             self.objectstatus = 0
@@ -87,7 +84,7 @@ class WorkingThread:
                             self.dbget = None
                             # Fix to filter out eveyrything except dirs with lengt of 8 or 9
                             if len(self.ObjectIdentifierValue) in range(8,10):
-                                SIPpath = DbRow.IngestPath
+                                SIPpath = ArchivePolicy_obj.IngestPath
                                 SIProotpath = os.path.join(SIPpath,self.ObjectIdentifierValue)
                                 if os.path.exists(os.path.join(SIProotpath,'sip.xml')):
                                     logging.debug('The SIPtype for object %s is eARD METS' % self.ObjectIdentifierValue)
@@ -161,7 +158,7 @@ class WorkingThread:
                                     Mets_filepath = os.path.join(SIProotpath,'sip.xml')
                                     altRecordID_dict = {}
                                     
-                                    if DbRow.Mode == 2:
+                                    if ArchivePolicy_obj.Mode == 2:
                                         ############################################
                                         # Get PolicyId / ProjectGroupCode from AIS
                                         self.extOBJdbget,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'GET3',('ProjectGroupCode',
@@ -240,14 +237,14 @@ class WorkingThread:
                                         if errno > 1:
                                             event_info = 'Problem to create PREMIS/mix for ObjectIdentifierValue: %s, error.num: %s  error.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
                                             logging.error(event_info)
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'1',event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'1',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                             self.ok = 0
                                         elif errno == 1:
                                             event_info = 'Warning in convert RES to PREMIS for objectIdentifierValue: %s, error.num: %s  warning.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
                                             logging.warning(event_info)
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0',event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                         else:
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0','',DbRow.Mode,self.ObjectIdentifierValue)
+                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                             errno,why = ESSMD.validate(FILENAME=Premis_filepath)
                                             if errno:
                                                 logging.error('Problem to validate PREMIS/mix for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
@@ -284,7 +281,7 @@ class WorkingThread:
                                         self.StatusActivity = 4
                                         self.event_info = 'Problem to create METS SIP for object: %s' % self.ObjectIdentifierValue
                                         logging.error(self.event_info)
-                                        ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                        ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                 elif self.objectstatus == 100:
                                     logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
                                 elif self.objectstatus == 99:
@@ -292,7 +289,7 @@ class WorkingThread:
                                     self.StatusActivity = 4
                                     self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (SIProotpath,str(self.filetree_errno),self.filetree_why)
                                     logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
     
                                 if self.objectstatus in range(1,100):
                                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
@@ -348,11 +345,11 @@ class WorkingThread:
 #                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
     
                     #########################################################
-                    if DbRow.IngestMetadata == 1 or DbRow.IngestMetadata == 4: # METS SIP
+                    if ArchivePolicy_obj.IngestMetadata == 1 or ArchivePolicy_obj.IngestMetadata == 4: # METS SIP
                         try:
-                            dir_list = os.listdir(DbRow.IngestPath)
+                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
                         except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (DbRow.IngestPath, str(sys.exc_info())))
+                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
                             dir_list = []
                         for self.fileitem in dir_list:
                             self.objectstatus = 0
@@ -365,7 +362,7 @@ class WorkingThread:
                             self.DataObjectSize = 0
                             self.dbget = None
 
-                            self.path = os.path.join(DbRow.IngestPath,self.fileitem)
+                            self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.fileitem)
                             try:
                                 if os.path.exists(self.path):
                                     self.mode = os.stat(self.path)
@@ -387,7 +384,7 @@ class WorkingThread:
                                     # Try to access ingestpath
                                     ###############################################################
                                     self.ObjectIdentifierValue = self.fileitem[:-17]
-                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(DbRow.IngestPath,self.fileitem)
+                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
     
                                     self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                     self.newobject = 1
@@ -419,7 +416,7 @@ class WorkingThread:
                                                 #######################################
                                                 # Verify package checksum and size
                                                 if self.SIP_OK:
-                                                    errno,error_list = Functions().VerifySIPchecksum(DbRow.IngestPath,self.SIPinfo[1])
+                                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
                                                     if not errno:
                                                         logging.info('Success to verify package checksum and size for object: %s' % self.ObjectIdentifierValue)
                                                     else:
@@ -428,7 +425,7 @@ class WorkingThread:
                                                 #######################################
                                                 # Extract package
                                                 if self.SIP_OK:
-                                                    errno,error_list = Functions().ExtractSIP(DbRow.IngestPath,self.SIPinfo[1])
+                                                    errno,error_list = Functions().ExtractSIP(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
                                                     if not errno:
                                                         logging.info('Success to extract object: %s' % self.ObjectIdentifierValue)
                                                     else:
@@ -437,15 +434,15 @@ class WorkingThread:
                                                 #######################################
                                                 # Get SIP information after Extract
                                                 if self.SIP_OK:
-                                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(DbRow.IngestPath,self.fileitem)
+                                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
                                                     if not errno:
                                                         logging.info('Success to get SIP information after extract for object: %s' % self.ObjectIdentifierValue)
                                                         self.POLICYID = self.SIPinfo[2]['POLICYID']
                                                         try:
-                                                            ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = self.POLICYID)
-                                                        except ESSArchPolicy.DoesNotExist, why:
-                                                            logging.error('Problem to get ESSArchPolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why)) 
-                                                            ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = 0) 
+                                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
+                                                        except ArchivePolicy.DoesNotExist, why:
+                                                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why)) 
+                                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
                                                             self.objectstatus = 99  
                                                         if 'DELIVERYTYPE' in self.SIPinfo[2].keys():
                                                             self.DELIVERYTYPE = self.SIPinfo[2]['DELIVERYTYPE']
@@ -461,7 +458,7 @@ class WorkingThread:
                                                 #######################################
                                                 # Verify Content_METS checksum and size
                                                 if self.SIP_OK:
-                                                    errno,error_list = Functions().VerifySIPchecksum(DbRow.IngestPath,self.SIPinfo[0])
+                                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[0])
                                                     if not errno:
                                                         logging.info('Success to verify Content_METS checksum and size for object: %s' % self.ObjectIdentifierValue)
                                                         self.objectstatus = 3
@@ -498,7 +495,7 @@ class WorkingThread:
                                     self.StatusProcess = 9
                                     self.StatusActivity = 0
                                     logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                 elif self.objectstatus == 100:
                                     logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
                                 elif self.objectstatus == 99:
@@ -506,14 +503,14 @@ class WorkingThread:
                                     self.StatusActivity = 4
                                     self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
                                     logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
     
                                 if self.objectstatus in range(1,100):
                                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                                     self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
                                     if self.dbget:
                                         ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                        ArchiveObject_obj.PolicyId = ESSArchPolicy_obj
+                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
                                         ArchiveObject_obj.DataObjectSize = self.SIPsize
@@ -536,7 +533,7 @@ class WorkingThread:
                                     else:
                                         ArchiveObject_obj = ArchiveObject()
                                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                        ArchiveObject_obj.PolicyId = ESSArchPolicy_obj
+                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
                                         ArchiveObject_obj.DataObjectSize = self.SIPsize
@@ -640,10 +637,10 @@ class WorkingThread:
                                         logging.debug('self.SIPsize:%s' % self.SIPsize)
                                         self.POLICYID = self.SIPinfo[1]['POLICYID']
                                         try:
-                                            ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = self.POLICYID)
-                                        except ESSArchPolicy.DoesNotExist, why:
-                                            logging.error('Problem to get ESSArchPolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why))
-                                            ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = 0) 
+                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
+                                        except ArchivePolicy.DoesNotExist, why:
+                                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why))
+                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
                                             self.objectstatus = 99  
                                         logging.debug('self.POLICYID:%s' % self.POLICYID)
                                         if 'DELIVERYTYPE' in self.SIPinfo[1].keys():
@@ -686,13 +683,11 @@ class WorkingThread:
                                         ###############################################################
                                         self.objectstatus = 99
                                 elif os.path.split(self.path)[1] == 'user':
-                                    #ReqIngestQueue_q = model.meta.Session.query(model.ReqIngestQueue)
-                                    #DbRows_ReqIngest = ReqIngestQueue_q.filter(model.ReqIngestQueue.Status==0).all()
-                                    DbRows_ReqIngest = IngestQueue.objects.filter( Status=0 ).all()
-                                    if DbRows_ReqIngest:
-                                        for DbRow_ReqIngest in DbRows_ReqIngest:
-                                            user_Req = DbRow_ReqIngest.user
-                                            ObjectIdentifierValue_Req = DbRow_ReqIngest.ObjectIdentifierValue
+                                    IngestQueue_objs = IngestQueue.objects.filter( Status=0 ).all()
+                                    if IngestQueue_objs:
+                                        for IngestQueue_obj in IngestQueue_objs:
+                                            user_Req = IngestQueue_obj.user
+                                            ObjectIdentifierValue_Req = IngestQueue_obj.ObjectIdentifierValue
                                             src_name = '%s/%s/%s' % (self.path,user_Req,ObjectIdentifierValue_Req)
                                             trg_name = os.path.split(self.path)[0]
                                             try:
@@ -701,9 +696,9 @@ class WorkingThread:
                                                 logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_name,trg_name,ObjectIdentifierValue_Req, why))
                                             else:
                                                 logging.info('Success to move %s to %s, ObjectIdentifierValue: %s' % (src_name,trg_name,ObjectIdentifierValue_Req))
-                                                DbRow_ReqIngest.Status = 2
+                                                IngestQueue_obj.Status = 2
                                                 #model.meta.Session.commit()
-                                                DbRow_ReqIngest.save()
+                                                IngestQueue_obj.save()
                                 if self.objectstatus == 0:
                                     pass
                                 elif self.objectstatus == 1:
@@ -719,7 +714,7 @@ class WorkingThread:
                                     self.StatusProcess = 9
                                     self.StatusActivity = 0
                                     logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                 elif self.objectstatus == 100:
                                     logging.warning('The object %s is already archived.' % self.ObjectIdentifierValue)
                                 elif self.objectstatus == 98:
@@ -727,20 +722,20 @@ class WorkingThread:
                                     self.StatusActivity = 4
                                     self.event_info = 'Filesize in METS is not equal to tha actual filesize. Totalsize in METS:%s, filesystem:%s' % (str(self.SIPsize),str(self.DataObjectSize))
                                     logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                                 elif self.objectstatus == 99:
                                     self.StatusProcess = 0
                                     self.StatusActivity = 4
                                     self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
                                     logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
 
                                 if self.objectstatus in range(1,100):
                                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                                     self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
                                     if self.dbget:
                                         ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                        ArchiveObject_obj.PolicyId = ESSArchPolicy_obj
+                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
@@ -763,7 +758,7 @@ class WorkingThread:
                                     else:
                                         ArchiveObject_obj = ArchiveObject()
                                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                        ArchiveObject_obj.PolicyId = ESSArchPolicy_obj
+                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
@@ -805,11 +800,11 @@ class WorkingThread:
 
                     #########################################################
                     # IngestMetadata 3 = PREMIS/ADDML SIP
-                    elif DbRow.IngestMetadata == 3:
+                    elif ArchivePolicy_obj.IngestMetadata == 3:
                         try:
-                            dir_list = os.listdir(DbRow.IngestPath)
+                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
                         except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (DbRow.IngestPath, str(sys.exc_info())))
+                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
                             dir_list = []
                         for self.ObjectIdentifierValue in dir_list:
                             self.objectstatus = 0
@@ -818,7 +813,7 @@ class WorkingThread:
                             self.dbget = None
                             # Fix to filter out eveyrything except dirs with lengt of 8 or 9
                             if len(self.ObjectIdentifierValue) in range(8,10):
-                                self.path = os.path.join(DbRow.IngestPath,self.ObjectIdentifierValue)
+                                self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue)
                                 ###############################################################
                                 # Try to access ingestpath
                                 ###############################################################
@@ -877,7 +872,7 @@ class WorkingThread:
                                 self.StatusProcess = 9
                                 self.StatusActivity = 0
                                 logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.DataObjectSize))
-                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',DbRow.Mode,self.ObjectIdentifierValue)
+                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
                             elif self.objectstatus == 100:
                                 logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
                             elif self.objectstatus == 99:
@@ -885,7 +880,7 @@ class WorkingThread:
                                 self.StatusActivity = 4
                                 self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.path,str(self.filetree_errno),self.filetree_why)
                                 logging.error(self.event_info)
-                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,DbRow.Mode,self.ObjectIdentifierValue)
+                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
 
                             if self.objectstatus in range(1,100):
                                 self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)

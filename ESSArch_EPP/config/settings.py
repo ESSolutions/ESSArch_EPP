@@ -197,7 +197,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'south',
+    #'south',
     'djcelery',
     'djangojs',
     'eztables',
@@ -214,6 +214,7 @@ INSTALLED_APPS = (
     'nested_inline',
     'Storage',
     'StorageMethodDisk',
+    'StorageMethodTape',
 )
 
 import djcelery
@@ -227,7 +228,7 @@ CELERY_DEFAULT_QUEUE = 'default'
 from celery.schedules import crontab
 from datetime import timedelta
 
-process_list=["IOEngine.pyc", "FTPServer.pyc", "AccessEngine.pyc","ESSlogging.pyc", "db_sync_ais.pyc", "TLD.pyc", "AIPPurge.pyc", 
+process_list=["FTPServer.pyc", "AccessEngine.pyc","ESSlogging.pyc", "db_sync_ais.pyc", "TLD.pyc", "AIPPurge.pyc", 
                     "AIPWriter.pyc", "SIPRemove.pyc", "AIPValidate.pyc", "AIPChecksum.pyc", "AIPCreator.pyc","SIPValidateFormat.pyc",
                     "SIPValidateApproval.pyc","SIPValidateAIS.pyc","SIPReceiver.pyc"]
 WORKERS_ROOT = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
@@ -377,6 +378,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 1000,
         },
+        'log_file_StorageMethodTape': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/StorageMethodTape.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
     },
     'loggers': {
         'django': {
@@ -433,7 +443,12 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['log_file_StorageMethodDisk'],
             'propagate': True,
-        },    
+        },
+        'StorageMethodTape': {
+            'level': 'INFO',
+            'handlers': ['log_file_StorageMethodTape'],
+            'propagate': True,
+        }, 
     },
 }
 

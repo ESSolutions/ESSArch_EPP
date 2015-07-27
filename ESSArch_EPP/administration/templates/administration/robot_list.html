@@ -66,7 +66,7 @@
 			        {% if admin_user %}
 			            {% if obj.status == 'Mounted' %} 
 			                <td><a href="{% url 'admin_robotreq_create_mediumid' obj.t_id 3 %}" title="Create unmount request">Force unmount</a></td>
-			            {% elif obj.status == 'ArchTape' or obj.status == 'WriteTape'%}
+			            {% elif obj.status == 'Full' or obj.status == 'Write'%}
 			                <td><a href="{% url 'admin_robotreq_create_mediumid' obj.t_id 1 %}" title="Create mount request">Manual mount</a></td>
 			            {% else %}
 			                <td>N/A</td>

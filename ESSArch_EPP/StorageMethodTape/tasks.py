@@ -1,0 +1,1224 @@
+'''
+    ESSArch - ESSArch is an Electronic Archive system
+    Copyright (C) 2010-2016  ES Solutions AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Contact information:
+    Web - http://www.essolutions.se
+    Email - essarch@essolutions.se
+'''
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+
+import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSPGM, ESSMSSQL, tarfile, subprocess, sys, traceback
+from xml.dom.minidom import Document
+from celery import Task, shared_task
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from Storage.models import storage, storageMedium, IOQueue
+from configuration.models import ESSConfig, StorageTargets
+from essarch.libs import GetSize, ESSArchSMError, calcsum, SMTapeFull
+from essarch.models import robotdrives, robotQueue, robot
+from django.utils import timezone
+
+@shared_task()
+def add(x, y):
+    return x + y
+
+class WriteStorageMethodTape(Task):
+    """Write IP with IO_uuid to tape
+    
+    Requires the following fields in IOQueue database table:
+    storagemethodtarget - Specifies the target of writing
+    archiveobject - Specifies the IP to be written
+    ObjectPath - Specifies the source path for IP to be written
+    ReqType - ReqType shall be set to 10 for writing to tape
+    Status - Status shall be set to 0
+    
+    File "IP" structure in the path ObjectPath:
+    "ObjectPath"/"ObjectIdentifierValue".tar
+    "ObjectPath"/"ObjectIdentifierValue"_Package_METS.xml
+    "ObjectPath"/"aic_uuid"_AIC_METS.xml
+    
+    :param req_pk: List of primary keys to IOQueue database table to be performed
+    
+    Example:
+    from StorageMethodTape.tasks import WriteStorageMethodTape
+    result = WriteStorageMethodTape().apply_async((['03a33829bad6494e990fe08bfdfb4f6b'],), queue='smtape')
+    result.status
+    result.result
+    
+    """
+    tz = timezone.get_default_timezone()
+    time_limit = 86400
+
+    def run(self, req_pk_list, *args, **kwargs):
+        """The body of the task executed by workers."""
+        logger = logging.getLogger('StorageMethodTape')
+        IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
+        NumberOfTasks = IO_objs.count()
+        
+        for TaskNum, IO_obj in enumerate(IO_objs):          
+            # Let folks know we started
+            IO_obj.Status = 5
+            IO_obj.save(update_fields=['Status'])
+            self.update_state(state='PROGRESS',
+                meta={'current': TaskNum, 'total': NumberOfTasks})
+    
+            try:
+                result = self._WriteTapeProc(IO_obj.id)
+            except SMTapeFull as e:
+                logger.info(e)
+                try:
+                    msg = 'Retry to write object: %s to new tape (IOuuid: %s)' % (IO_obj.archiveobject.ObjectIdentifierValue, IO_obj.id) 
+                    logger.info(msg)
+                    result = self._WriteTapeProc(IO_obj.id)
+                except ESSArchSMError as e:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    IO_obj.refresh_from_db()
+                    msg = 'Problem to write object %s to tape, error: %s line: %s (IOuuid: %s)' % (IO_obj.archiveobject.ObjectIdentifierValue, e, exc_traceback.tb_lineno, IO_obj.id)
+                    logger.error(msg)
+                    ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                    IO_obj.Status = 100
+                    IO_obj.save(update_fields=['Status'])
+                    #raise self.retry(exc=e, countdown=10, max_retries=2)
+                    raise e
+                except Exception as e:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    IO_obj.refresh_from_db()
+                    msg = 'Unknown error to write object %s to tape, error: %s trace: %s (IOuuid: %s)' % (IO_obj.archiveobject.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)), IO_obj.id)
+                    logger.error(msg)
+                    ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                    IO_obj.Status = 100
+                    IO_obj.save(update_fields=['Status'])
+                    raise e
+            except ESSArchSMError as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Problem to write object %s to tape, error: %s line: %s (IOuuid: %s)' % (IO_obj.archiveobject.ObjectIdentifierValue, e, exc_traceback.tb_lineno, IO_obj.id)
+                logger.error(msg)
+                ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                #raise self.retry(exc=e, countdown=10, max_retries=2)
+                raise e
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Unknown error to write object %s to tape, error: %s trace: %s (IOuuid: %s)' % (IO_obj.archiveobject.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)), IO_obj.id)
+                logger.error(msg)
+                ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                raise e
+            else:
+                IO_obj.refresh_from_db()
+                MBperSEC = int(result.get('WriteSize'))/int(result.get('WriteTime').seconds)
+                msg = 'Success to write IOuuid: %s for object %s to tape, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                           result.get('ObjectIdentifierValue'), 
+                                                                                                                                                                           result.get('WriteSize'), 
+                                                                                                                                                                           result.get('WriteTime'), 
+                                                                                                                                                                           MBperSEC,
+                                                                                                                                                                           )
+                logger.info(msg)
+                ESSPGM.Events().create('1104','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)      
+                IO_obj.Status = 20
+                IO_obj.save(update_fields=['Status'])
+                #return result
+
+    #def on_failure(self, exc, task_id, args, kwargs, einfo):
+    #    logger = logging.getLogger('StorageMethodTape')
+    #    logger.exception("Something happened when trying"
+    #                     " to resolve %s" % args[0])
+
+    def _WriteTapeProc(self,IO_obj_uuid):
+        """Writes IP (Information Package) to a tape
+        
+        :param IO_obj_uuid: Primary key to entry in IOQueue database table
+        
+        """
+        logger = logging.getLogger('StorageMethodTape')
+        runflag = 1
+        contentLocationValue = ''
+        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        error_list = []
+        IO_obj = IOQueue.objects.get(id=IO_obj_uuid)
+        st_obj = IO_obj.storagemethodtarget
+        target_obj = st_obj.target
+        target_obj_target = target_obj.target
+        sm_obj = st_obj.storagemethod
+        ArchiveObject_obj = IO_obj.archiveobject
+        ObjectIdentifierValue = ArchiveObject_obj.ObjectIdentifierValue
+        source_path = IO_obj.ObjectPath
+        WriteSize = IO_obj.WriteSize
+        AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+        MediumLocation = ESSConfig.objects.get(Name='storageMediumLocation').Value
+        ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
+        storage_obj = None
+        storageMedium_obj = None
+
+        logger.info('Start Tape Write Process for object: %s, target: %s, IOuuid: %s', ObjectIdentifierValue,target_obj_target,IO_obj_uuid)
+
+        ########################################################
+        # Check access to ip_tar_path and verify WriteSize
+        ########################################################
+        
+        aic_obj_uuid = ''
+        aic_mets_path_source = ''
+        aic_mets_size = 0
+        # If storage method format is AIC type (103)
+        if target_obj.format == 103:
+            try:
+                aic_obj_uuid=ArchiveObject_obj.reluuid_set.get().AIC_UUID
+            except ObjectDoesNotExist as e:
+                logger.warning('Problem to get AIC info for ObjectUUID: %s, error: %s' % (ObjectIdentifierValue, e))
+            else:
+                logger.info('Succeeded to get AIC_UUID: %s from DB' % aic_obj_uuid)
+            
+            # Check aic_mets_path_source
+            aic_mets_path_source = os.path.join(source_path,'%s_AIC_METS.xml' % aic_obj_uuid)
+            try:
+                aic_mets_size = GetSize(aic_mets_path_source)
+            except OSError as oe:
+                msg = 'Problem to access AIC METS object: %s, IOuuid: %s, error: %s' % (aic_mets_path_source, IO_obj_uuid, oe)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+
+        # Check ip_tar_path_source
+        ip_tar_filename = '%s.tar' % ArchiveObject_obj.ObjectIdentifierValue
+        ip_tar_path_source = os.path.join(source_path, ip_tar_filename)
+        try:
+            ip_tar_size = GetSize(ip_tar_path_source)
+        except OSError as oe:
+            msg = 'Problem to access object: %s, IOuuid: %s, error: %s' % (ip_tar_path_source, IO_obj_uuid, oe)
+            logger.error(msg)
+            error_list.append(msg)            
+            runflag = 0
+            ip_tar_size = 0
+
+        # Check ip_p_mets_path_source
+        ip_p_mets_path_source = ip_tar_path_source[:-4] + '_Package_METS.xml'
+        try:
+            ip_p_mets_size = GetSize(ip_p_mets_path_source)
+        except OSError as oe:
+            msg = 'Problem to access metaobject: %s, IOuuid: %s, error: %s' % (ip_p_mets_path_source, IO_obj_uuid, oe)
+            logger.error(msg)
+            error_list.append(msg)
+            runflag = 0
+            ip_p_mets_size = 0
+
+        # Check WriteSize
+        if WriteSize:
+            if not int(WriteSize) == int(ip_tar_size) + int(ip_p_mets_size) + int(aic_mets_size):
+                msg = 'Problem defined WriteSize does not match actual filesizes for object: ' + ip_tar_path_source + ', IOuuid: ' + str(IO_obj_uuid)
+                logger.error(msg)
+                error_list.append(msg)
+                msg = 'WriteSize: ' + str(WriteSize)
+                logger.error(msg)
+                error_list.append(msg)
+                msg = 'ip_tar_size: ' + str(ip_tar_size)
+                logger.error(msg)
+                error_list.append(msg)
+                msg = 'ip_p_mets_size: ' + str(ip_p_mets_size)
+                logger.error(msg)
+                error_list.append(msg)
+                if aic_mets_path_source:
+                    msg = 'aic_mets_size: ' + str(aic_mets_size)
+                    logger.error(msg)
+                    error_list.append(msg)
+                runflag = 0
+        else:
+            WriteSize = int(ip_tar_size) + int(ip_p_mets_size)
+            if aic_mets_path_source:
+                WriteSize += int(aic_mets_size)
+            logger.info('WriteSize not defined, setting write size for object: ' + ObjectIdentifierValue + ' WriteSize: ' + str(WriteSize))
+
+        if runflag:
+            ########################################################
+            # Mount write tape
+            ########################################################
+            Mount_exitcode, storageMediumID, tapedev, t_pos = self._MountWritePos(target_obj_id=target_obj.id, MediumLocation=MediumLocation, IO_obj_id=IO_obj_uuid)
+            if Mount_exitcode==0: 
+                logger.info('Succedd to mount write tape id: ' + storageMediumID + ' dev: ' + tapedev + ' pos: ' + str(t_pos))
+            elif Mount_exitcode==1:
+                msg = 'Problem to mount tape. (IOuuid: %s)' % IO_obj_uuid
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+            elif Mount_exitcode==2:
+                msg = 'No empty tapes are available in robot with prefix: %s (IOuuid: %s)' % (target_obj.target, IO_obj_uuid)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+            elif Mount_exitcode==3:
+                msg = 'Failed to verify tape after full write. (IOuuid: %s)' % IO_obj_uuid
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+
+        if runflag:    
+            ########################################################
+            # Verify tape position and check write/tape size
+            ########################################################
+            storageMedium_obj = storageMedium.objects.get(storageMediumID=storageMediumID)
+            IO_obj.storagemedium =  storageMedium_obj
+            new_t_size = storageMedium_obj.storageMediumUsedCapacity + int(WriteSize)
+            if new_t_size > target_obj.maxCapacity and target_obj.maxCapacity > 0:
+                logger.info('Tape id: %s has reached maximum configured tape size: %s bytes. (IOuuid: %s)',storageMediumID,str(target_obj.maxCapacity),str(IO_obj_uuid))
+                ###################################################
+                # Release lock for tapedrive
+                res, errno = ReleaseTapeLock(IO_obj_uuid)
+                if errno == 0:
+                    logger.info(res)
+                else:
+                    msg = '%s (IOuuid: %s)' % (res, IO_obj_uuid)
+                    logger.error(msg)
+                    error_list.append(msg)
+                    runflag = 0
+                
+                if runflag:
+                    ########################################################
+                    # Tape is full quickverify tape and retry job
+                    ########################################################
+                    res, errno = self._VerifyAndFlagTapeFull(storageMediumID)
+                    if errno == 0:
+                        logger.info('Success to verify storageMediumID: %s and flag as full "archivetape"' % storageMediumID)
+                        raise SMTapeFull('No space left on storageMediumID %s restart write for object: %s (IOuuid: %s)' % (storageMediumID, ObjectIdentifierValue, IO_obj.id))
+                    else:
+                        msg = '%s (IOuuid: %s)' % (res, IO_obj_uuid)
+                        logger.error(msg)
+                        error_list.append(msg)
+                        runflag = 0
+        if runflag:    
+            logger.info('New tape size for t_id: ' + storageMediumID + ' is: '+str(new_t_size))
+            current_t_pos,errno,why = MTFilenum(tapedev)
+            if errno:
+                msg = 'Problem to get current tape position. errno: %s error: %s (IOuuid: %s)' % (errno, why, IO_obj_uuid)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+
+        if runflag:
+            logger.info('Current t_pos: ' + str(current_t_pos) + ' for t_id: '+str(storageMediumID))
+            latest_storage_qs = storage.objects.filter(storagemedium__storageMediumID=storageMediumID).extra(
+                                                                     select={'contentLocationValue_int': 'CAST(contentLocationValue AS UNSIGNED)'}
+                                                                     ).order_by('-contentLocationValue_int')[:1]
+            if latest_storage_qs.exists():
+                db_t_pos = int(latest_storage_qs[0].contentLocationValue) + 1
+            else:
+                db_t_pos = 1                        
+            if not current_t_pos ==  db_t_pos:
+                msg = 'Current t_pos: %s for t_id: %s does not match db_t_pos: %s' % (current_t_pos, storageMediumID, db_t_pos)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+        
+        startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+        if runflag:
+            logger.info('Start to write object: %s to t_pos: %s and t_id: %s' % (ObjectIdentifierValue, t_pos, storageMediumID))
+            if current_t_pos == t_pos:
+                ########################################################
+                # Write AIP package to tape
+                ########################################################
+                
+                contentLocationValue = t_pos
+                Write_cmdres = self._WritePackage(tapedev,target_obj.blocksize,ObjectIdentifierValue,ip_tar_path_source,ip_p_mets_path_source,aic_mets_path_source)
+                logger.info('WritePackage cmdres: ' + str(Write_cmdres) + ' for t_id: '+str(storageMediumID))
+                if Write_cmdres[0]==0:
+                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    ##########################
+                    # Insert StorageTable
+                    storage_obj = storage()
+                    storage_obj.contentLocationType = 300 #sm_obj.type or 300
+                    storage_obj.contentLocationValue = contentLocationValue
+                    storage_obj.LocalDBdatetime = timestamp_utc
+                    storage_obj.archiveobject = ArchiveObject_obj
+                    storage_obj.storagemedium = storageMedium_obj
+                    storage_obj.save()
+                    IO_obj.storage =  storage_obj
+                    if ExtDBupdate:
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storage', 'INS', ('ObjectIdentifierValue',storage_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                  'contentLocationType',storage_obj.contentLocationType,
+                                                                                                  'contentLocationValue',storage_obj.contentLocationValue,
+                                                                                                  'storageMediumID',storage_obj.storagemedium.storageMediumID))
+                        if ext_errno: logger.error('Failed to insert to External DB: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' error: ' + str(ext_why))
+                        else:
+                            storage_obj.ExtDBdatetime = timestamp_utc
+                            storage_obj.save(update_fields=['ExtDBdatetime'])
+                            
+                    ###################################################
+                    # Release lock for tapedrive
+                    res, errno = ReleaseTapeLock(IO_obj_uuid)
+                    if errno == 0:
+                        logger.info(res)
+                    else:
+                        msg = '%s (IOuuid: %s)' % (res, IO_obj_uuid)
+                        logger.error(msg)
+                        error_list.append(msg)
+                        runflag = 0                                        
+    
+                #elif self.cmdres[0]==28: # 28=full tape with python tar
+                elif Write_cmdres[0]==2: # 2=full tape with SUSE tar
+                    #Tape is full
+                    #Hardclose writeobject (Only used with "FunctionThread().WritePackage")
+                    #self.cmdres = writer().hardclose(self.writeobject)
+                    ###################################################
+                    # Release lock for tapedrive
+                    res, errno = ReleaseTapeLock(IO_obj_uuid)
+                    if errno == 0:
+                        logger.info(res)
+                    else:
+                        msg = '%s (IOuuid: %s)' % (res, IO_obj_uuid)
+                        logger.error(msg)
+                        error_list.append(msg)
+                        runflag = 0                                           
+                    ########################################################
+                    # Tape is full quickverify tape and retry job
+                    ########################################################
+                    res, errno = self._VerifyAndFlagTapeFull(storageMediumID)
+                    if errno == 0:
+                        logger.info('Success to verify storageMediumID: %s and flag as full "archivetape"' % storageMediumID)
+                        raise SMTapeFull('No space left on storageMediumID %s restart write for object: %s (IOuuid: %s)' % (storageMediumID, ObjectIdentifierValue, IO_obj.id))
+                    else:
+                        msg = '%s (IOuuid: %s)' % (res, IO_obj_uuid)
+                        logger.error(msg)
+                        error_list.append(msg)
+                        runflag = 0
+                else:
+                    msg = 'Problem to write a copy of object: %s to tape: %s (IOuuid: %s)' % (ObjectIdentifierValue, storageMediumID, IO_obj_uuid)
+                    logger.error(msg)
+                    error_list.append(msg)
+                    runflag = 0
+            else:
+                msg = 'Current-tape position and DB-tape position missmatch for object: %s and tape: %s (IOuuid: %s)' % (ObjectIdentifierValue, storageMediumID, IO_obj_uuid)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+            
+
+        if not runflag:
+            msg = 'Because of the previous problems it is not possible to store the object %s to storage method target: %s (IOuuid: %s)' % (ObjectIdentifierValue, target_obj_target, IO_obj_uuid)
+            logger.error(msg)
+            error_list.append(msg)
+        
+        stopTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+        WriteTime = stopTime-startTime
+        if WriteTime.seconds < 1: WriteTime = datetime.timedelta(seconds=1)   #Fix min time to 1 second if it is zero.
+        
+        if storage_obj is not None:
+            storage_obj_id = storage_obj.id
+        else:
+            storage_obj_id = None
+        
+        if storageMedium_obj is not None:
+            storageMedium_obj_storageMediumID = storageMedium_obj.storageMediumID
+            storageMedium_obj_storageMediumUUID = storageMedium_obj.storageMediumUUID
+        else:
+            storageMedium_obj_storageMediumID = None
+            storageMedium_obj_storageMediumUUID = None
+
+        res_dict = {
+                    'ObjectIdentifierValue': ArchiveObject_obj.ObjectIdentifierValue,
+                    'ObjectUUID': ArchiveObject_obj.ObjectUUID,
+                    'sm_obj_id': sm_obj.id,
+                    'storage_obj_id': storage_obj_id,
+                    'contentLocationValue': contentLocationValue,
+                    'storageMediumID': storageMedium_obj_storageMediumID,
+                    'storageMediumUUID': storageMedium_obj_storageMediumUUID,
+                    'AgentIdentifierValue': AgentIdentifierValue,
+                    'WriteSize': WriteSize,
+                    'WriteTime': WriteTime,
+                    'timestamp_utc': timestamp_utc,
+                    'error_list': error_list,        
+                    'status': runflag,
+                    }
+        
+        IO_obj.result = res_dict
+        IO_obj.save(update_fields=['result', 'storagemedium', 'storage'])
+
+        if not runflag:
+            raise ESSArchSMError(error_list)
+        else:
+            return res_dict
+
+    def _WritePackage(self,tapedev,t_block,ObjectIdentifierValue,ObjectPath,PMetaObjectPath,AICmets_objpath):
+        """Prepares to write the information package with tar Command
+        
+        :param tapedev: SCSI tape device name
+        :param t_block: Block size
+        :param ObjectIdentifierValue: ObjectIdentifierValue
+        :param ObjectPath: File Path to the information package tarfile
+        :param PMeteObjectPath: File Path to the "package" METS file
+        :param AICmets_objpath: File Path to the AIC METS file
+        """
+        ObjectDIR,ObjectFILE = os.path.split(ObjectPath)
+        MetaObjectDIR,MetaObjectFILE = os.path.split(PMetaObjectPath)
+        if AICmets_objpath is not '':
+            AICObjectDIR,AICObjectFILE = os.path.split(AICmets_objpath)
+        else:
+            AICObjectDIR = None
+            AICObjectFILE = None
+        # Open writeobject
+        writeresult = writer().subtar(tapedev,t_block,ObjectDIR,ObjectFILE,MetaObjectFILE,AICObjectFILE)
+        return writeresult[0],writeresult[1],writeresult[2]
+
+    def _VerifyAndFlagTapeFull(self, storageMediumID='', work_uuid=''):
+        """Verifies the tape and sets media status
+        
+        Verifies that an object in the beginning of the tape, an object in the
+        middle of the tape and an object at the end of the tape. 
+        If all objects exist and have the correct checksum so marked 
+        the tape is marked with the status full and complete..
+        
+        :param storageMediumID: storageMediumID to verify
+        :param work_uuid: primary key in IOQueue database table
+        
+        """
+        logger = logging.getLogger('StorageMethodTape')
+        res = ''
+        exitstatus = 0
+        AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+        ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
+        
+        storageMedium_obj = storageMedium.objects.get(storageMediumID=storageMediumID)
+        cmdres,errno,why = ESSPGM.Check().AIPextract(storageMediumID, prefix=storageMedium_obj.storagetarget.target)
+        if errno:
+            # Mark tape as failed in StorageMediumTable
+            timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+            storageMedium_obj.storageMediumStatus = 100
+            storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+            storageMedium_obj.LocalDBdatetime = timestamp_utc
+            storageMedium_obj.save(update_fields=['storageMediumStatus', 'linkingAgentIdentifierValue', 'LocalDBdatetime'])
+            if ExtDBupdate:
+                ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium', 'UPD',('storageMediumStatus','100',
+                                                                                                'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                               ('storageMediumID',storageMediumID))
+                if ext_errno: logger.error('Failed to update External DB: ' + str(storageMediumID) + ' error: ' + str(ext_why))
+                else:
+                    storageMedium_obj.ExtDBdatetime = timestamp_utc
+                    storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+            exitstatus = 1
+            res = 'Problem to verify mediumID: %s, error: %s, error description: %s' % (storageMediumID, errno, why)
+        else:
+            # Mark tape as full in StorageMediumTable
+            timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+            storageMedium_obj.storageMediumStatus = 30
+            storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+            storageMedium_obj.LocalDBdatetime = timestamp_utc
+            storageMedium_obj.save(update_fields=['storageMediumStatus', 'linkingAgentIdentifierValue', 'LocalDBdatetime'])
+            if ExtDBupdate:
+                ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium', 'UPD',('storageMediumStatus','30',
+                                                                                                'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                               ('storageMediumID',storageMediumID))
+                if ext_errno: logger.error('Failed to update External DB: ' + str(storageMediumID) + ' error: ' + str(ext_why))
+                else:
+                    storageMedium_obj.ExtDBdatetime = timestamp_utc
+                    storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+            
+        return res, exitstatus
+
+    def _MountWritePos(self,target_obj_id, MediumLocation, IO_obj_id, full_t_id=''):
+        """Mount tape at last write position and return OK or Fail
+        
+        :param target_obj_id: PRIMARY KEY to the object in StorageTargets model
+        :param MediumLocation: Which location storage medium, according to the 
+                        configuration i ESSConfig model storageMediumLocation
+        :param full_t_id: Set to medium id to VerifyAndFlagTapeFull
+        :param IO_obj_id: primary key in IOQueue database table
+        
+        """
+        logger = logging.getLogger('StorageMethodTape')
+        AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+        ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
+
+        # If tape is full verify tape and then unmount
+        if len(full_t_id) == 6:
+            self._VerifyAndFlagTapeFull(storageMediumID=full_t_id, work_uuid=IO_obj_id)
+
+        target_obj = StorageTargets.objects.get(id=target_obj_id)
+
+        #Check if a write tape exist
+        try:
+            storageMedium_obj = storageMedium.objects.get(storageMediumStatus=20, storagetarget=target_obj)
+        except ObjectDoesNotExist as e:
+            t_id = ''
+        else:
+            t_id = storageMedium_obj.storageMediumID
+            
+        new_tape_flag = 0
+        if t_id:
+            #Check if write tape is mounted or need to mount
+            tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_id)
+        else:
+            #########################################
+            # Try to mount a new tape from robot
+            robot_objs = robot.objects.filter(status='Empty', t_id__startswith=target_obj.target)
+
+            if robot_objs: 
+                t_id=robot_objs[0].t_id
+                logger.info('No writetape found, start to mount new tape: ' + str(t_id))
+                ##########################
+                # Insert StorageMediumTable
+                timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                MediumUUID = uuid.uuid4()
+                storageMedium_obj = storageMedium()
+                storageMedium_obj.id = MediumUUID
+                storageMedium_obj.storageMediumUUID=unicode(MediumUUID)
+                storageMedium_obj.storageMedium=target_obj.type
+                storageMedium_obj.storageMediumID=t_id
+                storageMedium_obj.storageMediumDate=timestamp_utc
+                storageMedium_obj.storageMediumLocation=MediumLocation
+                storageMedium_obj.storageMediumLocationStatus=50
+                storageMedium_obj.storageMediumBlockSize=target_obj.blocksize
+                storageMedium_obj.storageMediumStatus=20
+                storageMedium_obj.storageMediumUsedCapacity=0
+                storageMedium_obj.storageMediumFormat=target_obj.format
+                storageMedium_obj.storageMediumMounts=1
+                storageMedium_obj.linkingAgentIdentifierValue=AgentIdentifierValue
+                storageMedium_obj.CreateDate=timestamp_utc
+                storageMedium_obj.CreateAgentIdentifierValue=AgentIdentifierValue
+                storageMedium_obj.LocalDBdatetime=timestamp_utc
+                storageMedium_obj.storagetarget=target_obj
+                storageMedium_obj.save()                                                                    
+                if ExtDBupdate:
+                    ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium', 'INS', ('storageMedium',storageMedium_obj.storageMedium,
+                                                                                                    'storageMediumID',storageMedium_obj.storageMediumID,
+                                                                                                    'storageMediumDate',storageMedium_obj.storageMediumDate.astimezone(self.tz).replace(tzinfo=None),
+                                                                                                    'storageMediumLocation',storageMedium_obj.storageMediumLocation,
+                                                                                                    'storageMediumLocationStatus',storageMedium_obj.storageMediumLocationStatus,
+                                                                                                    'storageMediumBlockSize',storageMedium_obj.storageMediumBlockSize,
+                                                                                                    'storageMediumUsedCapacity',storageMedium_obj.storageMediumUsedCapacity,
+                                                                                                    'storageMediumStatus',storageMedium_obj.storageMediumStatus,
+                                                                                                    'storageMediumFormat',storageMedium_obj.storageMediumFormat,
+                                                                                                    'storageMediumMounts',storageMedium_obj.storageMediumMounts,
+                                                                                                    'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue,
+                                                                                                    'CreateDate',storageMedium_obj.CreateDate.astimezone(self.tz).replace(tzinfo=None),
+                                                                                                    'CreateAgentIdentifierValue',storageMedium_obj.CreateAgentIdentifierValue,
+                                                                                                    'StorageMediumGuid',storageMedium_obj.storageMediumUUID))
+                    if ext_errno: logger.error('Failed to insert to External DB: ' + str(t_id) + ' (ESSPGM) error: ' + str(ext_why))
+                    else:
+                        storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
+                        storageMedium_obj.save(update_fields=['ExtDBdatetime'])   
+                ############################
+                # Mounting new tape
+                tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_id)                
+                ##########################################
+                # Write tapelabel to tape
+                xml_labelfilepath = ''
+                try:
+                    xml_labelfilepath = self._CreateTapeLabel(RootPath='/ESSArch/log/label',storageMedium_obj=storageMedium_obj)
+                    tar_obj = tarfile.open(name=tapedev,mode="w|",bufsize=512 * 20)
+                    logger.info(t_id + ' succeed to open tapedevice')
+                    logger.info(t_id + ' start to add label tape')
+                    tarinfo_obj = tar_obj.gettarinfo(xml_labelfilepath, t_id+'_label.xml')
+                    tar_obj.addfile(tarinfo_obj, file(xml_labelfilepath))
+                    logger.info(t_id + ' succeed to label new media')
+                    tar_obj.close()
+                    logger.info(t_id + ' close tapedevice succeed')
+                    new_tape_flag = 1                    
+                except (ValueError, IOError, OSError, tarfile.TarError) as e:
+                    msg = 'Problem to write labelfile: %s to storageMediumID: %s tapedevice: %s (IOuuid: %s) error: %s' % (xml_labelfilepath, t_id, tapedev, IO_obj_id, e)
+                    logger.error(msg)
+                    
+                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    storageMedium_obj.storageMediumStatus = 100
+                    storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                    storageMedium_obj.LocalDBdatetime = timestamp_utc
+                    if ExtDBupdate:
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium', 'UPD', ('storageMediumStatus',storageMedium_obj.storageMediumStatus,
+                                                                                                        'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue),
+                                                                                                        ('storageMediumID',storageMedium_obj.storageMediumID))
+                        if ext_errno: logger.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
+                        else:
+                            storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
+                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])                       
+            else:    
+                logger.error('Problem to find any empty tapes with prefix: %s in robot (IOuuid: %s)' % (target_obj.target, IO_obj_id))
+                return 2, 'None', 'None', 'None'
+        try:
+            storageMedium_obj = storageMedium.objects.get(storageMediumID=t_id)
+        except ObjectDoesNotExist as e:
+            logger.error('Storage medium %s not found in database. error: %s' % (t_id,e))
+            return 1, 'None', 'None', 'None'
+        except MultipleObjectsReturned as e:
+            logger.error('More then one entry for storage medium %s found in database. error: %s' % (t_id,e))
+            return 1, 'None', 'None', 'None'
+        if storageMedium_obj.storageMediumStatus == 100:
+            logger.error('Storage medium %s has status failed' % t_id)
+            return 1, 'None', 'None', 'None'
+        # Check if tape is in write position
+        latest_storage_qs = storage.objects.filter(storagemedium__storageMediumID=t_id).extra(
+                                                                 select={'contentLocationValue_int': 'CAST(contentLocationValue AS UNSIGNED)'}
+                                                                 ).order_by('-contentLocationValue_int')[:1]
+        if latest_storage_qs.exists():
+            t_pos = int(latest_storage_qs[0].contentLocationValue) + 1
+        else:
+            t_pos = 1
+        logger.info(t_id + ' start to position to writeposition ' + str(t_pos))
+        if MTPosition(tapedev, t_pos) == 'OK':
+            # Tape is in write position
+            logger.info(str(t_id) + ' is in writeposition ' + str(t_pos))
+            return 0, t_id, tapedev, t_pos
+        else:
+            # Problem to position tape
+            logger.error(str(t_id) + ' has problem to position to writeposition ' + str(t_pos))
+            return 1, t_id, tapedev, t_pos
+        
+    def _CreateTapeLabel(self, RootPath, storageMedium_obj):
+        """Creates a XMLfile containing a description of the tape "tape label"
+        
+        :param RootPath: Specifies the file directory where to create the XML file
+        :param storageMedium_obj: Specify storageMedium_obj
+        
+        Return:
+        filepath where to find tapelabel xmlfile 
+        
+        """
+        ##########################################
+        # Create tapelabel xmlfile
+        # Create the minidom document
+        xml_labeldoc = Document() 
+        # Create the <label> base element
+        xml_label = xml_labeldoc.createElement("label")
+        xml_labeldoc.appendChild(xml_label)
+        # Create the <tape> element
+        xml_tape = xml_labeldoc.createElement("tape")
+        xml_tape.setAttribute("id", storageMedium_obj.storageMediumID)
+        xml_tape.setAttribute("date", storageMedium_obj.storageMediumDate.isoformat())
+        xml_label.appendChild(xml_tape)
+        # Create the <format> element
+        xml_format = xml_labeldoc.createElement("format")
+        xml_format.setAttribute("format", str(storageMedium_obj.storageMediumFormat))
+        xml_format.setAttribute("blocksize", str(storageMedium_obj.storageMediumBlockSize))
+        xml_format.setAttribute("drivemanufacture", str(storageMedium_obj.storageMedium))
+        xml_label.appendChild(xml_format)
+        # Write  tapelabel to file
+        xml_labelfilepath = '%s/%s_label.xml' % (RootPath, storageMedium_obj.storageMediumID)
+        xml_labelfile = open(xml_labelfilepath, "w")
+        xml_labeldoc.writexml(xml_labelfile,addindent="    ",newl="\n")
+        xml_labelfile.close()
+        xml_labeldoc.unlink()
+        return xml_labelfilepath
+
+class ReadStorageMethodTape(Task):
+    """Read IP with IO_uuid from tape
+    
+    Requires the following fields in IOQueue database table:
+    archiveobject - Specifies the IP to be read
+    storage - Specifies the source of the IP to be read
+    ObjectPath - Specifies path where the IP should be written
+    ReqType - ReqType shall be set to 20 for read from tape
+    Status - Status shall be set to 0    
+
+    :param req_pk: List of primary keys to IOQueue database table to be performed
+
+    Example:
+    from StorageMethodTape.tasks import ReadStorageMethodTape
+    result = ReadStorageMethodTape().apply_async((['0de502d5-b7aa-493a-8df6-547768a9aac6'],), queue='smtape')
+    result.status
+    result.result
+    
+    """
+    tz = timezone.get_default_timezone()
+    time_limit = 86400
+
+    def run(self, req_pk_list, *args, **kwargs):
+        """The body of the task executed by workers."""
+        logger = logging.getLogger('StorageMethodTape')
+        IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
+        NumberOfTasks = IO_objs.count()
+        
+        for TaskNum, IO_obj in enumerate(IO_objs):          
+            # Let folks know we started
+            IO_obj.Status = 5
+            IO_obj.save(update_fields=['Status'])
+            self.update_state(state='PROGRESS',
+                meta={'current': TaskNum, 'total': NumberOfTasks})
+    
+            try:
+                result = self._ReadTapeProc(IO_obj.id)
+            except ESSArchSMError as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Problem to read object %s from tape, error: %s line: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, exc_traceback.tb_lineno)
+                logger.error(msg)
+                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                #raise self.retry(exc=e, countdown=10, max_retries=2)
+                raise e
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Unknown error to read object %s to tape, error: %s trace: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)))
+                logger.error(msg)
+                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue) 
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                raise e
+            else:
+                IO_obj.refresh_from_db()
+                MBperSEC = int(result.get('ReadSize'))/int(result.get('ReadTime').seconds)
+                msg = 'Success to read IOuuid: %s for object %s from tape, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                           result.get('ObjectIdentifierValue'), 
+                                                                                                                                                                           result.get('ReadSize'), 
+                                                                                                                                                                           result.get('ReadTime'), 
+                                                                                                                                                                           MBperSEC,
+                                                                                                                                                                           )
+                logger.info(msg)           
+                ESSPGM.Events().create('1105','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue) 
+                IO_obj.Status = 20
+                IO_obj.save(update_fields=['Status'])
+                #return result
+
+
+    ###############################################
+    def _ReadTapeProc(self,IO_obj_uuid):
+        """Read IOuuid from tape
+        
+        :param IO_obj_uuid: Primary key to entry in IOQueue database table
+        
+        """
+        logger = logging.getLogger('StorageMethodTape')
+        runflag = 1
+        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        error_list = []
+        IO_obj = IOQueue.objects.get(id=IO_obj_uuid)
+        ArchiveObject_obj = IO_obj.archiveobject
+        ObjectIdentifierValue = ArchiveObject_obj.ObjectIdentifierValue
+        target_path = IO_obj.ObjectPath
+        ip_tar_filename = ArchiveObject_obj.ObjectPackageName
+        ArchiveObject_obj_ObjectMessageDigest = ArchiveObject_obj.ObjectMessageDigest
+        ArchiveObject_obj_ObjectMessageDigestAlgorithm = ArchiveObject_obj.ObjectMessageDigestAlgorithm
+        storage_obj = IO_obj.storage
+        storageMedium_obj = storage_obj.storagemedium
+        target_obj = storageMedium_obj.storagetarget
+        contentLocationValue = storage_obj.contentLocationValue
+        AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+        t_id = storageMedium_obj.storageMediumID
+        t_pos = contentLocationValue
+
+        logger.debug('ReadTapeProc start with IOuuid: %s, Object: %s, ObjectPath: %s', IO_obj_uuid, ObjectIdentifierValue, target_path)
+        logger.info('Start Tape Read Process for object: %s, IOuuid: %s', ObjectIdentifierValue,IO_obj_uuid)
+        
+        ip_p_mets_filename = ip_tar_filename[:-4] + '_Package_METS.xml'
+        aic_obj_uuid = ''
+        aic_mets_filename = ''
+        # If storageMediumFormat is AIC type (103)
+        if storageMedium_obj.storageMediumFormat == 103:
+            try:
+                aic_obj_uuid=ArchiveObject_obj.reluuid_set.get().AIC_UUID
+            except ObjectDoesNotExist as e:
+                msg = 'Problem to get AIC info for ObjectUUID: %s, error: %s' % (ObjectIdentifierValue, e)
+                logger.warning(msg)
+                error_list.append(msg)
+            else:
+                logger.info('Succeeded to get AIC_UUID: %s from DB' % aic_obj_uuid)
+                aic_mets_filename = '%s_AIC_METS.xml' % aic_obj_uuid
+
+        startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+        tmp_target_path = os.path.join(target_path,'.tmpextract')
+        # Check write access to DIP directory
+        if not os.access(target_path, 7):
+            msg = 'Problem to access DIP directory: %s, IOuuid: %s' % (target_path, IO_obj_uuid)
+            logger.error(msg)
+            error_list.append(msg)
+            runflag = 0
+        # Check if temp DIP directory exist, if not create tempDIR
+        if runflag and not os.path.exists(tmp_target_path):
+            os.mkdir(tmp_target_path)
+
+        if runflag:
+            ########################################################
+            # Get AIP package to DIP directory
+            ########################################################
+            
+            # Check if tape is mounted or need to mount
+            tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_uuid)
+            if not tapedev:
+                logger.error('Problem to mount tape: %s, (IOuuid: %s)' % (t_id,IO_obj_uuid))
+                runflag = 0
+
+        if runflag:
+            # Position tape
+            if not MTPosition(tapedev, t_pos) == 'OK':
+                event_info = 'Failed to position the tape: %s to position: %s (IOuuid: %s)' % (t_id, t_pos, IO_obj_uuid)
+                logger.error(event_info)
+                ###################################################
+                # Release lock for tapedrive
+                res, errno = ReleaseTapeLock(IO_obj_uuid)
+                if errno == 0:
+                    logger.info(res)
+                else:
+                    logger.error(res)
+                runflag = 0
+
+        if runflag:
+            ######################################################
+            # Tar read IP from tape
+            ######################################################
+            logger.info('Start to read object: %s from tapedevice: %s, storageMediumID: %s, position: %s (IOuuid: %s)' % (ObjectIdentifierValue, tapedev, t_id, t_pos, IO_obj_uuid))
+            t_block = storageMedium_obj.storageMediumBlockSize
+            if storageMedium_obj.storageMediumFormat in range(100,102):
+                tar_proc = subprocess.Popen(["tar","-b",str(t_block),"-C",str(tmp_target_path),"-x","-f",str(tapedev),str(ip_tar_filename)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            elif storageMedium_obj.storageMediumFormat == 102:
+                tar_proc = subprocess.Popen(["tar","-b",str(t_block),"-C",str(tmp_target_path),"-x","-f",str(tapedev),str(ip_p_mets_filename),str(ip_tar_filename)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            elif storageMedium_obj.storageMediumFormat == 103:
+                tar_proc = subprocess.Popen(["tar","-b",str(t_block),"-C",str(tmp_target_path),"-x","-f",str(tapedev),str(ip_p_mets_filename),str(aic_mets_filename),str(ip_tar_filename)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            tar_proc_res = tar_proc.communicate()
+            if tar_proc.returncode == 0:
+                event_info = 'Success to read object: %s from tapedevice: %s, storageMediumID: %s, position: %s to tmp_path: %s (IOuuid: %s)' % (ObjectIdentifierValue, tapedev, t_id, t_pos, tmp_target_path, IO_obj_uuid)
+                logger.info(event_info)
+                ip_tar_path_tmp_target = os.path.join(tmp_target_path, ip_tar_filename)
+                ip_p_mets_path_tmp_target = os.path.join(tmp_target_path,ip_p_mets_filename)
+                if storageMedium_obj.storageMediumFormat == 103:
+                    aic_mets_path_tmp_target = os.path.join(tmp_target_path, aic_mets_filename)
+            else:
+                event_info = 'Problem to read object: %s from tapedevice: %s, storageMediumID: %s, position: %s to tmp_path: %s (IOuuid: %s), Error: %s' % (ObjectIdentifierValue, tapedev, t_id, t_pos, tmp_target_path, IO_obj_uuid, tar_proc_res)
+                logger.error(event_info)
+            ###################################################
+            # Release lock for tapedrive
+            res, errno = ReleaseTapeLock(IO_obj_uuid)
+            if errno == 0:
+                logger.info(res)
+            else:
+                logger.error(res)
+                        
+        if runflag:
+            #############################################
+            # Checksum Check
+            #############################################
+            try:
+                tp_sum = calcsum(ip_tar_path_tmp_target, ArchiveObject_obj_ObjectMessageDigestAlgorithm)
+            except IOError as e:
+                msg = 'Failed to get checksum for: %s, Error: %s' % (ip_tar_path_tmp_target,e)
+                logger.error(msg)
+                error_list.append(msg)
+                ESSPGM.Events().create('1041','',self.__name__,__version__,'1',msg,2,ObjectIdentifierValue)
+                runflag = 0
+            else:
+                msg = 'Success to get checksum for: %s, Checksum: %s' % (ip_tar_path_tmp_target,tp_sum)
+                logger.info(msg)
+                ESSPGM.Events().create('1041','',self.__name__,__version__,'0',msg,2,ObjectIdentifierValue)
+        if runflag:
+            if str(tp_sum) == str(ArchiveObject_obj_ObjectMessageDigest):
+                msg = 'Success to verify checksum for Object %s in tmpDIP: %s, IOuuid: %s' % (ObjectIdentifierValue, tmp_target_path, IO_obj_uuid)
+                logger.info(msg)
+                ESSPGM.Events().create('1042','',self.__name__,__version__,'0',msg,2,ObjectIdentifierValue)
+            else:
+                msg = 'Checksum verify mismatch for Object %s in tmpDIP: %s, IOuuid: %s, tape_checksum: %s, meta_checksum: %s' % (ObjectIdentifierValue, tmp_target_path, IO_obj_uuid, tp_sum, ArchiveObject_obj_ObjectMessageDigest)
+                logger.error(msg)
+                error_list.append(msg)
+                ESSPGM.Events().create('1042','',self.__name__,__version__,'1',msg,2,ObjectIdentifierValue)
+                runflag = 0
+
+        if runflag:
+            #############################
+            # Move files to req path
+            #############################
+            try:
+                ip_tar_path_target = os.path.join(target_path, ip_tar_filename)
+                ip_p_mets_path_target = os.path.join(target_path, ip_p_mets_filename)
+                shutil.move(ip_tar_path_tmp_target, ip_tar_path_target)
+                shutil.move(ip_p_mets_path_tmp_target, ip_p_mets_path_target)
+                if storageMedium_obj.storageMediumFormat == 103:
+                    aic_mets_path_target = os.path.join(target_path, aic_mets_filename)
+                    shutil.move(aic_mets_path_tmp_target, aic_mets_path_target)
+            except (IOError, OSError) as e:
+                msg = 'Problem to move Object %s from tmpdir: %s to target path: %s, IOuuid: %s, Error: %s' % (ObjectIdentifierValue, tmp_target_path, target_path, IO_obj_uuid, e)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0            
+        
+        ReadSize = 0
+        if runflag:                
+            aic_mets_size = 0
+            if storageMedium_obj.storageMediumFormat == 103:
+                # Check aic_mets_path
+                try:
+                    aic_mets_size = GetSize(aic_mets_path_target)
+                except OSError as oe:
+                    msg = 'Problem to access AIC METS object: %s, IOuuid: %s, error: %s' % (aic_mets_path_target, IO_obj_uuid, oe)
+                    logger.error(msg)
+                    error_list.append(msg)
+                    runflag = 0
+
+            # Check ip_tar_path
+            try:
+                ip_tar_size = GetSize(ip_tar_path_target)
+            except OSError as oe:
+                msg = 'Problem to access object: %s, IOuuid: %s, error: %s' % (ip_tar_path_target, IO_obj_uuid, oe)
+                logger.error(msg)
+                error_list.append(msg)            
+                runflag = 0
+                ip_tar_size = 0
+    
+            # Check ip_p_mets_path
+            try:
+                ip_p_mets_size = GetSize(ip_p_mets_path_target)
+            except OSError as oe:
+                msg = 'Problem to access metaobject: %s, IOuuid: %s, error: %s' % (ip_p_mets_path_target, IO_obj_uuid, oe)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+                ip_p_mets_size = 0
+
+            ReadSize = int(ip_tar_size) + int(ip_p_mets_size)
+            if storageMedium_obj.storageMediumFormat == 103:
+                ReadSize += int(aic_mets_size)
+
+        stopTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+        ReadTime = stopTime-startTime
+        if ReadTime.seconds < 1: ReadTime = datetime.timedelta(seconds=1)   #Fix min time to 1 second if it is zero.
+
+        res_dict = {
+                    'ObjectIdentifierValue': ArchiveObject_obj.ObjectIdentifierValue,
+                    'ObjectUUID': ArchiveObject_obj.ObjectUUID,
+                    'target_path': target_path,
+                    'contentLocationValue': contentLocationValue,
+                    'storageMediumID': storageMedium_obj.storageMediumID,
+                    'storageMediumUUID': storageMedium_obj.storageMediumUUID,
+                    'AgentIdentifierValue': AgentIdentifierValue,
+                    'ReadSize': ReadSize,
+                    'ReadTime': ReadTime,
+                    'timestamp_utc': timestamp_utc,
+                    'error_list': error_list,        
+                    'status': runflag,
+                    }
+        
+        IO_obj.result = res_dict
+        IO_obj.save(IO_obj.save(update_fields=['result']))
+
+        if not runflag:
+            raise ESSArchSMError(error_list)
+        else:
+            return res_dict
+
+class writer():
+    """Class to write file with ptyhon tar or tar command"""
+    ###############################################
+    def open(self,packagefile,mode,blksize):
+        Debug=0
+        errno=0
+        why=''
+        packageobject=''
+        try:  #Open packagefile
+            packageobject = tarfile.open(name=packagefile,mode=mode,bufsize=512 * int(blksize))
+        except (ValueError,OSError,IOError, tarfile.TarError), (errno, why):
+            if Debug: print 'Failed to open tarfile',why
+        else:
+            if Debug: print 'Succeed to open tarfile'
+        return errno,why,packageobject
+
+    def addfile(self,packageobject,sourcefile,archfile):
+        Debug=0
+        errno=0
+        why=''
+        try:  #Add sourcefile/archfile to packageobject
+            tarinfo = packageobject.gettarinfo(sourcefile, archfile)
+            packageobject.addfile(tarinfo, file(sourcefile))
+        except (ValueError,OSError, tarfile.TarError), (errno, why):
+            if Debug: print 'Failed to add files to tarfile'
+        else:
+            if Debug: print 'Succeed to add files to tarfile'
+        return errno,why
+
+    def close(self,packageobject):
+        Debug=0
+        errno=0
+        why=''
+        try:  #Close packageobject
+            packageobject.close()#Close tapedevice
+        except (ValueError,OSError, tarfile.TarError), (errno, why):
+            if Debug: print 'Failed to close tarfile'
+        else:
+            if Debug: print 'Succeed to close tarfile'
+        return errno,why
+
+    def hardclose(self,packageobject):
+        Debug=0
+        errno=0
+        why=''
+        try:  #HardClose packageobject
+            packageobject.hardclose()#Close tapedevice
+        except (ValueError,OSError, tarfile.TarError), (errno, why):
+            if Debug: print 'Failed to close tarfile'
+        else:
+            if Debug: print 'Succeed to close tarfile'
+        return errno,why
+
+    def subtar(self,packagefile,blksize,workdir,SIPfile,Metafile,AICObjectFILE=None):
+        """Write information package with tar command
+        
+        :param packagefile: SCSI tapedevice or tarfilename
+        :param blksize: Block size
+        :param workdir: Specifies the directory path to use as the root path of the TAR package
+        :param SIPfile: Specifies the filename to the information package tarfile in "workdir"
+        :param Metafile: Specifies the filename to the package METS file in "workdir"
+        :param AICObjectFILE: Specifies the filename to the AIC METS file in "workdir"
+        
+        """
+        logger = logging.getLogger('StorageMethodTape')
+        Debug=0
+        # Tar write tape
+        if AICObjectFILE == None:
+            tar_proc = subprocess.Popen(["tar","-b",str(blksize),"-c","-v","-f",str(packagefile),str(Metafile),str(SIPfile)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workdir)
+        else:
+            tar_proc = subprocess.Popen(["tar","-b",str(blksize),"-c","-v","-f",str(packagefile),str(Metafile),str(AICObjectFILE),str(SIPfile)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workdir)
+        tar_proc_result = tar_proc.communicate()
+        if tar_proc.returncode == 0:
+            if Debug: logger.info('Succeed to write files to tape, stdout: ' + str(tar_proc_result[0]) + ' stderr: ' + str(tar_proc_result[1]) + ' exitcode: ' + str(tar_proc.returncode))
+        else:
+            if Debug: logger.error('Problem to write files to tape, stdout: ' + str(tar_proc_result[0]) + ' stderr: ' + str(tar_proc_result[1]) + ' exitcode: ' + str(tar_proc.returncode))
+        return tar_proc.returncode,tar_proc_result[0],tar_proc_result[1]
+
+def MTFilenum(tapedev):
+    """Reads the output from mt command and return the filenum"""
+    if ESSConfig.objects.get(Name='OS').Value == 'SUSE':
+        mt_proc = subprocess.Popen(["mt -f " + tapedev + " status | grep 'file number'"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        mt_proc = subprocess.Popen(["mt -f " + tapedev + " status | awk {'print $2'} | grep number="], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    mt_proc_result = mt_proc.communicate()
+    if mt_proc.returncode == 0:
+        fileno = ''
+        for i in mt_proc_result[0]:       #Reads the output from mt command and return the filenum in fileno
+            if i.isdigit():
+                fileno = fileno + i
+        if len(fileno):
+            return int(fileno),0,str(mt_proc_result)
+        else:
+            return None,1,str(mt_proc_result)
+    else:
+        return None,2,str(mt_proc_result)
+
+def MTPosition(tapedev, t_num):
+    """Position the tape and return OK or Fail"""
+    logger = logging.getLogger('StorageMethodTape')
+    real_current_t_num,errno,why=MTFilenum(tapedev)
+    if errno:
+        logger.error('Problem to get current tape position, errno: %s, why: %s',str(errno),why)
+        return 'Fail'
+    logger.info('Start to position to tapefile: ' + str(t_num) + ' current position is: ' + str(real_current_t_num))
+    if int(t_num) == 0:
+        logger.info('Start to rewind tape to position: 0')
+        mt_proc = subprocess.Popen(["mt","-f",str(tapedev),"rewind"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    elif (int(t_num) - int(real_current_t_num)) < 0:
+        fileno = ''
+        for i in str(int(t_num) - int(real_current_t_num)):       #Cut away minus sign
+            if i.isdigit():
+                fileno = fileno + i
+        newt_num=int(fileno) + 1
+        logger.info('Start to position with: bsfm: ' + str(newt_num))
+        mt_proc = subprocess.Popen(["mt","-f",str(tapedev),"bsfm",str(newt_num)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        newt_num=int(t_num) - int(real_current_t_num)
+        if newt_num > 0:
+            logger.info('Start to position with: fsf: ' + str(newt_num))
+            mt_proc = subprocess.Popen(["mt","-f",str(tapedev),"fsf",str(newt_num)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        elif newt_num == 0:
+            newt_num = 1
+            logger.info('Start to position to beginining of tape file with: bsfm: ' + str(newt_num))
+            mt_proc = subprocess.Popen(["mt","-f",str(tapedev),"bsfm",str(newt_num)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    mt_proc_result = mt_proc.communicate()
+    if mt_proc.returncode == 0:
+        real_current_t_num,errno,why=MTFilenum(tapedev)
+        if errno:
+            logger.error('Problem to get current tape position, errno: %s, why: %s',str(errno),why)
+            return 'Fail'
+        elif int(t_num) == int(real_current_t_num): 
+            logger.info('Success to position to tapefile: ' + str(t_num) + ' cmdout: ' + str(mt_proc_result))
+            return 'OK'
+    else:
+        logger.error('Problem to position to tapefile: ' + str(t_num) + ' cmdout: ' + str(mt_proc_result))
+        return 'Fail'
+
+def MountTape(t_id, IO_obj_id):
+    """Mount the tape and return tapedevice"""
+    logger = logging.getLogger('StorageMethodTape')
+    tapedev = None
+    #Check if tape is mounted
+    try:
+        robotdrives_obj = robotdrives.objects.get(t_id=t_id, status='Mounted')
+    except ObjectDoesNotExist as e:
+        #Tape is not mounted, mounting tape
+        logger.info('Start to mount: ' + str(t_id))
+        robotQueue_obj = robotQueue()
+        robotQueue_obj.ReqUUID = IO_obj_id
+        robotQueue_obj.ReqType = 50 # Mount
+        robotQueue_obj.ReqPurpose = 'MountTapePosition'
+        robotQueue_obj.Status = 0 # Pending
+        robotQueue_obj.MediumID = t_id
+        robotQueue_obj.user = 'sys'
+        robotQueue_obj.save()
+        while 1:
+            try:
+                robotdrives_obj = robotdrives.objects.get(t_id=t_id, status='Mounted', drive_lock=IO_obj_id)
+            except ObjectDoesNotExist as e:
+                robotQueue_objs = robotQueue.objects.filter(ReqUUID=IO_obj_id)
+                if robotQueue_objs:
+                    if robotQueue_objs[0].Status == 100:
+                        tapedev = None
+                        break
+                logger.info('Wait for mounting of: ' + str(t_id))
+            else:
+                logger.info('Mount succeeded: ' + str(t_id))
+                break
+            time.sleep(2)
+        tapedev = robotdrives_obj.drive_dev
+    else:
+        while 1:
+            robotdrives_obj.refresh_from_db()
+            drive_id = robotdrives_obj.drive_id
+            current_lock = robotdrives_obj.drive_lock
+            tapedev = robotdrives_obj.drive_dev
+            ##########################################
+            #Tape is mounted, check if locked
+            if len(current_lock) > 0:
+                ########################################
+                # Tape is locked, check if req IO_obj_id = lock
+                if current_lock == IO_obj_id:
+                    ########################################
+                    # Tape is already locked with req IO_obj_id
+                    logger.info('Already Mounted: ' + str(t_id) + ' and locked by req IO_obj_id: ' + str(IO_obj_id))
+                    break
+                else:
+                    ########################################
+                    # Tape is locked with another IO_obj_id
+                    logger.info('Tape: ' + str(t_id) + ' is busy and locked by: ' + str(current_lock) + ' and not req IO_obj_id: ' + str(IO_obj_id))
+            else:
+                ########################################
+                # Tape is not locked, lock the drive with req IO_obj_id
+                robotdrives_obj.drive_lock=IO_obj_id
+                robotdrives_obj.save(update_fields=['drive_lock'])
+                logger.info('Tape: ' + str(t_id) + ' is available set lock to req IO_obj_id: ' + str(IO_obj_id))
+                break
+            time.sleep(5)
+    return tapedev
+
+def ReleaseTapeLock(lock_uuid):
+    """Release lock for tapedrive"""
+    res = 'Missing drivelock for: %s' % lock_uuid
+    exitstatus = 1
+    robotdrives_objs = robotdrives.objects.filter(drive_lock=lock_uuid)
+    for robotdrives_obj in robotdrives_objs:
+        robotdrives_obj.drive_lock=''
+        robotdrives_obj.save(update_fields=['drive_lock'])
+        res = 'Release drivelock for: %s' % lock_uuid
+        exitstatus = 0
+    return res, exitstatus

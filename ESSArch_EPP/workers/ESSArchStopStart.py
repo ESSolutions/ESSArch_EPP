@@ -30,7 +30,7 @@ from optparse import OptionParser
 import ESSPGM,ESSDB,time
 
 def StartStop(action,ProcName=None):
-    processlist = ['ESSlogging', 'SIPReceiver', 'SIPValidateAIS', 'SIPValidateApproval', 'SIPValidateFormat', 'AIPCreator', 'AIPChecksum', 'AIPValidate', 'SIPRemove', 'TLD', 'IOEngine', 'AIPWriter', 'AIPPurge', 'AccessEngine', 'db_sync_ais', 'FTPServer']
+    processlist = ['ESSlogging', 'SIPReceiver', 'SIPValidateAIS', 'SIPValidateApproval', 'SIPValidateFormat', 'AIPCreator', 'AIPChecksum', 'AIPValidate', 'SIPRemove', 'TLD', 'AIPWriter', 'AIPPurge', 'AccessEngine', 'db_sync_ais', 'FTPServer']
     #############################
     # Start process
     if action==1:
@@ -124,8 +124,8 @@ def StartStop(action,ProcName=None):
 
 def main():
     op = OptionParser(usage="usage: %prog [options] arg", version="%prog 2.0")
-    op.add_option("-u", "--up", help="Start process (NAME: SIPReceiver, SIPValidateAIS, SIPValidateApproval, SIPValidateFormat, AIPCreator, AIPChecksum, AIPValidate, SIPRemove, TLD, IOEngine, AIPWriter, AIPPurge, db_sync_ais, ESSlogging, FTPServer)", dest="StartProcName", metavar="NAME")
-    op.add_option("-d", "--down", help="Stop process (NAME: SIPReceiver, SIPValidateAIS, SIPValidateApproval, SIPValidateFormat, AIPCreator, AIPChecksum, AIPValidate, SIPRemove, TLD, IOEngine, AIPWriter, AIPPurge, db_sync_ais, ESSlogging, FTPServer)", dest="StopProcName", metavar="NAME")
+    op.add_option("-u", "--up", help="Start process (NAME: SIPReceiver, SIPValidateAIS, SIPValidateApproval, SIPValidateFormat, AIPCreator, AIPChecksum, AIPValidate, SIPRemove, TLD, AIPWriter, AIPPurge, AccessEngine, db_sync_ais, ESSlogging, FTPServer)", dest="StartProcName", metavar="NAME")
+    op.add_option("-d", "--down", help="Stop process (NAME: SIPReceiver, SIPValidateAIS, SIPValidateApproval, SIPValidateFormat, AIPCreator, AIPChecksum, AIPValidate, SIPRemove, TLD, AIPWriter, AIPPurge, AccessEngine, db_sync_ais, ESSlogging, FTPServer)", dest="StopProcName", metavar="NAME")
     op.add_option("-s", "--startALL", help="Start all process", action="store_true", dest="StartAllFlag")
     op.add_option("-q","--stopALL", help="Stop all process", action="store_true", dest="StopAllFlag")
     options, args = op.parse_args()

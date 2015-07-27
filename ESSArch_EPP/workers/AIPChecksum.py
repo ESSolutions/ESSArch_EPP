@@ -26,9 +26,13 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+
+import django
+django.setup()
+
 import os, thread, multiprocessing, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, ESSMD, uuid
 
-from configuration.models import SchemaProfile, ChecksumAlgorithm_CHOICES, Parameter
+from configuration.models import SchemaProfile, ChecksumAlgorithm_CHOICES, Parameter, ArchivePolicy
 from essarch.models import ArchiveObject
 from django.db.models import Q
 from django import db
@@ -62,7 +66,6 @@ class WorkingThread:
                 lock=thread.allocate_lock()
                 Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
                 self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-                self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
                 if ExtDBupdate:
                     self.ext_IngestTable = self.IngestTable
                 else:
@@ -95,18 +98,15 @@ class WorkingThread:
                     self.ObjectUUID = self.obj[1]
                     self.PolicyId = self.obj[2]
                     self.ObjectSize = self.obj[3]
-                    self.PolicyDB,errno,why = ESSDB.DB().action(self.PolicyTable,'GET3',('AIPpath','IngestMetadata','ChecksumAlgorithm','IngestPath'),('PolicyID',self.PolicyId))
-                    if errno:
-                        logging.error('Failed to access Local DB, error: ' + str(why))
-                        self.ok = 0
+                    ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyStat=1, PolicyID=self.PolicyId)
                     if self.ok:
                         ###########################################################
                         # set variables
-                        self.AIPpath = self.PolicyDB[0][0]
-                        self.metatype = self.PolicyDB[0][1]
-                        self.ChecksumAlgorithm = self.PolicyDB[0][2]
+                        self.AIPpath = ArchivePolicy_obj.AIPpath
+                        self.metatype = ArchivePolicy_obj.IngestMetadata
+                        self.ChecksumAlgorithm = ArchivePolicy_obj.ChecksumAlgorithm
                         self.CA = dict(ChecksumAlgorithm_CHOICES)[self.ChecksumAlgorithm]
-                        self.SIPpath = self.PolicyDB[0][3]
+                        self.SIPpath = ArchivePolicy_obj.IngestPath
                         self.p_obj = self.ObjectIdentifierValue + '.tar'
                         self.ObjectPath = os.path.join(self.AIPpath,self.p_obj)
                         self.SIProotpath = os.path.join(self.SIPpath,self.ObjectIdentifierValue)
@@ -400,7 +400,6 @@ class WorkingThread:
 # Table: ESSProc with Name: AIPChecksum, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestPath Value: /tmp/Ingest
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':

@@ -30,7 +30,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 import sys, os, datetime, time, logging, uuid, ESSDB, ESSMSSQL, ESSPGM, ESSlogging, ESSMD, pytz
 
-from configuration.models import ESSArchPolicy
+from configuration.models import ArchivePolicy
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django import db
@@ -45,7 +45,6 @@ class Proc:
     ###############################################
     def ObjectValidate(self):
         self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0] 
-        self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0] 
         if ExtDBupdate:
             self.ext_IngestTable = self.IngestTable
         else:
@@ -76,19 +75,16 @@ class Proc:
             if Debug: logging.info('StatusProcess 9, ObjectIdentifierValue ' +str(self.ObjectIdentifierValue))
             #Check....
             if self.PolicyID:
-                #q_ESSArchPolicy = model.meta.Session.query(model.ESSArchPolicy)
-                #DbRow = q_ESSArchPolicy.filter(and_(model.ESSArchPolicy.PolicyStat==1, \
-                #                                    model.ESSArchPolicy.PolicyID==int(self.PolicyID))).first()
-                DbRow = ESSArchPolicy.objects.filter( PolicyStat = 1, PolicyID = int(self.PolicyID) )[:1]
-                if DbRow:
-                    DbRow = DbRow.get()
-                    if DbRow.Mode in range(0,2):
-                        self.DBmode = DbRow.Mode
+                ArchivePolicy_objs = ArchivePolicy.objects.filter( PolicyStat = 1, PolicyID = str(self.PolicyID) )[:1]
+                if ArchivePolicy_objs:
+                    ArchivePolicy_obj = ArchivePolicy_objs.get()
+                    if ArchivePolicy_obj.Mode in range(0,2):
+                        self.DBmode = ArchivePolicy_obj.Mode
                         logging.info('Policy found for Object: %s in ESSArch mode' % self.ObjectIdentifierValue)
-                        if DbRow.IngestMetadata in [1,2,3]:
-                            metsfilename = os.path.join(DbRow.IngestPath,self.ObjectIdentifierValue + '_Package_METS.xml')
-                        elif DbRow.IngestMetadata in [4]:
-                            ObjectPath = os.path.join(DbRow.IngestPath,self.ObjectIdentifierValue)
+                        if ArchivePolicy_obj.IngestMetadata in [1,2,3]:
+                            metsfilename = os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue + '_Package_METS.xml')
+                        elif ArchivePolicy_obj.IngestMetadata in [4]:
+                            ObjectPath = os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue)
                             if os.path.exists(os.path.join(ObjectPath,'sip.xml')):
                                 metsfilename = os.path.join(ObjectPath,'sip.xml')
                             elif os.path.exists(os.path.join(ObjectPath,'mets.xml')):
@@ -97,7 +93,7 @@ class Proc:
                             #    metsfilename = os.path.join(ObjectPath,'%s_Content_METS.xml' % self.ObjectIdentifierValue)
                             else:
                                 metsfilename = ''
-                            #metsfilename = '%s/sip.xml' % os.path.join(DbRow.IngestPath,self.ObjectIdentifierValue)
+                            #metsfilename = '%s/sip.xml' % os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue)
                         else:
                             metsfilename = ''
                         res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=metsfilename)
@@ -122,8 +118,8 @@ class Proc:
                             self.objectstatus = 1
                         else:
                             self.objectstatus = 102 # Problem to get information from package METS 
-                    elif DbRow.Mode == 2: # AIS but POLICYID from METS, Check in AIS if object is active.
-                        self.DBmode = DbRow.Mode
+                    elif ArchivePolicy_obj.Mode == 2: # AIS but POLICYID from METS, Check in AIS if object is active.
+                        self.DBmode = ArchivePolicy_obj.Mode
                         self.extOBJdbget,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'GET3',('ProjectGroupCode',
                                                                                                            'ObjectPackageName',
                                                                                                            'ObjectGuid',
@@ -262,11 +258,9 @@ class Proc:
                         self.ext_OAISPackageType = 2 # updDB
                         self.ext_preservationLevelValue = 1 # updDB
                     if self.objectstatus < 100:
-                        self.PolicyID_dbget,errno,why = ESSDB.DB().action(self.PolicyTable,'GET3',('PolicyID',),('AISProjectID',self.ext_ProjectGroupCode,'AND','PolicyStat',1))
-                        if errno: 
-                            logging.error('Failed to access Local DB: ' + str(self.ObjectIdentifierValue) + ' error: ' + str(why))
-                        elif self.PolicyID_dbget:
-                            self.PolicyID = self.PolicyID_dbget[0][0]
+                        ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1, AISProjectID=self.ext_ProjectGroupCode)[:1]
+                        if ArchivePolicy_objs:
+                            self.PolicyID = ArchivePolicy_objs.get().PolicyID
                             if Debug: logging.info('PolicyID: '+str(self.PolicyID))
                             self.objectstatus = 14 # Object got PolicyID
                         else:
@@ -402,7 +396,6 @@ class Proc:
 # Dep:
 # Table: ESSProc with Name: ESSObjectValidate, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':

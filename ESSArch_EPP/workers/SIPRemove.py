@@ -29,6 +29,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 import os, thread, datetime, time, logging, sys, shutil, ESSDB, ESSPGM
+from configuration.models import ArchivePolicy
 
 class WorkingThread:
     "Thread is working in the background"
@@ -50,7 +51,6 @@ class WorkingThread:
                 # Process Item 
                 lock=thread.allocate_lock()
                 self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-                self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
                 if ExtDBupdate:
                     self.ext_IngestTable = self.IngestTable
                 else:
@@ -73,7 +73,10 @@ class WorkingThread:
                     self.ObjectIdentifierValue = self.obj[1]
                     self.PolicyId = self.obj[2]
                     self.DataObjectSize = self.obj[3]
-                    self.metatype,self.RemoveFlag,self.IngestPath = ESSDB.DB().action(self.PolicyTable,'GET',('IngestMetadata','IngestDelete','IngestPath'),('PolicyID',self.PolicyId))[0]
+                    ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyStat=1, PolicyID=self.PolicyId)
+                    self.metatype = ArchivePolicy_obj.IngestMetadata
+                    self.RemoveFlag = ArchivePolicy_obj.IngestDelete
+                    self.IngestPath = ArchivePolicy_obj.IngestPath
                     self.dirpath=os.path.join(self.IngestPath,self.ObjectIdentifierValue)
                     if Debug: 
                         logging.info('self.obj: '+str(self.obj))
@@ -146,7 +149,6 @@ class WorkingThread:
 # Table: ESSProc with Name: SIPRemove, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestPath Value: /tmp/Ingest
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':

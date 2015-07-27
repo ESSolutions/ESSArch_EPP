@@ -32,6 +32,9 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from configuration.models import ESSArchPolicy
 from essarch.models import ArchiveObject
 
+import django
+django.setup()
+
 from lxml import etree
 import ESSMD
  

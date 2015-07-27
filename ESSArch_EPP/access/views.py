@@ -27,8 +27,10 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 
 from essarch.models import AccessQueue, AccessQueueForm, AccessQueueFormUpdate, ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, AccessReqType_CHOICES
 from configuration.models import Path, DefaultValue, Parameter
@@ -162,7 +164,7 @@ class AccessList(ListView):
     model = AccessQueue
     template_name='access/list.html'
     context_object_name='req_list'
-    queryset=AccessQueue.objects.filter(Status__lt=20)   # Status<20
+    #queryset=AccessQueue.objects.filter(Status__lt=20)   # Status<20
 
     @method_decorator(permission_required('essarch.list_accessqueue'))
     def dispatch(self, *args, **kwargs):
@@ -235,13 +237,23 @@ class AccessCreate(CreateView):
         self.object = form.save(commit=False)
         num = 0
         for obj in form.instance.ObjectIdentifierValue.split():
+            if form.instance.ReqType == 5 or form.instance.ReqType == '5':
+                ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue=obj)
+                try:
+                    aic_obj = ip_obj.reluuid_set.get().AIC_UUID
+                except ObjectDoesNotExist: 
+                    # if no AIC exists change ReqType to 3 and Path without AIC directory 
+                    self.object.ReqType = 3
+                    self.object.Path = form.instance.Path
+                else:
+                    self.object.Path = op.join(form.instance.Path, aic_obj.ObjectUUID)
             self.object.pk = None
             self.object.ObjectIdentifierValue = obj
             self.object.ReqUUID = uuid.uuid1()
             self.object.save()
             num += 1
         if num == 1:
-            self.success_url = reverse_lazy('access_detail',kwargs={'pk': self.object.pk})
+            self.success_url = reverse_lazy('access_detail',kwargs={'pk': self.object.pk.hex})
         return super(AccessCreate, self).form_valid(form)
         
 class AccessUpdate(UpdateView):
@@ -262,3 +274,20 @@ class AccessDelete(DeleteView):
     @method_decorator(permission_required('essarch.delete_accessqueue'))
     def dispatch(self, *args, **kwargs):
         return super(AccessDelete, self).dispatch( *args, **kwargs)
+
+class AccessClearRequests(DeleteView):
+    success_url = reverse_lazy('access_list')
+    
+    @method_decorator(permission_required('essarch.delete_accessqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AccessClearRequests, self).dispatch( *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Calls the delete() method on the fetched objects and then
+        redirects to the success URL.
+        """
+        self.object = None
+        self.objects = AccessQueue.objects.filter(Status=20, user=self.request.user)
+        self.objects.delete()
+        return HttpResponseRedirect(self.success_url)

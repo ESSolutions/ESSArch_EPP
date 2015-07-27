@@ -340,15 +340,6 @@ if __name__ == "__main__":
     LocalFileHandler_root.setFormatter(essFormatter1)
     ###########################
     # LocalFileHandler
-    log_ProcName = 'IOEngine'
-    LogFile = ESSDB.DB().action('ESSProc','GET',('LogFile',),('Name',log_ProcName))[0][0]
-    LogFile = LogFile[:-4] + '_2.log'
-    LocalFileHandler_IOEngine = logging.handlers.TimedRotatingFileHandler(LogFile, when='W6', backupCount=1040)
-    LocalFileHandler_IOEngine.setLevel(LogLevel)
-    LocalFileHandler_IOEngine.setFormatter(essFormatter1)
-    LocalFileHandler_IOEngine.addFilter(nameFilter(log_ProcName))
-    ###########################
-    # LocalFileHandler
     log_ProcName = 'AIPWriter'
     LogFile = ESSDB.DB().action('ESSProc','GET',('LogFile',),('Name',log_ProcName))[0][0]
     LogFile = LogFile[:-4] + '_2.log'
@@ -392,7 +383,6 @@ if __name__ == "__main__":
     rootlogger = logging.getLogger('')
     rootlogger.setLevel(0)
     rootlogger.addHandler(LocalFileHandler_root)
-    rootlogger.addHandler(LocalFileHandler_IOEngine)
     rootlogger.addHandler(LocalFileHandler_AIPWriter)
     rootlogger.addHandler(LocalFileHandler_TLD)
     rootlogger.addHandler(LocalFileHandler_web_gui_index)

@@ -29,12 +29,16 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 # own models etc
-from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSArchPolicy, ESSProc, DefaultValue
-from essarch.models import eventType_codes, robotdrives, storageMedium
+from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSProc, DefaultValue, ArchivePolicy, StorageMethod, StorageTarget, StorageTargets 
+from essarch.models import eventType_codes, robotdrives, ArchiveObject, ArchiveObjectRel
+from Storage.models import storage, storageMedium, IOQueue
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
-import sys,datetime
+import sys,datetime,os
+
+import django
+django.setup()
 
 site_name = u'Site-X' # RA-OSLO , Marieberg, MKC, SVAR, HLA
 medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG
@@ -197,11 +201,11 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
 
-    ct_configuration_essarchpolicy = ContentType.objects.get(app_label='configuration', model='essarchpolicy')
-    permission_list = ['add_essarchpolicy','change_essarchpolicy','delete_essarchpolicy']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_essarchpolicy).all()
-    for permission_obj in permission_obj_list:
-        sysgroup.permissions.add(permission_obj)
+#    ct_configuration_essarchpolicy = ContentType.objects.get(app_label='configuration', model='essarchpolicy')
+#    permission_list = ['add_essarchpolicy','change_essarchpolicy','delete_essarchpolicy']
+#    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_essarchpolicy).all()
+#    for permission_obj in permission_obj_list:
+#        sysgroup.permissions.add(permission_obj)
 
     # essconfig permissions
     permission_list = ['add_essconfig','change_essconfig','delete_essconfig']
@@ -276,6 +280,30 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         admingroup.permissions.add(permission_obj)
         usergroup.permissions.add(permission_obj)
+
+    # Storage - ioqueue permissions
+    permission_list = ['add_ioqueue','change_ioqueue','delete_ioqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='Storage', 
+                                                    content_type__model='ioqueue').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - storagetargets permissions
+    permission_list = ['add_storagetargets','change_storagetargets','delete_storagetargets']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagetargets').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - archivepolicy permissions
+    permission_list = ['add_archivepolicy','change_archivepolicy','delete_archivepolicy']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='archivepolicy').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
 
     try:
         myuser = User.objects.get(username='admin')
@@ -518,7 +546,7 @@ def installdefaulteventType_codes(): # default eventType_codes
 def installdefaultESSConfig(): # default ESSConfig
 
     ESSConfig_list=((u'IngestTable',u'IngestObject'),
-                    (u'PolicyTable',u'ESSArchPolicy'),
+                    (u'PolicyTable',u'configuration_archivepolicy'),
                     (u'StorageTable',u'storage'),
                     (u'RobotTable',u'robot'),
                     (u'RobotDrivesTable',u'robotdrives'),
@@ -572,176 +600,90 @@ def installdefaultrobotdrives(): # default robotdrives
             robotdrives_obj.IdleTime=row[10]
             robotdrives_obj.save()
 
-def installdefaultstorageMedium(): # default storageMedium
-       
-    timestamp = datetime.datetime.now().isoformat()
+def installdefaultArchivePolicy(): # default ArchivePolicy
 
-    if not storageMedium.objects.filter(storageMediumID=u'disk').exists():
-        print "Adding disk entry to storageMedium..."
-        storageMedium_obj = storageMedium()
-        storageMedium_obj.storageMediumUUID=u'fc7d7a5e-9b62-102d-8001-001e4f38d237'
-        storageMedium_obj.storageMedium=200
-        storageMedium_obj.storageMediumID=u'disk'
-        storageMedium_obj.storageMediumDate=timestamp
-        storageMedium_obj.storageMediumLocation=medium_location
-        storageMedium_obj.storageMediumLocationStatus=50
-        storageMedium_obj.storageMediumBlockSize=128
-        storageMedium_obj.storageMediumStatus=20
-        storageMedium_obj.storageMediumUsedCapacity=0
-        storageMedium_obj.storageMediumFormat=103
-        storageMedium_obj.storageMediumMounts=0
-        storageMedium_obj.linkingAgentIdentifierValue=install_site
-        storageMedium_obj.CreateDate=timestamp
-        storageMedium_obj.CreateAgentIdentifierValue=install_site
-        storageMedium_obj.LocalDBdatetime=timestamp
-        storageMedium_obj.ExtDBdatetime=timestamp
-        storageMedium_obj.save()
+    if not ArchivePolicy.objects.filter(id=u'70d0177ddeb7416c800349c2cdfdfdc7').exists():
 
-def installdefaultESSArchPolicy(): # default ESSArchPolicy
+        print "Adding test entry to ArchivePolicy..."
+        ArchivePolicy_obj = ArchivePolicy()
+        ArchivePolicy_obj.id=u'70d0177ddeb7416c800349c2cdfdfdc7'
+        ArchivePolicy_obj.PolicyName=u'EARK policy 1'
+        ArchivePolicy_obj.PolicyID=u'1'
+        ArchivePolicy_obj.PolicyStat=u'1'
+        ArchivePolicy_obj.AISProjectName=u''
+        ArchivePolicy_obj.AISProjectID=u''
+        ArchivePolicy_obj.Mode=u'0'
+        ArchivePolicy_obj.WaitProjectApproval=u'2'
+        ArchivePolicy_obj.ChecksumAlgorithm=u'2'
+        ArchivePolicy_obj.ValidateChecksum=u'1'
+        ArchivePolicy_obj.ValidateXML=u'1'
+        ArchivePolicy_obj.ManualControll=u'0'
+        ArchivePolicy_obj.AIPType=u'1'
+        ArchivePolicy_obj.AIPpath=u'/ESSArch/essarch_temp'
+        ArchivePolicy_obj.PreIngestMetadata=u'0'
+        ArchivePolicy_obj.IngestMetadata=u'4'
+        ArchivePolicy_obj.INFORMATIONCLASS=u'1'
+        ArchivePolicy_obj.IngestPath=u'/ESSArch/ingest'
+        ArchivePolicy_obj.IngestDelete=u'1'
+        ArchivePolicy_obj.save()
+        
+    if not StorageMethod.objects.filter(id=u'caa8458a4c954b65affe8ae9867d7228').exists():
 
-    if not ESSArchPolicy.objects.filter(id=u'1').exists():
+        print "Adding test entry to StorageMethod..."
+        StorageMethod_obj = StorageMethod()
+        StorageMethod_obj.id=u'caa8458a4c954b65affe8ae9867d7228'
+        StorageMethod_obj.name=u'EARK policy 1 - SM 1'
+        StorageMethod_obj.status=1
+        StorageMethod_obj.type=200
+        StorageMethod_obj.archivepolicy=ArchivePolicy.objects.get(id=u'70d0177ddeb7416c800349c2cdfdfdc7')
+        StorageMethod_obj.save()
 
-        if install_site == 'ESSArch_RA-OSLO':
-            print "Adding NRA entry to ESSArchPolicy..."
-            ESSArchPolicy_obj = ESSArchPolicy()
-            ESSArchPolicy_obj.id=u'1'
-            ESSArchPolicy_obj.PolicyName=u'NRA'
-            ESSArchPolicy_obj.PolicyID=u'1'
-            ESSArchPolicy_obj.PolicyStat=u'1'
-            ESSArchPolicy_obj.AISProjectName=u''
-            ESSArchPolicy_obj.AISProjectID=u''
-            ESSArchPolicy_obj.Mode=u'0'
-            ESSArchPolicy_obj.WaitProjectApproval=u'2'
-            ESSArchPolicy_obj.ChecksumAlgorithm=u'2'
-            ESSArchPolicy_obj.ValidateChecksum=u'1'
-            ESSArchPolicy_obj.ValidateXML=u'1'
-            ESSArchPolicy_obj.ManualControll=u'0'
-            ESSArchPolicy_obj.AIPType=u'1'
-            #ESSArchPolicy_obj.AIPpath=u'/data/essarch_temp'
-            ESSArchPolicy_obj.AIPpath=u'/essarch_temp'
-            ESSArchPolicy_obj.PreIngestMetadata=u'0'
-            ESSArchPolicy_obj.IngestMetadata=u'4'
-            ESSArchPolicy_obj.INFORMATIONCLASS=u'1'
-            ESSArchPolicy_obj.IngestPath=u'/data/ingest'
-            ESSArchPolicy_obj.IngestDelete=u'1'
-            ESSArchPolicy_obj.sm_1=u'1'
-            ESSArchPolicy_obj.sm_type_1=u'200'
-            ESSArchPolicy_obj.sm_format_1=u'103'
-            ESSArchPolicy_obj.sm_blocksize_1=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_1=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_1=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_1=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_1=u'0'
-            #ESSArchPolicy_obj.sm_target_1=u'/data/dsm/dsm00001'
-            ESSArchPolicy_obj.sm_target_1=u'/dsm/dsm00001'
-            ESSArchPolicy_obj.sm_2=u'0'
-            ESSArchPolicy_obj.sm_type_2=u'200'
-            ESSArchPolicy_obj.sm_format_2=u'103'
-            ESSArchPolicy_obj.sm_blocksize_2=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_2=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_2=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_2=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_2=u'0'
-            ESSArchPolicy_obj.sm_target_2=u''
-            ESSArchPolicy_obj.sm_3=u'0'
-            ESSArchPolicy_obj.sm_type_3=u'200'
-            ESSArchPolicy_obj.sm_format_3=u'103'
-            ESSArchPolicy_obj.sm_blocksize_3=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_3=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_3=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_3=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_3=u'0'
-            ESSArchPolicy_obj.sm_target_3=u''
-            ESSArchPolicy_obj.sm_4=u'0'
-            ESSArchPolicy_obj.sm_type_4=u'200'
-            ESSArchPolicy_obj.sm_format_4=u'103'
-            ESSArchPolicy_obj.sm_blocksize_4=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_4=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_4=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_4=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_4=u'0'
-            ESSArchPolicy_obj.sm_target_4=u''
-            ESSArchPolicy_obj.save()
+    if not StorageTargets.objects.filter(id=u'e55194eeb1ea4bf7b8c7494f4f2b0101').exists():
 
-        else:
-            print "Adding default entry to ESSArchPolicy..."
-            ESSArchPolicy_obj = ESSArchPolicy()
-            ESSArchPolicy_obj.id=u'1'
-            ESSArchPolicy_obj.PolicyName=u'ProjectX'
-            ESSArchPolicy_obj.PolicyID=u'1'
-            ESSArchPolicy_obj.PolicyStat=u'1'
-            ESSArchPolicy_obj.AISProjectName=u''
-            ESSArchPolicy_obj.AISProjectID=u''
-            ESSArchPolicy_obj.Mode=u'0'
-            ESSArchPolicy_obj.WaitProjectApproval=u'2'
-            ESSArchPolicy_obj.ChecksumAlgorithm=u'1'
-            ESSArchPolicy_obj.ValidateChecksum=u'1'
-            ESSArchPolicy_obj.ValidateXML=u'1'
-            ESSArchPolicy_obj.ManualControll=u'0'
-            ESSArchPolicy_obj.AIPType=u'1'
-            ESSArchPolicy_obj.AIPpath=u'/ESSArch/essarch_temp'
-            ESSArchPolicy_obj.PreIngestMetadata=u'0'
-            ESSArchPolicy_obj.IngestMetadata=u'4'
-            ESSArchPolicy_obj.INFORMATIONCLASS=u'1'
-            ESSArchPolicy_obj.IngestPath=u'/ESSArch/ingest'
-            ESSArchPolicy_obj.IngestDelete=u'1'
-            ESSArchPolicy_obj.sm_1=u'1'
-            ESSArchPolicy_obj.sm_type_1=u'200'
-            ESSArchPolicy_obj.sm_format_1=u'103'
-            ESSArchPolicy_obj.sm_blocksize_1=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_1=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_1=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_1=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_1=u'0'
-            ESSArchPolicy_obj.sm_target_1=u'/ESSArch/store/disk1'
-            ESSArchPolicy_obj.sm_2=u'0'
-            ESSArchPolicy_obj.sm_type_2=u'200'
-            ESSArchPolicy_obj.sm_format_2=u'103'
-            ESSArchPolicy_obj.sm_blocksize_2=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_2=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_2=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_2=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_2=u'0'
-            ESSArchPolicy_obj.sm_target_2=u''
-            ESSArchPolicy_obj.sm_3=u'0'
-            ESSArchPolicy_obj.sm_type_3=u'200'
-            ESSArchPolicy_obj.sm_format_3=u'103'
-            ESSArchPolicy_obj.sm_blocksize_3=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_3=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_3=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_3=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_3=u'0'
-            ESSArchPolicy_obj.sm_target_3=u''
-            ESSArchPolicy_obj.sm_4=u'0'
-            ESSArchPolicy_obj.sm_type_4=u'200'
-            ESSArchPolicy_obj.sm_format_4=u'103'
-            ESSArchPolicy_obj.sm_blocksize_4=u'128'
-            ESSArchPolicy_obj.sm_maxCapacity_4=u'0'
-            ESSArchPolicy_obj.sm_minChunkSize_4=u'0'
-            ESSArchPolicy_obj.sm_minContainerSize_4=u'0'
-            ESSArchPolicy_obj.sm_minCapacityWarning_4=u'0'
-            ESSArchPolicy_obj.sm_target_4=u''
-            ESSArchPolicy_obj.save()
+        print "Adding test entry to StorageTargets..."
+        StorageTargets_obj = StorageTargets()
+        StorageTargets_obj.id=u'e55194eeb1ea4bf7b8c7494f4f2b0101'
+        StorageTargets_obj.name=u'disk1'
+        StorageTargets_obj.status=1
+        StorageTargets_obj.type=200
+        StorageTargets_obj.format=103
+        StorageTargets_obj.blocksize=1024
+        StorageTargets_obj.maxCapacity=0
+        StorageTargets_obj.minChunkSize=0
+        StorageTargets_obj.minContainerSize=0
+        StorageTargets_obj.minCapacityWarning=0
+        StorageTargets_obj.target=u'/ESSArch/store/disk1'
+        StorageTargets_obj.save()
 
+    if not StorageTarget.objects.filter(id=u'79b902a9f00b4ac696b11fd5ad0f3ae1').exists():
+
+        print "Adding test entry to StorageMethod - Target..."
+        StorageTarget_obj = StorageTarget()
+        StorageTarget_obj.id=u'79b902a9f00b4ac696b11fd5ad0f3ae1'
+        StorageTarget_obj.name=u'EARK policy 1 - SM 1 - Target 1'
+        StorageTarget_obj.status=1
+        StorageTarget_obj.storagemethod=StorageMethod.objects.get(id=u'caa8458a4c954b65affe8ae9867d7228')
+        StorageTarget_obj.target=StorageTargets.objects.get(id=u'e55194eeb1ea4bf7b8c7494f4f2b0101')
+        StorageTarget_obj.save()
 
 def installdefaultESSProc(): # default ESSProc
-
-    ESSProc_list=(('1','SIPReceiver','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
-                   ('3','SIPValidateAIS','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
-                   ('4','SIPValidateApproval','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
-                   ('5','SIPValidateFormat','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
-                   ('6','AIPCreator','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
-                   ('7','AIPChecksum','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
-                   ('8','AIPValidate','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
-                   ('9','SIPRemove','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
-                   ('10','AIPWriter','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
-                   ('11','AIPPurge','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
-                   ('12','TLD','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/TLD.pyc','/ESSArch/log/TLD.log',2,5,0,0,0,0),
-                   ('13','IOEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/IOEngine.pyc','/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
-                   ('14','db_sync_ais','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
-                   ('16','ESSlogging','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
-                   ('17','AccessEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
-                   ('18','FTPServer','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/FTPServer.pyc','/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
+    workers_path = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
+    ESSProc_list=(('1','SIPReceiver',os.path.join(workers_path, 'SIPReceiver.pyc'),'/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
+                   ('3','SIPValidateAIS',os.path.join(workers_path, 'SIPValidateAIS.pyc'),'/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
+                   ('4','SIPValidateApproval',os.path.join(workers_path, 'SIPValidateApproval.pyc'),'/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
+                   ('5','SIPValidateFormat',os.path.join(workers_path, 'SIPValidateFormat.pyc'),'/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
+                   ('6','AIPCreator',os.path.join(workers_path, 'AIPCreator.pyc'),'/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
+                   ('7','AIPChecksum',os.path.join(workers_path, 'AIPChecksum.pyc'),'/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
+                   ('8','AIPValidate',os.path.join(workers_path, 'AIPValidate.pyc'),'/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
+                   ('9','SIPRemove',os.path.join(workers_path, 'SIPRemove.pyc'),'/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
+                   ('10','AIPWriter',os.path.join(workers_path, 'AIPWriter.pyc'),'/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
+                   ('11','AIPPurge',os.path.join(workers_path, 'AIPPurge.pyc'),'/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
+                   ('12','TLD',os.path.join(workers_path, 'TLD.pyc'),'/ESSArch/log/TLD.log',2,5,0,0,0,0),
+                   #('13','IOEngine',os.path.join(workers_path, 'IOEngine.pyc'),'/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
+                   ('14','db_sync_ais',os.path.join(workers_path, 'db_sync_ais.pyc'),'/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
+                   ('16','ESSlogging',os.path.join(workers_path, 'ESSlogging.pyc'),'/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
+                   ('17','AccessEngine',os.path.join(workers_path, 'AccessEngine.pyc'),'/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
+                   ('18','FTPServer',os.path.join(workers_path, 'FTPServer.pyc'),'/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
     )
     for row in ESSProc_list:
         if not ESSProc.objects.filter(Name=row[1]).exists():
@@ -824,8 +766,7 @@ def installdefaultparameters(): # default config parameters
     installdefaulteventType_codes()  # default eventType_codes
     installdefaultESSConfig()        # default ESSConfig
     installdefaultrobotdrives()      # default robotdrives
-    installdefaultstorageMedium()    # default storageMedium
-    installdefaultESSArchPolicy()    # default ESSArchPolicy
+    installdefaultArchivePolicy()    # default ArchivePolicy
     installdefaultESSProc()          # default ESSProc
     
     return 0

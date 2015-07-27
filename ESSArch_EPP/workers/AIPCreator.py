@@ -29,7 +29,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, tarfile, ESSMD
 from django.utils import timezone
 from django import db
-from configuration.models import Parameter
+from configuration.models import Parameter, ArchivePolicy
 
 class WorkingThread:
     "Thread is working in the background"
@@ -52,7 +52,6 @@ class WorkingThread:
             # Process Item 
             lock=thread.allocate_lock()
             self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-            self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
             Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
             if ExtDBupdate:
                 self.ext_IngestTable = self.IngestTable
@@ -84,16 +83,13 @@ class WorkingThread:
                 self.ObjectUUID = self.obj[1]
                 self.PolicyId = self.obj[2]
                 logging.info('Start to create AIP for: %s', self.ObjectIdentifierValue)
-                self.PolicyDB,errno,why = ESSDB.DB().action(self.PolicyTable,'GET3',('AIPpath','IngestMetadata','IngestPath'),('PolicyID',self.PolicyId))
-                if errno: 
-                    logging.error('Failed to access Local DB, error: ' + str(why))
-                    self.ok = 0
+                ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyStat=1, PolicyID=self.PolicyId)
                 if self.ok:
                     ###########################################################
                     # set variables
-                    self.AIPpath = self.PolicyDB[0][0]
-                    self.metatype = self.PolicyDB[0][1]
-                    self.SIPpath = self.PolicyDB[0][2]
+                    self.AIPpath = ArchivePolicy_obj.AIPpath
+                    self.metatype = ArchivePolicy_obj.IngestMetadata
+                    self.SIPpath = ArchivePolicy_obj.IngestPath
                     self.p_obj = self.ObjectIdentifierValue + '.tar'
                     self.p_objpath = os.path.join(self.AIPpath,self.p_obj)
                     #self.Cmets_obj = self.ObjectIdentifierValue + '_Content_METS.xml'
@@ -534,7 +530,6 @@ class WorkingThread:
 # Table: ESSProc with Name: ESSObjectValidate, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestPath Value: /tmp/Ingest
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':

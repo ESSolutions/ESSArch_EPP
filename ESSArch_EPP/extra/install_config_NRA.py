@@ -36,6 +36,8 @@ from django.contrib.contenttypes.models import ContentType
 
 import sys,datetime
 
+import django
+django.setup()
 
 def createdefaultusers(): # default users, groups and permissions
     

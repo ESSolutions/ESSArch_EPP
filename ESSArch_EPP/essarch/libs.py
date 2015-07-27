@@ -154,6 +154,18 @@ def calcsum(filepath,checksumtype='MD5'):
     f.close()
     return h.hexdigest()
 
+def unicode2str(x):
+    if type(x).__name__ == 'unicode':
+        try:
+            res = x.encode('utf-8')
+        except UnicodeDecodeError:
+            res = x.decode('iso-8859-1').encode('utf-8')
+        except UnicodeEncodeError:
+            res = str(x.encode('iso-8859-1'))
+    else:
+        res = x
+    return res
+
 class ESSArchSMError(Exception):
     def __init__(self, value):
         self.value = value
@@ -161,6 +173,11 @@ class ESSArchSMError(Exception):
         super(ESSArchSMError, self).__init__(value)
 #    def __str__(self):
 #        return repr(self.value)
+
+class SMTapeFull(Exception):
+    def __init__(self, value):
+        self.value = value
+        super(SMTapeFull, self).__init__(value)
     
 class DatatablesView(DatatablesView):
 

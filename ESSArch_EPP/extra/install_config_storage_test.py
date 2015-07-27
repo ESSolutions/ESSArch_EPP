@@ -35,7 +35,10 @@ from Storage.models import storage, storageMedium, IOQueue
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
-import sys,datetime
+import sys,datetime,os
+
+import django
+django.setup()
 
 site_name = u'Site-X' # RA-OSLO , Marieberg, MKC, SVAR, HLA
 medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG
@@ -759,23 +762,23 @@ def installtestioqueue(): # test data to IOQueue
 
 
 def installdefaultESSProc(): # default ESSProc
-
-    ESSProc_list=(('1','SIPReceiver','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
-                   ('3','SIPValidateAIS','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateAIS.pyc','/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
-                   ('4','SIPValidateApproval','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateApproval.pyc','/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
-                   ('5','SIPValidateFormat','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPValidateFormat.pyc','/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
-                   ('6','AIPCreator','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPCreator.pyc','/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
-                   ('7','AIPChecksum','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPChecksum.pyc','/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
-                   ('8','AIPValidate','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPValidate.pyc','/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
-                   ('9','SIPRemove','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/SIPRemove.pyc','/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
-                   ('10','AIPWriter','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPWriter.pyc','/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
-                   ('11','AIPPurge','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AIPPurge.pyc','/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
-                   ('12','TLD','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/TLD.pyc','/ESSArch/log/TLD.log',2,5,0,0,0,0),
-                   ('13','IOEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/IOEngine.pyc','/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
-                   ('14','db_sync_ais','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/db_sync_ais.pyc','/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
-                   ('16','ESSlogging','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/ESSlogging.pyc','/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
-                   ('17','AccessEngine','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/AccessEngine.pyc','/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
-                   ('18','FTPServer','/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers/FTPServer.pyc','/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
+    workers_path = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
+    ESSProc_list=(('1','SIPReceiver',os.path.join(workers_path, 'SIPReceiver.pyc'),'/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
+                   ('3','SIPValidateAIS',os.path.join(workers_path, 'SIPValidateAIS.pyc'),'/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
+                   ('4','SIPValidateApproval',os.path.join(workers_path, 'SIPValidateApproval.pyc'),'/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
+                   ('5','SIPValidateFormat',os.path.join(workers_path, 'SIPValidateFormat.pyc'),'/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
+                   ('6','AIPCreator',os.path.join(workers_path, 'AIPCreator.pyc'),'/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
+                   ('7','AIPChecksum',os.path.join(workers_path, 'AIPChecksum.pyc'),'/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
+                   ('8','AIPValidate',os.path.join(workers_path, 'AIPValidate.pyc'),'/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
+                   ('9','SIPRemove',os.path.join(workers_path, 'SIPRemove.pyc'),'/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
+                   ('10','AIPWriter',os.path.join(workers_path, 'AIPWriter.pyc'),'/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
+                   ('11','AIPPurge',os.path.join(workers_path, 'AIPPurge.pyc'),'/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
+                   ('12','TLD',os.path.join(workers_path, 'TLD.pyc'),'/ESSArch/log/TLD.log',2,5,0,0,0,0),
+                   #('13','IOEngine',os.path.join(workers_path, 'IOEngine.pyc'),'/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
+                   ('14','db_sync_ais',os.path.join(workers_path, 'db_sync_ais.pyc'),'/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
+                   ('16','ESSlogging',os.path.join(workers_path, 'ESSlogging.pyc'),'/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
+                   ('17','AccessEngine',os.path.join(workers_path, 'AccessEngine.pyc'),'/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
+                   ('18','FTPServer',os.path.join(workers_path, 'FTPServer.pyc'),'/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
     )
     for row in ESSProc_list:
         if not ESSProc.objects.filter(Name=row[1]).exists():

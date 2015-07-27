@@ -10,5 +10,6 @@
 </pydev_variables_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/ESSArch_EPP</path>
+<path>/${PROJECT_DIR_NAME}/workers</path>
 </pydev_pathproperty>
 </pydev_project>

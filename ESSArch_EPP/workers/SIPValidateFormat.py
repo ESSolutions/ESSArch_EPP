@@ -30,7 +30,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, ESSMD
-from configuration.models import ChecksumAlgorithm_CHOICES
+from configuration.models import ChecksumAlgorithm_CHOICES, ArchivePolicy
 from django import db
 
 class WorkingThread:
@@ -53,7 +53,6 @@ class WorkingThread:
             # Process Item 
             lock=thread.allocate_lock()
             self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-            self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
             if ExtDBupdate:
                 self.ext_IngestTable = self.IngestTable
             else:
@@ -90,20 +89,17 @@ class WorkingThread:
                 logging.info('Start to validate format for SIP: %s', self.ObjectIdentifierValue)
                 self.ChecksumAlgorithm_CHOICES_dict = dict(ChecksumAlgorithm_CHOICES)
                 self.ChecksumAlgorithm_CHOICES_invdict = ESSPGM.Check().invert_dict(self.ChecksumAlgorithm_CHOICES_dict)
-                self.PolicyDB,errno,why = ESSDB.DB().action(self.PolicyTable,'GET3',('AIPpath','IngestMetadata','INFORMATIONCLASS','ChecksumAlgorithm','IngestPath','Mode'),('PolicyID',self.PolicyId))
-                if errno: 
-                    logging.error('Failed to access Local DB, error: ' + str(why)) 
-                    self.ok = 0
+                ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyStat=1, PolicyID=self.PolicyId)
                 if self.ok:
                     ###########################################################
                     # set variables
-                    self.AIPpath = ESSPGM.Check().str2unicode(self.PolicyDB[0][0])
-                    self.metatype = self.PolicyDB[0][1]
-                    self.Policy_INFORMATIONCLASS = self.PolicyDB[0][2]
-                    self.ChecksumAlgorithm = self.PolicyDB[0][3]
+                    self.AIPpath = ESSPGM.Check().str2unicode(ArchivePolicy_obj.AIPpath)
+                    self.metatype = ArchivePolicy_obj.IngestMetadata
+                    self.Policy_INFORMATIONCLASS = ArchivePolicy_obj.INFORMATIONCLASS
+                    self.ChecksumAlgorithm = ArchivePolicy_obj.ChecksumAlgorithm
                     self.ChecksumAlgorithm_name = self.ChecksumAlgorithm_CHOICES_dict[self.ChecksumAlgorithm]
-                    self.SIPpath = ESSPGM.Check().str2unicode(self.PolicyDB[0][4])
-                    self.DBmode = self.PolicyDB[0][5]
+                    self.SIPpath = ESSPGM.Check().str2unicode(ArchivePolicy_obj.IngestPath)
+                    self.DBmode = ArchivePolicy_obj.Mode
                     logging.debug('self.obj: %s', str(self.obj))
                     logging.debug('self.ObjectIdentifierValue: %s', self.ObjectIdentifierValue)
                     logging.debug('Len self.ObjectIdentifierValue: %s', len(self.ObjectIdentifierValue))
@@ -438,7 +434,6 @@ class WorkingThread:
 # Table: ESSProc with Name: SIPValidateFormat, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestPath Value: /tmp/Ingest
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':

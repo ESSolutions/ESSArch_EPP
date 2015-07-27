@@ -1,8 +1,6 @@
-#!/usr/bin/env /ESSArch/pd/python/bin/python
-
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,20 +19,24 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
 
-import subprocess, thread, datetime, time, logging, logging.handlers, sys, ESSDB, ESSMSSQL, ESSPGM, multiprocessing, tarfile,pytz
+import subprocess, thread, datetime, time, logging, logging.handlers, sys, ESSMSSQL, ESSPGM, multiprocessing, tarfile,pytz
 from Queue import Empty
 from lxml import etree
 from django.utils import timezone
 from essarch.models import robotQueue, robotdrives, robot
+from Storage.models import storageMedium
+from configuration.models import ESSProc, ESSConfig
 from django import db
-#from essarch.libs import flush_transaction
+
+import django
+django.setup()
 
 class WorkingThread:
     tz=timezone.get_default_timezone()
@@ -46,10 +48,10 @@ class WorkingThread:
             try:
                 if self.mDieFlag==1: break      # Request for death
                 self.mLock.acquire()
-                self.Time,self.Run = ESSDB.DB().action('ESSProc','GET',('Time','Run'),('Name',ProcName))[0]
+                PauseTime, self.Run = ESSProc.objects.filter(Name=ProcName).values_list('Time','Run')[0]
                 if self.Run == '0':
                     logger.info('Stopping ' + ProcName)
-                    ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
+                    ESSProc.objects.filter(Name=ProcName).update(Status='0', Run='0', PID=0)
                     self.RunFlag=0
                     self.mLock.release()
                     if Debug: logger.info('RunFlag: 0')
@@ -57,165 +59,116 @@ class WorkingThread:
                     continue
                 # Process Item 
                 lock=thread.allocate_lock()
-                self.RobotDrivesTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','RobotDrivesTable'))[0][0]
                 if Debug: logger.info('Start to list worklist')
                 #######################################
                 # Start to list robot req
-                self.worklist = robotQueue.objects.filter(ReqType__in=[50,51,52], Status=0) #Get pending robot requests
-                for self.item in self.worklist:
-                    if ESSDB.DB().action('ESSProc','GET',('Run',),('Name',ProcName))[0][0]=='0':
+                robotQueue_objs = robotQueue.objects.filter(ReqType__in=[50,51,52], Status=0) #Get pending robot requests
+                for robotQueue_obj in robotQueue_objs:
+                    if ESSProc.objects.get(Name=ProcName).Run=='0':
                         logger.info('Stopping ' + ProcName)
-                        ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
+                        ESSProc.objects.filter(Name=ProcName).update(Status='0', Run='0', PID=0)
                         thread.interrupt_main()
                         break
-                    self.id=self.item.id
-                    self.req_type=self.item.ReqType
-                    self.t_id=self.item.MediumID
-                    self.work_uuid=self.item.ReqUUID
-                    if self.req_type == 50: #Mount
+                    t_id=robotQueue_obj.MediumID
+                    if robotQueue_obj.ReqType == 50: #Mount
                         ##########################################
                         # Check if tape is already mounted
-                        self.robotdrive = ESSDB.DB().action(self.RobotDrivesTable,'GET',('drive_id','drive_lock'),('t_id',self.t_id,'AND','status','Mounted'))
-                        if self.robotdrive:
-                            self.drive_id = self.robotdrive[0][0]
-                            self.current_lock = self.robotdrive[0][1]
+                        robotdrives_objs = robotdrives.objects.filter(t_id=t_id, status='Mounted')
+                        if robotdrives_objs:
+                            robotdrives_obj = robotdrives_objs[0]
                             ##########################################
                             # Tape is mounted, check if locked
-                            if len(self.current_lock) > 0:
+                            if len(robotdrives_obj.drive_lock) > 0:
                                 ########################################
                                 # Tape is locked, check if req work_uuid = lock
-                                if self.current_lock == self.work_uuid:
+                                if robotdrives_obj.drive_lock == robotQueue_obj.ReqUUID:
                                     ########################################
                                     # Tape is already locked with req work_uuid
-                                    logger.info('Already Mounted: ' + str(self.t_id) + ' and locked by req work_uuid: ' + str(self.work_uuid))
-                                    self.item.delete()
+                                    logger.info('Already Mounted: ' + str(t_id) + ' and locked by req work_uuid: ' + str(robotQueue_obj.ReqUUID))
+                                    robotQueue_obj.delete()
                                 else:
                                     ########################################
                                     # Tape is locked with another work_uuid
-                                    logger.info('Tape: ' + str(self.t_id) + ' is busy and locked by: ' + str(self.current_lock) + ' and not req work_uuid: ' + str(self.work_uuid))
+                                    logger.info('Tape: ' + str(t_id) + ' is busy and locked by: ' + str(robotdrives_obj.drive_lock) + ' and not req work_uuid: ' + str(robotQueue_obj.ReqUUID))
                             else:
                                 ########################################
                                 # Tape is not locked, lock the drive with req work_uuid
-                                ESSDB.DB().action('robotdrives','UPD',('drive_lock',self.work_uuid),('drive_id',self.drive_id))
-                                logger.info('Tape: ' + str(self.t_id) + ' is available set lock to req work_uuid: ' + str(self.work_uuid))
-                                self.item.delete()
+                                robotdrives_obj.drive_lock=robotQueue_obj.ReqUUID
+                                robotdrives_obj.save(update_fields=['drive_lock'])
+                                logger.info('Tape: ' + str(t_id) + ' is available set lock to req work_uuid: ' + str(robotQueue_obj.ReqUUID))
+                                robotQueue_obj.delete()
                         else:
                             ##########################################
                             # Tape is not mounted, check for available tape drives
-                            self.robotdrives=ESSDB.DB().action('robotdrives','GET',('num_mounts','drive_id'),('status','Ready'))      #Get avilable tape drives
-                            if self.robotdrives:
-                                self.drive_id = self.robotdrives[0][1]
+                            robotdrives_objs = robotdrives.objects.filter(status='Ready') #Get available tape drives      
+                            if robotdrives_objs:
+                                robotdrives_obj=robotdrives_objs[0]
                                 ########################################
                                 # Tapedrives is available try to mount tape
-                                self.item.Status=5
-                                self.item.save(update_fields=['Status'])
-                                self.mountout, self.returncode = Robot().Mount(self.t_id,self.drive_id,self.work_uuid)
-                                if self.returncode == 0:
-                                    #ESSDB.DB().action('robotreq','DEL',('id',self.id))
-                                    self.item.delete()
+                                robotQueue_obj.Status=5
+                                robotQueue_obj.save(update_fields=['Status'])
+                                mountout, returncode = Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
+                                if returncode == 0:
+                                    robotQueue_obj.delete()
                                     ######################################################
                                     # Update StorageMediumTable with num of mounts
-                                    self.StorageMediumTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageMediumTable'))[0][0]
-                                    self.MediaMountDBget,errno,why = ESSDB.DB().action(self.StorageMediumTable,'GET3',('storageMediumMounts',),('storageMediumID',self.t_id))
-                                    if errno: logger.error('Failed to access Local DB: ' + str(self.t_id) + ' error: ' + str(why))
-                                    elif self.MediaMountDBget:
-                                        self.storageMediumMounts = int(self.MediaMountDBget[0][0]) + 1
-                                        self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                        self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                        res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('storageMediumLocationStatus',50,
-                                                                                                         'storageMediumMounts',self.storageMediumMounts,
-                                                                                                         'linkingAgentIdentifierValue',AgentIdentifierValue,
-                                                                                                         'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-                                                                                                        ('storageMediumID',self.t_id))
-                                        if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
-                                        if errno == 0 and ExtDBupdate:
-                                            ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.StorageMediumTable,'UPD',('storageMediumLocationStatus',50,
-                                                                                                                            'storageMediumMounts',self.storageMediumMounts,
-                                                                                                                            'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                                           ('storageMediumID',self.t_id))
-                                            if ext_errno: logger.error('Failed to update External DB: ' + str(self.t_id) + ' error: ' + str(ext_why))
-                                            else:
-                                                res,errno,why = ESSDB.DB().action(self.StorageMediumTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('storageMediumID',self.t_id))
-                                                if errno: logger.error('Failed to update Local DB: ' + str(self.t_id) + ' error: ' + str(why))
+                                    storageMedium_obj=storageMedium.objects.get(storageMediumID=t_id)
+                                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                    timestamp_dst = timestamp_utc.astimezone(self.tz)
+                                    storageMedium_obj.storageMediumMounts += 1
+                                    storageMedium_obj.storageMediumLocationStatus = 50
+                                    storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                                    storageMedium_obj.LocalDBdatetime = timestamp_utc
+                                    storageMedium_obj.save(update_fields=['storageMediumMounts','storageMediumLocationStatus','linkingAgentIdentifierValue','LocalDBdatetime'])
+                                    if ExtDBupdate:
+                                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',50,
+                                                                                                                        'storageMediumMounts',storageMedium_obj.storageMediumMounts,
+                                                                                                                        'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                                                       ('storageMediumID',t_id))
+                                        if ext_errno: logger.error('Failed to update External DB: ' + str(t_id) + ' error: ' + str(ext_why))
+                                        else:
+                                            storageMedium_obj.ExtDBdatetime = timestamp_utc
+                                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
                                 else:
-                                    logger.error('Problem to mount tape: ' + self.t_id + ' Message: ' + str(self.mountout))
-                                    self.item.Status=100
-                                    self.item.save(update_fields=['Status'])
-                    elif self.req_type == 51: # Unmount
+                                    logger.error('Problem to mount tape: ' + t_id + ' Message: ' + str(mountout))
+                                    robotQueue_obj.Status=100
+                                    robotQueue_obj.save(update_fields=['Status'])
+                    elif robotQueue_obj.ReqType in [51, 52]: # Unmount(51), F_Unmount(52)
                         ######################################
                         # Check if tape is mounted
-                        self.robotdrives=ESSDB.DB().action('robotdrives','GET',('drive_id','drive_lock'),('t_id',self.t_id))      #Get tape drive that is mounted
-                        if self.robotdrives:
+                        robotdrives_objs = robotdrives.objects.filter(t_id=t_id) #Get tape drive that is mounted
+                        if robotdrives_objs:
+                            robotdrives_obj = robotdrives_objs[0]
                             ################################################
                             # Tape is mounted, check if tape is locked(busy)
-                            self.drive_id = self.robotdrives[0][0]
-                            self.current_lock = self.robotdrives[0][1]
-                            if len(self.current_lock) == 0:
+                            if len(robotdrives_obj.drive_lock) == 0 or robotQueue_obj.ReqType == 52:
+                                if len(robotdrives_obj.drive_lock) > 0 and robotQueue_obj.ReqType == 52:
+                                    logger.info('Tape %s is locked with work_uuid %s, try to force unmount',t_id,robotdrives_obj.drive_lock)
                                 ###################################################
-                                # Tape is not locked, try to unmount
-                                self.item.Status=5
-                                self.item.save(update_fields=['Status'])
-                                ESSDB.DB().action('robotdrives','UPD',('status','Unmounting'),('drive_id',self.drive_id))
-                                self.mountout, self.returncode = Robot().Unmount(self.t_id,self.drive_id)
-                                if self.returncode == 0:
-                                    self.item.delete()
+                                # Try to unmount
+                                robotQueue_obj.Status=5
+                                robotQueue_obj.save(update_fields=['Status'])
+                                robotdrives_obj.status='Unmounting'
+                                robotdrives_obj.save(update_fields=['status'])
+                                mountout, returncode = Robot().Unmount(t_id,robotdrives_obj.drive_id)
+                                if returncode == 0:
+                                    robotQueue_obj.delete()
                                 else:
-                                    logger.error('Problem to unmount tape: ' + self.t_id + ' Message: ' + str(self.mountout))
-                                    self.item.Status=100
-                                    self.item.save(update_fields=['Status'])
+                                    logger.error('Problem to unmount tape: ' + t_id + ' Message: ' + str(mountout))
+                                    robotQueue_obj.Status=100
+                                    robotQueue_obj.save(update_fields=['Status'])
                             else:
                                 #################################################
                                 # Tape is locked, skip to unmount
-                                logger.info('Tape ' + self.t_id + ' is locked, skip to unmount')
+                                logger.info('Tape ' + t_id + ' is locked, skip to unmount')
                         else:
                             ################################################
                             # Tape is not mounted, skip to try to unmount
-                            logger.info('Tape ' + self.t_id + ' is not mounted')
-                            self.item.delete()
-                    elif self.req_type == 52: # F_Unmount
-                        ######################################
-                        # Check if tape is mounted
-                        self.robotdrives=ESSDB.DB().action('robotdrives','GET',('drive_id','drive_lock'),('t_id',self.t_id))      #Get tape drive that is mounted
-                        if self.robotdrives:
-                            ################################################
-                            # Tape is mounted, check if tape is locked(busy)
-                            self.drive_id = self.robotdrives[0][0]
-                            self.current_lock = self.robotdrives[0][1]
-                            if len(self.current_lock) == 0:
-                                ###################################################
-                                # Tape is not locked, try to unmount
-                                self.item.Status=5
-                                self.item.save(update_fields=['Status'])
-                                ESSDB.DB().action('robotdrives','UPD',('status','Unmounting'),('drive_id',self.drive_id))
-                                self.mountout, self.returncode = Robot().Unmount(self.t_id,self.drive_id)
-                                if self.returncode == 0:
-                                    self.item.delete()
-                                else:
-                                    logger.error('Problem to unmount tape: ' + self.t_id + 'Message: ' + str(self.mountout))
-                                    self.item.Status=100
-                                    self.item.save(update_fields=['Status'])
-                            else:
-                                #################################################
-                                # Tape is locked, try to unmount anyway
-                                logger.info('Tape %s is locked with work_uuid %s, try to force unmount',self.t_id,self.current_lock)
-                                self.item.Status=5
-                                self.item.save(update_fields=['Status'])
-                                ESSDB.DB().action('robotdrives','UPD',('status','Unmounting'),('drive_id',self.drive_id))
-                                self.mountout, self.returncode = Robot().Unmount(self.t_id,self.drive_id)
-                                if self.returncode == 0:
-                                    self.item.delete()
-                                else:
-                                    logger.error('Problem to unmount tape: ' + self.t_id + 'Message: ' + str(self.mountout))
-                                    self.item.Status=100
-                                    self.item.save(update_fields=['Status'])
-                        else:
-                            ################################################
-                            # Tape is not mounted, skip to try to unmount
-                            logger.info('Tape ' + self.t_id + ' is not mounted')
-                            self.item.delete()
+                            logger.info('Tape ' + t_id + ' is not mounted')
+                            robotQueue_obj.delete()
                 db.close_old_connections()
                 self.mLock.release()
-                time.sleep(int(self.Time))
+                time.sleep(int(PauseTime))
             except:
                 logger.error('Unexpected error: %s' % (str(sys.exc_info())))
                 raise
@@ -247,84 +200,112 @@ class Robot:
     ###############################################
     def Mount(self, volser, drive_id=None, work_uuid=''):
         logger.info('Mount tape: ' + volser)
-        robotdev = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','Robotdev'))[0][0]
-        robot_db = ESSDB.DB().action('robot','GET',('slot_id',),('t_id',volser))
-        if robot_db:
-            robot_db = robot_db[0]
+        robotdev = ESSConfig.objects.get(Name='Robotdev').Value
+        robot_objs = robot.objects.filter(t_id=volser)
+        if robot_objs:
+            robot_obj = robot_objs[0]
         else:
-            self.mountout = 'Missing MediumID: %s in robot' % str(volser)
-            self.returncode = 1
-            return self.mountout, self.returncode
-        if drive_id:
-            self.drive_id = drive_id
-        else:
-            self.drive_id = 0
-        self.num_mounts, tapedev = ESSDB.DB().action('robotdrives','GET',('num_mounts','drive_dev'),('drive_id',self.drive_id))[0]
-        #self.storageMediumFormat = ESSDB.DB().action('storageMedium','GET',('storageMediumFormat',),('storageMediumID',volser))[0][0]
-        self.mount = subprocess.Popen(['mtx -f ' + str(robotdev) + ' load ' + str(robot_db[0]) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.mountout = self.mount.communicate()
-        self.returninfo = str(self.mountout)
-        self.returncode = self.mount.returncode
-        if self.returncode == 0:
+            mountout = 'Missing MediumID: %s in robot' % str(volser)
+            returncode = 1
+            return mountout, returncode
+        if not drive_id:
+            drive_id = 0
+        robotdrives_obj = robotdrives.objects.get(drive_id=drive_id)
+        mount_proc = subprocess.Popen(['mtx -f ' + str(robotdev) + ' load ' + str(robot_obj.slot_id) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        mountout = mount_proc.communicate()
+        returninfo = str(mountout)
+        returncode = mount_proc.returncode
+        if returncode == 0:
             logger.info('Mount tape: %s Successful (work_uuid: %s), start to verify tape identity', volser, work_uuid)
-            exitcode, why = Robot().check_tape(tapedev,volser)
+            exitcode, why = Robot().check_tape(robotdrives_obj.drive_dev, volser)
             if exitcode in [0, 1, 2]:
                 logger.info('Tape identity verify result: %s (work_uuid: %s)', why, work_uuid)
-                ESSPGM.Events().create('2000','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(self.drive_id),2,storageMediumID=volser)
-                self.num_mounts = int(self.num_mounts) + 1
-                ESSDB.DB().action('robotdrives','UPD',('num_mounts',self.num_mounts,'status','Mounted','t_id',volser,'slot_id',robot_db[0],'drive_lock',work_uuid),('drive_id',self.drive_id))
-                ESSDB.DB().action('robot','UPD',('status','Mounted','drive_id',self.drive_id),('slot_id',robot_db[0]))
+                ESSPGM.Events().create('2000','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
+                robotdrives_obj.num_mounts += 1
+                robotdrives_obj.status='Mounted'
+                robotdrives_obj.t_id=volser
+                robotdrives_obj.slot_id = robot_obj.slot_id
+                robotdrives_obj.drive_lock = work_uuid
+                robotdrives_obj.save(update_fields=['num_mounts', 'status', 't_id', 'slot_id', 'drive_lock'])
+                robot_obj.status='Mounted'
+                robot_obj.drive_id=drive_id
+                robot_obj.save(update_fields=['status', 'drive_id'])
             else:
                 logger.error('Problem to verify tapeid: ' + volser + ' Message: ' + str(why))
-                ESSDB.DB().action('robotdrives','UPD',('status','Fail','t_id','??????','slot_id',robot_db[0],'drive_lock',work_uuid),('drive_id',self.drive_id))
-                ESSDB.DB().action('robot','UPD',('status','Fail','drive_id',self.drive_id),('slot_id',robot_db[0]))
+                robotdrives_obj.status='Fail'
+                robotdrives_obj.t_id='??????'
+                robotdrives_obj.slot_id = robot_obj.slot_id
+                robotdrives_obj.drive_lock = work_uuid
+                robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock'])
+                robot_obj.status='Fail'
+                robot_obj.drive_id=drive_id
+                robot_obj.save(update_fields=['status', 'drive_id'])
         else:
-            logger.error('Problem to mount tape: ' + volser + ' Message: ' + str(self.returninfo))
-            ESSDB.DB().action('robotdrives','UPD',('status','Fail','t_id','??????','slot_id',robot_db[0],'drive_lock',work_uuid),('drive_id',self.drive_id))
-            ESSDB.DB().action('robot','UPD',('status','Fail','drive_id',self.drive_id),('slot_id',robot_db[0]))
-            self.returncode = 1 
-        if Debug: print 'Mountout:', self.returninfo
-        return self.returninfo, self.returncode
+            logger.error('Problem to mount tape: ' + volser + ' Message: ' + str(returninfo))
+            robotdrives_obj.status='Fail'
+            robotdrives_obj.t_id='??????'
+            robotdrives_obj.slot_id = robot_obj.slot_id
+            robotdrives_obj.drive_lock = work_uuid
+            robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock'])
+            robot_obj.status='Fail'
+            robot_obj.drive_id=drive_id
+            robot_obj.save(update_fields=['status', 'drive_id'])
+            returncode = 1 
+        if Debug: print 'Mountout:', returninfo
+        return returninfo, returncode
 
     "Unmount tape"
     ###############################################
     def Unmount(self, volser, drive_id=None):
         logger.info('Unmount tape: ' + volser)
-        robotdev = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','Robotdev'))[0][0]
-        robot_db = ESSDB.DB().action('robot','GET',('slot_id',),('t_id',volser))
-        if robot_db:
-            robot_db = robot_db[0]
+        robotdev = ESSConfig.objects.get(Name='Robotdev').Value
+        robot_objs = robot.objects.filter(t_id=volser)
+        if robot_objs:
+            robot_obj = robot_objs[0]
         else:
-            self.unmountout = 'Missing MediumID: %s in robot' % str(volser)
-            self.returncode = 1
-            return self.unmountout, self.returncode
-        self.StorageMediumTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageMediumTable'))[0][0]
-        if drive_id:
-            self.drive_id = drive_id
-        else:
-            self.drive_id = 0
-        self.unmount = subprocess.Popen(['mtx -f ' + str(robotdev) + ' unload ' + str(robot_db[0]) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.unmountout = self.unmount.communicate()
-        if self.unmount.returncode == 0:
+            unmountout = 'Missing MediumID: %s in robot' % str(volser)
+            returncode = 1
+            return unmountout, returncode
+        if not drive_id:
+            drive_id = 0
+        robotdrives_obj = robotdrives.objects.get(drive_id=drive_id)
+        unmount_proc = subprocess.Popen(['mtx -f ' + str(robotdev) + ' unload ' + str(robot_obj.slot_id) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        unmountout = unmount_proc.communicate()
+        if unmount_proc.returncode == 0:
             logger.info('Unmount tape: ' + volser + ' Successful')
-            ESSPGM.Events().create('2010','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(self.drive_id),2,storageMediumID=volser)
-            ESSDB.DB().action('robotdrives','UPD',('status','Ready','t_id','','slot_id','0','drive_lock',''),('drive_id',self.drive_id))
-            StorageMedium_list = ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumID','storageMediumStatus'),('storageMediumID',volser))
-            if len(StorageMedium_list) > 0:
-                if StorageMedium_list[0][1] == 0:
-                    ESSDB.DB().action('robot','UPD',('status','InactiveTape','drive_id','99'),('slot_id',robot_db[0]))
-                elif StorageMedium_list[0][1] == 20:
-                    ESSDB.DB().action('robot','UPD',('status','WriteTape','drive_id','99'),('slot_id',robot_db[0]))
+            ESSPGM.Events().create('2010','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
+            robotdrives_obj.status='Ready'
+            robotdrives_obj.t_id=''
+            robotdrives_obj.slot_id = '0'
+            robotdrives_obj.drive_lock = ''
+            robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock'])
+            storageMedium_objs = storageMedium.objects.filter(storageMediumID=volser)
+            if storageMedium_objs:
+                storageMedium_obj = storageMedium_objs[0]
+                if storageMedium_obj.storageMediumStatus==0:
+                    robot_obj.status='Inactive'
+                    robot_obj.drive_id='99'
+                elif storageMedium_obj.storageMediumStatus==20:
+                    robot_obj.status='Write'
+                    robot_obj.drive_id='99'
                 else:
-                    ESSDB.DB().action('robot','UPD',('status','ArchTape','drive_id','99'),('slot_id',robot_db[0]))
+                    robot_obj.status='Full'
+                    robot_obj.drive_id='99'
             else:
-                ESSDB.DB().action('robot','UPD',('status','Ready','drive_id','99'),('slot_id',robot_db[0]))
+                robot_obj.status='New'
+                robot_obj.drive_id='99'
+            robot_obj.save(update_fields=['status', 'drive_id'])
         else:
-            logger.error('Problem to unmount tape: ' + volser + 'Message: ' + str(self.unmountout))
-            ESSDB.DB().action('robotdrives','UPD',('status','Fail','t_id','??????','slot_id',robot_db[0]),('drive_id',self.drive_id))
-            ESSDB.DB().action('robot','UPD',('status','Fail','drive_id',self.drive_id),('slot_id',robot_db[0]))
-        if Debug: print 'Unmountout:',self.unmountout
-        return self.unmountout, self.unmount.returncode
+            logger.error('Problem to unmount tape: ' + volser + 'Message: ' + str(unmountout))
+            robotdrives_obj.status='Fail'
+            robotdrives_obj.t_id='??????'
+            robotdrives_obj.slot_id = robot_obj.slot_id
+            robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id'])
+            robot_obj.status='Fail'
+            robot_obj.drive_id=drive_id
+            robot_obj.save(update_fields=['status', 'drive_id'])
+        if Debug: print 'Unmountout:',unmountout
+        return unmountout, unmount_proc.returncode
 
     "Idle tapedrive unmount process"
     ###############################################
@@ -336,18 +317,16 @@ class Robot:
                         break
                 except Empty:
                     pass
-                #flush_transaction()
                 robotdrives_objs = robotdrives.objects.filter(status='Mounted')
                 if robotdrives_objs:
                     #################################################
                     # Found mounted tape
-                    #flush_transaction()
-                    self.nummountreq = robotQueue.objects.filter(ReqType=50, Status=0).count()
+                    nummountreq = robotQueue.objects.filter(ReqType=50, Status=0).count()
                     for robotdrives_obj in robotdrives_objs:
                         if len(robotdrives_obj.drive_lock) == 0: 
                             #################################################
                             # Tape is not locked
-                            if int(robotdrives_obj.IdleTime) > 5 and self.nummountreq:
+                            if int(robotdrives_obj.IdleTime) > 5 and nummountreq:
                                 ##################################################################################################
                                 # Pendning mount request in RobotReqQueue. Set IdleTime to 5 sec.
                                 robotdrives_obj.IdleTime = 5
@@ -374,9 +353,9 @@ class Robot:
                                 robotQueue_obj.ReqPurpose = 'TLD - IdleUnmountProc'
                                 robotQueue_obj.Status = 0 # Pending
                                 robotQueue_obj.MediumID = robotdrives_obj.t_id
+                                robotQueue_obj.user = 'sys'
                                 robotQueue_obj.save()
                                 while 1:
-                                    #flush_transaction()
                                     robot_objs = robot.objects.filter(t_id=robotdrives_obj.t_id, drive_id='99')
                                     if robot_objs:
                                         logger.info('Success to unmount tape: ' + str(robotdrives_obj.t_id))
@@ -389,6 +368,7 @@ class Robot:
                                             robotQueue_obj.ReqPurpose = 'TLD - IdleUnmountProc'
                                             robotQueue_obj.Status = 0 # Pending
                                             robotQueue_obj.MediumID = robotdrives_obj.t_id
+                                            robotQueue_obj.user = 'sys'
                                             robotQueue_obj.save()
                                             time.sleep(1)
                                         else:
@@ -471,7 +451,6 @@ class Robot:
             time.sleep(1)
             test_num+=1
             logger.info('Wait for tapedev %s to go online with tapeid %s, test_num: %s ' % (tapedev,volser,test_num))
-            #print ('Wait for tapedev %s to go online with tapeid %s, test_num: %s ' % (tapedev,volser,test_num))
         exitcode, why = Robot().rewind_tape(tapedev)
         if exitcode == 0:
             try:
@@ -487,10 +466,8 @@ class Robot:
                         return 10, why
                 elif errno == 12 and detail == 'Cannot allocate memory':
                     logger.debug('IOError errno: %s, detail: %s' % (errno,detail))
-                    #print ('debug: IOError errno: %s, detail: %s' % (errno,detail))
                 else:
                     logger.error('IOError errno: %s, detail: %s' % (errno,detail))
-                    #print ('IOError errno: %s, detail: %s' % (errno,detail))
             except:
                 logger.error('Problem to read first byte from tapedev: %s, errno: %s' % (tapedev,str(sys.exc_info())))
 
@@ -557,7 +534,7 @@ if __name__ == '__main__':
         if sys.argv[1] == '-v' or sys.argv[1] == '-V':
             print ProcName,'Version',ProcVersion
             sys.exit()
-    LogFile,Time,Status,Run = ESSDB.DB().action('ESSProc','GET',('LogFile','Time','Status','Run'),('Name',ProcName))[0]
+    LogFile,Time,Status,Run = ESSProc.objects.filter(Name=ProcName).values_list('LogFile','Time','Status','Run')[0]
 
     ##########################
     # Log format
@@ -603,8 +580,8 @@ if __name__ == '__main__':
     logger.debug('Status: ' + str(Status))
     logger.debug('Run: ' + str(Run))
 
-    AgentIdentifierValue = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','AgentIdentifierValue'))[0][0]
-    ExtDBupdate = int(ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','ExtDBupdate'))[0][0])
+    AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+    ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
 
     q1 = multiprocessing.Queue()
     p1 = multiprocessing.Process(target=Robot().IdleUnmountProc, args=(q1,))

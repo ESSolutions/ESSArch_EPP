@@ -38,6 +38,7 @@ from configuration.models import ESSArchPolicy, ArchivePolicy
 from djcelery.models import TaskMeta
 from picklefield.fields import PickledObjectField
 from essarch.fields import BigAutoField
+import uuid
 
 ###########################################################################
 #
@@ -595,7 +596,8 @@ class ControlAreaForm_reception(ControlAreaForm2):
 #
 # Access models and forms
 #
-class AccessQueue(models.Model):     
+class AccessQueue(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ReqUUID = models.CharField(max_length=36)
     ReqType = models.IntegerField(null=True, choices=AccessReqType_CHOICES)
     ReqPurpose = models.CharField(max_length=255)

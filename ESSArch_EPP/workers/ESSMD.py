@@ -32,7 +32,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 import pytz, datetime, string, csv, os, uuid, ESSPGM, ESSDB, time, urllib, logging, shutil
 from lxml import etree
 import mets_eARD as m
-from configuration.models import SchemaProfile
+from configuration.models import SchemaProfile, ArchivePolicy
 from django.utils import timezone
 
 # Namespaces
@@ -2275,7 +2275,6 @@ def getRESObjects(FILENAME):
 "Create a new METSfile from PREMIS"
 ###############################################
 def PREMIS2METS(SIPpath,ObjectIdentifierValue,AgentIdentifierValue,altRecordID_dict={'POLICYID':10,'PROJECTNAME':'xyz123'},METSfile=None):
-    PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
     ProcVersion = '2.2'
     tz=timezone.get_default_timezone()
     error_list = []
@@ -2284,22 +2283,21 @@ def PREMIS2METS(SIPpath,ObjectIdentifierValue,AgentIdentifierValue,altRecordID_d
     ###########################################################
     # get policy info
     logging.info('Start to create METS for: %s', ObjectIdentifierValue)
-    PolicyDB,errno,why = ESSDB.DB().action(PolicyTable,'GET3',('AIPpath','IngestMetadata','ChecksumAlgorithm'),('PolicyID',altRecordID_dict['POLICYID']))
-    if errno:
-        logging.error('Failed to access Local DB, error: ' + str(why))
-        ok = 0
+    ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1, PolicyID=altRecordID_dict['POLICYID'])[:1]
     if ok:
-        if len(PolicyDB) == 0:
+        if not ArchivePolicy_objs:
             logging.error('POLICYID: %s for object: %s is not valid' % (altRecordID_dict['POLICYID'], ObjectIdentifierValue))
             error_list.append('POLICYID: %s for object: %s is not valid' % (altRecordID_dict['POLICYID'], ObjectIdentifierValue))
             error_code = 1
             ok = 0
+        else:
+            ArchivePolicy_obj = ArchivePolicy_objs.get()
     if ok:
         ###########################################################
         # set variables
-        AIPpath = PolicyDB[0][0]
-        metatype = PolicyDB[0][1]
-        ChecksumAlgorithm = PolicyDB[0][2]
+        AIPpath = ArchivePolicy_obj.AIPpath
+        metatype = ArchivePolicy_obj.IngestMetadata
+        ChecksumAlgorithm = ArchivePolicy_obj.ChecksumAlgorithm
 #    if metatype in [1,2,3]:
     if ok:
         ###########################################################

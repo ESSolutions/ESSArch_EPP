@@ -30,7 +30,7 @@ import sys, logging, logging.handlers, datetime, time, uuid, ESSDB, ESSMSSQL, ES
 from optparse import OptionParser
 from django.utils import timezone
 from essarch.models import storageMedium, storage, ArchiveObject
-from configuration.models import ESSArchPolicy
+from configuration.models import ArchivePolicy
 from django import db
 
 class work:
@@ -630,9 +630,9 @@ class work:
                                     logging.info('Found archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to update',ip_obj_ext[1],storageMediumID)
                                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                                     self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                    ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = ip_obj_ext[0])
+                                    ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                                     ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue = ip_obj_ext[1])
-                                    ip_obj.PolicyId = ESSArchPolicy_obj
+                                    ip_obj.PolicyId = ArchivePolicy_obj
                                     ip_obj.ObjectPackageName = ip_obj_ext[2]
                                     ip_obj.ObjectSize = ip_obj_ext[3]
                                     ip_obj.ObjectNumItems = ip_obj_ext[4]
@@ -712,9 +712,9 @@ class work:
                                 # archive object not exist in local "IngestObject" DB try to insert
                                 logging.info('Missing archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to insert',ip_obj_ext[1],storageMediumID)
                                 self.timestamp = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
-                                ESSArchPolicy_obj = ESSArchPolicy.objects.get(PolicyID = ip_obj_ext[0])
+                                ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                                 ip_obj = ArchiveObject()
-                                ip_obj.PolicyId = ESSArchPolicy_obj
+                                ip_obj.PolicyId = ArchivePolicy_obj
                                 ip_obj.ObjectIdentifierValue = ip_obj_ext[1]
                                 ip_obj.ObjectPackageName = ip_obj_ext[2]
                                 ip_obj.ObjectSize = ip_obj_ext[3]

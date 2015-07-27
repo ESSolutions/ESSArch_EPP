@@ -1,7 +1,6 @@
-#!/usr/bin/env /ESSArch/pd/python/bin/python
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,16 +19,20 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, shutil
-from configuration.models import Path
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+    
+import os, thread, datetime, time, logging, sys, ESSPGM, shutil
+from configuration.models import Path, ArchivePolicy, ESSConfig, ESSProc
 from essarch.models import ArchiveObject
 from django import db
+
+import django
+django.setup()
 
 class WorkingThread:
     "Thread is working in the background"
@@ -39,10 +42,10 @@ class WorkingThread:
         while 1:
                 if self.mDieFlag==1: break      # Request for death
                 self.mLock.acquire()
-                self.Time,self.Run = ESSDB.DB().action('ESSProc','GET',('Time','Run'),('Name',ProcName))[0]
+                PauseTime, self.Run = ESSProc.objects.filter(Name=ProcName).values_list('Time','Run')[0]
                 if self.Run == '0':
                     logging.info('Stopping ' + ProcName)
-                    ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
+                    ESSProc.objects.filter(Name=ProcName).update(Status='0', Run='0', PID=0)
                     self.RunFlag=0
                     self.mLock.release()
                     if Debug: logging.info('RunFlag: 0')
@@ -50,37 +53,28 @@ class WorkingThread:
                     continue
                 # Process Item 
                 lock=thread.allocate_lock()
-                self.IngestTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','IngestTable'))[0][0]
-                self.PolicyTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','PolicyTable'))[0][0]
+                self.IngestTable = 'IngestObject'
                 self.GatePath = Path.objects.get(entity = 'path_gate').value
                 self.PreIngestPath = Path.objects.get(entity = 'path_control').value
                 if ExtDBupdate:
                     self.ext_IngestTable = self.IngestTable
                 else:
                     self.ext_IngestTable = ''
-                #if Debug: logging.info('Start to list worklist (self.dbget)')
-                self.dbget,errno,why = ESSDB.DB().action(self.IngestTable,'GET4',('ObjectIdentifierValue',
-                                                                                  'ObjectUUID',
-                                                                                  'ObjectPackageName',
-                                                                                  'PolicyId',
-                                                                                  'DataObjectSize'),
-                                                                                 ('StatusProcess','BETWEEN',1999,'AND',2001,'AND',
-                                                                                  'StatusActivity','=','0'))
-                if errno: logging.error('Failed to access Local DB, error: ' + str(why))
-                for self.obj in self.dbget:
-                    if ESSDB.DB().action('ESSProc','GET',('Run',),('Name',ProcName))[0][0]=='0':
+                #if Debug: logging.info('Start to list worklist (ArchiveObject_objs)')
+                ArchiveObject_objs = ArchiveObject.objects.filter(StatusProcess__range=(1999,2001), StatusActivity=0)
+                for ArchiveObject_obj in ArchiveObject_objs:
+                    if ESSProc.objects.get(Name=ProcName).Run=='0':
                         logging.info('Stopping ' + ProcName)
-                        ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
+                        ESSProc.objects.filter(Name=ProcName).update(Status='0', Run='0', PID=0)
                         thread.interrupt_main()
                         break
-                    self.ObjectIdentifierValue = self.obj[0]
-                    self.ObjectUUID = self.obj[1]
-                    self.ObjectPackageName = self.obj[2]
-                    self.PolicyId = self.obj[3]
-                    self.DataObjectSize = self.obj[4]
-                    self.policydbget = ESSDB.DB().action(self.PolicyTable,'GET',('AIPpath','IngestMetadata'),('policyid',self.PolicyId))[0]
-                    self.AIPpath = self.policydbget[0]
-                    self.metatype = self.policydbget[1]
+                    self.ObjectIdentifierValue = ArchiveObject_obj.ObjectIdentifierValue
+                    self.ObjectUUID = ArchiveObject_obj.ObjectUUID
+                    self.ObjectPackageName = ArchiveObject_obj.ObjectPackageName
+                    self.DataObjectSize = ArchiveObject_obj.DataObjectSize
+                    ArchivePolicy_obj = ArchiveObject_obj.PolicyId
+                    self.AIPpath = ArchivePolicy_obj.AIPpath
+                    self.metatype = ArchivePolicy_obj.IngestMetadata
                     self.ObjectPath=os.path.join(self.AIPpath,self.ObjectPackageName)
                     if self.metatype in [1,2,3]:
                         self.CMetaObjectPath = os.path.join(self.AIPpath,self.ObjectIdentifierValue + '_Content_METS.xml')
@@ -166,7 +160,7 @@ class WorkingThread:
                             ESSPGM.Events().create('1150','','ESSArch AIPPurge',ProcVersion,'0','',2,self.ObjectIdentifierValue)
                 db.close_old_connections()
                 self.mLock.release()
-                time.sleep(int(self.Time))
+                time.sleep(int(PauseTime))
         self.mDieFlag=0
 
     ################################################
@@ -193,7 +187,6 @@ class WorkingThread:
 # Dep:
 # Table: ESSProc with Name: AIPPurge, LogFile: /log/xxx.log, Time: 5, Status: 0/1, Run: 0/1
 # Table: ESSConfig with Name: IngestTable Value: IngestObject
-# Table: ESSConfig with Name: PolicyTable Value: archpolicy
 # Arg: -d = Debug on
 #######################################################################################################
 if __name__ == '__main__':
@@ -205,7 +198,7 @@ if __name__ == '__main__':
         if sys.argv[1] == '-v' or sys.argv[1] == '-V':
             print ProcName,'Version',ProcVersion
             sys.exit()
-    LogFile,Time,Status,Run = ESSDB.DB().action('ESSProc','GET',('LogFile','Time','Status','Run'),('Name',ProcName))[0]
+    LogFile,Time,Status,Run = ESSProc.objects.filter(Name=ProcName).values_list('LogFile','Time','Status','Run')[0]
     LogLevel = logging.INFO
     #LogLevel = logging.DEBUG
     #LogLevel = multiprocessing.SUBDEBUG
@@ -249,8 +242,8 @@ if __name__ == '__main__':
     logging.debug('Status: ' + str(Status))
     logging.debug('Run: ' + str(Run))
 
-    AgentIdentifierValue = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','AgentIdentifierValue'))[0][0]
-    ExtDBupdate = int(ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','ExtDBupdate'))[0][0])
+    AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+    ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
 
     x=WorkingThread(ProcName)
     while 1:
