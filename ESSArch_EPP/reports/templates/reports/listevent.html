@@ -18,10 +18,10 @@
       </tr>
     </thead>
     <tbody>
-	    	{% for eventType,eventName, eventType_num in event_list %}
+	    	{% for eventType,eventDetail, eventType_num in event_list %}
 		      	<tr class="row{% cycle '1' '2' %}">
 					<td>{{ eventType }}</td>
-					<td>{{eventName}}</td>
+					<td>{{eventDetail}}</td>
 					<td>{{ eventType_num }}</td>
 		      	</tr>
 	      	{% endfor %}
