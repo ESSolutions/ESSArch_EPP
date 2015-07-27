@@ -111,6 +111,6 @@ class eventsReport(ListView):
             print(i)
             #event_list2.append([i,event_list[i].eventDetail])
         #print '#####################################: %s' % str(event_list2)
-
+        print(sorted(event_list2))
         context['event_list'] = sorted(event_list2)
         return context
