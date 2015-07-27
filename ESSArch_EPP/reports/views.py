@@ -100,7 +100,7 @@ class eventsReport(ListView):
         
         justanotherlist = (context['object_list'])
         for i in justanotherlist:
-            print(i)
+            print(i.eventDetail)
         event_list = []
         for i in eventobject_list:
             event_list.append(i.eventType)
