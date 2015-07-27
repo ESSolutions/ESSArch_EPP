@@ -226,7 +226,7 @@
 	                    //"mColumns": [1,],
 	                    //"sFieldSeperator": ",",
 	                    "sAjaxUrl" : Django.url('migration_create_parameter'),
-						if(document.getElementById("copyonlyflag").checked == true && $('#copypath').val() != "" ){
+						//if(document.getElementById("copyonlyflag").checked == true && $('#copypath').val() != "" ){
 	                    "fnClick": function( nButton, oConfig ) {
 	                        //var sData = this.fnGetTableData(oConfig);
 	                        var aData = this.fnGetSelectedData();
@@ -304,7 +304,7 @@
 		                        } );
 	                        }
 	                        else {alert('Migration canceled');}
-	                    }},
+	                    },
 	                    "fnAjaxComplete": function ( json ) {
 	                    	//var CompleteUrl = Django.url('migration_detail');
 	                    	var CompleteUrl = "/administration/migredetail/"
