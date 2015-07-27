@@ -98,7 +98,7 @@ class eventsReport(ListView):
         context['label'] = 'REPORTS - Log Events report'
         eventobject_list = context['object_list']
         
-		print(context['object_list'])
+        print(context['object_list'])
         event_list = []
         for i in eventobject_list:
             event_list.append(i.eventType)
