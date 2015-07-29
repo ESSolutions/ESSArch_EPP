@@ -247,7 +247,7 @@
 								if ($('#copypath').val() == ""){
 								 
 									var copyPathAnswer = prompt(" You must tell us the Copy Path");
-									var copyvariable = document.getElementById("copypath");
+									document.getElementById("copypath").value = copyPathAnswer;
 								}
 								
 							}
