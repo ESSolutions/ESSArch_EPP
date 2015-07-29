@@ -243,11 +243,11 @@
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
 							if (document.getElementById("copyonlyflag").checked == true){
-								data = "Copy  Only"
+								data = "Copy  Only";
 								if ($('#copypath').val() == ""){
 									//document.getElementById("copypath" = 
-									var copyPathAnswer = prompt(" You must tell us the Copy Path")
-									
+									var copyPathAnswer = prompt(" You must tell us the Copy Path");
+									document.getElementById("copypath") = copyPathAnswer;
 								}
 								
 							}
