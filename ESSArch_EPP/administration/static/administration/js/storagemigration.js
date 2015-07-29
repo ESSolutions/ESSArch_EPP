@@ -246,6 +246,7 @@
 								data = "Copy  Only"
 								if ($('#copypath').val() == ""){
 									var answer = prompt(" You must tell us the Copy Path")
+									document.getElementById("copypath") = answer
 								}
 								
 							}
