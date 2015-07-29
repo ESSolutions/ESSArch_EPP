@@ -98,7 +98,7 @@ class eventsReport(ListView):
         context['label'] = 'REPORTS - Log Events report'
         eventobject_list = context['object_list']
         
-		eventCodes = eventType_codes.objects.values('code','desc_sv')
+        eventCodes = eventType_codes.objects.values('code','desc_sv')
 		print(eventCodes)
         event_list = []
         for i in eventobject_list:
@@ -110,9 +110,9 @@ class eventsReport(ListView):
         event_list2 = []
         for i in list(set(event_list)):
             event_list2.append([i,event_list.count(i)])
-            print(i)
+            
             #event_list2.append([i,event_list[i].eventDetail])
         #print '#####################################: %s' % str(event_list2)
-        print(sorted(event_list2))
+        
         context['event_list'] = sorted(event_list2)
         return context
