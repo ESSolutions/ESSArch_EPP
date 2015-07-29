@@ -99,7 +99,7 @@ class eventsReport(ListView):
         eventobject_list = context['object_list']
         
         eventCodes = eventType_codes.objects.values('code','desc_sv')
-		print(eventCodes)
+        print(eventCodes)
         event_list = []
         for i in eventobject_list:
             b = ""
