@@ -245,9 +245,9 @@
 							if (document.getElementById("copyonlyflag").checked == true){
 								data = "Copy  Only";
 								if ($('#copypath').val() == ""){
-									//document.getElementById("copypath" = 
+								 
 									var copyPathAnswer = prompt(" You must tell us the Copy Path");
-									//document.getElementById("copypath") = copyPathAnswer;
+									var copyvariable = document.getElementById("copypath");
 								}
 								
 							}
