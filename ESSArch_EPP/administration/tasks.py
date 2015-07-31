@@ -517,13 +517,13 @@ class RobotInventoryTask(JobtasticTask):
                 UpdateTapeLocationFlag = 0    
                 if TapeExistFlag:
                     if storageMedium_objs[0].storageMediumStatus == 0:
-                        robot_obj.status = 'InactiveTape'
+                        robot_obj.status = 'Inactive'
                         UpdateTapeLocationFlag = 0
                     elif storageMedium_objs[0].storageMediumStatus == 20:
-                        robot_obj.status = 'WriteTape'
+                        robot_obj.status = 'Write'
                         UpdateTapeLocationFlag = 1
                     else:
-                        robot_obj.status = 'ArchTape'
+                        robot_obj.status = 'Full'
                         UpdateTapeLocationFlag = 1
                     if UpdateTapeLocationFlag == 1:
                         timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)

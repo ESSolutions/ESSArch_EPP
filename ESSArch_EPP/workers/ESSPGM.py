@@ -1671,7 +1671,7 @@ class Robot:
                                     logging.debug('self.s_elements[6][:6]: ' + str(self.s_elements[6][:6]))
                                     logging.debug('self.TapeExistFlag: ' + str(self.TapeExistFlag))
                                 if self.TapeExistFlag:                        #Check if t_id exist in archtape
-                                    res,errno,why = ESSDB.DB().action('robot','UPD',('status','ArchTape',
+                                    res,errno,why = ESSDB.DB().action('robot','UPD',('status','Full',
                                                                                      't_id',self.s_elements[6][:6],
                                                                                      'drive_id','99'),
                                                                                     ('slot_id',self.s_elements[3]))
@@ -1687,7 +1687,7 @@ class Robot:
                                     if errno:
                                         logging.error('Failed to update location for MediumID: %s , error: %s',self.s_elements[6][:6],str(why))
                                 else:
-                                    res,errno,why = ESSDB.DB().action('robot','UPD',('status','Ready',
+                                    res,errno,why = ESSDB.DB().action('robot','UPD',('status','Empty',
                                                                                      't_id',self.s_elements[6][:6],
                                                                                      'drive_id','99'),
                                                                                     ('slot_id',self.s_elements[3]))
@@ -1723,9 +1723,9 @@ class Robot:
                         self.e_elements = self.word.split(self.line)
                         if Debug: print 'Export/Import Element:', self.e_elements
                         if self.e_elements[6] == 'Full':
-                            self.TapeExistFlag = ESSDB.DB().action('archtape','GET',('status',),('t_id',self.e_elements[8]))
-                            if self.TapeExistFlag:                        #Check if t_id exist in archtape
-                                ESSDB.DB().action('robotie','UPD',('status','ArchTape','t_id',self.e_elements[8],'drive_id','99'),('slot_id',self.e_elements[3]))
+                            self.TapeExistFlag = ESSDB.DB().action('Full','GET',('status',),('t_id',self.e_elements[8]))
+                            if self.TapeExistFlag:                        #Check if t_id exist in archtape (full tape)
+                                ESSDB.DB().action('robotie','UPD',('status','Full','t_id',self.e_elements[8],'drive_id','99'),('slot_id',self.e_elements[3]))
                             else:
                                 ESSDB.DB().action('robotie','UPD',('status','Ready','t_id',self.e_elements[8],'drive_id','99'),('slot_id',self.e_elements[3]))
                         elif self.e_elements[6] == 'Empty':

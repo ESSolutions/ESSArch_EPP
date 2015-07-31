@@ -312,11 +312,11 @@ class Robot:
             StorageMedium_list = ESSDB.DB().action(self.StorageMediumTable,'GET',('storageMediumID','storageMediumStatus'),('storageMediumID',volser))
             if len(StorageMedium_list) > 0:
                 if StorageMedium_list[0][1] == 0:
-                    ESSDB.DB().action('robot','UPD',('status','InactiveTape','drive_id','99'),('slot_id',robot_db[0]))
+                    ESSDB.DB().action('robot','UPD',('status','Inactive','drive_id','99'),('slot_id',robot_db[0]))
                 elif StorageMedium_list[0][1] == 20:
-                    ESSDB.DB().action('robot','UPD',('status','WriteTape','drive_id','99'),('slot_id',robot_db[0]))
+                    ESSDB.DB().action('robot','UPD',('status','Write','drive_id','99'),('slot_id',robot_db[0]))
                 else:
-                    ESSDB.DB().action('robot','UPD',('status','ArchTape','drive_id','99'),('slot_id',robot_db[0]))
+                    ESSDB.DB().action('robot','UPD',('status','Full','drive_id','99'),('slot_id',robot_db[0]))
             else:
                 ESSDB.DB().action('robot','UPD',('status','Ready','drive_id','99'),('slot_id',robot_db[0]))
         else:
