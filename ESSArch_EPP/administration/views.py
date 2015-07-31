@@ -758,7 +758,7 @@ class DeactivateMedia(FormView):
         for media in robotMediumList:
             media.status = 'Inactive'
             media.save(update_fields=['status'])
-			event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
+            event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
             logger.info(event_info_robot)
 			
             if ExtDBupdate:
