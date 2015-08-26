@@ -693,15 +693,15 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         return deactivate_media_list, need_to_migrate_list
         
 
-    def render_to_response(self, form, **kwargs):
+    def render_to_response(self, form, **kwargs): #Paginator
         '''Render Datatables expected JSON format'''
         page = self.get_page(form)
         #print 'page_type_object_list: %s' % type(page.object_list)
         page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
         deactivate_media_list, need_to_migrate_list = self.get_deactivate_list()
         data = {
-            'iTotalRecords': page.paginator.count,
-            'iTotalDisplayRecords': page.paginator.count,
+            'iTotalRecords': len(deactivate_media_list), #page.paginator.count
+            'iTotalDisplayRecords': len(deactivate_media_list), #page.paginator.count
             'sEcho': form.cleaned_data['sEcho'],
             'aaData': self.get_rows(page.object_list),
             'deactivate_media_list': deactivate_media_list,
@@ -755,6 +755,13 @@ class DeactivateMedia(FormView):
             event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
             logger.info(event_info)
             ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
+        robotMediumList = robot.objects.filter(t_id__in=MediumList)
+        for media in robotMediumList:
+            media.status = 'Inactive'
+            media.save(update_fields=['status'])
+            event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
+            logger.info(event_info_robot)
+			
             if ExtDBupdate:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
                                                                                                                                 ('storageMediumID',storageMedium_obj.storageMediumID))

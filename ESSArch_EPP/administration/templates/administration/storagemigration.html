@@ -39,7 +39,7 @@
                 </td> 
             </tr>
             <tr class="copypath">
-                <td>Copy path</td>
+                <td class="required">Copy path</td>
                 <td>
                     <input id="copypath" type="text"
                         class="input-xxlarge"
@@ -313,6 +313,7 @@ function removeTarget(){
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
 		document.getElementById("enablePlusBoxField").innerHTML = "";
+		<!-- $('#filter-5').val("") -->
 		
 		
 	}
