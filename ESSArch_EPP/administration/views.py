@@ -33,11 +33,17 @@ from django.db.models import Q
 from operator import or_, and_
 
 #from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
-from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
-                           storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
-                           MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
+#from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
+#                           storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
+#                           MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
 
-from configuration.models import sm, DefaultValue, ESSConfig, ESSArchPolicy
+from essarch.models import ArchiveObject, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, \
+                                        MigrationQueue, MigrationReqType_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
+                           
+from Storage.models import storage, storageMedium, ReqStatus_CHOICES, MediumType_CHOICES, MediumStatus_CHOICES,\
+                                        MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES
+
+from configuration.models import sm, DefaultValue, ESSConfig, ArchivePolicy
 
 from administration.tasks import MigrationTask, RobotInventoryTask
 
@@ -67,6 +73,7 @@ import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
 
 ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 
+'''
 class storageMediumList3_old(ListView):
     """
     List storageMedium
@@ -85,6 +92,7 @@ class storageMediumList3_old(ListView):
         context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
         context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
         return context
+'''
 
 class storageMediumDetail(DetailView):
     """
@@ -100,7 +108,10 @@ class storageMediumDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(storageMediumDetail, self).get_context_data(**kwargs)
         storageMediumID = context['object'].storageMediumID
-        content_list = storage.objects.filter(storageMediumID=storageMediumID).order_by('id')
+        #content_list = storage.objects.filter(storagemedium__storageMediumID=storageMediumID).order_by('id')
+        content_list = storage.objects.filter(storagemedium__storageMediumID=storageMediumID).extra(
+                                                                     select={'contentLocationValue_int': 'CAST(contentLocationValue AS UNSIGNED)'}
+                                                                     ).order_by('-contentLocationValue_int')
         context['content_list'] = content_list
         context['label'] = 'Detail information - storage medium'
         context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
@@ -113,8 +124,9 @@ class storageMediumDetail(DetailView):
 class storageDatatablesView(DatatablesView):
     model = storage
     fields = (
-        "id", 
-        "ObjectIdentifierValue",
+        #"id",
+        "contentLocationValue", 
+        "archiveobject__ObjectIdentifierValue",
         "contentLocationValue",
     )
     def get_queryset(self):
@@ -122,7 +134,7 @@ class storageDatatablesView(DatatablesView):
         qs = super(DatatablesView, self).get_queryset()
         storageMediumID = self.request.GET.get('storageMediumID',None)
         if storageMediumID:
-            qs = qs.filter(storageMediumID=storageMediumID)
+            qs = qs.filter(storagemedium__storageMediumID=storageMediumID)
         return qs
 
 #def storageMediumList2(request):
@@ -156,7 +168,7 @@ class storageMediumList(TemplateView):
 class storageMediumDatatablesView(DatatablesView):
     model = storageMedium
     fields = (
-        "id",
+        "storageMediumUUID",
         "storageMediumID",
         "storageMedium",
         "storageMediumStatus",
@@ -287,10 +299,8 @@ class robotReqDelete(DeleteView):
     def dispatch(self, *args, **kwargs):
         return super(robotReqDelete, self).dispatch( *args, **kwargs)
 
+"""
 class robotInventory(DetailView):
-    """
-    Submit and View result from robot inventory
-    """
     #model = ArchiveObject
     template_name='administration/robotinventory_detail.html'
 
@@ -338,7 +348,7 @@ class robotInventory(DetailView):
         context['status_detail'] = status_detail
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context
-    
+"""
 
 class StorageMigration(TemplateView):
     template_name = 'administration/storagemigration.html'
@@ -355,17 +365,14 @@ class StorageMigration(TemplateView):
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
     
-    
-            
 class TargetPrePopulation(View):
 
     @method_decorator(permission_required('essarch.list_storageMedium'))
     def dispatch(self, *args, **kwargs):
-    
         return super(TargetPrePopulation, self).dispatch( *args, **kwargs)
         
     def get_enabled_policies(self, *args, **kwargs):
-        
+        # Change to ArchivePolicy.....
         allPolicies = ESSArchPolicy.objects.all()
         enabled_policies = []
         policy_selection_list =[]
@@ -408,8 +415,6 @@ class TargetPrePopulation(View):
     def get(self, request, *args, **kwargs):
         
         return self.json_response(request)  
-    
-    
     
 class StorageMaintenance(TemplateView):
     template_name = 'administration/storagemaintenance.html'
@@ -693,15 +698,15 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         return deactivate_media_list, need_to_migrate_list
         
 
-    def render_to_response(self, form, **kwargs):
+    def render_to_response(self, form, **kwargs): #Paginator
         '''Render Datatables expected JSON format'''
         page = self.get_page(form)
         #print 'page_type_object_list: %s' % type(page.object_list)
         page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
         deactivate_media_list, need_to_migrate_list = self.get_deactivate_list()
         data = {
-            'iTotalRecords': page.paginator.count,
-            'iTotalDisplayRecords': page.paginator.count,
+            'iTotalRecords': len(deactivate_media_list), #page.paginator.count
+            'iTotalDisplayRecords': len(deactivate_media_list), #page.paginator.count
             'sEcho': form.cleaned_data['sEcho'],
             'aaData': self.get_rows(page.object_list),
             'deactivate_media_list': deactivate_media_list,
@@ -745,6 +750,7 @@ class DeactivateMedia(FormView):
                 MediumList.append(o[0])
         else:
             MediumList = form.cleaned_data['MediumList'].split(' ')
+        
         #print 'MediumList: %s' % MediumList
         storageMedium_objs = storageMedium.objects.filter(storageMediumID__in=MediumList)
         #print len(storageMedium_objs)
@@ -755,13 +761,22 @@ class DeactivateMedia(FormView):
             event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
             logger.info(event_info)
             ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
+
             if ExtDBupdate:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
                                                                                                                                 ('storageMediumID',storageMedium_obj.storageMediumID))
                 if ext_errno: logger.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
                 else:
                     storageMedium_obj.ExtDBdatetime = timestamp_utc
-                    storageMedium_obj.save(update_fields=['ExtDBdatetime'])            
+                    storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+        
+        robotMediumList = robot.objects.filter(t_id__in=MediumList)
+        for media in robotMediumList:
+            media.status = 'Inactive'
+            media.save(update_fields=['status'])
+            event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
+            logger.info(event_info_robot)
+            
         if self.request.is_ajax():
             '''Render Datatables expected JSON format'''
             data = {

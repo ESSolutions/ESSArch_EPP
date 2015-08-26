@@ -31,6 +31,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
 from django.contrib import admin
 from picklefield.fields import PickledObjectField
+from Storage.models import MediumType_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES
 
 import datetime
 import sys
@@ -226,7 +227,7 @@ INFORMATIONCLASS_Policy_CHOICES = (
     (3, '3'),
     (4, '4'),
 )
-
+"""
 MediumType_CHOICES = (
     (200, 'DISK'),
     (300, 'TAPE'),
@@ -255,7 +256,7 @@ MediumBlockSize_CHOICES = (
     (1024, '512K'),
     (2048, '1024K'),
 )
-
+"""
 minChunkSize_CHOICES = (
     (0, 'Disabled'),
     (1000000, '1 MByte'),
@@ -269,6 +270,7 @@ minContainerSize_CHOICES = (
     (0, 'Disabled'),
 )
 
+"""
 class ESSArchPolicy(models.Model):
     PolicyName          = models.CharField('Policy Name', max_length=255)
     PolicyID            = models.IntegerField('Policy ID', unique=True)
@@ -327,6 +329,7 @@ class ESSArchPolicy(models.Model):
     class Meta:
         db_table = 'ESSArchPolicy'
         verbose_name = 'Archive policy'
+"""
 
 class ArchivePolicy(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

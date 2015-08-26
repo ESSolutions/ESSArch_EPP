@@ -87,6 +87,14 @@ MediumLocationStatus_CHOICES = (
     (50, 'Robot'),
 )
 
+MediumBlockSize_CHOICES = (
+    (128, '64K'),
+    (256, '128K'),
+    (512, '256K'),
+    (1024, '512K'),
+    (2048, '1024K'),
+)
+
 class storageMedium(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     storageMediumUUID = models.CharField(max_length=36, unique=True)
@@ -95,7 +103,7 @@ class storageMedium(models.Model):
     storageMediumDate = models.DateTimeField()
     storageMediumLocation = models.CharField(max_length=255)
     storageMediumLocationStatus = models.IntegerField(choices=MediumLocationStatus_CHOICES)
-    storageMediumBlockSize = models.IntegerField()
+    storageMediumBlockSize = models.IntegerField(choices=MediumBlockSize_CHOICES)
     storageMediumUsedCapacity = models.BigIntegerField()
     storageMediumStatus = models.IntegerField(choices=MediumStatus_CHOICES)
     storageMediumFormat = models.IntegerField(choices=MediumFormat_CHOICES)

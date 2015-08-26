@@ -32,7 +32,7 @@ from django.utils.safestring import mark_safe
 from django.forms.utils import flatatt
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from configuration.models import ESSArchPolicy, ArchivePolicy
+from configuration.models import ArchivePolicy
 #import django_tables2 as tables
 #from django_tables2.utils import A
 from djcelery.models import TaskMeta
@@ -239,7 +239,7 @@ RobotReqType_CHOICES = (
 #    ('pending', 'Mount/Unmount Pending'),
 #    ('mounting', 'Mount/Unmount Progress'),
 #)
-
+"""
 MediumType_CHOICES = (
     (200, 'DISK'),
     (301, 'IBM-LTO1'),
@@ -279,6 +279,7 @@ MediumBlockSize_CHOICES = (
     (1024, '512K'),
     (2048, '1024K'),
 )
+"""
 
 eventOutcome_CHOICES = (
     (0, 'OK'),
@@ -688,6 +689,7 @@ class IngestQueueFormUpdate(IngestQueueForm):
 #
 # Administration models and forms
 #
+"""
 class storageMedium(models.Model):
     #id = models.AutoField(big=True,primary_key=True)
     id = BigAutoField(primary_key=True)
@@ -747,6 +749,7 @@ class storage(models.Model):
         permissions = (
             ("list_storage", "Can list storage"),
         )
+"""
         
 class robot(models.Model):
     slot_id = models.IntegerField(null=True)
