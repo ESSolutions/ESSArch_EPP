@@ -284,13 +284,13 @@ class CheckStorageMediumsTask(JobtasticTask):
             alarm_sub = ''
             alarm_msg = ''
             if task == tasks_todo.pop(0):
-                if task.status == 'ArchTape':
+                if task.status == 'Full':
                     event_info = '%s - Slot:%s' % (task.t_id, task.slot_id)
                     ArchTape_list.append(event_info)
-                elif task.status == 'WriteTape':
+                elif task.status == 'Write':
                     event_info = '%s - Slot:%s' % (task.t_id, task.slot_id)
                     WriteTape_list.append(event_info)
-                elif task.status == 'Ready':
+                elif task.status == 'Empty':
                     event_info = '%s - Slot:%s' % (task.t_id, task.slot_id)
                     EmptyTape_list.append(event_info)
                     for target in target_dict.keys():

@@ -226,6 +226,7 @@
 	                    //"mColumns": [1,],
 	                    //"sFieldSeperator": ",",
 	                    "sAjaxUrl" : Django.url('migration_create_parameter'),
+						//if(document.getElementById("copyonlyflag").checked == true && $('#copypath').val() != "" ){
 	                    "fnClick": function( nButton, oConfig ) {
 	                        //var sData = this.fnGetTableData(oConfig);
 	                        var aData = this.fnGetSelectedData();
@@ -241,7 +242,15 @@
 	                        //alert('aaData:'+aaData+'end')
 	                        //console.dir(aData);	                    
 	                        var data = $('#filter-5').val();
-
+							if (document.getElementById("copyonlyflag").checked == true){
+								data = "Copy  Only";
+								if ($('#copypath').val() == ""){
+								 
+									var copyPathAnswer = prompt(" You must tell us the Copy Path");
+									document.getElementById("copypath").value = copyPathAnswer;
+								}
+								
+							}
 	                        if (confirm ('Do you really want to start migration to target: '+data +'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,

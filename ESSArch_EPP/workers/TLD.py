@@ -273,6 +273,7 @@ class Robot:
         unmountout = unmount_proc.communicate()
         if unmount_proc.returncode == 0:
             logger.info('Unmount tape: ' + volser + ' Successful')
+            
             ESSPGM.Events().create('2010','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
             robotdrives_obj.status='Ready'
             robotdrives_obj.t_id=''
@@ -291,6 +292,7 @@ class Robot:
                 else:
                     robot_obj.status='Full'
                     robot_obj.drive_id='99'
+
             else:
                 robot_obj.status='New'
                 robot_obj.drive_id='99'

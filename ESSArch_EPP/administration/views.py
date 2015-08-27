@@ -761,7 +761,17 @@ class DeactivateMedia(FormView):
             event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
             logger.info(event_info)
             ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
+<<<<<<< HEAD
 
+=======
+        robotMediumList = robot.objects.filter(t_id__in=MediumList)
+        for media in robotMediumList:
+            media.status = 'Inactive'
+            media.save(update_fields=['status'])
+            event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
+            logger.info(event_info_robot)
+			
+>>>>>>> refs/remotes/origin/master
             if ExtDBupdate:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
                                                                                                                                 ('storageMediumID',storageMedium_obj.storageMediumID))
