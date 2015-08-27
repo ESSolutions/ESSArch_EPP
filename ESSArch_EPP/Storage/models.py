@@ -53,7 +53,6 @@ ReqStatus_CHOICES = (
 
 MediumType_CHOICES = (
     (200, 'DISK'),
-    (300, 'TAPE'),
     (301, 'IBM-LTO1'),
     (302, 'IBM-LTO2'),
     (303, 'IBM-LTO3'),
@@ -62,9 +61,14 @@ MediumType_CHOICES = (
     (306, 'IBM-LTO6'),
     (325, 'HP-LTO5'),
     (326, 'HP-LTO6'),
-    (400, 'CAS'),
     (401, 'HDFS'),
     (402, 'HDFS-REST'),
+)
+
+StorageType_CHOICES = (
+    (200, 'DISK'),
+    (300, 'TAPE'),
+    (400, 'CAS'),
 )
 
 MediumFormat_CHOICES = (
@@ -125,7 +129,7 @@ class storageMedium(models.Model):
         
 class storage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    contentLocationType = models.IntegerField(choices=MediumType_CHOICES)
+    contentLocationType = models.IntegerField(choices=StorageType_CHOICES)
     contentLocationValue = models.CharField(max_length=255)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)

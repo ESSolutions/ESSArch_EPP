@@ -31,7 +31,7 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.db import models
 from django.contrib import admin
 from picklefield.fields import PickledObjectField
-from Storage.models import MediumType_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES
+from Storage.models import MediumType_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, StorageType_CHOICES
 
 import datetime
 import sys
@@ -361,7 +361,7 @@ class StorageMethod(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField('Name', max_length=255, blank=True)
     status = models.IntegerField('Storage method status', choices=enabled_disabled_CHOICES,default=0)
-    type = models.IntegerField('Type', choices=MediumType_CHOICES,default=200)
+    type = models.IntegerField('Type', choices=StorageType_CHOICES,default=200)
     archivepolicy = models.ForeignKey('ArchivePolicy')
 
     def __unicode__(self):
