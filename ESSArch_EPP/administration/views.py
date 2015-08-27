@@ -372,36 +372,34 @@ class TargetPrePopulation(View):
         return super(TargetPrePopulation, self).dispatch( *args, **kwargs)
         
     def get_enabled_policies(self, *args, **kwargs):
-        # Change to ArchivePolicy.....
-        allPolicies = ESSArchPolicy.objects.all()
-        enabled_policies = []
         policy_selection_list =[]
-        for p in allPolicies: 
-            if p.PolicyStat == 1:
-                    enabled_policies.append(p)
-
-        i = 0
-        while (i < len(enabled_policies)):
-            
-            a = enabled_policies[i]
-
-            Policy ={}
-            Policy['PolicyID'] = a.PolicyID
-            Policy['PolicyName'] =  a.PolicyName
-            
+        ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1)
+        for ArchivePolicy_obj in ArchivePolicy_objs:
             targetlist = []
-
-            if a.sm_1 == True and 299 <a.sm_type_1 <400:
-                        targetlist.append(a.sm_target_1)
-            if a.sm_2 == True and 299 <a.sm_type_2 <400:
-                        targetlist.append(a.sm_target_2)
-            if a.sm_3 == True and 299 <a.sm_type_3 <400:
-                        targetlist.append(a.sm_target_3)
-            if a.sm_4 == True and 299 <a.sm_type_4 <400:
-                        targetlist.append(a.sm_target_4)            
+            sm_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1, type=300)
+            for sm_obj in sm_objs:
+                #st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 2])
+                st_objs = sm_obj.storagetarget_set.filter(status=1)
+                if st_objs.count() == 1:
+                    st_obj = st_objs[0]
+                elif st_objs.count() == 0:
+                    #logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
+                    break
+                elif st_objs.count() > 1:
+                    #logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
+                    break
+                if st_obj.target.status == 1:
+                    target_obj = st_obj.target
+                    targetlist.append(target_obj.target)
+                else:
+                    #logger.error('The target %s is disabled' % target_obj.name)
+                    break
+            
+            Policy ={}
+            Policy['PolicyID'] = ArchivePolicy_obj.PolicyID
+            Policy['PolicyName'] =  ArchivePolicy_obj.PolicyName
             Policy['targetlist'] = targetlist
             policy_selection_list.append(Policy)
-            i = i +1
         
         return policy_selection_list  
 
@@ -761,17 +759,7 @@ class DeactivateMedia(FormView):
             event_info = 'Setting mediumstatus to inactive for media: %s, ReqPurpose: %s' % (storageMedium_obj.storageMediumID,ReqPurpose)
             logger.info(event_info)
             ESSPGM.Events().create('2090','','Storage maintenance',__version__,'0',event_info,2,storageMediumID=storageMedium_obj.storageMediumID)
-<<<<<<< HEAD
 
-=======
-        robotMediumList = robot.objects.filter(t_id__in=MediumList)
-        for media in robotMediumList:
-            media.status = 'Inactive'
-            media.save(update_fields=['status'])
-            event_info_robot = 'Setting status to Inactive for media: %s, ReqPurpose: %s' % (media.t_id,ReqPurpose)
-            logger.info(event_info_robot)
-			
->>>>>>> refs/remotes/origin/master
             if ExtDBupdate:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumStatus',storageMedium_obj.storageMediumStatus),
                                                                                                                                 ('storageMediumID',storageMedium_obj.storageMediumID))
