@@ -32,7 +32,8 @@ import django
 django.setup()
 
 # own models etc
-from essarch.models import storageMedium, storage, ArchiveObject
+from essarch.models import ArchiveObject
+from Storage.models import storageMedium, storage
 
 def set_uuid_to_storage():
 

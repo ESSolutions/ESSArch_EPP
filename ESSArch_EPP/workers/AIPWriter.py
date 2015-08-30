@@ -106,7 +106,7 @@ class WorkingThread:
                     if st_obj.target.status == 1:
                         target_obj = st_obj.target
                     else:
-                        logger.error('The target %s is disabled' % target_obj.name)
+                        logger.error('The target %s is disabled' % st_obj.target.name)
                         break
                     st_objs_to_check.append(st_obj)
                     ArchiveObject_objs = ArchiveObject.objects.filter(Q(PolicyId__PolicyID = PolicyID),

@@ -28,7 +28,7 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSArchPolicy, ESSConfig, ESSProc, DefaultValue, ArchivePolicy,  StorageMethod, StorageTarget, StorageTargets
+from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSConfig, ESSProc, DefaultValue, ArchivePolicy,  StorageMethod, StorageTarget, StorageTargets
 from django.contrib import admin
 #import nested_admin
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
@@ -128,6 +128,7 @@ class IPParameterAdmin( admin.ModelAdmin ):
 
 admin.site.register(IPParameter, IPParameterAdmin)
 
+"""
 # ESSArchPolicy
 class ESSArchPolicyAdmin( admin.ModelAdmin ):
     list_display = ( 'PolicyName', 'PolicyID', 'PolicyStat', 'AISProjectName', 'AISProjectID', 'Mode' )
@@ -209,6 +210,7 @@ class ESSArchPolicyAdmin( admin.ModelAdmin ):
                 )
 
 admin.site.register(ESSArchPolicy, ESSArchPolicyAdmin)
+"""
 
 # ArchivePolicy
 class StorageTargetInline(NestedStackedInline):

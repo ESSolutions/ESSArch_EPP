@@ -31,24 +31,28 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 # Custom fields
 #
 from django.db.models import fields
-from south.modelsinspector import add_introspection_rules
+#from south.modelsinspector import add_introspection_rules
 from django.core import exceptions
 
 class BigAutoField(fields.AutoField):
 
     def db_type(self, connection):
-        if 'mysql' in connection.__class__.__module__:
+        engine = connection.settings_dict['ENGINE']
+        if 'mysql' in engine:
             return "bigint AUTO_INCREMENT"
-        elif 'oracle' in connection.__class__.__module__:
+        elif 'oracle' in engine:
             return "NUMBER(19)"
-        elif 'postgres' in connection.__class__.__module__:
+        elif 'postgres' in engine:
             return "bigserial"
         else:
-            raise NotImplemented
-    
+            raise Exception('NotImplemented')
+
+    def get_related_db_type(self, connection):
+        return fields.BigIntegerField().db_type(connection)
+
     def get_internal_type(self):
         return "BigAutoField"
-    
+
     def to_python(self, value):
         if value is None:
             return value
@@ -58,4 +62,4 @@ class BigAutoField(fields.AutoField):
             raise exceptions.ValidationError(
                 _("This value must be a long integer."))
 
-add_introspection_rules([], ["^essarch\.fields\.BigAutoField"])
+#add_introspection_rules([], ["^essarch\.fields\.BigAutoField"])

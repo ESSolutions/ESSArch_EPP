@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,16 +19,15 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from configuration.models import StorageMethod, StorageTarget, StorageTargets
-from essarch.models import ArchiveObject, AccessQueue
 from picklefield.fields import PickledObjectField
 import uuid
 
@@ -117,7 +116,7 @@ class storageMedium(models.Model):
     CreateAgentIdentifierValue = models.CharField(max_length=255)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
-    storagetarget = models.ForeignKey(StorageTargets)
+    storagetarget = models.ForeignKey('configuration.StorageTargets')
     class Meta:
         permissions = (
             ("list_storageMedium", "Can list storageMedium"),
@@ -126,6 +125,12 @@ class storageMedium(models.Model):
     def __unicode__(self):
         if len(self.storageMediumID): return self.storageMediumID
         else: return unicode(self.id)
+    
+    def check_db_sync(self):
+        if self.LocalDBdatetime is not None and self.ExtDBdatetime is not None:
+            if (self.LocalDBdatetime-self.ExtDBdatetime).total_seconds() == 0: return True
+            else: return False
+        else: return False
         
 class storage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -133,8 +138,8 @@ class storage(models.Model):
     contentLocationValue = models.CharField(max_length=255)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
-    archiveobject = models.ForeignKey(ArchiveObject, related_name='Storage_set', to_field='ObjectUUID')
-    storagemedium = models.ForeignKey(storageMedium)
+    archiveobject = models.ForeignKey('essarch.ArchiveObject', related_name='Storage_set', to_field='ObjectUUID')
+    storagemedium = models.ForeignKey('storageMedium')
     class Meta:
         permissions = (
             ("list_storage", "Can list storage"),
@@ -152,6 +157,12 @@ class storage(models.Model):
         name = '%s @ %s' % (ObjectIdentifierValue, storageMediumID)
         return name
 
+    def check_db_sync(self):
+        if self.LocalDBdatetime is not None and self.ExtDBdatetime is not None:
+            if (self.LocalDBdatetime-self.ExtDBdatetime).total_seconds() == 0: return True
+            else: return False
+        else: return False
+
 
 class IOQueue(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -164,13 +175,13 @@ class IOQueue(models.Model):
     Status = models.IntegerField(blank=True, default=0, choices=ReqStatus_CHOICES)
     task_id = models.CharField(max_length=36,blank=True)
     posted = models.DateTimeField(auto_now_add=True)
-    archiveobject = models.ForeignKey(ArchiveObject, to_field='ObjectUUID', blank=True, null=True)
-    storagemethod = models.ForeignKey(StorageMethod, blank=True, null=True)
-    storagemethodtarget = models.ForeignKey(StorageTarget, blank=True, null=True)
-    storagetarget = models.ForeignKey(StorageTargets, blank=True, null=True)
-    storagemedium = models.ForeignKey(storageMedium, blank=True, null=True)
-    storage = models.ForeignKey(storage, blank=True, null=True)
-    accessqueue = models.ForeignKey(AccessQueue, blank=True, null=True)
+    archiveobject = models.ForeignKey('essarch.ArchiveObject', to_field='ObjectUUID', blank=True, null=True)
+    storagemethod = models.ForeignKey('configuration.StorageMethod', blank=True, null=True)
+    storagemethodtarget = models.ForeignKey('configuration.StorageTarget', blank=True, null=True)
+    storagetarget = models.ForeignKey('configuration.StorageTargets', blank=True, null=True)
+    storagemedium = models.ForeignKey('storageMedium', blank=True, null=True)
+    storage = models.ForeignKey('storage', blank=True, null=True)
+    accessqueue = models.ForeignKey('essarch.AccessQueue', blank=True, null=True)
     class Meta:
         permissions = (
             ("list_IOQueue", "Can list IOQueue"),

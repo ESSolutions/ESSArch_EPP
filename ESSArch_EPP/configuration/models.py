@@ -1,8 +1,6 @@
-#!/usr/bin/env /ESSArch/python27/bin/python
-# -*- coding: UTF-8 -*-
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,12 +19,12 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
 
 from django.db import models
 from django.contrib import admin
@@ -227,36 +225,7 @@ INFORMATIONCLASS_Policy_CHOICES = (
     (3, '3'),
     (4, '4'),
 )
-"""
-MediumType_CHOICES = (
-    (200, 'DISK'),
-    (300, 'TAPE'),
-    (301, 'IBM-LTO1'),
-    (302, 'IBM-LTO2'),
-    (303, 'IBM-LTO3'),
-    (304, 'IBM-LTO4'),
-    (305, 'IBM-LTO5'),
-    (306, 'IBM-LTO6'),
-    (325, 'HP-LTO5'),
-    (326, 'HP-LTO6'),
-    (400, 'CAS'),
-    (401, 'HDFS'),
-    (402, 'HDFS-REST'),
-)
 
-MediumFormat_CHOICES = (
-    (102, '102 (Media label)'),
-    (103, '103 (AIC support)'),
-)
-
-MediumBlockSize_CHOICES = (
-    (128, '64K'),
-    (256, '128K'),
-    (512, '256K'),
-    (1024, '512K'),
-    (2048, '1024K'),
-)
-"""
 minChunkSize_CHOICES = (
     (0, 'Disabled'),
     (1000000, '1 MByte'),

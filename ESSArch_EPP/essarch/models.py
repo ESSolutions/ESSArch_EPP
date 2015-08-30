@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,23 +19,19 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-from celery.worker.strategy import default
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+
 from django.db import models
 from django import forms
 from django.utils.safestring import mark_safe
 from django.forms.utils import flatatt
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from configuration.models import ArchivePolicy
-#import django_tables2 as tables
-#from django_tables2.utils import A
-from djcelery.models import TaskMeta
 from picklefield.fields import PickledObjectField
 from essarch.fields import BigAutoField
 import uuid
@@ -231,56 +227,6 @@ RobotReqType_CHOICES = (
     (1, 'Robot inventory'),
 )
 
-#RobotReqStatus_CHOICES = (
-#    ('0', 'Pending'),
-#    ('5', 'Progress'),
-#    ('20', 'Success'),
-#    ('100', 'FAIL'),
-#    ('pending', 'Mount/Unmount Pending'),
-#    ('mounting', 'Mount/Unmount Progress'),
-#)
-"""
-MediumType_CHOICES = (
-    (200, 'DISK'),
-    (301, 'IBM-LTO1'),
-    (302, 'IBM-LTO2'),
-    (303, 'IBM-LTO3'),
-    (304, 'IBM-LTO4'),
-    (305, 'IBM-LTO5'),
-    (306, 'IBM-LTO6'),
-    (325, 'HP-LTO5'),
-    (326, 'HP-LTO6'),
-)
-
-MediumFormat_CHOICES = (
-    (102, '102 (Media label)'),
-    (103, '103 (AIC support)'),
-)
-
-MediumStatus_CHOICES = (
-    (0, 'Inactive'),
-    (20, 'Write'),
-    (30, 'Full'),
-    (100, 'FAIL'),
-)
-
-MediumLocationStatus_CHOICES = (
-    (10, '10'),
-    (20, '20'),
-    (30, '30'),
-    (40, '40'),
-    (50, 'Robot'),
-)
-
-MediumBlockSize_CHOICES = (
-    (128, '64K'),
-    (256, '128K'),
-    (512, '256K'),
-    (1024, '512K'),
-    (2048, '1024K'),
-)
-"""
-
 eventOutcome_CHOICES = (
     (0, 'OK'),
     (1, 'Failed'),
@@ -296,7 +242,7 @@ class ArchiveObject(models.Model):
     ObjectUUID = models.CharField(max_length=36, unique=True)
     #PolicyId = models.IntegerField(null=True)
     #PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
-    PolicyId = models.ForeignKey(ArchivePolicy, db_column='PolicyId', to_field='PolicyID', default=0)
+    PolicyId = models.ForeignKey('configuration.ArchivePolicy', db_column='PolicyId', to_field='PolicyID', default=0)
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
     ObjectPackageName = models.CharField(max_length=255)
     ObjectSize = models.BigIntegerField(null=True)
@@ -335,6 +281,11 @@ class ArchiveObject(models.Model):
         return self.ObjectIdentifierValue
     def get_absolute_url(self):
         return reverse('ingest_listobj')
+    def check_db_sync(self):
+        if self.LocalDBdatetime is not None and self.ExtDBdatetime is not None:
+            if (self.LocalDBdatetime-self.ExtDBdatetime).total_seconds() == 0: return True
+            else: return False
+        else: return False
     def get_ip_list(self,StatusProcess=None,StatusProcess__lt=None,StatusProcess__in=None,StatusActivity__in=None):
         ip_list = []
         # Try to get an list of IP objects related to AIC object "IP_Object"
@@ -418,6 +369,11 @@ class ArchiveObjectMetadata(models.Model):
     ExtDBdatetime = models.DateTimeField(null=True)
     class Meta:
         db_table = 'IngestObjectMetadata'
+    def check_db_sync(self):
+        if self.LocalDBdatetime is not None and self.ExtDBdatetime is not None:
+            if (self.LocalDBdatetime-self.ExtDBdatetime).total_seconds() == 0: return True
+            else: return False
+        else: return False
 
 class ArchiveObjectRel(models.Model):
     #id = models.AutoField(big=True,primary_key=True)
@@ -486,6 +442,7 @@ class IOqueue(models.Model):
     class Meta:
         db_table = 'IOqueue'
 
+"""
 class ESSReg001(models.Model):
     #id = models.AutoField(big=True,primary_key=True)
     id = BigAutoField(primary_key=True)
@@ -532,6 +489,7 @@ class ESSReg001(models.Model):
     s019 = models.CharField(max_length=255)
     class Meta:
         db_table = 'ESSReg001'
+"""
 
 ###########################################################################
 #
@@ -689,7 +647,9 @@ class IngestQueueFormUpdate(IngestQueueForm):
 #
 # Administration models and forms
 #
-"""
+#"""
+from Storage.models import MediumType_CHOICES, MediumFormat_CHOICES, MediumLocationStatus_CHOICES, MediumStatus_CHOICES
+
 class storageMedium(models.Model):
     #id = models.AutoField(big=True,primary_key=True)
     id = BigAutoField(primary_key=True)
@@ -749,7 +709,7 @@ class storage(models.Model):
         permissions = (
             ("list_storage", "Can list storage"),
         )
-"""
+#"""
         
 class robot(models.Model):
     slot_id = models.IntegerField(null=True)

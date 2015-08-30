@@ -28,8 +28,8 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from jobtastic import JobtasticTask
 import ESSPGM, datetime, uuid, time, os, shutil, logging, subprocess, db_sync_ais, pytz
 from configuration.models import ESSConfig
-from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, IOqueue, robotQueue, robot, robotdrives
-from Storage.models import storageMedium
+from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, robotQueue, robot, robotdrives
+from Storage.models import storageMedium, IOQueue
 from administration.models import robot_info, robot_drive, robot_slot, robot_export
 from django.utils import timezone
 
@@ -241,7 +241,8 @@ class MigrationTask(JobtasticTask):
                         # Wait for write request to success
                         loop_num = 0
                         while 1:
-                            IOqueue_obj_list = IOqueue.objects.filter(work_uuid=self.ReqUUID) 
+                            ##### work_uuid does not exists i new model!!!!!
+                            IOqueue_obj_list = IOQueue.objects.filter(work_uuid=self.ReqUUID) 
                             if IOqueue_obj_list.exists():
                                 DbRow_IOqueue = IOqueue_obj_list[0]
                                 if DbRow_IOqueue.Status==20:

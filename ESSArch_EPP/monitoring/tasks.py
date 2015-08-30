@@ -1,6 +1,6 @@
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,19 +19,21 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+
 from jobtastic import JobtasticTask
-from configuration.models import ESSProc, ESSArchPolicy, sm
+from configuration.models import ESSProc, sm, ArchivePolicy
 import psutil, logging, os
 from django.core.mail import send_mail, mail_admins
 from datetime import datetime
 from monitoring.models import MonitoringObject
-from essarch.models import storageMedium, robot
+from essarch.models import robot
+from Storage.models import storageMedium
 
 logger = logging.getLogger('essarch.monitoring')
 
@@ -252,9 +254,34 @@ class CheckStorageMediumsTask(JobtasticTask):
         # Populating MinTape_dict and target_dict
         target_dict = {}
         MinTape_dict = {}
-        ESSArchPolicy_objs = ESSArchPolicy.objects.filter(PolicyStat=1)
-        for ep_obj in ESSArchPolicy_objs:
-            sm_objs = []
+        ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1)
+        for ArchivePolicy_obj in ArchivePolicy_objs:
+            sm_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1)
+            for sm_obj in sm_objs:
+                target_obj = None
+                st_objs = sm_obj.storagetarget_set.filter(status=1)
+                if st_objs.count() == 1:
+                    st_obj = st_objs[0]
+                elif st_objs.count() == 0:
+                    logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
+                elif st_objs.count() > 1:
+                    logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
+                if st_obj.target.status == 1:
+                    target_obj = st_obj.target
+                else:
+                    logger.error('The target %s is disabled' % st_obj.target.name)
+                
+                if target_obj is not None:
+                    if target_obj.minCapacityWarning > 0:
+                        try:
+                            if not MinTape_dict[target_obj.target] > target_obj.minCapacityWarning:
+                                MinTape_dict[target_obj.target] = target_obj.minCapacityWarning
+                        except KeyError:
+                            MinTape_dict[target_obj.target] = target_obj.minCapacityWarning
+                            target_dict[target_obj.target] = 0   
+            """                        
+            #sm_objs = ep_obj.
+            #sm_objs = []
             for i in [1,2,3,4]:
                 sm_obj = sm()
                 sm_obj.id = i
@@ -277,6 +304,7 @@ class CheckStorageMediumsTask(JobtasticTask):
                     except KeyError:
                         MinTape_dict[sm_obj.target] = sm_obj.minCapacityWarning
                         target_dict[sm_obj.target] = 0       
+        """
 
         # Create all tasks
         for counter, task in enumerate(tasks):

@@ -408,7 +408,7 @@ class TargetPrePopulation(View):
         data = self.get_enabled_policies()
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
-            mimetype='application/json'
+            content_type='application/json'
         )
     def get(self, request, *args, **kwargs):
         
@@ -787,7 +787,7 @@ class DeactivateMedia(FormView):
     def json_response(self, data):
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
-            mimetype='application/json'
+            content_type='application/json'
         )
     
 class MigrationList(ListView):
@@ -948,7 +948,7 @@ class MigrationCreate(CreateView):
     def json_response(self, data):
         return HttpResponse(
             json.dumps(data, cls=DjangoJSONEncoder),
-            mimetype='application/json'
+            content_type='application/json'
         )
         
 class MigrationUpdate(UpdateView):

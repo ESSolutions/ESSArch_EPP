@@ -1,7 +1,6 @@
-#!/usr/bin/env /ESSArch/pd/python/bin/python
 '''
     ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2013  ES Solutions AB, Henrik Ek
+    Copyright (C) 2010-2016  ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,17 +19,20 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-__majorversion__ = "2.5"
-__revision__ = "$Revision$"
-__date__ = "$Date$"
-__author__ = "$Author$"
-import re
-__version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+try:
+    import ESSArch_EPP as epp
+except ImportError:
+    __version__ = '2'
+else:
+    __version__ = epp.__version__ 
+
 import sys, logging, logging.handlers, datetime, time, uuid, ESSDB, ESSMSSQL, ESSsched, types, pytz
 from optparse import OptionParser
 from django.utils import timezone
-from essarch.models import storageMedium, storage, ArchiveObject
-from configuration.models import ArchivePolicy
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from essarch.models import ArchiveObject
+from configuration.models import ArchivePolicy, ESSProc, ESSConfig, StorageTargets
+from Storage.models import storageMedium, storage
 from django import db
 
 class work:
@@ -39,126 +41,89 @@ class work:
     "sync_storageMedium"
     ###############################################
     def sync_storageMedium(self,startDateTime,stopDateTime):
-        self.table = 'storageMedium'
-        self.rows,errno,why = ESSDB.DB().action(self.table,'GET4',('id',
-                                                                   'storageMediumUUID',
-                                                                   'storageMedium',
-                                                                   'storageMediumID',
-                                                                   'storageMediumDate',
-                                                                   'storageMediumLocation',
-                                                                   'storageMediumLocationStatus',
-                                                                   'storageMediumBlockSize',
-                                                                   'storageMediumUsedCapacity',
-                                                                   'storageMediumStatus',
-                                                                   'storageMediumFormat',
-                                                                   'storageMediumMounts',
-                                                                   'linkingAgentIdentifierValue',
-                                                                   'CreateDate',
-                                                                   'CreateAgentIdentifierValue',
-                                                                   'LocalDBdatetime',
-                                                                   'ExtDBdatetime'),
-                                                                  ('LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'ExtDBdatetime','IS','NULL','AND',
-                                                                   'LocalDBdatetime','IS NOT','NULL',
-                                                                   'OR',
-                                                                   'LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)','<', '0'))
-
-        if errno:
-            logging.error('Problem to access MySQL DB ' + str(why))
-        else:
-            for self.i in self.rows:
-                self.rows2,errno2,why2 = ESSMSSQL.DB().action(self.table,'GET3',('storageMediumID',),('storageMediumID',self.i[3]))
+        storageMedium_objs = storageMedium.objects.filter(LocalDBdatetime__range=(startDateTime,stopDateTime))
+        for storageMedium_obj in storageMedium_objs:
+            if not storageMedium_obj.check_db_sync():
+                storageMedium_ext_objs,errno2,why2 = ESSMSSQL.DB().action('storageMedium','GET3',('storageMediumID',),('storageMediumID',storageMedium_obj.storageMediumID))
                 if errno2:
                     logging.error('Problem to access MS-SQL DB ' + str(why2))
                 else:
-                    storageMediumDate_utc = self.i[4].replace(microsecond=0,tzinfo=pytz.utc)
+                    storageMediumDate_utc = storageMedium_obj.storageMediumDate.replace(microsecond=0,tzinfo=pytz.utc)
                     storageMediumDate_dst = storageMediumDate_utc.astimezone(self.tz)
-                    CreateDate_utc = self.i[13].replace(microsecond=0,tzinfo=pytz.utc)
+                    CreateDate_utc = storageMedium_obj.CreateDate.replace(microsecond=0,tzinfo=pytz.utc)
                     CreateDate_dst = CreateDate_utc.astimezone(self.tz)
-                    if self.rows2:
-                        logging.info('Found storageMediumID: ' + str(self.i[3]) + ' in AIS, try to update')
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.table,'UPD',('StorageMediumGuid',self.i[1],
-                                                                                           'storageMedium',self.i[2],
+                    if storageMedium_ext_objs:
+                        logging.info('Found storageMediumID: ' + str(storageMedium_obj.storageMediumID) + ' in AIS, try to update')
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('StorageMediumGuid',storageMedium_obj.storageMediumUUID,
+                                                                                           'storageMedium',storageMedium_obj.storageMedium,
                                                                                            'storageMediumDate',storageMediumDate_dst.replace(tzinfo=None),
-                                                                                           'storageMediumLocation',self.i[5],
-                                                                                           'storageMediumLocationStatus',self.i[6],
-                                                                                           'storageMediumBlockSize',self.i[7],
-                                                                                           'storageMediumUsedCapacity',self.i[8],
-                                                                                           'storageMediumStatus',self.i[9],
-                                                                                           'storageMediumFormat',self.i[10],
-                                                                                           'storageMediumMounts',self.i[11],
-                                                                                           'linkingAgentIdentifierValue',self.i[12],
+                                                                                           'storageMediumLocation',storageMedium_obj.storageMediumLocation,
+                                                                                           'storageMediumLocationStatus',storageMedium_obj.storageMediumLocationStatus,
+                                                                                           'storageMediumBlockSize',storageMedium_obj.storageMediumBlockSize,
+                                                                                           'storageMediumUsedCapacity',storageMedium_obj.storageMediumUsedCapacity,
+                                                                                           'storageMediumStatus',storageMedium_obj.storageMediumStatus,
+                                                                                           'storageMediumFormat',storageMedium_obj.storageMediumFormat,
+                                                                                           'storageMediumMounts',storageMedium_obj.storageMediumMounts,
+                                                                                           'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue,
                                                                                            'CreateDate',CreateDate_dst.replace(tzinfo=None),
-                                                                                           'CreateAgentIdentifierValue',self.i[14]),
-                                                                                          ('storageMediumID',self.i[3]))
-                        if ext_errno: logging.error('Failed to update External DB: ' + str(self.i[3]) + ' error: ' + str(ext_why))
+                                                                                           'CreateAgentIdentifierValue',storageMedium_obj.CreateAgentIdentifierValue),
+                                                                                          ('storageMediumID',storageMedium_obj.storageMediumID))
+                        if ext_errno: logging.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
                         else:
-                            res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[15]),('id',self.i[0]))
-                            if errno: logging.error('Failed to update Local DB: ' + str(self.i[3]) + ' error: ' + str(why))
+                            storageMedium_obj.ExtDBdatetime=storageMedium_obj.LocalDBdatetime
+                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+                            #if errno: logging.error('Failed to update Local DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(why))
                     else:
-                        logging.info('Missing storageMediumID: ' + str(self.i[3]) + ' in AIS, try to insert')
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.table,'INS',('StorageMediumGuid',self.i[1],
-                                                                                           'storageMedium',self.i[2],
-                                                                                           'storageMediumID',self.i[3],
+                        logging.info('Missing storageMediumID: ' + str(storageMedium_obj.storageMediumID) + ' in AIS, try to insert')
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','INS',('StorageMediumGuid',storageMedium_obj.storageMediumUUID,
+                                                                                           'storageMedium',storageMedium_obj.storageMedium,
+                                                                                           'storageMediumID',storageMedium_obj.storageMediumID,
                                                                                            'storageMediumDate',storageMediumDate_dst.replace(tzinfo=None),
-                                                                                           'storageMediumLocation',self.i[5],
-                                                                                           'storageMediumLocationStatus',self.i[6],
-                                                                                           'storageMediumBlockSize',self.i[7],
-                                                                                           'storageMediumUsedCapacity',self.i[8],
-                                                                                           'storageMediumStatus',self.i[9],
-                                                                                           'storageMediumFormat',self.i[10],
-                                                                                           'storageMediumMounts',self.i[11],
-                                                                                           'linkingAgentIdentifierValue',self.i[12],
+                                                                                           'storageMediumLocation',storageMedium_obj.storageMediumLocation,
+                                                                                           'storageMediumLocationStatus',storageMedium_obj.storageMediumLocationStatus,
+                                                                                           'storageMediumBlockSize',storageMedium_obj.storageMediumBlockSize,
+                                                                                           'storageMediumUsedCapacity',storageMedium_obj.storageMediumUsedCapacity,
+                                                                                           'storageMediumStatus',storageMedium_obj.storageMediumStatus,
+                                                                                           'storageMediumFormat',storageMedium_obj.storageMediumFormat,
+                                                                                           'storageMediumMounts',storageMedium_obj.storageMediumMounts,
+                                                                                           'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue,
                                                                                            'CreateDate',CreateDate_dst.replace(tzinfo=None),
-                                                                                           'CreateAgentIdentifierValue',self.i[14]))
-                        if ext_errno: logging.error('Failed to insert to External DB: ' + str(self.i[3]) + ' error: ' + str(ext_why))
+                                                                                           'CreateAgentIdentifierValue',storageMedium_obj.CreateAgentIdentifierValue))
+                        if ext_errno: logging.error('Failed to insert to External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
                         else:
-                            res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[15]),('id',self.i[0]))
-                            if errno: logging.error('Failed to update Local DB: ' + str(self.i[3]) + ' error: ' + str(why))
+                            storageMedium_obj.ExtDBdatetime=storageMedium_obj.LocalDBdatetime
+                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+                            #if errno: logging.error('Failed to update Local DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(why))
 
     "sync_storage"
     ###############################################
     def sync_storage(self,startDateTime,stopDateTime):
-        self.table = 'storage'
-        self.rows,errno,why = ESSDB.DB().action(self.table,'GET4',('id',
-                                                                   'ObjectIdentifierValue',
-                                                                   'contentLocationType',
-                                                                   'contentLocationValue',
-                                                                   'storageMediumID',
-                                                                   'LocalDBdatetime',
-                                                                   'ExtDBdatetime'),
-                                                                  ('LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'ExtDBdatetime','IS','NULL','AND',
-                                                                   'LocalDBdatetime','IS NOT','NULL',
-                                                                   'OR',
-                                                                   'LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)','<', '0'))
-        if errno:
-            logging.error('Problem to access MySQL DB ' + str(why))
-        else:
-            for self.i in self.rows:
-                self.rows2,errno2,why2 = ESSMSSQL.DB().action(self.table,'GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',self.i[1],'AND',
-                                                                                                            'contentLocationType',str(self.i[2]),'AND',
-                                                                                                            'contentLocationValue',self.i[3],'AND',
-                                                                                                            'storageMediumID',self.i[4]))
+        storage_objs = storage.objects.filter(LocalDBdatetime__range=(startDateTime,stopDateTime))
+        for storage_obj in storage_objs:
+            if not storage_obj.check_db_sync():
+                storage_ext_objs,errno2,why2 = ESSMSSQL.DB().action('storage','GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',storage_obj.archiveobject.ObjectIdentifierValue,'AND',
+                                                                                                            'contentLocationType',str(storage_obj.contentLocationType),'AND',
+                                                                                                            'contentLocationValue',storage_obj.contentLocationValue,'AND',
+                                                                                                            'storageMediumID',storage_obj.storagemedium.storageMediumID))
                 if errno2:
                     logging.error('Problem to access MS-SQL DB ' + str(why2))
                 else:
-                    if self.rows2:
-                        logging.info('Found ObjectIdentifierValue: ' + str(self.i[1]) + ' contentLocationType: ' + str(self.i[2]) + ' contentLocationValue: ' + str(self.i[3]) + ' storageMediumID: ' + str(self.i[4]) + ' in AIS, nothing to update')
-                        res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[5]),('id',self.i[0]))
-                        if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(self.i[1]) + ' contentLocationType: ' + str(self.i[2]) + ' contentLocationValue: ' + str(self.i[3]) + ' storageMediumID: ' + str(self.i[4]) + ' error: ' + str(why))
+                    if storage_ext_objs:
+                        logging.info('Found ObjectIdentifierValue: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' contentLocationType: ' + str(storage_obj.contentLocationType) + ' contentLocationValue: ' + str(storage_obj.contentLocationValue) + ' storageMediumID: ' + str(storage_obj.storagemedium.storageMediumID) + ' in AIS, nothing to update')
+                        storage_obj.ExtDBdatetime=storage_obj.LocalDBdatetime
+                        storage_obj.save(update_fields=['ExtDBdatetime'])
+                        #if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' contentLocationType: ' + str(storage_obj.contentLocationType) + ' contentLocationValue: ' + str(storage_obj.contentLocationValue) + ' storageMediumID: ' + str(storage_obj.storagemedium.storageMediumID) + ' error: ' + str(why))
                     else:
-                        logging.info('Missing ObjectIdentifierValue: ' + str(self.i[1]) + ' contentLocationType: ' + str(self.i[2]) + ' contentLocationValue: ' + str(self.i[3]) + ' storageMediumID: ' + str(self.i[4]) + ' in AIS, try to insert')
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.table,'INS',('ObjectIdentifierValue',self.i[1],
-                                                                                           'contentLocationType',self.i[2],
-                                                                                           'contentLocationValue',self.i[3],
-                                                                                           'storageMediumID',self.i[4]))
-                        if ext_errno: logging.error('Failed to insert to External DB for ObjectIdentifierValue: ' + str(self.i[1]) + ' contentLocationType: ' + str(self.i[2]) + ' contentLocationValue: ' + str(self.i[3]) + ' storageMediumID: ' + str(self.i[4]) + ' error: ' + str(ext_why))
+                        logging.info('Missing ObjectIdentifierValue: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' contentLocationType: ' + str(storage_obj.contentLocationType) + ' contentLocationValue: ' + str(storage_obj.contentLocationValue) + ' storageMediumID: ' + str(storage_obj.storagemedium.storageMediumID) + ' in AIS, try to insert')
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storage','INS',('ObjectIdentifierValue',storage_obj.archiveobject.ObjectIdentifierValue,
+                                                                                           'contentLocationType',storage_obj.contentLocationType,
+                                                                                           'contentLocationValue',storage_obj.contentLocationValue,
+                                                                                           'storageMediumID',storage_obj.storagemedium.storageMediumID))
+                        if ext_errno: logging.error('Failed to insert to External DB for ObjectIdentifierValue: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' contentLocationType: ' + str(storage_obj.contentLocationType) + ' contentLocationValue: ' + str(storage_obj.contentLocationValue) + ' storageMediumID: ' + str(storage_obj.storagemedium.storageMediumID) + ' error: ' + str(ext_why))
                         else:
-                            res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[5]),('id',self.i[0]))
-                            if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(self.i[1]) + ' contentLocationType: ' + str(self.i[2]) + ' contentLocationValue: ' + str(self.i[3]) + ' storageMediumID: ' + str(self.i[4]) + ' error: ' + str(why))
+                            storage_obj.ExtDBdatetime=storage_obj.LocalDBdatetime
+                            storage_obj.save(update_fields=['ExtDBdatetime'])
+                            #if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(storage_obj.archiveobject.ObjectIdentifierValue) + ' contentLocationType: ' + str(storage_obj.contentLocationType) + ' contentLocationValue: ' + str(storage_obj.contentLocationValue) + ' storageMediumID: ' + str(storage_obj.storagemedium.storageMediumID) + ' error: ' + str(why))
 
     "sync_IngestObject"
     ###############################################
@@ -385,7 +350,7 @@ class work:
     "day_sync_centralDB"
     ###############################################
     def day_sync_centralDB(self,numdays):
-        ExtDBupdate = int(ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','ExtDBupdate'))[0][0])
+        ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
         startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(numdays)),microsecond=0).isoformat(' ')
         stopDateTime = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
         logging.info('startDateTime: %s',str(startDateTime))
@@ -403,8 +368,7 @@ class work:
     "sync objects from AIS to ESSArch for mediaid 'XXX001'"
     ###############################################
     def sync_from_centralDB(self,storageMediumID,set_storageMediumLocation='IT_Marieberg',set_storageMediumLocationStatus=''):
-        #self.table = 'storageMedium'
-        self.storageMedium,errno,why = ESSMSSQL.DB().action('storageMedium','GET3',('storageMedium',
+        storageMedium_ais_objs,errno,why = ESSMSSQL.DB().action('storageMedium','GET3',('storageMedium',
                                                                                'storageMediumID',
                                                                                'storageMediumDate',
                                                                                'storageMediumLocation',
@@ -422,154 +386,129 @@ class work:
         if errno:
             logging.error('Failed to access central DB ' + str(why))
             return 20
-        elif len(self.storageMedium) == 1:
-            self.storageMedium = self.storageMedium[0]
+        elif len(storageMedium_ais_objs) == 1:
+            storageMedium_ais_obj = storageMedium_ais_objs[0]
             logging.info('Found storageMediumID: %s in central DB',storageMediumID)
             ###################################################
             # Check if storageMediumID exist in local DB
-            self.local_storageMedium,errno,why = ESSDB.DB().action('storageMedium','GET3',('storageMediumID',
-                                                                                      'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)'),
-                                                                                     ('storageMediumID',storageMediumID))
-            if errno:
-                logging.error('Failed to access local DB ' + str(why))
-                return 10
-
-            elif len(self.local_storageMedium) == 1:
-                if self.local_storageMedium[0][1] == 0: # Check if ESSArch and centralDB is in sync
+            storageMedium_objs = storageMedium.objects.filter(storageMediumID=storageMediumID)
+            #if errno:
+            #    logging.error('Failed to access local DB ' + str(why))
+            #    return 10
+            if len(storageMedium_objs) == 1:
+                storageMedium_obj = storageMedium_objs[0]
+                if storageMedium_obj.check_db_sync(): # Check if ESSArch and centralDB is in sync
+                #if storageMedium_objs[0][1] == 0: # Check if ESSArch and centralDB is in sync
                     ###################################################
                     # storageMediumID exist in local DB try to update
 
                     ###################################################
                     # Force set storageMediumLocation or storageMediumLocationStatus
                     if set_storageMediumLocation:
-                        self.storageMedium[3] = set_storageMediumLocation
+                        storageMedium_ais_obj[3] = set_storageMediumLocation
                     if set_storageMediumLocationStatus:
-                        self.storageMedium[4] = set_storageMediumLocationStatus
-
+                        storageMedium_ais_obj[4] = set_storageMediumLocationStatus
+                        
                     logging.info('Found storageMediumID: %s in local "storageMedium" DB, try to update',storageMediumID)
-                    storageMediumDate_dst = self.storageMedium[2].replace(microsecond=0,tzinfo=self.tz)
+                    storageMediumDate_dst = storageMedium_ais_obj[2].replace(microsecond=0,tzinfo=self.tz)
                     storageMediumDate_utc = storageMediumDate_dst.astimezone(pytz.utc)
-                    CreateDate_dst = self.storageMedium[11].replace(microsecond=0,tzinfo=self.tz)
+                    CreateDate_dst = storageMedium_ais_obj[11].replace(microsecond=0,tzinfo=self.tz)
                     CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                     self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                    storageMedium_obj = storageMedium.objects.get(storageMediumID=self.storageMedium[1])
-                    storageMedium_obj.storageMedium = self.storageMedium[0]
+                    #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=storageMedium_ais_obj[13])
+                    storageMedium_obj.storageMediumUUID = uuid.UUID(storageMedium_ais_obj[13])
+                    storageMedium_obj.storageMedium = storageMedium_ais_obj[0]
                     storageMedium_obj.storageMediumDate = storageMediumDate_utc.replace(tzinfo=None)
-                    storageMedium_obj.storageMediumLocation = self.storageMedium[3]
-                    storageMedium_obj.storageMediumLocationStatus = self.storageMedium[4]
-                    storageMedium_obj.storageMediumBlockSize = self.storageMedium[5]
-                    storageMedium_obj.storageMediumUsedCapacity = self.storageMedium[6]
-                    storageMedium_obj.storageMediumStatus = self.storageMedium[7]
-                    storageMedium_obj.storageMediumFormat = self.storageMedium[8]
-                    storageMedium_obj.storageMediumMounts = self.storageMedium[9]
-                    storageMedium_obj.linkingAgentIdentifierValue = self.storageMedium[10]
+                    storageMedium_obj.storageMediumLocation = storageMedium_ais_obj[3]
+                    storageMedium_obj.storageMediumLocationStatus = storageMedium_ais_obj[4]
+                    storageMedium_obj.storageMediumBlockSize = storageMedium_ais_obj[5]
+                    storageMedium_obj.storageMediumUsedCapacity = storageMedium_ais_obj[6]
+                    storageMedium_obj.storageMediumStatus = storageMedium_ais_obj[7]
+                    storageMedium_obj.storageMediumFormat = storageMedium_ais_obj[8]
+                    storageMedium_obj.storageMediumMounts = storageMedium_ais_obj[9]
+                    storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
                     storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
-                    storageMedium_obj.CreateAgentIdentifierValue = self.storageMedium[12]
-                    #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=self.storageMedium[13])
-                    storageMedium_obj.storageMediumUUID = uuid.UUID(self.storageMedium[13])
+                    storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
                     storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                     storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                     storageMedium_obj.save()
-                                                                        
-#                    res,errno,why = ESSDB.DB().action('storageMedium','UPD',('storageMedium',self.storageMedium[0],
-#                                                                        'storageMediumDate',storageMediumDate_utc.replace(tzinfo=None),
-#                                                                        'storageMediumLocation',self.storageMedium[3],
-#                                                                        'storageMediumLocationStatus',self.storageMedium[4],
-#                                                                        'storageMediumBlockSize',self.storageMedium[5],
-#                                                                        'storageMediumUsedCapacity',self.storageMedium[6],
-#                                                                        'storageMediumStatus',self.storageMedium[7],
-#                                                                        'storageMediumFormat',self.storageMedium[8],
-#                                                                        'storageMediumMounts',self.storageMedium[9],
-#                                                                        'linkingAgentIdentifierValue',self.storageMedium[10],
-#                                                                        'CreateDate',CreateDate_utc.replace(tzinfo=None),
-#                                                                        'CreateAgentIdentifierValue',self.storageMedium[12],
-#                                                                        #'storageMediumUUID',uuid.UUID(bytes_le=self.storageMedium[13]),
-#                                                                        'storageMediumUUID',uuid.UUID(self.storageMedium[13]),
-#                                                                        'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                        'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                       ('storageMediumID',self.storageMedium[1]))
-#                    if errno: 
-#                        logging.error('Failed to update local DB: %s error: %s', self.storageMedium[1], str(why))
-#                        return 11
+                    #if errno: 
+                    #    logging.error('Failed to update local DB: %s error: %s', storageMedium_ais_obj[1], str(why))
+                    #    return 11
                 else:
                     logging.error('Local "storageMedium" DB and Central DB is not in SYNC! for MediaID: %s',storageMediumID)
                     return 14
-            elif len(self.local_storageMedium) == 0:
+            elif len(storageMedium_objs) == 0:
                 ###################################################
                 # storageMediumID not exist in local DB try to insert
 
-                ###################################################
                 # Force set storageMediumLocation or storageMediumLocationStatus
                 if set_storageMediumLocation:
-                    self.storageMedium[3] = set_storageMediumLocation
+                    storageMedium_ais_obj[3] = set_storageMediumLocation
                 if set_storageMediumLocationStatus:
-                    self.storageMedium[4] = set_storageMediumLocationStatus
+                    storageMedium_ais_obj[4] = set_storageMediumLocationStatus
 
                 logging.info('Missing storageMediumID: %s in local "storageMedium" DB, try to insert',storageMediumID)
-                storageMediumDate_dst = self.storageMedium[2].replace(microsecond=0,tzinfo=self.tz)
+                try:
+                    if storageMedium_ais_obj[0] in range(300,330):
+                        try:
+                            target_obj = StorageTargets.objects.get(target=storageMedium_ais_obj[1][:3])
+                        except ObjectDoesNotExist:
+                            try:
+                                target_obj = StorageTargets.objects.get(target=storageMedium_ais_obj[1][:2])
+                            except ObjectDoesNotExist:
+                                target_obj = StorageTargets.objects.get(target=storageMedium_ais_obj[1][:1])
+                    else:
+                        target_obj = StorageTargets.objects.get(name=storageMedium_ais_obj[1])
+                except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
+                    logging.error('Target object not found for storageMediumID: %s, error: %s' % (storageMedium_ais_obj[1], e))
+                    return 12
+                storageMediumDate_dst = storageMedium_ais_obj[2].replace(microsecond=0,tzinfo=self.tz)
                 storageMediumDate_utc = storageMediumDate_dst.astimezone(pytz.utc)
-                CreateDate_dst = self.storageMedium[11].replace(microsecond=0,tzinfo=self.tz)
+                CreateDate_dst = storageMedium_ais_obj[11].replace(microsecond=0,tzinfo=self.tz)
                 CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
                 self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                 self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
                 storageMedium_obj = storageMedium()
-                storageMedium_obj.storageMedium = self.storageMedium[0]
-                storageMedium_obj.storageMediumID = self.storageMedium[1]
+                storageMedium_obj.id = uuid.UUID(storageMedium_ais_obj[13])
+                #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=storageMedium_ais_obj[13])
+                storageMedium_obj.storageMediumUUID = uuid.UUID(storageMedium_ais_obj[13])
+                storageMedium_obj.storageMedium = storageMedium_ais_obj[0]
+                storageMedium_obj.storageMediumID = storageMedium_ais_obj[1]
                 storageMedium_obj.storageMediumDate = storageMediumDate_utc.replace(tzinfo=None)
-                storageMedium_obj.storageMediumLocation = self.storageMedium[3]
-                storageMedium_obj.storageMediumLocationStatus = self.storageMedium[4]
-                storageMedium_obj.storageMediumBlockSize = self.storageMedium[5]
-                storageMedium_obj.storageMediumUsedCapacity = self.storageMedium[6]
-                storageMedium_obj.storageMediumStatus = self.storageMedium[7]
-                storageMedium_obj.storageMediumFormat = self.storageMedium[8]
-                storageMedium_obj.storageMediumMounts = self.storageMedium[9]
-                storageMedium_obj.linkingAgentIdentifierValue = self.storageMedium[10]
+                storageMedium_obj.storageMediumLocation = storageMedium_ais_obj[3]
+                storageMedium_obj.storageMediumLocationStatus = storageMedium_ais_obj[4]
+                storageMedium_obj.storageMediumBlockSize = storageMedium_ais_obj[5]
+                storageMedium_obj.storageMediumUsedCapacity = storageMedium_ais_obj[6]
+                storageMedium_obj.storageMediumStatus = storageMedium_ais_obj[7]
+                storageMedium_obj.storageMediumFormat = storageMedium_ais_obj[8]
+                storageMedium_obj.storageMediumMounts = storageMedium_ais_obj[9]
+                storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
                 storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
-                storageMedium_obj.CreateAgentIdentifierValue = self.storageMedium[12]
-                #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=self.storageMedium[13])
-                storageMedium_obj.storageMediumUUID = uuid.UUID(self.storageMedium[13])
+                storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
                 storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                 storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.storagetarget = target_obj
                 storageMedium_obj.save()                                                                  
-#                res,errno,why = ESSDB.DB().action('storageMedium','INS',('storageMedium',self.storageMedium[0],
-#                                                                    'storageMediumID',self.storageMedium[1],
-#                                                                    'storageMediumDate',storageMediumDate_utc.replace(tzinfo=None),
-#                                                                    'storageMediumLocation',self.storageMedium[3],
-#                                                                    'storageMediumLocationStatus',self.storageMedium[4],
-#                                                                    'storageMediumBlockSize',self.storageMedium[5],
-#                                                                    'storageMediumUsedCapacity',self.storageMedium[6],
-#                                                                    'storageMediumStatus',self.storageMedium[7],
-#                                                                    'storageMediumFormat',self.storageMedium[8],
-#                                                                    'storageMediumMounts',self.storageMedium[9],
-#                                                                    'linkingAgentIdentifierValue',self.storageMedium[10],
-#                                                                    'CreateDate',CreateDate_utc.replace(tzinfo=None),
-#                                                                    'CreateAgentIdentifierValue',self.storageMedium[12],
-#                                                                    #'storageMediumUUID',uuid.UUID(bytes_le=self.storageMedium[13]),
-#                                                                    'storageMediumUUID',uuid.UUID(self.storageMedium[13]),
-#                                                                    'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                    'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                if errno: 
-#                    logging.error('Failed to insert to local DB: %s error: %s', self.storageMedium[1], str(why))
-#                    return 12
+                #if errno: 
+                #    logging.error('Failed to insert to local DB: %s error: %s', storageMedium_ais_obj[1], str(why))
+                #    return 12
             else: logging.error('To many storageMediumID found i local "storageMedium" DB for %s', storageMediumID)
             ###################################################
             # Get all archive object for storageMediumID from central DB 
-            #self.table = 'storage'
             storage_objs_ext,errno2,why2 = ESSMSSQL.DB().action('storage','GET3',('ObjectIdentifierValue',
                                                                                      'contentLocationType',
                                                                                      'contentLocationValue',
                                                                                      'storageMediumID'),
-                                                                                    ('storageMediumID',self.storageMedium[1]))
+                                                                                    ('storageMediumID',storageMedium_ais_obj[1]))
             if errno2:
                 logging.error('Failed to access central DB ' + str(why2))
                 return 20
             elif storage_objs_ext:
                 for storage_obj_ext in storage_objs_ext:
-############################
                     ###################################################
                     # Get all object for IngestObject from central DB
-                    #self.table = 'IngestObject'
                     ip_objs_ext,errno3,why3 = ESSMSSQL.DB().action('IngestObject','GET3',('PolicyId',
                                                                                       'ObjectIdentifierValue',
                                                                                       'ObjectPackageName',
@@ -617,21 +556,20 @@ class work:
                             EntryDate_utc = EntryDate_dst.astimezone(pytz.utc)
                             ###################################################
                             # Check if archive object exist in local "IngestObject" DB
-                            self.local_object,errno,why = ESSDB.DB().action('IngestObject','GET3',('id',
-                                                                                               'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)'),
-                                                                                              ('ObjectIdentifierValue',ip_obj_ext[1]))
-                            if errno:
-                                logging.error('Failed to access local DB ' + str(why))
-                                return 10
-                            elif len(self.local_object) == 1:
-                                if self.local_object[0][1] == 0: # Check if ESSArch and centralDB is in sync
+                            ArchiveObject_objs = ArchiveObject.objects.filter(ObjectIdentifierValue=ip_obj_ext[1])
+                            #if errno:
+                            #    logging.error('Failed to access local DB ' + str(why))
+                            #    return 10
+                            if len(ArchiveObject_objs) == 1:
+                                ip_obj = ArchiveObject_objs[0]
+                                if ip_obj.check_db_sync(): # Check if ESSArch and centralDB is in sync
                                     ###################################################
                                     # archive object exist in local "IngestObject" DB try to update
                                     logging.info('Found archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to update',ip_obj_ext[1],storageMediumID)
                                     self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                                     self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
                                     ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
-                                    ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue = ip_obj_ext[1])
+                                    #ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue = ip_obj_ext[1])
                                     ip_obj.PolicyId = ArchivePolicy_obj
                                     ip_obj.ObjectPackageName = ip_obj_ext[2]
                                     ip_obj.ObjectSize = ip_obj_ext[3]
@@ -666,48 +604,13 @@ class work:
                                     ip_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                     ip_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                     ip_obj.save()
-                                                                                        
-#                                    res,errno,why = ESSDB.DB().action('IngestObject','UPD',('PolicyId',ip_obj_ext[0],
-#                                                                                        'ObjectPackageName',ip_obj_ext[2],
-#                                                                                        'ObjectSize',ip_obj_ext[3],
-#                                                                                        'ObjectNumItems',ip_obj_ext[4],
-#                                                                                        'ObjectMessageDigestAlgorithm',ip_obj_ext[5],
-#                                                                                        'ObjectMessageDigest',ip_obj_ext[6],
-#                                                                                        'ObjectPath',ip_obj_ext[7],
-#                                                                                        'MetaObjectIdentifier',ip_obj_ext[8],
-#                                                                                        'MetaObjectSize',ip_obj_ext[9],
-#                                                                                        'CMetaMessageDigestAlgorithm',ip_obj_ext[10],
-#                                                                                        'CMetaMessageDigest',ip_obj_ext[11],
-#                                                                                        'PMetaMessageDigestAlgorithm',ip_obj_ext[12],
-#                                                                                        'PMetaMessageDigest',ip_obj_ext[13],
-#                                                                                        'DataObjectSize',ip_obj_ext[14],
-#                                                                                        'DataObjectNumItems',ip_obj_ext[15],
-#                                                                                        'Status',ip_obj_ext[16],
-#                                                                                        'StatusActivity',ip_obj_ext[17],
-#                                                                                        'StatusProcess',ip_obj_ext[18],
-#                                                                                        'LastEventDate',LastEventDate_utc.replace(tzinfo=None),
-#                                                                                        'linkingAgentIdentifierValue',ip_obj_ext[20],
-#                                                                                        'CreateDate',CreateDate_utc.replace(tzinfo=None),
-#                                                                                        'CreateAgentIdentifierValue',ip_obj_ext[22],
-#                                                                                        #'ObjectUUID',uuid.UUID(bytes_le=ip_obj_ext[23]),
-#                                                                                        'ObjectUUID',uuid.UUID(ip_obj_ext[23]),
-#                                                                                        'EntryDate',EntryDate_utc.replace(tzinfo=None),
-#                                                                                        'EntryAgentIdentifierValue',ip_obj_ext[25],
-#                                                                                        'OAISPackageType',ip_obj_ext[26],
-#                                                                                        'preservationLevelValue',ip_obj_ext[27],
-#                                                                                        'DELIVERYTYPE',ip_obj_ext[28],
-#                                                                                        'INFORMATIONCLASS',ip_obj_ext[29],
-#                                                                                        'ObjectActive',ip_obj_ext[30],
-#                                                                                        'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                        'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                                       ('ObjectIdentifierValue',ip_obj_ext[1]))
-#                                    if errno: 
-#                                        logging.error('Failed to update local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
-#                                        return 11
+                                    #if errno: 
+                                    #    logging.error('Failed to update local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
+                                    #    return 11
                                 else:
                                     logging.error('Local "IngestObject" DB and Central DB is not in SYNC! for MediaID: %s and Object: %s',storageMediumID,ip_obj_ext[1])
                                     return 14
-                            elif len(self.local_object) == 0:
+                            elif len(ArchiveObject_objs) == 0:
                                 ###################################################
                                 # archive object not exist in local "IngestObject" DB try to insert
                                 logging.info('Missing archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to insert',ip_obj_ext[1],storageMediumID)
@@ -749,128 +652,67 @@ class work:
                                 ip_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                 ip_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
                                 ip_obj.save()
-
-#                                res,errno,why = ESSDB.DB().action('IngestObject','INS',('PolicyId',ip_obj_ext[0],
-#                                                                                    'ObjectIdentifierValue',ip_obj_ext[1],
-#                                                                                    'ObjectPackageName',ip_obj_ext[2],
-#                                                                                    'ObjectSize',ip_obj_ext[3],
-#                                                                                    'ObjectNumItems',ip_obj_ext[4],
-#                                                                                    'ObjectMessageDigestAlgorithm',ip_obj_ext[5],
-#                                                                                    'ObjectMessageDigest',ip_obj_ext[6],
-#                                                                                    'ObjectPath',ip_obj_ext[7],
-#                                                                                    'MetaObjectIdentifier',ip_obj_ext[8],
-#                                                                                    'MetaObjectSize',ip_obj_ext[9],
-#                                                                                    'CMetaMessageDigestAlgorithm',ip_obj_ext[10],
-#                                                                                    'CMetaMessageDigest',ip_obj_ext[11],
-#                                                                                    'PMetaMessageDigestAlgorithm',ip_obj_ext[12],
-#                                                                                    'PMetaMessageDigest',ip_obj_ext[13],
-#                                                                                    'DataObjectSize',ip_obj_ext[14],
-#                                                                                    'DataObjectNumItems',ip_obj_ext[15],
-#                                                                                    'Status',ip_obj_ext[16],
-#                                                                                    'StatusActivity',ip_obj_ext[17],
-#                                                                                    'StatusProcess',ip_obj_ext[18],
-#                                                                                    'LastEventDate',LastEventDate_utc.replace(tzinfo=None),
-#                                                                                    'linkingAgentIdentifierValue',ip_obj_ext[20],
-#                                                                                    'CreateDate',CreateDate_utc.replace(tzinfo=None),
-#                                                                                    'CreateAgentIdentifierValue',ip_obj_ext[22],
-#                                                                                    #'ObjectUUID',uuid.UUID(bytes_le=ip_obj_ext[23]),
-#                                                                                    'ObjectUUID',uuid.UUID(ip_obj_ext[23]),
-#                                                                                    'EntryDate',EntryDate_utc.replace(tzinfo=None),
-#                                                                                    'EntryAgentIdentifierValue',ip_obj_ext[25],
-#                                                                                    'OAISPackageType',ip_obj_ext[26],
-#                                                                                    'preservationLevelValue',ip_obj_ext[27],
-#                                                                                    'DELIVERYTYPE',ip_obj_ext[28],
-#                                                                                    'INFORMATIONCLASS',ip_obj_ext[29],
-#                                                                                    'ObjectActive',ip_obj_ext[30],
-#                                                                                    'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                    'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                                if errno: 
-#                                    logging.error('Failed to insert to local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
-#                                    return 11
+                                #if errno: 
+                                #    logging.error('Failed to insert to local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
+                                #    return 11
                             else: 
                                 logging.error('To many objects found in local "IngestObject" DB for %s', ip_obj_ext[1])
                                 return 13
+                        logging.debug('storageMediumID: %s ,storageObject: %s',storageMediumID,storage_obj_ext[0])
+                        ###################################################
+                        # Check if archive object exist in local "storage" DB
+                        storage_objs = ip_obj.Storage_set.filter(contentLocationType=storage_obj_ext[1],
+                                                                          contentLocationValue=storage_obj_ext[2],
+                                                                          storagemedium=storageMedium_obj)
+                        #if errno:
+                        #    logging.error('Failed to access local DB ' + str(why))
+                        #    return 10
+                        if len(storage_objs) == 1:
+                            storage_obj = storage_objs[0]
+                            if storage_obj.check_db_sync(): # Check if ESSArch and centralDB is in sync
+                                ###################################################
+                                # archive object exist in local "storage" DB try to update
+                                logging.info('Found archive object: %s in local "storage" DB for storageMediumID: %s, try to update',storage_obj_ext[0],storageMediumID)
+                                self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                                storage_obj.contentLocationType = storage_obj_ext[1]
+                                storage_obj.contentLocationValue = storage_obj_ext[2]
+                                storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                storage_obj.save()                           
+                                #if errno: 
+                                #    logging.error('Failed to update local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
+                                #    return 11
+                            else:
+                                logging.error('Local "storage" DB and Central DB is not in SYNC! for MediaID: %s and Object: %s',storageMediumID,storage_obj_ext[0])
+                                return 14
+                        elif len(storage_objs) == 0:
+                            ###################################################
+                            # archive object not exist in local "storage" DB try to insert
+                            logging.info('Missing archive object: %s in local "storage" DB for storageMediumID: %s, try to insert',storage_obj_ext[0],storageMediumID)
+                            self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                            self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                            storage_obj = storage()
+                            storage_obj.contentLocationType = storage_obj_ext[1]
+                            storage_obj.contentLocationValue = storage_obj_ext[2]
+                            storage_obj.storagemedium = storageMedium_obj
+                            storage_obj.archiveobject = ip_obj
+                            storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            storage_obj.save()   
+                            #if errno: 
+                            #    logging.error('Failed to insert to local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
+                            #    return 12
+                        else: 
+                            logging.error('To many objects found i local "storage" DB for %s', storage_obj_ext[0])
+                            return 13
                     else:
                         logging.info('No archive objects found for storageMedia %s in central "IngestObject" DB', storageMediumID)
                         return 3
-
-############################
-                    logging.debug('storageMediumID: %s ,storageObject: %s',storageMediumID,storage_obj_ext[0])
-                    ###################################################
-                    # Check if archive object exist in local "storage" DB
-                    self.table = 'storage'
-                    self.local_storage,errno,why = ESSDB.DB().action('storage','GET3',('id',
-                                                                                        'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)'),
-                                                                                       ('ObjectIdentifierValue',storage_obj_ext[0],'AND',
-                                                                                        'contentLocationType',storage_obj_ext[1],'AND',
-                                                                                        'contentLocationValue',storage_obj_ext[2],'AND',
-                                                                                        'storageMediumID',storage_obj_ext[3]))
-                    if errno:
-                        logging.error('Failed to access local DB ' + str(why))
-                        return 10
-                    elif len(self.local_storage) == 1:
-                        if self.local_storage[0][1] == 0: # Check if ESSArch and centralDB is in sync
-                            ###################################################
-                            # archive object exist in local "storage" DB try to update
-                            logging.info('Found archive object: %s in local "storage" DB for storageMediumID: %s, try to update',storage_obj_ext[0],storageMediumID)
-                            self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                            self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                            storage_obj = storage.objects.get(id = self.local_storage[0][0])
-                            storage_obj.ObjectIdentifierValue = storage_obj_ext[0]
-                            storage_obj.contentLocationType = storage_obj_ext[1]
-                            storage_obj.contentLocationValue = storage_obj_ext[2]
-                            storage_obj.storageMediumID = storage_obj_ext[3]
-                            storage_obj.storageMediumUUID = storageMedium_obj
-                            storage_obj.ObjectUUID = ip_obj
-                            storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                            storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                            storage_obj.save()                           
-                                                      
-#                            res,errno,why = ESSDB.DB().action('storage','UPD',('ObjectIdentifierValue',storage_obj_ext[0],
-#                                                                                'contentLocationType',storage_obj_ext[1],
-#                                                                                'contentLocationValue',storage_obj_ext[2],
-#                                                                                'storageMediumID',storage_obj_ext[3],
-#                                                                                'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                               ('id',self.local_storage[0][0]))
-#                            if errno: 
-#                                logging.error('Failed to update local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
-#                                return 11
-                        else:
-                            logging.error('Local "storage" DB and Central DB is not in SYNC! for MediaID: %s and Object: %s',storageMediumID,storage_obj_ext[0])
-                            return 14
-                    elif len(self.local_storage) == 0:
-                        ###################################################
-                        # archive object not exist in local "storage" DB try to insert
-                        logging.info('Missing archive object: %s in local "storage" DB for storageMediumID: %s, try to insert',storage_obj_ext[0],storageMediumID)
-                        self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                        self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                        storage_obj = storage()
-                        storage_obj.ObjectIdentifierValue = storage_obj_ext[0]
-                        storage_obj.contentLocationType = storage_obj_ext[1]
-                        storage_obj.contentLocationValue = storage_obj_ext[2]
-                        storage_obj.storageMediumID = storage_obj_ext[3]
-                        storage_obj.storageMediumUUID = storageMedium_obj
-                        storage_obj.ObjectUUID = ip_obj
-                        storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                        storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                        storage_obj.save()   
-#                        res,errno,why = ESSDB.DB().action('storage','INS',('ObjectIdentifierValue',storage_obj_ext[0],
-#                                                                            'contentLocationType',storage_obj_ext[1],
-#                                                                            'contentLocationValue',storage_obj_ext[2],
-#                                                                            'storageMediumID',storage_obj_ext[3],
-#                                                                            'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None),
-#                                                                            'ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                        if errno: 
-#                            logging.error('Failed to insert to local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
-#                            return 12
-                    else: 
-                        logging.error('To many objects found i local "storage" DB for %s', storage_obj_ext[0])
-                        return 13
             else: 
                 logging.info('No archive objects found for storageMedia %s in central "storage" DB', storageMediumID)
                 return 2
-        elif len(self.storageMedium) > 1:
+        elif len(storageMedium_ais_objs) > 1:
             logging.error('To many storagemedias found in central "storageMedium" DB for %s', storageMediumID)
             return 23
         else:
@@ -936,7 +778,7 @@ if __name__ == '__main__':
     else: Console = 1
 
     if options.process:
-        LogFile,Time,Status,Run = ESSDB.DB().action('ESSProc','GET',('LogFile','Time','Status','Run'),('Name',ProcName))[0]
+        LogFile,Time,Status,Run = ESSProc.objects.filter(Name=ProcName).values_list('LogFile','Time','Status','Run')[0]
     else:
         LogFile = '/ESSArch/log/db_sync/ais.log'
     ##########################
@@ -984,10 +826,10 @@ if __name__ == '__main__':
         s.add_daytime_task( work().day_sync_centralDB, "day_sync_centralDB action", (1,2,3,4,5,6,7), 0, (07,00),  ESSsched.method.threaded, [Time], None ) 
         s.start()
         while 1:
-            Time,Status,Run = ESSDB.DB().action('ESSProc','GET',('Time','Status','Run'),('Name',ProcName))[0]
+            Time,Status,Run = ESSProc.objects.filter(Name=ProcName).values_list('Time','Status','Run')[0]
             if Run == '0':
                 logging.info('Stopping ' + ProcName)
-                ESSDB.DB().action('ESSProc','UPD',('Status','0','Run','0','PID','0'),('Name',ProcName))
+                ESSProc.objects.filter(Name=ProcName).update(Status='0', Run='0', PID=0)
                 s.stop()
                 break
             time.sleep(10)
