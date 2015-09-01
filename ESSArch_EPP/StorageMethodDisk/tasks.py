@@ -29,6 +29,7 @@ else:
 import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSMSSQL, ESSPGM
 from celery import Task, shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db import IntegrityError
 from Storage.models import storage, storageMedium, IOQueue
 from configuration.models import ESSConfig
 from essarch.libs import GetSize, ESSArchSMError, calcsum
@@ -96,8 +97,9 @@ class WriteStorageMethodDisk(Task):
         else:
             IO_obj.refresh_from_db()
             MBperSEC = int(result.get('WriteSize'))/int(result.get('WriteTime').seconds)
-            msg = 'Success to write IOuuid: %s for object %s to disk, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
-                                                                                                                                                                       result.get('ObjectIdentifierValue'), 
+            msg = 'Success to write IOuuid: %s for object %s to %s, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                       result.get('ObjectIdentifierValue'),
+                                                                                                                                                                       result.get('storageMediumID'),
                                                                                                                                                                        result.get('WriteSize'), 
                                                                                                                                                                        result.get('WriteTime'), 
                                                                                                                                                                        MBperSEC,
@@ -220,28 +222,34 @@ class WriteStorageMethodDisk(Task):
         try:
             storageMedium_obj = storageMedium.objects.get(storageMediumID=target_obj.name)
         except storageMedium.DoesNotExist as e:
-            logger.warning('storageMediumID %s not found for IOuuid: %s, try to and new storageMedium' % (target_obj.name, IO_obj_uuid))
-            timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-            MediumUUID = uuid.uuid4()
-            storageMedium_obj = storageMedium()
-            storageMedium_obj.id = MediumUUID
-            storageMedium_obj.storageMediumUUID=unicode(MediumUUID)
-            storageMedium_obj.storageMedium=target_obj.type
-            storageMedium_obj.storageMediumID=target_obj.name
-            storageMedium_obj.storageMediumDate=timestamp_utc
-            storageMedium_obj.storageMediumLocation=MediumLocation
-            storageMedium_obj.storageMediumLocationStatus=50
-            storageMedium_obj.storageMediumBlockSize=128
-            storageMedium_obj.storageMediumStatus=20
-            storageMedium_obj.storageMediumUsedCapacity=0
-            storageMedium_obj.storageMediumFormat=target_obj.format
-            storageMedium_obj.storageMediumMounts=0
-            storageMedium_obj.linkingAgentIdentifierValue=AgentIdentifierValue
-            storageMedium_obj.CreateDate=timestamp_utc
-            storageMedium_obj.CreateAgentIdentifierValue=AgentIdentifierValue
-            storageMedium_obj.LocalDBdatetime=timestamp_utc
-            storageMedium_obj.storagetarget=target_obj
-            storageMedium_obj.save()
+            try:
+                logger.warning('storageMediumID %s not found for IOuuid: %s, try to and new storageMedium' % (target_obj.name, IO_obj_uuid))
+                timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                MediumUUID = uuid.uuid4()
+                storageMedium_obj = storageMedium()
+                storageMedium_obj.id = MediumUUID
+                storageMedium_obj.storageMediumUUID=unicode(MediumUUID)
+                storageMedium_obj.storageMedium=target_obj.type
+                storageMedium_obj.storageMediumID=target_obj.name
+                storageMedium_obj.storageMediumDate=timestamp_utc
+                storageMedium_obj.storageMediumLocation=MediumLocation
+                storageMedium_obj.storageMediumLocationStatus=50
+                storageMedium_obj.storageMediumBlockSize=128
+                storageMedium_obj.storageMediumStatus=20
+                storageMedium_obj.storageMediumUsedCapacity=0
+                storageMedium_obj.storageMediumFormat=target_obj.format
+                storageMedium_obj.storageMediumMounts=0
+                storageMedium_obj.linkingAgentIdentifierValue=AgentIdentifierValue
+                storageMedium_obj.CreateDate=timestamp_utc
+                storageMedium_obj.CreateAgentIdentifierValue=AgentIdentifierValue
+                storageMedium_obj.LocalDBdatetime=timestamp_utc
+                storageMedium_obj.storagetarget=target_obj
+                storageMedium_obj.save()
+            except IntegrityError as e:
+                if e.args[0] == 1062: # 1062 = Duplicate entry, try to get object instead
+                    storageMedium_obj = storageMedium.objects.get(storageMediumID=target_obj.name)
+                else:
+                    raise e
         
         IO_obj.storagemedium =  storageMedium_obj
         
@@ -391,8 +399,9 @@ class ReadStorageMethodDisk(Task):
         else:
             IO_obj.refresh_from_db()
             MBperSEC = int(result.get('ReadSize'))/int(result.get('ReadTime').seconds)
-            msg = 'Success to read IOuuid: %s for object %s from disk, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
-                                                                                                                                                                       result.get('ObjectIdentifierValue'), 
+            msg = 'Success to read IOuuid: %s for object %s from %s, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                       result.get('ObjectIdentifierValue'),
+                                                                                                                                                                       result.get('storageMediumID'),
                                                                                                                                                                        result.get('ReadSize'), 
                                                                                                                                                                        result.get('ReadTime'), 
                                                                                                                                                                        MBperSEC,

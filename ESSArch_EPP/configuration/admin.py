@@ -289,6 +289,7 @@ class StorageTargetsAdmin( admin.ModelAdmin ):
                 'format',
                 'blocksize',
                 'maxCapacity',
+                'minChunkSize',
                 'minContainerSize',
                 'minCapacityWarning',
                 'target',

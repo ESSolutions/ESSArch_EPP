@@ -33,7 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from Storage.models import storage, storageMedium, IOQueue
 from configuration.models import ESSConfig, StorageTargets
 from essarch.libs import GetSize, ESSArchSMError, calcsum, SMTapeFull
-from essarch.models import robotdrives, robotQueue, robot
+from essarch.models import robotdrives, robotQueue, robot, AccessQueue
 from django.utils import timezone
 
 @shared_task()
@@ -126,20 +126,21 @@ class WriteStorageMethodTape(Task):
                 IO_obj.Status = 100
                 IO_obj.save(update_fields=['Status'])
                 raise e
-            else:
-                IO_obj.refresh_from_db()
-                MBperSEC = int(result.get('WriteSize'))/int(result.get('WriteTime').seconds)
-                msg = 'Success to write IOuuid: %s for object %s to tape, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
-                                                                                                                                                                           result.get('ObjectIdentifierValue'), 
-                                                                                                                                                                           result.get('WriteSize'), 
-                                                                                                                                                                           result.get('WriteTime'), 
-                                                                                                                                                                           MBperSEC,
-                                                                                                                                                                           )
-                logger.info(msg)
-                ESSPGM.Events().create('1104','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)      
-                IO_obj.Status = 20
-                IO_obj.save(update_fields=['Status'])
-                #return result
+
+            IO_obj.refresh_from_db()
+            MBperSEC = int(result.get('WriteSize'))/int(result.get('WriteTime').seconds)
+            msg = 'Success to write IOuuid: %s for object %s to %s, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                       result.get('ObjectIdentifierValue'),
+                                                                                                                                                                       result.get('storageMediumID'),
+                                                                                                                                                                       result.get('WriteSize'), 
+                                                                                                                                                                       result.get('WriteTime'), 
+                                                                                                                                                                       MBperSEC,
+                                                                                                                                                                       )
+            logger.info(msg)
+            ESSPGM.Events().create('1104','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)      
+            IO_obj.Status = 20
+            IO_obj.save(update_fields=['Status'])
+            #return result
 
     #def on_failure(self, exc, task_id, args, kwargs, einfo):
     #    logger = logging.getLogger('StorageMethodTape')
@@ -493,12 +494,69 @@ class WriteStorageMethodTape(Task):
         logger = logging.getLogger('StorageMethodTape')
         res = ''
         exitstatus = 0
+        failed_flag = 0
         AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
         ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
+        verifydir = ESSConfig.objects.get(Name='verifydir').Value
+
         
         storageMedium_obj = storageMedium.objects.get(storageMediumID=storageMediumID)
-        cmdres,errno,why = ESSPGM.Check().AIPextract(storageMediumID, prefix=storageMedium_obj.storagetarget.target)
-        if errno:
+        TmpPath = os.path.join(verifydir, storageMedium_obj.storagetarget.target)
+        if not os.path.exists(TmpPath):
+            os.mkdir(TmpPath)
+        
+        ReqUUID = uuid.uuid1()
+        ReqType = u'2'
+        ReqPurpose = u'verify'
+        ObjectIdentifierValue = u''
+        user = u'system'
+        
+        # Log Access Order request
+        event_info = 'User: %s has create a Access Order Request to verify storageMediumID: %s' % (user, storageMediumID)
+        logger.info(event_info)
+        
+        # Add Access Order request to AccessQueue database table
+        AccessQueue_obj = AccessQueue()
+        setattr(AccessQueue_obj, 'ReqUUID', ReqUUID)
+        setattr(AccessQueue_obj, 'ReqType', ReqType)
+        setattr(AccessQueue_obj, 'ReqPurpose', ReqPurpose)
+        setattr(AccessQueue_obj, 'user', user)
+        setattr(AccessQueue_obj, 'ObjectIdentifierValue', ObjectIdentifierValue)
+        setattr(AccessQueue_obj, 'storageMediumID', storageMediumID)
+        setattr(AccessQueue_obj, 'Status', 0)
+        setattr(AccessQueue_obj, 'Path', TmpPath)
+        AccessQueue_obj.save()
+        
+        # Wait for access request to success
+        loop_num = 0
+        while 1:
+            DbRows = AccessQueue.objects.filter(ReqUUID=ReqUUID)
+            if DbRows.exists():
+                DbRow = DbRows[0]
+                if DbRow.Status==20:
+                    event_info = 'Success to verify storageMediumID: %s ReqUUID: %s' % (storageMediumID, ReqUUID)
+                    logger.info(event_info)
+                    DbRow.delete()
+                    break
+                elif loop_num == 15:
+                    event_info = 'Access to verify storageMediumID: %s RequUID: %s Status: %s' % (storageMediumID, ReqUUID, DbRow.Status)
+                    logger.info(event_info)
+                    loop_num = 0
+                elif DbRow.Status==100:
+                    event_info = 'Failed to verify storageMediumID: %s ReqUUID: %s' % (storageMediumID, ReqUUID)
+                    logger.error(event_info)
+                    DbRow.delete()
+                    failed_flag = 1
+                    break
+            else:
+                event_info = 'Access to verify storageMediumID: %s with ReqUUID: %s does not exists' % (storageMediumID, ReqUUID)
+                logger.info(event_info)
+                failed_flag = 1
+                break
+            loop_num += 1
+            time.sleep(1)
+
+        if failed_flag:
             # Mark tape as failed in StorageMediumTable
             timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
             storageMedium_obj.storageMediumStatus = 100
@@ -514,7 +572,7 @@ class WriteStorageMethodTape(Task):
                     storageMedium_obj.ExtDBdatetime = timestamp_utc
                     storageMedium_obj.save(update_fields=['ExtDBdatetime'])
             exitstatus = 1
-            res = 'Problem to verify mediumID: %s, error: %s, error description: %s' % (storageMediumID, errno, why)
+            res = 'Problem to verify mediumID: %s' % (storageMediumID)
         else:
             # Mark tape as full in StorageMediumTable
             timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
@@ -741,10 +799,12 @@ class ReadStorageMethodTape(Task):
     def run(self, req_pk_list, *args, **kwargs):
         """The body of the task executed by workers."""
         logger = logging.getLogger('StorageMethodTape')
-        IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
-        NumberOfTasks = IO_objs.count()
+        #IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
+        #NumberOfTasks = IO_objs.count()
+        NumberOfTasks = len(req_pk_list)
         
-        for TaskNum, IO_obj in enumerate(IO_objs):          
+        for TaskNum, req_pk in enumerate(req_pk_list):    
+            IO_obj = IOQueue.objects.get(pk=req_pk)
             # Let folks know we started
             IO_obj.Status = 5
             IO_obj.save(update_fields=['Status'])
@@ -775,8 +835,9 @@ class ReadStorageMethodTape(Task):
             else:
                 IO_obj.refresh_from_db()
                 MBperSEC = int(result.get('ReadSize'))/int(result.get('ReadTime').seconds)
-                msg = 'Success to read IOuuid: %s for object %s from tape, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
-                                                                                                                                                                           result.get('ObjectIdentifierValue'), 
+                msg = 'Success to read IOuuid: %s for object %s from %s, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                           result.get('ObjectIdentifierValue'),
+                                                                                                                                                                           result.get('storageMediumID'),
                                                                                                                                                                            result.get('ReadSize'), 
                                                                                                                                                                            result.get('ReadTime'), 
                                                                                                                                                                            MBperSEC,

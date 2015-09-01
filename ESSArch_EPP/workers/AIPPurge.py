@@ -243,7 +243,7 @@ if __name__ == '__main__':
     logging.debug('Run: ' + str(Run))
 
     AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
-    ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
+    ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 
     x=WorkingThread(ProcName)
     while 1:

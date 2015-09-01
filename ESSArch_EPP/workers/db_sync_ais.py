@@ -350,7 +350,7 @@ class work:
     "day_sync_centralDB"
     ###############################################
     def day_sync_centralDB(self,numdays):
-        ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
+        ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
         startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(numdays)),microsecond=0).isoformat(' ')
         stopDateTime = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
         logging.info('startDateTime: %s',str(startDateTime))

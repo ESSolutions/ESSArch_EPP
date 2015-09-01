@@ -319,6 +319,7 @@ class Robot:
                         break
                 except Empty:
                     pass
+                numreadydrives = robotdrives.objects.filter(status='Ready').count()
                 robotdrives_objs = robotdrives.objects.filter(status='Mounted')
                 if robotdrives_objs:
                     #################################################
@@ -328,16 +329,16 @@ class Robot:
                         if len(robotdrives_obj.drive_lock) == 0: 
                             #################################################
                             # Tape is not locked
-                            if int(robotdrives_obj.IdleTime) > 5 and nummountreq:
+                            if int(robotdrives_obj.IdleTime) > 10 and nummountreq > 0 and numreadydrives == 0:
                                 ##################################################################################################
-                                # Pendning mount request in RobotReqQueue. Set IdleTime to 5 sec.
-                                robotdrives_obj.IdleTime = 5
+                                # Pendning mount request in RobotReqQueue. Set IdleTime to 10 sec.
+                                robotdrives_obj.IdleTime = 10
                                 robotdrives_obj.save(update_fields=['IdleTime'])
                                 logger.info('Setting IdleTime to ' + str(robotdrives_obj.IdleTime) + ' sec, for tape id: ' + str(robotdrives_obj.t_id))
                             elif int(robotdrives_obj.IdleTime) == 9999:
                                 ##################################################################
-                                # Tape is new_unlocked(9999). Set IdleTime to 120 sec.
-                                robotdrives_obj.IdleTime = 120
+                                # Tape is new_unlocked(9999). Set IdleTime to 3600 sec.
+                                robotdrives_obj.IdleTime = 3600
                                 robotdrives_obj.save(update_fields=['IdleTime'])
                                 logger.info('Setting IdleTime to ' + str(robotdrives_obj.IdleTime) + ' sec, for tape id: ' + str(robotdrives_obj.t_id))
                             if int(robotdrives_obj.IdleTime) < 9999:
@@ -583,7 +584,7 @@ if __name__ == '__main__':
     logger.debug('Run: ' + str(Run))
 
     AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
-    ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
+    ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 
     q1 = multiprocessing.Queue()
     p1 = multiprocessing.Process(target=Robot().IdleUnmountProc, args=(q1,))

@@ -26,20 +26,22 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import os, thread, datetime, time, logging, sys, ESSPGM, ESSlogging, ESSMD, csv, ESSMSSQL, pytz
+import os, thread, datetime, time, logging, sys, ESSPGM, ESSlogging, ESSMD, csv, ESSMSSQL, pytz, traceback
 
 from essarch.models import IngestQueue, ArchiveObject
 from configuration.models import ESSConfig, ESSProc, ArchivePolicy, StorageTargets
 from Storage.models import IOQueue
+from Storage.libs import StorageMethodWrite
 from django.db.models import Q
 from django import db
 from django.utils import timezone
+from essarch.libs import ESSArchSMError
 
 import django
 django.setup()
 
-from StorageMethodDisk.tasks import WriteStorageMethodDisk
-from StorageMethodTape.tasks import WriteStorageMethodTape
+#from StorageMethodDisk.tasks import WriteStorageMethodDisk
+#from StorageMethodTape.tasks import WriteStorageMethodTape
 
 class WorkingThread:
     tz = timezone.get_default_timezone()
@@ -85,6 +87,32 @@ class WorkingThread:
                     #thread.interrupt_main()
                     break
                 PolicyID = ArchivePolicy_obj.PolicyID
+                
+                # new start
+                ArchiveObject_objs = ArchiveObject.objects.filter(Q(PolicyId__PolicyID = PolicyID),
+                                                  Q(StatusProcess__range = [69,1000]),
+                                                  Q(StatusActivity = 0) | Q(StatusActivity__range = [5,6]),
+                                                  )
+                StorageMethodWrite_obj = StorageMethodWrite()
+                StorageMethodWrite_obj.logger = logger
+                StorageMethodWrite_obj.ArchiveObject_objs = ArchiveObject_objs
+                StorageMethodWrite_obj.add_to_ioqueue()
+                StorageMethodWrite_obj.apply_ios_to_write()
+                for ArchiveObject_obj in ArchiveObject_objs:
+                    try:
+                        StorageMethodWrite_obj.get_write_status(ArchiveObject_obj)
+                        StorageMethodWrite_obj.handle_write_status(ArchiveObject_obj)
+                    except ESSArchSMError as e:
+                        exc_type, exc_value, exc_traceback = sys.exc_info()
+                        msg = 'Problem to write object %s, error: %s line: %s' % (ArchiveObject_obj.ObjectIdentifierValue, e, exc_traceback.tb_lineno)
+                        logger.error(msg)
+                    except Exception as e:
+                        exc_type, exc_value, exc_traceback = sys.exc_info()
+                        msg = 'Unknown error to write object %s, error: %s trace: %s' % (ArchiveObject_obj.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)))
+                        logger.error(msg)
+                #new end
+                
+                '''
                 TempPath = ArchivePolicy_obj.AIPpath
                 IngestMetadata = ArchivePolicy_obj.IngestMetadata
                 self.sm_num = 0
@@ -371,7 +399,7 @@ class WorkingThread:
                 for target_obj_id in ActiveTapeIOs:
                     if not IOQueue.objects.filter(ReqType=10, Status__lt=100, storagemethodtarget__target__id=target_obj_id).exists():
                         ActiveTapeIOs.remove(target_obj_id)
-                        
+                '''        
             ############################################################################
             # Check if any active Write IO exist to set pause flags for ingest of new objects
             if IOQueue.objects.filter(ReqType__in=[10, 15], Status__in = [1,19]).exists():
@@ -379,7 +407,7 @@ class WorkingThread:
             else:
                 ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
            
-            db.close_old_connections()
+            #db.close_old_connections()
             self.mLock.release()
             time.sleep(int(PauseTime))
         self.RunFlag=0
@@ -472,7 +500,7 @@ if __name__ == '__main__':
     logger.debug('Run: ' + str(Run))
 
     AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
-    ExtDBupdate = ESSConfig.objects.get(Name='ExtDBupdate').Value
+    ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 
     x=WorkingThread(ProcName)
     while 1:

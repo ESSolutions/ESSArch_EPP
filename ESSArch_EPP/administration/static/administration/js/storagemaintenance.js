@@ -189,10 +189,10 @@
                              { 'bVisible': false, 'aTargets': [ 10 ] },
                              { 'bVisible': false, 'aTargets': [ 11 ] },
                              { 'bVisible': false, 'aTargets': [ 12 ] },
-                             { 'bVisible': false, 'aTargets': [ 13 ] },
-                             { 'bVisible': false, 'aTargets': [ 14 ] },
-                             { 'bVisible': false, 'aTargets': [ 15 ] },
-                             { 'bVisible': false, 'aTargets': [ 16 ] },                         
+                             //{ 'bVisible': false, 'aTargets': [ 13 ] },
+                             //{ 'bVisible': false, 'aTargets': [ 14 ] },
+                             //{ 'bVisible': false, 'aTargets': [ 15 ] },
+                             //{ 'bVisible': false, 'aTargets': [ 16 ] },                         
                              { 'bRegex': true, 'aTargets': [ 4 ] }
                         ],            
             //"sDom": 'T<"clear">lfrtip',
@@ -246,7 +246,7 @@
 		                            "type": "POST",
 		                            "cache": false,
 		                            "error": function () {
-		                                alert( "Failed to deactivate media" );
+		                                alert( "Problem to create deactivate media request. Please fill out all mandatory fields." );
 		                            }
 		                        } );
 	                        }

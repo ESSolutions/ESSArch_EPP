@@ -369,6 +369,15 @@ LOGGING = {
             # Reference to handler in log.py below
             'class': 'monitoring.log.DbLogHandler',
         },
+        'log_file_Storage': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/Storage.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
         'log_file_StorageMethodDisk': {
             'level': 'DEBUG',
             #'filters': ['require_debug_false'],
@@ -437,6 +446,11 @@ LOGGING = {
         'essarch.dblog': {
             'level': 'ERROR',
             'handlers': ['dblog'],
+            'propagate': True,
+        },
+        'Storage': {
+            'level': 'INFO',
+            'handlers': ['log_file_Storage'],
             'propagate': True,
         },
         'StorageMethodDisk': {
