@@ -32,11 +32,6 @@ from django.shortcuts import render
 from django.db.models import Q
 from operator import or_, and_
 
-#from essarch.models import storageMedium, storageMediumTable, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
-#from essarch.models import storageMedium, MediumType_CHOICES, MediumStatus_CHOICES, MediumLocationStatus_CHOICES, MediumFormat_CHOICES, MediumBlockSize_CHOICES, \
-#                           storage, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, ArchiveObject, \
-#                           MigrationQueue, MigrationReqType_CHOICES, ReqStatus_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
-
 from essarch.models import ArchiveObject, robot, robotQueue, robotQueueForm, robotQueueFormUpdate, RobotReqType_CHOICES, \
                                         MigrationQueue, MigrationReqType_CHOICES, MigrationQueueForm, MigrationQueueFormUpdate, DeactivateMediaForm
                            
@@ -64,9 +59,6 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 from django.utils import timezone
 
-#from django_tables2 import RequestConfig
-
-#from essarch.libs import DatatablesView, flush_transaction, DatatablesForm, get_field_choices, get_object_list_display
 from essarch.libs import DatatablesView, DatatablesForm, get_field_choices, get_object_list_display
 
 import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
@@ -384,16 +376,16 @@ class TargetPrePopulation(View):
                     st_obj = st_objs[0]
                 elif st_objs.count() == 0:
                     #logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
-                    break
+                    continue
                 elif st_objs.count() > 1:
                     #logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
-                    break
+                    continue
                 if st_obj.target.status == 1:
                     target_obj = st_obj.target
                     targetlist.append(target_obj.target)
                 else:
                     #logger.error('The target %s is disabled' % target_obj.name)
-                    break
+                    continue
             
             Policy ={}
             Policy['PolicyID'] = ArchivePolicy_obj.PolicyID
@@ -430,48 +422,32 @@ class StorageMaintenance(TemplateView):
      
 class StorageMaintenanceDatatablesView(DatatablesView):
     model = ArchiveObject
-    #queryset = ArchiveObject.objects.exclude(Q(storage__storageMediumUUID__storageMediumStatus = 0))
-    #queryset = ArchiveObject.objects.exclude(storage__storageMediumUUID__storageMediumStatus = 0)
-    #queryset = ArchiveObject.objects.extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0'])
+
     fields = (
         'ObjectIdentifierValue',
         'ObjectUUID',
         'StatusProcess',
         'StatusActivity',
-        'storage__storageMediumUUID__storageMediumID',
-        'storage__contentLocationValue',
-        
+        'Storage_set__storagemedium__storageMediumID',
+        'Storage_set__contentLocationValue',     
         'PolicyId__PolicyName',
         'PolicyId__PolicyID',
-        'PolicyId__PolicyStat',
-        
-        '{PolicyId__sm_type_1} ({PolicyId__sm_1})',
-        'PolicyId__sm_target_1',
-        '{PolicyId__sm_type_2} ({PolicyId__sm_2})',
-        'PolicyId__sm_target_2',
-        '{PolicyId__sm_type_3} ({PolicyId__sm_3})',
-        'PolicyId__sm_target_3',
-        '{PolicyId__sm_type_4} ({PolicyId__sm_4})',
-        'PolicyId__sm_target_4',
-        
-        #'storage__storageMediumUUID__storageMediumDate',
-        'storage__storageMediumUUID__CreateDate',
-        'storage__storageMediumUUID__storageMediumStatus',
+        'PolicyId__PolicyStat', 
+        'Storage_set__storagemedium__storagetarget__name',
+        'Storage_set__storagemedium__storagetarget__target',
+
+        'Storage_set__storagemedium__CreateDate',
+        'Storage_set__storagemedium__storageMediumStatus',
     )   
 
     def process_dt_response(self, data):
         self.form = DatatablesForm(data)
         if self.form.is_valid():
-            #flush_transaction()
-            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
-            self.object_list_with_writetapes = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
+            self.object_list_with_writetapes = self.get_queryset().extra(where=["NOT `Storage_storagemedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
             self.object_list = []
             for obj in self.object_list_with_writetapes:
-                if not obj['storage__storageMediumUUID__storageMediumStatus'] == 20:
+                if not obj['Storage_set__storagemedium__storageMediumStatus'] == 20:
                     self.object_list.append(obj)
-            
-            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` IN (%s)"],params=['0',]).values(*self.get_db_fields())
-            #self.object_list = self.get_queryset().extra(where=["NOT `storageMedium`.`storageMediumStatus` IN (%s,%s)"],params=['0','20']).values(*self.get_db_fields())
             #print 'self.object_list : %s' % self.object_list 
             self.field_choices_dict = get_field_choices(self.get_queryset()[:1], self.get_db_fields())
             return self.render_to_response(self.form)
@@ -480,11 +456,11 @@ class StorageMaintenanceDatatablesView(DatatablesView):
 
     def sort_col_4(self, direction):
         '''sort for col_5'''
-        return ('%sstorage__storageMediumUUID__storageMediumID' % direction, '%sstorage__id' % direction)
+        return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__id' % direction)
 
     def sort_col_5(self, direction):
         '''sort for col_6'''
-        return ('%sstorage__id' % direction, '%sstorage__storageMediumUUID__storageMediumID' % direction)
+        return ('%sStorage_set__id' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
 
     def search_col_4(self, search, queryset):
         idx=4
@@ -512,12 +488,11 @@ class StorageMaintenanceDatatablesView(DatatablesView):
             if term.startswith('/'):
                 #print 'term/: %s' % term
                 #print 'exclude_list_before: %s' % exclude_list
-                for x in storage.objects.filter(contentLocationValue = term, ObjectUUID__isnull=False).values_list('ObjectUUID', flat=True):
+                for x in storage.objects.filter(contentLocationValue = term, archiveobject__isnull=False).values_list('archiveobject', flat=True):
                     exclude_list.append(x)
                 #print 'exclude_list_after: %s' % exclude_list
             else:
-                for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term, ObjectUUID__isnull=False).values_list('ObjectUUID', flat=True):
-                #for x in storage.objects.filter(storageMediumUUID__storageMediumID__startswith = term).values_list('ObjectUUID', flat=True):
+                for x in storage.objects.filter(storagemedium__storageMediumID__startswith = term, archiveobject__isnull=False).values_list('archiveobject', flat=True):
                     exclude_list.append(x)
             search2 = Q(ObjectUUID__in = exclude_list)
             queryset = queryset.exclude(search2)
@@ -525,11 +500,10 @@ class StorageMaintenanceDatatablesView(DatatablesView):
 
     def get_deactivate_list(self):
         logger = logging.getLogger('essarch.storagemaintenance')
-        #
+
         # Create unique obj_list
         obj_list = []
         for obj in self.object_list_with_writetapes:
-        #for obj in self.object_list:
             if not any(d['ObjectUUID'] == obj['ObjectUUID'] for d in obj_list):
                 obj_list.append(obj)
         
@@ -538,8 +512,6 @@ class StorageMaintenanceDatatablesView(DatatablesView):
             
             #Prepare storage method list
             sm_objs = []
-
-            #current_mediumid_search = self.dt_data['sSearch_%s' % '4']
             current_mediumid_search = self.dt_data.get('sSearch_%s' % '4','xxx')
             logger.debug('col4 serach: %s' % current_mediumid_search)
 
@@ -561,7 +533,31 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                 sm_obj.target = current_mediumid_search[1:4]
                 sm_objs.append(sm_obj)
             else:
-                media_target_replace_flag = 0    
+                media_target_replace_flag = 0
+                ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = obj['PolicyId__PolicyID'])
+                StorageMethod_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1)
+                for StorageMethod_obj in StorageMethod_objs:
+                    st_objs = StorageMethod_obj.storagetarget_set.filter(status=1)
+                    if st_objs.count() == 1:
+                        st_obj = st_objs[0]
+                    elif st_objs.count() == 0:
+                        logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
+                        continue
+                    elif st_objs.count() > 1:
+                        logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
+                        continue
+                    if st_obj.target.status == 1:
+                        target_obj = st_obj.target
+                    else:
+                        logger.error('The target %s is disabled' % st_obj.target.name)
+                        continue
+                    sm_obj = sm()
+                    sm_obj.id = StorageMethod_obj.id
+                    sm_obj.status = st_obj.status
+                    sm_obj.type = target_obj.type
+                    sm_obj.target = target_obj.target
+                    sm_objs.append(sm_obj)
+                '''
                 for i in [1,2,3,4]:
                     sm_obj = sm()
                     sm_obj.id = i
@@ -575,7 +571,7 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                     #sm_obj.minCapacityWarning = getattr(ep_obj,'sm_minCapacityWarning_%s' % i)
                     sm_obj.target = obj['PolicyId__sm_target_%s' % i]
                     sm_objs.append(sm_obj)
-                            
+            '''
             sm_list = []
             if media_target_replace_flag:
                 storage_list = []
@@ -584,26 +580,24 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                 storage_list = []
                 if sm_obj.status == 1:
                     for d in self.object_list_with_writetapes:
-                        if d['storage__storageMediumUUID__storageMediumID'] is not None:
+                        if d['Storage_set__storagemedium__storageMediumID'] is not None:
                             if (sm_obj.type in range(300,330) and
-                                d['storage__storageMediumUUID__storageMediumID'].startswith(sm_obj.target) and
+                                d['Storage_set__storagemedium__storageMediumID'].startswith(sm_obj.target) and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ) or\
                                 (media_target_replace_flag and sm_obj.type == 300 and
-                                d['storage__storageMediumUUID__storageMediumID'].startswith(current_mediumid_search[1:4]) and
+                                d['Storage_set__storagemedium__storageMediumID'].startswith(current_mediumid_search[1:4]) and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ) or\
                                (sm_obj.type == 200 and
-                                d['storage__storageMediumUUID__storageMediumID'] == 'disk' and
+                                d['Storage_set__storagemedium__storageMediumID'] == 'disk' and
                                 d['ObjectUUID'] == obj['ObjectUUID']
                                 ):
-                                    storage_list.append({'storageMediumUUID__storageMediumID': d['storage__storageMediumUUID__storageMediumID'],
-                                                         #'storageMediumUUID__storageMedium': sm_obj.type,
-                                                         #'storageMediumUUID__storageMediumDate': d['storage__storageMediumUUID__storageMediumDate'],
-                                                         'storageMediumUUID__CreateDate': d['storage__storageMediumUUID__CreateDate'],
-                                                         'contentLocationValue': d['storage__contentLocationValue'],
-                                                         'ObjectUUID__ObjectIdentifierValue': obj['ObjectIdentifierValue'],
-                                                         'ObjectUUID__ObjectUUID': obj['ObjectUUID'],
+                                    storage_list.append({'storagemedium__storageMediumID': d['Storage_set__storagemedium__storageMediumID'],
+                                                         'storagemedium__CreateDate': d['Storage_set__storagemedium__CreateDate'],
+                                                         'contentLocationValue': d['Storage_set__contentLocationValue'],
+                                                         'archiveobject__ObjectIdentifierValue': obj['ObjectIdentifierValue'],
+                                                         'archiveobject__ObjectUUID': obj['ObjectUUID'],
                                                          })
                                     #print 'd - storage__storageMediumUUID__storageMediumID: %s' % d['storage__storageMediumUUID__storageMediumID']
                                     #print 'o - storage__storageMediumUUID__storageMediumID: %s' % obj['storage__storageMediumUUID__storageMediumID']
@@ -629,15 +623,13 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                     for storage_obj in sm_obj['storage_list']:
                         if active_storage_obj is None:
                             active_storage_obj = storage_obj
-                        #elif storage_obj['storageMediumUUID__storageMediumDate'] > active_storage_obj['storageMediumUUID__storageMediumDate']:
-                        elif storage_obj['storageMediumUUID__CreateDate'] > active_storage_obj['storageMediumUUID__CreateDate']:
+                        elif storage_obj['storagemedium__CreateDate'] > active_storage_obj['storagemedium__CreateDate']:
                             active_storage_obj = storage_obj
                     for storage_obj in sm_obj['storage_list']:
-                        #if storage_obj['storageMediumUUID__storageMediumDate'] < active_storage_obj['storageMediumUUID__storageMediumDate']:
-                        if storage_obj['storageMediumUUID__CreateDate'] < active_storage_obj['storageMediumUUID__CreateDate']:
-                            if not storage_obj['storageMediumUUID__storageMediumID'] in redundant_storage_list.keys():
-                                redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']] = []
-                            redundant_storage_list[storage_obj['storageMediumUUID__storageMediumID']].append(storage_obj)
+                        if storage_obj['storagemedium__CreateDate'] < active_storage_obj['storagemedium__CreateDate']:
+                            if not storage_obj['storagemedium__storageMediumID'] in redundant_storage_list.keys():
+                                redundant_storage_list[storage_obj['storagemedium__storageMediumID']] = []
+                            redundant_storage_list[storage_obj['storagemedium__storageMediumID']].append(storage_obj)
         
         logger.debug('redundant_storage_list: %s' % repr(redundant_storage_list))
 
@@ -646,13 +638,11 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         need_to_migrate_list = []
         #need_to_migrate_dict = {}
         for storageMediumID in redundant_storage_list.keys():
-            storage_list = storage.objects.exclude(storageMediumUUID__storageMediumStatus=0).filter(storageMediumUUID__storageMediumID=storageMediumID).values('storageMediumUUID__storageMediumID',
-                                                                                                          #'storageMediumUUID__storageMedium',
-                                                                                                          #'storageMediumUUID__storageMediumDate',
-                                                                                                          'storageMediumUUID__CreateDate',
+            storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID).values('storagemedium__storageMediumID',
+                                                                                                          'storagemedium__CreateDate',
                                                                                                           'contentLocationValue',
-                                                                                                          'ObjectUUID__ObjectIdentifierValue',
-                                                                                                          'ObjectUUID__ObjectUUID',
+                                                                                                          'archiveobject__ObjectIdentifierValue',
+                                                                                                          'archiveobject__ObjectUUID',
                                                                                                           )
             storage_list2 = list(storage_list)
             for storage_values in storage_list:
@@ -670,19 +660,16 @@ class StorageMaintenanceDatatablesView(DatatablesView):
                         #print 'storage_list2_len after: %s' % len(storage_list2)
                         #pass
             if len(storage_list2) == 0:
-                #deactivate_media_list.append([storageMediumID])
                 deactivate_media_list.append(['','','','',storageMediumID,'','','','','','','','','','','',''])
             else:
                 #need_to_migrate_dict[storageMediumID] = storage_list2
                 for m in storage_list2:
                     tmp_list = []
-                    keys = ['storageMediumUUID__storageMediumID',
-                          #'storageMediumUUID__storageMedium',
-                          #'storageMediumUUID__storageMediumDate',
-                          'storageMediumUUID__CreateDate',
+                    keys = ['storagemedium__storageMediumID',
+                          'storagemedium__CreateDate',
                           'contentLocationValue',
-                          'ObjectUUID__ObjectIdentifierValue',
-                          'ObjectUUID__ObjectUUID']
+                          'archiveobject__ObjectIdentifierValue',
+                          'archiveobject__ObjectUUID']
                     for key in keys:
                         tmp_list.append(m[key])
                     need_to_migrate_list.append(tmp_list)
