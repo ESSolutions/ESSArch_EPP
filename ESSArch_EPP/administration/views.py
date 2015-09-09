@@ -456,13 +456,21 @@ class StorageMaintenanceDatatablesView(DatatablesView):
 
     def sort_col_4(self, direction):
         '''sort for col_5'''
+<<<<<<< HEAD
         #return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__id' % direction)
         return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__contentLocationValue' % direction)
+=======
+        return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__id' % direction)
+>>>>>>> branch 'master' of https://github.com/ESSolutions/ESSArch_EPP.git
 
     def sort_col_5(self, direction):
         '''sort for col_6'''
+<<<<<<< HEAD
         #return ('%sStorage_set__id' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
         return ('%sStorage_set__contentLocationValue' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
+=======
+        return ('%sStorage_set__id' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
+>>>>>>> branch 'master' of https://github.com/ESSolutions/ESSArch_EPP.git
 
     def search_col_4(self, search, queryset):
         idx=4
