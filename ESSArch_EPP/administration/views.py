@@ -456,12 +456,10 @@ class StorageMaintenanceDatatablesView(DatatablesView):
 
     def sort_col_4(self, direction):
         '''sort for col_5'''
-        #return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__id' % direction)
         return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__contentLocationValue' % direction)
 
     def sort_col_5(self, direction):
         '''sort for col_6'''
-        #return ('%sStorage_set__id' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
         return ('%sStorage_set__contentLocationValue' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
 
     def search_col_4(self, search, queryset):
