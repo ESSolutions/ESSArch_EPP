@@ -47,9 +47,9 @@ else
     SCRIPT_FILE="$0"
 fi
 
+export EPP=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP
 export LD_LIBRARY_PATH=/ESSArch/pd/python/lib:/ESSArch/pd/libxslt/lib:/ESSArch/pd/libxml/lib:/ESSArch/pd/libmpeg2/lib:/usr/local/lib
-#export DJANGO_SETTINGS_MODULE=config.settings
-export PYTHONPATH=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP:/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers:/ESSArch/config
+export PYTHONPATH=${EPP}:${EPP}/workers:/ESSArch/config
 
 SCRIPT_NAME="$(basename "$SCRIPT_FILE")"
 
@@ -60,8 +60,7 @@ DEFAULT_LOG_LEVEL="INFO"
 DEFAULT_NODES="celery"
 DEFAULT_CELERYD="-m celery worker --detach"
 
-#CELERY_DEFAULTS=${CELERY_DEFAULTS:-"/etc/default/${SCRIPT_NAME}"}
-CELERY_DEFAULTS=${CELERY_DEFAULTS:-"/ESSArch/config/${SCRIPT_NAME}"}
+CELERY_DEFAULTS=${CELERY_DEFAULTS:-"${EPP}/config/${SCRIPT_NAME}"}
 
 # Make sure executable configuration script is owned by root
 _config_sanity() {

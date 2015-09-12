@@ -41,9 +41,9 @@ else
 fi
 SCRIPT_NAME="$(basename "$SCRIPT_FILE")"
 
+export EPP=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP
 export LD_LIBRARY_PATH=/ESSArch/pd/python/lib:/ESSArch/pd/libxslt/lib:/ESSArch/pd/libxml/lib:/ESSArch/pd/libmpeg2/lib:/usr/local/lib
-#export DJANGO_SETTINGS_MODULE=config.settings
-export PYTHONPATH=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP:/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers:/ESSArch/config
+export PYTHONPATH=${EPP}:${EPP}/workers:/ESSArch/config
 
 # /etc/init.d/celerybeat: start and stop the celery periodic task scheduler daemon.
 
@@ -98,12 +98,12 @@ scripts=""
 #    . /etc/default/celeryd
 #fi
 
-if test -f /ESSArch/config/celeryd; then
-    scripts="/ESSArch/config/celeryd"
-    #_config_sanity /ESSArch/app/config/celeryd
-    . /ESSArch/config/celeryd
+CONFIG="${EPP}/config/celeryd"
+if test -f "$CONFIG"; then
+    scripts="$CONFIG"
+    #_config_sanity "$CONFIG"
+    . "$CONFIG"
 fi
-
 
 EXTRA_CONFIG="/etc/default/${SCRIPT_NAME}"
 if test -f "$EXTRA_CONFIG"; then
