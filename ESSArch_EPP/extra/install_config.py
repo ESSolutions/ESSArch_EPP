@@ -296,6 +296,22 @@ def createdefaultusers(): # default users, groups and permissions
                                                     content_type__model='storagetargets').all()
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
+        
+    # configuration - storagetarget permissions
+    permission_list = ['add_storagetarget','change_storagetarget','delete_storagetarget']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagetarget').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - storagemethod permissions
+    permission_list = ['add_storagemethod','change_storagemethod','delete_storagemethod']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagemethod').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
 
     # configuration - archivepolicy permissions
     permission_list = ['add_archivepolicy','change_archivepolicy','delete_archivepolicy']
@@ -514,7 +530,7 @@ def installdefaulteventType_codes(): # default eventType_codes
                           (1302,u'Ingest Order Accept',u'',1,0),
                           (1303,u'Ingest Order Complete',u'',1,0),
                           (2000,u'Mounting the tape in tapedrive in the robot',u'',1,0),
-                          (2010,u'Dismounting the taoe from tapedrive in the robot',u'',1,0),
+                          (2010,u'Dismounting the tape from tapedrive in the robot',u'',1,0),
                           (2090,u'Deactivate storage medium',u'',1,0),
                           (2201,u'Media quickverify Order Request',u'',1,0),
                           (2202,u'Media quickverify Order Accept',u'',1,0),

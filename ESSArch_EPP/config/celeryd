@@ -1,0 +1,37 @@
+# Names of nodes to start
+#   most will only start one node:
+CELERYD_NODES="worker1 smdisk1 smtape1"
+#   but you can also start multiple and configure settings
+#   for each in CELERYD_OPTS (see `celery multi --help` for examples).
+#CELERYD_NODES="worker1 worker2 worker3"
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/ESSArch/pd/python/bin/celery"
+
+# App instance to use
+CELERY_APP="config"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP"
+
+#CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
+
+# Extra command-line arguments to the worker
+CELERYD_OPTS="-Q:worker1 default -c:worker1 2 -Q:smdisk1 smdisk -c:smdisk1 2 -Q:smtape1 smtape -c:smtape1 2 --time-limit=300"
+
+# %N will be replaced with the first part of the nodename.
+CELERYD_LOG_LEVEL=INFO
+CELERYD_LOG_FILE="/ESSArch/log/celery_%N.log"
+CELERYD_PID_FILE="/ESSArch/log/proc/celery_%N.pid"
+
+# Workers should run as an unprivileged user.
+CELERYD_USER="arch"
+CELERYD_GROUP="arch"
+
+# CELERYBEAT configuration
+CELERYBEAT_LOG_LEVEL=INFO
+CELERYBEAT_LOG_FILE="/ESSArch/log/celerybeat.log"
+CELERYBEAT_PID_FILE="/ESSArch/log/proc/celerybeat.pid"
+CELERYBEAT_USER=${CELERYD_USER}
+CELERYBEAT_GROUP=${CELERYD_GROUP}
+CELERYBEAT_CHDIR=${CELERYD_CHDIR}

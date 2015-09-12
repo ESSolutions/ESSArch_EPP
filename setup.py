@@ -83,7 +83,7 @@ if __name__ == '__main__':
             "Jinja2>=2.8",
             "Soapbox>=0.3.7",
             "django.js>=0.8.1",
-            "django-eztables>=0.3.2",
+            "django-eztables>=0.3.3.dev0",
             "celery>=3.1.18",
             "django-celery>=3.1.16",
             "jobtastic>=0.3.1",
