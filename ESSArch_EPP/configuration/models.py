@@ -35,35 +35,6 @@ import datetime
 import sys
 import uuid
 
-# Logevents
-class LogEvent(models.Model):
-    eventType   = models.IntegerField( default=0, unique=True )
-    eventDetail = models.CharField( max_length = 255 )
-
-    class Meta:
-        ordering = ['eventType']
-        permissions = (
-                       ("Can_view_log_menu", "Can_view_log_menu"),
-                       )
-
-    def __unicode__(self):
-        # create a unicode representation of this object
-        return self.eventDetail
-
-    def populate_from_form(self, form):
-        # pull out all fields from a form and use them to set
-        # the values of this object.
-        for field in LogEvent._meta.fields:
-            if field.name in form.cleaned_data:
-                setattr( self, field.name, form.cleaned_data[field.name] )
-
-    def get_value_array(self):
-        # make an associative array of all fields  mapping the field
-        # name to the current value of the field
-        return { field.name: field.value_to_string(self) 
-                 for field in LogEvent._meta.fields }
-
-
 # Parameters
 class Parameter(models.Model):
     entity      = models.CharField( max_length = 255, unique=True )

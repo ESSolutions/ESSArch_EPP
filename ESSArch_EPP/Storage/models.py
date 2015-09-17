@@ -71,8 +71,9 @@ StorageType_CHOICES = (
 )
 
 MediumFormat_CHOICES = (
-    (102, '102 (Media label)'),
     (103, '103 (AIC support)'),
+    (102, '102 (Media label)'),
+    (101, '101 (Old read only)'),
 )
 
 MediumStatus_CHOICES = (
@@ -83,10 +84,10 @@ MediumStatus_CHOICES = (
 )
 
 MediumLocationStatus_CHOICES = (
-    (10, '10'),
-    (20, '20'),
-    (30, '30'),
-    (40, '40'),
+    (10, 'Delivered'),
+    (20, 'Received'),
+    (30, 'Placed'),
+    (40, 'Collected'),
     (50, 'Robot'),
 )
 

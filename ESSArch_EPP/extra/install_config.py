@@ -29,7 +29,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 # own models etc
-from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSProc, DefaultValue, ArchivePolicy, StorageMethod, StorageTarget, StorageTargets 
+from configuration.models import Parameter, SchemaProfile, IPParameter, Path, ESSConfig, ESSProc, DefaultValue, ArchivePolicy, StorageMethod, StorageTarget, StorageTargets 
 from essarch.models import eventType_codes, robotdrives, ArchiveObject, ArchiveObjectRel
 from Storage.models import storage, storageMedium, IOQueue
 from django.contrib.auth.models import User, Group, Permission
@@ -403,46 +403,6 @@ def installdefaultpaths(): # default paths
     
     return 0 
     
-def installogdefaults(): # default logevents
-    
-    # First remove all existing data 
-    LogEvent.objects.all().delete()
-
-    # create logevents dictionaries per zone
-    dct = {}
-    dct3 = {
-            'Received delivery':'21000',
-            'Delivery is handed over':'21100',
-            'Processing directory structure for IP':'22000',
-            'Extracting material':'22100',
-            'Testing material':'22200',
-            'Changes in the material':'22300',
-            'Additions to the material':'22310',
-            'Removal of material':'22320',
-            'Acquisition of additional information':'22400',
-            'Change of metadata':'22500',
-            'Letter to creator':'22600',
-            }
-        
-    # set default logevents according to zone
-    dct.update(dct3)
-    
-    # if zone is incorrect
-    if dct is None: 
-        return 1
-    
-    # create according to model with two fields
-    for key in dct :
-        print >> sys.stderr, "**", key
-        try:
-            le = LogEvent( eventType=dct[key], eventDetail=key )
-            le.save()
-        except:
-            pass
-
-    return 0
-
-
 def installdefaultschemaprofiles(): # default schema profiles for Sweden and Norway
     
     # First remove all existing data 
@@ -776,7 +736,6 @@ def installdefaultparameters(): # default config parameters
     createdefaultusers()             # default users, groups and permissions
     installdefaultpaths()            # default paths
     installdefaultschemaprofiles()   # default schema profiles for Sweden or Norway
-    installogdefaults()              # default logevents
     installdefaultdefaultvalues()    # default values
     installIPParameter()             # default metadata for IP
     installdefaulteventType_codes()  # default eventType_codes

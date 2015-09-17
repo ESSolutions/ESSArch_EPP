@@ -454,6 +454,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 1000,
         },
+        'log_file_install': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/install.log',
+            'maxBytes': 1024*1024*5, # 5MB
+            'backupCount': 1000,
+        },
     },
     'loggers': {
         'django': {
@@ -524,6 +533,11 @@ LOGGING = {
         'StorageMethodTape': {
             'level': 'INFO',
             'handlers': ['log_file_StorageMethodTape'],
+            'propagate': True,
+        },
+        'install': {
+            'level': 'INFO',
+            'handlers': ['log_file_install'],
             'propagate': True,
         },
     },

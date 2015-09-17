@@ -28,17 +28,10 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter, ESSConfig, ESSProc, DefaultValue, ArchivePolicy,  StorageMethod, StorageTarget, StorageTargets
+from configuration.models import Parameter, SchemaProfile, Path, IPParameter, ESSConfig, ESSProc, DefaultValue, ArchivePolicy,  StorageMethod, StorageTarget, StorageTargets
 from django.contrib import admin
 #import nested_admin
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
-
-# Logevents
-class LogEventAdmin( admin.ModelAdmin ):
-    list_display = ( 'eventDetail', 'eventType' )
-    search_fields = ( 'eventDetail', )
-        
-admin.site.register( LogEvent, LogEventAdmin )
  
 # XML schemas and namespaces
 class SchemaProfileAdmin( admin.ModelAdmin ):

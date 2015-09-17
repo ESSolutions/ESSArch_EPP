@@ -35,7 +35,7 @@ ESSDB_flag = 1
 import ESSMD,pytz,datetime,uuid,ESSPGM,stat,os,os.path as op
 
 if ESSDB_flag == 1:
-    from configuration.models import LogEvent, Parameter, SchemaProfile, Path, IPParameter
+    from configuration.models import Parameter, SchemaProfile, Path, IPParameter
     from essarch.models import ArchiveObject, eventIdentifier, PackageType_CHOICES
     from django.utils import timezone
 

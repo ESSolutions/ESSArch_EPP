@@ -143,18 +143,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='LogEvent',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('eventType', models.IntegerField(default=0, unique=True)),
-                ('eventDetail', models.CharField(max_length=255)),
-            ],
-            options={
-                'ordering': ['eventType'],
-                'permissions': (('Can_view_log_menu', 'Can_view_log_menu'),),
-            },
-        ),
-        migrations.CreateModel(
             name='Parameter',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),

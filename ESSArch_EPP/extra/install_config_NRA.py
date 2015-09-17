@@ -29,7 +29,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 # own models etc
-from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path, ESSConfig, ESSArchPolicy, ESSProc
+from configuration.models import Parameter, SchemaProfile, IPParameter, Path, ESSConfig, ESSProc
 from essarch.models import eventType_codes, robotdrives, storageMedium
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -250,46 +250,6 @@ def installdefaultpaths(): # default paths
             pass
     
     return 0 
-    
-def installogdefaults(): # default logevents
-    
-    # First remove all existing data 
-    LogEvent.objects.all().delete()
-
-    # create logevents dictionaries per zone
-    dct = {}
-    dct3 = {
-            'Received delivery':'21000',
-            'Delivery is handed over':'21100',
-            'Processing directory structure for IP':'22000',
-            'Extracting material':'22100',
-            'Testing material':'22200',
-            'Changes in the material':'22300',
-            'Additions to the material':'22310',
-            'Removal of material':'22320',
-            'Acquisition of additional information':'22400',
-            'Change of metadata':'22500',
-            'Letter to creator':'22600',
-            }
-        
-    # set default logevents according to zone
-    dct.update(dct3)
-    
-    # if zone is incorrect
-    if dct is None: 
-        return 1
-    
-    # create according to model with two fields
-    for key in dct :
-        print >> sys.stderr, "**", key
-        try:
-            le = LogEvent( eventType=dct[key], eventDetail=key )
-            le.save()
-        except:
-            pass
-
-    return 0
-
 
 def installdefaultschemaprofiles(): # default schema profiles for Sweden and Norway
     
@@ -489,7 +449,8 @@ def installdefaultstorageMedium(): # default storageMedium
         storageMedium_obj.save()
 
 def installdefaultESSArchPolicy(): # default ESSArchPolicy
-
+    pass
+    '''
     if not ESSArchPolicy.objects.filter(id=u'1').exists():
         print "Adding NRA entry to ESSArchPolicy..."
         ESSArchPolicy_obj = ESSArchPolicy()
@@ -551,7 +512,7 @@ def installdefaultESSArchPolicy(): # default ESSArchPolicy
         ESSArchPolicy_obj.sm_minCapacityWarning_4=u'0'
         ESSArchPolicy_obj.sm_target_4=u''
         ESSArchPolicy_obj.save()
-
+    '''
 def installdefaultESSProc(): # default ESSProc
 
     ESSProc_list=(('1','SIPReceiver','/ESSArch/bin/SIPReceiver.pyc','/ESSArch/log/SIPReceiver.log',30,0,0,0,0),
@@ -616,7 +577,6 @@ def installdefaultparameters(): # default config parameters
     createdefaultusers()             # default users, groups and permissions
     installdefaultpaths()            # default paths
     installdefaultschemaprofiles()   # default schema profiles for Sweden or Norway
-    installogdefaults()              # default logevents
     installIPParameter()             # default metadata for IP
     installdefaulteventType_codes()  # default eventType_codes
     installdefaultESSConfig()        # default ESSConfig
