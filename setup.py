@@ -87,6 +87,7 @@ if __name__ == '__main__':
             "celery>=3.1.18",
             "django-celery>=3.1.16",
             "jobtastic>=0.3.1",
+            "requests>=2.7.0",
             "logfileviewer>=0.6.2",
         ],
         packages=find_packages(),
