@@ -43,7 +43,7 @@ from django.contrib.auth.views import password_change as admin_password_change
 import sys
 
 # own models etc
-from configuration.models import Parameter, LogEvent, SchemaProfile, IPParameter, Path
+from configuration.models import Parameter, SchemaProfile, IPParameter, Path
 
 
 @login_required
@@ -218,77 +218,6 @@ def installdefaultpaths(request): # default paths
     
     return HttpResponseRedirect( '/admin/configuration' )
 
-    
-@staff_member_required
-def installogdefaults(request): # default logevents
-    
-    # First remove all existing data 
-    LogEvent.objects.all().delete()
-
-    # find out which zone
-    zone = Parameter.objects.get(entity="zone").value
-
-    # create logevents dictionaries per zone
-    dct = {}
-    dct1 = {
-            #'Log circular created':'10000',
-            'Delivery is being prepared':'10100',
-            'Delivery is created':'10200',
-            'Ready for delivery':'10300',
-            }
-    dct2 = {
-            #'Created log circular':'20000',
-            'Delivery received':'20100',
-            'Delivery checked':'20200',
-            'Delivery registered':'20300',
-            'Delivery registered in journal system':'20400',
-            'Delivery registered in archival information system':'20500',
-            'Delivery receipt sent':'20600',
-            'Virus control done':'20700',
-            'Delivery ready for hand over':'20800',
-            }
-    dct3 = {
-            'Received delivery':'21000',
-            'Delivery is handed over':'21100',
-            'Processing directory structure for IP':'22000',
-            'Extracting material':'22100',
-            'Testing material':'22200',
-            'Changes in the material':'22300',
-            'Additions to the material':'22310',
-            'Removal of material':'22320',
-            'Acquisition of additional information':'22400',
-            'Change of metadata':'22500',
-            'Letter to creator':'22600',
-            }
-        
-    # set default logevents according to zone
-    if zone == "zone1" :
-        dct.update(dct1)
-    if zone == "zone2" :
-        dct.update(dct2)
-    if zone == "zone3" :
-        dct.update(dct3)
-    if zone == "all" :
-        dct.update(dct1)
-        dct.update(dct2)
-        dct.update(dct3)
-    
-    # if zone is incorrect
-    if dct is None: 
-        return HttpResponseRedirect( '/admin/configuration/logevent' )
-    
-    # create according to model with two fields
-    for key in dct :
-        print >> sys.stderr, "**", key
-        try:
-            le = LogEvent( eventType=dct[key], eventDetail=key )
-            le.save()
-        except:
-            pass
-
-    return HttpResponseRedirect( '/admin/configuration/logevent' )
-
-
 @staff_member_required
 def installdefaultschemaprofiles(request): # default schema profiles for Sweden and Norway
     
@@ -386,7 +315,6 @@ def installdefaultparameters(request): # default config parameters
     createdefaultusers(request)             # default users, groups and permissions
     installdefaultpaths(request)            # default paths
     installdefaultschemaprofiles(request)   # default schema profiles for Sweden or Norway
-    installogdefaults(request)              # default logevents
     installIPParameter(request)             # default metadata for IP
     
     return HttpResponseRedirect( '/admin/configuration' )
