@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(unique=True, max_length=255, verbose_name=b'Name')),
                 ('status', models.IntegerField(default=1, verbose_name=b'Storage target status', choices=[(0, b'Disabled'), (1, b'Enabled')])),
                 ('type', models.IntegerField(default=200, verbose_name=b'Type', choices=[(200, b'DISK'), (301, b'IBM-LTO1'), (302, b'IBM-LTO2'), (303, b'IBM-LTO3'), (304, b'IBM-LTO4'), (305, b'IBM-LTO5'), (306, b'IBM-LTO6'), (325, b'HP-LTO5'), (326, b'HP-LTO6'), (401, b'HDFS'), (402, b'HDFS-REST')])),
-                ('format', models.IntegerField(default=103, verbose_name=b'Format', choices=[(102, b'102 (Media label)'), (103, b'103 (AIC support)')])),
+                ('format', models.IntegerField(default=103, verbose_name=b'Format', choices=[(103, b'103 (AIC support)'), (102, b'102 (Media label)'), (101, b'101 (Old read only)')])),
                 ('blocksize', models.BigIntegerField(default=1024, verbose_name=b'BlockSize (tape)', choices=[(128, b'64K'), (256, b'128K'), (512, b'256K'), (1024, b'512K'), (2048, b'1024K')])),
                 ('maxCapacity', models.BigIntegerField(default=0, verbose_name=b'Max capacity (0=Disabled)')),
                 ('minChunkSize', models.BigIntegerField(default=0, verbose_name=b'Min chunk size', choices=[(0, b'Disabled'), (1000000, b'1 MByte'), (1073741824, b'1 GByte'), (53687091201, b'5 GByte'), (10737418240, b'10 GByte'), (107374182400, b'100 GByte')])),

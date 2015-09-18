@@ -181,6 +181,48 @@ class SMTapeFull(Exception):
     
 class DatatablesView(DatatablesView):
 
+    def get_orders_qs(self, queryset):
+        '''Get ordering fields for ``QuerySet.order_by``'''
+        orders = []
+        iSortingCols = self.dt_data['iSortingCols']
+        dt_orders = [(self.dt_data['iSortCol_%s' % i], self.dt_data['sSortDir_%s' % i]) for i in xrange(iSortingCols)]
+        for field_idx, field_dir in dt_orders:
+            direction = '-' if field_dir == 'desc' else ''
+            if hasattr(self, 'sort_col_qs_%s' % field_idx):
+                method = getattr(self, 'sort_col_qs_%s' % field_idx)
+                result, queryset = method(direction, queryset)
+                if isinstance(result, (bytes, unicode)):
+                    orders.append(result)
+                else:
+                    orders.extend(result)
+            elif hasattr(self, 'sort_col_%s' % field_idx):
+                method = getattr(self, 'sort_col_%s' % field_idx)
+                result = method(direction)
+                if isinstance(result, (bytes, unicode)):
+                    orders.append(result)
+                else:
+                    orders.extend(result)
+            else:
+                field = self.get_field(field_idx)
+                if RE_FORMATTED.match(field):
+                    tokens = RE_FORMATTED.findall(field)
+                    orders.extend(['%s%s' % (direction, token) for token in tokens])
+                else:
+                    orders.append('%s%s' % (direction, field))
+        queryset = queryset.order_by(*orders)
+        return queryset
+
+    def get_queryset(self):
+        '''Apply Datatables sort and search criterion to QuerySet'''
+        qs = super(DatatablesView, self).get_queryset()
+        # Perform global search
+        qs = self.global_search(qs)
+        # Perform column search
+        qs = self.column_search(qs)
+        # Perform ordered queryset
+        qs = self.get_orders_qs(qs)
+        return qs
+
     def process_dt_response(self, data):
         self.form = DatatablesForm(data)
         if self.form.is_valid():

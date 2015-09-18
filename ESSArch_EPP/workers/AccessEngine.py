@@ -172,7 +172,7 @@ class Access:
             if storage_objs.filter(storagemedium__storageMediumID=storageMediumID).exists():
                 storage_objs = storage_objs.filter(storagemedium__storageMediumID=storageMediumID)
         
-        if len(storage_objs) > 1:
+        if len(storage_objs) >= 1:
             if storage_objs.filter(storagemedium__storageMedium__in=[200,201]).exists():
                 storage_obj = storage_objs.filter(storagemedium__storageMedium__in=[200,201])[0]
             elif storage_objs.filter(storagemedium__storageMedium__in=[300,330]).exists():

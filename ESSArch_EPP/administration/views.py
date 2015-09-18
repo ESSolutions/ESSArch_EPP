@@ -19,8 +19,6 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
-from django.core.context_processors import request
-from _elementtree import tostring
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
@@ -443,24 +441,29 @@ class StorageMaintenanceDatatablesView(DatatablesView):
     def process_dt_response(self, data):
         self.form = DatatablesForm(data)
         if self.form.is_valid():
-            self.object_list_with_writetapes = self.get_queryset().extra(where=["NOT `Storage_storagemedium`.`storageMediumStatus` = %s"],params=['0']).values(*self.get_db_fields())
+            self.object_list_with_writetapes = self.get_queryset().extra(
+                  where=["NOT `Storage_storagemedium`.`storageMediumStatus` = %s"],params=['0']).values(
+                  *self.get_db_fields())
             self.object_list = []
             for obj in self.object_list_with_writetapes:
                 if not obj['Storage_set__storagemedium__storageMediumStatus'] == 20:
                     self.object_list.append(obj)
-            #print 'self.object_list : %s' % self.object_list 
             self.field_choices_dict = get_field_choices(self.get_queryset()[:1], self.get_db_fields())
             return self.render_to_response(self.form)
         else:
             return HttpResponseBadRequest()
 
-    def sort_col_4(self, direction):
+    def sort_col_qs_4(self, direction, queryset):
         '''sort for col_5'''
-        return ('%sStorage_set__storagemedium__storageMediumID' % direction, '%sStorage_set__contentLocationValue' % direction)
+        queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
+        orders = ('%sStorage_set__storagemedium__storageMediumID' % direction, '%scontentLocationValue_int' % direction)
+        return orders, queryset
 
-    def sort_col_5(self, direction):
+    def sort_col_qs_5(self, direction, queryset):
         '''sort for col_6'''
-        return ('%sStorage_set__contentLocationValue' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
+        queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
+        orders = ('%scontentLocationValue_int' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
+        return orders, queryset
 
     def search_col_4(self, search, queryset):
         idx=4
@@ -500,7 +503,6 @@ class StorageMaintenanceDatatablesView(DatatablesView):
 
     def get_deactivate_list(self):
         logger = logging.getLogger('essarch.storagemaintenance')
-
         # Create unique obj_list
         obj_list = []
         for obj in self.object_list_with_writetapes:
@@ -682,7 +684,6 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         #print 'need_to_migrate_list: %s' % need_to_migrate_list
         return deactivate_media_list, need_to_migrate_list
         
-
     def render_to_response(self, form, **kwargs): #Paginator
         '''Render Datatables expected JSON format'''
         page = self.get_page(form)
@@ -690,8 +691,8 @@ class StorageMaintenanceDatatablesView(DatatablesView):
         page.object_list = get_object_list_display(page.object_list, self.field_choices_dict)
         deactivate_media_list, need_to_migrate_list = self.get_deactivate_list()
         data = {
-            'iTotalRecords': len(deactivate_media_list), #page.paginator.count
-            'iTotalDisplayRecords': len(deactivate_media_list), #page.paginator.count
+            'iTotalRecords': page.paginator.count,
+            'iTotalDisplayRecords': page.paginator.count,
             'sEcho': form.cleaned_data['sEcho'],
             'aaData': self.get_rows(page.object_list),
             'deactivate_media_list': deactivate_media_list,
