@@ -171,12 +171,6 @@ def createdefaultusers(): # default users, groups and permissions
     for permission_obj in permission_obj_list:
         sysgroup.permissions.add(permission_obj)
 
-    ct_configuration_logevent = ContentType.objects.get(app_label='configuration', model='logevent')
-    permission_list = ['add_logevent','change_logevent','delete_logevent']
-    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_logevent).all()
-    for permission_obj in permission_obj_list:
-        sysgroup.permissions.add(permission_obj)
-
     ct_configuration_parameter = ContentType.objects.get(app_label='configuration', model='parameter')
     permission_list = ['add_parameter','change_parameter','delete_parameter']
     permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_parameter).all()

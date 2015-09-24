@@ -96,7 +96,8 @@ class WriteStorageMethodDisk(Task):
             raise e
         else:
             IO_obj.refresh_from_db()
-            MBperSEC = int(result.get('WriteSize'))/int(result.get('WriteTime').seconds)
+            ObjectSizeMB = int(result.get('WriteSize'))/1048576
+            MBperSEC = ObjectSizeMB/int(result.get('WriteTime').seconds)
             msg = 'Success to write IOuuid: %s for object %s to %s, WriteSize: %s, WriteTime: %s (%s MB/Sec)' % (IO_obj.id, 
                                                                                                                                                                        result.get('ObjectIdentifierValue'),
                                                                                                                                                                        result.get('storageMediumID'),
@@ -398,7 +399,8 @@ class ReadStorageMethodDisk(Task):
             raise e
         else:
             IO_obj.refresh_from_db()
-            MBperSEC = int(result.get('ReadSize'))/int(result.get('ReadTime').seconds)
+            ObjectSizeMB = int(result.get('ReadSize'))/1048576
+            MBperSEC = ObjectSizeMB/int(result.get('ReadTime').seconds)
             msg = 'Success to read IOuuid: %s for object %s from %s, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
                                                                                                                                                                        result.get('ObjectIdentifierValue'),
                                                                                                                                                                        result.get('storageMediumID'),

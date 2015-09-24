@@ -127,8 +127,12 @@
                 <td>
                  </td>
             </tr>
-
-            
+            <tr>
+              <td></td>
+              <td>
+                  <button type="button" id="filter-submit">Apply filters</button>
+              </td>
+            </tr>
         </tbody>
     </table>
 </div>       
@@ -205,6 +209,7 @@
 {% block app-extra-script %}
     {% js "TableTools/media/js/TableTools.min.js" %}
     {% js "administration/js/eztables.demo.js" %}
+    {% js "datatablesMultiFilter/fnMultiFilter.js" %}
 	{% js "administration/js/storagemigration.js" %}
 
 	<script>	

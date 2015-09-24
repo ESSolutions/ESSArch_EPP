@@ -74,7 +74,13 @@
                         placeholder="Please specify previous medium prefix. For tape AAA001, write AAA"
                         title="Please specify previous medium prefix. For tape AAA001, write AAA">
                 </td>
-            </tr>          
+            </tr>    
+            <tr>
+              <td></td>
+              <td>
+                  <button type="button" id="filter-submit">Apply filters</button>
+              </td>
+            </tr>      
         </tbody>
     </table>
 </div>       
@@ -138,6 +144,7 @@
 {% block app-extra-script %}
     {% js "TableTools/media/js/TableTools.min.js" %}
     {% js "administration/js/eztables.demo.js" %}
+    {% js "datatablesMultiFilter/fnMultiFilter.js" %}
 	{% js "administration/js/storagemaintenance.js" %}
 
 	<script>	

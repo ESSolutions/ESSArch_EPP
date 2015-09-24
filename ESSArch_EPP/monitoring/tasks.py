@@ -65,9 +65,9 @@ class CheckProcessTask(JobtasticTask):
         self.update_progress(0, num_tasks)
 
         # Get ps list from OS        
-        logger.info('Try to get process list from OS')
+        logger.debug('Try to get process list from OS')
         ps_dict = self.get_ps_dict(process_list)
-        logger.info('Succeeded to get process list from OS')
+        logger.debug('Succeeded to get process list from OS')
            
         # Create all tasks
         for counter, task in enumerate(tasks):

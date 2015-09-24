@@ -285,16 +285,16 @@ for i,p in enumerate(process_list):
     process_list[i]=os.path.join(WORKERS_ROOT,p)
 
 CELERYBEAT_SCHEDULE = {
-    "CheckProcesses-every-30-seconds": {
+    "CheckProcesses-every-120-seconds": {
         "task": "monitoring.tasks.CheckProcessTask",
-        "schedule": timedelta(seconds=30),
+        "schedule": timedelta(seconds=120),
         "kwargs": {
                 'process_list':process_list,
         }
     },
-    "CheckProcFiles-every-60-seconds": {
+    "CheckProcFiles-every-300-seconds": {
         "task": "monitoring.tasks.CheckProcFilesTask",
-        "schedule": timedelta(seconds=60),
+        "schedule": timedelta(seconds=300),
         "kwargs": {
                 'proc_log_path':"/ESSArch/log/proc",
         }

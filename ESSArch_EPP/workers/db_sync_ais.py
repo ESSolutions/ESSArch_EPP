@@ -26,11 +26,11 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import sys, logging, logging.handlers, datetime, time, uuid, ESSDB, ESSMSSQL, ESSsched, types, pytz
+import sys, logging, logging.handlers, datetime, time, uuid, ESSMSSQL, ESSsched, types, pytz
 from optparse import OptionParser
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from essarch.models import ArchiveObject
+from essarch.models import ArchiveObject, ArchiveObjectMetadata, eventIdentifier
 from configuration.models import ArchivePolicy, ESSProc, ESSConfig, StorageTargets
 from Storage.models import storageMedium, storage
 from django import db
@@ -128,231 +128,157 @@ class work:
     "sync_IngestObject"
     ###############################################
     def sync_IngestObject(self,startDateTime,stopDateTime):
-        self.table = 'IngestObject'
-        self.rows,errno,why = ESSDB.DB().action(self.table,'GET4',('id',
-                                                                   'ObjectUUID',
-                                                                   'PolicyId',
-                                                                   'ObjectIdentifierValue',
-                                                                   'ObjectPackageName',
-                                                                   'ObjectSize',
-                                                                   'ObjectNumItems',
-                                                                   'ObjectMessageDigestAlgorithm',
-                                                                   'ObjectMessageDigest',
-                                                                   'ObjectPath',
-                                                                   'MetaObjectIdentifier',
-                                                                   'MetaObjectSize',
-                                                                   'CMetaMessageDigestAlgorithm',
-                                                                   'CMetaMessageDigest',
-                                                                   'PMetaMessageDigestAlgorithm',
-                                                                   'PMetaMessageDigest',
-                                                                   'DataObjectSize',
-                                                                   'DataObjectNumItems',
-                                                                   'Status',
-                                                                   'StatusActivity',
-                                                                   'StatusProcess',
-                                                                   'LastEventDate',
-                                                                   'linkingAgentIdentifierValue',
-                                                                   'CreateDate',
-                                                                   'CreateAgentIdentifierValue',
-                                                                   'EntryDate',
-                                                                   'EntryAgentIdentifierValue',
-                                                                   'OAISPackageType',
-                                                                   'preservationLevelValue',
-                                                                   'DELIVERYTYPE',
-                                                                   'INFORMATIONCLASS',
-                                                                   'LocalDBdatetime',
-                                                                   'ExtDBdatetime'),
-                                                                  ('LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'ExtDBdatetime','IS','NULL','AND',
-                                                                   'LocalDBdatetime','IS NOT','NULL',
-                                                                   'OR',
-                                                                   'LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)','<', '0'))
-        if errno:
-            logging.error('Problem to access MySQL DB ' + str(why))
-        else:
-            for self.i in self.rows:
-                self.rows2,errno2,why2 = ESSMSSQL.DB().action(self.table,'GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',self.i[3]))
+        ArchiveObject_objs = ArchiveObject.objects.filter(LocalDBdatetime__range=(startDateTime,stopDateTime))
+        for ArchiveObject_obj in ArchiveObject_objs:
+            if not ArchiveObject_obj.check_db_sync():
+                rows2,errno2,why2 = ESSMSSQL.DB().action('IngestObject','GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',ArchiveObject_obj.ObjectIdentifierValue))
                 if errno2:
                     logging.error('Problem to access MS-SQL DB ' + str(why2))
                 else:
-                    if self.rows2:
-                        logging.info('Found ObjectIdentifierValue: ' + str(self.i[3]) + ' in AIS, try to update')
-                        LastEventDate_utc = self.i[21].replace(microsecond=0,tzinfo=pytz.utc)
+                    if rows2:
+                        logging.info('Found ObjectIdentifierValue: ' + str(ArchiveObject_obj.ObjectIdentifierValue) + ' in AIS, try to update')                  
+                        LastEventDate_utc = ArchiveObject_obj.LastEventDate.replace(microsecond=0,tzinfo=pytz.utc)
                         LastEventDate_dst = LastEventDate_utc.astimezone(self.tz)
-                        CreateDate_utc = self.i[23].replace(microsecond=0,tzinfo=pytz.utc)
+                        CreateDate_utc = ArchiveObject_obj.CreateDate.replace(microsecond=0,tzinfo=pytz.utc)
                         CreateDate_dst = CreateDate_utc.astimezone(self.tz)
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.table,'UPD',('PolicyId',self.i[2],
-                                                                                           'ObjectPackageName',self.i[4],
-                                                                                           'ObjectSize',self.i[5],
-                                                                                           'ObjectNumItems',self.i[6],
-                                                                                           'ObjectMessageDigestAlgorithm',self.i[7],
-                                                                                           'ObjectMessageDigest',self.i[8],
-                                                                                           'ObjectPath',self.i[9],
-                                                                                           'MetaObjectIdentifier',self.i[10],
-                                                                                           'MetaObjectSize',self.i[11],
-                                                                                           'CMetaMessageDigestAlgorithm',self.i[12],
-                                                                                           'CMetaMessageDigest',self.i[13],
-                                                                                           'PMetaMessageDigestAlgorithm',self.i[14],
-                                                                                           'PMetaMessageDigest',self.i[15],
-                                                                                           'DataObjectSize',self.i[16],
-                                                                                           'DataObjectNumItems',self.i[17],
-                                                                                           #'Status',self.i[18],
-                                                                                           'StatusActivity',self.i[19],
-                                                                                           'StatusProcess',self.i[20],
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('IngestObject','UPD',('PolicyId',ArchiveObject_obj.PolicyId,
+                                                                                           'ObjectPackageName',ArchiveObject_obj.ObjectPackageName,
+                                                                                           'ObjectSize',ArchiveObject_obj.ObjectSize,
+                                                                                           'ObjectNumItems',ArchiveObject_obj.ObjectNumItems,
+                                                                                           'ObjectMessageDigestAlgorithm',ArchiveObject_obj.ObjectMessageDigestAlgorithm,
+                                                                                           'ObjectMessageDigest',ArchiveObject_obj.ObjectMessageDigest,
+                                                                                           'ObjectPath',ArchiveObject_obj.ObjectPath,
+                                                                                           'MetaObjectIdentifier',ArchiveObject_obj.MetaObjectIdentifier,
+                                                                                           'MetaObjectSize',ArchiveObject_obj.MetaObjectSize,
+                                                                                           'CMetaMessageDigestAlgorithm',ArchiveObject_obj.CMetaMessageDigestAlgorithm,
+                                                                                           'CMetaMessageDigest',ArchiveObject_obj.CMetaMessageDigest,
+                                                                                           'PMetaMessageDigestAlgorithm',ArchiveObject_obj.PMetaMessageDigestAlgorithm,
+                                                                                           'PMetaMessageDigest',ArchiveObject_obj.PMetaMessageDigest,
+                                                                                           'DataObjectSize',ArchiveObject_obj.DataObjectSize,
+                                                                                           'DataObjectNumItems',ArchiveObject_obj.DataObjectNumItems,
+                                                                                           #'Status',ArchiveObject_obj.Status,
+                                                                                           'StatusActivity',ArchiveObject_obj.StatusActivity,
+                                                                                           'StatusProcess',ArchiveObject_obj.StatusProcess,
                                                                                            'LastEventDate',LastEventDate_dst.replace(tzinfo=None),
-                                                                                           'linkingAgentIdentifierValue',self.i[22],
+                                                                                           'linkingAgentIdentifierValue',ArchiveObject_obj.linkingAgentIdentifierValue,
                                                                                            'CreateDate',CreateDate_dst.replace(tzinfo=None),
-                                                                                           'CreateAgentIdentifierValue',self.i[24],
-                                                                                           #'EntryDate',self.i[25],
-                                                                                           #'EntryAgentIdentifierValue',self.i[26],
-                                                                                           'OAISPackageType',self.i[27],
-                                                                                           'preservationLevelValue',self.i[28],
-                                                                                           'DELIVERYTYPE',self.i[29],
-                                                                                           'INFORMATIONCLASS',self.i[30]),
-                                                                                          ('ObjectIdentifierValue',self.i[3]))
-                        if ext_errno: logging.error('Failed to update External DB: ' + str(self.i[3]) + ' error: ' + str(ext_why))
+                                                                                           'CreateAgentIdentifierValue',ArchiveObject_obj.CreateAgentIdentifierValue,
+                                                                                           #'EntryDate',ArchiveObject_obj.EntryDate,
+                                                                                           #'EntryAgentIdentifierValue',ArchiveObject_obj.EntryAgentIdentifierValue,
+                                                                                           'OAISPackageType',ArchiveObject_obj.OAISPackageType,
+                                                                                           'preservationLevelValue',ArchiveObject_obj.preservationLevelValue,
+                                                                                           'DELIVERYTYPE',ArchiveObject_obj.DELIVERYTYPE,
+                                                                                           'INFORMATIONCLASS',ArchiveObject_obj.INFORMATIONCLASS),
+                                                                                          ('ObjectIdentifierValue',ArchiveObject_obj.ObjectIdentifierValue))
+                        if ext_errno: logging.error('Failed to update External DB: ' + str(ArchiveObject_obj.ObjectIdentifierValue) + ' error: ' + str(ext_why))
                         else:
-                            res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[31]),('id',self.i[0]))
-                            if errno: logging.error('Failed to update Local DB: ' + str(self.i[3]) + ' error: ' + str(why))
+                            ArchiveObject_obj.ExtDBdatetime = ArchiveObject_obj.LocalDBdatetime
+                            ArchiveObject_obj.save(update_fields=['ExtDBdatetime'])
                     else:
-                        logging.error('Missing ObjectIdentifierValue: ' + str(self.i[3]) + ' in AIS IngestObject, need of manual check!')
+                        logging.error('Missing ObjectIdentifierValue: ' + str(ArchiveObject_obj.ObjectIdentifierValue) + ' in AIS IngestObject, need of manual check!')
 
     "sync_eventIdentifier"
     ###############################################
     def sync_eventIdentifier(self,startDateTime,stopDateTime):
-        self.table = 'eventIdentifier'
-        self.rows,errno,why = ESSDB.DB().action(self.table,'GET4',('id',
-                                                                   'eventIdentifierValue',
-                                                                   'eventType',
-                                                                   'eventDateTime',
-                                                                   'eventDetail',
-                                                                   'eventApplication',
-                                                                   'eventVersion',
-                                                                   'eventOutcome',
-                                                                   'eventOutcomeDetailNote',
-                                                                   'linkingAgentIdentifierValue',
-                                                                   'linkingObjectIdentifierValue'),
-                                                                  ('eventDateTime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'"))
-        if errno:
-            logging.error('Problem to access MySQL DB ' + str(why))
-        else:
-            for self.i in self.rows:
-                if int(self.i[2]) <= 40:
-                    self.rows2,errno2,why2 = ESSMSSQL.DB().action('eventStorageMedium','GET3',('eventIdentifierValue',),('eventIdentifierValue',self.i[1]))
-                elif int(self.i[2]) in range(41,2000):
-                    self.rows2,errno2,why2 = ESSMSSQL.DB().action('eventIdentifier','GET3',('eventIdentifierValue',),('eventIdentifierValue',self.i[1]))
-                elif int(self.i[2]) >= 2000:
-                    self.rows2,errno2,why2 = ESSMSSQL.DB().action('eventStorageMedium','GET3',('eventIdentifierValue',),('eventIdentifierValue',self.i[1]))
-                if errno2:
-                    logging.error('Problem to access MS-SQL DB ' + str(why2))
+        eventIdentifier_objs = eventIdentifier.objects.filter(eventDateTime__range=(startDateTime,stopDateTime))
+        for eventIdentifier_obj in eventIdentifier_objs:
+            if eventIdentifier_obj.eventType <= 40:
+                rows2,errno2,why2 = ESSMSSQL.DB().action('eventStorageMedium','GET3',('eventIdentifierValue',),('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue))
+            elif eventIdentifier_obj.eventType in range(41,2000):
+                rows2,errno2,why2 = ESSMSSQL.DB().action('eventIdentifier','GET3',('eventIdentifierValue',),('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue))
+            elif eventIdentifier_obj.eventType >= 2000:
+                rows2,errno2,why2 = ESSMSSQL.DB().action('eventStorageMedium','GET3',('eventIdentifierValue',),('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue))
+            if errno2:
+                logging.error('Problem to access MS-SQL DB ' + str(why2))
+            else:
+                if rows2:
+                    logging.debug('Found eventIdentifierValue: ' + str(eventIdentifier_obj.eventIdentifierValue) + ' in AIS')
                 else:
-                    if self.rows2:
-                        logging.debug('Found eventIdentifierValue: ' + str(self.i[1]) + ' in AIS')
-                    else:
-                        logging.info('Missing eventIdentifierValue: ' + str(self.i[1]) + ' in AIS try to update')
-                        eventDateTime_utc = self.i[3].replace(microsecond=0,tzinfo=pytz.utc)
-                        eventDateTime_dst = eventDateTime_utc.astimezone(self.tz)
-                        ##########################################################
-                        #Update externalDB (AIS) for storagemedium object
-                        if int(self.i[2]) <= 40:
-                            self.rows3,errno3,why3=ESSMSSQL.DB().action('eventStorageMedium','INS',('eventIdentifierValue',self.i[1],
-                                                                                                    'eventType',self.i[2],
-                                                                                                    'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
-                                                                                                    'eventDetail',self.i[4],
-                                                                                                    'eventApplication',self.i[5],
-                                                                                                    'eventVersion',self.i[6],
-                                                                                                    'eventOutcome',self.i[7],
-                                                                                                    'eventOutcomeDetailNote',self.i[8],
-                                                                                                    'linkingAgentIdentifierValue',self.i[9],
-                                                                                                    'storageMediumID',self.i[10]))
-                            if errno3: logging.error('Failed to insert to External DB: ' + str(self.i[1]) + ' error: ' + str(why3))
-                        ##########################################################
-                        #Update externalDB (AIS) for archive object
-                        elif int(self.i[2]) in range(41,2000):
-                            eventOutcomeDetailNote_MSSQL = ESSMSSQL.escape_string(self.i[8])
-                            self.rows3,errno3,why3=ESSMSSQL.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.i[1],
-                                                                                                 'eventType',self.i[2],
-                                                                                                 'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
-                                                                                                 'eventDetail',self.i[4],
-                                                                                                 'eventApplication',self.i[5],
-                                                                                                 'eventVersion',self.i[6],
-                                                                                                 'eventOutcome',self.i[7],
-                                                                                                 'eventOutcomeDetailNote',eventOutcomeDetailNote_MSSQL,
-                                                                                                 'linkingAgentIdentifierValue',self.i[9],
-                                                                                                 'linkingObjectIdentifierValue',self.i[10]))
-                            if errno3: logging.error('Failed to insert to External DB: ' + str(self.i[1]) + ' error: ' + str(why3))
-                        ##########################################################
-                        #Update externalDB (AIS) for storagemedium object
-                        elif int(self.i[2]) >= 2000:
-                            self.rows3,errno3,why3=ESSMSSQL.DB().action('eventStorageMedium','INS',('eventIdentifierValue',self.i[1],
-                                                                                                    'eventType',self.i[2],
-                                                                                                    'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
-                                                                                                    'eventDetail',self.i[4],
-                                                                                                    'eventApplication',self.i[5],
-                                                                                                    'eventVersion',self.i[6],
-                                                                                                    'eventOutcome',self.i[7],
-                                                                                                    'eventOutcomeDetailNote',self.i[8],
-                                                                                                    'linkingAgentIdentifierValue',self.i[9],
-                                                                                                    'storageMediumID',self.i[10]))
-                            if errno3: logging.error('Failed to insert to External DB: ' + str(self.i[1]) + ' error: ' + str(why3))
+                    logging.info('Missing eventIdentifierValue: ' + str(eventIdentifier_obj.eventIdentifierValue) + ' in AIS try to update')
+                    eventDateTime_utc = eventIdentifier_obj.eventDateTime.replace(microsecond=0,tzinfo=pytz.utc)
+                    eventDateTime_dst = eventDateTime_utc.astimezone(self.tz)
+                    ##########################################################
+                    #Update externalDB (AIS) for storagemedium object
+                    if eventIdentifier_obj.eventType <= 40:
+                        rows3,errno3,why3=ESSMSSQL.DB().action('eventStorageMedium','INS',('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue,
+                                                                                                'eventType',eventIdentifier_obj.eventType,
+                                                                                                'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
+                                                                                                'eventDetail',eventIdentifier_obj.eventDetail,
+                                                                                                'eventApplication',eventIdentifier_obj.eventApplication,
+                                                                                                'eventVersion',eventIdentifier_obj.eventVersion,
+                                                                                                'eventOutcome',eventIdentifier_obj.eventOutcome,
+                                                                                                'eventOutcomeDetailNote',eventIdentifier_obj.eventOutcomeDetailNote,
+                                                                                                'linkingAgentIdentifierValue',eventIdentifier_obj.linkingAgentIdentifierValue,
+                                                                                                'storageMediumID',eventIdentifier_obj.linkingObjectIdentifierValue))
+                        if errno3: logging.error('Failed to insert to External DB: ' + str(eventIdentifier_obj.eventIdentifierValue) + ' error: ' + str(why3))
+                    ##########################################################
+                    #Update externalDB (AIS) for archive object
+                    elif eventIdentifier_obj.eventType in range(41,2000):
+                        eventOutcomeDetailNote_MSSQL = ESSMSSQL.escape_string(eventIdentifier_obj.eventOutcomeDetailNote)
+                        rows3,errno3,why3=ESSMSSQL.DB().action('eventIdentifier','INS',('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue,
+                                                                                             'eventType',eventIdentifier_obj.eventType,
+                                                                                             'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
+                                                                                             'eventDetail',eventIdentifier_obj.eventDetail,
+                                                                                             'eventApplication',eventIdentifier_obj.eventApplication,
+                                                                                             'eventVersion',eventIdentifier_obj.eventVersion,
+                                                                                             'eventOutcome',eventIdentifier_obj.eventOutcome,
+                                                                                             'eventOutcomeDetailNote',eventOutcomeDetailNote_MSSQL,
+                                                                                             'linkingAgentIdentifierValue',eventIdentifier_obj.linkingAgentIdentifierValue,
+                                                                                             'linkingObjectIdentifierValue',eventIdentifier_obj.linkingObjectIdentifierValue))
+                        if errno3: logging.error('Failed to insert to External DB: ' + str(eventIdentifier_obj.eventIdentifierValue) + ' error: ' + str(why3))
+                    ##########################################################
+                    #Update externalDB (AIS) for storagemedium object
+                    elif eventIdentifier_obj.eventType >= 2000:
+                        rows3,errno3,why3=ESSMSSQL.DB().action('eventStorageMedium','INS',('eventIdentifierValue',eventIdentifier_obj.eventIdentifierValue,
+                                                                                                'eventType',eventIdentifier_obj.eventType,
+                                                                                                'eventDateTime',eventDateTime_dst.replace(tzinfo=None),
+                                                                                                'eventDetail',eventIdentifier_obj.eventDetail,
+                                                                                                'eventApplication',eventIdentifier_obj.eventApplication,
+                                                                                                'eventVersion',eventIdentifier_obj.eventVersion,
+                                                                                                'eventOutcome',eventIdentifier_obj.eventOutcome,
+                                                                                                'eventOutcomeDetailNote',eventIdentifier_obj.eventOutcomeDetailNote,
+                                                                                                'linkingAgentIdentifierValue',eventIdentifier_obj.linkingAgentIdentifierValue,
+                                                                                                'storageMediumID',eventIdentifier_obj.linkingObjectIdentifierValue))
+                        if errno3: logging.error('Failed to insert to External DB: ' + str(eventIdentifier_obj.eventIdentifierValue) + ' error: ' + str(why3))
 
     "sync_IngestObjectMetadata"
     ###############################################
     def sync_IngestObjectMetadata(self,startDateTime,stopDateTime):
-        self.table = 'IngestObjectMetadata'
-        self.rows,errno,why = ESSDB.DB().action(self.table,'GET4',('id',
-                                                                   'ObjectUUID',
-                                                                   'ObjectIdentifierValue',
-                                                                   'ObjectMetadataType',
-                                                                   'ObjectMetadataBLOB',
-                                                                   'ObjectMetadataServer',
-                                                                   'ObjectMetadataURL',
-                                                                   'linkingAgentIdentifierValue',
-                                                                   'LocalDBdatetime',
-                                                                   'ExtDBdatetime'),
-                                                                  ('LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'ExtDBdatetime','IS','NULL','AND',
-                                                                   'LocalDBdatetime','IS NOT','NULL',
-                                                                   'OR',
-                                                                   'LocalDBdatetime','BETWEEN',"'" + startDateTime + "'",'AND',"'" + stopDateTime + "'",'AND',
-                                                                   'TIMESTAMPDIFF(SECOND,LocalDBdatetime,ExtDBdatetime)','<', '0'))
-        if errno:
-            logging.error('Problem to access MySQL DB ' + str(why))
-        else:
-            for self.i in self.rows:
-                self.rows2,errno2,why2 = ESSMSSQL.DB().action(self.table,'GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',self.i[2],'AND',
-                                                                                                            'ObjectMetadataType',str(self.i[3])))
+        ArchiveObjectMetadata_objs = ArchiveObjectMetadata.objects.filter(LocalDBdatetime__range=(startDateTime,stopDateTime))
+        for ArchiveObjectMetadata_obj in ArchiveObjectMetadata_objs:
+            if not ArchiveObjectMetadata_obj.check_db_sync():                    
+                rows2,errno2,why2 = ESSMSSQL.DB().action('IngestObjectMetadata','GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',ArchiveObjectMetadata_obj.ObjectIdentifierValue,'AND',
+                                                                                                            'ObjectMetadataType',str(ArchiveObjectMetadata_obj.ObjectMetadataType)))
                 if errno2:
                     logging.error('Problem to access MS-SQL DB ' + str(why2))
                 else:
-                    if type(self.i[4]) is not types.NoneType:
-                        self.blob_mssql = ESSMSSQL.escape_string(self.i[4])
+                    if type(ArchiveObjectMetadata_obj.ObjectMetadataBLOB) is not types.NoneType:
+                        blob_mssql = ESSMSSQL.escape_string(ArchiveObjectMetadata_obj.ObjectMetadataBLOB)
                     else:
-                        self.blob_mssql = self.i[4]
-                    if self.rows2:
-                        logging.error('Found ObjectIdentifierValue: %s with ObjectMetadataType: %s in AIS, need of manual check!',str(self.i[2]),str(self.i[3]))
-                        #res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[5]),('id',self.i[0]))
-                        #if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(self.i[2]) + ' ObjectMetadataType: ' + str(self.i[3]) + ' error: ' + str(why))
+                        blob_mssql = ArchiveObjectMetadata_obj.ObjectMetadataBLOB
+                    if rows2:
+                        logging.error('Found ObjectIdentifierValue: %s with ObjectMetadataType: %s in AIS, need of manual check!',str(ArchiveObjectMetadata_obj.ObjectIdentifierValue),str(ArchiveObjectMetadata_obj.ObjectMetadataType))
                     else:
-                        logging.info('Missing ObjectIdentifierValue: %s with ObjectMetadataType: %s in AIS, try to insert',str(self.i[2]),str(self.i[3])) 
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.table,'INS',('ObjectIdentifierValue',self.i[2],
-                                                                                           'ObjectMetadataType',self.i[3],
-                                                                                           'ObjectMetadataBLOB',self.blob_mssql,
-                                                                                           'ObjectMetadataServer',self.i[5],
-                                                                                           'ObjectMetadataURL',self.i[6],
-                                                                                           'linkingAgentIdentifierValue',self.i[7]))
-                        if ext_errno: logging.error('Failed to insert to External DB for ObjectIdentifierValue: ' + str(self.i[2]) + ' ObjectMetadataType: ' + str(self.i[3]) + ' error: ' + str(ext_why))
+                        logging.info('Missing ObjectIdentifierValue: %s with ObjectMetadataType: %s in AIS, try to insert',str(ArchiveObjectMetadata_obj.ObjectIdentifierValue),str(ArchiveObjectMetadata_obj.ObjectMetadataType)) 
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('IngestObjectMetadata','INS',('ObjectIdentifierValue',ArchiveObjectMetadata_obj.ObjectIdentifierValue,
+                                                                                           'ObjectMetadataType',ArchiveObjectMetadata_obj.ObjectMetadataType,
+                                                                                           'ObjectMetadataBLOB',blob_mssql,
+                                                                                           'ObjectMetadataServer',ArchiveObjectMetadata_obj.ObjectMetadataServer,
+                                                                                           'ObjectMetadataURL',ArchiveObjectMetadata_obj.ObjectMetadataURL,
+                                                                                           'linkingAgentIdentifierValue',ArchiveObjectMetadata_obj.linkingAgentIdentifierValue))
+                        if ext_errno: logging.error('Failed to insert to External DB for ObjectIdentifierValue: ' + str(ArchiveObjectMetadata_obj.ObjectIdentifierValue) + ' ObjectMetadataType: ' + str(ArchiveObjectMetadata_obj.ObjectMetadataType) + ' error: ' + str(ext_why))
                         else:
-                            res,errno,why = ESSDB.DB().action(self.table,'UPD',('ExtDBdatetime',self.i[8]),('id',self.i[0]))
-                            if errno: logging.error('Failed to update Local DB for ObjectIdentifierValue: ' + str(self.i[2]) + ' ObjectMetadataType: ' + str(self.i[3]) + ' error: ' + str(why))
+                            ArchiveObjectMetadata_obj.ExtDBdatetime=ArchiveObjectMetadata_obj.LocalDBdatetime
+                            ArchiveObjectMetadata_obj.save(update_fields=['ExtDBdatetime'])
 
     "day_sync_centralDB"
     ###############################################
     def day_sync_centralDB(self,numdays):
         ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
-        startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(numdays)),microsecond=0).isoformat(' ')
-        stopDateTime = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
+        #startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(numdays)),microsecond=0).isoformat(' ')
+        startDateTime = datetime.datetime.replace(datetime.datetime.utcnow()-datetime.timedelta(days=int(numdays)),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
+        #stopDateTime = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
+        stopDateTime = datetime.datetime.replace(datetime.datetime.utcnow(),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
         logging.info('startDateTime: %s',str(startDateTime))
         logging.info('stopDateTime: %s',stopDateTime)
         if ExtDBupdate:
@@ -361,7 +287,6 @@ class work:
             work().sync_IngestObject(startDateTime,stopDateTime)
             work().sync_eventIdentifier(startDateTime,stopDateTime)
             work().sync_IngestObjectMetadata(startDateTime,stopDateTime)
-            db.close_old_connections()
         else:
             logging.info('Skip to update centralDB')
 
@@ -414,8 +339,8 @@ class work:
                     storageMediumDate_utc = storageMediumDate_dst.astimezone(pytz.utc)
                     CreateDate_dst = storageMedium_ais_obj[11].replace(microsecond=0,tzinfo=self.tz)
                     CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
-                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    timestamp_dst = timestamp_utc.astimezone(self.tz)
                     #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=storageMedium_ais_obj[13])
                     storageMedium_obj.storageMediumUUID = uuid.UUID(storageMedium_ais_obj[13])
                     storageMedium_obj.storageMedium = storageMedium_ais_obj[0]
@@ -430,8 +355,8 @@ class work:
                     storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
                     storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
                     storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
-                    storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                    storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    storageMedium_obj.LocalDBdatetime = timestamp_utc
+                    storageMedium_obj.ExtDBdatetime = timestamp_utc
                     storageMedium_obj.save()
                     #if errno: 
                     #    logging.error('Failed to update local DB: %s error: %s', storageMedium_ais_obj[1], str(why))
@@ -468,8 +393,8 @@ class work:
                 storageMediumDate_utc = storageMediumDate_dst.astimezone(pytz.utc)
                 CreateDate_dst = storageMedium_ais_obj[11].replace(microsecond=0,tzinfo=self.tz)
                 CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
-                self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                timestamp_dst = timestamp_utc.astimezone(self.tz)
                 storageMedium_obj = storageMedium()
                 storageMedium_obj.id = uuid.UUID(storageMedium_ais_obj[13])
                 #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=storageMedium_ais_obj[13])
@@ -487,8 +412,8 @@ class work:
                 storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
                 storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
                 storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
-                storageMedium_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                storageMedium_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                storageMedium_obj.LocalDBdatetime = timestamp_utc
+                storageMedium_obj.ExtDBdatetime = timestamp_utc
                 storageMedium_obj.storagetarget = target_obj
                 storageMedium_obj.save()                                                                  
                 #if errno: 
@@ -566,8 +491,8 @@ class work:
                                     ###################################################
                                     # archive object exist in local "IngestObject" DB try to update
                                     logging.info('Found archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to update',ip_obj_ext[1],storageMediumID)
-                                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                    timestamp_dst = timestamp_utc.astimezone(self.tz)
                                     ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                                     #ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue = ip_obj_ext[1])
                                     ip_obj.PolicyId = ArchivePolicy_obj
@@ -601,8 +526,8 @@ class work:
                                     ip_obj.DELIVERYTYPE = ip_obj_ext[28]
                                     ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                                     ip_obj.ObjectActive = ip_obj_ext[30]
-                                    ip_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                                    ip_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                    ip_obj.LocalDBdatetime = timestamp_utc
+                                    ip_obj.ExtDBdatetime = timestamp_utc
                                     ip_obj.save()
                                     #if errno: 
                                     #    logging.error('Failed to update local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
@@ -614,7 +539,8 @@ class work:
                                 ###################################################
                                 # archive object not exist in local "IngestObject" DB try to insert
                                 logging.info('Missing archive object: %s in local "IngestObject" DB for storageMediumID: %s, try to insert',ip_obj_ext[1],storageMediumID)
-                                self.timestamp = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
+                                timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                timestamp_dst = timestamp_utc.astimezone(self.tz)
                                 ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                                 ip_obj = ArchiveObject()
                                 ip_obj.PolicyId = ArchivePolicy_obj
@@ -649,8 +575,8 @@ class work:
                                 ip_obj.DELIVERYTYPE = ip_obj_ext[28]
                                 ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                                 ip_obj.ObjectActive = ip_obj_ext[30]
-                                ip_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                                ip_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                ip_obj.LocalDBdatetime = timestamp_utc
+                                ip_obj.ExtDBdatetime = timestamp_utc
                                 ip_obj.save()
                                 #if errno: 
                                 #    logging.error('Failed to insert to local "IngestObject" DB: %s, %s error: %s', ip_obj_ext[1], storageMediumID, str(why))
@@ -673,12 +599,12 @@ class work:
                                 ###################################################
                                 # archive object exist in local "storage" DB try to update
                                 logging.info('Found archive object: %s in local "storage" DB for storageMediumID: %s, try to update',storage_obj_ext[0],storageMediumID)
-                                self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                                timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                timestamp_dst = timestamp_utc.astimezone(self.tz)
                                 storage_obj.contentLocationType = storage_obj_ext[1]
                                 storage_obj.contentLocationValue = storage_obj_ext[2]
-                                storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                                storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                storage_obj.LocalDBdatetime = timestamp_utc
+                                storage_obj.ExtDBdatetime = timestamp_utc
                                 storage_obj.save()                           
                                 #if errno: 
                                 #    logging.error('Failed to update local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
@@ -690,15 +616,15 @@ class work:
                             ###################################################
                             # archive object not exist in local "storage" DB try to insert
                             logging.info('Missing archive object: %s in local "storage" DB for storageMediumID: %s, try to insert',storage_obj_ext[0],storageMediumID)
-                            self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                            self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                            timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                            timestamp_dst = timestamp_utc.astimezone(self.tz)
                             storage_obj = storage()
                             storage_obj.contentLocationType = storage_obj_ext[1]
                             storage_obj.contentLocationValue = storage_obj_ext[2]
                             storage_obj.storagemedium = storageMedium_obj
                             storage_obj.archiveobject = ip_obj
-                            storage_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
-                            storage_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                            storage_obj.LocalDBdatetime = timestamp_utc
+                            storage_obj.ExtDBdatetime = timestamp_utc
                             storage_obj.save()   
                             #if errno: 
                             #    logging.error('Failed to insert to local "storage" DB: %s, %s error: %s', storage_obj_ext[0], storage_obj_ext[3], str(why))
@@ -745,10 +671,11 @@ if __name__ == '__main__':
         options.quiet = 1
     if options.days:
         optionflag = 0
-        startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(options.days)),microsecond=0).isoformat(' ')
+        #startDateTime = datetime.datetime.replace(datetime.datetime.today()-datetime.timedelta(days=int(options.days)),microsecond=0).isoformat(' ')
+        startDateTime = datetime.datetime.replace(datetime.datetime.utcnow()-datetime.timedelta(days=int(options.days)),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
     elif options.startDateTime:
         optionflag = 0
-        try: startDateTime = datetime.datetime.replace(datetime.datetime.strptime(options.startDateTime,"%Y-%m-%d %H:%M:%S"),microsecond=0).isoformat(' ')
+        try: startDateTime = datetime.datetime.replace(datetime.datetime.strptime(options.startDateTime,"%Y-%m-%d %H:%M:%S"),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
         except: op.error("Invalid startDateTime")
     elif options.GetStorageMediaID:
         optionflag = 0
@@ -757,10 +684,10 @@ if __name__ == '__main__':
     if optionflag: op.error("incorrect options")
 
     if options.stopDateTime:
-        try: stopDateTime = datetime.datetime.replace(datetime.datetime.strptime(options.stopDateTime,"%Y-%m-%d %H:%M:%S"),microsecond=0).isoformat(' ')
+        try: stopDateTime = datetime.datetime.replace(datetime.datetime.strptime(options.stopDateTime,"%Y-%m-%d %H:%M:%S"),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
         except: op.error("Invalid stopDateTime")
     else:
-        stopDateTime = datetime.datetime.replace(datetime.datetime.today(),microsecond=0).isoformat(' ')
+        stopDateTime = datetime.datetime.replace(datetime.datetime.utcnow(),microsecond=0,tzinfo=pytz.utc).isoformat(' ')
 
     if options.LogLevel: 
         if options.LogLevel == 'CRITICAL': LogLevel = 50
