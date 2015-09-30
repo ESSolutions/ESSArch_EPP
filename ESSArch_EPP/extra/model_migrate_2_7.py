@@ -265,20 +265,20 @@ def update_archive_obj_from_ais(ais=True):
                 ip_obj.Status = ip_obj_ext[16]
                 ip_obj.StatusActivity = ip_obj_ext[17]
                 ip_obj.StatusProcess = ip_obj_ext[18]
-                ip_obj.LastEventDate = LastEventDate_utc.replace(tzinfo=None)
+                ip_obj.LastEventDate = LastEventDate_utc
                 ip_obj.linkingAgentIdentifierValue = ip_obj_ext[20]
-                ip_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
+                ip_obj.CreateDate = CreateDate_utc
                 ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
                 ip_obj.ObjectUUID = uuid.UUID(ip_obj_ext[23])
-                ip_obj.EntryDate = EntryDate_utc.replace(tzinfo=None)
+                ip_obj.EntryDate = EntryDate_utc
                 ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
                 ip_obj.OAISPackageType = ip_obj_ext[26]
                 ip_obj.preservationLevelValue = ip_obj_ext[27]
                 ip_obj.DELIVERYTYPE = ip_obj_ext[28]
                 ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                 ip_obj.ObjectActive = ip_obj_ext[30]
-                ip_obj.LocalDBdatetime = timestamp_utc.replace(tzinfo=None)
-                ip_obj.ExtDBdatetime = timestamp_utc.replace(tzinfo=None)
+                ip_obj.LocalDBdatetime = timestamp_utc
+                ip_obj.ExtDBdatetime = timestamp_utc
                 ip_obj.save()
             else:
                 logger.error('Local DB and central DB is not in sync for object: %s' % ip_obj.ObjectIdentifierValue)

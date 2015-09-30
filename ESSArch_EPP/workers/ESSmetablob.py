@@ -94,7 +94,7 @@ class prod:
             ArchiveObjectMetadata_obj.ObjectMetadataURL = self.ftp_res[1]
             ArchiveObjectMetadata_obj.ObjectMetadataBLOB = blob
             ArchiveObjectMetadata_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc
             ArchiveObjectMetadata_obj.save()       
 #            res,errno,why =  ESSDB.DB().action('IngestObjectMetadata','INS',('ObjectUUID',ObjectUUID,
 #                                                                 'ObjectIdentifierValue',ObjectIdentifierValue,
@@ -115,7 +115,7 @@ class prod:
                                                                                     'linkingAgentIdentifierValue',AgentIdentifierValue))
                 if ext_errno: return '',41,'errno: %s, why: %s' % (str(ext_errno),str(ext_why))
                 else:
-                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc
                     ArchiveObjectMetadata_obj.save()
 #                    res,errno,why = ESSDB.DB().action('IngestObjectMetadata','UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectUUID',ObjectUUID,'AND',
 #                                                                                                         'ObjectIdentifierValue',ObjectIdentifierValue,'AND',
@@ -132,7 +132,7 @@ class prod:
             ArchiveObjectMetadata_obj.ObjectMetadataType = ObjectMetadataType
             ArchiveObjectMetadata_obj.ObjectMetadataBLOB = blob
             ArchiveObjectMetadata_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc
             ArchiveObjectMetadata_obj.save()  
 #            res,errno,why =  ESSDB.DB().action('IngestObjectMetadata','INS',('ObjectUUID',ObjectUUID,
 #                                                                 'ObjectIdentifierValue',ObjectIdentifierValue,
@@ -149,7 +149,7 @@ class prod:
                                                                                     'linkingAgentIdentifierValue',AgentIdentifierValue))
                 if ext_errno: return '',41,'errno: %s, why: %s' % (str(ext_errno),str(ext_why))
                 else:
-                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc
                     ArchiveObjectMetadata_obj.save()
 #                    res,errno,why = ESSDB.DB().action('IngestObjectMetadata','UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectUUID',ObjectUUID,'AND',
 #                                                                                                         'ObjectIdentifierValue',ObjectIdentifierValue,'AND',
@@ -168,7 +168,7 @@ class prod:
             ArchiveObjectMetadata_obj.ObjectMetadataServer = self.ftp_res[0]
             ArchiveObjectMetadata_obj.ObjectMetadataURL = self.ftp_res[1]
             ArchiveObjectMetadata_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+            ArchiveObjectMetadata_obj.LocalDBdatetime = self.timestamp_utc
             ArchiveObjectMetadata_obj.save()  
 #            res,errno,why =  ESSDB.DB().action('IngestObjectMetadata','INS',('ObjectUUID',ObjectUUID,
 #                                                                 'ObjectIdentifierValue',ObjectIdentifierValue,
@@ -187,7 +187,7 @@ class prod:
                                                                                     'linkingAgentIdentifierValue',AgentIdentifierValue))
                 if ext_errno: return '',41,'errno: %s, why: %s' % (str(ext_errno),str(ext_why))
                 else:
-                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                    ArchiveObjectMetadata_obj.ExtDBdatetime = self.timestamp_utc
                     ArchiveObjectMetadata_obj.save()
 #                    res,errno,why = ESSDB.DB().action('IngestObjectMetadata','UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectUUID',ObjectUUID,'AND',
 #                                                                                                         'ObjectIdentifierValue',ObjectIdentifierValue,'AND',
