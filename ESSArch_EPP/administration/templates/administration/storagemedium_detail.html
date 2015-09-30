@@ -94,7 +94,6 @@
     <table id="storage-objects-table" class="span12 display table table-bordered table-condensed table-striped">
         <thead>
             <tr>               
-                <th id="test1233">pk</th>
                 <th>IP Object</th>
                 <th>Content location</th>
             </tr>
@@ -119,6 +118,7 @@ $(document).ready(function() {
         "sPaginationType": "bootstrap",
         "bProcessing": true,
         "bServerSide": true,
+        "aaSorting": [[1,'asc']],
         "iDisplayLength": 10,
         "oLanguage": {
             "sLengthMenu": 'Display <select>'+
@@ -137,11 +137,6 @@ $(document).ready(function() {
             aoData.push( { 
             	"name": "storageMediumID", "value": $('#storageMediumID').text() } );
         },
-        "aoColumnDefs": [
-    	  { 'bVisible': false, 
-    	  	'aTargets': [ 0 ] 
-    	  }, 
-        ],
         //"oSearch": { "sSearch": "test" }, 
     } );
     $('#storage-objects-table_filter').attr('title', 'Global serach in columns: IP Object, Content location');

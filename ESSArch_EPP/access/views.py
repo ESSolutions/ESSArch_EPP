@@ -43,7 +43,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
-from essarch.libs import DatatablesView
+from essarch.libs import DatatablesViewEss
 
 import uuid, os.path as op
 
@@ -62,7 +62,7 @@ class ArchObjectList(TemplateView):
         #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
         return context
 
-class ArchObjectDatatablesView(DatatablesView):
+class ArchObjectDatatablesView(DatatablesViewEss):
     model = ArchiveObject
     fields = (
         "id",
