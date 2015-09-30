@@ -344,7 +344,7 @@ class work:
                     #storageMedium_obj.storageMediumUUID = uuid.UUID(bytes_le=storageMedium_ais_obj[13])
                     storageMedium_obj.storageMediumUUID = uuid.UUID(storageMedium_ais_obj[13])
                     storageMedium_obj.storageMedium = storageMedium_ais_obj[0]
-                    storageMedium_obj.storageMediumDate = storageMediumDate_utc.replace(tzinfo=None)
+                    storageMedium_obj.storageMediumDate = storageMediumDate_utc
                     storageMedium_obj.storageMediumLocation = storageMedium_ais_obj[3]
                     storageMedium_obj.storageMediumLocationStatus = storageMedium_ais_obj[4]
                     storageMedium_obj.storageMediumBlockSize = storageMedium_ais_obj[5]
@@ -353,7 +353,7 @@ class work:
                     storageMedium_obj.storageMediumFormat = storageMedium_ais_obj[8]
                     storageMedium_obj.storageMediumMounts = storageMedium_ais_obj[9]
                     storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
-                    storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
+                    storageMedium_obj.CreateDate = CreateDate_utc
                     storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
                     storageMedium_obj.LocalDBdatetime = timestamp_utc
                     storageMedium_obj.ExtDBdatetime = timestamp_utc
@@ -401,7 +401,7 @@ class work:
                 storageMedium_obj.storageMediumUUID = uuid.UUID(storageMedium_ais_obj[13])
                 storageMedium_obj.storageMedium = storageMedium_ais_obj[0]
                 storageMedium_obj.storageMediumID = storageMedium_ais_obj[1]
-                storageMedium_obj.storageMediumDate = storageMediumDate_utc.replace(tzinfo=None)
+                storageMedium_obj.storageMediumDate = storageMediumDate_utc
                 storageMedium_obj.storageMediumLocation = storageMedium_ais_obj[3]
                 storageMedium_obj.storageMediumLocationStatus = storageMedium_ais_obj[4]
                 storageMedium_obj.storageMediumBlockSize = storageMedium_ais_obj[5]
@@ -410,7 +410,7 @@ class work:
                 storageMedium_obj.storageMediumFormat = storageMedium_ais_obj[8]
                 storageMedium_obj.storageMediumMounts = storageMedium_ais_obj[9]
                 storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
-                storageMedium_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
+                storageMedium_obj.CreateDate = CreateDate_utc
                 storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
                 storageMedium_obj.LocalDBdatetime = timestamp_utc
                 storageMedium_obj.ExtDBdatetime = timestamp_utc
@@ -513,13 +513,13 @@ class work:
                                     ip_obj.Status = ip_obj_ext[16]
                                     ip_obj.StatusActivity = ip_obj_ext[17]
                                     ip_obj.StatusProcess = ip_obj_ext[18]
-                                    ip_obj.LastEventDate = LastEventDate_utc.replace(tzinfo=None)
+                                    ip_obj.LastEventDate = LastEventDate_utc
                                     ip_obj.linkingAgentIdentifierValue = ip_obj_ext[20]
-                                    ip_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
+                                    ip_obj.CreateDate = CreateDate_utc
                                     ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
                                     #ip_obj.ObjectUUID = uuid.UUID(bytes_le=ip_obj_ext[23])
                                     ip_obj.ObjectUUID = uuid.UUID(ip_obj_ext[23])
-                                    ip_obj.EntryDate = EntryDate_utc.replace(tzinfo=None)
+                                    ip_obj.EntryDate = EntryDate_utc
                                     ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
                                     ip_obj.OAISPackageType = ip_obj_ext[26]
                                     ip_obj.preservationLevelValue = ip_obj_ext[27]
@@ -562,13 +562,13 @@ class work:
                                 ip_obj.Status = ip_obj_ext[16]
                                 ip_obj.StatusActivity = ip_obj_ext[17]
                                 ip_obj.StatusProcess = ip_obj_ext[18]
-                                ip_obj.LastEventDate = LastEventDate_utc.replace(tzinfo=None)
+                                ip_obj.LastEventDate = LastEventDate_utc
                                 ip_obj.linkingAgentIdentifierValue = ip_obj_ext[20]
-                                ip_obj.CreateDate = CreateDate_utc.replace(tzinfo=None)
+                                ip_obj.CreateDate = CreateDate_utc
                                 ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
                                 #ip_obj.ObjectUUID = uuid.UUID(bytes_le=ip_obj_ext[23])
                                 ip_obj.ObjectUUID = uuid.UUID(ip_obj_ext[23])
-                                ip_obj.EntryDate = EntryDate_utc.replace(tzinfo=None)
+                                ip_obj.EntryDate = EntryDate_utc
                                 ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
                                 ip_obj.OAISPackageType = ip_obj_ext[26]
                                 ip_obj.preservationLevelValue = ip_obj_ext[27]
