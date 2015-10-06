@@ -72,8 +72,10 @@ class WriteStorageMethodTape(Task):
         logger = logging.getLogger('StorageMethodTape')
         IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
         NumberOfTasks = IO_objs.count()
+        logger.debug('Initiate write task, NumberOfTasks: %s' % NumberOfTasks)
         
         for TaskNum, IO_obj in enumerate(IO_objs):          
+            logger.debug('Prepare to start WriteTapeProc for IOuuid: %s' % IO_obj.id)
             # Let folks know we started
             IO_obj.Status = 5
             IO_obj.save(update_fields=['Status'])
@@ -803,9 +805,11 @@ class ReadStorageMethodTape(Task):
         #IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
         #NumberOfTasks = IO_objs.count()
         NumberOfTasks = len(req_pk_list)
+        logger.debug('Initiate read task, NumberOfTasks: %s' % NumberOfTasks)
         
-        for TaskNum, req_pk in enumerate(req_pk_list):    
+        for TaskNum, req_pk in enumerate(req_pk_list):
             IO_obj = IOQueue.objects.get(pk=req_pk)
+            logger.debug('Prepare to start ReadTapeProc for IOuuid: %s' % IO_obj.id)
             # Let folks know we started
             IO_obj.Status = 5
             IO_obj.save(update_fields=['Status'])

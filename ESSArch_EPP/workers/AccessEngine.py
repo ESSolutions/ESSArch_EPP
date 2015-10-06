@@ -241,30 +241,34 @@ class Access:
             if storageMedium_obj.storageMedium in range(300,330): 
                 # Read from tape (ReqType=20)
                 IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
+                for  IOQueue_obj in IOQueue_obj_list:
+                    IOQueue_obj.Status=2
+                    IOQueue_obj.save(update_fields=['Status'])                        
                 result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
                 logger.info('Apply new read IO process from tape id: %s (AccessReqUUID: %s)' % (storageMedium_obj.storageMediumID, 
                                                                                                                                            AccessQueue_obj.ReqUUID))         
                 for  IOQueue_obj in IOQueue_obj_list:
-                    IOQueue_obj.Status=2
                     IOQueue_obj.task_id = result.task_id
-                    IOQueue_obj.save(update_fields=['Status', 'task_id'])                        
+                    IOQueue_obj.save(update_fields=['task_id'])                        
             elif storageMedium_obj.storageMedium in range(200,201): 
                 # Read from disk (ReqType=25)
                 for  IOQueue_obj in IOQueue_obj_list:
+                    IOQueue_obj.Status=2
+                    IOQueue_obj.save(update_fields=['Status'])
                     result = ReadStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
                     logger.info('Apply new read IO process for object: %s from disk id: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
                                                                                                                                                                                       storageMedium_obj.storageMediumID, 
                                                                                                                                                                                       AccessQueue_obj.ReqUUID, 
                                                                                                                                                                                       IOQueue_obj.id))
-                    IOQueue_obj.Status=2
                     IOQueue_obj.task_id = result.task_id
-                    IOQueue_obj.save(update_fields=['Status', 'task_id'])        
+                    IOQueue_obj.save(update_fields=['task_id'])        
 
     def _WaitForIOsToRead(self, ReqUUID):
         AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
         IOQueue_objs = AccessQueue_obj.ioqueue_set.all()
         while 1:
             ReadOK=1
+            loop_num = 1
             for IOQueue_obj in IOQueue_objs:
                 result = AsyncResult(IOQueue_obj.task_id)
                 if result.failed():
@@ -280,11 +284,28 @@ class Access:
                                                                                                                                          AccessQueue_obj.ReqUUID, 
                                                                                                                                          IOQueue_obj.id))
                 else:
+                    if loop_num == 60:
+                        if result.state == 'PENDING':
+                            logger.warning('Unknown status for read task for object: %s, traceback: %s, result: %s, state: %s (AccessReqUUID: %s, IOuuid: %s)' % (
+                                                                                                                                                            IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                            result.traceback, 
+                                                                                                                                                            result.result,
+                                                                                                                                                            result.state,
+                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            IOQueue_obj.id))
+                        else:
+                            logger.info('Wait for read task for object: %s, state: %s (AccessReqUUID: %s, IOuuid: %s)' % (
+                                                                                                                                                            IOQueue_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                            result.state,
+                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            IOQueue_obj.id))
+                        loop_num = 1
                     ReadOK=0
             if ReadOK==1:
                 logger.info('all reads done!!!')
                 IOQueue_objs.delete()
                 break
+            loop_num += 1
             time.sleep(1)
 
     def _IPunpack(self,ReqUUID):
