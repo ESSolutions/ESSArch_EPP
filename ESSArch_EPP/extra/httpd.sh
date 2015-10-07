@@ -15,7 +15,6 @@
 # description: Apache is a World Wide Web server.  It is used to serve \
 #	       HTML files and CGI.
 # processname: httpd
-# pidfile: /var/run/httpd.pid
 
 # Source function library.
 . /etc/rc.d/init.d/functions 	#SUSE11 comment out the this row
