@@ -38,7 +38,7 @@ from django import db
 
 ################# Only for test ##################
 disable_ObjectPackageName = 0
-force_ProjectGroupCode = 0
+force_ProjectGroupCode = ''
 
 class Proc:
     tz = timezone.get_default_timezone()
@@ -70,7 +70,7 @@ class Proc:
             self.ext_preservationLevelValue = 1
             self.ext_ObjectActive = 0
             self.objectstatus = 0
-            self.ext_ProjectGroupCode = None
+            self.ext_ProjectGroupCode = ''
             self.ext_ObjectPackageName = ''
             if Debug: logging.info('StatusProcess 9, ObjectIdentifierValue ' +str(self.ObjectIdentifierValue))
             #Check....
@@ -163,7 +163,7 @@ class Proc:
                             if self.objectstatus < 100:
                                 ########################################
                                 # Check if POLICYID in local DB "METS" is equal to ProjectGroupCode in AIS
-                                self.ext_ProjectGroupCode = self.extOBJdbget[0][0]
+                                self.ext_ProjectGroupCode = str(self.extOBJdbget[0][0])
                                 if self.ext_ProjectGroupCode == self.PolicyID:
                                     self.objectstatus = 1 # Object have an ProjectCode
                                     logging.info('Object: %s found in AIS with correct POLICYID' % self.ObjectIdentifierValue)
@@ -213,7 +213,7 @@ class Proc:
                     self.objectstatus = 10 # Object found in external DB
                     ########################################
                     # Check if object alredy have an AIP
-                    self.ext_ProjectGroupCode = self.extOBJdbget[0][0]
+                    self.ext_ProjectGroupCode = str(self.extOBJdbget[0][0])
                     if self.objectstatus < 100 and self.ext_ProjectGroupCode:
                         self.objectstatus = 11 # Object have an ProjectCode
                     else:

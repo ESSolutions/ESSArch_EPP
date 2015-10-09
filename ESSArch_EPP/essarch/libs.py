@@ -179,7 +179,7 @@ class SMTapeFull(Exception):
         self.value = value
         super(SMTapeFull, self).__init__(value)
     
-class DatatablesView(DatatablesView):
+class DatatablesViewEss(DatatablesView):
 
     def get_orders_qs(self, queryset):
         '''Get ordering fields for ``QuerySet.order_by``'''

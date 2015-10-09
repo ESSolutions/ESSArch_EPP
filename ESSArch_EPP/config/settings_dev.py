@@ -219,6 +219,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_filters.backends.DjangoFilterBackend',
+    ),
+}
+
 ROOT_URLCONF = 'config.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -248,6 +258,7 @@ INSTALLED_APPS = (
     #'django_tables2',
     'djangojs',
     'eztables',
+    'rest_framework',
     'configuration',
     'storagelogistics',
     'essarch',
@@ -263,6 +274,8 @@ INSTALLED_APPS = (
     'Storage',
     'StorageMethodDisk',
     'StorageMethodTape',
+    'chunked_upload',
+    'api',
 )
 
 import djcelery

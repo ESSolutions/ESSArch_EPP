@@ -57,7 +57,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 from django.utils import timezone
 
-from essarch.libs import DatatablesView, DatatablesForm, get_field_choices, get_object_list_display
+from essarch.libs import DatatablesViewEss, DatatablesForm, get_field_choices, get_object_list_display
 
 import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
 
@@ -111,21 +111,26 @@ class storageMediumDetail(DetailView):
         context['MediumBlockSize_CHOICES'] = dict(MediumBlockSize_CHOICES)
         return context
 
-class storageDatatablesView(DatatablesView):
+class storageDatatablesView(DatatablesViewEss):
     model = storage
     fields = (
-        #"id",
-        "contentLocationValue", 
         "archiveobject__ObjectIdentifierValue",
         "contentLocationValue",
     )
+
     def get_queryset(self):
         '''Apply search filter to QuerySet'''
-        qs = super(DatatablesView, self).get_queryset()
+        qs = super(storageDatatablesView, self).get_queryset()
         storageMediumID = self.request.GET.get('storageMediumID',None)
         if storageMediumID:
             qs = qs.filter(storagemedium__storageMediumID=storageMediumID)
         return qs
+
+    def sort_col_qs_1(self, direction, queryset):
+        '''sort for col_1'''
+        queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`contentLocationValue` AS UNSIGNED)'})
+        orders = ('%scontentLocationValue_int' % direction)
+        return orders, queryset
 
 #def storageMediumList2(request):
 #    """
@@ -155,7 +160,7 @@ class storageMediumList(TemplateView):
         #context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
         return context
 
-class storageMediumDatatablesView(DatatablesView):
+class storageMediumDatatablesView(DatatablesViewEss):
     model = storageMedium
     fields = (
         "storageMediumUUID",
@@ -418,7 +423,7 @@ class StorageMaintenance(TemplateView):
         #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
      
-class StorageMaintenanceDatatablesView(DatatablesView):
+class StorageMaintenanceDatatablesView(DatatablesViewEss):
     model = ArchiveObject
 
     fields = (

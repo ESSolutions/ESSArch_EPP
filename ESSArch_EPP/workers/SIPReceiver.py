@@ -299,9 +299,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
 #                                                                                                  'StatusProcess',self.StatusProcess,
@@ -316,9 +316,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
 #                                                                                                  'DataObjectSize',self.DataObjectSize,
@@ -339,7 +339,7 @@ class WorkingThread:
                                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                         if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
                                         else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
                                             ArchiveObject_obj.save()
 #                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
 #                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
@@ -516,9 +516,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.SIPsize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
 #                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
@@ -539,9 +539,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.SIPsize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
 #                                                                                                  'PolicyID',self.POLICYID,
@@ -568,7 +568,7 @@ class WorkingThread:
                                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                         if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
                                         else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
                                             ArchiveObject_obj.save()
 #                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
 #                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
@@ -741,9 +741,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
 #                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
@@ -764,9 +764,9 @@ class WorkingThread:
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
 #                                                                                                  'PolicyID',self.POLICYID,
@@ -793,7 +793,7 @@ class WorkingThread:
                                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                         if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
                                         else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
                                             ArchiveObject_obj.save()
 #                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
 #                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
@@ -890,9 +890,9 @@ class WorkingThread:
                                     ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                     ArchiveObject_obj.StatusProcess = self.StatusProcess
                                     ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                     ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                     ArchiveObject_obj.save()
 #                                    res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
 #                                                                                              'StatusProcess',self.StatusProcess,
@@ -907,9 +907,9 @@ class WorkingThread:
                                     ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                     ArchiveObject_obj.StatusProcess = self.StatusProcess
                                     ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc.replace(tzinfo=None)
+                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
                                     ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                                     ArchiveObject_obj.save()
 #                                    res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
 #                                                                                              'DataObjectSize',self.DataObjectSize,
@@ -930,7 +930,7 @@ class WorkingThread:
                                                                                                             ('ObjectIdentifierValue',self.ObjectIdentifierValue))
                                     if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
                                     else:
-                                        ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc.replace(tzinfo=None)
+                                        ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
                                         ArchiveObject_obj.save()
 #                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
 #                                        if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))

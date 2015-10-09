@@ -50,7 +50,8 @@ class StorageMethodWrite:
         self.TempPath = ''                   # Rootpath for IPs
         self.target_list = []                   # Only write to specified targets. If not defined default is to write all targets in archivepolicy
         self.force_write_flag = 0          # Force to write to targets even if the total size of objects is less then minChunkSize in archivepolicy
-        self.retry_write_flag = 0           # Flag to retry failed jobs
+        self.retry_write_flag = 0           # Flag to retry failed write jobs
+        self.retry_transfer_flag = 0       # Flag to retry failed transfer jobs
         self.exitFlag = 0                      # Flag to stop writes
 
         # Result status flags
@@ -62,6 +63,7 @@ class StorageMethodWrite:
 
         # Default values 
         self.IOs_to_write = {}
+        self.IOs_to_transfer = {}
         self.st_objs_to_check = {}
         self.ActiveTapeIOs = []
         self.logger = logging.getLogger('Storage')
@@ -100,6 +102,13 @@ class StorageMethodWrite:
                     continue
                 if st_obj.target.status == 1:
                     target_obj = st_obj.target
+                    target_obj_target_list =  target_obj.target.split(':')
+                    if len(target_obj_target_list) > 1:
+                        remote_target = target_obj_target_list[0]
+                        remote_status = 0
+                    else:
+                        remote_target = ''
+                        remote_status = 20
                 else:
                     self.logger.error('The target %s is disabled' % st_obj.target.name)
                     continue
@@ -148,6 +157,8 @@ class StorageMethodWrite:
                     IOQueue_obj.Status=0
                     IOQueue_obj.archiveobject=ArchiveObject_obj
                     IOQueue_obj.storagemethodtarget=st_obj
+                    IOQueue_obj.remote_target=remote_target
+                    IOQueue_obj.remote_status=remote_status
                     IOQueue_obj.save()
                     self.logger.info('Add WriteReq with target type: %s for object: %s (IOuuid: %s)' % (target_obj.type, 
                                                                                                         ArchiveObject_obj.ObjectIdentifierValue, 
@@ -179,17 +190,58 @@ class StorageMethodWrite:
                         IOQueue_obj.task_id = ''
                         IOQueue_obj.Status = 100
                         IOQueue_obj.save(update_fields=['task_id', 'Status'])
-                    
+                        
+                if (IOQueue_obj.remote_status in [2, 5] and        # if transfer task_id failed and status is set to "OK" in GUI then set task_id='' and Status=100
+                         IOQueue_obj.transfer_task_id and
+                         ArchiveObject_obj.StatusProcess == 1000 and 
+                         ArchiveObject_obj.StatusActivity == 0):
+                    result = AsyncResult(IOQueue_obj.transfer_task_id)
+                    self.logger.info('Statusresult=%s for transfer task_id: %s for object: %s (IOuuid: %s)' % (result.status, 
+                                                                                                                                         IOQueue_obj.transfer_task_id,
+                                                                                                                                         ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                         IOQueue_obj.id ))
+                    if result.ready() and result.failed():
+                        self.logger.error('transfer task_id: %s failed for object: %s, setting transfer task_id to blank and Status=100 in IOqueue, traceback: %s (IOuuid: %s)' % (IOQueue_obj.transfer_task_id,
+                                                                                                                                         ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                         result.traceback,
+                                                                                                                                         IOQueue_obj.id))
+                        IOQueue_obj.transfer_task_id = ''
+                        IOQueue_obj.remote_status = 100
+                        IOQueue_obj.save(update_fields=['transfer_task_id', 'remote_status'])
+                
+                # append IOQueue_obj to list per remote_target dict and ArchiveObject_obj dict. This dicts is used as a list of objects to transfer to remote.
+                if (IOQueue_obj.Status == 0 and           # normal add to IOs_to_transfer list
+                        IOQueue_obj.remote_status == 0) or \
+                        (IOQueue_obj.Status == 0 and      # add to IOs_to_transfer list if transfer_task_id is blank
+                        IOQueue_obj.remote_status == 2 and
+                        IOQueue_obj.transfer_task_id == '') or \
+                        (IOQueue_obj.Status == 0 and       # if transfer job failed, add to IOs_to_transfer list if retry_transfer_flag
+                         IOQueue_obj.Status > 21 and         
+                        self.retry_transfer_flag == 1) or \
+                        (IOQueue_obj.Status == 0 and       # if transfer job failed, add to IOs_to_transfer list if status is set to "OK" in GUI.
+                         IOQueue_obj.remote_status > 21 and
+                         ArchiveObject_obj.StatusProcess == 1000 and 
+                         ArchiveObject_obj.StatusActivity == 0):
+                    IOQueue_obj.remote_tatus=2
+                    IOQueue_obj.save(update_fields=['remote_status'])
+                    if not self.IOs_to_transfer.has_key(IOQueue_obj.remote_target):
+                        self.IOs_to_transfer[IOQueue_obj.remote_target] = {}
+                    if not self.IOs_to_transfer[IOQueue_obj.remote_target].has_key(ArchiveObject_obj):
+                        self.IOs_to_transfer[IOQueue_obj.remote_target][ArchiveObject_obj] = []
+                    self.IOs_to_transfer[IOQueue_obj.remote_target][ArchiveObject_obj].append(IOQueue_obj)                
+                
                 # append IOQueue_obj to list per st_obj dict. This dict is used as a list of objects to apply for write.
                 if (IOQueue_obj.Status == 0 and             # normal add to IOs_to_write list if minChunkSize_flag
-                        sm_minChunkSize_flag == 1) or \
+                        sm_minChunkSize_flag == 1 and
+                        IOQueue_obj.remote_status == 20) or \
                         (IOQueue_obj.Status == 2 and        # add to IOs_to_write list if task_id is blank
                         IOQueue_obj.task_id == '') or \
                         (IOQueue_obj.Status == 0 and        # add  to IOs_to_write list if force_write_flag
+                        IOQueue_obj.remote_status == 20 and
                         self.force_write_flag == 1) or \
-                        (IOQueue_obj.Status > 21 and        # if IO job failed add to IOs_to_write list if retry_write_flag 
+                        (IOQueue_obj.Status > 21 and        # if IO job failed, add to IOs_to_write list if retry_write_flag 
                         self.retry_write_flag == 1) or \
-                        (IOQueue_obj.Status > 21 and        # if IO job failed add to IOs_to_write list if status is set to "OK" in GUI.
+                        (IOQueue_obj.Status > 21 and        # if IO job failed, add to IOs_to_write list if status is set to "OK" in GUI.
                          ArchiveObject_obj.StatusProcess == 1000 and 
                          ArchiveObject_obj.StatusActivity == 0):
                     IOQueue_obj.Status=2

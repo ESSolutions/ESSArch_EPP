@@ -50,6 +50,14 @@ ReqStatus_CHOICES = (
     (100, 'FAIL'),
 )
 
+RemoteStatus_CHOICES = (
+    (0, 'Pending'),
+    (2, 'Initiate'),
+    (5, 'Transfer'),
+    (20, 'Success'),
+    (100, 'FAIL'),
+)
+
 MediumType_CHOICES = (
     (200, 'DISK'),
     (301, 'IBM-LTO1'),
@@ -183,6 +191,9 @@ class IOQueue(models.Model):
     storagemedium = models.ForeignKey('storageMedium', blank=True, null=True)
     storage = models.ForeignKey('storage', blank=True, null=True)
     accessqueue = models.ForeignKey('essarch.AccessQueue', blank=True, null=True)
+    remote_target = models.CharField(max_length=256, blank=True)
+    remote_status = models.IntegerField(blank=True, default=0, choices=RemoteStatus_CHOICES)
+    transfer_taks_id = models.CharField(max_length=36,blank=True)
     class Meta:
         permissions = (
             ("list_IOQueue", "Can list IOQueue"),

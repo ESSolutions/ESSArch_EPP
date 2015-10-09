@@ -226,7 +226,8 @@ class Robot:
                 robotdrives_obj.t_id=volser
                 robotdrives_obj.slot_id = robot_obj.slot_id
                 robotdrives_obj.drive_lock = work_uuid
-                robotdrives_obj.save(update_fields=['num_mounts', 'status', 't_id', 'slot_id', 'drive_lock'])
+                robotdrives_obj.IdleTime = 9999
+                robotdrives_obj.save(update_fields=['num_mounts', 'status', 't_id', 'slot_id', 'drive_lock', 'IdleTime'])
                 robot_obj.status='Mounted'
                 robot_obj.drive_id=drive_id
                 robot_obj.save(update_fields=['status', 'drive_id'])
@@ -236,7 +237,8 @@ class Robot:
                 robotdrives_obj.t_id='??????'
                 robotdrives_obj.slot_id = robot_obj.slot_id
                 robotdrives_obj.drive_lock = work_uuid
-                robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock'])
+                robotdrives_obj.IdleTime = 9999
+                robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock', 'IdleTime'])
                 robot_obj.status='Fail'
                 robot_obj.drive_id=drive_id
                 robot_obj.save(update_fields=['status', 'drive_id'])
@@ -246,7 +248,8 @@ class Robot:
             robotdrives_obj.t_id='??????'
             robotdrives_obj.slot_id = robot_obj.slot_id
             robotdrives_obj.drive_lock = work_uuid
-            robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock'])
+            robotdrives_obj.IdleTime = 9999
+            robotdrives_obj.save(update_fields=['status', 't_id', 'slot_id', 'drive_lock', 'IdleTime'])
             robot_obj.status='Fail'
             robot_obj.drive_id=drive_id
             robot_obj.save(update_fields=['status', 'drive_id'])
