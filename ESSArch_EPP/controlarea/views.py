@@ -1672,6 +1672,7 @@ class TasksInfo(View):
                         info['reqpurpose'] = t.ReqPurpose
                         info['user'] = t.user
                         Task['info'] = json.dumps(info)
+                        Task['result'] = json.dumps(t.result)
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
