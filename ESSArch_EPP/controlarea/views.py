@@ -1753,8 +1753,8 @@ class TestTaskView(TemplateView):
     def get_context_data(self, **kwargs):
 
         context = super(TestTaskView, self).get_context_data(**kwargs)
-        TestDict= {'thistask':'TestTask','someinfo':'somerandominfo'}
-        TestToSeeTasks = TestTask.delay_or_fail(randomDict=TestDict)
+        TestString= 'Teststring'
+        TestToSeeTasks = TestTask.delay_or_fail(TestString=TestString)
         context['task_id'] = TestToSeeTasks.task_id
         context['result'] = TestToSeeTasks.result
         return context

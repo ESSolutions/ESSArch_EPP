@@ -33,7 +33,7 @@ from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectRel, e
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
-                           eventIdentifier, eventOutcome_CHOICES, IngestQueue
+                           eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter, SchemaProfile, IPParameter, ChecksumAlgorithm_CHOICES, ESSConfig
 import shutil, errno, essarch.log as logtool, ESSPGM, datetime, tarfile, sys,logging
 import ESSMD
@@ -1483,7 +1483,7 @@ class TestTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self,randomDict = None):
+    def calculate_result(self,TestString = None):
         testdrive = 1
         testtime = 10
         update_frequency = 1
@@ -1497,6 +1497,6 @@ class TestTask(JobtasticTask):
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Test task'
-        result['reqpurpose'] = 'Test task'
+        result['reqpurpose'] = TestString
         result['user'] = 'testuser'        
-        return randomDict
+        return result
