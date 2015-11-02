@@ -984,6 +984,15 @@ class CopyFilelistTask(JobtasticTask):
                               filelist = req_filelist, 
                               reqfilename = os.path.join(target_path,'request.xml'),
                               )
+        result = {}
+        result['category'] = 'controlarea'
+        result['label'] = 'Check infrom or to gatarea'
+        result['reqpurpose'] = ReqPurpose
+        result['user'] = linkingAgentIdentifierValue
+        result['statuslist'] = status_list
+        result['errorlist'] = error_list
+
+        return result
 
     def createExchangeRequestFile(self,ReqUUID=None,ReqType=None,ReqPurpose=None,user=None,ObjectIdentifierValue=None,posted=None,filelist=None,reqfilename=None):
         EL_root = etree.Element('exchange')
