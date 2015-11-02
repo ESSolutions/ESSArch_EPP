@@ -1658,8 +1658,7 @@ class TasksInfo(View):
         for t in allTasks:
             Task = {
             'taskid': t.task_id,
-            'status' : t.status,
-            'result': json.dumps(t.result)
+            'status' : t.status
             }
             if t.status == 'FAILURE':
                 FailedTasks.append(Task)
@@ -1676,6 +1675,7 @@ class TasksInfo(View):
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
+                        Task['result'] = json.dumps(t.result)
                         Task['datedone'] = str(t.date_done)
                         SuccessTasks.append(Task)                
         Tasks['FailedTasks'] = FailedTasks
