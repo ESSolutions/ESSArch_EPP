@@ -977,9 +977,12 @@ class CheckinFromGateToWork(CreateView):
         ReqType = form.cleaned_data.get('ReqType'), 
         ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
         user = form.cleaned_data.get('user'), 
-        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'), 
-        posted = loc_dt_isoformat, 
-        filelist = req_filelist, 
+        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'),
+        TimeZone = timezone.get_default_timezone_name()
+        loc_timezone=pytz.timezone(TimeZone)
+        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        posted = dt.astimezone(loc_timezone).isoformat()
+        #filelist = req_filelist, 
         reqfilename = os.path.join(target_path,'request.xml'),
         linkingAgentIdentifierValue=self.request.user.username        
         CopyFilelistTask.delay_or_fail(source_path=source_path,
