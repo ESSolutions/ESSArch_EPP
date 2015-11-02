@@ -1,0 +1,144 @@
+{% extends "admin/base_site.html" %}
+{% load js staticfiles%}
+{% block app-extrahead %}
+	<meta http-equiv="refresh" content="60" > 
+{% endblock %}
+
+{% block content %}
+Request to check in IP to work area
+<br>
+<br>
+<div id="taskinprogress">
+</div>
+<br>
+  
+{% endblock %}
+{% block app-extra-script %}
+    {% js "jQuery/jquery-1.11.3.min.js" %}
+
+<script>
+
+var taskid = "{{ taskid }}";
+console.log(taskid);
+
+getTaskInfo(taskid);
+
+function getTaskInfo(taskid){
+
+var taskinprogressinfo = {};
+$.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
+
+	populateTaskInProgress(taskinprogressinfo);
+	
+	});
+    
+function populateTaskInProgress(taskinprogressinfo){
+
+var thetask = taskinprogressinfo['task'];
+
+var taskhtml = determineStatus(thetask);
+
+function determineStatus(thetask){
+        
+        var infohtml = 'No info';
+        var taskstatus = thetask['status'];
+        var taskresult = thetask['result'];
+        
+        switch(taskstatus){
+            case 'FAILURE':
+                failedtask(taskresult);
+                break;
+            case 'PENDING':
+                pendingtask(taskresult);
+                break;
+            case 'PROGRESS':
+                progresstask(taskresult);
+                break;
+            case 'SUCCESS':
+                successtask(taskresult);
+                break;
+            default:
+                console.log('Status undetermined');
+                
+        }
+
+
+
+
+function failedtask(result){
+
+    infohtml = '<b>The request failed<b><br>' + result;
+    return infohtml;
+}
+
+function pendingtask(result){
+
+    infohtml = '<b>The request is pending<b><br>' + result;
+    return infohtml;
+}
+
+function progresstask(result){
+    
+    var progressresult = result['progress_percent'];
+    infohtml = 'Request is in progress<br><br><progress value=' + progressresult + 'max="100"></progress>';
+    console.log('progress percent');
+    console.log(progressresult);
+    return infohtml;
+
+}
+
+function successtask(result){
+    infohtml = 'Request is successful<br><br>'
+    + '<table>'
+    + '<tr><td>Category: </td><td></td><td>' + result['category'] + '</td></tr>'
+    + '<tr><td>Label: </td><td></td><td>' + result['label'] + '</td></tr>'
+    + '<tr><td>User:</td><td></td><td>' + result['user'] + '<td></tr>'
+    + '<tr><td>Request purpose: </td><td></td><td>' + result['reqpurpose'] + '</td></tr>'
+    + '</table>';
+    
+    var statuslist = result['statuslist'];
+    if (statuslist.length > 0){
+    
+    var statuslisthtml = '<br>Status list<br><table>'
+    
+    for (i = 0; i < statuslist.length; i++){
+    
+    statuslisthtml = statuslisthtml + '<tr><td>' + statuslist[i] + '<td></tr>';
+    
+    }
+
+    statuslisthtml = statuslisthtml + '</table>';
+    infohtml = infohtml + statuslisthtml;
+    }
+
+    var errorlist = result['errorlist'];
+    if(errorlist != undefined){
+    
+    if (errorlist.length > 0 ) {
+    
+    var errorlisthtml = '<br>Errors:<br><table>'
+    
+    for (i = 0; i < errorlist.length; i++){
+    
+    errorlisthtml = errorlisthtml + '<tr><td>' + errorlist[i] + '</td></tr>'
+    }
+    errorlisthtml = errorlisthtml + '</table>';
+    infohtml = infohtml + errorlisthtml;
+    }
+    }
+    return infohtml;
+
+}
+
+return infohtml;
+};
+
+document.getElementById("taskinprogress").innerHTML = taskhtml;
+
+};
+
+
+};
+</script>
+
+{% endblock %}

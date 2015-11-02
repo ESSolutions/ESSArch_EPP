@@ -131,6 +131,7 @@
 			  <li><a href="{% url 'controlarea_diffcheck_list' %}">{% trans 'DiffCheck' %}</a></li>
 			  <li><a href="{% url 'controlarea_preserveip_list' %}">{% trans 'Preserve Information Package' %}</a></li>
 			  <li><a href="{% url 'controlarea_deleteip_list' %}">{% trans 'Delete IP in Controlarea' %}</a></li>
+              <li><a href="{% url 'taskoverview' %}">{% trans 'Overview of controlarea requests' %}</a></li>
 			</ul>
 	    </li>
 		{% endif %}
@@ -229,6 +230,7 @@
 		});
 	</script>
     {% js "bootstrap/js/bootstrap.min.js" %}
+	{% js "aCollapTable/jquery.aCollapTable.min.js" %}
     {% datatables_js %}
     {% datatables_bootstrap_js %}
 

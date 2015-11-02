@@ -1,0 +1,84 @@
+{% extends 'index.html' %}
+{% load js staticfiles%}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div>
+  <table class="collaptable">
+    <thead>
+      <tr>
+                
+                <th>AIC/Media</th>
+                <th>Archivist organization</th>
+                <th>Label</th>
+                <th>Create date</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>IP type</th>
+                <th>Process</th>
+                <th>State</th>
+                <th>AIC (UUID)</th>
+                <th>IP (UUID)</th>
+      </tr>
+    </thead>
+    <tbody>
+	      	{% for ip in filelist %}
+				<tr data-id="{{ ip.aic_uuid }}" data-parent="">
+				<td>AIC</td>
+				<td>{{ ip.EntryAgentIdentifierValue }}</td>
+				<td>{{ ip.label }}</td>
+				<td>{{ ip.createdate }}</td>
+				<td>{{ ip.startdate }}</td>
+				<td>{{ ip.enddate }}</td>
+				<td>AIC</td>
+				<td>{{ ip.StatusProcess }}</td>
+				<td>{{ ip.state }}</td>
+                <td>{{ ip.aic_uuid }}</td>
+				</tr>
+		      	<tr data-id="{{ ip.uuid }}" data-parent="{{ ip.aic_uuid }}" class="row{% cycle '1' '2' %}">
+					{% if not ip.uuid == '' %}
+						<td><a href="{% url 'controlarea_checkinfromreception' ip.uuid %}">{{ ip.media }}</a></td>
+					{% else %}
+						<td>{{ ip.media }}</td>
+					{% endif %}
+					<td>{{ ip.EntryAgentIdentifierValue }}</td>
+					<td>{{ ip.label }}</td>
+					<td>{{ ip.createdate }}</td>
+					<td>{{ ip.startdate }}</td>
+					<td>{{ ip.enddate }}</td>
+					<td>{{ ip.iptype }}</td>
+					<td>{{ ip.StatusProcess }}</td>
+					<td>{{ ip.state }}</td>
+					<td>{{ ip.aic_uuid }}</td>
+					<td>{{ ip.uuid }}</td>
+		      	</tr>
+			{% endfor %}	
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+{% endblock %}
+{% block app-extra-script %}
+    {% js "jQuery/jquery-1.11.3.min.js" %}
+    {% js "aCollapTable/jquery.aCollapTable.min.js" %}
+<script>
+$(document).ready(function(){
+  $('.collaptable').aCollapTable({ 
+    startCollapsed: true,
+    addColumn: false, 
+    plusButton: '<span class="i">+</span>', 
+    minusButton: '<span class="i">-</span>' 
+  });
+});
+</script>
+
+
+{% endblock %}

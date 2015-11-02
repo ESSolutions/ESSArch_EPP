@@ -918,11 +918,11 @@ class MigrationCreate(CreateView):
         self.object.ReqUUID = uuid.uuid1()
         #self.object.CopyOnlyFlag = self.copy_only_flag
         self.object.CopyOnlyFlag = form.cleaned_data.get('CopyOnlyFlag',False)
-        print 'copy_only_flagrrr: %s %s' % (str(form.cleaned_data.get('CopyOnlyFlag',False)), type(form.cleaned_data.get('CopyOnlyFlag',False)))
+        #print 'copy_only_flagrrr: %s %s' % (str(form.cleaned_data.get('CopyOnlyFlag',False)), type(form.cleaned_data.get('CopyOnlyFlag',False)))
         #print 'copy_only_flagrrr: %s %s' % (str(form.cleaned_data('CopyOnlyFlag',False)), type(form.cleaned_data('CopyOnlyFlag',False)))
         self.object.save()
         req_pk = self.object.pk
-        print(self.object)
+        #print(self.object)
         result = MigrationTask.delay_or_eager(obj_list=self.object.ObjectIdentifierValue, mig_pk=req_pk)
         task_id = result.task_id
         self.object.task_id = task_id

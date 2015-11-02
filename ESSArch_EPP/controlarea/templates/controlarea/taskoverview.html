@@ -1,0 +1,205 @@
+{% extends "admin/base_site.html" %}
+{% load js staticfiles%}
+{% block app-extrahead %}
+	<meta http-equiv="refresh" content="6" > 
+{% endblock %}
+
+{% block content %}
+Failed requests
+<br>
+<table>
+<thead>
+<tr>
+<th>Request Status</th>
+<th>Request Result</th>
+</tr>
+<tbody id="failedtasks">
+<td> No requests</td>
+</tbody>
+</thead>
+</table>
+<br>
+Pending requests
+<br>
+<table>
+<thead>
+<tr>
+<th>Request Status</th>
+<th>Request Result</th>
+</tr>
+<tbody id="pendingtasks">
+<td> No requests</td>
+</tbody>
+</thead>
+</table>
+<br>
+Requests in progress
+<br>
+<table>
+<thead>
+<tr>
+<th>Request purpose</th>
+<th></th>
+<th>User</th>
+<th></th>
+<th>Request Progress</th>
+</tr>
+<tbody id="progresstasks">
+<td> No requests</td>
+</tbody>
+</thead>
+</table>
+<br>
+Completed Requests from the: <input type="text" value="5" size="3" id="numberofdays"> number of days.
+<br>
+<table>
+<thead>
+<tr>
+<th>Request Label</th>
+<th></th>
+<th>Request purpose</th>
+<th></th>
+<th>User</th>
+<th></th>
+<th>Request status</th>
+<th></th>
+<th>Date completed</th>
+</tr>
+<tbody id="successtasks">
+<td> No tasks</td>
+</tbody>
+</thead>
+</table>
+{% endblock %}
+{% block app-extra-script %}
+		{% js "jQuery/jquery-1.11.3.min.js" %}
+<script>
+
+var allTasks = {};
+
+var numberofdays = $('#numberofdays').val();
+
+$.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
+
+	populateAllTasks(allTasks);
+	
+	});
+
+//$( "#numberofdays" ).change(populateAllTasks(allTasks));
+    
+function populateAllTasks(allTasks){
+
+var failedtasks = allTasks['FailedTasks'];
+
+var failedTaskshtml = "No failed requests";
+
+if(failedtasks.length > 0) {
+
+for (i=0; i< failedTasks.length; i++){
+
+failedTaskshtml = failedTaskshtml + '<tr><td>' + failedTasks[i].status + '</td><td>' + failedTasks[i].result + '</td></tr>';
+
+}
+
+}
+
+document.getElementById("failedtasks").innerHTML = failedTaskshtml;
+
+var pendingTaskshtml = '';
+
+var pendingTasks = allTasks['PendingTasks'];
+
+
+for (i=0; i<pendingtasks.length; i++){
+
+pendingTaskshtml = pendingTaskshtml + '<tr><td>' + pendingTasks[i].status + '</td><td>' + pendingTasks[i].result + '</td></tr>';
+
+}
+
+if (pendingTasks.length == 0){
+    pendingTaskshtml = "No pending requests";
+}
+
+document.getElementById("pendingtasks").innerHTML = pendingTaskshtml;
+
+var progressTaskshtml = '';
+
+var progressTasks = allTasks['ProgressTasks'];
+
+for (i=0; i< progressTasks.length; i++){
+var progressinfo = JSON.parse(progressTasks[i].info);
+var progressresult = JSON.parse(progressTasks[i].result);
+progressTaskshtml = progressTaskshtml + '<tr><td>' + progressinfo['reqpurpose'] + '</td><td></td><td>' + progressinfo['user'] +'</td><td></td><td><progress value=' + progressresult['progress_percent'] + ' max="100"></progress></td></tr>';
+
+}
+
+
+if (progressTasks.length == 0){
+
+progressTaskshtml = "No requests in progress";
+}
+
+document.getElementById("progresstasks").innerHTML = progressTaskshtml;
+
+
+var successTaskshtml = '';
+
+var successTasks = allTasks['SuccessTasks'];
+
+function getlink(label){
+
+var link = '/controlarea/';
+var stage = '';
+var stop ='/';
+
+switch(label){
+            case 'Check In from Reception':
+                stage = 'fromreceptionprogress';
+                break;
+            case 'Check out to work':
+                stage = 'toworkprogress';
+                break;
+            case 'Check out from work':
+                stage = 'fromworkprogress';
+                break
+            case 'Diffcheck':
+                stage = 'diffcheckprogress';
+                break;
+            case 'Preserve IP':
+                stage = 'preserveprogress';
+                break;
+            case 'Delete IP':
+                stage = 'deleteprogress';
+                break;
+            default:
+                console.log(label);
+}
+var completelink = link + stage + stop;
+
+return completelink;
+
+}
+
+for (i=0; i< successTasks.length; i++){
+
+    var theresult = JSON.parse(successTasks[i].result);
+    if(theresult['category'] == 'controlarea'){
+    
+    var controlarealink = getlink(theresult['label']);
+    successTaskshtml = successTaskshtml + '<tr><td>' +  theresult['label'] + '</td><td></td><td><a href=' + controlarealink + successTasks[i].taskid + '>'+ theresult['reqpurpose'] + '</a></td><td></td><td>'+ theresult['user'] + '</td><td></td><td> ' + successTasks[i].status + '</td><td></td><td>' + successTasks[i].datedone + '</td></tr>'
+        
+    }
+    }
+
+
+if (successTasks.length == 0){
+
+successTaskshtml = "No completed requests";
+}
+
+document.getElementById("successtasks").innerHTML = successTaskshtml;
+
+}
+</script>
+
+{% endblock %}

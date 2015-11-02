@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-
+{% load js staticfiles%}
 {% block app-extrahead %}
 	<meta http-equiv="refresh" content="60" > 
 {% endblock %}
@@ -72,8 +72,75 @@
         {% else %}
         	<p class="highlight-green">None</p>
         {% endif %}        
-        
+    <h4>Ongoing controlarea requests</h4>
+  
+	<div class="span6" style="color:#055773 background-color:#E9F0F2">
+    <a href="/controlarea/taskoverview/">
+	<table>
+    <thead>
+    <tr>
+    <th>User</th>
+    <th></th>
+    <th>Request purpose</th>
+    <th></th>
+    <th>Status</th>
+    <th></th>
+    <th>Info</th>
+    <tr>
+    </thead>
+    <tbody id="activeTasks">
+    <tr><td>No data</td></tr>
+    </tbody>   
+    </table>
+    </a>
+	</div>
+    
     </div>
 </div>
+{% endblock %}
+{% block app-extra-script %}
+		{% js "jQuery/jquery-1.11.3.min.js" %}
+
+<script>
+
+var activeTasks = {};
+$.getJSON( "{% url 'progress' %}", function(activeTasks) {
+
+	populateTasksProgress(activeTasks);
+	
+	});
+
+function populateTasksProgress(activeTasks){
+
+var tasksInProgresshtml = ''
+
+for (i=0; i< activeTasks.length; i++){
+
+var taskinfo = ''
+var taskresult = JSON.parse(activeTasks[i].result);
+console.log(taskresult);
+if(taskresult['progress_percent'] != undefined){
+
+taskinfo = '<progress value=' + taskresult['progress_percent'] + ' max="100"></progress>';
+}
+else{
+
+taskinfo = taskresult;
+}
+
+tasksInProgresshtml = tasksInProgresshtml + '<tr><td>' + activeTasks[i].user + '</td><td></td><td>' + activeTasks[i].reqpurpose + '</td><td></td><td>' + activeTasks[i].status + '</td><td></td><td>' + taskinfo + '</td></tr>';
+
+}
+
+if (activeTasks.length == 0){
+
+tasksInProgresshtml = 'No uncompleted tasks';
+}
+
+document.getElementById("activeTasks").innerHTML = tasksInProgresshtml;
+
+}
+
+</script>
 {% endblock %}
 

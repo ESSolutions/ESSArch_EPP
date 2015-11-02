@@ -31,10 +31,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from essarch.models import IngestQueue, IngestQueueForm, IngestQueueFormUpdate, ArchiveObject, \
-                           ArchiveObjectData, ArchiveObjectRel, \
                            ArchiveObjectStatusForm, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, IngestReqType_CHOICES
 
-from django.views.generic import TemplateView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, BaseUpdateView
@@ -45,15 +43,11 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
-#from django.http import HttpResponse
-
-import json
-from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 
 import uuid, urlparse
 
-'''class ArchObjectListUpdate(ListView, BaseUpdateView):
+class ArchObjectListUpdate(ListView, BaseUpdateView):
     model = ArchiveObject
     template_name='archobject/list.html'
     form_class=ArchiveObjectStatusForm
@@ -80,63 +74,6 @@ import uuid, urlparse
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
-        
-class IngestListInfoView(View):
-
-    @method_decorator(permission_required('essarch.change_ingestqueue'))
-    def dispatch(self, *args, **kwargs):    
-        return super(IngestListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_ingest_listinfo(self, *args, **kwargs):
-        AICs_in_ingestarea = ArchiveObject.objects.filter(StatusProcess__lt=3000) #(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1))
-        AIC_list = []
-        for obj in AICs_in_ingestarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__lt=3000)
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_ingest_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
-
-class IngestIPListTemplateView(TemplateView):
-    template_name = 'ingest/iplist.html'
-
-    @method_decorator(permission_required('essarch.change_ingestqueue'))
-    def dispatch(self, *args, **kwargs):
-        return super(IngestIPListTemplateView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(IngestIPListTemplateView, self).get_context_data(**kwargs)
-        context['label'] = 'INGEST - List information packages'
         return context
 
 class IngestList(ListView):

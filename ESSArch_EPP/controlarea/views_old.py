@@ -28,41 +28,28 @@ __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.conf import settings
 
 from models import MyFile, RequestFile
 from django.db.models import Q
-from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, PackageType_CHOICES, StatusProcess_CHOICES, \
+from essarch.models import ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
                            eventIdentifier, eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter
-
-
-from controlarea.tasks import CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
-							  DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
-							  GetExchangeRequestFileContentTask, TestTask
+import ControlAreaFunc
 
 from django.views.generic.detail import DetailView
-from django.views.generic import ListView, TemplateView, View
+from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
-import json
-from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpResponseBadRequest
-from djcelery.models import TaskMeta
-from djcelery import views as celeryviews
-
 import ESSMD, os, uuid
 from ESSPGM import Check as g_functions
 import ESSPGM, pytz, datetime, logging
-
-
 
 logger = logging.getLogger('essarch.controlarea')
 
@@ -188,12 +175,7 @@ class RequestFileList(object):
                 if os.path.isdir(os.path.join(self.source_path, f)): # exchange ReqUUID directory
                     reqfilename = os.path.join(os.path.join(self.source_path, f),u'request.xml')
                     if os.path.isfile(reqfilename):
-                         
-                        filecontent = GetExchangeRequestFileContentTask.delay_or_fail(reqfilename)
-                        filecontent_result = filecontent.get(timeout=30)
-                        res_info = filecontent_result['res']
-                        return_status_code = filecontent_result['status_code']
-                        return_status_list = filecontent_result['status_list']
+                        res_info,return_status_code,return_status_list = ControlAreaFunc.GetExchangeRequestFileContent(reqfilename)
                         if return_status_code == 0 and res_info:
                             req = RequestFile()
                             req.ReqUUID = res_info[0]
@@ -216,9 +198,8 @@ class CheckinFromReceptionListView(ListView):
     """
     List reception area
     """
-    model = ArchiveObject
-    template_name='controlarea/fromrec.html'
-    #template_name='archobject/list.html'
+    #model = ArchiveObject
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.all()
     source_path = Path.objects.get(entity='path_reception').value
     gate_path = Path.objects.get(entity='path_gate').value
@@ -287,24 +268,14 @@ class CheckinFromReception(CreateView):
         if DELIVERYSPECIFICATION:
             altRecordID_list.append(['DELIVERYSPECIFICATION',DELIVERYSPECIFICATION])
         allow_unknown_filetypes = form.cleaned_data.get('allow_unknown_filetypes',False)
-        #status_code, status_detail = 
-        ReqUUID = form.cleaned_data.get('ReqUUID',None)
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        ThisIPfromReception = CheckInFromMottagTask.delay_or_fail(source_path=self.source_path, 
-                                                                target_path=self.target_path, 
-                                                                Package=objectpath, 
-                                                                ObjectIdentifierValue=ObjectIdentifierValue,
-                                                                ReqUUID = ReqUUID,
-                                                                ReqPurpose=ReqPurpose,
-                                                                creator=None,
-                                                                system=None,
-                                                                version=None,
-                                                                agent_list=[],
-                                                                altRecordID_list=altRecordID_list,
-                                                                allow_unknown_filetypes=allow_unknown_filetypes,
-                                                                linkingAgentIdentifierValue=self.request.user.username
-                                                                )
-        '''if status_code:
+        status_code, status_detail = ControlAreaFunc.CheckInFromMottag(self.source_path, 
+                                                                       self.target_path, 
+                                                                       objectpath, 
+                                                                       ObjectIdentifierValue,
+                                                                       altRecordID_list=altRecordID_list,
+                                                                       allow_unknown_filetypes=allow_unknown_filetypes,
+                                                                       )
+        if status_code:
             self.object.Status=100
             event_info = 'Failed to CheckIn object: %s from reception, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
                                                                                                 form.cleaned_data.get('ReqUUID',None),
@@ -322,26 +293,11 @@ class CheckinFromReception(CreateView):
                                    event_info,0,ObjectIdentifierValue,linkingAgentIdentifierValue=self.request.user.username,
                                    )
         self.request.session['result_status_code'] = status_code
-        self.request.session['result_status_detail'] = status_detail'''
-        taskid = ThisIPfromReception.task_id
-        self.object.taskid = taskid
-        self.object.save()
-        self.success_url = '/controlarea/fromreceptionprogress/' + taskid
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromreceptionresult',kwargs={'pk': self.object.pk})
         return super(CheckinFromReception, self).form_valid(form)
 
-class FromReceptionProgress(TemplateView):
-    template_name = 'controlarea/fromreceptionprogress.html'
-
-    @method_decorator(permission_required('controlarea.CheckinFromReception'))
-    def dispatch(self, *args, **kwargs):
-        return super(FromReceptionProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(FromReceptionProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-'''class CheckinFromReceptionResult(DetailView):
+class CheckinFromReceptionResult(DetailView):
     """
     View result from checkin from reception
     """
@@ -357,14 +313,14 @@ class FromReceptionProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
 
-'''class CheckoutToWorkListView(ListView):
+class CheckoutToWorkListView(ListView):
     """
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/towork.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
@@ -373,75 +329,16 @@ class FromReceptionProgress(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckoutToWorkListView, self).get_context_data(**kwargs)
-        #context['type'] = 'ToWork'
+        context['type'] = 'ToWork'
         context['label'] = 'Select which information package to checkout to work area'
         ip_list = []
         object_list = context['object_list']
         for obj in object_list: 
             for ip in obj.get_ip_list(StatusProcess=5000,StatusActivity__in=[ 7, 8 ]):
                 ip_list.append(ip)
-               
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
-
-class ToWorkListInfoView(View):
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):    
-        return super(ToWorkListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_towork_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
-        AIC_list = []
-        for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID)
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5000:
-                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                        AIC_IP = {}
-                        AIC_IP['id'] = ip.UUID.id
-                        AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                        AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                        AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                        AIC_IP['Label'] = datainfo.label
-                        AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = ip.UUID.EntryDate
-                        AIC['create_date'] = ip.UUID.EntryDate
-                        AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = datainfo.startdate
-                        AIC_IP['enddate'] = datainfo.enddate
-                        AIC_IP['Process'] = ip.UUID.StatusProcess
-                        AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_towork_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
-
-class ToWorkListTemplateView(TemplateView):
-    template_name = 'controlarea/toworklist.html'
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(ToWorkListTemplateView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(ToWorkListTemplateView, self).get_context_data(**kwargs)
-        context['label'] = 'Select which information package to checkout to work area'
         return context
 
 class CheckoutToWork(CreateView):
@@ -480,30 +377,15 @@ class CheckoutToWork(CreateView):
         a_uid = os.getuid()
         a_gid = os.getgid()
         a_mode = 0770
-        #status_code = None
-            
-        #toWork = TestTask.delay_or_fail(randomString = 'doWeGetAnyResult?')
-        #toWork_result = toWork.get(timeout=180)
-        #status_detail = [[toWork_result,'All is too well'],['All is well for now','Everything will only improve']]
-        ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue',None)
-        ReqUUID=form.cleaned_data.get('ReqUUID',None)
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        linkingAgentIdentifierValue=self.request.user.username
-        ThisIPtoWork = CheckOutToWorkTask.delay_or_fail(source_path=source_path, 
-                                         target_path=target_path, 
-                                         Package=objectpath, 
-                                         a_uid=a_uid, 
-                                         a_gid=a_gid, 
-                                         a_mode=a_mode,
-                                         read_only_access=read_only_access,
-                                         ObjectIdentifierValue=ObjectIdentifierValue,
-                                         ReqUUID=ReqUUID,
-                                         ReqPurpose=ReqPurpose,
-                                         linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                         )
-        
-       
-        '''if status_code:
+        status_code, status_detail = ControlAreaFunc.CheckOutToWork(source_path, 
+                                                                    target_path, 
+                                                                    objectpath, 
+                                                                    a_uid, 
+                                                                    a_gid, 
+                                                                    a_mode,
+                                                                    read_only_access,
+                                                                    )
+        if status_code:
             self.object.Status=100
             event_info = 'Failed to CheckOut object: %s to workarea, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
                                                                                               form.cleaned_data.get('ReqUUID',None),
@@ -519,57 +401,13 @@ class CheckoutToWork(CreateView):
                                                                                       )
             ESSPGM.Events().create('31000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
                                    event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
-                                   )'''
-                                   
-
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        #return super(CheckoutToWork, self).form_valid(form)
-        taskid = ThisIPtoWork.task_id
-        self.object.taskid = taskid
-        self.object.save()
-        self.success_url = '/controlarea/toworkprogress/' + taskid
-        # are you with me GIT?
-        #self.success_url = self.get_success_url()
+                                   )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkouttoworkresult',kwargs={'pk': self.object.pk})
         return super(CheckoutToWork, self).form_valid(form)
 
-class ToWorkProgress(TemplateView):
-    template_name = 'controlarea/toworkprogress.html'
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(ToWorkProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(ToWorkProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-
-    '''def get_success_url(self):
-    
-        return '/taskinprogress/', {'label':'somelabel', 'taskid':1234 }'''
-        
-
-
-'''class CheckoutToWorkResult(DetailView):
-    """
-    View result for checkout to work
-    """
-    model = TaskMeta
-    template_name='controlarea/detail.html'
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(CheckoutToWorkResult, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CheckoutToWorkResult, self).get_context_data(**kwargs)
-        context['label'] = 'CheckIn from Work'
-        context['status'] = self.status
-        context['result'] = self.result
-        return context'''
-'''class CheckoutToWorkResult(DetailView):
+class CheckoutToWorkResult(DetailView):
     """
     View result from checkout to work area
     """
@@ -585,104 +423,34 @@ class ToWorkProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
 
-'''class CheckinFromWorkListView(ListView):
+class CheckinFromWorkListView(ListView):
     """
-    List control area AlteredTask
+    List control area
     """
     model = ArchiveObject
-    template_name='controlarea/fromwork.html'
-    #queryset=ArchiveObject.objects.filter(Q(StatusProcess=5100) | Q(OAISPackageType=1)).order_by('id','Generation')
-    queryset=ArchiveObject.objects.filter(StatusProcess=5100).order_by('id','Generation')
-    
+    template_name='archobject/list.html'
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5100) | Q(OAISPackageType=1)).order_by('id','Generation')
+
     @method_decorator(permission_required('controlarea.CheckinFromWork'))
     def dispatch(self, *args, **kwargs):
         return super(CheckinFromWorkListView, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromWorkListView, self).get_context_data(**kwargs)
-        #context['type'] = 'FromWork'
+        context['type'] = 'FromWork'
         context['label'] = 'Select which information package to checkin from work area'
         ip_list = []
-        aic_ip_list = []
         object_list = context['object_list']
-        AIC_UUID_list = []
-        aic_query = ArchiveObjectRel.objects.all()
-        print aic_query
-        for rel_obj in aic_query:
-            AIC_UUID_UUID = [rel_obj.UUID.ObjectUUID,rel_obj.AIC_UUID.ObjectUUID]
-            print AIC_UUID_UUID
-            AIC_UUID_list.append(AIC_UUID_UUID)
-        for obj in object_list:
-            aic_ip_list.append(obj)
+        for obj in object_list: 
             for ip in obj.get_ip_list(StatusProcess=5100):
                 ip_list.append(ip)
         context['ip_list'] = ip_list
-        context['aic_ip_list'] = aic_ip_list
-        context['aic_uuid_list'] = AIC_UUID_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
-
-class FromWorkListInfoView(View):
-
-    @method_decorator(permission_required('controlarea.CheckinFromWork'))
-    def dispatch(self, *args, **kwargs):    
-        return super(FromWorkListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_fromwork_listinfo(self, *args, **kwargs):
-        AICs_in_workarea = ArchiveObject.objects.filter(StatusProcess=5000)
-        AIC_list = []
-        for obj in AICs_in_workarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5100)
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5100:
-                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                        AIC_IP = {}
-                        AIC_IP['id'] = ip.UUID.id
-                        AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                        AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                        AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                        AIC_IP['Label'] = datainfo.label
-                        AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = ip.UUID.EntryDate
-                        AIC['create_date'] = ip.UUID.EntryDate
-                        AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = datainfo.startdate
-                        AIC_IP['enddate'] = datainfo.enddate
-                        AIC_IP['Process'] = ip.UUID.StatusProcess
-                        AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_fromwork_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
-
-class FromWorkListTemplateView(TemplateView):
-    template_name = 'controlarea/fromworklist.html'
-
-    @method_decorator(permission_required('controlarea.CheckinFromWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(FromWorkListTemplateView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(FromWorkListTemplateView, self).get_context_data(**kwargs)
-        context['label'] = 'Select which information package to checkin from work area'
         return context
-        
+
 class CheckinFromWork(CreateView):
     """
     Create checkin request from work area
@@ -719,24 +487,15 @@ class CheckinFromWork(CreateView):
         a_gid = os.getgid()
         a_mode = 0770
         allow_unknown_filetypes = form.cleaned_data.get('allow_unknown_filetypes',False)
-        #status_code, status_detail = 
-        ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue',None)
-        ReqUUID=form.cleaned_data.get('ReqUUID',None)
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        linkingAgentIdentifierValue=self.request.user.username
-        ThisIPfromWork = CheckInFromWorkTask.delay_or_fail(source_path=source_path, 
-                                          target_path=target_path, 
-                                          Package=objectpath, 
-                                          a_uid=a_uid, 
-                                          a_gid=a_gid, 
-                                          a_mode=a_mode,
-                                          allow_unknown_filetypes=allow_unknown_filetypes,
-                                          ObjectIdentifierValue=ObjectIdentifierValue,
-                                          ReqUUID=ReqUUID,
-                                          ReqPurpose=ReqPurpose,
-                                          linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                          )
-        '''if status_code:
+        status_code, status_detail = ControlAreaFunc.CheckInFromWork(source_path, 
+                                                                     target_path, 
+                                                                     objectpath, 
+                                                                     a_uid, 
+                                                                     a_gid, 
+                                                                     a_mode,
+                                                                     allow_unknown_filetypes,
+                                                                     )
+        if status_code:
             self.object.Status=100
             event_info = 'Failed to CheckIn object: %s from workarea, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
                                                                                                form.cleaned_data.get('ReqUUID',None),
@@ -752,29 +511,13 @@ class CheckinFromWork(CreateView):
                                                                                        )
             ESSPGM.Events().create('32000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
                                    event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
-                                   )'''
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        #self.success_url = reverse_lazy('taskoverview')
-        taskid = ThisIPfromWork.task_id
-        self.object.taskid = taskid
-        self.object.save()
-        self.success_url = '/controlarea/fromworkprogress/' + taskid
+                                   )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromworkresult',kwargs={'pk': self.object.pk})
         return super(CheckinFromWork, self).form_valid(form)
 
-class FromWorkProgress(TemplateView):
-    template_name = 'controlarea/fromworkprogress.html'
-
-    @method_decorator(permission_required('controlarea.CheckinFromWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(FromWorkProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(FromWorkProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-'''class CheckinFromWorkResult(DetailView):
+class CheckinFromWorkResult(DetailView):
     """
     View result from checkin from work area
     """
@@ -790,7 +533,7 @@ class FromWorkProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
 
 class CheckoutToGateFromWork(CreateView):
     """
@@ -828,32 +571,8 @@ class CheckoutToGateFromWork(CreateView):
         ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
         target_path = os.path.join(self.target_path, 'exchange/%s' % ReqUUID)
         source_path = os.path.join(self.source_path, self.request.user.username)
-        #status_code, tmp_status_detail = 
-        #ReqUUID = form.cleaned_data.get('ReqUUID')
-        ReqType = form.cleaned_data.get('ReqType')
-        ReqPurpose = form.cleaned_data.get('ReqPurpose')
-        user = form.cleaned_data.get('user')
-        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue')
-        TimeZone = timezone.get_default_timezone_name()
-        loc_timezone=pytz.timezone(TimeZone)
-        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-        loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
-        #filelist = req_filelist
-        reqfilename = os.path.join(target_path,'request.xml')
-        linkingAgentIdentifierValue=self.request.user.username
-        CopyFilelistTask_res = CopyFilelistTask.delay_or_fail(source_path = source_path,
-                                        target_path = target_path,
-                                        filelist = filelist,
-                                        ReqUUID = ReqUUID, 
-                                        ReqType = ReqType, 
-                                        ReqPurpose = ReqPurpose, 
-                                        user = user, 
-                                        ObjectIdentifierValue = ObjectIdentifierValue, 
-                                        posted = loc_dt_isoformat, 
-                                        reqfilename=reqfilename,
-                                        linkingAgentIdentifierValue=linkingAgentIdentifierValue
-                                        )
-        '''if status_code:
+        status_code, tmp_status_detail = ControlAreaFunc.CopyFilelist(source_path, target_path, filelist)
+        if status_code:
             self.object.Status=100
         else:
             self.object.Status=20
@@ -879,7 +598,7 @@ class CheckoutToGateFromWork(CreateView):
         dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
         loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
         self.object.posted = loc_dt_isoformat
-        CreateExchangeRequestFileTask.delay_or_fail(ReqUUID = form.cleaned_data.get('ReqUUID'), 
+        ControlAreaFunc.CreateExchangeRequestFile(ReqUUID = form.cleaned_data.get('ReqUUID'), 
                                                   ReqType = form.cleaned_data.get('ReqType'), 
                                                   ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
                                                   user = form.cleaned_data.get('user'), 
@@ -887,18 +606,13 @@ class CheckoutToGateFromWork(CreateView):
                                                   posted = loc_dt_isoformat, 
                                                   filelist = req_filelist, 
                                                   reqfilename = os.path.join(target_path,'request.xml'),
-                                                  )'''
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        CopyFilelistTask_id = CopyFilelistTask_res.task_id
-        self.object.taskid = CopyFilelistTask_id
-        print ('Task ID')
-        print (self.object.taskid)
-        self.object.save()
-        self.success_url = reverse_lazy('taskoverview')
+                                                  )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkouttogatefromworkresult',kwargs={'pk': self.object.pk})
         return super(CheckoutToGateFromWork, self).form_valid(form)
 
-'''class CheckoutToGateFromWorkResult(DetailView):
+class CheckoutToGateFromWorkResult(DetailView):
     """
     View result from checkout to gate area from work
     """
@@ -914,26 +628,6 @@ class CheckoutToGateFromWork(CreateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
-
-class CheckinFromGateListView(ListView):
-    """
-    List gate "exchange" area
-    """
-    template_name='controlarea/reqlist.html'
-    queryset=ArchiveObject.objects.all()
-    gate_path = Path.objects.get(entity='path_gate').value
-
-    @method_decorator(permission_required('controlarea.CheckinFromGate'))
-    def dispatch(self, *args, **kwargs):
-        return super(CheckinFromGateListView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CheckinFromGateListView, self).get_context_data(**kwargs)
-        context['req_list'] = RequestFileList(source_path = self.gate_path).get()
-        context['type'] = 'FromGate'
-        context['label'] = 'List exchange requests'
-        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         return context
 
 class CheckinFromGateToWork(CreateView):
@@ -972,29 +666,8 @@ class CheckinFromGateToWork(CreateView):
         ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
         target_path = os.path.join(self.target_path, '%s/incoming/%s' % (self.request.user.username,ReqUUID))
         source_path = os.path.join(self.source_path, 'exchange/%s' % self.request.user.username)
-        #status_code, tmp_status_detail = 
-        ReqUUID = form.cleaned_data.get('ReqUUID'), 
-        ReqType = form.cleaned_data.get('ReqType'), 
-        ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
-        user = form.cleaned_data.get('user'), 
-        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'), 
-        posted = loc_dt_isoformat, 
-        filelist = req_filelist, 
-        reqfilename = os.path.join(target_path,'request.xml'),
-        linkingAgentIdentifierValue=self.request.user.username        
-        CopyFilelistTask.delay_or_fail(source_path=source_path,
-                                        target_path=target_path,
-                                        filelist=filelist,
-                                        ReqUUID = ReqUUID, 
-                                        ReqType = ReqType, 
-                                        ReqPurpose = ReqPurpose, 
-                                        user = user, 
-                                        ObjectIdentifierValue = ObjectIdentifierValue, 
-                                        posted = posted, 
-                                        reqfilename = reqfilename,
-                                        linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                                  )
-        '''if status_code:
+        status_code, tmp_status_detail = ControlAreaFunc.CopyFilelist(source_path, target_path, filelist)
+        if status_code:
             self.object.Status=100
         else:
             self.object.Status=20
@@ -1020,7 +693,7 @@ class CheckinFromGateToWork(CreateView):
         dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
         loc_dt_isoformat = dt.astimezone(loc_timezone).isoformat()
         self.object.posted = loc_dt_isoformat
-        CreateExchangeRequestFileTask.delay_or_fail(ReqUUID = form.cleaned_data.get('ReqUUID'), 
+        ControlAreaFunc.CreateExchangeRequestFile(ReqUUID = form.cleaned_data.get('ReqUUID'), 
                                                   ReqType = form.cleaned_data.get('ReqType'), 
                                                   ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
                                                   user = form.cleaned_data.get('user'), 
@@ -1028,13 +701,13 @@ class CheckinFromGateToWork(CreateView):
                                                   posted = loc_dt_isoformat, 
                                                   filelist = req_filelist, 
                                                   reqfilename = os.path.join(target_path,'request.xml'),
-                                                  )'''
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        self.success_url = reverse_lazy('taskoverview')
+                                                  )
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_checkinfromgatetoworkresult',kwargs={'pk': self.object.pk})
         return super(CheckinFromGateToWork, self).form_valid(form)
 
-'''class CheckinFromGateToWorkResult(DetailView):
+class CheckinFromGateToWorkResult(DetailView):
     """
     View result from checkin from gate area to work
     """
@@ -1050,63 +723,52 @@ class CheckinFromGateToWork(CreateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
 
-class DiffCheckListInfoView(View):
+class CheckinFromGateListView(ListView):
+    """
+    List gate "exchange" area
+    """
+    template_name='controlarea/reqlist.html'
+    queryset=ArchiveObject.objects.all()
+    gate_path = Path.objects.get(entity='path_gate').value
 
-    @method_decorator(permission_required('controlarea.DiffCheck'))
-    def dispatch(self, *args, **kwargs):    
-        return super(DiffCheckListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_diffcheck_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1))
-        AIC_list = []
-        for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_diffcheck_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
+    @method_decorator(permission_required('controlarea.CheckinFromGate'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromGateListView, self).dispatch( *args, **kwargs)
 
-class DiffCheckListTemplateView(TemplateView):
-    template_name = 'controlarea/diffchecklist.html'
+    def get_context_data(self, **kwargs):
+        context = super(CheckinFromGateListView, self).get_context_data(**kwargs)
+        context['req_list'] = RequestFileList(source_path = self.gate_path).get()
+        context['type'] = 'FromGate'
+        context['label'] = 'List exchange requests'
+        context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
+        return context
+
+class DiffCheckListView(ListView):
+    """
+    List control area
+    """
+    model = ArchiveObject
+    template_name='archobject/list.html'
+    queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):
-        return super(DiffCheckListTemplateView, self).dispatch( *args, **kwargs)
+        return super(DiffCheckListView, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-
-        context = super(DiffCheckListTemplateView, self).get_context_data(**kwargs)
+        context = super(DiffCheckListView, self).get_context_data(**kwargs)
+        context['type'] = 'DiffCheck'
         context['label'] = 'Select which information package to DiffCheck'
+        ip_list = []
+        object_list = context['object_list']
+        for obj in object_list: 
+            for ip in obj.get_ip_list(StatusProcess=5000):
+                ip_list.append(ip)
+        context['ip_list'] = ip_list
+        context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
+        context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
 
 class DiffCheck(CreateView):
@@ -1147,48 +809,40 @@ class DiffCheck(CreateView):
         if Cmets_obj == '':
             Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
         METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), Cmets_obj )
-        ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue')#self.ip_obj.ObjectUUID
-        print'ObjectIdentifierValue'
-        print ObjectIdentifierValue
-        print ObjectIdentifierValue[0]
-        ObjectPath=IP_ObjectPath
-        ReqUUID=form.cleaned_data.get('ReqUUID',None)
-        linkingAgentIdentifierValue=self.request.user.username
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        self.object.save()
-        IPtoDiffcheck = DiffCheckTask.delay_or_fail(ObjectIdentifierValue=ObjectIdentifierValue,
-                                    ObjectPath=ObjectPath, 
-                                    METS_ObjectPath=METS_ObjectPath,
-                                    ReqUUID=ReqUUID,
-                                    linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                    ReqPurpose=ReqPurpose,
-                                    )
-
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        diffchecktaskid = IPtoDiffcheck.task_id
-        self.object.taskid = diffchecktaskid
-        print ('Task ID')
-        print (self.object.taskid)
-        self.object.save()
-        #self.success_url = reverse_lazy('taskoverview')
-        #self.success_url = '/controlarea/diffcheckprogress/' + taskid
-        self.success_url = '/controlarea/diffcheckprogress/' + diffchecktaskid
+        status_code, status_detail, res_list = g_functions().DiffCheck_IP(ObjectIdentifierValue=self.ip_obj.ObjectUUID,
+                                                                          ObjectPath=IP_ObjectPath, 
+                                                                          METS_ObjectPath=METS_ObjectPath,
+                                                                          )
+        if status_code:
+            self.object.Status=100
+            event_info = 'Failed to DiffCheck object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                   form.cleaned_data.get('ReqUUID',None),
+                                                                                   status_detail[1]
+                                                                                   )
+            ESSPGM.Events().create('33000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'1',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            logger.error(event_info)
+        else:
+            self.object.Status=20
+            status_summary = ''
+            for st in status_detail[0]:
+                if st.startswith('STATUS -'):
+                    status_summary = st
+            event_info = 'Success to DiffCheck object: %s, ReqUUID: %s, Result: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
+                                                                                       form.cleaned_data.get('ReqUUID',None),
+                                                                                       status_summary
+                                                                                       )
+            ESSPGM.Events().create('33000',form.cleaned_data.get('ReqPurpose',''),'controlarea views',__version__,'0',
+                                   event_info,0,self.ip_obj.ObjectUUID,linkingAgentIdentifierValue=self.request.user.username,
+                                   )
+            logger.info(event_info)
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_diffcheckresult',kwargs={'pk': self.object.pk})
         return super(DiffCheck, self).form_valid(form)
 
-class DiffcheckProgress(TemplateView):
-    template_name = 'controlarea/diffcheckprogress.html'
-
-    @method_decorator(permission_required('controlarea.CheckinFromWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(DiffcheckProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(DiffcheckProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-'''class DiffCheckResult(DetailView):
+class DiffCheckResult(DetailView):
     """
     View result from diffcheck
     """
@@ -1204,14 +858,14 @@ class DiffcheckProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
 
-'''class PreserveIPListView(ListView):
+class PreserveIPListView(ListView):
     """
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/preserveIP.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.PreserveIP'))
@@ -1220,6 +874,7 @@ class DiffcheckProgress(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(PreserveIPListView, self).get_context_data(**kwargs)
+        context['type'] = 'ToIngest'
         context['label'] = 'Select which information package to preserve in archive'
         ip_list = []
         object_list = context['object_list']
@@ -1229,65 +884,7 @@ class DiffcheckProgress(TemplateView):
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
-
-class PreserveListInfoView(View):
-
-    @method_decorator(permission_required('controlarea.PreserveIP'))
-    def dispatch(self, *args, **kwargs):    
-        return super(PreserveListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_preserve_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
-        AIC_list = []
-        for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_preserve_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
-
-class PreserveTemplateView(TemplateView):
-    template_name = 'controlarea/preserveIPlist.html'
-
-    @method_decorator(permission_required('controlarea.DiffCheck'))
-    def dispatch(self, *args, **kwargs):
-        return super(PreserveTemplateView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(PreserveTemplateView, self).get_context_data(**kwargs)
-        context['label'] = 'Select which information package to preserve in archive'
         return context
-
 
 class PreserveIP(CreateView):
     """
@@ -1322,23 +919,14 @@ class PreserveIP(CreateView):
         a_uid = os.getuid()
         a_gid = os.getgid()
         a_mode = 0770
-        linkingAgentIdentifierValue = form.cleaned_data.get('user',None)
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue',None)
-        ReqUUID=form.cleaned_data.get('ReqUUID',None)
-        #status_code, status_detail = 
-        IPtoPreserve = PreserveIPTask.delay_or_fail(source_path=source_path,
-                                    target_path=target_path, 
-                                    Package=objectpath, 
-                                    a_uid=a_uid, 
-                                    a_gid=a_gid, 
-                                    a_mode=a_mode,
-                                    linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                    ReqPurpose=ReqPurpose,
-                                    ObjectIdentifierValue=ObjectIdentifierValue,
-                                    ReqUUID=ReqUUID,
-                                    )
-        '''if status_code:
+        status_code, status_detail = ControlAreaFunc.PreserveIP(source_path,
+                                                                target_path, 
+                                                                objectpath, 
+                                                                a_uid, 
+                                                                a_gid, 
+                                                                a_mode,
+                                                                )
+        if status_code:
             self.object.Status=100
             event_info = 'Failed to PreserveIP object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
                                                                                     form.cleaned_data.get('ReqUUID',None),
@@ -1365,13 +953,10 @@ class PreserveIP(CreateView):
                                    )            
             # Update ip_obj with StatusProcess = 0 to enable ingest to discover new IP.
             self.ip_obj.StatusProcess = 0
-            self.ip_obj.save()'''
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        taskid = IPtoPreserve.task_id
-        self.object.taskid = taskid
-        self.object.save()
-        self.success_url = '/controlarea/preserveprogress/' + taskid
+            self.ip_obj.save()
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_preserveipresult',kwargs={'pk': self.object.pk})
         return super(PreserveIP, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -1399,19 +984,7 @@ class PreserveIP(CreateView):
         context['eventOutcome_CHOICES'] = dict(eventOutcome_CHOICES)
         return context
 
-class PreserveProgress(TemplateView):
-    template_name = 'controlarea/preserveprogress.html'
-
-    @method_decorator(permission_required('controlarea.PreserveIP'))
-    def dispatch(self, *args, **kwargs):
-        return super(PreserveProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(PreserveProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-'''class PreserveIPResult(DetailView):
+class PreserveIPResult(DetailView):
     """
     View result from PreserveIP
     """
@@ -1427,14 +1000,14 @@ class PreserveProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
+        return context
     
-'''class ControlareaDeleteIPListView(ListView):
+class ControlareaDeleteIPListView(ListView):
     """
     List control area
     """
     model = ArchiveObject
-    template_name='controlarea/controlareadeletelist.html'
+    template_name='archobject/list.html'
     queryset=ArchiveObject.objects.filter(Q(StatusProcess__in=[5000,5100]) | Q(OAISPackageType=1)).order_by('id','Generation')
 
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
@@ -1461,63 +1034,6 @@ class PreserveProgress(TemplateView):
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
-
-class DeleteIPListInfoView(View):
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):    
-        return super(DeleteIPListInfoView, self).dispatch( *args, **kwargs)
-        
-    def get_deleteip_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess__in=[5000,5100])
-        AIC_list = []
-        for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__in=[5000,5100])
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
-                AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
-  
-    def json_response(self, request):
-        
-        data = self.get_deleteip_listinfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):        
-        return self.json_response(request)
-
-class DeleteIPListTemplateView(TemplateView):
-    template_name = 'controlarea/controlareadeletelist.html'
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(DeleteIPListTemplateView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(DeleteIPListTemplateView, self).get_context_data(**kwargs)
-        context['label'] = 'Select which information package to delete in control/work area'
         return context
 
 class ControlareaDeleteIP(CreateView):
@@ -1551,21 +1067,11 @@ class ControlareaDeleteIP(CreateView):
         source_path = Path.objects.get(entity='path_control').value
         target_path_tmp = Path.objects.get(entity='path_work').value
         target_path = os.path.join(target_path_tmp, self.request.user.username)
-        #status_code, status_detail = 
-        ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue',None)
-        ReqUUID=form.cleaned_data.get('ReqUUID',None)
-        ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        linkingAgentIdentifierValue=self.request.user.username
-        Package=objectpath
-        DeleteIP = DeleteIPTask.delay_or_fail(source_path=source_path, 
-                                   target_path=target_path, 
-                                   Package=Package,
-                                   ObjectIdentifierValue=ObjectIdentifierValue,                        
-                                   ReqUUID=ReqUUID,
-                                   ReqPurpose=ReqPurpose,
-                                   linkingAgentIdentifierValue=linkingAgentIdentifierValue,
-                                   )
-        '''if status_code:
+        status_code, status_detail = ControlAreaFunc.DeleteIP(source_path, 
+                                                              target_path, 
+                                                              objectpath, 
+                                                              )
+        if status_code:
             self.object.Status=100
             event_info = 'Failed to delete object: %s, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),
                                                                                 form.cleaned_data.get('ReqUUID',None),
@@ -1591,27 +1097,13 @@ class ControlareaDeleteIP(CreateView):
                 self.ip_obj.StatusProcess = 9999
                 self.ip_obj.StatusActivity = 0
                 self.ip_obj.ObjectActive = 0
-                self.ip_obj.save()'''
-        #self.request.session['result_status_code'] = status_code
-        #self.request.session['result_status_detail'] = status_detail
-        deletetaskid = DeleteIP.task_id
-        self.success_url = '/controlarea/deleteprogress/' + deletetaskid
+                self.ip_obj.save()
+        self.request.session['result_status_code'] = status_code
+        self.request.session['result_status_detail'] = status_detail
+        self.success_url = reverse_lazy('controlarea_deleteipresult',kwargs={'pk': self.object.pk})
         return super(ControlareaDeleteIP, self).form_valid(form)
 
-class DeleteProgress(TemplateView):
-    template_name = 'controlarea/deleteprogress.html'
-
-    @method_decorator(permission_required('controlarea.CheckoutToWork'))
-    def dispatch(self, *args, **kwargs):
-        return super(DeleteProgress, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(DeleteProgress, self).get_context_data(**kwargs)
-        context['taskid'] = self.kwargs['taskid']
-        return context
-        
-'''class ControlareaDeleteIPResult(DetailView):
+class ControlareaDeleteIPResult(DetailView):
     """
     View result from delete IP
     """
@@ -1627,131 +1119,5 @@ class DeleteProgress(TemplateView):
         context['label'] = 'Detail information - ControlArea requests'
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context'''
-
-class TasksInfo(View):
-
-    
-    def dispatch(self, *args, **kwargs):
-    
-        return super(TasksInfo, self).dispatch( *args, **kwargs)
-        
-    def getTaskInfo(self, *args, **kwargs):
-
-        numberofdays = int(self.kwargs['days'])
-        print('Days')
-        print(numberofdays)
-        enddate = datetime.datetime.now()
-        print(enddate)
-        startdate = enddate - datetime.timedelta(days=numberofdays)
-        print (startdate)
-        allTasks = TaskMeta.objects.filter(date_done__range=[startdate, enddate]).order_by('date_done').reverse()
-        print len(list(allTasks))
-        Tasks = {}
-        FailedTasks = []
-        PendingTasks = []
-        ProgressTasks = []
-        SuccessTasks = []
-        for t in allTasks:
-            Task = {
-            'taskid': t.task_id,
-            'status' : t.status,
-            'result': json.dumps(t.result)
-            }
-            if t.status == 'FAILURE':
-                FailedTasks.append(Task)
-            elif t.status == 'PENDING':
-                PendingTasks.append(Task)
-            elif t.status == 'PROGRESS':                
-                if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
-                    taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
-                    for t in taskinfo:
-                        info = {}
-                        info['reqpurpose'] = t.ReqPurpose
-                        info['user'] = t.user
-                        Task['info'] = json.dumps(info)
-                        ProgressTasks.append(Task)
-            elif t.status =='SUCCESS':
-                if t.result is not None:
-                        Task['datedone'] = str(t.date_done)
-                        SuccessTasks.append(Task)                
-        Tasks['FailedTasks'] = FailedTasks
-        Tasks['PendingTasks'] = PendingTasks
-        Tasks['ProgressTasks'] = ProgressTasks
-        Tasks['SuccessTasks'] = SuccessTasks
-        return Tasks
-
-    def json_response(self, request):
-        
-        data = self.getTaskInfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-        )
-    def get(self, request, *args, **kwargs):
-        
-        return self.json_response(request)
-
-class TaskOverviewView(TemplateView):
-    template_name = 'controlarea/taskoverview.html'
-
-    #@method_decorator(permission_required('essarch.list_storageMedium'))
-    def dispatch(self, *args, **kwargs):
-        return super(TaskOverviewView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(TaskOverviewView, self).get_context_data(**kwargs)
         return context
 
-        
-        
-class ProgressTasksInfo(View):
-
-    #@method_decorator(permission_required('essarch.list_storageMedium'))
-    def dispatch(self, *args, **kwargs):
-    
-        return super(ProgressTasksInfo, self).dispatch( *args, **kwargs)
-        
-    def getTaskInfo(self, *args, **kwargs):
-
-        progressTasks = TaskMeta.objects.filter(status='PROGRESS')
-        Tasks = []
-        for t in progressTasks:
-            progressinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
-            for p in progressinfo:
-                Task = {
-                'user' : p.user,
-                'reqpurpose': p.ReqPurpose,
-                'status' : t.status,
-                'result': json.dumps(t.result)
-                }
-                Tasks.append(Task)
-        return Tasks
-
-    def json_response(self, request):
-        
-        data = self.getTaskInfo()
-        return HttpResponse(
-            json.dumps(data, cls=DjangoJSONEncoder)
-            #,mimetype='application/json'
-        )
-
-    def get(self, request, *args, **kwargs):
-        
-        return self.json_response(request)
-
-class TestTaskView(TemplateView):
-    template_name = 'controlarea/testtask.html'
-
-    #@method_decorator(permission_required('essarch.list_storageMedium'))
-    def dispatch(self, *args, **kwargs):
-        return super(TestTaskView, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-
-        context = super(TestTaskView, self).get_context_data(**kwargs)
-        TestDict= {'thistask':'TestTask','someinfo':'somerandominfo'}
-        TestToSeeTasks = TestTask.delay_or_fail(randomDict=TestDict)
-        context['task_id'] = TestToSeeTasks.task_id
-        context['result'] = TestToSeeTasks.result
-        return context

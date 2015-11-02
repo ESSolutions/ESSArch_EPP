@@ -10,7 +10,7 @@
 <H1>{{ label }}</H1>
 <br/>
 
-<div class="row">
+<div id="aic" class="row">
     <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
         <thead>
             <tr>
@@ -40,6 +40,53 @@
 
 {% block app-extra-script %}
 <script>
+
+var aiccheckresult = false;
+
+$.getJSON("{% url 'aiccheck' %}", function(aiccheckresult){
+
+
+if (aiccheckresult == true ){
+
+var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()">Previous</button>' +
+                    '<button id="nextpagebutton" onclick="getnextpage()">Next</button></div>' +
+                    '<table class="collaptable">' +
+                    '<thead>' +
+                    '<tr>' +
+                '<th>Generation</th>' +
+                '<th>Archivist organization</th>' +
+                '<th>Label</th>' +
+                '<th>Create date</th>' +
+                '<th>Start date</th>' +
+                '<th>End date</th>' +
+                '<th>Process</th>' +
+                '<th>AIC-UUID</th>' +
+                '<th>IP-UUID</th>' +
+      '</tr>' +
+    '</thead>' +
+    '<tbody id="AICtable">' +
+            '<tr><td>No IPs</td></tr>' +
+    '</tbody>' +
+  '</table>';
+
+
+document.getElementById("aic").innerHTML = aiccheckhtml;
+
+var JSONlink = '/api/aicobjects/?StatusProcess=3000&UUID__StatusProcess=3000';
+//var JSONlink = "{% url 'access_list_info' %}"
+
+var nextpage = 'nextpage';
+var previouspage = 'previouspage';
+
+accesslist(JSONlink);
+
+}
+
+
+});
+
+
+
 $(document).ready(function() {
 	$('#my-table').dataTable( {
 	    "bPaginate": true,
@@ -59,7 +106,7 @@ $(document).ready(function() {
                 '<option value="-1">All</option>'+
                 '</select> records'
         },
-        "sAjaxSource": Django.url('archobject-dt'),
+        "sAjaxSource": Django.url('archobjectdt'),
         "aoColumnDefs": [
     	  { 'bVisible': false, 
     	  	'aTargets': [ 0 ] 
@@ -82,7 +129,168 @@ $(document).ready(function() {
     } );
 	$('#my-table_filter').attr('title', 'Global search in columns: Object, Archivist organization, Label, AIC(UUID), IP(UUID)');
 } );
+
+function accesslist(JSONlink){
+
+
+var ajaxinfo = {};
+var tabletext = '';
+//$(document).ready(function(){
+$.getJSON( JSONlink, function(listinfo1) {
+
+         ajaxinfo = listinfo1;
+     var population = get_access_listinfo(ajaxinfo);
+         populatelist(population);
+     $('.collaptable').aCollapTable({
+     startCollapsed: true,
+     addColumn: false,
+     plusButton: '<span class="i">+</span>',
+     minusButton: '<span class="i">-</span>'
+    });
+
+});
+//});
+
+function StatusProcessChoices(Process){
+
+       var StatusProcessText = "";
+
+       switch(Process){
+            case 3000:
+                StatusProcessText = 'Archived';
+                break;
+            case 5000:
+                StatusProcessText = 'Controlarea';
+                break;
+            case 5100:
+                StatusProcessText = 'Workarea';
+                break;
+            case 9999:
+                StatusProcessText = 'Deleted';
+                break;
+            default:
+                StatusProcessText ='Not known';
+       }
+
+        return StatusProcessText;
+   };
+
+function populatelist(info){
+
+    var createlink = '/access/new/';
+
+    if(info.length == 0){
+        tabletext = 'List is empty';
+    }
+
+    for (i = 0; i < info.length; i++){
+
+    tabletext = tabletext
+    + '<tr data-id="'
+    + info[i].AIC_UUID + '" data-parent="">'
+    + '<td>AIC</td>'
+    + '<td>' + info[i].Archivist_organization + '</td>'
+    + '<td>' + info[i].Label + '</td>'
+    + '<td>' + info[i].create_date +'</td>'
+    + '<td>' + '</td>'
+    + '<td>' + '</td>'
+    + '<td>' + '</td>'
+    + '<td>' + info[i].AIC_UUID + '<td>'
+    + '</tr>';
+
+   var IPList = info[i].IPs;
+
+   var parent = info[i].AIC_UUID;
+
+
+   for (j = 0; j < IPList.length; j++){
+        tabletext = tabletext
+        + '<tr data-id=' + IPList[j].ObjectUUID + ' '
+        + 'data-parent=' + parent + '>'
+        + '<td><a href="'+ createlink + IPList[j].id +'/"> IP_' + IPList[j].Generation + '</a></td>'
+        + '<td> ' + IPList[j].Archivist_organization + ' </td>'
+        + '<td> ' + IPList[j].Label + ' </td>'
+        + '<td> ' + IPList[j].create_date + ' </td>'
+        + '<td> ' + IPList[j].startdate + ' </td>'
+        + '<td> ' + IPList[j].enddate + ' </td>'
+        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
+        + '<td> ' + parent + ' <td>'
+        + '<td> ' + IPList[j].ObjectUUID + ' <td>'
+        + '</tr>'
+    };
+
+    };
+
+ document.getElementById("AICtable").innerHTML = tabletext;
+ };
+
+
+function get_access_listinfo(AICs_to_access){
+
+    var AIC_list = [];
+    var first_AIC_list = AICs_to_access.results;
+    nextpage = AICs_to_access.next;
+    previouspage = AICs_to_access.previous;
+
+    for (i = 0; i < first_AIC_list.length; i++) {
+
+    var AIC_IPs_query = first_AIC_list[i].relaic_set;
+
+    var AIC = {};
+    AIC['AIC_UUID'] = first_AIC_list[i].ObjectIdentifierValue;
+
+    var AIC_IPs = [];
+    for (i = 0; i < AIC_IPs_query.length; i++) {
+    var IPinfo = AIC_IPs_query[i].UUID;
+
+    datainfo = IPinfo.archiveobjectdata_set[0];
+
+    AIC_IP = {};
+    AIC_IP.id = IPinfo.id;
+
+    AIC_IP.ObjectUUID = IPinfo.ObjectUUID;
+
+    AIC_IP.Archivist_organization = IPinfo.EntryAgentIdentifierValue;
+
+    AIC.Archivist_organization = IPinfo.EntryAgentIdentifierValue;
+    AIC_IP.Label = datainfo.label;
+
+    AIC.Label = datainfo.label;
+    AIC_IP.create_date = IPinfo.EntryDate;
+
+    AIC.create_date = IPinfo.EntryDate;
+    AIC_IP.Generation = IPinfo.Generation;
+    AIC_IP.startdate = datainfo.startdate;
+
+    AIC_IP.enddate = datainfo.enddate;
+
+    AIC_IP.Process = IPinfo.StatusProcess;
+
+    AIC_IPs.push(AIC_IP);
+
+    };
+        AIC['IPs'] = AIC_IPs;
+        AIC_list.push(AIC);
+
+        };
+
+        return AIC_list;
+    };
+};
+
+function getnextpage(){
+
+if(nextpage != null){
+accesslist(nextpage);
+};
+};
+
+function getpreviouspage(){
+
+if(previouspage != null){
+accesslist(previouspage);
+};
+};
+
 </script>
 {% endblock %}
-
-

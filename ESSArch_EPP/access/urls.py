@@ -26,13 +26,18 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.conf.urls import patterns, url
-from views import AccessList, AccessDetail, AccessCreate ,AccessUpdate, AccessDelete, ArchObjectList, ArchObjectDatatablesView, AccessClearRequests
+from views import ArchObjectList, ArchObjectDatatablesView, AccessListInfoView, \
+                  AccessList, AICCheckView, AccessDetail,\
+                  AccessCreate, AccessUpdate, AccessDelete,\
+                  AccessClearRequests
 
 #import views
 
 urlpatterns = patterns('',   
     url(r'^listobj/$', ArchObjectList.as_view(),name='access_listobj'),
-    url(r'^archobjectdt$', ArchObjectDatatablesView.as_view(), name='archobject-dt'),
+    url(r'^archobjectdt$', ArchObjectDatatablesView.as_view(), name='archobjectdt'),
+    url(r'^access_list_info/$', AccessListInfoView.as_view(), name='access_list_info'),
+    url(r'^aiccheck$', AICCheckView.as_view(), name='aiccheck'),
     url(r'^list/$', AccessList.as_view(),name='access_list'),
     url(r'^detail/(?P<pk>[A-Fa-f0-9]{32})/$', AccessDetail.as_view(), name='access_detail'),
     url(r'^new$', AccessCreate.as_view(), name='access_create_parameter'),

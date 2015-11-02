@@ -77,7 +77,7 @@ class ArchiveObjectSerializer(serializers.ModelSerializer):
                   'OAISPackageType', 'preservationLevelValue',
                   'DELIVERYTYPE', 'INFORMATIONCLASS',
                   'Generation', 'LocalDBdatetime',
-                  'ExtDBdatetime','archiveobjectdata_set']
+                  'ExtDBdatetime']
 
 class ArchiveObjectNestedSerializer(ArchiveObjectSerializer):
     archiveobjectdata_set =  ArchiveObjectDataSerializer(many=True)

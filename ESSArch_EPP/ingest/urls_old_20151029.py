@@ -26,14 +26,13 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.conf.urls import patterns, url
-from views import IngestList, IngestDetail, IngestCreate, IngestUpdate, IngestDelete, IngestListInfoView, IngestIPListTemplateView
+from views import IngestList, IngestDetail, IngestCreate, IngestUpdate, IngestDelete, ArchObjectListUpdate
 
 #import views
 
 urlpatterns = patterns('',   
-    url(r'^listobj/$', IngestIPListTemplateView.as_view(),name='ingest_listobj'),
-    url(r'^ingestlistinfo/$', IngestListInfoView.as_view(),name='ingest_list_info'),
-    url(r'^listobjupd/(?P<pk>\d+)/$', IngestIPListTemplateView.as_view(),name='ingest_listobjupd'),
+    url(r'^listobj/$', ArchObjectListUpdate.as_view(),name='ingest_listobj'),
+    url(r'^listobjupd/(?P<pk>\d+)/$', ArchObjectListUpdate.as_view(),name='ingest_listobjupd'),
     url(r'^list/$', IngestList.as_view(),name='ingest_list'),
     url(r'^detail/(?P<pk>\d+)/$', IngestDetail.as_view(), name='ingest_detail'),
     url(r'^new$', IngestCreate.as_view(), name='ingest_create_parameter'),

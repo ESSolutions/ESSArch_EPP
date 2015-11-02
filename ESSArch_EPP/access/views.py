@@ -32,20 +32,105 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 
-from essarch.models import AccessQueue, AccessQueueForm, AccessQueueFormUpdate, ArchiveObject, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, AccessReqType_CHOICES
+from essarch.models import AccessQueue, AccessQueueForm, AccessQueueFormUpdate, ArchiveObject, ArchiveObjectData, ArchiveObjectRel, PackageType_CHOICES, StatusProcess_CHOICES, ReqStatus_CHOICES, AccessReqType_CHOICES
 from configuration.models import Path, DefaultValue, Parameter
 
 from django.views.generic.detail import DetailView
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView,View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse, HttpResponseBadRequest
+
 from essarch.libs import DatatablesViewEss
 
+
 import uuid, os.path as op
+
+class AccessListInfoView(View):
+
+    @method_decorator(permission_required('essarch.list_accessqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AccessListInfoView, self).dispatch( *args, **kwargs)
+
+    def get_access_listinfo(self, *args, **kwargs):
+        AICs_to_access = ArchiveObject.objects.filter(StatusProcess=3000) #filter(Q(StatusProcess=3000) | Q(OAISPackageType=1))
+        AIC_list = []
+        for obj in AICs_to_access:
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=3000)
+            if len(AIC_IPs_query) > 0:
+                AIC = {}
+                AIC['AIC_UUID'] =(str(obj.ObjectUUID))
+                AIC_IPs = []
+                for ip in AIC_IPs_query:
+                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                    AIC_IP = {}
+                    AIC_IP['id'] = ip.UUID.id
+                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
+                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                    AIC_IP['Label'] = datainfo.label
+                    AIC['Label'] = datainfo.label
+                    AIC_IP['create_date'] = ip.UUID.EntryDate
+                    AIC['create_date'] = ip.UUID.EntryDate
+                    AIC_IP['Generation'] = ip.UUID.Generation
+                    AIC_IP['startdate'] = datainfo.startdate
+                    AIC_IP['enddate'] = datainfo.enddate
+                    AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IPs.append(AIC_IP)
+                AIC['IPs'] = AIC_IPs
+                AIC_list.append(AIC)
+        return AIC_list
+
+    def json_response(self, request):
+
+        data = self.get_access_listinfo()
+        return HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder)
+        )
+    def get(self, request, *args, **kwargs):
+        return self.json_response(request)
+
+'''
+class AccessListTemplateView(TemplateView):
+    template_name = 'access/access_list.html'
+
+    @method_decorator(permission_required('essarch.list_accessqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AccessListTemplateView, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(AccessListTemplateView, self).get_context_data(**kwargs)
+        context['label'] = 'ACCESS - List information packages'
+        return context
+'''
+
+class AICCheckView(View):
+
+    @method_decorator(permission_required('essarch.list_accessqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AICCheckView, self).dispatch( *args, **kwargs)
+
+    def get_aic_check(self, *args, **kwargs):
+
+        AICcheck = ArchiveObjectRel.objects.exists()
+        #return AICcheck
+        return True
+
+    def json_response(self, request):
+
+        data = self.get_aic_check()
+        return HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder)
+        )
+    def get(self, request, *args, **kwargs):
+        return self.json_response(request)
 
 class ArchObjectList(TemplateView):
     template_name = 'access/archiveobject_list.html'
@@ -92,7 +177,7 @@ class ArchObjectDatatablesView(DatatablesViewEss):
     def sort_col_9(self, direction):
         '''sort for col_10'''
         return ('%sid' % direction , '%sGeneration' % direction, '%sObjectUUID' % direction)
-
+'''
 class ArchObjectList2(ListView):
     """
     List ArchiveObject
@@ -156,6 +241,8 @@ class ArchObjectList2(ListView):
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
         return context
+'''
+
 
 class AccessList(ListView):
     """

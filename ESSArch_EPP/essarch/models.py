@@ -504,6 +504,7 @@ class ControlAreaQueue(models.Model):
     ObjectIdentifierValue = models.CharField(max_length=255, blank=True)
     Status = models.IntegerField(null=True, blank=True, default=0, choices=ReqStatus_CHOICES)
     posted = models.DateTimeField(auto_now_add=True)
+    taskid = models.CharField(max_length=255,blank=True,null=True)
     class Meta:
         db_table = 'ReqControlAreaQueue'
     
@@ -515,7 +516,7 @@ class ControlAreaForm(forms.ModelForm):
     user = forms.CharField(label='User', widget = PlainText())
     class Meta:
         model=ControlAreaQueue   
-        exclude=('password',)
+        exclude=('password', 'taskid',)
 
 class ControlAreaForm2(ControlAreaForm):
     ReqType = forms.ChoiceField(label='ReqType',choices=ControlAreaReqType_CHOICES, widget = PlainText())
