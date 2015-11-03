@@ -1179,6 +1179,7 @@ class DeleteIPTask(JobtasticTask):
                 deleted_obj.StatusActivity = 0
                 deleted_obj.ObjectActive = 0
                 deleted_obj.save()
+
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Delete IP'
@@ -1186,20 +1187,7 @@ class DeleteIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
-
-        #Test functionality added to test monitoring of tasks in progress
-        
-        testdrive = 1
-        testtime = 10
-        update_frequency = 1
-        while(testdrive < 11):
-            self.update_progress(completed_count=testdrive,
-                                total_count=testtime,
-                                update_frequency=update_frequency,
-                                )
-            testdrive = testdrive + 1
-            sleep(0.2)        
-                
+          
         return result
                 
 def SetPermission(path,uid=None,gid=None,mode=0770):
@@ -1494,14 +1482,17 @@ class TestTask(JobtasticTask):
                                 )
             testdrive = testdrive + 1
             sleep(0.2)
+       
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Test task'
         result['reqpurpose'] = TestString
-        result['user'] = 'testuser'        
+        result['user'] = 'testuser'
+        raise ControlareaException(result)    
         return result
     
 class ControlareaException(Exception):
     def __init__(self, value):
         self.value = value
         super(ControlareaException, self).__init__(value)
+        

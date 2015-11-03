@@ -41,8 +41,8 @@ from configuration.models import Path, Parameter
 
 
 from controlarea.tasks import CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
-							  DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
-							  GetExchangeRequestFileContentTask, TestTask
+							                DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
+							                GetExchangeRequestFileContentTask, TestTask
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView, View
@@ -1642,14 +1642,13 @@ class TasksInfo(View):
     def getTaskInfo(self, *args, **kwargs):
 
         numberofdays = int(self.kwargs['days'])
-        print('Days')
-        print(numberofdays)
+
         enddate = datetime.datetime.now()
-        print(enddate)
+
         startdate = enddate - datetime.timedelta(days=numberofdays)
-        print (startdate)
+
         allTasks = TaskMeta.objects.filter(date_done__range=[startdate, enddate]).order_by('date_done').reverse()
-        print len(list(allTasks))
+
         Tasks = {}
         FailedTasks = []
         PendingTasks = []
