@@ -1500,3 +1500,8 @@ class TestTask(JobtasticTask):
         result['reqpurpose'] = TestString
         result['user'] = 'testuser'        
         return result
+    
+class ControlareaException(Exception):
+    def __init__(self, value):
+        self.value = value
+        super(ControlareaException, self).__init__(value)
