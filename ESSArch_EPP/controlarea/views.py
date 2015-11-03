@@ -164,7 +164,8 @@ class MyFileList(object):
                                     if ip_uuid_test_flag == 0:
                                         logger.error('IP: %s found in reception, IP directory with name: "%s" do not exists in any AIC in "gate area" (%s)' % (ObjectPath, ip_uuid_test, logs_path))       
                                 else:
-                                    logger.error('path: %s do not exists' % logs_path)                    
+                                    logger.error('path: %s do not exists' % logs_path)
+          
         return self.filelist
 
     def __iter__(self):
@@ -1662,10 +1663,10 @@ class TasksInfo(View):
             if t.status == 'FAILURE':
                 if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
                     taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
-                    for t in taskinfo:
+                    for s in taskinfo:
                         info = {}
-                        info['reqpurpose'] = t.ReqPurpose
-                        info['user'] = t.user
+                        info['reqpurpose'] = s.ReqPurpose
+                        info['user'] = s.user
                         Task['info'] = json.dumps(info)                
                 Task['result'] = json.dumps(str(t.result))
                 FailedTasks.append(Task)                
@@ -1674,16 +1675,18 @@ class TasksInfo(View):
             elif t.status == 'PROGRESS':                
                 if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
                     taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
-                    for t in taskinfo:
+                    for s in taskinfo:
                         info = {}
-                        info['reqpurpose'] = t.ReqPurpose
-                        info['user'] = t.user
+                        info['reqpurpose'] = s.ReqPurpose
+                        info['user'] = s.user
                         Task['info'] = json.dumps(info)
                         Task['result'] = json.dumps(t.result)
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
                         Task['result'] = json.dumps(t.result)
+                        print('Task result')
+                        print(t.result)
                         Task['datedone'] = str(t.date_done)
                         SuccessTasks.append(Task)                
         Tasks['FailedTasks'] = FailedTasks
