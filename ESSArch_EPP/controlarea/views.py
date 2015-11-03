@@ -1659,7 +1659,8 @@ class TasksInfo(View):
         for t in allTasks:
             Task = {
             'taskid': t.task_id,
-            'status' : t.status
+            'status' : t.status,
+            'result' : jsonpickle.encode(t.result)
             }
             if t.status == 'FAILURE':
                 if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
@@ -1669,7 +1670,6 @@ class TasksInfo(View):
                         info['reqpurpose'] = s.ReqPurpose
                         info['user'] = s.user
                         Task['info'] = json.dumps(info)                
-                Task['result'] = json.dumps(str(t.result))
                 FailedTasks.append(Task)                
             elif t.status == 'PENDING':
                 PendingTasks.append(Task)
@@ -1681,13 +1681,9 @@ class TasksInfo(View):
                         info['reqpurpose'] = s.ReqPurpose
                         info['user'] = s.user
                         Task['info'] = json.dumps(info)
-                        Task['result'] = json.dumps(t.result)
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
-                        Task['result'] = json.dumps(t.result)
-                        print('Task result')
-                        print(t.result)
                         Task['datedone'] = str(t.date_done)
                         SuccessTasks.append(Task)                
         Tasks['FailedTasks'] = FailedTasks
