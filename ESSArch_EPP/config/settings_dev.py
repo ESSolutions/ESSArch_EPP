@@ -222,9 +222,25 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework_filters.backends.DjangoFilterBackend',
+        #'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.DjangoFilterBackend',
     ),
 }
+
+'''
+Problem with rest_framework_filters.backends.DjangoFilterBackend version 0.5 and DRF 3.3.0:
+TypeError at /api/aicobjects/
+
+__init__() got an unexpected keyword argument 'cache'
+
+Request Method:         GET
+Request URL:    http://192.168.0.70:5001/api/aicobjects/?StatusProcess=5000
+Django Version:         1.8.4
+Exception Type:         TypeError
+Exception Value:
+
+__init__() got an unexpected keyword argument 'cache'
+'''
 
 ROOT_URLCONF = 'config.urls'
 

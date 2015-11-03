@@ -40,12 +40,13 @@ from api.views import TmpWorkareaUploadView, \
                     StorageTargetsViewSet,\
                     storageMediumViewSet,\
                     storageViewSet,\
-                    IOQueueViewSet
+                    IOQueueViewSet, \
+                    AICListView
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'archiveobjects', ArchiveObjectViewSet)
-router.register(r'aicobjects', AICObjectViewSet)
+router.register(r'aicobjects', AICObjectViewSet, 'aicobject')
 router.register(r'archivepolicy', ArchivePolicyViewSet)
 router.register(r'storagemethod', StorageMethodViewSet)
 router.register(r'storagetarget', StorageTargetViewSet)
@@ -57,6 +58,7 @@ router.register(r'ioqueue', IOQueueViewSet)
 urlpatterns = patterns('',
     url(r'^', include(router.urls)),
     url(r'^tmpworkarea_upload', TmpWorkareaUploadView.as_view(), name='chunked_upload'),
+    url(r'^aic_list/?$', AICListView.as_view(), name='aic_list'),
     url(r'^create_tmpworkarea_upload/?$', CreateTmpWorkareaUploadView.as_view(), name='api_chunked_upload'),
     url(r'^create_tmpworkarea_upload_complete/?$', CreateTmpWorkareaUploadCompleteView.as_view(), name='api_chunked_upload_complete'),
 )

@@ -28,7 +28,8 @@ else:
     
 from rest_framework import serializers, \
                                          relations
-import rest_framework_filters as rest_filters
+#import rest_framework_filters as rest_filters
+import django_filters
 from essarch.models import ArchiveObject, \
                                         ArchiveObjectRel, \
                                         ArchiveObjectData, \
@@ -88,6 +89,7 @@ class ArchiveObjectNestedSerializer(ArchiveObjectSerializer):
                                 'archiveobjectmetadata_set']
     
     def create(self, validated_data):
+        #print 'validated_data: %s' % repr(validated_data)
         archiveobjectdata_set_data = validated_data.pop('archiveobjectdata_set')
         archiveobjectmetadata_set_data = validated_data.pop('archiveobjectmetadata_set')
         ArchiveObject_obj = ArchiveObject.objects.create(**validated_data)
@@ -97,38 +99,52 @@ class ArchiveObjectNestedSerializer(ArchiveObjectSerializer):
             ArchiveObjectMetadata.objects.create(ObjectUUID=ArchiveObject_obj, **archiveobjectmetadata_data)
         return ArchiveObject_obj
 
+class IPFilter(django_filters.FilterSet):
+    archiveobjects__ObjectIdentifierValue = django_filters.CharFilter(name='ObjectIdentifierValue')
+    archiveobjects__ObjectUUID = django_filters.CharFilter(name='ObjectUUID')
+    archiveobjects__PolicyId = django_filters.CharFilter(name='PolicyId')
+    archiveobjects__StatusProcess = django_filters.CharFilter(name='StatusProcess')
+    class Meta:
+        model = ArchiveObjectRel
+        fields = ['archiveobjects__ObjectIdentifierValue', 
+                  'archiveobjects__ObjectUUID', 
+                  'archiveobjects__PolicyId',
+                  'archiveobjects__StatusProcess']
+
+class Filtered_archiveobjects__IP_ListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        data = IPFilter(self.context['request'].GET, queryset=data)
+        return super(Filtered_archiveobjects__IP_ListSerializer, self).to_representation(data)
+
 class ArchiveObjectIDNestedSerializer(ArchiveObjectNestedSerializer):
     class Meta:
         model = ArchiveObject
+        list_serializer_class = Filtered_archiveobjects__IP_ListSerializer
         fields = ArchiveObjectNestedSerializer.Meta.fields + ['id']
 
-class IPFilter(rest_filters.FilterSet):
-    class Meta:
-        model = ArchiveObjectRel
-        fields = ['UUID__ObjectIdentifierValue', 
-                  'UUID__ObjectUUID', 
-                  'UUID__PolicyId',
-                  'UUID__StatusProcess']
-
-class Filtered_UUID__IP_ListSerializer(serializers.ListSerializer):
-    def to_representation(self, data):
-        data = IPFilter(self.context['request'].GET, queryset=data)
-        return super(Filtered_UUID__IP_ListSerializer, self).to_representation(data)
-
-class ArchiveObjectRelSerializer(serializers.ModelSerializer):
-    UUID = ArchiveObjectIDNestedSerializer()
-    class Meta:
-        model = ArchiveObjectRel
-        list_serializer_class = Filtered_UUID__IP_ListSerializer
-        fields = ('UUID',)
-        
 class AICObjectSerializer(serializers.ModelSerializer):
-    relaic_set = ArchiveObjectRelSerializer(many=True, read_only=True)
+    archiveobjects = ArchiveObjectIDNestedSerializer(many=True)
     class Meta:
         model = ArchiveObject
-        fields = ('ObjectIdentifierValue', 'StatusActivity', 
-                  'StatusProcess', 'relaic_set')
-
+        fields = ('ObjectUUID','ObjectIdentifierValue', 'StatusActivity', 
+                  'StatusProcess', 'archiveobjects',)
+    
+    def create(self, validated_data):
+        #print 'validated_data: %s' % repr(validated_data)
+        archiveobjects_data = validated_data.pop('archiveobjects')
+        ArchiveObject_obj = ArchiveObject.objects.create(**validated_data)
+        for ip_data in archiveobjects_data:
+            archiveobjectdata_set_data = ip_data.pop('archiveobjectdata_set')
+            archiveobjectmetadata_set_data = ip_data.pop('archiveobjectmetadata_set')
+            IP_ArchiveObject_obj = ArchiveObject.objects.create(**ip_data)
+            for archiveobjectdata_data in archiveobjectdata_set_data:
+                ArchiveObjectData.objects.create(UUID=IP_ArchiveObject_obj, **archiveobjectdata_data)
+            for archiveobjectmetadata_data in archiveobjectmetadata_set_data:
+                ArchiveObjectMetadata.objects.create(ObjectUUID=IP_ArchiveObject_obj, **archiveobjectmetadata_data)
+            ArchiveObjectRel_obj = ArchiveObjectRel.objects.create(UUID = IP_ArchiveObject_obj,
+                                                                                            AIC_UUID = ArchiveObject_obj)
+        return ArchiveObject_obj
+    
 class ArchivePolicySerializer(serializers.ModelSerializer):
         class Meta:
                 model = ArchivePolicy

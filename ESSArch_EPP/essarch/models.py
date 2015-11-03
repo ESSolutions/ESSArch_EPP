@@ -275,6 +275,7 @@ class ArchiveObject(models.Model):
     Generation = models.IntegerField(null=True)
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
+    archiveobjects = models.ManyToManyField('self', through='ArchiveObjectRel', through_fields=('AIC_UUID', 'UUID'), related_name='aic_set', symmetrical=False)
     class Meta:
         db_table = 'IngestObject'
     def __unicode__(self):
@@ -378,8 +379,8 @@ class ArchiveObjectMetadata(models.Model):
 class ArchiveObjectRel(models.Model):
     #id = models.AutoField(big=True,primary_key=True)
     id = BigAutoField(primary_key=True)
-    AIC_UUID = models.ForeignKey(ArchiveObject, db_column='AIC_UUID', related_name='relaic_set', to_field='ObjectUUID')
-    UUID = models.ForeignKey(ArchiveObject, db_column='UUID', related_name='reluuid_set', to_field='ObjectUUID')
+    AIC_UUID = models.ForeignKey('ArchiveObject', db_column='AIC_UUID', related_name='relaic_set', to_field='ObjectUUID')
+    UUID = models.ForeignKey('ArchiveObject', db_column='UUID', related_name='reluuid_set', to_field='ObjectUUID')
     class Meta:
         db_table = 'Object_rel'
 

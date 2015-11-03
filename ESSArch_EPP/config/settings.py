@@ -183,7 +183,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework_filters.backends.DjangoFilterBackend',
+        #'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.DjangoFilterBackend',
     ),
 }
 

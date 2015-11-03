@@ -46,7 +46,8 @@ from api.serializers import ArchiveObjectSerializer, \
                         StorageTargetsSerializer, \
                         storageMediumSerializer, \
                         storageSerializer, \
-                        IOQueueSerializer
+                        IOQueueSerializer, \
+                        ArchiveObjectNestedSerializer
 from essarch.models import ArchiveObject
 from configuration.models import ArchivePolicy, \
                                                 StorageMethod, \
@@ -57,7 +58,13 @@ from Storage.models import storageMedium, \
                                         IOQueue
 from rest_framework import viewsets, mixins, permissions, views
 from rest_framework.pagination import PageNumberPagination
-import rest_framework_filters as rest_filters
+
+class AICListView(TemplateView):
+    template_name = 'api/aic_list.html'
+
+    @method_decorator(permission_required('essarch.change_ingestqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AICListView, self).dispatch( *args, **kwargs)
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'
@@ -187,7 +194,7 @@ class ArchiveObjectViewSet(CreateListRetrieveViewSet):
     
     """
     queryset = ArchiveObject.objects.all()
-    serializer_class = ArchiveObjectSerializer
+    serializer_class = ArchiveObjectNestedSerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_fields = ('ObjectIdentifierValue', 'ObjectUUID', 'PolicyId')
 
@@ -199,7 +206,7 @@ class AICObjectViewSet(CreateListRetrieveViewSet):
     s = requests.Session()
     s.auth = ('admin', 'admin')
     
-    r = s.get('http://192.168.0.70:5001/api/aicobjects/?StatusProcess=3000&UUID_StatusProcess=3000&format=json')
+    r = s.get('http://192.168.0.70:5001/api/aicobjects/?StatusProcess=3000&UUID__StatusProcess=3000&format=json')
     >>> r.json()
     [{u'ObjectSize': 1234, u'StatusProcess': 3000, u'StatusActivity': 0, u'ObjectUUID': u'11', 
     u'ObjectIdentifierValue': u'11', u'PolicyId': u'test222'}, {u'ObjectSize': 952320, 
@@ -215,7 +222,7 @@ class AICObjectViewSet(CreateListRetrieveViewSet):
     serializer_class = AICObjectSerializer
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = TwoResultsSetPagination
-    filter_fields = ('ObjectIdentifierValue', 'StatusProcess',)
+    filter_fields = ('ObjectIdentifierValue', 'StatusProcess')
 
 class ArchivePolicyViewSet(CreateListRetrieveViewSet):
 

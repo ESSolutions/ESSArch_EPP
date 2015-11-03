@@ -1,0 +1,30 @@
+body {
+  font: 90%/1.45em "Helvetica Neue", HelveticaNeue, Verdana, Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  background-color: #fff;
+}
+
+
+td.details-control {
+    background: url('/static/api/datatables/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('/static/api/datatables/details_close.png') no-repeat center center;
+}
+
+tr.child-row td:first-child {
+  text-align: right;
+}
+
+td.child-details-control {
+    background: url('/static/api/datatables/resources/details_open.png') no-repeat;
+    cursor: pointer;
+	background-position: 70%;
+}
+tr.child-shown td.child-details-control {
+    background: url('/static/api/datatables/details_close.png') no-repeat;
+	background-position: 70%;
+}
