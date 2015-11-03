@@ -59,6 +59,13 @@ from rest_framework import viewsets, mixins, permissions, views
 from rest_framework.pagination import PageNumberPagination
 import rest_framework_filters as rest_filters
 
+class AICListView(TemplateView):
+    template_name = 'api/aic_list.html'
+
+    @method_decorator(permission_required('essarch.change_ingestqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(AICListView, self).dispatch( *args, **kwargs)
+
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'
 
