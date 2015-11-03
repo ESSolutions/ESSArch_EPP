@@ -53,6 +53,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
 import json
+import jsonpickle
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 from djcelery.models import TaskMeta
