@@ -392,6 +392,8 @@ class CheckInFromMottagTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result 
     
 class CheckOutToWorkTask(JobtasticTask):
@@ -582,6 +584,8 @@ class CheckOutToWorkTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result
 
 class CheckInFromWorkTask(JobtasticTask):
@@ -598,7 +602,7 @@ class CheckInFromWorkTask(JobtasticTask):
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
-	
+
     def calculate_result(self,source_path=None,target_path=None,Package=None,a_uid=None,a_gid=None,a_mode=None,allow_unknown_filetypes=False,ObjectIdentifierValue=None,ReqUUID=None,ReqPurpose=None,linkingAgentIdentifierValue=None):
         status_code = 0
         status_list = []
@@ -714,10 +718,10 @@ class CheckInFromWorkTask(JobtasticTask):
                 logger.info(event_info)
                 os.rmdir(op.join(source_path,AIC_uuid))
             except (IOError, os.error), why:
-                event_info = 'Failed to remove AIC_Dir, ERROR: %s' % why
+                event_info = 'Varning AIC_Dir not removed, ERROR: %s' % why
                 error_list.append(event_info)
                 logger.error(event_info)
-                status_code = 3
+                #/status_code = 3
 
         #return status_code,[status_list,error_list]
         if status_code:
@@ -743,6 +747,8 @@ class CheckInFromWorkTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        if status_code != 0:
+            raise ControlareaException(result)
         return result
                                    
 class DiffCheckTask(JobtasticTask):
@@ -820,6 +826,8 @@ class DiffCheckTask(JobtasticTask):
         result['statusdetail'] = status_detail
         result['resullist'] = res_list
         result['statuslist'] = status_list
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result
 
 class PreserveIPTask(JobtasticTask):
@@ -908,6 +916,8 @@ class PreserveIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result     
             
 class CopyFilelistTask(JobtasticTask):
@@ -991,7 +1001,8 @@ class CopyFilelistTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
-
+        if status_code != 0:
+            raise ControlareaException(result)
         return result
 
     def createExchangeRequestFile(self,ReqUUID=None,ReqType=None,ReqPurpose=None,user=None,ObjectIdentifierValue=None,posted=None,filelist=None,reqfilename=None):
@@ -1187,7 +1198,8 @@ class DeleteIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
-          
+        if status_code != 0:
+            raise ControlareaException(result)          
         return result
                 
 def SetPermission(path,uid=None,gid=None,mode=0770):
