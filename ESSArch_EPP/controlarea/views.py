@@ -1661,7 +1661,15 @@ class TasksInfo(View):
             'status' : t.status
             }
             if t.status == 'FAILURE':
-                FailedTasks.append(Task)
+                if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
+                    taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
+                    for t in taskinfo:
+                        info = {}
+                        info['reqpurpose'] = t.ReqPurpose
+                        info['user'] = t.user
+                        Task['info'] = json.dumps(info)                
+                Task['result'] = json.dumps(str(t.result))
+                FailedTasks.append(Task)                
             elif t.status == 'PENDING':
                 PendingTasks.append(Task)
             elif t.status == 'PROGRESS':                

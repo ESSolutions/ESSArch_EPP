@@ -74,6 +74,7 @@ Completed Requests from the: <input type="text" value="5" size="3" id="numberofd
 {% block app-extra-script %}
 		{% js "jQuery/jquery-1.11.3.min.js" %}
 <script>
+console.log('The script is with us');
 
 var allTasks = {};
 
@@ -81,27 +82,48 @@ var numberofdays = $('#numberofdays').val();
 
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
+	console.log('Alltasks is catched');
+	console.log(allTasks);
 	populateAllTasks(allTasks);
 	
 	});
 
-//$( "#numberofdays" ).change(populateAllTasks(allTasks));
     
 function populateAllTasks(allTasks){
+	
+console.log('Populate all tasks is called');
+console.log(allTasks);
 
 var failedtasks = allTasks['FailedTasks'];
 
-var failedTaskshtml = "No failed requests";
+console.log(' Failed tasks');
+console.log(failedtasks);
+
+var failedTaskshtml = '';
+
+	if(failedtasks.length == 0) {
+		failedTaskshtml = "No failed requests";
+	};
+
 
 if(failedtasks.length > 0) {
+	
+	console.log('Number of failed tasks:');
+	console.log(failedtasks.length);
+	
+	for(i=0; i< failedtasks.length; i++){
+		
+		console.log('This for loop iterates');
+		console.log(i);
+		console.log(failedtasks[i].status);
+		failedTaskshtml =  failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + failedtasks[i].result + '</td></tr>';
+		console.log( failedTaskshtml);
+	}	
+	
+	
+	};
+	
 
-for (i=0; i< failedTasks.length; i++){
-
-failedTaskshtml = failedTaskshtml + '<tr><td>' + failedTasks[i].status + '</td></tr>';
-
-}
-
-}
 
 document.getElementById("failedtasks").innerHTML = failedTaskshtml;
 
@@ -200,6 +222,7 @@ successTaskshtml = "No completed requests";
 document.getElementById("successtasks").innerHTML = successTaskshtml;
 
 }
+
 </script>
 
 {% endblock %}
