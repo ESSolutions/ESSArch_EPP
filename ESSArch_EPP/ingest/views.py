@@ -89,7 +89,7 @@ class IngestListInfoView(View):
         return super(IngestListInfoView, self).dispatch( *args, **kwargs)
         
     def get_ingest_listinfo(self, *args, **kwargs):
-        AICs_in_ingestarea = ArchiveObject.objects.filter(StatusProcess__lt=3000) #(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1))
+        AICs_in_ingestarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_ingestarea:
             AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__lt=3000)
