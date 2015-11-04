@@ -1071,10 +1071,10 @@ class GetExchangeRequestFileContentTask(JobtasticTask):
                     a_name = EL_file.get('name')
                     filelist.append(a_name)
             res = [a_ReqUUID,a_ReqType,a_ReqPurpose,a_user,a_ObjectIdentifierValue,a_posted,filelist]
-        '''return {'res':res,
+        return {'res':res,
                 'status_code':status_code,
                 'status_list':[status_list,error_list]
-                }'''
+                }
 
 class DeleteIPTask(JobtasticTask):
 
