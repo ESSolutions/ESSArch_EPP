@@ -897,7 +897,7 @@ class CheckoutToGateFromWork(CreateView):
         print ('Task ID')
         print (self.object.taskid)
         self.object.save()
-        self.success_url = reverse_lazy('taskoverview')
+        self.success_url = '/controlarea/checkouttogateprogress/' +  CopyFilelistTask_id
         return super(CheckoutToGateFromWork, self).form_valid(form)
 
 '''class CheckoutToGateFromWorkResult(DetailView):
@@ -917,6 +917,19 @@ class CheckoutToGateFromWork(CreateView):
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context'''
+
+class CheckoutToGateProgress(TemplateView):
+    template_name = 'controlarea/checkouttogateprogress.html'
+
+    @method_decorator(permission_required('controlarea.CheckinFromWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutToGateProgress, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(CheckoutToGateProgress, self).get_context_data(**kwargs)
+        context['taskid'] = self.kwargs['taskid']
+        return context
 
 class CheckinFromGateListView(ListView):
     """
@@ -1193,6 +1206,7 @@ class DiffcheckProgress(TemplateView):
         context = super(DiffcheckProgress, self).get_context_data(**kwargs)
         context['taskid'] = self.kwargs['taskid']
         return context
+    
 '''class DiffCheckResult(DetailView):
     """
     View result from diffcheck
