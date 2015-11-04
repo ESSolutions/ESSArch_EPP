@@ -112,6 +112,7 @@ class IngestListInfoView(View):
                     AIC_IP['startdate'] = datainfo.startdate
                     AIC_IP['enddate'] = datainfo.enddate
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)        
