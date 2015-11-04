@@ -8,20 +8,19 @@
 <H1>{{ label }}</H1>
 
 <br/>
-
-<div>
+<div   id="spacetable" >
   <table class="collaptable">
     <thead>
       <tr>
-                <th>Generation</th>
-                <th>Archivist organization</th>
-                <th>Label</th>
-                <th>Create date</th>
-                <th>Start date</th>
-                <th>End date</th>
-                <th>Process</th>
-                <th>AIC-UUID</th>
-                <th>IP-UUID</th>
+                <th>Generation </th>
+                <th>Archivist organization </th>
+                <th>Labe l</th>
+                <th>Create date </th>
+                <th>Start date </th>
+                <th>End date </th>
+                <th>State </th>
+                <th>AIC-UUID </th>
+                <th>IP-UUID </th>
       </tr>
     </thead>
     <tbody id="AIC-table">
@@ -29,7 +28,7 @@
     </tbody>
   </table>
 </div>
-
+</div>
 
 {% endblock %}
 {% block app-extra-script %}
