@@ -806,7 +806,7 @@ class DiffCheckTask(JobtasticTask):
             status_list.append(event_info)
 
         #Test functionality added to test monitoring of tasks in progress
-        
+        '''
         testdrive = 1
         testtime = 10
         update_frequency = 1
@@ -817,7 +817,7 @@ class DiffCheckTask(JobtasticTask):
                                 )
             testdrive = testdrive + 1
             sleep(0.2)
-                
+         '''       
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Diffcheck'
