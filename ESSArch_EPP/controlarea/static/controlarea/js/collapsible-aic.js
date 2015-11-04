@@ -21,6 +21,9 @@ function StatusProcessChoices(Process){
        var StatusProcessText = "";
        
        switch(Process){
+       		case 0:
+       			StatusProcessText = 'Ingest';
+       			break;
             case 3000:
                 StatusProcessText = 'Archived';
                 break;
@@ -34,7 +37,9 @@ function StatusProcessChoices(Process){
                 StatusProcessText = 'Deleted';
                 break;
             default:
-                StatusProcessText ='Not known';           
+                StatusProcessText =' Not known ';
+            	console.log('StatusProcess:')
+            	console.log(Process);
        }
 
         return StatusProcessText;
