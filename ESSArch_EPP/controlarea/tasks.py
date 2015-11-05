@@ -1208,7 +1208,7 @@ def SetPermission(path,uid=None,gid=None,mode=0770):
             uid = os.getuid()
         if gid is None:
             gid = os.getgid()
-        for root, dirs, files in os.walk(str(path)): # stringification off path http://stackoverflow.com/questions/21772271/unicodedecodeerror-when-performing-os-walk
+        for root, dirs, files in os.walk(unicode(path)):
             for momo in dirs:
                 os.chown(os.path.join(root, momo), uid,gid)
                 os.chmod(os.path.join(root, momo), mode)
