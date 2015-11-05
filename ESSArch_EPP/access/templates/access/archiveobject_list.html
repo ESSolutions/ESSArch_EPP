@@ -50,7 +50,7 @@ if (aiccheckresult == true ){
 
 var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()">Previous</button>' +
                     '<button id="nextpagebutton" onclick="getnextpage()">Next</button></div>' +
-                    '<table class="collaptable">' +
+                    '<table class="collaptable table">' +
                     '<thead>' +
                     '<tr>' +
                 '<th>Generation</th>' +
@@ -72,7 +72,7 @@ var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()"
 
 document.getElementById("aic").innerHTML = aiccheckhtml;
 
-var JSONlink = '/api/aicobjects/?StatusProcess=3000&UUID__StatusProcess=3000';
+var JSONlink = '/api/aicobjects/?UUID__StatusProcess=3000';
 //var JSONlink = "{% url 'access_list_info' %}"
 
 var nextpage = 'nextpage';
