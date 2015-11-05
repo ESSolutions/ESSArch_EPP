@@ -54,6 +54,7 @@ from django.contrib.auth.decorators import permission_required
 
 import json
 import jsonpickle
+from operator import itemgetter, attrgetter, methodcaller
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 from djcelery.models import TaskMeta
@@ -166,7 +167,7 @@ class MyFileList(object):
                                         logger.error('IP: %s found in reception, IP directory with name: "%s" do not exists in any AIC in "gate area" (%s)' % (ObjectPath, ip_uuid_test, logs_path))       
                                 else:
                                     logger.error('path: %s do not exists' % logs_path)
-          
+        self.filelist = sorted(self.filelist, key = attrgetter('EntryAgentIdentifierValue','label'))
         return self.filelist
 
     def __iter__(self):
