@@ -392,6 +392,7 @@ class CheckInFromMottagTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result) 
         return result 
@@ -584,6 +585,7 @@ class CheckOutToWorkTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result) 
         return result
@@ -747,6 +749,7 @@ class CheckInFromWorkTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result)
         return result
@@ -826,6 +829,7 @@ class DiffCheckTask(JobtasticTask):
         result['statusdetail'] = status_detail
         result['resullist'] = res_list
         result['statuslist'] = status_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result) 
         return result
@@ -916,6 +920,7 @@ class PreserveIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result) 
         return result     
@@ -1001,6 +1006,7 @@ class CopyFilelistTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result)
         return result
@@ -1198,6 +1204,7 @@ class DeleteIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result)          
         return result
@@ -1208,7 +1215,7 @@ def SetPermission(path,uid=None,gid=None,mode=0770):
             uid = os.getuid()
         if gid is None:
             gid = os.getgid()
-        for root, dirs, files in os.walk(unicode(path)):
+        for root, dirs, files in os.walk(str(path)):
             for momo in dirs:
                 os.chown(os.path.join(root, momo), uid,gid)
                 os.chmod(os.path.join(root, momo), mode)
