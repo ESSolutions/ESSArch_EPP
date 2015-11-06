@@ -167,7 +167,7 @@ class MyFileList(object):
                                         logger.error('IP: %s found in reception, IP directory with name: "%s" do not exists in any AIC in "gate area" (%s)' % (ObjectPath, ip_uuid_test, logs_path))       
                                 else:
                                     logger.error('path: %s do not exists' % logs_path)
-        self.filelist = sorted(self.filelist, key = attrgetter('EntryAgentIdentifierValue','label'))
+        #self.filelist = 
         return self.filelist
 
     def __iter__(self):
@@ -233,7 +233,8 @@ class CheckinFromReceptionListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromReceptionListView, self).get_context_data(**kwargs)
-        context['filelist'] = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
+        originallist = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
+        context['filelist'] = sorted(originallist, key = attrgetter('EntryAgentIdentifierValue','label'))
         context['type'] = 'FromRec'
         context['label'] = 'Select which information package to checkin from reception'
         return context
