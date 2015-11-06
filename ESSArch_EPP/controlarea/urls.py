@@ -41,7 +41,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception,\
                   PreserveProgress,\
                   DeleteIPListTemplateView, DeleteIPListInfoView, ControlareaDeleteIP,\
                   DeleteProgress,\
-                  TasksInfo, TaskOverviewView,TestTaskView,ProgressTasksInfo
+                  TasksInfo, TaskOverviewView,TestTaskView,ProgressTasksInfo, TaskResult
 
 #import views
 
@@ -77,4 +77,5 @@ urlpatterns = patterns('',
     url(r'^tasksinfo/(?P<days>[^&]*)$', TasksInfo.as_view(), name='tasksinfo'),
     url(r'^progress/$', ProgressTasksInfo.as_view(), name='progress'),
     url(r'^testtask/$', TestTaskView.as_view(), name='testtask'),
+    url(r'^taskresult/(?P<taskid>[^&]*)/$', TaskResult.as_view(), name='taskresult'),
 )

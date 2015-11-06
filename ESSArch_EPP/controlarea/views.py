@@ -1782,3 +1782,40 @@ class TestTaskView(TemplateView):
         context['task_id'] = TestToSeeTasks.task_id
         context['result'] = TestToSeeTasks.result
         return context
+    
+class TaskResult(View):
+
+    
+    def dispatch(self, *args, **kwargs):
+    
+        return super(TaskResult, self).dispatch( *args, **kwargs)
+        
+    def getTaskResult(self, *args, **kwargs):
+
+        thetaskid = self.kwargs['taskid']
+        print (thetaskid)
+        kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
+        print (kwargstest)
+        if kwargstest:
+
+            thetask = TaskMeta.objects.filter(task_id=thetaskid)
+            resultinfo = thetask[0].result
+            print(resultinfo)
+            #result = jsonpickle.encode(thetask.result)
+            result = jsonpickle.encode(resultinfo)
+        else:
+        
+            result = jsonpickle.encode('notaskfound')
+
+        return result
+
+    def json_response(self, request):
+        
+        data = self.getTaskResult()
+        return HttpResponse(
+            data
+            #json.dumps(data, cls=DjangoJSONEncoder)
+        )
+    def get(self, request, *args, **kwargs):
+        
+        return self.json_response(request)
