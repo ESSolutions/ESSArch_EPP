@@ -121,7 +121,7 @@ class AICCheckView(View):
 
         AICcheck = ArchiveObjectRel.objects.exists()
         #return AICcheck
-        return True
+        return AICcheck
 
     def json_response(self, request):
 
