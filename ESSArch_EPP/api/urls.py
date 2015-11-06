@@ -29,31 +29,38 @@ else:
 from django.conf.urls import patterns, url, include
 from rest_framework.routers import DefaultRouter
 
-from api.views import TmpWorkareaUploadView, \
-                    CreateTmpWorkareaUploadView, \
-                    CreateTmpWorkareaUploadCompleteView, \
-                    ArchiveObjectViewSet, \
-                    AICObjectViewSet, \
-                    ArchivePolicyViewSet,\
-                    StorageMethodViewSet,\
-                    StorageTargetViewSet,\
-                    StorageTargetsViewSet,\
-                    storageMediumViewSet,\
-                    storageViewSet,\
-                    IOQueueViewSet, \
-                    AICListView
+from api.views import (TmpWorkareaUploadView,
+                    CreateTmpWorkareaUploadView,
+                    CreateTmpWorkareaUploadCompleteView,
+                    ArchiveObjectViewSet,
+                    AICObjectViewSet,
+                    ArchivePolicyViewSet,
+                    ArchivePolicyNestedViewSet,
+                    StorageMethodViewSet,
+                    StorageTargetViewSet,
+                    StorageTargetsViewSet,
+                    storageMediumViewSet,
+                    storageViewSet,
+                    storageNestedViewSet,
+                    IOQueueViewSet, 
+                    IOQueueNestedViewSet,
+                    AICListView,
+                    )
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'archiveobjects', ArchiveObjectViewSet)
 router.register(r'aicobjects', AICObjectViewSet, 'aicobject')
 router.register(r'archivepolicy', ArchivePolicyViewSet)
+router.register(r'archivepolicynested', ArchivePolicyNestedViewSet, 'archivepolicynested')
 router.register(r'storagemethod', StorageMethodViewSet)
 router.register(r'storagetarget', StorageTargetViewSet)
 router.register(r'storagetargets', StorageTargetsViewSet)
 router.register(r'storagemedium', storageMediumViewSet)
 router.register(r'storage', storageViewSet)
+router.register(r'storagenested', storageNestedViewSet, 'storagenested')
 router.register(r'ioqueue', IOQueueViewSet)
+router.register(r'ioqueuenested', IOQueueNestedViewSet, 'ioqueuenested')
 
 urlpatterns = patterns('',
     url(r'^', include(router.urls)),

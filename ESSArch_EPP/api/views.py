@@ -38,24 +38,32 @@ from chunked_upload.exceptions import ChunkedUploadError
 from chunked_upload.response import Response
 from configuration.models import Path
 from api.models import TmpWorkareaUpload
-from api.serializers import ArchiveObjectSerializer, \
-                        AICObjectSerializer, \
-                        ArchivePolicySerializer, \
-                        StorageMethodSerializer, \
-                        StorageTargetSerializer, \
-                        StorageTargetsSerializer, \
-                        storageMediumSerializer, \
-                        storageSerializer, \
-                        IOQueueSerializer, \
-                        ArchiveObjectNestedSerializer
-from essarch.models import ArchiveObject
-from configuration.models import ArchivePolicy, \
-                                                StorageMethod, \
-                                                StorageTarget,\
-                                                StorageTargets
-from Storage.models import storageMedium, \
-                                        storage, \
-                                        IOQueue
+from api.serializers import (
+                        ArchiveObjectSerializer,
+                        ArchiveObjectNestedSerializer,
+                        AICObjectSerializer,
+                        ArchivePolicySerializer,
+                        ArchivePolicyNestedSerializer,
+                        StorageMethodSerializer,
+                        StorageTargetSerializer,
+                        StorageTargetsSerializer,
+                        storageMediumSerializer,
+                        storageSerializer,
+                        storageNestedSerializer,
+                        IOQueueSerializer,
+                        IOQueueNestedSerializer,
+                        ArchiveObjectRelSerializer,
+                        )
+from essarch.models import ArchiveObject, ArchiveObjectRel
+from configuration.models import (ArchivePolicy,
+                                                StorageMethod,
+                                                StorageTarget,
+                                                StorageTargets,
+                                                )
+from Storage.models import (storageMedium,
+                                        storage,
+                                        IOQueue,
+                                        )
 from rest_framework import viewsets, mixins, permissions, views
 from rest_framework.pagination import PageNumberPagination
 
@@ -193,11 +201,15 @@ class ArchiveObjectViewSet(CreateListRetrieveViewSet):
     
     """
     queryset = ArchiveObject.objects.all()
-    serializer_class = ArchiveObjectNestedSerializer
+    #serializer_class = ArchiveObjectNestedSerializer
+    serializer_class = ArchiveObjectSerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_fields = ('ObjectIdentifierValue', 'ObjectUUID', 'PolicyId')
+    lookup_field = 'ObjectUUID'
+    lookup_value_regex = '[0-9a-f-]{36}'
 
-class AICObjectViewSet(CreateListRetrieveViewSet):
+class AICObjectViewSet(mixins.UpdateModelMixin, CreateListRetrieveViewSet):
+#class AICObjectViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
@@ -205,14 +217,14 @@ class AICObjectViewSet(CreateListRetrieveViewSet):
     s = requests.Session()
     s.auth = ('admin', 'admin')
     
-    r = s.get('http://192.168.0.70:5001/api/aicobjects/?StatusProcess=3000&UUID__StatusProcess=3000&format=json')
+    r = s.get('http://192.168.0.70:5001/api/aicobjects/?StatusProcess=3000&archiveobjects__StatusProcess=3000&format=json')
     >>> r.json()
     [{u'ObjectSize': 1234, u'StatusProcess': 3000, u'StatusActivity': 0, u'ObjectUUID': u'11', 
     u'ObjectIdentifierValue': u'11', u'PolicyId': u'test222'}, {u'ObjectSize': 952320, 
     u'StatusProcess': 1999, u'StatusActivity': 0, u'ObjectUUID': u'4459bc18-b39d-11e4-945e-fa163e627d01', 
     u'ObjectIdentifierValue': u'4459bc18-b39d-11e4-945e-fa163e627d01', u'PolicyId': u'test222'}]
 
-    r = s.post('http://192.168.0.70:5001/api/aicobjects/', data={u'ObjectSize': 1234, 
+    r = s.post('http://192.168.0.70:5001/api/aicobjects/', json={u'ObjectSize': 1234, 
                 u'StatusProcess': 3000, u'StatusActivity': 0, u'ObjectUUID': u'33', u'ObjectIdentifierValue': u'33', 
                 u'PolicyId': u'test222'})
     
@@ -222,34 +234,46 @@ class AICObjectViewSet(CreateListRetrieveViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = TwoResultsSetPagination
     filter_fields = ('ObjectIdentifierValue', 'StatusProcess')
+    lookup_field = 'ObjectUUID'
+    lookup_value_regex = '[0-9a-f-]{36}'
 
+class ArchiveObjectRelViewSet(CreateListRetrieveViewSet):
+    queryset = ArchiveObjectRel.objects.all()
+    serializer_class = ArchiveObjectRelSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('UUID', 'AIC_UUID')
+    
 class ArchivePolicyViewSet(CreateListRetrieveViewSet):
 
     queryset = ArchivePolicy.objects.all()
     serializer_class = ArchivePolicySerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('id','PolicyID','PolicyName','PolicyStat', 'Mode', 'AIPType', 'INFORMATIONCLASS')
+    filter_fields = ('id', 'PolicyID', 'PolicyName', 'PolicyStat', 
+                     'Mode', 'AIPType', 'INFORMATIONCLASS')
+
+class ArchivePolicyNestedViewSet(ArchivePolicyViewSet):
+    serializer_class = ArchivePolicyNestedSerializer
 
 class StorageMethodViewSet(CreateListRetrieveViewSet):
 
     queryset = StorageMethod.objects.all()
     serializer_class = StorageMethodSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('id','name','status','type','archivepolicy')
+    filter_fields = ('id', 'name', 'status', 'type', 'archivepolicy')
 
 class StorageTargetViewSet(CreateListRetrieveViewSet):
 
     queryset = StorageTarget.objects.all()
     serializer_class = StorageTargetSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('id', 'name','status','target','storagemethod')
+    filter_fields = ('id', 'name', 'status', 'target', 'storagemethod')
 
 class StorageTargetsViewSet(CreateListRetrieveViewSet):
 
     queryset = StorageTargets.objects.all()
     serializer_class = StorageTargetsSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('id', 'name','status','type','format','target')
+    filter_fields = ('id', 'name', 'status', 'type', 'format', 'target')
 
 class storageMediumViewSet(CreateListRetrieveViewSet):
 
@@ -278,7 +302,11 @@ class storageViewSet(CreateListRetrieveViewSet):
     queryset = storage.objects.all()
     serializer_class = storageSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('id','contentLocationType','contentLocationValue', 'archiveobject', 'storagemedium')
+    filter_fields = ('id', 'contentLocationType', 'contentLocationValue', 
+                     'archiveobject', 'storagemedium')
+
+class storageNestedViewSet(storageViewSet):
+    serializer_class = storageNestedSerializer
 
 class IOQueueViewSet(CreateListRetrieveViewSet):
 
@@ -301,4 +329,10 @@ class IOQueueViewSet(CreateListRetrieveViewSet):
                     'storagetarget',
                     'storagemedium',
                     'storage',
-                    'accessqueue')
+                    'accessqueue',
+                    'remote_target',
+                    'remote_status',
+                    'transfer_taks_id')
+
+class IOQueueNestedViewSet(IOQueueViewSet):
+    serializer_class = IOQueueNestedSerializer

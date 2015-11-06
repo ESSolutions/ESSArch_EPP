@@ -254,7 +254,7 @@ stop_beat () {
 }
 
 _chuid () {
-    su -m "$CELERYBEAT_USER" -c "$CELERYBEAT $*"
+    su - "$CELERYBEAT_USER" -c "$CELERYBEAT $*"
 }
 
 start_beat () {
