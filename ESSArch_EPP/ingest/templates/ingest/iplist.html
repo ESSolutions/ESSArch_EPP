@@ -39,13 +39,25 @@
 
 <script>
 
+var aiccheckresult = false;
 var JSONlink = "{% url 'ingest_list_info' %}"
 var createlink = '/ingest/new/'
+var info = {};
+var tabletext = '';
 
+$.getJSON("{% url 'aiccheck' %}", function(aiccheckresult){
+	
+	if (aiccheckresult == true ){
+		
+		AICingestlist(JSONlink,createlink);
+	}
+	
+	else {
+		noAICingestlist(JSONlink,createlink);
+	}
+});
 
-ingestlist(JSONlink,createlink);
-
-function ingestlist(JSONlink, createlink){
+function AICingestlist(JSONlink, createlink){
 $(document).ready(function(){
 $.getJSON( JSONlink, function(listinfo1) {
 
@@ -59,9 +71,18 @@ $.getJSON( JSONlink, function(listinfo1) {
     });
 });
 });
+};
 
-var info = {};
-var tabletext = '';
+function noAICingestlist(JSONlink, createlink){
+	$(document).ready(function(){
+	$.getJSON( JSONlink, function(listinfo1) {
+
+	     info = listinfo1;
+	     populateIPlist();
+	    
+	});
+	});
+	};
 
 function StatusActivityChoices(Activity){
 	
@@ -161,12 +182,12 @@ function populatelist(){
     + '</tr>';
     
    var IPList = info[i].IPs
-   var parent = info[i].AIC_UUID
+   var AICparent = info[i].AIC_UUID
    
    for (j = 0; j < IPList.length; j++){
         tabletext = tabletext
         + '<tr data-id=' + IPList[j].ObjectUUID + ' '
-        + 'data-parent=' + parent + '>'
+        + 'data-parent=' + AICparent + '>'
         + '<td><a href="'+ createlink + IPList[j].id +'/"> IP_' + IPList[j].Generation + '</a></td>'
         + '<td> ' + IPList[j].Archivist_organization + ' </td>'
         + '<td> ' + IPList[j].Label + ' </td>'
@@ -175,7 +196,7 @@ function populatelist(){
         + '<td> ' + IPList[j].enddate + ' </td>'
         + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
         + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
-        + '<td> ' + parent + ' <td>'
+        + '<td> ' + AICparent + ' <td>'
         + '<td> ' + IPList[j].ObjectUUID + ' <td>'
         + '</tr>'
     }
@@ -186,6 +207,38 @@ function populatelist(){
     }
  document.getElementById("AIC-table").innerHTML = tabletext;
  };
-};
+
+ function populateIPlist(){
+	    
+	    if(info.length == 0){
+	        tabletext = 'List is empty';
+	    }
+	    
+	    for (i = 0; i < info.length; i++){
+	    
+	   var IPList = info[i].IPs
+	   var AICparent = info[i].AIC_UUID
+	   
+	   for (j = 0; j < IPList.length; j++){
+	        tabletext = tabletext
+	        + '<td><a href="'+ createlink + IPList[j].id +'/"> IP_' + IPList[j].Generation + '</a></td>'
+	        + '<td> ' + IPList[j].Archivist_organization + ' </td>'
+	        + '<td> ' + IPList[j].Label + ' </td>'
+	        + '<td> ' + IPList[j].create_date + ' </td>'
+	        + '<td> ' + IPList[j].startdate + ' </td>'
+	        + '<td> ' + IPList[j].enddate + ' </td>'
+	        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
+	        + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
+	        + '<td> ' + AICparent + ' <td>'
+	        + '<td> ' + IPList[j].ObjectUUID + ' <td>'
+	        + '</tr>'
+	    }
+	    
+	    
+	    
+	        
+	    }
+	 document.getElementById("AIC-table").innerHTML = tabletext;
+	 };
 </script>
 {% endblock %}
