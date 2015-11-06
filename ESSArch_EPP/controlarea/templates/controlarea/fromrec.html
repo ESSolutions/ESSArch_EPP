@@ -21,7 +21,6 @@
                 <th>Start date</th>
                 <th>End date</th>
                 <th>IP type</th>
-                <th>Process</th>
                 <th>State</th>
                 <th>AIC (UUID)</th>
                 <th>IP (UUID)</th>
@@ -38,7 +37,6 @@
 				<td>{{ ip.enddate }}</td>
 				<td>AIC</td>
 				<td>{{ ip.StatusProcess }}</td>
-				<td>{{ ip.state }}</td>
                 <td>{{ ip.aic_uuid }}</td>
 				</tr>
 		      	<tr data-id="{{ ip.uuid }}" data-parent="{{ ip.aic_uuid }}"> <!--  class="row{% cycle '1' '2' %}"-->
@@ -54,7 +52,6 @@
 					<td>{{ ip.enddate }}</td>
 					<td>{{ ip.iptype }}</td>
 					<td>{{ ip.StatusProcess }}</td>
-					<td>{{ ip.state }}</td>
 					<td>{{ ip.aic_uuid }}</td>
 					<td>{{ ip.uuid }}</td>
 		      	</tr>
