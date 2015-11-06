@@ -41,7 +41,6 @@ class my_install(_install):
         self.execute(_post_install, [],  
                      msg="Running post install task")
 
-
 if __name__ == '__main__':
     cmdclass=versioneer.get_cmdclass()
     cmdclass.update({'install': my_install})

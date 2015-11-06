@@ -78,7 +78,6 @@ class CreateTmpWorkareaUploadView(views.APIView, ChunkedUploadView):
     model = TmpWorkareaUpload
     field_name = 'the_file'
     permission_classes = (permissions.IsAuthenticated,)
-    
     '''
     def get(self, request, *args, **kwargs):
         request.META["CSRF_COOKIE_USED"] = True
