@@ -14,7 +14,7 @@ Request to check in IP to work area
   
 {% endblock %}
 {% block app-extra-script %}
-
+     {% js "controlarea/js/failedtask.js" %}
 <script>
 
 var taskid = "{{ taskid }}";
@@ -66,7 +66,7 @@ function determineStatus(thetask){
 
 function failedtask(result){
 
-    infohtml = '<b>The request failed<b><br>' + result;
+	 infohtml = 'The request failed<br><br>' + result;
     return infohtml;
 }
 

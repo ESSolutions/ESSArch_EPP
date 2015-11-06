@@ -11,6 +11,7 @@ Failed requests
 <thead>
 <tr>
 <th>Request Status</th>
+<th>Type of error</th>
 <th>Request Result</th>
 </tr>
 <tbody id="failedtasks">
@@ -74,7 +75,7 @@ Completed Requests from the: <input type="text" value="5" size="3" id="numberofd
 {% block app-extra-script %}
 
 <script>
-console.log('The script is with us');
+
 
 var allTasks = {};
 
@@ -82,22 +83,16 @@ var numberofdays = $('#numberofdays').val();
 
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
-	console.log('Alltasks is catched');
-	console.log(allTasks);
 	populateAllTasks(allTasks);
 	
 	});
 
     
 function populateAllTasks(allTasks){
-	
-console.log('Populate all tasks is called');
-console.log(allTasks);
+
 
 var failedtasks = allTasks['FailedTasks'];
 
-console.log(' Failed tasks');
-console.log(failedtasks);
 
 var failedTaskshtml = '';
 
@@ -108,16 +103,47 @@ var failedTaskshtml = '';
 
 if(failedtasks.length > 0) {
 	
-	console.log('Number of failed tasks:');
-	console.log(failedtasks.length);
 	
 	for(i=0; i< failedtasks.length; i++){
 		
-		console.log('This for loop iterates');
-		console.log(i);
-		console.log(failedtasks[i].status);
-		failedTaskshtml =  failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + failedtasks[i].result + '</td></tr>';
-		console.log( failedTaskshtml);
+		var failresult = JSON.parse(failedtasks[i].result);
+		console.log(failresult);
+		var typeoferror = failresult['py/object'];
+		console.log('Type of error');
+		console.log(typeoferror);
+		var errortype = typeoferror;
+		if(typeoferror =='controlarea.tasks.ControlareaException'){
+			
+			console.log('This is a known error');
+			errortype = 'Controlarea'
+			
+		var reduce = failresult['py/reduce'];
+		console.log('Our object')
+		var getmore = reduce[1];
+		console.log(getmore);
+		var ourtuple = getmore['py/tuple'];
+		console.log(ourtuple);
+		var moreinfo = ourtuple[0];
+		console.log('More info');
+		console.log(moreinfo);
+		   console.log('Even more info');		
+		    var taskcategory = moreinfo['category'];
+		    var taskstatuslist = moreinfo['statuslist'];
+			var tasklabel = moreinfo['label'];
+			var taskrequestpurpose = moreinfo['reqpurpose'];
+			var taskuser = moreinfo['user'];
+		    var ipuuid = moreinfo['ipuuid'];
+			var taskerrorlist = moreinfo['errorlist'][0];
+			//failedTaskshtml =  failedTaskshtml + '<tr><td>' + 'Controlareaexception' + '</td></tr>'';
+			failedTaskshtml = failedTaskshtml + '<tr><td>'+ failedtasks[i].status + '</td><td>' + 'Controlarea' +  '</td><td>' + '<b>IP UUID: </b>' + ipuuid + '<b> Request purpose: </b>'+ taskrequestpurpose + '<b> Action:</b> ' + tasklabel + '<b> Errorlist: </b> ' + taskerrorlist + '</td></tr>';
+		}
+		
+		else{
+		//failedTaskshtml =  failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + errortype + '</td><td>' + failedtasks[i].result + '</td></tr>';
+		console.log('Not a controlareaexception');
+		failedTaskshtml = failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + errortype + '</td><td>' + failedtasks[i].result + '</td></tr>';
+		}
+		
 	}	
 	
 	
