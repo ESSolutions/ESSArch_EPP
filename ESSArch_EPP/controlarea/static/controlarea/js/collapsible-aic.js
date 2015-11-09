@@ -59,10 +59,11 @@ function populatelist(){
     + '<td>' + info[i].Archivist_organization + '</td>' 
     + '<td>' + info[i].Label + '</td>' 
     + '<td>' + info[i].create_date +'</td>'
-    + '<td>' + '</td>'
-    + '<td>' + '</td>'
+    + '<td>' + info[i].startdate + '</td>'
+    + '<td>' + info[i].enddate + '</td>'
     + '<td>' + '</td>'
     + '<td>' + info[i].AIC_UUID + '<td>'
+    + '<td></td>'
     + '</tr>';
     
    var IPList = info[i].IPs
