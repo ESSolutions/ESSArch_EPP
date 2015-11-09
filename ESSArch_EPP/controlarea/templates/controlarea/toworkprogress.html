@@ -45,7 +45,8 @@ function determineStatus(thetask){
         
         switch(taskstatus){
             case 'FAILURE':
-                failedtask(taskresult);
+            	//called with taskid
+                failedtask(taskid);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -64,9 +65,9 @@ function determineStatus(thetask){
 
 
 
-function failedtask(result){
+function failedtask(taskid){
 
-	 infohtml = 'The request failed<br><br>' + result;
+	infohtml = getfailedtaskhtml(taskid);
     return infohtml;
 }
 
