@@ -46,7 +46,7 @@ function determineStatus(thetask){
         switch(taskstatus){
             case 'FAILURE':
             	//called with taskid
-                failedtask(taskresult);
+                failedtask(taskid);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -65,11 +65,16 @@ function determineStatus(thetask){
 
 
 
-function failedtask(result){
-
-	 infohtml = 'The request failed<br><br>' + result;
-    return infohtml;
-}
+function failedtask(taskid){
+            
+  $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+        	        
+        	        var readable = getfailedtaskhtml(failedtaskinfo1);
+        	        infohtml = readable;;
+        	        document.getElementById("taskinprogress").innerHTML = infohtml;
+        	        });
+        	    
+        	    };
 
 function pendingtask(result){
 

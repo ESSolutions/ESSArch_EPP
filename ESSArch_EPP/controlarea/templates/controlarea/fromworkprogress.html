@@ -18,7 +18,7 @@ Request to check in IP from work area
 <script>
 
 var taskid = "{{ taskid }}";
-console.log(taskid);
+
 
 getTaskInfo(taskid);
 
@@ -45,9 +45,8 @@ function determineStatus(thetask){
         
         switch(taskstatus){
             case 'FAILURE':
-                console.log('taskid');
-                console.log(taskid);
-                failedtask(taskid, taskresult);
+            	//Is called with taskid!!!
+                failedtask(taskid);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -68,13 +67,14 @@ function determineStatus(thetask){
 
 function failedtask(taskid){
     
-	console.log('We got the task id to this function');
-	var whatwewant = getfailedtaskhtml(taskid);
-	console.log('This is what we got back');	
-	console.log(whatwewant);
-    infohtml = whatwewant;
-    return infohtml;
-}
+$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+        
+        var readable = getfailedtaskhtml(failedtaskinfo1);
+        infohtml = readable;;
+        document.getElementById("taskinprogress").innerHTML = infohtml;
+        });
+    
+};
 
 function pendingtask(result){
 

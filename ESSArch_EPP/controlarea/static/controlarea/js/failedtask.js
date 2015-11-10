@@ -1,85 +1,56 @@
-function getfailedtaskhtml(taskid){
-   
-	console.log('The remote function is called');
-	console.log('taskid');
-	console.log(taskid);
-	//var failinfo = {};
-	
-	//var taskJSON = getinfo();
-	//console.log(taskJSON);
-	var taskstring = 'some random html';
-	//getfailiurehtml(taskJSON);
-	console.log('Is the string ready?')
-	console.log(taskstring);
-	
-	$.getJSON( '/controlarea/taskresult/' + taskid, function(failinfo)
-			
-		});
-	
-	
-	return taskstring;
-	
-};
+function getfailedtaskhtml(failresult){
 
-/*
-function getinfo(){
+var  failedTaskshtml = '<b>The request failed</b><br>';
+var typeoferror = failresult['py/object'];
 
-	console.log('This function is also called');
-	$.getJSON( '/controlarea/taskresult/' + taskid, function(failinfo)
-		
-	});//end of JSON request
-
-	return failinfo;
+var typeoferror = failresult['py/object'];
+var errortype = typeoferror;
+var reduce = failresult['py/reduce'];
+if(typeoferror =='controlarea.tasks.ControlareaException'){
 	
-};
+	console.log('This is a known error');
+	errortype = 'Controlarea'
 
-function getfailiurehtml(failresult){
-	console.log('The last function is called');
-	console.log(failresult);
-	var workedonstring = 'New html';
-	/*
-	var failedtaskhtml = '<b> The request failed </b>';
-	console.log('This function is called');
-	//console.log(failedtaskhtml);
-	var typeoferror = failresult['py/object'];
-	var errortype = typeoferror;
-	console.log('This is the errortype');
-	console.log(errortype);
+var getmore = reduce[1];
+
+var ourtuple = getmore['py/tuple'];
+
+var moreinfo = ourtuple[0];
 	
-	if(typeoferror =='controlarea.tasks.ControlareaException'){
-		errortype = 'Controlarea'
-		
-		var reduce = failresult['py/reduce'];
-		var getmore = reduce[1];
-		var ourtuple = getmore['py/tuple'];
-		var moreinfo = ourtuple[0];	
-	    var taskcategory = moreinfo['category'];
-	    var taskstatuslist = moreinfo['statuslist'];
-		var tasklabel = moreinfo['label'];
-		var taskrequestpurpose = moreinfo['reqpurpose'];
-		var ipuuid = moreinfo['ipuuid'];
-		var taskuser = moreinfo['user'];
-		var taskerrorlist = moreinfo['errorlist'][0];
+    var taskcategory = moreinfo['category'];
+    var tasklabel = moreinfo['label'];
+    
+    if(tasklabel == 'Test task'){
+    	taskstatuslist = ['Test1','Test2','Test3'];
+    }
+    
+    else{
+    taskstatuslist = moreinfo['statuslist'];
+    }
+	var taskrequestpurpose = moreinfo['reqpurpose'];
 
-		failedtaskhtml = failedtaskhtml + '<b> IP UUID: </b>' + ipuuid +'<br><b> User: </b>' + taskuser + '<br><b> Request purpose: </b>'+ taskrequestpurpose + '<br><b>  Action: </b> ' + tasklabel + '<br><b> Errorlist:</b> ' + taskerrorlist + '<br>';
+	var taskuser = moreinfo['user'];
+
+    var ipuuid = moreinfo['ipuuid'];
+	var taskerrorlist = [];
+	if(tasklabel == 'Test task'){
+		taskerrorlist = 'Some random error';
 	}
-	
 	else{
-
-	failedtaskhtml = failedtaskhtml + ' Errortype: ' + errortype + 'Cause: ' +  failresult + '<br>';
-	console.log('Else is called');
-	console.log(failedtaskhtml);
+		taskerrorlist = moreinfo['errorlist'][0];
 	}
+		
+	//failedTaskshtml =  failedTaskshtml +  'Controlareaexception';
+	failedTaskshtml = failedTaskshtml + '<br>'+ 'FAILURE' + '<br>' + 'Controlarea' +  '<br><br>' + '<b>IP UUID: </b>' + ipuuid + '<br>'+ '<b> Request purpose: </b>'+ taskrequestpurpose + '<br><b> Action:</b> ' + tasklabel + '<br><b> Errorlist: </b> ' + taskerrorlist;
+
+}
+
+else{
+//failedTaskshtml =  failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + errortype + '</td><td>' + failedtasks[i].result + '</td></tr>';
+failedTaskshtml = failedTaskshtml + '<br>' + 'FAILURE' + '<br><br>' + errortype + '<br><br>' + reduce[1]['py/tuple'];
+
+}
 	
-	console.log('This is what we want to return');
-	console.log(failedtaskhtml);
-	*/
-	//return workedonstring;
- //}
-
-	/*
-	console.log('This what we acctually return');
-	console.log(failedtaskhtmlfinal);
-	return failedtaskhtmlfinal;
-*/
-
+return failedTaskshtml;
+	
+};

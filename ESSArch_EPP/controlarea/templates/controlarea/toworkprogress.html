@@ -62,14 +62,16 @@ function determineStatus(thetask){
                 
         }
 
-
-
-
-function failedtask(taskid){
-
-	infohtml = getfailedtaskhtml(taskid);
-    return infohtml;
-}
+ function failedtask(taskid){
+            
+      $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+        	        
+        	var readable = getfailedtaskhtml(failedtaskinfo1);
+        	 infohtml = readable;;
+        	document.getElementById("taskinprogress").innerHTML = infohtml;
+       });
+        	    
+  };
 
 function pendingtask(result){
 
