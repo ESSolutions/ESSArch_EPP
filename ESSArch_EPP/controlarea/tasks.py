@@ -746,7 +746,7 @@ class CheckInFromWorkTask(JobtasticTask):
         
         result = {}
         result['category'] = 'controlarea'
-        result['label'] = 'Check out from work'
+        result['label'] = 'Check in from work'
         result['reqpurpose'] = ReqPurpose
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
