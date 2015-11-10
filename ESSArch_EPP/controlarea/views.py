@@ -62,7 +62,7 @@ from djcelery import views as celeryviews
 
 import ESSMD, os, uuid
 from ESSPGM import Check as g_functions
-import ESSPGM, pytz, datetime, logging
+import ESSPGM, pytz, datetime, time, logging
 
 
 
@@ -415,13 +415,13 @@ class ToWorkListInfoView(View):
                         AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                         AIC_IP['Label'] = datainfo.label
                         AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)
-                        AIC['create_date'] = str(ip.UUID.EntryDate)
+                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                         AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = str(datainfo.startdate)
-                        AIC['startdate'] = str(datainfo.startdate)
-                        AIC_IP['enddate'] = str(datainfo.enddate)
-                        AIC['enddate'] = str(datainfo.enddate)
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
                         AIC_IP['Process'] = ip.UUID.StatusProcess
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
@@ -656,13 +656,13 @@ class FromWorkListInfoView(View):
                         AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                         AIC_IP['Label'] = datainfo.label
                         AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)
-                        AIC['create_date'] = str(ip.UUID.EntryDate)
+                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                         AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = str(datainfo.startdate)
-                        AIC['startdate'] = str(datainfo.startdate)
-                        AIC_IP['enddate'] = str(datainfo.enddate)
-                        AIC['enddate'] = str(datainfo.enddate)
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
                         AIC_IP['Process'] = ip.UUID.StatusProcess
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
@@ -1100,13 +1100,13 @@ class DiffCheckListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = str(ip.UUID.EntryDate)
-                    AIC['create_date'] = str(ip.UUID.EntryDate)
+                    AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                     AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = str(datainfo.startdate)
-                    AIC['startdate'] = str(datainfo.startdate)
-                    AIC_IP['enddate'] = str(datainfo.enddate)
-                    AIC['enddate'] = str(datainfo.enddate)
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
@@ -1282,13 +1282,13 @@ class PreserveListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = str( ip.UUID.EntryDate)
-                    AIC['create_date'] =str( ip.UUID.EntryDate)
+                    AIC_IP['create_date'] = str( ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] =str( ip.UUID.EntryDate)[:10]
                     AIC_IP['Generation'] = str(ip.UUID.Generation)
-                    AIC_IP['startdate'] = str(datainfo.startdate)
-                    AIC['startdate'] = str(datainfo.startdate)
-                    AIC_IP['enddate'] = str(datainfo.enddate)
-                    AIC['enddate'] = str(datainfo.enddate)
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
@@ -1516,13 +1516,13 @@ class DeleteIPListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] =str( ip.UUID.EntryDate)
-                    AIC['create_date'] = str(ip.UUID.EntryDate)
+                    AIC_IP['create_date'] =str( ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                     AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = str(datainfo.startdate)
-                    AIC['startdate'] = str(datainfo.startdate)
-                    AIC_IP['enddate'] = str(datainfo.enddate)
-                    AIC['enddate'] = str(datainfo.enddate)
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
