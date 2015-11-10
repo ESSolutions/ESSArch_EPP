@@ -178,7 +178,7 @@ function populatelist(){
     + '<td>' + '</td>'
     + '<td>' + '</td>'
     + '<td>' + '</td>'
-    + '<td>' + info[i].AIC_UUID + '<td>'
+    + '<td>' + info[i].AIC_UUID + '</td>'
     + '</tr>';
     
    var IPList = info[i].IPs
@@ -196,8 +196,8 @@ function populatelist(){
         + '<td> ' + IPList[j].enddate + ' </td>'
         + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
         + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
-        + '<td> ' + AICparent + ' <td>'
-        + '<td> ' + IPList[j].ObjectUUID + ' <td>'
+        + '<td> ' + AICparent + ' </td>'
+        + '<td> ' + IPList[j].ObjectUUID + ' </td>'
         + '</tr>'
     }
     
@@ -229,8 +229,8 @@ function populatelist(){
 	        + '<td> ' + IPList[j].enddate + ' </td>'
 	        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
 	        + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
-	        + '<td> ' + AICparent + ' <td>'
-	        + '<td> ' + IPList[j].ObjectUUID + ' <td>'
+	        + '<td> ' + AICparent + ' </td>'
+	        + '<td> ' + IPList[j].ObjectUUID + ' </td>'
 	        + '</tr>'
 	    }
 	    
