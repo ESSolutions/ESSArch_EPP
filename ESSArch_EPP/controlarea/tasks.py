@@ -647,6 +647,7 @@ class CheckInFromWorkTask(JobtasticTask):
                 status_list.append(event_info)
                 logger.info(event_info)
                 shutil.move(op.join(source_path,Package),op.join(target_path,Package))
+                logger.warning('unicode debug - TargetPath: %s, defencoding: %s' % (repr(target_path), sys.getfilesystemencoding()))
                 errno,why = SetPermission(op.join(target_path,Package),a_uid,a_gid,a_mode)
                 if errno:
                     event_info = 'Failed to SetPermission, ERROR: %s' % why
@@ -691,6 +692,7 @@ class CheckInFromWorkTask(JobtasticTask):
             event_info = 'Create new content METS: %s' % METS_ObjectPath
             status_list.append(event_info)
             logger.info(event_info)
+            logger.warning('unicode debug - ObjectPath: %s, defencoding: %s' % (repr(ObjectPath), sys.getfilesystemencoding()))
             PREMIS_ObjectPath = os.path.join( ObjectPath, premis_obj )
             errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
                                                            METS_ObjectPath=METS_ObjectPath, 
@@ -1215,7 +1217,7 @@ def SetPermission(path,uid=None,gid=None,mode=0770):
             uid = os.getuid()
         if gid is None:
             gid = os.getgid()
-        for root, dirs, files in os.walk(str(path)):
+        for root, dirs, files in os.walk(path):
             for momo in dirs:
                 os.chown(os.path.join(root, momo), uid,gid)
                 os.chmod(os.path.join(root, momo), mode)
