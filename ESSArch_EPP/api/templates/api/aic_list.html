@@ -29,14 +29,14 @@
 <script>
 function format ( data )
 {
-  if ( ! data.relaic_set ) {
+  if ( ! data.archiveobjects ) {
     return "No child rows";
   }
   
   var rows = '';
   
-  for ( var i=0, ien=data.relaic_set.length ; i<ien ; i++ ) {
-    var ip = data.relaic_set[i].UUID;
+  for ( var i=0, ien=data.archiveobjects.length ; i<ien ; i++ ) {
+    var ip = data.archiveobjects[i];
 	rows +=
 	  '<tr class="child-row">'+
 		'<td></td>'+
@@ -67,7 +67,7 @@ $(document).ready( function () {
         "data":           null,
         "defaultContent": '',
         "createdCell":    function ( cell, data, row ) {
-          if ( row.relaic_set ) {
+          if ( row.archiveobjects ) {
             $(cell).addClass( 'details-control' );
           }
         }
@@ -80,9 +80,9 @@ $(document).ready( function () {
         "visible": false,
         "render": function ( data, type, row ) {
           str = '';
-          if ( row.relaic_set ) {
-            for ( var i=0, ien=row.relaic_set.length ; i<ien ; i++ ) {
-              var ip = row.relaic_set[i].UUID;
+          if ( row.archiveobjects ) {
+            for ( var i=0, ien=row.archiveobjects.length ; i<ien ; i++ ) {
+              var ip = row.archiveobjects[i];
               
               str +=
                 ip.ObjectIdentifierValue +' '+
