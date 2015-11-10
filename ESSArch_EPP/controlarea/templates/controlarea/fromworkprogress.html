@@ -1,7 +1,7 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
 {% block app-extrahead %}
-	<meta http-equiv="refresh" content="6" > 
+	<meta http-equiv="refresh" content="60" > 
 {% endblock %}
 
 {% block content %}
@@ -45,7 +45,9 @@ function determineStatus(thetask){
         
         switch(taskstatus){
             case 'FAILURE':
-                failedtask(taskid);
+                console.log('taskid');
+                console.log(taskid);
+                failedtask(taskid, taskresult);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -65,8 +67,12 @@ function determineStatus(thetask){
 
 
 function failedtask(taskid){
-
-	 infohtml = getfailedtaskhtml(taskid);
+    
+	console.log('We got the task id to this function');
+	var whatwewant = getfailedtaskhtml(taskid);
+	console.log('This is what we got back');	
+	console.log(whatwewant);
+    infohtml = whatwewant;
     return infohtml;
 }
 

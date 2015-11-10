@@ -1,14 +1,51 @@
 function getfailedtaskhtml(taskid){
+   
+	console.log('The remote function is called');
+	console.log('taskid');
+	console.log(taskid);
+	//var failinfo = {};
 	
-	var JSONlink = '/taskresult/' + taskid;
+	//var taskJSON = getinfo();
+	//console.log(taskJSON);
+	var taskstring = 'some random html';
+	//getfailiurehtml(taskJSON);
+	console.log('Is the string ready?')
+	console.log(taskstring);
 	
-	$.getJSON( JSONlink, function(failresult) {
-	};
+	$.getJSON( '/controlarea/taskresult/' + taskid, function(failinfo)
+			
+		});
 	
-	var failedtaskhtml = '<b>The request failed<b><br>';
 	
+	return taskstring;
+	
+};
+
+/*
+function getinfo(){
+
+	console.log('This function is also called');
+	$.getJSON( '/controlarea/taskresult/' + taskid, function(failinfo)
+		
+	});//end of JSON request
+
+	return failinfo;
+	
+};
+
+function getfailiurehtml(failresult){
+	console.log('The last function is called');
+	console.log(failresult);
+	var workedonstring = 'New html';
+	/*
+	var failedtaskhtml = '<b> The request failed </b>';
+	console.log('This function is called');
+	//console.log(failedtaskhtml);
 	var typeoferror = failresult['py/object'];
 	var errortype = typeoferror;
+	console.log('This is the errortype');
+	console.log(errortype);
+	
 	if(typeoferror =='controlarea.tasks.ControlareaException'){
 		errortype = 'Controlarea'
 		
@@ -30,9 +67,19 @@ function getfailedtaskhtml(taskid){
 	else{
 
 	failedtaskhtml = failedtaskhtml + ' Errortype: ' + errortype + 'Cause: ' +  failresult + '<br>';
-	
+	console.log('Else is called');
+	console.log(failedtaskhtml);
 	}
 	
-	
-	return failedtaskhtml;
-};
+	console.log('This is what we want to return');
+	console.log(failedtaskhtml);
+	*/
+	//return workedonstring;
+ //}
+
+	/*
+	console.log('This what we acctually return');
+	console.log(failedtaskhtmlfinal);
+	return failedtaskhtmlfinal;
+*/
+

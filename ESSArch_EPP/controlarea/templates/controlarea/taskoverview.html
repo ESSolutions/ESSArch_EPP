@@ -94,7 +94,7 @@ function populateAllTasks(allTasks){
 var failedtasks = allTasks['FailedTasks'];
 
 
-var failedTaskshtml = '';
+
 
 	if(failedtasks.length == 0) {
 		failedTaskshtml = "No failed requests";
@@ -103,6 +103,7 @@ var failedTaskshtml = '';
 
 if(failedtasks.length > 0) {
 	
+	var failedTaskshtml = '';
 	
 	for(i=0; i< failedtasks.length; i++){
 		
@@ -128,14 +129,38 @@ if(failedtasks.length > 0) {
 		console.log(moreinfo);
 		   console.log('Even more info');		
 		    var taskcategory = moreinfo['category'];
-		    var taskstatuslist = moreinfo['statuslist'];
-			var tasklabel = moreinfo['label'];
+		    console.log(taskcategory);
+            var tasklabel = moreinfo['label'];
+            console.log(tasklabel);
+            //var taskstatuslist = [];
+            
+            if(tasklabel == 'Test task'){
+            	console.log('This is a test task');
+            	taskstatuslist = ['Test1','Test2','Test3'];
+            	console.log('This is the statuslist' + taskstatuslist);
+            }
+            
+            else{
+            taskstatuslist = moreinfo['statuslist'];
+            }
+		    console.log(taskstatuslist);
 			var taskrequestpurpose = moreinfo['reqpurpose'];
+			console.log(taskrequestpurpose);
 			var taskuser = moreinfo['user'];
+			console.log(taskuser);
 		    var ipuuid = moreinfo['ipuuid'];
-			var taskerrorlist = moreinfo['errorlist'][0];
-			//failedTaskshtml =  failedTaskshtml + '<tr><td>' + 'Controlareaexception' + '</td></tr>'';
+			var taskerrorlist = [];
+			if(tasklabel == 'Test task'){
+				taskerrorlist = 'Some random error';
+			}
+			else{
+				taskerrorlist = moreinfo['errorlist'][0];
+			}
+				
+			console.log(taskerrorlist);
+			//failedTaskshtml =  failedTaskshtml +  'Controlareaexception';
 			failedTaskshtml = failedTaskshtml + '<tr><td>'+ failedtasks[i].status + '</td><td>' + 'Controlarea' +  '</td><td>' + '<b>IP UUID: </b>' + ipuuid + '<b> Request purpose: </b>'+ taskrequestpurpose + '<b> Action:</b> ' + tasklabel + '<b> Errorlist: </b> ' + taskerrorlist + '</td></tr>';
+			console.log(failedTaskshtml);
 		}
 		
 		else{
