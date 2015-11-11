@@ -89,5 +89,12 @@ body {
 	color:white;
 }
 
+/* Table */
 
+#aic-table {
 
+td {
+    margin: 6px;
+    border: 6px;
+    }
+}

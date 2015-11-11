@@ -41,7 +41,6 @@ class my_install(_install):
         self.execute(_post_install, [],  
                      msg="Running post install task")
 
-
 if __name__ == '__main__':
     cmdclass=versioneer.get_cmdclass()
     cmdclass.update({'install': my_install})
@@ -89,10 +88,11 @@ if __name__ == '__main__':
             "jobtastic>=0.3.1",
             "requests>=2.7.0",
             "requests-toolbelt>=0.4.0",
-            "djangorestframework==3.2.5",
+            "djangorestframework==3.3.1",
             "django-filter>=0.11.0",
             "djangorestframework-filters>=0.5.0",
             "django-chunked-upload>=1.1.1",
+            "jsonpickle>=0.9.2",
             "logfileviewer>=0.6.2",
         ],
         packages=find_packages(),

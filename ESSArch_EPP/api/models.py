@@ -9,7 +9,6 @@ from django.utils import timezone
 from django.conf import settings
 from chunked_upload.models import CHUNKED_UPLOAD_CHOICES, UPLOADING, \
                 AUTH_USER_MODEL, EXPIRATION_DELTA
-from configuration.models import Path
 
 def generate_upload_id():
     return uuid.uuid4().hex
@@ -98,8 +97,10 @@ class BaseChunkedUpload(models.Model):
         abstract = True
 
 try:
+    from django.db import ProgrammingError
+    from configuration.models import Path
     TmpWorkarea_upload_root =  Path.objects.get(entity='TmpWorkarea_upload_path').value
-except  Path.DoesNotExist as e:
+except (Path.DoesNotExist, ProgrammingError) as e:
     TmpWorkarea_upload_root = settings.MEDIA_ROOT
 
 def TmpWorkarea_filename(instance, filename):
