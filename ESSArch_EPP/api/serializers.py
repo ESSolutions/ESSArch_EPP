@@ -211,14 +211,16 @@ class IPFilter(django_filters.FilterSet):
     archiveobjects__ObjectIdentifierValue = django_filters.CharFilter(name='ObjectIdentifierValue')
     archiveobjects__ObjectUUID = django_filters.CharFilter(name='ObjectUUID')
     archiveobjects__PolicyId = django_filters.CharFilter(name='PolicyId')
-    archiveobjects__StatusProcess = django_filters.CharFilter(name='StatusProcess')
+    archiveobjects__StatusProcess = django_filters.NumberFilter(name='StatusProcess')
+    archiveobjects__StatusProcess__lt = django_filters.NumberFilter(name='StatusProcess', lookup_type='lt')
     class Meta:
         model = ArchiveObjectRel
         fields = ['archiveobjects__ObjectIdentifierValue', 
                   'archiveobjects__ObjectUUID', 
                   'archiveobjects__PolicyId',
-                  'archiveobjects__StatusProcess']
-
+                  'archiveobjects__StatusProcess',
+                  'archiveobjects__StatusProcess__lt']
+        
 class Filtered_archiveobjects__IP_ListSerializer(serializers.ListSerializer):
     def to_representation(self, data):
         data = IPFilter(self.context['request'].GET, queryset=data)

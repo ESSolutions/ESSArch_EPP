@@ -163,8 +163,8 @@ class CreateTmpWorkareaUploadCompleteView(views.APIView, ChunkedUploadCompleteVi
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
                             (chunked_upload.filename, chunked_upload.offset))}
 
-class TwoResultsSetPagination(PageNumberPagination):
-    page_size = 2
+class TenResultsSetPagination(PageNumberPagination):
+    page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
@@ -232,7 +232,7 @@ class AICObjectViewSet(mixins.UpdateModelMixin, CreateListRetrieveViewSet):
     queryset = ArchiveObject.objects.filter(OAISPackageType=1)
     serializer_class = AICObjectSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = TwoResultsSetPagination
+    pagination_class = TenResultsSetPagination
     filter_fields = ('ObjectIdentifierValue', 'StatusProcess')
     lookup_field = 'ObjectUUID'
     lookup_value_regex = '[0-9a-f-]{36}'
