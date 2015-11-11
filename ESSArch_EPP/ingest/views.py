@@ -45,7 +45,8 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
-#from django.http import HttpResponse
+from django.http import HttpResponse
+import datetime, time
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -110,7 +111,9 @@ class IngestListInfoView(View):
                     AIC['create_date'] = ip.UUID.EntryDate
                     AIC_IP['Generation'] = ip.UUID.Generation
                     AIC_IP['startdate'] = datainfo.startdate
+                    AIC['startdate'] = datainfo.startdate
                     AIC_IP['enddate'] = datainfo.enddate
+                    AIC['enddate'] = datainfo.enddate
                     AIC_IP['Process'] = ip.UUID.StatusProcess
                     AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)

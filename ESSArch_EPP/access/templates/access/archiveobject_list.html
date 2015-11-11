@@ -193,10 +193,11 @@ function populatelist(info){
     + '<td>' + info[i].Archivist_organization + '</td>'
     + '<td>' + info[i].Label + '</td>'
     + '<td>' + info[i].create_date +'</td>'
-    + '<td>' + '</td>'
-    + '<td>' + '</td>'
+    + '<td>' + info[i].startdate + '</td>'
+    + '<td>' + info[i].enddate + '</td>'
     + '<td>' + '</td>'
     + '<td>' + info[i].AIC_UUID + '</td>'
+    + '<td>' + '</td>'
     + '</tr>';
 
    var IPList = info[i].IPs;
@@ -211,8 +212,9 @@ function populatelist(info){
         + '<td><a href="'+ createlink + IPList[j].id +'/"> IP_' + IPList[j].Generation + '</a></td>'
         + '<td> ' + IPList[j].Archivist_organization + ' </td>'
         + '<td> ' + IPList[j].Label + ' </td>'
-        + '<td> ' + IPList[j].create_date + ' </td>'
-        + '<td> ' + IPList[j].startdate + ' </td>'
+        + '<td> ' + IPList[j].create_date + '</td>'
+        + '<td> ' + IPList[j].startdate + '</td>'
+        console.log(IPList[j].startdate);
         + '<td> ' + IPList[j].enddate + ' </td>'
         + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
         + '<td> ' + parent + ' </td>'
