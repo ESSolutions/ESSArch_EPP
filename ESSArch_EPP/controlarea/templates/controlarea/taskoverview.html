@@ -1,10 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="20" > 
-{% endblock %}
 
 {% block content %}
+<br>
+Requests from: <input type="text" value="5" size="3" id="numberofdays" > number of days ago.<button onclick=otherdays()>Get Tasks</button>
+<br>
+<br>
 Failed requests
 <br>
 <table>
@@ -51,7 +52,7 @@ Requests in progress
 </thead>
 </table>
 <br>
-Completed Requests from the: <input type="text" value="5" size="3" id="numberofdays"> number of days.
+
 <br>
 <table>
 <thead>
@@ -81,13 +82,25 @@ var allTasks = {};
 
 var numberofdays = $('#numberofdays').val();
 
+gettasklist();
+
+function gettasklist(){
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
 	populateAllTasks(allTasks);
-	
+		
 	});
+};
 
-    
+function otherdays(){
+	
+	console.log('other days');
+	numberofdays = $('#numberofdays').val();
+	gettasklist();
+    console.log('We get here');
+	
+};
+
 function populateAllTasks(allTasks){
 
 
@@ -108,46 +121,30 @@ if(failedtasks.length > 0) {
 	for(i=0; i< failedtasks.length; i++){
 		
 		var failresult = JSON.parse(failedtasks[i].result);
-		console.log(failresult);
 		var typeoferror = failresult['py/object'];
-		console.log('Type of error');
-		console.log(typeoferror);
 		var errortype = typeoferror;
 		if(typeoferror =='controlarea.tasks.ControlareaException'){
 			
-			console.log('This is a known error');
 			errortype = 'Controlarea'
 			
 		var reduce = failresult['py/reduce'];
-		console.log('Our object')
 		var getmore = reduce[1];
-		console.log(getmore);
 		var ourtuple = getmore['py/tuple'];
-		console.log(ourtuple);
-		var moreinfo = ourtuple[0];
-		console.log('More info');
-		console.log(moreinfo);
-		   console.log('Even more info');		
-		    var taskcategory = moreinfo['category'];
-		    console.log(taskcategory);
-            var tasklabel = moreinfo['label'];
-            console.log(tasklabel);
-            //var taskstatuslist = [];
+		var moreinfo = ourtuple[0];;		
+		var taskcategory = moreinfo['category'];
+        var tasklabel = moreinfo['label'];
             
             if(tasklabel == 'Test task'){
-            	console.log('This is a test task');
+            	
             	taskstatuslist = ['Test1','Test2','Test3'];
-            	console.log('This is the statuslist' + taskstatuslist);
+            	
             }
             
             else{
             taskstatuslist = moreinfo['statuslist'];
             }
-		    console.log(taskstatuslist);
 			var taskrequestpurpose = moreinfo['reqpurpose'];
-			console.log(taskrequestpurpose);
 			var taskuser = moreinfo['user'];
-			console.log(taskuser);
 		    var ipuuid = moreinfo['ipuuid'];
 			var taskerrorlist = [];
 			if(tasklabel == 'Test task'){
@@ -157,15 +154,14 @@ if(failedtasks.length > 0) {
 				taskerrorlist = moreinfo['errorlist'][0];
 			}
 				
-			console.log(taskerrorlist);
 			//failedTaskshtml =  failedTaskshtml +  'Controlareaexception';
 			failedTaskshtml = failedTaskshtml + '<tr><td>'+ failedtasks[i].status + '</td><td>' + 'Controlarea' +  '</td><td>' + '<b>IP UUID: </b>' + ipuuid + '<b> Request purpose: </b>'+ taskrequestpurpose + '<b> Action:</b> ' + tasklabel + '<b> Errorlist: </b> ' + taskerrorlist + '</td></tr>';
-			console.log(failedTaskshtml);
+			
 		}
 		
 		else{
 		//failedTaskshtml =  failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + errortype + '</td><td>' + failedtasks[i].result + '</td></tr>';
-		console.log('Not a controlareaexception');
+
 		failedTaskshtml = failedTaskshtml + '<tr><td>' + failedtasks[i].status + '</td><td>' + errortype + '</td><td>' + failedtasks[i].result + '</td></tr>';
 		}
 		
@@ -232,7 +228,7 @@ switch(label){
             case 'Check out to work':
                 stage = 'toworkprogress';
                 break;
-            case 'Check out from work':
+            case 'Check in from work':
                 stage = 'fromworkprogress';
                 break;
             case  'Check infrom or to gatarea':
