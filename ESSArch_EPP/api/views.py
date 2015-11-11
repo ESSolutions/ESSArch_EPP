@@ -180,7 +180,7 @@ class CreateListRetrieveViewSet(mixins.CreateModelMixin,
     """
     pass
 
-class ArchiveObjectViewSet(CreateListRetrieveViewSet):
+class ArchiveObjectViewSet(mixins.UpdateModelMixin, CreateListRetrieveViewSet):
     """
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
