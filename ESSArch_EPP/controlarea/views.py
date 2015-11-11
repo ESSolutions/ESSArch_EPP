@@ -1801,7 +1801,8 @@ class TaskResult(View):
         return super(TaskResult, self).dispatch( *args, **kwargs)
         
     def getTaskResult(self, *args, **kwargs):
-
+        taskwrapper = {}
+        task = {}
         thetaskid = self.kwargs['taskid']
         print (thetaskid)
         kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
@@ -1809,15 +1810,14 @@ class TaskResult(View):
         if kwargstest:
 
             thetask = TaskMeta.objects.filter(task_id=thetaskid)
-            resultinfo = thetask[0].result
-            print(resultinfo)
-            #result = jsonpickle.encode(thetask.result)
-            result = jsonpickle.encode(resultinfo)
+            task['status'] = thetask[0].status
+            task['result']  =  thetask[0].result
         else:
-        
-            result = jsonpickle.encode('notaskfound')
-
-        return result
+            task['status'] = 'notaskfound'
+            task['result'] = 'notaskfound'
+        taskwrapper['task'] = task
+        finishedtask = jsonpickle.encode(taskwrapper)
+        return finishedtask
 
     def json_response(self, request):
         

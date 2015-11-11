@@ -1,8 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="6" > 
-{% endblock %}
+
 
 {% block content %}
 Request to check in IP from reception
@@ -22,18 +20,34 @@ console.log(taskid);
 
 getTaskInfo(taskid);
 
+setInterval(getTaskInfo, 6000);
+
 function getTaskInfo(taskid){
 
+	console.log('get task function is called');
 var taskinprogressinfo = {};
+/*
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
+	 console.log(taskinprogressinfo);
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
-    
+ */
+
+
+$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
+
+    console.log(taskinprogressinfo);
+   populateTaskInProgress(taskinprogressinfo);
+   
+   });
+
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
+console.log('The task');
+console.log(thetask);
 
 var taskhtml = determineStatus(thetask);
 
@@ -41,6 +55,8 @@ function determineStatus(thetask){
         
         var infohtml = 'No info';
         var taskstatus = thetask['status'];
+        console.log('Task status');
+        console.log(taskstatus);
         var taskresult = thetask['result'];
         
         switch(taskstatus){
@@ -77,7 +93,7 @@ function determineStatus(thetask){
 
 function pendingtask(result){
 
-    infohtml = '<b>The request is pending<b><br>' + result;
+    infohtml = '<b>The request is pending<b><br>';
     return infohtml;
 }
 
@@ -140,7 +156,7 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 };
 
 
-};
+
 
 
 function getfailedtaskhtml(result){
@@ -163,6 +179,8 @@ function getfailedtaskhtml(result){
     console.log(failedtaskhtml);
     return failedtaskhtml;
     
+};
+
 };
 </script>
 

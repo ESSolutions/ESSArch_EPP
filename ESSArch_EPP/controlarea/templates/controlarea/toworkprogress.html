@@ -25,12 +25,20 @@ getTaskInfo(taskid);
 function getTaskInfo(taskid){
 
 var taskinprogressinfo = {};
+/*
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
+*/
+$.getJSON( '/controlarea//taskresult/' + taskid, function(taskinprogressinfo){
+
+	console.log(taskinprogressinfo)
+    populateTaskInProgress(taskinprogressinfo);
     
+    });
+
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
