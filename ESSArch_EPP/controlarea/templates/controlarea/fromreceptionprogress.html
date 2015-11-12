@@ -15,33 +15,44 @@ Request to check in IP from reception
 
 <script>
 
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 6000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+
 var taskid = "{{ taskid }}";
 console.log(taskid);
 
 getTaskInfo(taskid);
 
-setInterval(getTaskInfo, 6000);
+//setInterval(getTaskInfo, 6000);
 
 function getTaskInfo(taskid){
 
 	console.log('get task function is called');
 var taskinprogressinfo = {};
-/*
+
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
 	 console.log(taskinprogressinfo);
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
- */
+ 
 
-
+/*
 $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
 
     console.log(taskinprogressinfo);
    populateTaskInProgress(taskinprogressinfo);
    
    });
+*/
 
 function populateTaskInProgress(taskinprogressinfo){
 
