@@ -36,6 +36,7 @@ from django import db
 from django.utils import timezone
 from StorageMethodDisk.tasks import WriteStorageMethodDisk
 from StorageMethodTape.tasks import WriteStorageMethodTape
+from Storage.tasks import TransferWriteIO
 from essarch.libs import ESSArchSMError
 from celery.result import AsyncResult
 
@@ -102,12 +103,10 @@ class StorageMethodWrite:
                     continue
                 if st_obj.target.status == 1:
                     target_obj = st_obj.target
-                    target_obj_target_list =  target_obj.target.split(':')
-                    if len(target_obj_target_list) > 1:
-                        remote_target = target_obj_target_list[0]
+                    remote_server = target_obj.remote_server.split(',')
+                    if len(remote_server) == 4:
                         remote_status = 0
                     else:
-                        remote_target = ''
                         remote_status = 20
                 else:
                     self.logger.error('The target %s is disabled' % st_obj.target.name)
@@ -157,7 +156,6 @@ class StorageMethodWrite:
                     IOQueue_obj.Status=0
                     IOQueue_obj.archiveobject=ArchiveObject_obj
                     IOQueue_obj.storagemethodtarget=st_obj
-                    IOQueue_obj.remote_target=remote_target
                     IOQueue_obj.remote_status=remote_status
                     IOQueue_obj.save()
                     self.logger.info('Add WriteReq with target type: %s for object: %s (IOuuid: %s)' % (target_obj.type, 
@@ -224,11 +222,11 @@ class StorageMethodWrite:
                          ArchiveObject_obj.StatusActivity == 0):
                     IOQueue_obj.remote_tatus=2
                     IOQueue_obj.save(update_fields=['remote_status'])
-                    if not self.IOs_to_transfer.has_key(IOQueue_obj.remote_target):
-                        self.IOs_to_transfer[IOQueue_obj.remote_target] = {}
-                    if not self.IOs_to_transfer[IOQueue_obj.remote_target].has_key(ArchiveObject_obj):
-                        self.IOs_to_transfer[IOQueue_obj.remote_target][ArchiveObject_obj] = []
-                    self.IOs_to_transfer[IOQueue_obj.remote_target][ArchiveObject_obj].append(IOQueue_obj)                
+                    if not self.IOs_to_transfer.has_key(remote_server[0]):
+                        self.IOs_to_transfer[remote_server[0]] = {}
+                    if not self.IOs_to_transfer[remote_server[0]].has_key(ArchiveObject_obj):
+                        self.IOs_to_transfer[remote_server[0]][ArchiveObject_obj] = []
+                    self.IOs_to_transfer[remote_server[0]][ArchiveObject_obj].append(IOQueue_obj)                
                 
                 # append IOQueue_obj to list per st_obj dict. This dict is used as a list of objects to apply for write.
                 if (IOQueue_obj.Status == 0 and             # normal add to IOs_to_write list if minChunkSize_flag
@@ -249,6 +247,23 @@ class StorageMethodWrite:
                     if not self.IOs_to_write.has_key(st_obj):
                         self.IOs_to_write[st_obj] = []
                     self.IOs_to_write[st_obj].append(IOQueue_obj)
+
+    def apply_ios_to_transfer(self):
+        '''Apply all IOs to transfer
+        
+        '''
+        for remote_host, ArchiveObject_obj_dict in self.IOs_to_transfer.iteritems():
+            for ArchiveObject_obj, IOQueue_obj_list in ArchiveObject_obj_dict.iteritems():
+                for IOQueue_obj in IOQueue_obj_list:
+                    # transfer IOQueue_obj to remote_host
+                    result = TransferWriteIO().apply_async((IOQueue_obj.id,), queue='default')
+                    IOQueue_obj.transfer_task_id = result.task_id
+                    IOQueue_obj.save(update_fields=['transfer_task_id'])
+                    self.logger.info('Apply new transfer writeIO process for IOQueue_obj: %s with transfer_task: %s' % (
+                                                                                                                        IOQueue_obj.id, 
+                                                                                                                        IOQueue_obj.transfer_task_id))
+                    
+                    #print 'remote: %s, ip: %s, IOs: %s' % (remote_host, ip_obj, repr(io_list))
             
     def apply_ios_to_write(self):
         '''Apply all IOs to write

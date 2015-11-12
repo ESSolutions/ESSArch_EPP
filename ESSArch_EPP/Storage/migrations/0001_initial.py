@@ -26,9 +26,8 @@ class Migration(migrations.Migration):
                 ('Status', models.IntegerField(default=0, blank=True, choices=[(0, b'Pending'), (2, b'Initiate'), (5, b'Progress'), (20, b'Success'), (100, b'FAIL')])),
                 ('task_id', models.CharField(max_length=36, blank=True)),
                 ('posted', models.DateTimeField(auto_now_add=True)),
-                ('remote_target', models.CharField(max_length=256, blank=True)),
                 ('remote_status', models.IntegerField(default=0, blank=True, choices=[(0, b'Pending'), (2, b'Initiate'), (5, b'Transfer'), (20, b'Success'), (100, b'FAIL')])),
-                ('transfer_taks_id', models.CharField(max_length=36, blank=True)),
+                ('transfer_task_id', models.CharField(max_length=36, blank=True)),
             ],
             options={
                 'permissions': (('list_IOQueue', 'Can list IOQueue'),),

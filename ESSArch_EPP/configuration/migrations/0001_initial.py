@@ -211,6 +211,7 @@ class Migration(migrations.Migration):
                 ('minChunkSize', models.BigIntegerField(default=0, verbose_name=b'Min chunk size', choices=[(0, b'Disabled'), (1000000, b'1 MByte'), (1073741824, b'1 GByte'), (53687091201, b'5 GByte'), (10737418240, b'10 GByte'), (107374182400, b'100 GByte')])),
                 ('minContainerSize', models.BigIntegerField(default=0, verbose_name=b'Min container size (0=Disabled)', choices=[(0, b'Disabled')])),
                 ('minCapacityWarning', models.BigIntegerField(default=0, verbose_name=b'Min capacity warning (0=Disabled)')),
+                ('remote_server', models.CharField(max_length=255, verbose_name=b'Remote (host,port,user,password)', blank=True)),
                 ('target', models.CharField(max_length=255, verbose_name=b'Target (URL, path or barcodeprefix)')),
             ],
             options={
