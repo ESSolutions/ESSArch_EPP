@@ -66,14 +66,15 @@ var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()"
       '</tr>' +
     '</thead>' +
     '<tbody id="AICtable">' +
-            '<tr><td>No IPs</td></tr>' +
+            '<tr><td>No information</td></tr>' +
     '</tbody>' +
   '</table>';
 
 
 document.getElementById("aic").innerHTML = aiccheckhtml;
 
-var JSONlink = '/api/aicobjects/?UUID__StatusProcess=3000';
+var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess=3000' //Access
+//var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess__lt=3000' //ingest
 //var JSONlink = "{% url 'access_list_info' %}"
 
 var nextpage = 'nextpage';
@@ -139,16 +140,17 @@ var tabletext = '';
 //$(document).ready(function(){
 $.getJSON( JSONlink, function(listinfo1) {
 
-         ajaxinfo = listinfo1;
-     var population = get_access_listinfo(ajaxinfo);
-         populatelist(population);
+      ajaxinfo = listinfo1;
+
+      setaichtml(ajaxinfo);
+     
      $('.collaptable').aCollapTable({
      startCollapsed: true,
      addColumn: false,
      plusButton: '<span class="i">+</span>',
      minusButton: '<span class="i">-</span>'
     });
-
+     
 });
 //});
 
@@ -171,114 +173,79 @@ function StatusProcessChoices(Process){
                 break;
             default:
                 StatusProcessText ='Not known';
+                console.log('Unknown process');
+                console.log(Process);
        }
 
         return StatusProcessText;
    };
 
-function populatelist(info){
+function setaichtml(ajaxinfo){
+	
+	var aicwrapper = ajaxinfo;
+	
+	nextpage = aicwrapper.next;
+	previouspage = aicwrapper.previous;
+	
+	var AIClist = aicwrapper.results;
 
-    var createlink = '/access/new/';
+	for (i = 0; i < AIClist.length; i++){
+		
+		
+		var IPlist = AIClist[i].archiveobjects;
 
-    if(info.length == 0){
-        tabletext = 'List is empty';
-    }
+		if(IPlist.length > 0){
+			    var AIC = AIClist[i];
+			    var lastIPcounter = IPlist.length - 1;
+		        var lastIP = IPlist[lastIPcounter];
+		        var lastIPinfo = lastIP.archiveobjectdata_set[0];
+			
+		        tabletext = tabletext
+		        + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
+		        + '<td>AIC</td>'
+		        + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
+		        + '<td>' + lastIPinfo.label + '</td>'
+		        + '<td>' + lastIP.CreateDate + '</td>'
+		        + '<td>' + lastIPinfo.startdate + '</td>'
+		        + '<td>' + lastIPinfo.enddate + '</td>'
+		        + '<td></td>'
+		        + '<td>' + AIC.ObjectUUID + '</td>'
+		        +'</tr>';
+		        
+		        var aicparent = AIC.ObjectUUID;
+		        var createlink = '/access/new/';
+		        
+		        for (j = 0; j < IPlist.length; j++){
+		        	 
+		        	var IP = IPlist[j];
+		        	var IPinfo = IP.archiveobjectdata_set[0];
+		            
+		            tabletext = tabletext
+		            + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
+		            + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
+		            + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
+		            + '<td>' + IPinfo.label + '</td>'
+		            + '<td>' + IP.CreateDate + '</td>'
+		            + '<td>' + IPinfo.startdate + '</td>'
+		            + '<td>' + IPinfo.enddate + '</td>'
+		            + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+		            + '<td>' + aicparent + '</td>'
+		            + '<td>' + IP.ObjectUUID + '</td>'
+		            + '</tr>';
 
-    for (i = 0; i < info.length; i++){
-
-    tabletext = tabletext
-    + '<tr data-id="'
-    + info[i].AIC_UUID + '" data-parent="">'
-    + '<td>AIC</td>'
-    + '<td>' + info[i].Archivist_organization + '</td>'
-    + '<td>' + info[i].Label + '</td>'
-    + '<td>' + info[i].create_date +'</td>'
-    + '<td>' + info[i].startdate + '</td>'
-    + '<td>' + info[i].enddate + '</td>'
-    + '<td>' + '</td>'
-    + '<td>' + info[i].AIC_UUID + '</td>'
-    + '<td>' + '</td>'
-    + '</tr>';
-
-   var IPList = info[i].IPs;
-
-   var parent = info[i].AIC_UUID;
-
-
-   for (j = 0; j < IPList.length; j++){
-        tabletext = tabletext
-        + '<tr data-id=' + IPList[j].ObjectUUID + ' '
-        + 'data-parent=' + parent + '>'
-        + '<td><a href="'+ createlink + IPList[j].ObjectUUID +'/"> IP_' + IPList[j].Generation + '</a></td>'
-        + '<td> ' + IPList[j].Archivist_organization + ' </td>'
-        + '<td> ' + IPList[j].Label + ' </td>'
-        + '<td> ' + IPList[j].create_date + '</td>'
-        + '<td> ' + IPList[j].startdate + '</td>'
-        + '<td> ' + IPList[j].enddate + ' </td>'
-        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
-        + '<td> ' + parent + ' </td>'
-        + '<td> ' + IPList[j].ObjectUUID + ' </td>'
-        + '</tr>'
-    };
-
-    };
-
- document.getElementById("AICtable").innerHTML = tabletext;
- };
-
-
-function get_access_listinfo(AICs_to_access){
-
-    var AIC_list = [];
-    var first_AIC_list = AICs_to_access.results;
-    nextpage = AICs_to_access.next;
-    previouspage = AICs_to_access.previous;
-
-    for (i = 0; i < first_AIC_list.length; i++) {
-
-    var AIC_IPs_query = first_AIC_list[i].relaic_set;
-
-    var AIC = {};
-    AIC['AIC_UUID'] = first_AIC_list[i].ObjectIdentifierValue;
-
-    var AIC_IPs = [];
-    for (i = 0; i < AIC_IPs_query.length; i++) {
-    var IPinfo = AIC_IPs_query[i].UUID;
-
-    datainfo = IPinfo.archiveobjectdata_set[0];
-
-    AIC_IP = {};
-    AIC_IP.id = IPinfo.id;
-
-    AIC_IP.ObjectUUID = IPinfo.ObjectUUID;
-
-    AIC_IP.Archivist_organization = IPinfo.EntryAgentIdentifierValue;
-
-    AIC.Archivist_organization = IPinfo.EntryAgentIdentifierValue;
-    AIC_IP.Label = datainfo.label;
-
-    AIC.Label = datainfo.label;
-    AIC_IP.create_date = IPinfo.EntryDate;
-
-    AIC.create_date = IPinfo.EntryDate;
-    AIC_IP.Generation = IPinfo.Generation;
-    AIC_IP.startdate = datainfo.startdate;
-
-    AIC_IP.enddate = datainfo.enddate;
-
-    AIC_IP.Process = IPinfo.StatusProcess;
-
-    AIC_IPs.push(AIC_IP);
-
-    };
-        AIC['IPs'] = AIC_IPs;
-        AIC_list.push(AIC);
-
-        };
-
-        return AIC_list;
-    };
+		            
+		        	
+		        }//IPlist for loop
+		        
+		        
+		}; //End of length test
+	};//End of for aic list for loop
+	
+	 
+	document.getElementById("AICtable").innerHTML = tabletext;
 };
+    
+};//End of accesslistfunction
 
 function getnextpage(){
 
