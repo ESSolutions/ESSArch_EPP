@@ -40,8 +40,10 @@
 <script>
 
 var aiccheckresult = false;
-var JSONlink = "{% url 'ingest_list_info' %}"
-var createlink = '/ingest/new/'
+var IPJSONlink = "{% url 'ingest_list_info' %}";
+//var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess__lt=3000';
+var JSONlink = "{% url 'ingest_list_info' %}";
+var createlink = '/ingest/new/';
 var info = {};
 var tabletext = '';
 
@@ -63,6 +65,8 @@ $.getJSON( JSONlink, function(listinfo1) {
 
 	 info = listinfo1;
 	 populatelist();
+	 //setaichtml(info);
+	 
      $('.collaptable').aCollapTable({ 
      startCollapsed: true,
      addColumn: false, 
@@ -73,9 +77,9 @@ $.getJSON( JSONlink, function(listinfo1) {
 });
 };
 
-function noAICingestlist(JSONlink, createlink){
+function noAICingestlist(IPJSONlink, createlink){
 	$(document).ready(function(){
-	$.getJSON( JSONlink, function(listinfo1) {
+	$.getJSON( IPJSONlink, function(listinfo1) {
 
 	     info = listinfo1;
 	     populateIPlist();
@@ -183,7 +187,10 @@ function populatelist(){
     
    var IPList = info[i].IPs
    var AICparent = info[i].AIC_UUID
-   var selectlisthtml = '<select onchange="setactivity()">'
+   
+   for (j = 0; j < IPList.length; j++){
+   
+   var selectlisthtml = '<select id="' + IPList[j].ObjectUUID + '" onchange=setacitivity("' + IPList[j].ObjectUUID + '"'  + ',' + IPList[j].Process +')>'
 	   + '<option value="0">OK</option>'
 	   + '<option value="1">New object</option>'
 	   + '<option value="2">Receive</option>'
@@ -196,7 +203,7 @@ function populatelist(){
 	   + '<option value="100">FAIL</option>'
 	   + '</select>';
    
-   for (j = 0; j < IPList.length; j++){
+
         tabletext = tabletext
         + '<tr data-id=' + IPList[j].ObjectUUID + ' '
         + 'data-parent=' + AICparent + '>'
@@ -220,9 +227,87 @@ function populatelist(){
  document.getElementById("AIC-table").innerHTML = tabletext;
  };
 
- function setacitivity(){
+ function setaichtml(ajaxinfo){
+	    
+	    var aicwrapper = ajaxinfo;
+	    
+	    console.log('We got info');
+	    console.log(ajaxinfo);
+	    
+	    nextpage = aicwrapper.next;
+	    previouspage = aicwrapper.previous;
+	    
+	    var AIClist = aicwrapper.results;
+
+	    for (i = 0; i < AIClist.length; i++){
+	        
+	        
+	        var IPlist = AIClist[i].archiveobjects;
+
+	        if(IPlist.length > 0){
+	                var AIC = AIClist[i];
+	                var lastIPcounter = IPlist.length - 1;
+	                var lastIP = IPlist[lastIPcounter];
+	                var lastIPinfo = lastIP.archiveobjectdata_set[0];
+	            
+	                tabletext = tabletext
+	                + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
+	                + '<td>AIC</td>'
+	                + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
+	                + '<td>' + lastIPinfo.label + '</td>'
+	                + '<td>' + lastIP.CreateDate + '</td>'
+	                + '<td>' + lastIPinfo.startdate + '</td>'
+	                + '<td>' + lastIPinfo.enddate + '</td>'
+	                + '<td></td>'
+	                + '<td>' + AIC.ObjectUUID + '</td>'
+	                +'</tr>';
+	                
+	                var aicparent = AIC.ObjectUUID;
+	                //var createlink = '/access/new/';
+	                
+	                for (j = 0; j < IPlist.length; j++){
+	                     
+	                    var IP = IPlist[j];
+	                    var IPinfo = IP.archiveobjectdata_set[0];
+	                    
+	                    tabletext = tabletext
+	                    + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
+	                    + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
+	                    + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
+	                    + '<td>' + IPinfo.label + '</td>'
+	                    + '<td>' + IP.CreateDate + '</td>'
+	                    + '<td>' + IPinfo.startdate + '</td>'
+	                    + '<td>' + IPinfo.enddate + '</td>'
+	                    + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+	                    + '<td>' + aicparent + '</td>'
+	                    + '<td>' + IP.ObjectUUID + '</td>'
+	                    + '</tr>';
+
+	                  	                    
+	                }//IPlist for loop
+	                
+	                
+	        }; //End of length test
+	    };//End of for aic list for loop
+	    
+	     console.log(tabletext);
+	    document.getElementById("AICtable").innerHTML = tabletext;
+	};//End of serAIChtml function
+ 
+
+ 
+ 
+ 
+ function setacitivity(number, presentactivity){
 	 
 	 console.log('The function is with us');
+	 console.log('IP UUID');
+	 //console.log(IPUUID);
+	 console.log(number);
+	 console.log(presentactivity);
+	 var thevalue = document.getElementById(number).value
+	 console.log('Selected state');
+	 console.log(thevalue);
 	 
  }
  
