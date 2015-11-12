@@ -183,6 +183,18 @@ function populatelist(){
     
    var IPList = info[i].IPs
    var AICparent = info[i].AIC_UUID
+   var selectlisthtml = '<select onchange="setactivity()">'
+	   + '<option value="0">OK</option>'
+	   + '<option value="1">New object</option>'
+	   + '<option value="2">Receive</option>'
+	   + '<option value="3">Checking</option>'
+	   + '<option value="4">Need of assistance</option>'
+	   + '<option value="5">Progress</option>'
+	   + '<option value="6">Pending writes</option>'
+	   + '<option value="7">ControlArea</option>'
+	   + '<option value="8">Workarea</option>'
+	   + '<option value="100">FAIL</option>'
+	   + '</select>';
    
    for (j = 0; j < IPList.length; j++){
         tabletext = tabletext
@@ -191,11 +203,11 @@ function populatelist(){
         + '<td><a href="'+ createlink + IPList[j].ObjectUUID +'/"> IP_' + IPList[j].Generation + '</a></td>'
         + '<td> ' + IPList[j].Archivist_organization + '</td>'
         + '<td> ' + IPList[j].Label + '</td>'
-        + '<td> ' + IPList[j].create_date + '</td>'
-        + '<td> ' + IPList[j].startdate + '</td>'
-        + '<td> ' + IPList[j].enddate + '</td>'
-        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
-        + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
+        + '<td>' + IPList[j].create_date + '</td>'
+        + '<td>' + IPList[j].startdate + '</td>'
+        + '<td>' + IPList[j].enddate + '</td>'
+        + '<td>' + StatusProcessChoices(IPList[j].Process) + ' </td>'
+        + '<td>'  + selectlisthtml + '</td>' //StatusActivityChoices(IPList[j].Activity)
         + '<td> ' + AICparent + ' </td>'
         + '<td> ' + IPList[j].ObjectUUID + ' </td>'
         + '</tr>'
@@ -208,6 +220,14 @@ function populatelist(){
  document.getElementById("AIC-table").innerHTML = tabletext;
  };
 
+ function setacitivity(){
+	 
+	 console.log('The function is with us');
+	 
+ }
+ 
+ 
+ 
  function populateIPlist(){
 	    
 	    if(info.length == 0){
