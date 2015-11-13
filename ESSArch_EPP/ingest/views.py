@@ -54,9 +54,9 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 import uuid, urlparse
 
-'''class ArchObjectListUpdate(ListView, BaseUpdateView):
+class ArchObjectListUpdate(ListView, BaseUpdateView):
     model = ArchiveObject
-    template_name='archobject/list.html'
+    template_name='ingest/iplist.html'
     form_class=ArchiveObjectStatusForm
     queryset=ArchiveObject.objects.filter(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
     
@@ -81,7 +81,7 @@ import uuid, urlparse
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
+        return context
         
 class IngestListInfoView(View):
 

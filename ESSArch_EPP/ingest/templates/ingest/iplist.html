@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% load js staticfiles%}
+{% load js staticfiles %}
 {% load dictionary_extras %}
 
 {% block content %}
@@ -9,140 +9,177 @@
 
 <br/>
 
-<div>
-  <table class="collaptable table">
+<div id="aic" class="results">
+  <table id="result_list">
     <thead>
       <tr>
-                <th>Generation</th>
+                {% if type == 'FromRec' %}
+                    <th>Media</th>
+                {% else %}
+                    <th>Generation</th>
+                {% endif %}
                 <th>Archivist organization</th>
                 <th>Label</th>
                 <th>Create date</th>
                 <th>Start date</th>
                 <th>End date</th>
+                <th>IP type</th>
+                <th>AIC (UUID)</th>
+                <th>IP (UUID)</th>
+                <th>Process</th>
                 <th>State</th>
-                <th>Activity</th>
-                <th>AIC-UUID</th>
-                <th>IP-UUID</th>
       </tr>
     </thead>
-    <tbody id="AIC-table">
-            <tr><td>No IPs</td></tr>
+    <tbody>
+        {% if type == 'FromRec' %}
+            {% for ip in filelist %}
+                <tr class="row{% cycle '1' '2' %}">
+                    {% if not ip.uuid == '' %}
+                        <td><a href="{% url 'controlarea_checkinfromreception' ip.uuid %}">{{ ip.media }}</a></td>
+                    {% else %}
+                        <td>{{ ip.media }}</td>
+                    {% endif %}
+                    <td>{{ ip.EntryAgentIdentifierValue }}</td>
+                    <td>{{ ip.label }}</td>
+                    <td>{{ ip.createdate }}</td>
+                    <td>{{ ip.startdate }}</td>
+                    <td>{{ ip.enddate }}</td>
+                    <td>{{ ip.iptype }}</td>
+                    <td>{{ ip.aic_uuid }}</td>
+                    <td>{{ ip.uuid }}</td>
+                    <td>{{ ip.StatusProcess }}</td>
+                    <td>{{ ip.state }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in ip_list %}
+                <tr class="row{% cycle '1' '2' %}">
+                    {% if type == 'ToWork' %}
+                        <td><a href="{% url 'controlarea_checkouttowork' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'FromWork' %}
+                        <td><a href="{% url 'controlarea_checkinfromwork' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'DiffCheck' %}
+                        <td><a href="{% url 'controlarea_diffcheck' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'ToIngest' %}
+                        <td><a href="{% url 'controlarea_preserveip' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'ControlareaDeleteIP' %}
+                        <td><a href="{% url 'controlarea_deleteip' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% else %}
+                        <td>IP_{{ ip_obj.Generation }}</td>
+                    {% endif %}
+                    <td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
+                    <td>{{ ip_obj_data.label }}</td>
+                    <td>{{ ip_obj.EntryDate }}</td>
+                    <td>{{ ip_obj_data.startdate }}</td>
+                    <td>{{ ip_obj_data.enddate }}</td>
+                    <td>{{ PackageType_CHOICES|access:ip_obj.OAISPackageType }}</td>
+                    <td>{{ aic_obj.ObjectUUID }}</td>
+                    {% if type == 'Access' %}
+                        <td><a href="{% url 'access_create_ip_uuid' ip_obj.ObjectUUID %}" title="Create access request">{{ ip_obj.ObjectUUID }}</a></td>
+                    {% elif type == 'Ingest' %}
+                        <td><a href="{% url 'ingest_create_ip_uuid' ip_obj.ObjectIdentifierValue %}" title="Create ingest request">{{ ip_obj.ObjectIdentifierValue }}</a></td>
+                    {% else %}
+                        <td>{{ ip_obj.ObjectUUID }}</td>
+                    {% endif %}  
+                    <td>{{ StatusProcess_CHOICES|access:ip_obj.StatusProcess }}</td>
+                    {% if type == 'Ingest' %}   
+                        <td>
+                        <form action="{% url 'ingest_listobjupd' ip_obj.pk %}" method="post">
+                        {% csrf_token %}
+                        {{ ip_form.StatusActivity }}
+                        </form>
+                        </td>
+                    {% else %}
+                        <td>{{ ip_obj.StatusActivity }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
     </tbody>
   </table>
 </div>
 
+</div>
 
 {% endblock %}
+
 {% block app-extra-script %}
     {% js "aCollapTable/aCollapTable.js" %}
-    {% js "controlarea/js/collapsible-aic.js" %}
-
 <script>
 
 var aiccheckresult = false;
-var IPJSONlink = "{% url 'ingest_list_info' %}";
-//var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess__lt=3000';
-var JSONlink = "{% url 'ingest_list_info' %}";
-var createlink = '/ingest/new/';
-var info = {};
-var tabletext = '';
 
 $.getJSON("{% url 'aiccheck' %}", function(aiccheckresult){
-	
-	if (aiccheckresult == true ){
-		
-		AICingestlist(JSONlink,createlink);
-	}
-	
-	else {
-		noAICingestlist(JSONlink,createlink);
-	}
+
+
+if (aiccheckresult == true ){
+
+var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()">Previous</button>' +
+                    '<button id="nextpagebutton" onclick="getnextpage()">Next</button></div>' +
+                    '<table class="collaptable table">' +
+                    '<thead>' +
+                    '<tr>' +
+                '<th>Generation</th>' +
+                '<th>Archivist organization</th>' +
+                '<th>Label</th>' +
+                '<th>Create date</th>' +
+                '<th>Start date</th>' +
+                '<th>End date</th>' +
+                '<th>State</th>' +
+                '<th>Activity</th>' +
+                '<th>AIC-UUID</th>' +
+                '<th>IP-UUID</th>' +
+      '</tr>' +
+    '</thead>' +
+    '<tbody id="AICtable">' +
+            '<tr><td>No information</td></tr>' +
+    '</tbody>' +
+  '</table>';
+
+
+document.getElementById("aic").innerHTML = aiccheckhtml;
+
+//var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess=3000' //Access
+var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess__lt=3000' //ingest
+//var JSONlink = "{% url 'access_list_info' %}"
+
+var nextpage = 'nextpage';
+var previouspage = 'previouspage';
+
+ingestlist(JSONlink);
+
+}
+
+
 });
 
-function AICingestlist(JSONlink, createlink){
-$(document).ready(function(){
+function ingestlist(JSONlink){
+
+
+var ajaxinfo = {};
+var tabletext = '';
+//$(document).ready(function(){
 $.getJSON( JSONlink, function(listinfo1) {
 
-	 info = listinfo1;
-	 populatelist();
-	 //setaichtml(info);
-	 
-     $('.collaptable').aCollapTable({ 
+      ajaxinfo = listinfo1;
+
+      setaichtml(ajaxinfo);
+     
+     $('.collaptable').aCollapTable({
      startCollapsed: true,
-     addColumn: false, 
-     plusButton: '<span class="i">+</span>', 
-     minusButton: '<span class="i">-</span>' 
+     addColumn: false,
+     plusButton: '<span class="i">+</span>',
+     minusButton: '<span class="i">-</span>'
     });
+     
 });
-});
-};
-
-function noAICingestlist(IPJSONlink, createlink){
-	$(document).ready(function(){
-	$.getJSON( IPJSONlink, function(listinfo1) {
-
-	     info = listinfo1;
-	     populateIPlist();
-	    
-	});
-	});
-	};
-
-function StatusActivityChoices(Activity){
-	
-	var StatusActivityText = "";
-	
-    switch(Activity){
-  
-    case 0:
-    	StatusActivityText =  'OK';
-    	break;
-    case 1:
-    	StatusActivityText =  'New object';
-    	break;
-    case 2:
-    	StatusActivityText = 'Receive';
-    	break;
-    case 3:
-    	StatusActivityText = 'Checking';
-    	break;
-    case 4:
-    	StatusActivityText = 'Need of assistance';
-    	break;
-    case 5:
-    	StatusActivityText = 'Progress';
-    	break;
-    case 6:
-    	StatusActivityText = 'Pending writes';
-    	break;
-    case 7:
-    	StatusActivityText = 'ControlArea';
-    	break;
-    case 8:
-    	StatusActivityText = 'WorkArea';
-    	break;
-    case 100:
-    	StatusActivityText = 'FAIL';
-    	break;
-    default:
-    	StatusActivityText = 'Not known';
-    	console.log('Activity');
-    	console.log(Activity);
-    }
-	
-	return StatusActivityText;
-};
-
-
+//});
 
 function StatusProcessChoices(Process){
-       
+
        var StatusProcessText = "";
-       
+
        switch(Process){
-       		case 0:
-       			StatusProcessText = 'Ingest';
-       			break;
             case 3000:
                 StatusProcessText = 'Archived';
                 break;
@@ -156,194 +193,94 @@ function StatusProcessChoices(Process){
                 StatusProcessText = 'Deleted';
                 break;
             default:
-                StatusProcessText =' Not known ';
-            	console.log('StatusProcess:')
-            	console.log(Process);
+                StatusProcessText ='Not known';
+                console.log('Unknown process');
+                console.log(Process);
        }
 
         return StatusProcessText;
    };
 
-function populatelist(){
+function setaichtml(ajaxinfo){
     
-    if(info.length == 0){
-        tabletext = 'List is empty';
-    }
+    var aicwrapper = ajaxinfo;
     
-    for (i = 0; i < info.length; i++){
-    tabletext = tabletext 
-    + '<tr data-id="' 
-    + info[i].AIC_UUID + '" data-parent="">'
-    + '<td>AIC</td>'
-    + '<td>' + info[i].Archivist_organization + '</td>' 
-    + '<td>' + info[i].Label + '</td>' 
-    + '<td>' + info[i].create_date +'</td>'
-    + '<td>' + info[i].startdate + '</td>'
-    + '<td>' + info[i].enddate + '</td>'
-    + '<td>' + '</td>'
-    + '<td>' + '</td>'
-    + '<td>' + info[i].AIC_UUID + '</td>'
-    + '</tr>';
+    nextpage = aicwrapper.next;
+    previouspage = aicwrapper.previous;
     
-   var IPList = info[i].IPs
-   var AICparent = info[i].AIC_UUID
-   
-   for (j = 0; j < IPList.length; j++){
-   
-   var selectlisthtml = '<select id="' + IPList[j].ObjectUUID + '" onchange=setacitivity("' + IPList[j].ObjectUUID + '"'  + ',' + IPList[j].Process +')>'
-	   + '<option value="0">OK</option>'
-	   + '<option value="1">New object</option>'
-	   + '<option value="2">Receive</option>'
-	   + '<option value="3">Checking</option>'
-	   + '<option value="4">Need of assistance</option>'
-	   + '<option value="5">Progress</option>'
-	   + '<option value="6">Pending writes</option>'
-	   + '<option value="7">ControlArea</option>'
-	   + '<option value="8">Workarea</option>'
-	   + '<option value="100">FAIL</option>'
-	   + '</select>';
-   
+    var AIClist = aicwrapper.results;
 
-        tabletext = tabletext
-        + '<tr data-id=' + IPList[j].ObjectUUID + ' '
-        + 'data-parent=' + AICparent + '>'
-        + '<td><a href="'+ createlink + IPList[j].ObjectUUID +'/"> IP_' + IPList[j].Generation + '</a></td>'
-        + '<td> ' + IPList[j].Archivist_organization + '</td>'
-        + '<td> ' + IPList[j].Label + '</td>'
-        + '<td>' + IPList[j].create_date + '</td>'
-        + '<td>' + IPList[j].startdate + '</td>'
-        + '<td>' + IPList[j].enddate + '</td>'
-        + '<td>' + StatusProcessChoices(IPList[j].Process) + ' </td>'
-        + '<td>'  + selectlisthtml + '</td>' //StatusActivityChoices(IPList[j].Activity)
-        + '<td> ' + AICparent + ' </td>'
-        + '<td> ' + IPList[j].ObjectUUID + ' </td>'
-        + '</tr>'
-    }
-    
-    
-    
+    for (i = 0; i < AIClist.length; i++){
         
-    }
- document.getElementById("AIC-table").innerHTML = tabletext;
- };
+        
+        var IPlist = AIClist[i].archiveobjects;
 
- function setaichtml(ajaxinfo){
-	    
-	    var aicwrapper = ajaxinfo;
-	    
-	    console.log('We got info');
-	    console.log(ajaxinfo);
-	    
-	    nextpage = aicwrapper.next;
-	    previouspage = aicwrapper.previous;
-	    
-	    var AIClist = aicwrapper.results;
+        if(IPlist.length > 0){
+                var AIC = AIClist[i];
+                var lastIPcounter = IPlist.length - 1;
+                var lastIP = IPlist[lastIPcounter];
+                var lastIPinfo = lastIP.archiveobjectdata_set[0];
+            
+                tabletext = tabletext
+                + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
+                + '<td>AIC</td>'
+                + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
+                + '<td>' + lastIPinfo.label + '</td>'
+                + '<td>' + lastIP.CreateDate + '</td>'
+                + '<td>' + lastIPinfo.startdate + '</td>'
+                + '<td>' + lastIPinfo.enddate + '</td>'
+                + '<td></td>'
+                + '<td>' + AIC.ObjectUUID + '</td>'
+                +'</tr>';
+                
+                var aicparent = AIC.ObjectUUID;
+                var createlink = '/access/new/';
+                
+                for (j = 0; j < IPlist.length; j++){
+                     
+                    var IP = IPlist[j];
+                    var IPinfo = IP.archiveobjectdata_set[0];
+                    
+                    tabletext = tabletext
+                    + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
+                    + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
+                    + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
+                    + '<td>' + IPinfo.label + '</td>'
+                    + '<td>' + IP.CreateDate + '</td>'
+                    + '<td>' + IPinfo.startdate + '</td>'
+                    + '<td>' + IPinfo.enddate + '</td>'
+                    + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+                    + '<td>' + aicparent + '</td>'
+                    + '<td>' + IP.ObjectUUID + '</td>'
+                    + '</tr>';
 
-	    for (i = 0; i < AIClist.length; i++){
-	        
-	        
-	        var IPlist = AIClist[i].archiveobjects;
+                    
+                    
+                }//IPlist for loop
+                
+                
+        }; //End of length test
+    };//End of for aic list for loop
+    
+     
+    document.getElementById("AICtable").innerHTML = tabletext;
+};//End of serAIChtml function
+    
+};//End of accesslistfunction
 
-	        if(IPlist.length > 0){
-	                var AIC = AIClist[i];
-	                var lastIPcounter = IPlist.length - 1;
-	                var lastIP = IPlist[lastIPcounter];
-	                var lastIPinfo = lastIP.archiveobjectdata_set[0];
-	            
-	                tabletext = tabletext
-	                + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
-	                + '<td>AIC</td>'
-	                + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
-	                + '<td>' + lastIPinfo.label + '</td>'
-	                + '<td>' + lastIP.CreateDate + '</td>'
-	                + '<td>' + lastIPinfo.startdate + '</td>'
-	                + '<td>' + lastIPinfo.enddate + '</td>'
-	                + '<td></td>'
-	                + '<td>' + AIC.ObjectUUID + '</td>'
-	                +'</tr>';
-	                
-	                var aicparent = AIC.ObjectUUID;
-	                //var createlink = '/access/new/';
-	                
-	                for (j = 0; j < IPlist.length; j++){
-	                     
-	                    var IP = IPlist[j];
-	                    var IPinfo = IP.archiveobjectdata_set[0];
-	                    
-	                    tabletext = tabletext
-	                    + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
-	                    + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
-	                    + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
-	                    + '<td>' + IPinfo.label + '</td>'
-	                    + '<td>' + IP.CreateDate + '</td>'
-	                    + '<td>' + IPinfo.startdate + '</td>'
-	                    + '<td>' + IPinfo.enddate + '</td>'
-	                    + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
-	                    + '<td>' + aicparent + '</td>'
-	                    + '<td>' + IP.ObjectUUID + '</td>'
-	                    + '</tr>';
+function getnextpage(){
 
-	                  	                    
-	                }//IPlist for loop
-	                
-	                
-	        }; //End of length test
-	    };//End of for aic list for loop
-	    
-	     console.log(tabletext);
-	    document.getElementById("AICtable").innerHTML = tabletext;
-	};//End of serAIChtml function
- 
+if(nextpage != null){
+ingestlist(nextpage);
+};
+};
 
- 
- 
- 
- function setacitivity(number, presentactivity){
-	 
-	 console.log('The function is with us');
-	 console.log('IP UUID');
-	 //console.log(IPUUID);
-	 console.log(number);
-	 console.log(presentactivity);
-	 var thevalue = document.getElementById(number).value
-	 console.log('Selected state');
-	 console.log(thevalue);
-	 
- }
- 
- 
- 
- function populateIPlist(){
-	    
-	    if(info.length == 0){
-	        tabletext = 'List is empty';
-	    }
-	    
-	    for (i = 0; i < info.length; i++){
-	    
-	   var IPList = info[i].IPs
-	   var AICparent = info[i].AIC_UUID
-	   
-	   for (j = 0; j < IPList.length; j++){
-	        tabletext = tabletext
-	        + '<td><a href="'+ createlink + IPList[j].id +'/"> IP_' + IPList[j].Generation + '</a></td>'
-	        + '<td> ' + IPList[j].Archivist_organization + ' </td>'
-	        + '<td> ' + IPList[j].Label + ' </td>'
-	        + '<td> ' + IPList[j].create_date + ' </td>'
-	        + '<td> ' + IPList[j].startdate + ' </td>'
-	        + '<td> ' + IPList[j].enddate + ' </td>'
-	        + '<td> ' + StatusProcessChoices(IPList[j].Process) + ' </td>'
-	        + '<td>'  + StatusActivityChoices(IPList[j].Activity) + '</td>'
-	        + '<td> ' + AICparent + ' </td>'
-	        + '<td> ' + IPList[j].ObjectUUID + ' </td>'
-	        + '</tr>'
-	    }
-	    
-	    
-	    
-	        
-	    }
-	 document.getElementById("AIC-table").innerHTML = tabletext;
-	 };
+function getpreviouspage(){
+
+if(previouspage != null){
+ingestlist(previouspage);
+};
+};
+
 </script>
 {% endblock %}
