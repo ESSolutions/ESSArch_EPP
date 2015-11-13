@@ -384,6 +384,7 @@ def installdefaultpaths(): # default paths
             'path_control':'/ESSArch/control',
             'path_ingest':'/ESSArch/ingest',
             'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
+            'TmpWorkarea_upload_path':'/ESSArch/essarch_temp',
             }
 
     # create according to model with two fields

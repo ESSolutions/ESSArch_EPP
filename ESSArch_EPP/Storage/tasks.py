@@ -33,6 +33,8 @@ from Storage.models import IOQueue
 from configuration.models import ESSConfig
 from essarch.libs import GetSize, ESSArchSMError, calcsum
 from django.utils import timezone
+from esscore.rest.uploadchunkedrestclient import UploadChunkedRestClient, UploadChunkedRestException
+import requests
 
 @shared_task()
 def add(x, y):
@@ -75,7 +77,12 @@ class TransferWriteIO(Task):
         IO_obj.remote_status = 5
         IO_obj.save(update_fields=['remote_status'])
 
+        st_obj = IO_obj.storagemethodtarget
+        target_obj = st_obj.target
+        rhost, rport, ruser, rpass = target_obj.remote_server.split(',')
+
         try:
+            self.upload_rest_client = self._initialize_upload_rest_client(rhost, rport, ruser, rpass)
             result = self._TransferWriteIOProc(req_pk)
         except ESSArchSMError as e:
             IO_obj.refresh_from_db()
@@ -239,13 +246,15 @@ class TransferWriteIO(Task):
                                                                                                target_obj_target,
                                                                                                remote_server[0], 
                                                                                                IO_obj_uuid))
-                pass
+                
+                self.upload_rest_client.upload(ip_tar_path_source)
+                self.upload_rest_client.upload(ip_p_mets_path_source)
                 #shutil.copy2(ip_tar_path_source,target_obj_target)
                 #shutil.copy2(ip_p_mets_path_source,target_obj_target)
                 if target_obj.format == 103:
-                    pass
+                    self.upload_rest_client.upload(aic_mets_path_source)
                     #shutil.copy2(aic_mets_path_source,target_obj_target)
-            except (IOError, OSError) as e:
+            except (UploadChunkedRestException, requests.exceptions.RequestException) as e:
                 msg = 'Problem transfer writeIO %s to target %s on remote: %s, IOuuid: %s, error: %s' % (
                                                                                                          ObjectIdentifierValue, 
                                                                                                          target_obj_target,
@@ -289,4 +298,14 @@ class TransferWriteIO(Task):
         if not runflag:
             raise ESSArchSMError(error_list)
         else:
-            return res_dict   
+            return res_dict
+
+    def _custom_progress_reporter(self, percent):
+            print "\rProgress:{percent:3.0f}%".format(percent=percent)
+
+    def _initialize_upload_rest_client(self, rhost, rport, ruser, rpass, rproto='https'):
+        requests_session = requests.Session()
+        rest_endpoint = '%s://%s:%s/api/create_tmpworkarea_upload' % (
+                                                                         rproto, rhost, rport)
+        requests_session.auth = (ruser, rpass)
+        return UploadChunkedRestClient(requests_session, rest_endpoint, self._custom_progress_reporter)        
