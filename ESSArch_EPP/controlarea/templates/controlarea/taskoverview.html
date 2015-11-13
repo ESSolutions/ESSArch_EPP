@@ -87,7 +87,10 @@ gettasklist();
 function gettasklist(){
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
+	console.log('IncomingTasks');
+	console.log(allTasks);
 	populateAllTasks(allTasks);
+	
 		
 	});
 };
@@ -106,7 +109,7 @@ function populateAllTasks(allTasks){
 
 var failedtasks = allTasks['FailedTasks'];
 
-
+console.log(failedtasks);
 
 
 	if(failedtasks.length == 0) {
@@ -215,6 +218,9 @@ var successTaskshtml = '';
 
 var successTasks = allTasks['SuccessTasks'];
 
+console.log('SuccessTasks');
+console.log(successTasks);
+
 function getlink(label){
 
 var link = '/controlarea/';
@@ -248,27 +254,46 @@ switch(label){
 }
 var completelink = link + stage + stop;
 
+console.log('Complete link');
+console.log(completelink);
 return completelink;
 
 }
 
+if (successTasks.length == 0){
+
+	successTaskshtml = "No completed requests";
+	}
+
+var controlareaiterator = 0;
+
 for (i=0; i< successTasks.length; i++){
 
     var theresult = JSON.parse(successTasks[i].result);
+    //var theresult = successTasks[i].result;
+    console.log(theresult);
+    
     if(theresult['category'] == 'controlarea'){
     
+    controlareaiterator = controlareaiterator + 1;
+    console.log(controlareaiterator);
+    console.log(successTasks[i]);
     var controlarealink = getlink(theresult['label']);
     successTaskshtml = successTaskshtml + '<tr><td>' +  theresult['label'] + '</td><td></td><td><a href=' + controlarealink + successTasks[i].taskid + '>'+ theresult['reqpurpose'] + '</a></td><td></td><td>'+ theresult['user'] + '</td><td></td><td> ' + successTasks[i].status + '</td><td></td><td>' + successTasks[i].datedone + '</td></tr>'
         
     }
     }
 
+console.log(controlareaiterator);
 
-if (successTasks.length == 0){
+if (controlareaiterator == 0){
 
-successTaskshtml = "No completed requests";
-}
+    successTaskshtml = "No completed requests";
+    }
 
+
+console.log('successTaskshtml');
+console.log(successTaskshtml);
 document.getElementById("successtasks").innerHTML = successTaskshtml;
 
 }
