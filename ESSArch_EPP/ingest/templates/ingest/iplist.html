@@ -175,31 +175,180 @@ $.getJSON( JSONlink, function(listinfo1) {
 });
 //});
 
+
+function StatusActivityChoices(Activity){
+    
+    var StatusActivityText = "";
+    
+    switch(Activity){
+  
+    case 0:
+        StatusActivityText =
+       '<option value="0" selected> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';        
+        break;
+    case 1:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1" selected>New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 2:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2" selected>Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 3:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3" selected>Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 4:
+        StatusActivityText =
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4" selected>Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 5:
+        StatusActivityText =
+               '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5" selected>Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 6:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6" selected>Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 7:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7" selected>ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 8:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8" selected>Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 100:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100" selected>FAIL</option>';
+        break;
+    default:
+        StatusActivityText = '<option value="1000">Not known</option>'
+        console.log('Activity');
+        console.log(Activity);
+    }
+    
+    return StatusActivityText;
+};
+
 function StatusProcessChoices(Process){
+    
+    var StatusProcessText = "";
+    
+    switch(Process){
+         case 0:
+             StatusProcessText = 'Ingest';
+             break;
+         case 3000:
+             StatusProcessText = 'Archived';
+             break;
+         case 5000:
+             StatusProcessText = 'Controlarea';
+             break;
+         case 5100:
+             StatusProcessText = 'Workarea';
+             break;
+         case 9999:
+             StatusProcessText = 'Deleted';
+             break;
+         default:
+             StatusProcessText =' Not known ';
+             console.log('StatusProcess:')
+             console.log(Process);
+    }
 
-       var StatusProcessText = "";
-
-       switch(Process){
-            case 3000:
-                StatusProcessText = 'Archived';
-                break;
-            case 5000:
-                StatusProcessText = 'Controlarea';
-                break;
-            case 5100:
-                StatusProcessText = 'Workarea';
-                break;
-            case 9999:
-                StatusProcessText = 'Deleted';
-                break;
-            default:
-                StatusProcessText ='Not known';
-                console.log('Unknown process');
-                console.log(Process);
-       }
-
-        return StatusProcessText;
-   };
+     return StatusProcessText;
+};
 
 function setaichtml(ajaxinfo){
     
@@ -230,11 +379,12 @@ function setaichtml(ajaxinfo){
                 + '<td>' + lastIPinfo.startdate + '</td>'
                 + '<td>' + lastIPinfo.enddate + '</td>'
                 + '<td></td>'
+                + '<td></td>'
                 + '<td>' + AIC.ObjectUUID + '</td>'
                 +'</tr>';
                 
                 var aicparent = AIC.ObjectUUID;
-                var createlink = '/access/new/';
+                var createlink = '/ingest/new/';
                 
                 for (j = 0; j < IPlist.length; j++){
                      
@@ -250,6 +400,7 @@ function setaichtml(ajaxinfo){
                     + '<td>' + IPinfo.startdate + '</td>'
                     + '<td>' + IPinfo.enddate + '</td>'
                     + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+                    + '<td>' + '<select id="' + IP.ObjectUUID + '" onchange=setacitivity("' + IP.ObjectUUID + '"'  + ',' + IP.StatusProcess + ')>' + StatusActivityChoices(IP.StatusActivity) + '</select>' + '</td>'
                     + '<td>' + aicparent + '</td>'
                     + '<td>' + IP.ObjectUUID + '</td>'
                     + '</tr>';
@@ -281,6 +432,30 @@ if(previouspage != null){
 ingestlist(previouspage);
 };
 };
+
+function setacitivity(number, presentactivity){
+    
+    console.log('The function is with us');
+    console.log('IP UUID');
+    //console.log(IPUUID);
+    console.log(number);
+    var thevalue = document.getElementById(number).value
+    console.log('NewStatusActivity');
+    console.log(thevalue);
+    var datastring = '{ "StatusActivity":' + thevalue + '}';
+    
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number,
+        type: 'PATCH',
+        data: datastring,
+        contentType:"application/json; charset=utf-8",
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    
+};
+
 
 </script>
 {% endblock %}
