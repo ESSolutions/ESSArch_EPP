@@ -104,7 +104,7 @@ class StorageMethodWrite:
                 if st_obj.target.status == 1:
                     target_obj = st_obj.target
                     remote_server = target_obj.remote_server.split(',')
-                    if len(remote_server) == 4:
+                    if len(remote_server) == 3:
                         remote_status = 0
                     else:
                         remote_status = 20
@@ -271,8 +271,13 @@ class StorageMethodWrite:
         '''              
         self.ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10, Status__lt=100, Status__gt=2).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]                          
         for st_obj, IOQueue_obj_list in self.IOs_to_write.iteritems():
-            target_obj = st_obj.target             
-            
+            target_obj = st_obj.target
+            remote_server = target_obj.remote_server.split(',')
+            if len(remote_server) == 3:
+                remote_io = True
+            else:         
+                remote_io = False
+                
             if target_obj.type in range(300,330): 
                 ReqType = 10
                 ReqPurpose=u'Write package to tape'

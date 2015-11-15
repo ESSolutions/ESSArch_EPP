@@ -341,7 +341,7 @@ class StorageTargets(models.Model):
     minChunkSize = models.BigIntegerField('Min chunk size', choices=minChunkSize_CHOICES, default=0)
     minContainerSize = models.BigIntegerField('Min container size (0=Disabled)', choices=minContainerSize_CHOICES, default=0)
     minCapacityWarning = models.BigIntegerField('Min capacity warning (0=Disabled)', default=0)
-    remote_server = models.CharField('Remote (host,port,user,password)', max_length=255, blank=True)
+    remote_server = models.CharField('Remote server (https://hostname,user,password)', max_length=255, blank=True)
     target = models.CharField('Target (URL, path or barcodeprefix)', max_length=255)
     class Meta:
         verbose_name = 'Storage Target'

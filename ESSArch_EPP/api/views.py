@@ -51,7 +51,8 @@ from api.serializers import (
                         storageSerializer,
                         storageNestedSerializer,
                         IOQueueSerializer,
-                        IOQueueNestedSerializer,
+                        IOQueueNestedReadSerializer,
+                        IOQueueNestedWriteSerializer,
                         ArchiveObjectRelSerializer,
                         )
 from essarch.models import ArchiveObject, ArchiveObjectRel
@@ -330,9 +331,14 @@ class IOQueueViewSet(CreateListRetrieveViewSet):
                     'storagemedium',
                     'storage',
                     'accessqueue',
-                    'remote_target',
                     'remote_status',
-                    'transfer_taks_id')
+                    'transfer_task_id')
 
 class IOQueueNestedViewSet(IOQueueViewSet):
-    serializer_class = IOQueueNestedSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return IOQueueNestedReadSerializer
+        elif self.request.method == 'POST':
+            return IOQueueNestedWriteSerializer
+        else:
+            return IOQueueSerializer

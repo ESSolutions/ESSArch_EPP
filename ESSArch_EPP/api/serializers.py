@@ -55,13 +55,6 @@ class StorageTargetsSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'status', 'type', 'format', 'blocksize', 'maxCapacity', 
                   'minChunkSize', 'minContainerSize', 'minCapacityWarning', 'target')
 
-class StorageTargetsNoValidateSerializer(StorageTargetsSerializer):
-    id = serializers.UUIDField(read_only=False, validators=[])
-    name = serializers.CharField(max_length=255, validators=[])
-    class Meta:
-        model = StorageTargets
-        fields = StorageTargetsSerializer.Meta.fields
-
 class StorageTargetSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=StorageTarget.objects.all())])
     class Meta:
@@ -72,14 +65,7 @@ class StorageTargetNestedSerializer(StorageTargetSerializer):
     target = StorageTargetsSerializer()
     class Meta:
         model = StorageTarget
-        fields = StorageTargetSerializer.Meta.fields
-
-class StorageTargetNoValidateNestedSerializer(StorageTargetNestedSerializer):
-    id = serializers.UUIDField(read_only=False, validators=[])
-    target = StorageTargetsNoValidateSerializer()
-    class Meta:
-        model = StorageTarget
-        fields = StorageTargetNestedSerializer.Meta.fields
+        fields = ('id', 'name', 'status', 'target')
 
 class StorageMethodSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=StorageMethod.objects.all())])
@@ -91,14 +77,7 @@ class StorageMethodNestedSerializer(StorageMethodSerializer):
     storagetarget_set =  StorageTargetNestedSerializer(many=True)
     class Meta:
         model = StorageMethod
-        fields = StorageMethodSerializer.Meta.fields + ['storagetarget_set',]
-
-class StorageMethodNoValidateNestedSerializer(StorageMethodNestedSerializer):
-    id = serializers.UUIDField(read_only=False, validators=[])
-    storagetarget_set =  StorageTargetNoValidateNestedSerializer(many=True)
-    class Meta:
-        model = StorageMethod
-        fields = StorageMethodNestedSerializer.Meta.fields
+        fields = ['id', 'name', 'status', 'type', 'storagetarget_set']
 
 class ArchivePolicySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=ArchivePolicy.objects.all())])
@@ -117,14 +96,6 @@ class ArchivePolicyNestedSerializer(ArchivePolicySerializer):
     class Meta:
         model = ArchivePolicy
         fields = ArchivePolicySerializer.Meta.fields + ['storagemethod_set',]
-
-class ArchivePolicyNoValidateNestedSerializer(ArchivePolicyNestedSerializer):
-    id = serializers.UUIDField(read_only=False, validators=[])
-    storagemethod_set =  StorageMethodNoValidateNestedSerializer(many=True)
-    PolicyID = serializers.CharField(label='Policy ID', max_length=32, validators=[])
-    class Meta:
-        model = ArchivePolicy
-        fields = ArchivePolicyNestedSerializer.Meta.fields
 
 class ArchiveObjectDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -184,28 +155,12 @@ class ArchiveObjectNestedSerializer(ArchiveObjectSerializer):
             ArchiveObjectMetadata.objects.create(ObjectUUID=ArchiveObject_obj, **archiveobjectmetadata_data)
         return ArchiveObject_obj
 
-class ArchiveObjectNoValidateNestedSerializer(ArchiveObjectNestedSerializer):
-    ObjectUUID = serializers.CharField(label='ObjectUUID', max_length=36, validators=[])
-    ObjectIdentifierValue = serializers.CharField(label='ObjectIdentifierValue', max_length=255, validators=[])
-    class Meta:
-        model = ArchiveObject
-        fields = ArchiveObjectNestedSerializer.Meta.fields
-
 class ArchiveObjectPlusAICNestedSerializer(ArchiveObjectNestedSerializer):
     PolicyId = ArchivePolicyNestedSerializer()
     aic_set = ArchiveObjectNestedSerializer(many=True)
     class Meta:
         model = ArchiveObject
         fields = ArchiveObjectNestedSerializer.Meta.fields + ['aic_set']
-
-class ArchiveObjectPlusAICnoValidateNestedSerializer(ArchiveObjectPlusAICNestedSerializer):
-    PolicyId = ArchivePolicyNoValidateNestedSerializer()
-    aic_set = ArchiveObjectNoValidateNestedSerializer(many=True)
-    ObjectUUID = serializers.CharField(label='ObjectUUID', max_length=36, validators=[])
-    ObjectIdentifierValue = serializers.CharField(label='ObjectIdentifierValue', max_length=255, validators=[])
-    class Meta:
-        model = ArchiveObject
-        fields = ArchiveObjectPlusAICNestedSerializer.Meta.fields + ['aic_set']
 
 class IPFilter(django_filters.FilterSet):
     archiveobjects__ObjectIdentifierValue = django_filters.CharFilter(name='ObjectIdentifierValue')
@@ -342,20 +297,29 @@ class IOQueueSerializer(serializers.ModelSerializer):
                     'storagemedium',
                     'storage',
                     'accessqueue',
-                    'remote_target',
                     'remote_status',
-                    'transfer_taks_id')
+                    'transfer_task_id')
 
-class IOQueueNestedSerializer(IOQueueSerializer):
-    archiveobject = ArchiveObjectPlusAICnoValidateNestedSerializer()
+class IOQueueNestedReadSerializer(IOQueueSerializer):
+    archiveobject = ArchiveObjectPlusAICNestedSerializer()
+    
+    class Meta:
+        model = IOQueue
+        fields = IOQueueSerializer.Meta.fields
+
+
+class IOQueueNestedWriteSerializer(IOQueueSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=IOQueue.objects.all())])
+    archiveobject = serializers.CharField(validators=[])
+    storagemethodtarget = serializers.UUIDField(validators=[])
+    
     class Meta:
         model = IOQueue
         fields = IOQueueSerializer.Meta.fields
 
     def create(self, validated_data):
         #print 'validated_data: %s' % repr(validated_data)
-        ip_data = validated_data.pop('archiveobject')
+        ip_data = eval(validated_data.pop('archiveobject'))
         
         #Create or Update ArchivePolicy
         PolicyId_data = ip_data.pop('PolicyId')
@@ -365,6 +329,7 @@ class IOQueueNestedSerializer(IOQueueSerializer):
                                                                    defaults=PolicyId_data)
         for storagemethod_data in storagemethod_set_data:
             storagetarget_set_data = storagemethod_data.pop('storagetarget_set')
+            storagemethod_data['archivepolicy'] = ArchivePolicy_obj
             StorageMethod_obj, created = StorageMethod.objects.update_or_create(
                                                                        id=storagemethod_data['id'], 
                                                                        defaults=storagemethod_data)
@@ -374,6 +339,7 @@ class IOQueueNestedSerializer(IOQueueSerializer):
                                                                      id=target_data['id'],
                                                                      defaults=target_data)
                 storagetarget_data['target'] = target_obj
+                storagetarget_data['storagemethod'] = StorageMethod_obj
                 StorageTarget_obj, created = StorageTarget.objects.update_or_create(
                                                                            id=storagetarget_data['id'],
                                                                            defaults=storagetarget_data)
@@ -393,9 +359,10 @@ class IOQueueNestedSerializer(IOQueueSerializer):
         # Create AIC
         archiveobjectdata_set_data = aic_data.pop('archiveobjectdata_set')
         archiveobjectmetadata_set_data = aic_data.pop('archiveobjectmetadata_set')
+        aic_data['PolicyId'] = ArchivePolicy_obj
         AIC_ArchiveObject_obj, created = ArchiveObject.objects.get_or_create(
                                                                              ObjectUUID=aic_data['ObjectUUID'], 
-                                                                             defaults=ip_data) 
+                                                                             defaults=aic_data) 
         for archiveobjectdata_data in archiveobjectdata_set_data:
             ArchiveObjectData.objects.get_or_create(UUID=AIC_ArchiveObject_obj, **archiveobjectdata_data)
         for archiveobjectmetadata_data in archiveobjectmetadata_set_data:
@@ -406,6 +373,9 @@ class IOQueueNestedSerializer(IOQueueSerializer):
             ArchiveObjectRel_obj = ArchiveObjectRel.objects.create(UUID = IP_ArchiveObject_obj,
                                                                                         AIC_UUID = AIC_ArchiveObject_obj)
         
+        StorageTarget_obj = StorageTarget.objects.get(id=validated_data.pop('storagemethodtarget'))
         # Create IOQueue object
-        IOQueue_obj = IOQueue.objects.create(archiveobject=IP_ArchiveObject_obj, **validated_data)
+        IOQueue_obj = IOQueue.objects.create(archiveobject=IP_ArchiveObject_obj, 
+                                             storagemethodtarget=StorageTarget_obj, 
+                                             **validated_data)
         return IOQueue_obj

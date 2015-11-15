@@ -26,7 +26,7 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import logging, time, os, datetime, pytz
+import logging, time, os, datetime, pytz, sys, traceback
 from celery import Task, shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from Storage.models import IOQueue
@@ -35,10 +35,28 @@ from essarch.libs import GetSize, ESSArchSMError, calcsum
 from django.utils import timezone
 from esscore.rest.uploadchunkedrestclient import UploadChunkedRestClient, UploadChunkedRestException
 import requests
+from api.serializers import IOQueueNestedReadSerializer
+from urlparse import urljoin
+from rest_framework.renderers import JSONRenderer
 
 @shared_task()
 def add(x, y):
     return x + y
+
+class DatabasePostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize DatabasePostRestException
+        """
+        self.value = value
+        super(DatabasePostRestException, self).__init__(value)
+
+class DatabasePostRestError(DatabasePostRestException):
+    """An post request error occurred."""
 
 class TransferWriteIO(Task):
     """Transfer write IO to remote
@@ -77,12 +95,11 @@ class TransferWriteIO(Task):
         IO_obj.remote_status = 5
         IO_obj.save(update_fields=['remote_status'])
 
-        st_obj = IO_obj.storagemethodtarget
-        target_obj = st_obj.target
-        rhost, rport, ruser, rpass = target_obj.remote_server.split(',')
-
         try:
-            self.upload_rest_client = self._initialize_upload_rest_client(rhost, rport, ruser, rpass)
+            st_obj = IO_obj.storagemethodtarget
+            target_obj = st_obj.target
+            self.base_url, ruser, rpass = target_obj.remote_server.split(',')
+            self.requests_session = self._initialize_requests_session(ruser, rpass, cert_verify=False, disable_warnings=True)
             result = self._TransferWriteIOProc(req_pk)
         except ESSArchSMError as e:
             IO_obj.refresh_from_db()
@@ -91,11 +108,16 @@ class TransferWriteIO(Task):
             #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
             IO_obj.remote_status = 100
             IO_obj.save(update_fields=['remote_status'])
-            #raise self.retry(exc=e, countdown=10, max_retries=2)
-            raise e
+            raise self.retry(exc=e, countdown=60, max_retries=5)
+            #raise e
         except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             IO_obj.refresh_from_db()
-            msg = 'Unknown error to transfer object %s to remote, error: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e)
+            msg = 'Unknown error to transfer object %s to remote, error: %s trace: %s (IOuuid: %s)' % (
+                                                                                                       IO_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                       e, 
+                                                                                                       repr(traceback.format_tb(exc_traceback)), 
+                                                                                                       IO_obj.id)
             logger.error(msg)
             #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
             IO_obj.remote_status = 100
@@ -246,15 +268,32 @@ class TransferWriteIO(Task):
                                                                                                target_obj_target,
                                                                                                remote_server[0], 
                                                                                                IO_obj_uuid))
-                
-                self.upload_rest_client.upload(ip_tar_path_source)
-                self.upload_rest_client.upload(ip_p_mets_path_source)
-                #shutil.copy2(ip_tar_path_source,target_obj_target)
-                #shutil.copy2(ip_p_mets_path_source,target_obj_target)
+                # Insert IO_obj to remote database
+                IOQueue_rest_endpoint = urljoin(self.base_url, 'api/ioqueuenested/')
+                IO_obj_data = IOQueueNestedReadSerializer(IO_obj).data
+                IO_obj_data['archiveobject']['StatusProcess'] = 1500        # 'Remote AIP'
+                IO_obj_data['archiveobject']['StatusActivity'] = 6              # 'Pending writes'
+                if IO_obj_data['archiveobject']['aic_set'][0]['PolicyId'] == None:
+                    IO_obj_data['archiveobject']['aic_set'][0]['PolicyId'] = IO_obj_data['archiveobject']['PolicyId']['PolicyID']
+                IO_obj_json = JSONRenderer().render(IO_obj_data)
+                r = self.requests_session.post(IOQueue_rest_endpoint,
+                                                headers={'Content-Type': 'application/json'}, 
+                                                data=IO_obj_json)
+                if not r.status_code == 201:
+                    raise DatabasePostRestError([r.status_code, r.reason, r.text])
+                # Upload IO_obj to remote tmpworkarea
+                upload_rest_endpoint = urljoin(self.base_url, 'api/create_tmpworkarea_upload')
+                upload_rest_client = UploadChunkedRestClient(self.requests_session, 
+                                                             upload_rest_endpoint, 
+                                                             self._custom_progress_reporter)
+                self.upload_file =  ip_tar_path_source
+                upload_rest_client.upload(ip_tar_path_source)
+                self.upload_file = ip_p_mets_path_source
+                upload_rest_client.upload(ip_p_mets_path_source)
                 if target_obj.format == 103:
-                    self.upload_rest_client.upload(aic_mets_path_source)
-                    #shutil.copy2(aic_mets_path_source,target_obj_target)
-            except (UploadChunkedRestException, requests.exceptions.RequestException) as e:
+                    self.upload_file = aic_mets_path_source
+                    upload_rest_client.upload(aic_mets_path_source)
+            except (UploadChunkedRestException, DatabasePostRestError, requests.exceptions.RequestException) as e:
                 msg = 'Problem transfer writeIO %s to target %s on remote: %s, IOuuid: %s, error: %s' % (
                                                                                                          ObjectIdentifierValue, 
                                                                                                          target_obj_target,
@@ -268,7 +307,7 @@ class TransferWriteIO(Task):
                 pass
             
         if not runflag:
-            msg = 'Because of the previous problems it is not possible to transfer the object %s to remote: %s, IOuuid: %s' % (
+            msg = 'Because of the previous problems it is not possible to transfer the object %s to target %s on  remote: %s, IOuuid: %s' % (
                                                                                                                                ObjectIdentifierValue, 
                                                                                                                                target_obj_target,
                                                                                                                                remote_server[0],
@@ -300,12 +339,15 @@ class TransferWriteIO(Task):
         else:
             return res_dict
 
-    def _custom_progress_reporter(self, percent):
-            print "\rProgress:{percent:3.0f}%".format(percent=percent)
-
-    def _initialize_upload_rest_client(self, rhost, rport, ruser, rpass, rproto='https'):
+    def _initialize_requests_session(self, ruser, rpass, cert_verify=True, disable_warnings=False):
+        if disable_warnings == True:
+            from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+            requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         requests_session = requests.Session()
-        rest_endpoint = '%s://%s:%s/api/create_tmpworkarea_upload' % (
-                                                                         rproto, rhost, rport)
+        requests_session.verify = cert_verify
         requests_session.auth = (ruser, rpass)
-        return UploadChunkedRestClient(requests_session, rest_endpoint, self._custom_progress_reporter)        
+        return requests_session
+
+    def _custom_progress_reporter(self, percent):
+        self.logger.info('\rUpload file: %s - progress:%s percent' % (self.upload_file,'{percent:3.0f}'.format(percent=percent)))

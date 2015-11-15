@@ -16,7 +16,7 @@ class UploadChunkedRestException(Exception):
         `UploadChunkedRestClient` objects.
         """
         self.value = value
-        super(UploadError, self).__init__(value)
+        super(UploadChunkedRestException, self).__init__(value)
 
 class UploadError(UploadChunkedRestException):
     """An upload error occurred."""
@@ -115,6 +115,9 @@ def main():
         print "\rProgress:{percent:3.0f}%".format(percent=percent)
 
     rest_endpoint = "http://10.0.0.26:5001/api/create_tmpworkarea_upload"
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+    requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     requests_session = requests.Session()
     requests_session.auth = ('admin', 'admin')
     upload_rest_client = UploadChunkedRestClient(requests_session, rest_endpoint, custom_progress_reporter)

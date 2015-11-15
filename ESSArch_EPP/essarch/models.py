@@ -166,6 +166,7 @@ StatusProcess_CHOICES = (
     (1002, 'No empty media available'),
     (1003, 'Problem to mount media'),
     (1004, 'Failed to verify tape after full write'),
+    (1500, 'Remote AIP'),
     (1999, 'Write AIP OK'),
     (2000, 'Try to remove temp AIP object'),
     (2001, 'Failed to remove temp AIP object'),
