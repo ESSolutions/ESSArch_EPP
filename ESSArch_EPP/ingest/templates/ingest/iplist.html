@@ -442,18 +442,36 @@ function setacitivity(number, presentactivity){
     var thevalue = document.getElementById(number).value
     console.log('NewStatusActivity');
     console.log(thevalue);
-    var datastring = '{ "StatusActivity":' + thevalue + '}';
+    var datastringjson = '{ "StatusActivity":' + thevalue + '}';
+    
+    var postobject = { '_content' : datastringjson,
+    		                   '_content_type' : 'application/json',
+    		                   '_method' : 'PATCH',
+    		                  // 'csrfmiddlewaretoken': {% csrf_token %}
+    		                  };
     
     $.ajax({ 
-        url: '/api/archiveobjects/' + number,
-        type: 'PATCH',
-        data: datastring,
-        contentType:"application/json; charset=utf-8",
+        url: '/api/archiveobjects/' + number + '/',
+        type: 'POST',
+        data: postobject,
+        contentType:"application/x-www-form-urlencoded",
         success: function(){
             console.log('Successful patch');
                             }
     });
     
+    /*
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number + '/',
+        type: 'PATCH',
+        data: datastringjson,
+        //contentType:"application/json; charset=utf-8",
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    */
+
 };
 
 
