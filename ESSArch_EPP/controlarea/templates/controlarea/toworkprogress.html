@@ -1,8 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="6" > 
-{% endblock %}
 
 {% block content %}
 Request to check in IP to work area
@@ -14,30 +11,39 @@ Request to check in IP to work area
   
 {% endblock %}
 {% block app-extra-script %}
-     {% js "controlarea/js/failedtask.js" %}
+     {% js "controlarea/js/progress.js" %}
 <script>
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+
+
 
 var taskid = "{{ taskid }}";
 console.log(taskid);
 
 getTaskInfo(taskid);
-
+/*
 function getTaskInfo(taskid){
 
+console.log('The get task info function is called');
+	
 var taskinprogressinfo = {};
-/*
-$.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
+$.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo1){
+
+	taskinprogressinfo = taskinprogressinfo1;
+	console.log(taskinprogressinfo1);
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
-*/
-$.getJSON( '/controlarea//taskresult/' + taskid, function(taskinprogressinfo){
-
-	console.log(taskinprogressinfo)
-    populateTaskInProgress(taskinprogressinfo);
-    
-    });
 
 function populateTaskInProgress(taskinprogressinfo){
 
@@ -147,8 +153,9 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 
 };
 
-
 };
+
+*/
 </script>
 
 {% endblock %}

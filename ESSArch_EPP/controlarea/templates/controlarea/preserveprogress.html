@@ -1,8 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="6" > 
-{% endblock %}
 
 {% block content %}
 Request to preserve IP
@@ -14,14 +11,25 @@ Request to preserve IP
   
 {% endblock %}
 {% block app-extra-script %}
-     {% js "controlarea/js/failedtask.js" %}
+     {% js "controlarea/js/progress.js" %}
 <script>
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
 
 var taskid = "{{ taskid }}";
 console.log(taskid);
 
 getTaskInfo(taskid);
 
+/*
 function getTaskInfo(taskid){
 
 var taskinprogressinfo = {};
@@ -137,8 +145,9 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 
 };
 
-
 };
+
+*/
 </script>
 
 {% endblock %}

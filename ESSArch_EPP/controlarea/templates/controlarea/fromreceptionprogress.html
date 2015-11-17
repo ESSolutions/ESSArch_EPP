@@ -12,13 +12,13 @@ Request to check in IP from reception
   
 {% endblock %}
 {% block app-extra-script %}
-
+    {% js "controlarea/js/progress.js" %}
 <script>
-
+//Reload script
 window.onload = setupRefresh;
 
 function setupRefresh() {
-  setTimeout("refreshPage();", 6000);
+  setTimeout("refreshPage();", 24000);
 }
 function refreshPage() {
    window.location = location.href;
@@ -26,12 +26,11 @@ function refreshPage() {
 
 
 var taskid = "{{ taskid }}";
-console.log(taskid);
 
 getTaskInfo(taskid);
 
 //setInterval(getTaskInfo, 6000);
-
+/*
 function getTaskInfo(taskid){
 
 	console.log('get task function is called');
@@ -44,16 +43,6 @@ $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 	
 	});
  
-
-/*
-$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
-
-    console.log(taskinprogressinfo);
-   populateTaskInProgress(taskinprogressinfo);
-   
-   });
-*/
-
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
@@ -173,16 +162,20 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 function getfailedtaskhtml(result){
     console.log('function is called');
     
-    var failedtaskhtml = '<b>The request failed<b><br>';
+    var failedtaskhtml = '<b>The request failed<b><br>';;
     console.log('Errortype');
-    var errortype = result.substr(0,20);
+    var resultstring = result.toString();
+    var errortype = resultstring.substr(0,20);
+    console.log('String result');
+    console.log(resultstring);
+    
     console.log(errortype);
     if (errortype == 'ControlareaException'){
     	
     	console.log('This is a controlarea exception');
     }
    
-    var errorreason = result.substr(21);
+    var errorreason = resultstring.substr(21);
     console.log(errorreason);
     
 
@@ -193,6 +186,9 @@ function getfailedtaskhtml(result){
 };
 
 };
+
+*/
+
 </script>
 
 {% endblock %}
