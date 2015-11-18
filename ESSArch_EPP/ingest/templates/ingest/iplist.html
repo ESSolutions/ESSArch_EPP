@@ -336,22 +336,124 @@ function StatusProcessChoices(Process){
     var StatusProcessText = "";
     
     switch(Process){
-         case 0:
-             StatusProcessText = 'Ingest';
-             break;
-         case 3000:
-             StatusProcessText = 'Archived';
-             break;
-         case 5000:
-             StatusProcessText = 'Controlarea';
-             break;
-         case 5100:
-             StatusProcessText = 'Workarea';
-             break;
-         case 9999:
-             StatusProcessText = 'Deleted';
-             break;
-         default:
+    case 0:
+        StatusProcessText = 'Receive new object';
+        break;
+    case 5:
+        StatusProcessText = 'The object is ready to remodel';
+        break;
+    case 9:
+        StatusProcessText = 'New object stable';
+        break;
+    case 10:
+        StatusProcessText = "Object don't exist in AIS";
+        break;
+    case 11: 
+        StatusProcessText = "Object don't have any projectcode in AIS";
+        break;
+    case 12: 
+        StatusProcessText = "Object don't have any local policy";
+        break;
+    case 13: 
+        StatusProcessText = "Object already have an AIP!";
+        break;
+    case 14: 
+        StatusProcessText = "Object is not active!";
+        break;
+    case 19: 
+        StatusProcessText = 'Object got a policy';
+        break;
+    case 20: 
+        StatusProcessText = "Object not updated from AIS";
+        break;
+    case 21:
+        StatusProcessText = 'Object not accepted in AIS';
+        break;
+    case 24:
+        StatusProcessText = 'Object accepted in AIS';
+        break;
+    case 25: 
+        StatusProcessText = 'SIP validate';
+        break;
+    case 26: 
+        StatusProcessText = 'SIP validate failed';
+        break;
+    case 29:
+        StatusProcessText = 'SIP validate OK';
+        break;
+    case 30:
+        StatusProcessText = 'Create AIP package';
+        break;
+    case 31:
+        StatusProcessText = 'AIP create failed';
+        break;
+    case 39:
+        StatusProcessText = 'AIP created OK';
+        break;
+    case 40:
+        StatusProcessText ='Create packge checksum';
+        break;
+    case 49:
+        StatusProcessText = 'AIP checksum created OK';
+        break;
+    case 50:
+        StatusProcessText ='AIP validate';
+        break;
+    case 51:
+        StatusProcessText ='AIP validate failed';
+        break;
+    case 59:
+        StatusProcessText = 'AIP validate OK';
+        break;
+    case 60:
+        StatusProcessText = 'Try to remove IngestObject';
+        break;
+    case 61:
+        StatusProcessText = 'Failed to remove IngestObject';
+        break;
+    case 69:
+        StatusProcessText = 'Remove OK of IngestObject';
+        break;
+    case 1000:
+        StatusProcessText = 'Write AIP to longterm storage';
+        break;
+    case 1001:
+        StatusProcessText = 'Fail to write AIP';
+        break;
+    case 1002:
+        StatusProcessText = 'No empty media available';
+        break;
+    case 1003:
+        StatusProcessText = 'Problem to mount media';
+        break;
+    case 1004:
+        StatusProcessText = 'Failed to verify tape after full write';
+        break;
+    case 1999:
+        StatusProcessText = 'Write AIP OK';
+        break;
+    case 2000:
+        StatusProcessText = 'Try to remove temp AIP object';
+        break;
+    case 2001:
+        StatusProcessText = 'Failed to remove temp AIP object';
+        break;
+    case 2009:
+        StatusProcessText = 'Remove temp AIP object OK';
+        break;
+    case 3000:
+        StatusProcessText = 'Archived';
+        break;
+    case 5000:
+        StatusProcessText = 'ControlArea';
+        break;
+    case 5100:
+        StatusProcessText = 'WorkArea';
+        break;
+    case 9999:
+        StatusProcessText = 'Deleted';
+        break;
+    default:
              StatusProcessText =' Not known ';
              console.log('StatusProcess:')
              console.log(Process);
