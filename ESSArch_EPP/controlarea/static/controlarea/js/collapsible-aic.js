@@ -45,6 +45,53 @@ function StatusProcessChoices(Process){
         return StatusProcessText;
    };
 
+   
+   function StatusActivityChoices(Activity){
+	    
+	    var StatusActivityText = "";
+	    
+	    switch(Activity){
+	        
+	    case 0:
+	        StatusActivityText = 'OK';
+	        break;
+	    case 1: 
+	        StatusActivityText = 'New object';
+	        break;
+	    case 2:
+	        StatusActivityText = 'Receive';
+	    case 3:
+	        StatusActivityText = 'Checking';
+	        break;
+	    case 4:
+	        StatusActivityText = 'Need of assistance';
+	        break;
+	    case 5:
+	        StatusActivityText = 'Progress';
+	        break;
+	    case 6:
+	        StatusActivityText = 'Pending writes';
+	        break;
+	    case 7:
+	        StatusActivityText = 'ControlArea';
+	        break;
+	    case 8:
+	        StatusActivityText = 'WorkArea';
+	        break;
+	    case 100:
+	         StatusActivityText = 'FAIL';
+	         break
+	    default:
+	        console.log(Activity)
+	        console.log('undetermined activity');
+	        StatusActivityText = 'Not known';
+	    
+	    }
+	    
+	   return StatusActivityText;
+	}
+     
+   
 function populatelist(){
     
     if(info.length == 0){
@@ -61,6 +108,7 @@ function populatelist(){
     + '<td>' + info[i].create_date +'</td>'
     + '<td>' + info[i].startdate + '</td>'
     + '<td>' + info[i].enddate + '</td>'
+    + '<td>' + '</td>'
     + '<td>' + '</td>'
     + '<td>' + info[i].AIC_UUID + '<td>'
     + '<td></td>'
@@ -80,6 +128,7 @@ function populatelist(){
         + '<td>' + IPList[j].startdate + '</td>'
         + '<td>' + IPList[j].enddate + '</td>'
         + '<td>' + StatusProcessChoices(IPList[j].Process) + '</td>'
+        + '<td>' +  StatusActivityChoices(IPList[j].Activity) + '</td>'
         + '<td>' + parent + ' </td>'
         + '<td>' + IPList[j].ObjectUUID + '</td>'
         + '</tr>'
