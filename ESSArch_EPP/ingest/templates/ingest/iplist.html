@@ -107,6 +107,16 @@
     {% js "aCollapTable/aCollapTable.js" %}
 <script>
 
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
 var aiccheckresult = false;
 
 $.getJSON("{% url 'aiccheck' %}", function(aiccheckresult){
