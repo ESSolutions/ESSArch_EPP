@@ -397,17 +397,16 @@ class ToWorkListInfoView(View):
         return super(ToWorkListInfoView, self).dispatch( *args, **kwargs)
         
     def get_towork_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity=7))
             if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+                AIC = {}           
                 AIC_IPs = []
                 for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5000:
                         datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))
                         AIC_IP = {}
                         AIC_IP['id'] = ip.UUID.id
                         AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
@@ -1085,10 +1084,11 @@ class DiffCheckListInfoView(View):
         return super(DiffCheckListInfoView, self).dispatch( *args, **kwargs)
         
     def get_diffcheck_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1))
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity=7))
             if len(AIC_IPs_query) > 0:
                 AIC = {}
                 AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
@@ -1267,10 +1267,10 @@ class PreserveListInfoView(View):
         return super(PreserveListInfoView, self).dispatch( *args, **kwargs)
         
     def get_preserve_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5000)
             if len(AIC_IPs_query) > 0:
                 AIC = {}
                 AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
