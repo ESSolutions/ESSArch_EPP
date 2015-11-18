@@ -426,8 +426,11 @@ class ToWorkListInfoView(View):
                         AIC_IP['Activity'] = ip.UUID.StatusActivity
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))
+                print sortedAICs     
+        #return AIC_list
+        return sortedAICs
   
     def json_response(self, request):
         
