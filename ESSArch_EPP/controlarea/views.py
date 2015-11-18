@@ -32,6 +32,7 @@ from django.conf import settings
 
 from models import MyFile, RequestFile
 from django.db.models import Q
+from django.db.models import Max
 from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
@@ -1501,32 +1502,39 @@ class DeleteIPListInfoView(View):
         return super(DeleteIPListInfoView, self).dispatch( *args, **kwargs)
         
     def get_deleteip_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess__in=[5000,5100])
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__in=[5000,5100])
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess__in=[5000,5100])
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess__in=[5000,5100]) | Q(UUID__StatusActivity__in=[ 7, 8 ])).order_by('UUID__Generation')
             if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+                AIC = {}           
                 AIC_IPs = []
+                lastgeneration =  AIC_IPs_query.aggregate(Max('UUID__Generation')).values()[0]
+                print lastgeneration
                 for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] =str( ip.UUID.EntryDate)[:10]
-                    AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
-                    AIC['startdate'] = str(datainfo.startdate)[:10]
-                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
-                    AIC['enddate'] = str(datainfo.enddate)[:10]
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
+                    generation = ip.UUID.Generation
+                    if generation == 0 or generation == lastgeneration:
+                        pass
+                    else:
+                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))                     
+                        AIC_IP = {}
+                        AIC_IP['id'] = ip.UUID.id
+                        AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
+                        AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                        AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                        AIC_IP['Label'] = datainfo.label
+                        AIC['Label'] = datainfo.label
+                        AIC_IP['create_date'] =str( ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC_IP['Generation'] = ip.UUID.Generation
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
+                        AIC_IP['Process'] = ip.UUID.StatusProcess
+                        AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)        
         return AIC_list
