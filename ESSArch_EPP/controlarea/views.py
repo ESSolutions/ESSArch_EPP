@@ -638,17 +638,19 @@ class FromWorkListInfoView(View):
         return super(FromWorkListInfoView, self).dispatch( *args, **kwargs)
         
     def get_fromwork_listinfo(self, *args, **kwargs):
-        AICs_in_workarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        #AICs_in_workarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_workarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_workarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5100)
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5100)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5100) | Q(UUID__StatusActivity=8))
             if len(AIC_IPs_query) > 0:
                 AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+                # AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
                 AIC_IPs = []
                 for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5100:
                         datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))     
                         AIC_IP = {}
                         AIC_IP['id'] = ip.UUID.id
                         AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
