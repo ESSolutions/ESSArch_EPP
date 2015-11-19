@@ -7,7 +7,6 @@
 <div style="margin:20px">
 <H1>{{ label }}</H1>
 
-<br/>
 
 <div id="aic" class="results">
   <table id="result_list">
@@ -462,6 +461,14 @@ function StatusProcessChoices(Process){
      return StatusProcessText;
 };
 
+function stringifieddate(longdate){
+    
+    var datestring = longdate.toString();
+    var shortdate = datestring.substring(0, 10);
+    return shortdate;
+}
+
+
 function setaichtml(ajaxinfo){
     
     var aicwrapper = ajaxinfo;
@@ -487,9 +494,9 @@ function setaichtml(ajaxinfo){
                 + '<td>AIC</td>'
                 + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
                 + '<td>' + lastIPinfo.label + '</td>'
-                + '<td>' + lastIP.CreateDate + '</td>'
-                + '<td>' + lastIPinfo.startdate + '</td>'
-                + '<td>' + lastIPinfo.enddate + '</td>'
+                + '<td>' + stringifieddate(lastIP.CreateDate) + '</td>'
+                + '<td>' + stringifieddate(lastIPinfo.startdate) + '</td>'
+                + '<td>' + stringifieddate(lastIPinfo.enddate) + '</td>'
                 + '<td></td>'
                 + '<td></td>'
                 + '<td>' + AIC.ObjectUUID + '</td>'
@@ -508,9 +515,9 @@ function setaichtml(ajaxinfo){
                     + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
                     + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
                     + '<td>' + IPinfo.label + '</td>'
-                    + '<td>' + IP.CreateDate + '</td>'
-                    + '<td>' + IPinfo.startdate + '</td>'
-                    + '<td>' + IPinfo.enddate + '</td>'
+                    + '<td>' + stringifieddate(IP.CreateDate) + '</td>'
+                    + '<td>' + stringifieddate(IPinfo.startdate) + '</td>'
+                    + '<td>' + stringifieddate(IPinfo.enddate) + '</td>'
                     + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
                     + '<td>' + '<select id="' + IP.ObjectUUID + '" onchange=setacitivity("' + IP.ObjectUUID + '"'  + ',' + IP.StatusProcess + ')>' + StatusActivityChoices(IP.StatusActivity) + '</select>' + '</td>'
                     + '<td>' + aicparent + '</td>'

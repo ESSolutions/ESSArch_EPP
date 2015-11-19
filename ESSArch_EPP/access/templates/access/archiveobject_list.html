@@ -4,11 +4,11 @@
 
 {% block server-side-base %}active{% endblock %}
 
-{% block container %}
+{% block content %}
 
-
+<div style="margin:20px">
 <H1>{{ label }}</H1>
-<br/>
+
 
 <div id="aic" class="row">
     <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
@@ -61,6 +61,7 @@ var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()"
                 '<th>Start date</th>' +
                 '<th>End date</th>' +
                 '<th>State</th>' +
+                '<th>Activity</th>' +
                 '<th>AIC-UUID</th>' +
                 '<th>IP-UUID</th>' +
       '</tr>' +
@@ -180,6 +181,58 @@ function StatusProcessChoices(Process){
         return StatusProcessText;
    };
 
+   function StatusActivityChoices(Activity){
+       
+       var StatusActivityText = "";
+       
+       switch(Activity){
+           
+       case 0:
+           StatusActivityText = 'OK';
+           break;
+       case 1: 
+           StatusActivityText = 'New object';
+           break;
+       case 2:
+           StatusActivityText = 'Receive';
+       case 3:
+           StatusActivityText = 'Checking';
+           break;
+       case 4:
+           StatusActivityText = 'Need of assistance';
+           break;
+       case 5:
+           StatusActivityText = 'Progress';
+           break;
+       case 6:
+           StatusActivityText = 'Pending writes';
+           break;
+       case 7:
+           StatusActivityText = 'ControlArea';
+           break;
+       case 8:
+           StatusActivityText = 'WorkArea';
+           break;
+       case 100:
+            StatusActivityText = 'FAIL';
+            break
+       default:
+           console.log(Activity)
+           console.log('undetermined activity');
+           StatusActivityText = 'Not known';
+       
+       }
+       
+      return StatusActivityText;
+   }   
+   
+ function stringifieddate(longdate){
+	 
+	 var datestring = longdate.toString();
+	 var shortdate = datestring.substring(0, 10);
+	 return shortdate;
+ }  
+   
 function setaichtml(ajaxinfo){
 	
 	var aicwrapper = ajaxinfo;
@@ -205,9 +258,10 @@ function setaichtml(ajaxinfo){
 		        + '<td>AIC</td>'
 		        + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
 		        + '<td>' + lastIPinfo.label + '</td>'
-		        + '<td>' + lastIP.CreateDate + '</td>'
-		        + '<td>' + lastIPinfo.startdate + '</td>'
-		        + '<td>' + lastIPinfo.enddate + '</td>'
+		        + '<td>' + stringifieddate(lastIP.CreateDate) + '</td>'
+		        + '<td>' + stringifieddate(lastIPinfo.startdate) + '</td>'
+		        + '<td>' + stringifieddate(lastIPinfo.enddate) + '</td>'
+		        + '<td></td>'
 		        + '<td></td>'
 		        + '<td>' + AIC.ObjectUUID + '</td>'
 		        +'</tr>';
@@ -225,10 +279,11 @@ function setaichtml(ajaxinfo){
 		            + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
 		            + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
 		            + '<td>' + IPinfo.label + '</td>'
-		            + '<td>' + IP.CreateDate + '</td>'
-		            + '<td>' + IPinfo.startdate + '</td>'
-		            + '<td>' + IPinfo.enddate + '</td>'
+		            + '<td>' + stringifieddate(IP.CreateDate) + '</td>'
+		            + '<td>' + stringifieddate(IPinfo.startdate) + '</td>'
+		            + '<td>' + stringifieddate(IPinfo.enddate) + '</td>'
 		            + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+		            + '<td> ' +  StatusActivityChoices(IP.StatusActivity) + '</td>'
 		            + '<td>' + aicparent + '</td>'
 		            + '<td>' + IP.ObjectUUID + '</td>'
 		            + '</tr>';
