@@ -428,9 +428,7 @@ class ToWorkListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
-                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
-        #return AIC_list
-        return sortedAICs
+        return AIC_list
   
     def json_response(self, request):
         
@@ -673,8 +671,9 @@ class FromWorkListInfoView(View):
                         AIC_IP['Activity'] = ip.UUID.StatusActivity
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
+                AIC_list.append(AIC)
         return AIC_list
+
   
     def json_response(self, request):
         
@@ -1119,8 +1118,9 @@ class DiffCheckListInfoView(View):
                     AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)  
+        return AIC_list     
+
   
     def json_response(self, request):
         
@@ -1302,8 +1302,9 @@ class PreserveListInfoView(View):
                     AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)  
+        return AIC_list    
+
   
     def json_response(self, request):
         
@@ -1509,23 +1510,27 @@ class DeleteIPListInfoView(View):
         return super(DeleteIPListInfoView, self).dispatch( *args, **kwargs)
         
     def get_deleteip_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
+        AICs = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
-        for obj in AICs_in_controlarea:
+        for obj in AICs:
             #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess__in=[5000,5100])
             AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess__in=[5000,5100]) | Q(UUID__StatusActivity__in=[ 7, 8 ])).order_by('UUID__Generation')
-            if len(AIC_IPs_query) > 0:
+            if len(AIC_IPs_query)> 0:
                 AIC = {}           
                 AIC_IPs = []
-                lastgeneration =  AIC_IPs_query.aggregate(Max('UUID__Generation')).values()[0]
+                AIC['AIC_UUID'] =(str(obj.ObjectUUID)) 
+                lastgeneration =  AIC_IPs_query.filter(UUID__StatusProcess__in=[5000,5100]).aggregate(Max('UUID__Generation')).values()[0]
+                print 'lastgeneration'
                 print lastgeneration
-                for ip in AIC_IPs_query:
-                    generation = ip.UUID.Generation
-                    if generation == 0 or generation == lastgeneration:
-                        pass
+                excludelist = []
+                for pp in AIC_IPs_query:
+                    if pp.UUID.StatusProcess == 3000:
+                        excludelist.append(pp) 
                     else:
-                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))                     
+                        if 0 < pp.UUID.Generation < lastgeneration:
+                            excludelist.append(pp)
+                for ip in excludelist:                   
+                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)                    
                         AIC_IP = {}
                         AIC_IP['id'] = ip.UUID.id
                         AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
@@ -1543,9 +1548,11 @@ class DeleteIPListInfoView(View):
                         AIC_IP['Process'] = ip.UUID.StatusProcess
                         AIC_IP['Activity'] = ip.UUID.StatusActivity
                         AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                if len(AIC_IPs) > 0:
+                    AIC['IPs'] = AIC_IPs
+                    AIC_list.append(AIC) 
+        return AIC_list  
+
   
     def json_response(self, request):
         
@@ -1833,7 +1840,6 @@ class TaskResult(View):
         kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
         print (kwargstest)
         if kwargstest:
-            transaction.commit()
             thetask = TaskMeta.objects.filter(task_id=thetaskid)
             task['status'] = thetask[0].status
             task['result']  =  thetask[0].result
