@@ -84,6 +84,7 @@ class AccessListInfoView(View):
                     AIC_IP['enddate'] = str(datainfo.enddate)[:10]
                     AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
