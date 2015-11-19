@@ -110,7 +110,7 @@
 window.onload = setupRefresh;
 
 function setupRefresh() {
-  setTimeout("refreshPage();", 24000);
+  setTimeout("refreshPage();", 120000);
 }
 function refreshPage() {
    window.location = location.href;
@@ -463,9 +463,13 @@ function StatusProcessChoices(Process){
 
 function stringifieddate(longdate){
     
+	if (longdate != undefined){
     var datestring = longdate.toString();
     var shortdate = datestring.substring(0, 10);
     return shortdate;
+    else{
+    	return 'nodate';}
+    }
 }
 
 

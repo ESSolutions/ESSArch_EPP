@@ -226,12 +226,16 @@ function StatusProcessChoices(Process){
       return StatusActivityText;
    }   
    
- function stringifieddate(longdate){
-	 
-	 var datestring = longdate.toString();
-	 var shortdate = datestring.substring(0, 10);
-	 return shortdate;
- }  
+function stringifieddate(longdate){
+	    
+	    if (longdate != undefined){
+	    var datestring = longdate.toString();
+	    var shortdate = datestring.substring(0, 10);
+	    return shortdate;
+	    else{
+	        return 'not set';}
+	    }
+	}
    
 function setaichtml(ajaxinfo){
 	
