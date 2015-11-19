@@ -237,6 +237,7 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
 CELERY_DEFAULT_QUEUE = 'default'
+CELERY_TASK_RESULT_EXPIRES = 864000 # clean older than 10 days in celery_taskmeta
 
 from celery.schedules import crontab
 from datetime import timedelta
