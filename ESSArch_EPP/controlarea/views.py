@@ -55,6 +55,7 @@ from django.contrib.auth.decorators import permission_required
 
 import json
 import jsonpickle
+from django.db import transaction
 from operator import itemgetter, attrgetter, methodcaller
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -427,8 +428,7 @@ class ToWorkListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
-                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))
-                print sortedAICs     
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
         #return AIC_list
         return sortedAICs
   
@@ -1688,10 +1688,16 @@ class TasksInfo(View):
     def getTaskInfo(self, *args, **kwargs):
 
         numberofdays = int(self.kwargs['days'])
+        print 'numberofdays'
+        print numberofdays
 
         enddate = datetime.datetime.now()
+        print 'enddate'
+        print enddate
 
         startdate = enddate - datetime.timedelta(days=numberofdays)
+        print 'startdate'
+        print startdate
 
         allTasks = TaskMeta.objects.filter(date_done__range=[startdate, enddate]).order_by('date_done').reverse()
 
@@ -1728,7 +1734,7 @@ class TasksInfo(View):
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
-                        Task['datedone'] = str(t.date_done)
+                        Task['datedone'] = str(t.date_done)[:10]
                         SuccessTasks.append(Task)                
         Tasks['FailedTasks'] = FailedTasks
         Tasks['PendingTasks'] = PendingTasks
@@ -1823,16 +1829,19 @@ class TaskResult(View):
         task = {}
         thetaskid = self.kwargs['taskid']
         print (thetaskid)
+        
         kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
         print (kwargstest)
         if kwargstest:
-
+            transaction.commit()
             thetask = TaskMeta.objects.filter(task_id=thetaskid)
             task['status'] = thetask[0].status
             task['result']  =  thetask[0].result
+            task['id'] = thetaskid
         else:
             task['status'] = 'notaskfound'
             task['result'] = 'notaskfound'
+            task['id'] = thetaskid
         taskwrapper['task'] = task
         finishedtask = jsonpickle.encode(taskwrapper)
         return finishedtask
