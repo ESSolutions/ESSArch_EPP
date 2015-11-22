@@ -26,7 +26,7 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSMSSQL, ESSPGM
+import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSMSSQL, ESSPGM, sys, traceback
 from celery import Task, shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import IntegrityError
@@ -34,10 +34,57 @@ from Storage.models import storage, storageMedium, IOQueue
 from configuration.models import ESSConfig
 from essarch.libs import GetSize, ESSArchSMError, calcsum
 from django.utils import timezone
+import requests
+from rest_framework.renderers import JSONRenderer
+from urlparse import urljoin
+from api.serializers import IOQueueNestedReadSerializer
+from retrying import retry
+
+# Disable https insecure warnings
+from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 @shared_task()
 def add(x, y):
     return x + y
+
+class apply_result(object):
+    def __init__(self, task_id):
+        """
+        Initialize apply_sync result
+        """
+        self.task_id = task_id
+
+class DatabasePostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize DatabasePostRestException
+        """
+        self.value = value
+        super(DatabasePostRestException, self).__init__(value)
+
+class DatabasePostRestError(DatabasePostRestException):
+    """An post request error occurred."""
+
+class ApplyPostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize ApplyPostRestException
+        """
+        self.value = value
+        super(ApplyPostRestException, self).__init__(value)
+
+class ApplyPostRestError(ApplyPostRestException):
+    """An post request error occurred."""
 
 class WriteStorageMethodDisk(Task):
     """Write IP with IO_uuid to disk
@@ -65,10 +112,11 @@ class WriteStorageMethodDisk(Task):
     """
     tz = timezone.get_default_timezone()
     time_limit = 86400
+    logger = logging.getLogger('StorageMethodDisk')
 
     def run(self, req_pk, *args, **kwargs):
         """The body of the task executed by workers."""
-        logger = logging.getLogger('StorageMethodDisk')
+        logger = self.logger
         IO_obj = IOQueue.objects.get(pk=req_pk)
 
         # Let folks know we started
@@ -76,6 +124,12 @@ class WriteStorageMethodDisk(Task):
         IO_obj.save(update_fields=['Status'])
 
         try:
+            target_obj = IO_obj.storagemethodtarget.target
+            master_server = target_obj.master_server.split(',')
+            if len(master_server) == 3:
+                remote_io = True
+            else:         
+                remote_io = False
             result = self._WriteDiskProc(req_pk)
         except ESSArchSMError as e:
             IO_obj.refresh_from_db()
@@ -84,6 +138,7 @@ class WriteStorageMethodDisk(Task):
             ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
             IO_obj.Status = 100
             IO_obj.save(update_fields=['Status'])
+            if remote_io: self._update_master_ioqueue(master_server, IO_obj)
             #raise self.retry(exc=e, countdown=10, max_retries=2)
             raise e
         except Exception as e:
@@ -93,6 +148,7 @@ class WriteStorageMethodDisk(Task):
             ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
             IO_obj.Status = 100
             IO_obj.save(update_fields=['Status'])
+            if remote_io: self._update_master_ioqueue(master_server, IO_obj)
             raise e
         else:
             IO_obj.refresh_from_db()
@@ -109,12 +165,74 @@ class WriteStorageMethodDisk(Task):
             ESSPGM.Events().create('1102','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
             IO_obj.Status = 20
             IO_obj.save(update_fields=['Status'])
+            if remote_io: self._update_master_ioqueue(master_server, IO_obj)        
             return result
 
     #def on_failure(self, exc, task_id, args, kwargs, einfo):
     #    logger = logging.getLogger('StorageMethodDisk')
     #    logger.exception("Something happened when trying"
     #                     " to resolve %s" % args[0])
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)    
+    def _update_master_ioqueue(self, master_server, IO_obj):
+        """ Call REST service on master to update IOQueue with nested storage, storageMedium
+        
+        :param master_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        logger = self.logger
+        base_url, ruser, rpass = master_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueuenested/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        IO_obj_data = IOQueueNestedReadSerializer(IO_obj).data
+        IO_obj_json = JSONRenderer().render(IO_obj_data)
+        r = requests_session.patch(IOQueue_rest_endpoint,
+                                        headers={'Content-Type': 'application/json'}, 
+                                        data=IO_obj_json)
+        if not r.status_code == 200:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to update master server IOQueue, storage, storageMedium for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def remote_write_disk_apply_async(self, remote_server, IOQueue_obj_id, ArchiveObject_obj_ObjectUUID, queue='smdisk'):
+        """Remote REST call to appy_async
+        
+        :param remote_server: example: [https://servername:port/api/write_storage_method_tape_apply, user, password]
+        :param IOQueue_obj_id: Primary key to IOQueue database table to be performed, ex 'id1'
+        :param ArchiveObject_obj_ObjectUUID: ObjectUUID key to ArchiveObject database table to be performed, ex 'id1'
+        :param queue: celery queue name, ex 'smdisk'
+        
+        """
+        logger = logging.getLogger('Storage')
+        base_url, ruser, rpass = remote_server
+        write_disk_rest_endpoint = urljoin(base_url, '/api/write_storage_method_disk_apply/')
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        data = {'queue': queue, 
+                'IOQueue_obj_id': IOQueue_obj_id, 
+                'ArchiveObject_obj_ObjectUUID': ArchiveObject_obj_ObjectUUID}
+        r = requests_session.post(write_disk_rest_endpoint,
+                                  headers={'Content-Type': 'application/json'},
+                                  data=JSONRenderer().render(data))
+        if not r.status_code == 201:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to apply write task to remote server for ObjectUUID: %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              ArchiveObject_obj_ObjectUUID,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_obj_id)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
+        return apply_result(r.json()['task_id'])
 
     def _WriteDiskProc(self,IO_obj_uuid):
         """Writes IP (Information Package) to a disk filepath

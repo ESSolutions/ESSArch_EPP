@@ -35,10 +35,57 @@ from configuration.models import ESSConfig, StorageTargets
 from essarch.libs import GetSize, ESSArchSMError, calcsum, SMTapeFull
 from essarch.models import robotdrives, robotQueue, robot, AccessQueue
 from django.utils import timezone
+import requests
+from rest_framework.renderers import JSONRenderer
+from urlparse import urljoin
+from api.serializers import IOQueueNestedReadSerializer
+from retrying import retry
+
+# Disable https insecure warnings
+from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 @shared_task()
 def add(x, y):
     return x + y
+
+class apply_result(object):
+    def __init__(self, task_id):
+        """
+        Initialize apply_sync result
+        """
+        self.task_id = task_id
+
+class DatabasePostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize DatabasePostRestException
+        """
+        self.value = value
+        super(DatabasePostRestException, self).__init__(value)
+
+class DatabasePostRestError(DatabasePostRestException):
+    """An post request error occurred."""
+
+class ApplyPostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize ApplyPostRestException
+        """
+        self.value = value
+        super(ApplyPostRestException, self).__init__(value)
+
+class ApplyPostRestError(ApplyPostRestException):
+    """An post request error occurred."""
 
 class WriteStorageMethodTape(Task):
     """Write IP with IO_uuid to tape
@@ -55,7 +102,7 @@ class WriteStorageMethodTape(Task):
     "ObjectPath"/"ObjectIdentifierValue"_Package_METS.xml
     "ObjectPath"/"aic_uuid"_AIC_METS.xml
     
-    :param req_pk: List of primary keys to IOQueue database table to be performed
+    :param req_pk_list: List of primary keys to IOQueue database table to be performed
     
     Example:
     from StorageMethodTape.tasks import WriteStorageMethodTape
@@ -66,10 +113,11 @@ class WriteStorageMethodTape(Task):
     """
     tz = timezone.get_default_timezone()
     time_limit = 86400
+    logger = logging.getLogger('StorageMethodTape')
 
     def run(self, req_pk_list, *args, **kwargs):
         """The body of the task executed by workers."""
-        logger = logging.getLogger('StorageMethodTape')
+        logger = self.logger
         IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
         NumberOfTasks = IO_objs.count()
         logger.debug('Initiate write task, NumberOfTasks: %s' % NumberOfTasks)
@@ -81,8 +129,13 @@ class WriteStorageMethodTape(Task):
             IO_obj.save(update_fields=['Status'])
             self.update_state(state='PROGRESS',
                 meta={'current': TaskNum, 'total': NumberOfTasks})
-    
             try:
+                target_obj = IO_obj.storagemethodtarget.target
+                master_server = target_obj.master_server.split(',')
+                if len(master_server) == 3:
+                    remote_io = True
+                else:         
+                    remote_io = False
                 result = self._WriteTapeProc(IO_obj.id)
             except SMTapeFull as e:
                 logger.info(e)
@@ -98,6 +151,7 @@ class WriteStorageMethodTape(Task):
                     ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
                     IO_obj.Status = 100
                     IO_obj.save(update_fields=['Status'])
+                    if remote_io: self._update_master_ioqueue(master_server, IO_obj)
                     #raise self.retry(exc=e, countdown=10, max_retries=2)
                     raise e
                 except Exception as e:
@@ -108,6 +162,7 @@ class WriteStorageMethodTape(Task):
                     ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
                     IO_obj.Status = 100
                     IO_obj.save(update_fields=['Status'])
+                    if remote_io: self._update_master_ioqueue(master_server, IO_obj)
                     raise e
             except ESSArchSMError as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -117,6 +172,7 @@ class WriteStorageMethodTape(Task):
                 ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
                 IO_obj.Status = 100
                 IO_obj.save(update_fields=['Status'])
+                if remote_io: self._update_master_ioqueue(master_server, IO_obj)
                 #raise self.retry(exc=e, countdown=10, max_retries=2)
                 raise e
             except Exception as e:
@@ -127,6 +183,7 @@ class WriteStorageMethodTape(Task):
                 ESSPGM.Events().create('1104','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
                 IO_obj.Status = 100
                 IO_obj.save(update_fields=['Status'])
+                if remote_io: self._update_master_ioqueue(master_server, IO_obj)
                 raise e
 
             IO_obj.refresh_from_db()
@@ -143,12 +200,74 @@ class WriteStorageMethodTape(Task):
             ESSPGM.Events().create('1104','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)      
             IO_obj.Status = 20
             IO_obj.save(update_fields=['Status'])
+            if remote_io: self._update_master_ioqueue(master_server, IO_obj)
             #return result
 
     #def on_failure(self, exc, task_id, args, kwargs, einfo):
     #    logger = logging.getLogger('StorageMethodTape')
     #    logger.exception("Something happened when trying"
     #                     " to resolve %s" % args[0])
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def _update_master_ioqueue(self, master_server, IO_obj):
+        """ Call REST service on master to update IOQueue with nested storage, storageMedium
+        
+        :param master_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        logger = self.logger
+        base_url, ruser, rpass = master_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueuenested/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        IO_obj_data = IOQueueNestedReadSerializer(IO_obj).data
+        IO_obj_json = JSONRenderer().render(IO_obj_data)
+        r = requests_session.patch(IOQueue_rest_endpoint,
+                                        headers={'Content-Type': 'application/json'}, 
+                                        data=IO_obj_json)
+        if not r.status_code == 200:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to update master server IOQueue, storage, storageMedium for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def remote_write_tape_apply_async(self, remote_server, IOQueue_objs_id_list, ArchiveObject_objs_ObjectUUID_list, queue='smtape'):
+        """Remote REST call to appy_async
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param IOQueue_objs_id_list: List of primary keys to IOQueue database table to be performed, ex ['id1', 'id2']
+        :param ArchiveObject_objs_ObjectUUID_list: List of ObjectUUID keys to ArchiveObject database table to be performed, ex ['id1', 'id2']
+        :param queue: celery queue name, ex 'smtape'
+        
+        """
+        logger = logging.getLogger('Storage')
+        base_url, ruser, rpass = remote_server
+        write_tape_rest_endpoint = urljoin(base_url, '/api/write_storage_method_tape_apply/')
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        data = {'queue': queue, 
+                'IOQueue_objs_id_list': IOQueue_objs_id_list, 
+                'ArchiveObject_objs_ObjectUUID_list': ArchiveObject_objs_ObjectUUID_list}
+        r = requests_session.post(write_tape_rest_endpoint,
+                                  headers={'Content-Type': 'application/json'},
+                                  data=JSONRenderer().render(data))
+        if not r.status_code == 201:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to apply write task to remote server for ObjectUUID: %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              ArchiveObject_objs_ObjectUUID_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_objs_id_list)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
+        return apply_result(r.json()['task_id'])
 
     def _WriteTapeProc(self,IO_obj_uuid):
         """Writes IP (Information Package) to a tape
@@ -615,17 +734,19 @@ class WriteStorageMethodTape(Task):
         target_obj = StorageTargets.objects.get(id=target_obj_id)
 
         #Check if a write tape exist
-        try:
-            storageMedium_obj = storageMedium.objects.get(storageMediumStatus=20, storagetarget=target_obj)
-        except ObjectDoesNotExist as e:
+        storageMedium_objs = storageMedium.objects.filter(storageMediumStatus=20, storagetarget=target_obj)
+        if not storageMedium_objs.exists():
             t_id = ''
         else:
-            t_id = storageMedium_obj.storageMediumID
+            t_id = storageMedium_objs[0].storageMediumID
             
-        new_tape_flag = 0
         if t_id:
             #Check if write tape is mounted or need to mount
             tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_id)
+            if not tapedev:
+                # Problem to mount tape
+                logger.error('Problem to mount tape: %s' % t_id)
+                return 1, 'None', None, 'None'   
         else:
             #########################################
             # Try to mount a new tape from robot
@@ -678,7 +799,11 @@ class WriteStorageMethodTape(Task):
                         storageMedium_obj.save(update_fields=['ExtDBdatetime'])   
                 ############################
                 # Mounting new tape
-                tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_id)                
+                tapedev = MountTape(t_id=t_id, IO_obj_id=IO_obj_id)
+                if not tapedev:
+                    # Problem to mount tape
+                    logger.error('Problem to mount tape: %s' % t_id)
+                    return 1, 'None', None, 'None'              
                 ##########################################
                 # Write tapelabel to tape
                 xml_labelfilepath = ''
@@ -691,8 +816,7 @@ class WriteStorageMethodTape(Task):
                     tar_obj.addfile(tarinfo_obj, file(xml_labelfilepath))
                     logger.info(t_id + ' succeed to label new media')
                     tar_obj.close()
-                    logger.info(t_id + ' close tapedevice succeed')
-                    new_tape_flag = 1                    
+                    logger.info(t_id + ' close tapedevice succeed')             
                 except (ValueError, IOError, OSError, tarfile.TarError) as e:
                     msg = 'Problem to write labelfile: %s to storageMediumID: %s tapedevice: %s (IOuuid: %s) error: %s' % (xml_labelfilepath, t_id, tapedev, IO_obj_id, e)
                     logger.error(msg)
@@ -711,18 +835,18 @@ class WriteStorageMethodTape(Task):
                             storageMedium_obj.save(update_fields=['ExtDBdatetime'])                       
             else:    
                 logger.error('Problem to find any empty tapes with prefix: %s in robot (IOuuid: %s)' % (target_obj.target, IO_obj_id))
-                return 2, 'None', 'None', 'None'
+                return 2, 'None', None, 'None'
         try:
             storageMedium_obj = storageMedium.objects.get(storageMediumID=t_id)
         except ObjectDoesNotExist as e:
             logger.error('Storage medium %s not found in database. error: %s' % (t_id,e))
-            return 1, 'None', 'None', 'None'
+            return 1, 'None', None, 'None'
         except MultipleObjectsReturned as e:
             logger.error('More then one entry for storage medium %s found in database. error: %s' % (t_id,e))
-            return 1, 'None', 'None', 'None'
+            return 1, 'None', None, 'None'
         if storageMedium_obj.storageMediumStatus == 100:
             logger.error('Storage medium %s has status failed' % t_id)
-            return 1, 'None', 'None', 'None'
+            return 1, 'None', None, 'None'
         # Check if tape is in write position
         latest_storage_qs = storage.objects.filter(storagemedium__storageMediumID=t_id).extra(
                                                                  select={'contentLocationValue_int': 'CAST(contentLocationValue AS UNSIGNED)'}
@@ -1225,14 +1349,21 @@ def MountTape(t_id, IO_obj_id):
     except ObjectDoesNotExist as e:
         #Tape is not mounted, mounting tape
         logger.info('Start to mount: ' + str(t_id))
-        robotQueue_obj = robotQueue()
-        robotQueue_obj.ReqUUID = IO_obj_id
-        robotQueue_obj.ReqType = 50 # Mount
-        robotQueue_obj.ReqPurpose = 'MountTapePosition'
-        robotQueue_obj.Status = 0 # Pending
-        robotQueue_obj.MediumID = t_id
-        robotQueue_obj.user = 'sys'
-        robotQueue_obj.save()
+        robotQueue_obj, created = robotQueue.objects.update_or_create(
+                                                                     ReqUUID=IO_obj_id,
+                                                                     ReqType=50,
+                                                                     ReqPurpose='MountTapePosition',
+                                                                     MediumID=t_id,
+                                                                     user='sys',
+                                                                     defaults={'Status':0}) 
+        #robotQueue_obj = robotQueue()
+        #robotQueue_obj.ReqUUID = IO_obj_id
+        #robotQueue_obj.ReqType = 50 # Mount
+        #robotQueue_obj.ReqPurpose = 'MountTapePosition'
+        #robotQueue_obj.Status = 0 # Pending
+        #robotQueue_obj.MediumID = t_id
+        #robotQueue_obj.user = 'sys'
+        #robotQueue_obj.save()
         while 1:
             try:
                 robotdrives_obj = robotdrives.objects.get(t_id=t_id, status='Mounted', drive_lock=IO_obj_id)
@@ -1245,9 +1376,9 @@ def MountTape(t_id, IO_obj_id):
                 logger.info('Wait for mounting of: ' + str(t_id))
             else:
                 logger.info('Mount succeeded: ' + str(t_id))
+                tapedev = robotdrives_obj.drive_dev
                 break
             time.sleep(2)
-        tapedev = robotdrives_obj.drive_dev
     else:
         while 1:
             robotdrives_obj.refresh_from_db()

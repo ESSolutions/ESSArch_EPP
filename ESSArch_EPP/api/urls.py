@@ -33,6 +33,7 @@ from api.views import (TmpWorkareaUploadView,
                     CreateTmpWorkareaUploadView,
                     CreateTmpWorkareaUploadCompleteView,
                     ArchiveObjectViewSet,
+                    ArchiveObjectStorageViewSet,
                     AICObjectViewSet,
                     ArchivePolicyViewSet,
                     ArchivePolicyNestedViewSet,
@@ -45,11 +46,14 @@ from api.views import (TmpWorkareaUploadView,
                     IOQueueViewSet, 
                     IOQueueNestedViewSet,
                     AICListView,
+                    WriteStorageMethodTapeApply,
+                    WriteStorageMethodDiskApply,
                     )
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'archiveobjects', ArchiveObjectViewSet)
+router.register(r'archiveobjectsandstorage', ArchiveObjectStorageViewSet)
 router.register(r'aicobjects', AICObjectViewSet, 'aicobject')
 router.register(r'archivepolicy', ArchivePolicyViewSet)
 router.register(r'archivepolicynested', ArchivePolicyNestedViewSet, 'archivepolicynested')
@@ -61,6 +65,8 @@ router.register(r'storage', storageViewSet)
 router.register(r'storagenested', storageNestedViewSet, 'storagenested')
 router.register(r'ioqueue', IOQueueViewSet)
 router.register(r'ioqueuenested', IOQueueNestedViewSet, 'ioqueuenested')
+router.register(r'write_storage_method_tape_apply', WriteStorageMethodTapeApply, 'api_write_storage_method_tape_apply')
+router.register(r'write_storage_method_disk_apply', WriteStorageMethodDiskApply, 'api_write_storage_method_disk_apply')
 
 urlpatterns = patterns('',
     url(r'^', include(router.urls)),

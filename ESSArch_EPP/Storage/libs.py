@@ -39,9 +39,33 @@ from StorageMethodTape.tasks import WriteStorageMethodTape
 from Storage.tasks import TransferWriteIO
 from essarch.libs import ESSArchSMError
 from celery.result import AsyncResult
+import requests
+from rest_framework.renderers import JSONRenderer
+from urlparse import urljoin
+from api.serializers import ArchiveObjectPlusAICPlusStorageNestedReadSerializer
+
+# Disable https insecure warnings
+from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 import django
 django.setup()
+
+class DatabasePostRestException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    request.
+    """
+    def __init__(self, value):
+        """
+        Initialize DatabasePostRestException
+        """
+        self.value = value
+        super(DatabasePostRestException, self).__init__(value)
+
+class DatabasePostRestError(DatabasePostRestException):
+    """An post request error occurred."""
 
 class StorageMethodWrite:
     tz = timezone.get_default_timezone()
@@ -78,6 +102,7 @@ class StorageMethodWrite:
     def add_to_ioqueue(self):
         ArchiveObjects_objs_SizeSum = sum(i[0] for i in self.ArchiveObject_objs.values_list('ObjectSize'))
         self.IOs_to_write = {}
+        self.IOs_to_transfer = {}
         self.st_objs_to_check = {}
         for ArchiveObject_obj in self.ArchiveObject_objs:
             
@@ -282,10 +307,17 @@ class StorageMethodWrite:
                 ReqType = 10
                 ReqPurpose=u'Write package to tape'
                 #ReadTapeIO_flag = IOQueue.objects.filter(ReqType=20, Status__lt=20).exists()
+                ArchiveObject_objs_ObjectUUID_list = [i.archiveobject.ObjectUUID for i in IOQueue_obj_list]
                 IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
                 #if not target_obj.id in self.ActiveTapeIOs and not ReadTapeIO_flag:
                 if not target_obj.id in self.ActiveTapeIOs:
-                    result = WriteStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
+                    if remote_io:
+                        result = WriteStorageMethodTape().remote_write_tape_apply_async(remote_server, 
+                                                                               IOQueue_objs_id_list, 
+                                                                               ArchiveObject_objs_ObjectUUID_list,
+                                                                               queue='smtape')
+                    else:
+                        result = WriteStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
                     self.ActiveTapeIOs.append(target_obj.id)
                     ActiveTapeIOs_str = ', '.join([i.target for i in StorageTargets.objects.filter(id__in=self.ActiveTapeIOs)])
                     self.logger.info('Apply new write IO process for tape prefix: %s, (ActiveTapeIOs: %s)' % (target_obj.target, ActiveTapeIOs_str))         
@@ -301,7 +333,13 @@ class StorageMethodWrite:
                 ReqType = 15
                 ReqPurpose=u'Write package to disk'
                 for  IOQueue_obj in IOQueue_obj_list:
-                    result = WriteStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
+                    if remote_io:
+                        result = WriteStorageMethodDisk().remote_write_tape_apply_async(remote_server, 
+                                                                               IOQueue_obj.id, 
+                                                                               IOQueue_obj.archiveobject.ObjectUUID,
+                                                                               queue='smdisk')
+                    else:
+                        result = WriteStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
                     IOQueue_obj.task_id = result.task_id
                     IOQueue_obj.save(update_fields=['task_id'])
     
@@ -511,8 +549,80 @@ class StorageMethodWrite:
                         self.logger.warning('smtp_server not configured, skip to send email receipt for AIP: %s' % ArchiveObject_obj.ObjectIdentifierValue)
                 else:
                     self.logger.error('Missing receipt email address for AIP: %s' % ArchiveObject_obj.ObjectIdentifierValue)
+            
+            # Update remote server
+            remote_io = False        
+            for IOQueue_obj in IOQueue_objs:
+                target_obj = IOQueue_obj.storagemethodtarget.target
+                remote_server = target_obj.remote_server.split(',')
+                if len(remote_server) == 3:
+                    valid_remote_server = remote_server
+                    try:
+                        self._delete_remote_IOQueue_obj(remote_server, IOQueue_obj)
+                    except DatabasePostRestError as e:
+                        self.logger.error('Failed to delete IOQueue_obj %s from remote DB for AIP: %s, error: %s' % (
+                                                                                                                     IOQueue_obj.id, 
+                                                                                                                     ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                     e))
+                    remote_io = True
+            if remote_io:
+                try:
+                    self._update_remote_archiveobject(valid_remote_server, ArchiveObject_obj)
+                except DatabasePostRestError as e:
+                    self.logger.error('Failed to update remote DB status for AIP: %s, error: %s' % (
+                                                                                                    ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                    e))
             # Delete IOQueue_objs for ArchiveObject
             IOQueue_objs.delete()
+    
+    def _update_remote_archiveobject(self, remote_server, ArchiveObject_obj):
+        """ Call REST service on remote to update ArchiveObject with nested storage, storageMedium
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param ArchiveObject_obj: ArchiveObject database instance to be performed
+        
+        """
+        base_url, ruser, rpass = remote_server
+        ArchiveObject_rest_endpoint_base = urljoin(base_url, '/api/archiveobjectsandstorage/')
+        ArchiveObject_rest_endpoint = urljoin(ArchiveObject_rest_endpoint_base, '%s/' % str(ArchiveObject_obj.ObjectUUID))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        ArchiveObject_obj_data = ArchiveObjectPlusAICPlusStorageNestedReadSerializer(ArchiveObject_obj).data
+        # Set StatusProcess and StatusActivity
+        ArchiveObject_obj_data['StatusProcess'] = 1999        # 'Write AIP OK'
+        ArchiveObject_obj_data['StatusActivity'] = 0              # 'OK'
+        # Remove local disk storage type 200 from Storage_set
+        exclude_targets = [i.id for i in StorageTargets.objects.filter(type=200, remote_server='')]
+        new_Storage_set = []
+        for storage_data in ArchiveObject_obj_data['Storage_set']:
+            if not storage_data['storagemedium']['storagetarget'] in exclude_targets:
+                new_Storage_set.append(storage_data)
+        ArchiveObject_obj_data['Storage_set'] = new_Storage_set
+        # JSONRenderer
+        ArchiveObject_obj_json = JSONRenderer().render(ArchiveObject_obj_data)
+        r = requests_session.patch(ArchiveObject_rest_endpoint,
+                                        headers={'Content-Type': 'application/json'}, 
+                                        data=ArchiveObject_obj_json)
+        if not r.status_code == 200:
+            raise DatabasePostRestError([r.status_code, r.reason, r.text])
+        
+    def _delete_remote_IOQueue_obj(self, remote_server, IO_obj):
+        """ Call REST service on remote to remove IOQueue object
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        base_url, ruser, rpass = remote_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueue/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        r = requests_session.delete(IOQueue_rest_endpoint)
+        if not r.status_code == 204:
+            raise DatabasePostRestError([r.status_code, r.reason, r.text])
 
     def notify_external_project(self, ArchiveObject_obj):
         IOQueue_objs = ArchiveObject_obj.ioqueue_set.filter(ReqType__in=[10])

@@ -93,6 +93,7 @@ if __name__ == '__main__':
             "djangorestframework-filters>=0.5.0",
             "django-chunked-upload>=1.1.1",
             "jsonpickle>=0.9.2",
+            "retrying>=1.3.3",
             "logfileviewer>=0.6.2",
         ],
         packages=find_packages(),

@@ -287,6 +287,7 @@ class StorageTargetsAdmin( admin.ModelAdmin ):
                 'minContainerSize',
                 'minCapacityWarning',
                 'remote_server',
+                'master_server',
                 'target',
                 )}),
     )
