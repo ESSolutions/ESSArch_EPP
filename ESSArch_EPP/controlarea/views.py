@@ -55,7 +55,7 @@ from django.contrib.auth.decorators import permission_required
 
 import json
 import jsonpickle
-from django.db import transaction
+from django.core.cache import cache
 from operator import itemgetter, attrgetter, methodcaller
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -428,7 +428,9 @@ class ToWorkListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
-        return AIC_list
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+
   
     def json_response(self, request):
         
@@ -672,7 +674,9 @@ class FromWorkListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
-        return AIC_list
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+
 
   
     def json_response(self, request):
@@ -1118,8 +1122,10 @@ class DiffCheckListInfoView(View):
                     AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)  
-        return AIC_list     
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+   
 
   
     def json_response(self, request):
@@ -1302,8 +1308,10 @@ class PreserveListInfoView(View):
                     AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)  
-        return AIC_list    
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs  
+   
 
   
     def json_response(self, request):
@@ -1550,8 +1558,10 @@ class DeleteIPListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 if len(AIC_IPs) > 0:
                     AIC['IPs'] = AIC_IPs
-                    AIC_list.append(AIC) 
-        return AIC_list  
+                    AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+ 
 
   
     def json_response(self, request):
@@ -1840,6 +1850,7 @@ class TaskResult(View):
         kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
         print (kwargstest)
         if kwargstest:
+            #cache._cache.clear()
             thetask = TaskMeta.objects.filter(task_id=thetaskid)
             task['status'] = thetask[0].status
             task['result']  =  thetask[0].result
