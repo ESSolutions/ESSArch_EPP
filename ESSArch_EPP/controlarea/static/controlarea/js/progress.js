@@ -1,8 +1,5 @@
 function getTaskInfo(taskid){
 
-	console.log(Django.user);
-	console.log('Get task info called');
-	
 var taskinprogressinfo = {};
 /*
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
@@ -13,7 +10,7 @@ $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 */
 $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
 
-	console.log(taskinprogressinfo);
+
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
@@ -60,7 +57,7 @@ function failedtask(taskid){
         	        
         	
             console.log('Failed task info');
-            console.log(failedtaskinfo1);
+
             var readable = getfailedtaskhtml(failedtaskinfo1);
         	infohtml = readable;;
         	 document.getElementById("taskinprogress").innerHTML = infohtml;
@@ -79,11 +76,9 @@ function progresstask(result){
 	 infohtml = 'Request is in progress<br><br>';
     var progressresult = result['progress_percent'];
 	 if(progressresult != undefined){
-    console.log('progress percent');
-    console.log(progressresult);
+
     infohtml = infohtml + '<progress value=' + progressresult + ' max="100"></progress>';
-    console.log('progresshtml');
-    console.log(infohtml);
+
 	 }
     return infohtml;
 
@@ -114,7 +109,7 @@ function successtask(result){
     }
     
     var statusdetail = result['statusdetail'];
-    console.log(statusdetail);
+
     if (statusdetail != undefined){
     var statusdetailhtml = '<br>Status info<br><table>';
     for (i = 0; i < statusdetail.length; i++){
@@ -167,35 +162,27 @@ if(typeoferror =='controlarea.tasks.ControlareaException'){
 	errortype = 'Controlarea'
 
 var getmore = reduce[1];
-	console.log('getmore');
-	console.log(getmore);
+
 var ourtuple = getmore['py/tuple'];
-	console.log('our tuple');
-	console.log(ourtuple)
+
 var moreinfo = ourtuple[0];
-	console.log('moreinfo');
-	console.log(moreinfo);
+
     var taskcategory = moreinfo['category'];
-    console.log('taskcategory');
-    console.log(taskcategory);
+
     var tasklabel = moreinfo['label'];
-    console.log('tasklabel');
-    console.log(tasklabel);
+
     if(tasklabel == 'Test task'){
     	taskstatuslist = ['Test1','Test2','Test3'];
     }
     
     else{
     taskstatuslist = moreinfo['statuslist'];
-    console.log('taskstatuslist');
-    console.log(taskstatuslist);
+
     }
 	var taskrequestpurpose = moreinfo['reqpurpose'];
-	console.log('taskrequestpurpose');
-	console.log(taskrequestpurpose);
+
 	var taskuser = moreinfo['user'];
-	console.log('taskuser');
-   console.log(taskuser);
+
     var ipuuid = moreinfo['ipuuid'];
 	var taskerrorlist = [];
 	if(tasklabel == 'Test task'){

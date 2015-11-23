@@ -89,10 +89,6 @@ gettasklist();
 function gettasklist(){
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
-	console.log('number of days');
-	console.log(numberofdays);
-	console.log('allTasks');
-	console.log(allTasks);
 	populateAllTasks(allTasks);
 	
 		
