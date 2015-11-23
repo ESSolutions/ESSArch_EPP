@@ -32,6 +32,7 @@ from django.conf import settings
 
 from models import MyFile, RequestFile
 from django.db.models import Q
+from django.db.models import Max
 from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
@@ -41,8 +42,8 @@ from configuration.models import Path, Parameter
 
 
 from controlarea.tasks import CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
-							  DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
-							  GetExchangeRequestFileContentTask, TestTask
+							                DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
+							                GetExchangeRequestFileContentTask, TestTask
 
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView, TemplateView, View
@@ -53,6 +54,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
 import json
+import jsonpickle
+from django.core.cache import cache
+from operator import itemgetter, attrgetter, methodcaller
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 from djcelery.models import TaskMeta
@@ -60,7 +64,7 @@ from djcelery import views as celeryviews
 
 import ESSMD, os, uuid
 from ESSPGM import Check as g_functions
-import ESSPGM, pytz, datetime, logging
+import ESSPGM, pytz, datetime, time, logging
 
 
 
@@ -164,7 +168,8 @@ class MyFileList(object):
                                     if ip_uuid_test_flag == 0:
                                         logger.error('IP: %s found in reception, IP directory with name: "%s" do not exists in any AIC in "gate area" (%s)' % (ObjectPath, ip_uuid_test, logs_path))       
                                 else:
-                                    logger.error('path: %s do not exists' % logs_path)                    
+                                    logger.error('path: %s do not exists' % logs_path)
+        #self.filelist = 
         return self.filelist
 
     def __iter__(self):
@@ -230,7 +235,8 @@ class CheckinFromReceptionListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromReceptionListView, self).get_context_data(**kwargs)
-        context['filelist'] = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
+        originallist = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
+        context['filelist'] = sorted(originallist, key = attrgetter('EntryAgentIdentifierValue','label'))
         context['type'] = 'FromRec'
         context['label'] = 'Select which information package to checkin from reception'
         return context
@@ -393,17 +399,16 @@ class ToWorkListInfoView(View):
         return super(ToWorkListInfoView, self).dispatch( *args, **kwargs)
         
     def get_towork_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity=7))
             if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+                AIC = {}           
                 AIC_IPs = []
                 for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5000:
                         datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))
                         AIC_IP = {}
                         AIC_IP['id'] = ip.UUID.id
                         AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
@@ -411,16 +416,21 @@ class ToWorkListInfoView(View):
                         AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                         AIC_IP['Label'] = datainfo.label
                         AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = ip.UUID.EntryDate
-                        AIC['create_date'] = ip.UUID.EntryDate
+                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                         AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = datainfo.startdate
-                        AIC_IP['enddate'] = datainfo.enddate
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
                         AIC_IP['Process'] = ip.UUID.StatusProcess
+                        AIC_IP['Activity'] = ip.UUID.StatusActivity
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+
   
     def json_response(self, request):
         
@@ -632,17 +642,19 @@ class FromWorkListInfoView(View):
         return super(FromWorkListInfoView, self).dispatch( *args, **kwargs)
         
     def get_fromwork_listinfo(self, *args, **kwargs):
-        AICs_in_workarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        #AICs_in_workarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_workarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_workarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5100)
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5100)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5100) | Q(UUID__StatusActivity=8))
             if len(AIC_IPs_query) > 0:
                 AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+                # AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
                 AIC_IPs = []
                 for ip in AIC_IPs_query:
-                    if ip.UUID.StatusProcess==5100:
                         datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
+                        AIC['AIC_UUID'] =(str(obj.ObjectUUID))     
                         AIC_IP = {}
                         AIC_IP['id'] = ip.UUID.id
                         AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
@@ -650,16 +662,22 @@ class FromWorkListInfoView(View):
                         AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                         AIC_IP['Label'] = datainfo.label
                         AIC['Label'] = datainfo.label
-                        AIC_IP['create_date'] = ip.UUID.EntryDate
-                        AIC['create_date'] = ip.UUID.EntryDate
+                        AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                         AIC_IP['Generation'] = ip.UUID.Generation
-                        AIC_IP['startdate'] = datainfo.startdate
-                        AIC_IP['enddate'] = datainfo.enddate
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
                         AIC_IP['Process'] = ip.UUID.StatusProcess
+                        AIC_IP['Activity'] = ip.UUID.StatusActivity
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+
+
   
     def json_response(self, request):
         
@@ -895,7 +913,7 @@ class CheckoutToGateFromWork(CreateView):
         print ('Task ID')
         print (self.object.taskid)
         self.object.save()
-        self.success_url = reverse_lazy('taskoverview')
+        self.success_url = '/controlarea/checkouttogateprogress/' +  CopyFilelistTask_id
         return super(CheckoutToGateFromWork, self).form_valid(form)
 
 '''class CheckoutToGateFromWorkResult(DetailView):
@@ -915,6 +933,19 @@ class CheckoutToGateFromWork(CreateView):
         context['ControlAreaReqType_CHOICES'] = dict(ControlAreaReqType_CHOICES)
         context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
         return context'''
+
+class CheckoutToGateProgress(TemplateView):
+    template_name = 'controlarea/checkouttogateprogress.html'
+
+    @method_decorator(permission_required('controlarea.CheckinFromWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutToGateProgress, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(CheckoutToGateProgress, self).get_context_data(**kwargs)
+        context['taskid'] = self.kwargs['taskid']
+        return context
 
 class CheckinFromGateListView(ListView):
     """
@@ -977,9 +1008,12 @@ class CheckinFromGateToWork(CreateView):
         ReqType = form.cleaned_data.get('ReqType'), 
         ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
         user = form.cleaned_data.get('user'), 
-        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'), 
-        posted = loc_dt_isoformat, 
-        filelist = req_filelist, 
+        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'),
+        TimeZone = timezone.get_default_timezone_name()
+        loc_timezone=pytz.timezone(TimeZone)
+        dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+        posted = dt.astimezone(loc_timezone).isoformat()
+        #filelist = req_filelist, 
         reqfilename = os.path.join(target_path,'request.xml'),
         linkingAgentIdentifierValue=self.request.user.username        
         CopyFilelistTask.delay_or_fail(source_path=source_path,
@@ -1059,10 +1093,11 @@ class DiffCheckListInfoView(View):
         return super(DiffCheckListInfoView, self).dispatch( *args, **kwargs)
         
     def get_diffcheck_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(Q(StatusProcess=5000) | Q(OAISPackageType=1))
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity=7))
             if len(AIC_IPs_query) > 0:
                 AIC = {}
                 AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
@@ -1076,16 +1111,22 @@ class DiffCheckListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
+                    AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                     AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+   
+
   
     def json_response(self, request):
         
@@ -1188,6 +1229,7 @@ class DiffcheckProgress(TemplateView):
         context = super(DiffcheckProgress, self).get_context_data(**kwargs)
         context['taskid'] = self.kwargs['taskid']
         return context
+    
 '''class DiffCheckResult(DetailView):
     """
     View result from diffcheck
@@ -1238,10 +1280,10 @@ class PreserveListInfoView(View):
         return super(PreserveListInfoView, self).dispatch( *args, **kwargs)
         
     def get_preserve_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess=5000)
+        AICs_in_controlarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess=5000)
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess=5000)
             if len(AIC_IPs_query) > 0:
                 AIC = {}
                 AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
@@ -1255,16 +1297,22 @@ class PreserveListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
+                    AIC_IP['create_date'] = str( ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] =str( ip.UUID.EntryDate)[:10]
+                    AIC_IP['Generation'] = str(ip.UUID.Generation)
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs  
+   
+
   
     def json_response(self, request):
         
@@ -1470,33 +1518,51 @@ class DeleteIPListInfoView(View):
         return super(DeleteIPListInfoView, self).dispatch( *args, **kwargs)
         
     def get_deleteip_listinfo(self, *args, **kwargs):
-        AICs_in_controlarea = ArchiveObject.objects.filter(StatusProcess__in=[5000,5100])
+        AICs = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
-        for obj in AICs_in_controlarea:
-            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__in=[5000,5100])
-            if len(AIC_IPs_query) > 0:
-                AIC = {}
-                AIC['AIC_UUID'] =(str(obj.ObjectUUID))            
+        for obj in AICs:
+            #AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(UUID__StatusProcess__in=[5000,5100])
+            AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID).filter(Q(UUID__StatusProcess__in=[5000,5100]) | Q(UUID__StatusActivity__in=[ 7, 8 ])).order_by('UUID__Generation')
+            if len(AIC_IPs_query)> 0:
+                AIC = {}           
                 AIC_IPs = []
-                for ip in AIC_IPs_query:
-                    datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)
-                    AIC_IP = {}
-                    AIC_IP['id'] = ip.UUID.id
-                    AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
-                    AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
-                    AIC_IP['Label'] = datainfo.label
-                    AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
-                    AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
-                    AIC_IP['Process'] = ip.UUID.StatusProcess
-                    AIC_IPs.append(AIC_IP)
-                AIC['IPs'] = AIC_IPs
-                AIC_list.append(AIC)        
-        return AIC_list
+                AIC['AIC_UUID'] =(str(obj.ObjectUUID)) 
+                lastgeneration =  AIC_IPs_query.filter(UUID__StatusProcess__in=[5000,5100]).aggregate(Max('UUID__Generation')).values()[0]
+                print 'lastgeneration'
+                print lastgeneration
+                excludelist = []
+                for pp in AIC_IPs_query:
+                    if pp.UUID.StatusProcess == 3000:
+                        excludelist.append(pp) 
+                    else:
+                        if 0 < pp.UUID.Generation < lastgeneration:
+                            excludelist.append(pp)
+                for ip in excludelist:                   
+                        datainfo = ArchiveObjectData.objects.get(UUID=ip.UUID.ObjectUUID)                    
+                        AIC_IP = {}
+                        AIC_IP['id'] = ip.UUID.id
+                        AIC_IP['ObjectUUID'] = str(ip.UUID.ObjectUUID)
+                        AIC_IP['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                        AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
+                        AIC_IP['Label'] = datainfo.label
+                        AIC['Label'] = datainfo.label
+                        AIC_IP['create_date'] =str( ip.UUID.EntryDate)[:10]
+                        AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
+                        AIC_IP['Generation'] = ip.UUID.Generation
+                        AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                        AIC['startdate'] = str(datainfo.startdate)[:10]
+                        AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                        AIC['enddate'] = str(datainfo.enddate)[:10]
+                        AIC_IP['Process'] = ip.UUID.StatusProcess
+                        AIC_IP['Activity'] = ip.UUID.StatusActivity
+                        AIC_IPs.append(AIC_IP)
+                if len(AIC_IPs) > 0:
+                    AIC['IPs'] = AIC_IPs
+                    AIC_list.append(AIC)
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+        return sortedAICs
+ 
+
   
     def json_response(self, request):
         
@@ -1639,14 +1705,19 @@ class TasksInfo(View):
     def getTaskInfo(self, *args, **kwargs):
 
         numberofdays = int(self.kwargs['days'])
-        print('Days')
-        print(numberofdays)
+        print 'numberofdays'
+        print numberofdays
+
         enddate = datetime.datetime.now()
-        print(enddate)
+        print 'enddate'
+        print enddate
+
         startdate = enddate - datetime.timedelta(days=numberofdays)
-        print (startdate)
+        print 'startdate'
+        print startdate
+
         allTasks = TaskMeta.objects.filter(date_done__range=[startdate, enddate]).order_by('date_done').reverse()
-        print len(list(allTasks))
+
         Tasks = {}
         FailedTasks = []
         PendingTasks = []
@@ -1656,24 +1727,31 @@ class TasksInfo(View):
             Task = {
             'taskid': t.task_id,
             'status' : t.status,
-            'result': json.dumps(t.result)
+            'result' : jsonpickle.encode(t.result)
             }
             if t.status == 'FAILURE':
-                FailedTasks.append(Task)
+                if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
+                    taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
+                    for s in taskinfo:
+                        info = {}
+                        info['reqpurpose'] = s.ReqPurpose
+                        info['user'] = s.user
+                        Task['info'] = json.dumps(info)                
+                FailedTasks.append(Task)                
             elif t.status == 'PENDING':
                 PendingTasks.append(Task)
             elif t.status == 'PROGRESS':                
                 if ControlAreaQueue.objects.filter(taskid=t.task_id).exists():                    
                     taskinfo = ControlAreaQueue.objects.filter(taskid=t.task_id)
-                    for t in taskinfo:
+                    for s in taskinfo:
                         info = {}
-                        info['reqpurpose'] = t.ReqPurpose
-                        info['user'] = t.user
+                        info['reqpurpose'] = s.ReqPurpose
+                        info['user'] = s.user
                         Task['info'] = json.dumps(info)
                         ProgressTasks.append(Task)
             elif t.status =='SUCCESS':
                 if t.result is not None:
-                        Task['datedone'] = str(t.date_done)
+                        Task['datedone'] = str(t.date_done)[:10]
                         SuccessTasks.append(Task)                
         Tasks['FailedTasks'] = FailedTasks
         Tasks['PendingTasks'] = PendingTasks
@@ -1750,8 +1828,48 @@ class TestTaskView(TemplateView):
     def get_context_data(self, **kwargs):
 
         context = super(TestTaskView, self).get_context_data(**kwargs)
-        TestDict= {'thistask':'TestTask','someinfo':'somerandominfo'}
-        TestToSeeTasks = TestTask.delay_or_fail(randomDict=TestDict)
+        TestString = 'Teststring'
+        TestToSeeTasks = TestTask.delay_or_fail(TestString)
         context['task_id'] = TestToSeeTasks.task_id
         context['result'] = TestToSeeTasks.result
         return context
+    
+class TaskResult(View):
+
+    
+    def dispatch(self, *args, **kwargs):
+    
+        return super(TaskResult, self).dispatch( *args, **kwargs)
+        
+    def getTaskResult(self, *args, **kwargs):
+        taskwrapper = {}
+        task = {}
+        thetaskid = self.kwargs['taskid']
+        print (thetaskid)
+        
+        kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
+        print (kwargstest)
+        if kwargstest:
+            #cache._cache.clear()
+            thetask = TaskMeta.objects.filter(task_id=thetaskid)
+            task['status'] = thetask[0].status
+            task['result']  =  thetask[0].result
+            task['id'] = thetaskid
+        else:
+            task['status'] = 'notaskfound'
+            task['result'] = 'notaskfound'
+            task['id'] = thetaskid
+        taskwrapper['task'] = task
+        finishedtask = jsonpickle.encode(taskwrapper)
+        return finishedtask
+
+    def json_response(self, request):
+        
+        data = self.getTaskResult()
+        return HttpResponse(
+            data
+            #json.dumps(data, cls=DjangoJSONEncoder)
+        )
+    def get(self, request, *args, **kwargs):
+        
+        return self.json_response(request)

@@ -1,8 +1,9 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
 
+
 {% block content %}
-Request to preserve IP
+Checkout to gate from workarea
 <br>
 <br>
 <div id="taskinprogress">
@@ -22,7 +23,6 @@ function setupRefresh() {
 function refreshPage() {
    window.location = location.href;
 }
-
 
 var taskid = "{{ taskid }}";
 
@@ -53,6 +53,7 @@ function determineStatus(thetask){
         
         switch(taskstatus){
             case 'FAILURE':
+            	//called with taskid
                 failedtask(taskid);
                 break;
             case 'PENDING':
@@ -70,16 +71,18 @@ function determineStatus(thetask){
         }
 
 
-        function failedtask(taskid){
+
+
+function failedtask(taskid){
             
-        	$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+  $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
         	        
         	        var readable = getfailedtaskhtml(failedtaskinfo1);
         	        infohtml = readable;;
         	        document.getElementById("taskinprogress").innerHTML = infohtml;
         	        });
         	    
-        	};
+        	    };
 
 function pendingtask(result){
 
@@ -148,6 +151,7 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 };
 
 */
+
 </script>
 
 {% endblock %}

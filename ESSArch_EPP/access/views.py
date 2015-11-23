@@ -48,7 +48,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
 
 from essarch.libs import DatatablesViewEss
-
+import datetime, time
 
 import uuid, os.path as op
 
@@ -76,12 +76,15 @@ class AccessListInfoView(View):
                     AIC['Archivist_organization'] = ip.UUID.EntryAgentIdentifierValue
                     AIC_IP['Label'] = datainfo.label
                     AIC['Label'] = datainfo.label
-                    AIC_IP['create_date'] = ip.UUID.EntryDate
-                    AIC['create_date'] = ip.UUID.EntryDate
+                    AIC_IP['create_date'] = str(ip.UUID.EntryDate)[:10]
+                    AIC['create_date'] = str(ip.UUID.EntryDate)[:10]
                     AIC_IP['Generation'] = ip.UUID.Generation
-                    AIC_IP['startdate'] = datainfo.startdate
-                    AIC_IP['enddate'] = datainfo.enddate
+                    AIC_IP['startdate'] = str(datainfo.startdate)[:10]
+                    AIC['startdate'] = str(datainfo.startdate)[:10]
+                    AIC_IP['enddate'] = str(datainfo.enddate)[:10]
+                    AIC['enddate'] = str(datainfo.enddate)[:10]
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
@@ -121,7 +124,7 @@ class AICCheckView(View):
 
         AICcheck = ArchiveObjectRel.objects.exists()
         #return AICcheck
-        return True
+        return AICcheck
 
     def json_response(self, request):
 

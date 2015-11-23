@@ -4,36 +4,37 @@
 
 {% block content %}
 
-<div style="margin:20px">
+<div><!--  style="margin:20px"-->
 <H1>{{ label }}</H1>
 
-<br/>
-
+<br>
 <div>
-  <table class="collaptable">
+  <table class="collaptable table">
     <thead>
       <tr>
-                <th>Generation</th>
-                <th>Archivist organization</th>
+                <th>Generation </th>
+                <th>Archivist organization </th>
                 <th>Label</th>
-                <th>Create date</th>
-                <th>Start date</th>
-                <th>End date</th>
-                <th>Process</th>
-                <th>AIC-UUID</th>
-                <th>IP-UUID</th>
+                <th>Create date </th>
+                <th>Start date </th>
+                <th>End date </th>
+                <th>State </th>
+                <th>Activity</th>
+                <th>AIC-UUID </th>
+                <th>IP-UUID </th>
       </tr>
     </thead>
     <tbody id="AIC-table">
             <tr><td>No IPs</td></tr>
     </tbody>
   </table>
+  </div>
 </div>
 
 
 {% endblock %}
 {% block app-extra-script %}
-    {% js "aCollapTable/jquery.aCollapTable.min.js" %}
+    {% js "aCollapTable/aCollapTable.js" %}
     {% js "controlarea/js/collapsible-aic.js" %}
 
 <script>

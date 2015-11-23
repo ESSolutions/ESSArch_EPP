@@ -40,10 +40,10 @@ import sys,datetime,os
 import django
 django.setup()
 
-site_name = u'Site-X' # RA-OSLO , Marieberg, MKC, SVAR, HLA
-medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG
-site_profile = "SE" # SE or NO
-
+# settings
+site_profile = "SE" # SE_NEW, SE, NO, EC
+site_name = u'Site-X' # RA-OSLO, Marieberg, MKC, SVAR, HLA 
+medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG 
 install_site = u'ESSArch_%s' % site_name 
 
 def createdefaultusers(): # default users, groups and permissions
@@ -364,7 +364,7 @@ def installdefaultpaths(): # default paths
     # First remove all existing data 
     Path.objects.all().delete()
 
-    # create dictionaries for zone
+    # create dictionaries for different sites
     if install_site == 'ESSArch_RA-OSLO':
         dct = {
             #'path_reception':'/data/mottak',
@@ -403,6 +403,28 @@ def installdefaultschemaprofiles(): # default schema profiles for Sweden and Nor
     # First remove all existing data 
     SchemaProfile.objects.all().delete()
 
+    if site_profile == "SE_NEW" :
+        dct = {
+               'addml_namespace':'http://xml.ra.se/addml',
+               'addml_schemalocation':'http://xml.ra.se/addml/ra_addml.xsd',
+               'erms_schemalocation':'http://xml.ra.se/e-arkiv/ERMS/version10/Arendehantering.xsd',
+               'mets_namespace': 'http://www.loc.gov/METS/',
+               'mets_profile': 'http://xml.ra.se/e-arkiv/METS/eARD/version20/eARD_Paket_FGS.xml',
+               'mets_schemalocation': 'http://xml.ra.se/e-arkiv/METS/eARD/version20/eARD_Paket_FGS_mets.xsd',
+               'mix_namespace':'http://xml.ra.se/MIX',
+               'mix_schemalocation':'http://xml.ra.se/MIX/RA_MIX.xsd',
+               'mods_namespace':'http://www.loc.gov/mods/v3',
+               'personnel_schemalocation':'http://xml.ra.se/e-arkiv/Personnel/version10/Personal.xsd',
+               'premis_namespace':'http://xml.ra.se/PREMIS',
+               'premis_schemalocation':'http://xml.ra.se/PREMIS/ESS/RA_PREMIS_PreVersion.xsd',
+               'premis_version':'2.0',
+               'xhtml_namespace':'http://www.w3.org/1999/xhtml',
+               'xhtml_schemalocation':'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd',
+               'xlink_namespace':'http://www.w3.org/1999/xlink',
+               'xsd_namespace':'http://www.w3.org/2001/XMLSchema',
+               'xsi_namespace':'http://www.w3.org/2001/XMLSchema-instance',
+               }
+
     if site_profile == "SE" :
         dct = {
                'mets_namespace': 'http://www.loc.gov/METS/',
@@ -420,28 +442,49 @@ def installdefaultschemaprofiles(): # default schema profiles for Sweden and Nor
                'addml_namespace':'http://xml.ra.se/addml',
                'addml_schemalocation':'http://xml.ra.se/addml/ra_addml.xsd',
                'xhtml_namespace':'http://www.w3.org/1999/xhtml',
-               'xhtml_schemalocation':'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd'      
+               'xhtml_schemalocation':'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd'
                }
 
     if site_profile == "NO" :
         dct = {
+               'addml_namespace': 'http://www.arkivverket.no/addml',
+               'addml_schemalocation': 'http://schema.arkivverket.no/ADDML/v8.2/addml.xsd',
                'mets_namespace': 'http://www.loc.gov/METS/',
-               #'mets_schemalocation': 'http://xml.ra.se/METS/RA_METS_eARD.xsd',
+               'mets_profile': 'http://xml.ra.se/e-arkiv/METS/eARD/version20/eARD_Paket_FGS.xml',
                'mets_schemalocation': 'http://schema.arkivverket.no/METS/mets.xsd',
-               'mets_profile': 'http://xml.ra.se/METS/RA_METS_eARD.xml',
+               'mix_namespace': 'http://xml.ra.se/MIX',
+               'mix_schemalocation': 'http://xml.ra.se/MIX/RA_MIX.xsd',
+               'mods_namespace': 'http://www.loc.gov/mods/v3',
                'premis_namespace': 'http://arkivverket.no/standarder/PREMIS',
                'premis_schemalocation': 'http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd',
                'premis_version': '2.0',
-               'mods_namespace': 'http://www.loc.gov/mods/v3',
-               'xlink_namespace': 'http://www.w3.org/1999/xlink',
-               'xsi_namespace': 'http://www.w3.org/2001/XMLSchema-instance',
-               'xsd_namespace': 'http://www.w3.org/2001/XMLSchema',
-               'mix_namespace': 'http://xml.ra.se/MIX',
-               'mix_schemalocation': 'http://xml.ra.se/MIX/RA_MIX.xsd',
-               'addml_namespace': 'http://www.arkivverket.no/addml',
-               'addml_schemalocation': 'http://xml.ra.se/addml/ra_addml.xsd',
                'xhtml_namespace': 'http://www.w3.org/1999/xhtml',
-               'xhtml_schemalocation': 'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd'      
+               'xhtml_schemalocation': 'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd',
+               'xlink_namespace': 'http://www.w3.org/1999/xlink',
+               'xsd_namespace': 'http://www.w3.org/2001/XMLSchema',
+               'xsi_namespace': 'http://www.w3.org/2001/XMLSchema-instance',
+               }
+
+    if site_profile == "EC" :
+        dct = {
+               'addml_namespace':'http://xml.ra.se/addml',
+               'addml_schemalocation':'http://xml.ra.se/addml/ra_addml.xsd',
+               'erms_schemalocation':'http://xml.ra.se/e-arkiv/ERMS/version10/Arendehantering.xsd',
+               'mets_namespace': 'http://www.loc.gov/METS/',
+               'mets_profile': 'http://www.ra.ee/METS/v01/SIP.xml',
+               'mets_schemalocation': 'http://www.ra.ee/METS/v01/SIP.xsd',
+               'mix_namespace':'http://xml.ra.se/MIX',
+               'mix_schemalocation':'http://xml.ra.se/MIX/RA_MIX.xsd',
+               'mods_namespace':'http://www.loc.gov/mods/v3',
+               'personnel_schemalocation':'http://xml.ra.se/e-arkiv/Personnel/version10/Personal.xsd',
+               'premis_namespace':'http://xml.ra.se/PREMIS',
+               'premis_schemalocation':'http://xml.ra.se/PREMIS/ESS/RA_PREMIS_PreVersion.xsd',
+               'premis_version':'2.0',
+               'xhtml_namespace':'http://www.w3.org/1999/xhtml',
+               'xhtml_schemalocation':'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd',
+               'xlink_namespace':'http://www.w3.org/1999/xlink',
+               'xsd_namespace':'http://www.w3.org/2001/XMLSchema',
+               'xsi_namespace':'http://www.w3.org/2001/XMLSchema-instance',
                }
 
     # create according to model with two fields

@@ -45,7 +45,8 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
-#from django.http import HttpResponse
+from django.http import HttpResponse
+import datetime, time
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -53,9 +54,9 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 import uuid, urlparse
 
-'''class ArchObjectListUpdate(ListView, BaseUpdateView):
+class ArchObjectListUpdate(ListView, BaseUpdateView):
     model = ArchiveObject
-    template_name='archobject/list.html'
+    template_name='ingest/iplist.html'
     form_class=ArchiveObjectStatusForm
     queryset=ArchiveObject.objects.filter(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
     
@@ -80,7 +81,7 @@ import uuid, urlparse
         context['ip_list'] = ip_list
         context['PackageType_CHOICES'] = dict(PackageType_CHOICES)
         context['StatusProcess_CHOICES'] = dict(StatusProcess_CHOICES)
-        return context'''
+        return context
         
 class IngestListInfoView(View):
 
@@ -89,7 +90,7 @@ class IngestListInfoView(View):
         return super(IngestListInfoView, self).dispatch( *args, **kwargs)
         
     def get_ingest_listinfo(self, *args, **kwargs):
-        AICs_in_ingestarea = ArchiveObject.objects.filter(StatusProcess__lt=3000) #(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1))
+        AICs_in_ingestarea = ArchiveObject.objects.filter(OAISPackageType=1)
         AIC_list = []
         for obj in AICs_in_ingestarea:
             AIC_IPs_query = ArchiveObjectRel.objects.filter(AIC_UUID=obj.ObjectUUID, UUID__StatusProcess__lt=3000)
@@ -110,8 +111,11 @@ class IngestListInfoView(View):
                     AIC['create_date'] = ip.UUID.EntryDate
                     AIC_IP['Generation'] = ip.UUID.Generation
                     AIC_IP['startdate'] = datainfo.startdate
+                    AIC['startdate'] = datainfo.startdate
                     AIC_IP['enddate'] = datainfo.enddate
+                    AIC['enddate'] = datainfo.enddate
                     AIC_IP['Process'] = ip.UUID.StatusProcess
+                    AIC_IP['Activity'] = ip.UUID.StatusActivity
                     AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)        

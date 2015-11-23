@@ -32,7 +32,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception,\
                   ToWorkProgress,\
                   FromWorkListTemplateView,FromWorkListInfoView, CheckinFromWork,\
                   FromWorkProgress,\
-                  CheckoutToGateFromWork,\
+                  CheckoutToGateFromWork,CheckoutToGateProgress,\
                   CheckinFromGateToWork,\
                   CheckinFromGateListView,\
                   DiffCheckListTemplateView, DiffCheckListInfoView, DiffCheck,\
@@ -41,7 +41,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception,\
                   PreserveProgress,\
                   DeleteIPListTemplateView, DeleteIPListInfoView, ControlareaDeleteIP,\
                   DeleteProgress,\
-                  TasksInfo, TaskOverviewView,TestTaskView,ProgressTasksInfo
+                  TasksInfo, TaskOverviewView,TestTaskView,ProgressTasksInfo, TaskResult
 
 #import views
 
@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     url(r'^checkinfromwork/(?P<pk>\d+)/$', CheckinFromWork.as_view(), name='controlarea_checkinfromwork'),
     url(r'^fromworkprogress/(?P<taskid>[^&]*)/$', FromWorkProgress.as_view(), name='controlarea_checkinfromworkprogress'),
     url(r'^checkouttogatefromwork/$', CheckoutToGateFromWork.as_view(), name='controlarea_checkouttogatefromwork'),
+    url(r'^checkouttogateprogress/(?P<taskid>[^&]*)/$', CheckoutToGateProgress.as_view(), name='controlarea_checkouttogate_progress'),
     url(r'^checkinfromgatetowork/$', CheckinFromGateToWork.as_view(), name='controlarea_checkinfromgatetowork'),
     url(r'^checkinfromgatelist/$', CheckinFromGateListView.as_view(),name='controlarea_checkinfromgate_list'),
     url(r'^diffchecklist/$', DiffCheckListTemplateView.as_view(),name='controlarea_diffcheck_list'),
@@ -76,4 +77,5 @@ urlpatterns = patterns('',
     url(r'^tasksinfo/(?P<days>[^&]*)$', TasksInfo.as_view(), name='tasksinfo'),
     url(r'^progress/$', ProgressTasksInfo.as_view(), name='progress'),
     url(r'^testtask/$', TestTaskView.as_view(), name='testtask'),
+    url(r'^taskresult/(?P<taskid>[^&]*)/$', TaskResult.as_view(), name='taskresult'),
 )

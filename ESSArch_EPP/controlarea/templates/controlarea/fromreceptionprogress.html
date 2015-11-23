@@ -1,8 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="60" > 
-{% endblock %}
+
 
 {% block content %}
 Request to check in IP from reception
@@ -14,26 +12,42 @@ Request to check in IP from reception
   
 {% endblock %}
 {% block app-extra-script %}
-
+    {% js "controlarea/js/progress.js" %}
 <script>
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
 
 var taskid = "{{ taskid }}";
-console.log(taskid);
 
 getTaskInfo(taskid);
 
+//setInterval(getTaskInfo, 6000);
+/*
 function getTaskInfo(taskid){
 
+	console.log('get task function is called');
 var taskinprogressinfo = {};
+
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
+	 console.log(taskinprogressinfo);
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
-    
+ 
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
+console.log('The task');
+console.log(thetask);
 
 var taskhtml = determineStatus(thetask);
 
@@ -41,11 +55,13 @@ function determineStatus(thetask){
         
         var infohtml = 'No info';
         var taskstatus = thetask['status'];
+        console.log('Task status');
+        console.log(taskstatus);
         var taskresult = thetask['result'];
         
         switch(taskstatus){
             case 'FAILURE':
-                failedtask(taskresult);
+                failedtask(taskid);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -64,15 +80,20 @@ function determineStatus(thetask){
 
 
 
-function failedtask(result){
-
-    infohtml = '<b>The request failed<b><br>' + result;
-    return infohtml;
-}
+        function failedtask(taskid){
+            
+        	$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+        	        
+        	        var readable = getfailedtaskhtml(failedtaskinfo1);
+        	        infohtml = readable;;
+        	        document.getElementById("taskinprogress").innerHTML = infohtml;
+        	        });
+        	    
+        	};
 
 function pendingtask(result){
 
-    infohtml = '<b>The request is pending<b><br>' + result;
+    infohtml = '<b>The request is pending<b><br>';
     return infohtml;
 }
 
@@ -91,7 +112,6 @@ function successtask(result){
     + '<table>'
     + '<tr><td>Category: </td><td></td><td>' + result['category'] + '</td></tr>'
     + '<tr><td>Label: </td><td></td><td>' + result['label'] + '</td></tr>'
-    + '<tr><td>Creator:</td><td></td><td>' + result['creator'] + '<td></tr>'
     + '<tr><td>User:</td><td></td><td>' + result['user'] + '<td></tr>'
     + '<tr><td>Request purpose: </td><td></td><td>' + result['reqpurpose'] + '</td></tr>'
     + '</table>';
@@ -136,7 +156,39 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 };
 
 
+
+
+
+function getfailedtaskhtml(result){
+    console.log('function is called');
+    
+    var failedtaskhtml = '<b>The request failed<b><br>';;
+    console.log('Errortype');
+    var resultstring = result.toString();
+    var errortype = resultstring.substr(0,20);
+    console.log('String result');
+    console.log(resultstring);
+    
+    console.log(errortype);
+    if (errortype == 'ControlareaException'){
+    	
+    	console.log('This is a controlarea exception');
+    }
+   
+    var errorreason = resultstring.substr(21);
+    console.log(errorreason);
+    
+
+  
+    console.log(failedtaskhtml);
+    return failedtaskhtml;
+    
 };
+
+};
+
+*/
+
 </script>
 
 {% endblock %}

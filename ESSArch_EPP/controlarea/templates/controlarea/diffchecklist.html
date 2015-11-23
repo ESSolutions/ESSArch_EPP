@@ -10,7 +10,7 @@
 <br/>
 
 <div>
-  <table class="collaptable" id="aic-table">
+  <table class="collaptable table"><!--   id="aic-table"-->
     <thead>
         <tr>
                 <th>Generation</th>
@@ -19,7 +19,8 @@
                 <th>Create date</th>
                 <th>Start date</th>
                 <th>End date</th>
-                <th>Process</th>
+                <th>State</th>
+                <th>Activity</th>
                 <th>AIC-UUID</th>
                 <th>IP-UUID</th>
         </tr>
@@ -33,7 +34,7 @@
 
 {% endblock %}
 {% block app-extra-script %}
-    {% js "aCollapTable/jquery.aCollapTable.min.js" %}
+    {% js "aCollapTable/aCollapTable.js" %}
     {% js "controlarea/js/collapsible-aic.js" %}
 
 <script>

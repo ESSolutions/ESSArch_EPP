@@ -72,7 +72,7 @@
         {% else %}
         	<p class="highlight-green">None</p>
         {% endif %}        
-    <h4>Ongoing controlarea requests</h4>
+    <h4>Ongoing requests</h4>
   
 	<div class="span6" style="color:#055773 background-color:#E9F0F2">
     <a href="/controlarea/taskoverview/">
@@ -133,7 +133,7 @@ tasksInProgresshtml = tasksInProgresshtml + '<tr><td>' + activeTasks[i].user + '
 
 if (activeTasks.length == 0){
 
-tasksInProgresshtml = 'No uncompleted tasks';
+tasksInProgresshtml = 'No uncompleted requests';
 }
 
 document.getElementById("activeTasks").innerHTML = tasksInProgresshtml;

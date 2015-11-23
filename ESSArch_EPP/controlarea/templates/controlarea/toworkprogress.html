@@ -1,11 +1,8 @@
 {% extends "admin/base_site.html" %}
 {% load js staticfiles%}
-{% block app-extrahead %}
-	<meta http-equiv="refresh" content="60" > 
-{% endblock %}
 
 {% block content %}
-Request to check in IP to work area
+Request to check out IP to work area
 <br>
 <br>
 <div id="taskinprogress">
@@ -14,23 +11,37 @@ Request to check in IP to work area
   
 {% endblock %}
 {% block app-extra-script %}
-
+     {% js "controlarea/js/progress.js" %}
 <script>
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
 
 var taskid = "{{ taskid }}";
-console.log(taskid);
 
 getTaskInfo(taskid);
-
+/*
 function getTaskInfo(taskid){
 
+console.log('The get task info function is called');
+	
 var taskinprogressinfo = {};
-$.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
+$.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo1){
+
+	taskinprogressinfo = taskinprogressinfo1;
+	console.log(taskinprogressinfo1);
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
-    
+
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
@@ -45,7 +56,8 @@ function determineStatus(thetask){
         
         switch(taskstatus){
             case 'FAILURE':
-                failedtask(taskresult);
+            	//called with taskid
+                failedtask(taskid);
                 break;
             case 'PENDING':
                 pendingtask(taskresult);
@@ -61,14 +73,16 @@ function determineStatus(thetask){
                 
         }
 
-
-
-
-function failedtask(result){
-
-    infohtml = '<b>The request failed<b><br>' + result;
-    return infohtml;
-}
+ function failedtask(taskid){
+            
+      $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(failedtaskinfo1){
+        	        
+        	var readable = getfailedtaskhtml(failedtaskinfo1);
+        	 infohtml = readable;;
+        	document.getElementById("taskinprogress").innerHTML = infohtml;
+       });
+        	    
+  };
 
 function pendingtask(result){
 
@@ -136,8 +150,9 @@ document.getElementById("taskinprogress").innerHTML = taskhtml;
 
 };
 
-
 };
+
+*/
 </script>
 
 {% endblock %}

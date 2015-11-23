@@ -42,7 +42,7 @@ django.setup()
 
 # settings
 site_profile = "NO" # SE_NEW, SE, NO, EC
-site_name = u'NRA' # Bergen Byarkiv 
+site_name = u'Bergen' # Bergen Byarkiv 
 medium_location = u'Media_%s' % site_name  
 install_site = u'ESSArch_%s' % site_name 
 
@@ -53,14 +53,12 @@ def installdefaultpaths(): # default paths for site profile
 
     # create dictionaries for site profile
     dct = {
-          #'path_reception':'/data/mottak',
-          'path_reception':'/mottak',
-          'path_gate':'/data/ioessarch/',
-          'path_work':'/data/test',
-          #'path_control':'/data/control',
-          'path_control':'/kontroll',
-          'path_ingest':'/data/ingest',
-          'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
+         'path_reception':'/ESSArch/exchange/ingest/media',
+         'path_gate':'/ESSArch/exchange/gate',
+         'path_work':'/ESSArch/exchange/work',
+         'path_control':'/ESSArch/exchange/control',
+         'path_ingest':'/ESSArch/exchange/control/ingest',
+         'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
          }
 
     # create according to model with two fields
@@ -248,7 +246,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         ArchivePolicy_obj.PreIngestMetadata=u'0'
         ArchivePolicy_obj.IngestMetadata=u'4'
         ArchivePolicy_obj.INFORMATIONCLASS=u'1'
-        ArchivePolicy_obj.IngestPath=u'/ESSArch/ingest'
+        ArchivePolicy_obj.IngestPath=u'/ESSArch/exchange/control/ingest'
         ArchivePolicy_obj.IngestDelete=u'1'
         ArchivePolicy_obj.save()
         

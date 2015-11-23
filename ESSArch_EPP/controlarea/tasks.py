@@ -33,7 +33,7 @@ from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectRel, e
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
-                           eventIdentifier, eventOutcome_CHOICES, IngestQueue
+                           eventOutcome_CHOICES, IngestQueue
 from configuration.models import Path, Parameter, SchemaProfile, IPParameter, ChecksumAlgorithm_CHOICES, ESSConfig
 import shutil, errno, essarch.log as logtool, ESSPGM, datetime, tarfile, sys,logging
 import ESSMD
@@ -392,6 +392,9 @@ class CheckInFromMottagTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result 
     
 class CheckOutToWorkTask(JobtasticTask):
@@ -582,6 +585,9 @@ class CheckOutToWorkTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result
 
 class CheckInFromWorkTask(JobtasticTask):
@@ -598,7 +604,7 @@ class CheckInFromWorkTask(JobtasticTask):
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
-	
+
     def calculate_result(self,source_path=None,target_path=None,Package=None,a_uid=None,a_gid=None,a_mode=None,allow_unknown_filetypes=False,ObjectIdentifierValue=None,ReqUUID=None,ReqPurpose=None,linkingAgentIdentifierValue=None):
         status_code = 0
         status_list = []
@@ -641,6 +647,7 @@ class CheckInFromWorkTask(JobtasticTask):
                 status_list.append(event_info)
                 logger.info(event_info)
                 shutil.move(op.join(source_path,Package),op.join(target_path,Package))
+                logger.warning('unicode debug - TargetPath: %s, defencoding: %s' % (repr(target_path), sys.getfilesystemencoding()))
                 errno,why = SetPermission(op.join(target_path,Package),a_uid,a_gid,a_mode)
                 if errno:
                     event_info = 'Failed to SetPermission, ERROR: %s' % why
@@ -685,6 +692,7 @@ class CheckInFromWorkTask(JobtasticTask):
             event_info = 'Create new content METS: %s' % METS_ObjectPath
             status_list.append(event_info)
             logger.info(event_info)
+            logger.warning('unicode debug - ObjectPath: %s, defencoding: %s' % (repr(ObjectPath), sys.getfilesystemencoding()))
             PREMIS_ObjectPath = os.path.join( ObjectPath, premis_obj )
             errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
                                                            METS_ObjectPath=METS_ObjectPath, 
@@ -714,10 +722,10 @@ class CheckInFromWorkTask(JobtasticTask):
                 logger.info(event_info)
                 os.rmdir(op.join(source_path,AIC_uuid))
             except (IOError, os.error), why:
-                event_info = 'Failed to remove AIC_Dir, ERROR: %s' % why
+                event_info = 'Varning AIC_Dir not removed, ERROR: %s' % why
                 error_list.append(event_info)
                 logger.error(event_info)
-                status_code = 3
+                #/status_code = 3
 
         #return status_code,[status_list,error_list]
         if status_code:
@@ -738,11 +746,14 @@ class CheckInFromWorkTask(JobtasticTask):
         
         result = {}
         result['category'] = 'controlarea'
-        result['label'] = 'Check out from work'
+        result['label'] = 'Check in from work'
         result['reqpurpose'] = ReqPurpose
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result)
         return result
                                    
 class DiffCheckTask(JobtasticTask):
@@ -800,7 +811,7 @@ class DiffCheckTask(JobtasticTask):
             status_list.append(event_info)
 
         #Test functionality added to test monitoring of tasks in progress
-        
+        '''
         testdrive = 1
         testtime = 10
         update_frequency = 1
@@ -811,7 +822,7 @@ class DiffCheckTask(JobtasticTask):
                                 )
             testdrive = testdrive + 1
             sleep(0.2)
-                
+         '''       
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Diffcheck'
@@ -820,6 +831,9 @@ class DiffCheckTask(JobtasticTask):
         result['statusdetail'] = status_detail
         result['resullist'] = res_list
         result['statuslist'] = status_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result
 
 class PreserveIPTask(JobtasticTask):
@@ -908,6 +922,9 @@ class PreserveIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result) 
         return result     
             
 class CopyFilelistTask(JobtasticTask):
@@ -984,6 +1001,17 @@ class CopyFilelistTask(JobtasticTask):
                               filelist = req_filelist, 
                               reqfilename = os.path.join(target_path,'request.xml'),
                               )
+        result = {}
+        result['category'] = 'controlarea'
+        result['label'] = 'Check infrom or to gatarea'
+        result['reqpurpose'] = ReqPurpose
+        result['user'] = linkingAgentIdentifierValue
+        result['statuslist'] = status_list
+        result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result)
+        return result
 
     def createExchangeRequestFile(self,ReqUUID=None,ReqType=None,ReqPurpose=None,user=None,ObjectIdentifierValue=None,posted=None,filelist=None,reqfilename=None):
         EL_root = etree.Element('exchange')
@@ -1051,10 +1079,10 @@ class GetExchangeRequestFileContentTask(JobtasticTask):
                     a_name = EL_file.get('name')
                     filelist.append(a_name)
             res = [a_ReqUUID,a_ReqType,a_ReqPurpose,a_user,a_ObjectIdentifierValue,a_posted,filelist]
-        '''return {'res':res,
+        return {'res':res,
                 'status_code':status_code,
                 'status_list':[status_list,error_list]
-                }'''
+                }
 
 class DeleteIPTask(JobtasticTask):
 
@@ -1170,6 +1198,7 @@ class DeleteIPTask(JobtasticTask):
                 deleted_obj.StatusActivity = 0
                 deleted_obj.ObjectActive = 0
                 deleted_obj.save()
+
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Delete IP'
@@ -1177,20 +1206,9 @@ class DeleteIPTask(JobtasticTask):
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
         result['errorlist'] = error_list
-
-        #Test functionality added to test monitoring of tasks in progress
-        
-        testdrive = 1
-        testtime = 10
-        update_frequency = 1
-        while(testdrive < 11):
-            self.update_progress(completed_count=testdrive,
-                                total_count=testtime,
-                                update_frequency=update_frequency,
-                                )
-            testdrive = testdrive + 1
-            sleep(0.2)        
-                
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result)          
         return result
                 
 def SetPermission(path,uid=None,gid=None,mode=0770):
@@ -1474,7 +1492,7 @@ class TestTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self,randomDict = None):
+    def calculate_result(self,TestString = None):
         testdrive = 1
         testtime = 10
         update_frequency = 1
@@ -1485,9 +1503,17 @@ class TestTask(JobtasticTask):
                                 )
             testdrive = testdrive + 1
             sleep(0.2)
+       
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Test task'
-        result['reqpurpose'] = 'Test task'
-        result['user'] = 'testuser'        
-        return randomDict
+        result['reqpurpose'] = TestString
+        result['user'] = 'testuser'
+        raise ControlareaException(result)    
+        return result
+    
+class ControlareaException(Exception):
+    def __init__(self, value):
+        self.value = value
+        super(ControlareaException, self).__init__(value)
+        
