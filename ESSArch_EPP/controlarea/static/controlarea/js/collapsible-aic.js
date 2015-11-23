@@ -91,7 +91,7 @@ function StatusProcessChoices(Process){
 	   return StatusActivityText;
 	}
      
-   
+    
 function populatelist(){
     
     if(info.length == 0){
@@ -128,7 +128,7 @@ function populatelist(){
         + '<td>' + IPList[j].startdate + '</td>'
         + '<td>' + IPList[j].enddate + '</td>'
         + '<td>' + StatusProcessChoices(IPList[j].Process) + '</td>'
-        + '<td>' +  StatusActivityChoices(IPList[j].Activity) + '</td>'
+        + '<td>' + StatusActivityChoices(IPList[j].Activity) + '</td>'
         + '<td>' + parent + ' </td>'
         + '<td>' + IPList[j].ObjectUUID + '</td>'
         + '</tr>'
