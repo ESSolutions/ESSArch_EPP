@@ -41,27 +41,25 @@ import django
 django.setup()
 
 # settings
-site_profile = "NO" # SE_NEW, SE, NO, EC
-site_name = u'NRA' # Bergen Byarkiv 
-medium_location = u'Media_%s' % site_name  
+site_profile = "EC" # SE_NEW, SE, NO, EC
+site_name = u'EARK' # Project E-ARK 
+medium_location = u'Media_%s' % site_name # IT_EARK 
 install_site = u'ESSArch_%s' % site_name 
 
-def installdefaultpaths(): # default paths for site profile
+def installdefaultpaths(): # default paths
     
     # First remove all existing data 
     Path.objects.all().delete()
 
-    # create dictionaries for site profile
+    # create dictionaries for different site profile
     dct = {
-          #'path_reception':'/data/mottak',
-          'path_reception':'/mottak',
-          'path_gate':'/data/ioessarch/',
-          'path_work':'/data/test',
-          #'path_control':'/data/control',
-          'path_control':'/kontroll',
-          'path_ingest':'/data/ingest',
+          'path_reception':'/ESSArch/exchange/ingest/media',
+          'path_gate':'/ESSArch/exchange/gate',
+          'path_work':'/ESSArch/exchange/work',
+          'path_control':'/ESSArch/exchange/control',
+          'path_ingest':'/ESSArch/exchange/control/ingest',
           'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
-         }
+          }
 
     # create according to model with two fields
     for key in dct :
@@ -80,22 +78,24 @@ def installdefaultschemaprofiles(): # default schema profiles for site profile
     SchemaProfile.objects.all().delete()
 
     dct = {
-          'addml_namespace': 'http://www.arkivverket.no/addml',
-          'addml_schemalocation': 'http://schema.arkivverket.no/ADDML/v8.2/addml.xsd',
+          'addml_namespace':'http://xml.ra.se/addml',
+          'addml_schemalocation':'http://xml.ra.se/addml/ra_addml.xsd',
+          'erms_schemalocation':'http://xml.ra.se/e-arkiv/ERMS/version10/Arendehantering.xsd',
           'mets_namespace': 'http://www.loc.gov/METS/',
-          'mets_profile': 'http://xml.ra.se/e-arkiv/METS/eARD/version20/eARD_Paket_FGS.xml',
-          'mets_schemalocation': 'http://schema.arkivverket.no/METS/mets.xsd',
-          'mix_namespace': 'http://xml.ra.se/MIX',
-          'mix_schemalocation': 'http://xml.ra.se/MIX/RA_MIX.xsd',
-          'mods_namespace': 'http://www.loc.gov/mods/v3',
-          'premis_namespace': 'http://arkivverket.no/standarder/PREMIS',
-          'premis_schemalocation': 'http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd',
-          'premis_version': '2.0',
-          'xhtml_namespace': 'http://www.w3.org/1999/xhtml',
-          'xhtml_schemalocation': 'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd',
-          'xlink_namespace': 'http://www.w3.org/1999/xlink',
-          'xsd_namespace': 'http://www.w3.org/2001/XMLSchema',
-          'xsi_namespace': 'http://www.w3.org/2001/XMLSchema-instance',
+          'mets_profile': 'http://www.ra.ee/METS/v01/SIP.xml',
+          'mets_schemalocation': 'http://www.ra.ee/METS/v01/SIP.xsd',
+          'mix_namespace':'http://xml.ra.se/MIX',
+          'mix_schemalocation':'http://xml.ra.se/MIX/RA_MIX.xsd',
+          'mods_namespace':'http://www.loc.gov/mods/v3',
+          'personnel_schemalocation':'http://xml.ra.se/e-arkiv/Personnel/version10/Personal.xsd',
+          'premis_namespace':'http://xml.ra.se/PREMIS',
+          'premis_schemalocation':'http://xml.ra.se/PREMIS/ESS/RA_PREMIS_PreVersion.xsd',
+          'premis_version':'2.0',
+          'xhtml_namespace':'http://www.w3.org/1999/xhtml',
+          'xhtml_schemalocation':'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd',
+          'xlink_namespace':'http://www.w3.org/1999/xlink',
+          'xsd_namespace':'http://www.w3.org/2001/XMLSchema',
+          'xsi_namespace':'http://www.w3.org/2001/XMLSchema-instance',
           }
 
     # create according to model with two fields
@@ -248,7 +248,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         ArchivePolicy_obj.PreIngestMetadata=u'0'
         ArchivePolicy_obj.IngestMetadata=u'4'
         ArchivePolicy_obj.INFORMATIONCLASS=u'1'
-        ArchivePolicy_obj.IngestPath=u'/ESSArch/ingest'
+        ArchivePolicy_obj.IngestPath=u'/ESSArch/exchange/control/ingest'
         ArchivePolicy_obj.IngestDelete=u'1'
         ArchivePolicy_obj.save()
         
@@ -351,12 +351,12 @@ def installdefaultparameters(): # default config parameters
     dct = {
        'site_profile':site_profile,
        'zone': 'zone3' ,
-       'templatefile_log': 'log.xml' ,
-       'templatefile_specification':'info.xml',
+       'templatefile_log': 'ipevents.xml' ,
+       'templatefile_specification':'ip.xml',
        'package_descriptionfile':'info.xml',
-       'content_descriptionfile':'mets.xml',
-       'ip_logfile':'log.xml',
-       'preservation_descriptionfile':'administrative_metadata/premis.xml',
+       'content_descriptionfile':'ip.xml',
+       'ip_logfile':'ipevents.xml',
+       'preservation_descriptionfile':'metadata/premis.xml',
        }
 
     # create according to model with two fields
@@ -429,7 +429,7 @@ def installIPParameter():  # default metadata for IP
           'policyid':'1',
           'receipt_email':'Mike.Oldfield@company.se',
           'file_id':'ID550e8400-e29b-41d4-a716-4466554400bg', ## kkkk
-           'file_name':'file:personalexport.xml',
+          'file_name':'file:personalexport.xml',
           'file_createdate':'2012-04-20T13:30:00,+01:00',
           'file_mime_type':'text/xml',
           'file_format':'PDF/A',
