@@ -1,14 +1,23 @@
 function getTaskInfo(taskid){
 
+	console.log(Django.user);
 	console.log('Get task info called');
 	
 var taskinprogressinfo = {};
+/*
 $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 
 	populateTaskInProgress(taskinprogressinfo);
 	
 	});
-    
+*/
+$.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
+
+	console.log(taskinprogressinfo);
+	populateTaskInProgress(taskinprogressinfo);
+	
+	});
+
 function populateTaskInProgress(taskinprogressinfo){
 
 var thetask = taskinprogressinfo['task'];
@@ -206,7 +215,7 @@ else{
 failedTaskshtml = failedTaskshtml + '<br>' + 'FAILURE' + '<br><br>' + errortype + '<br><br>' + reduce[1]['py/tuple'];
 
 }
-console.log(failedTaskshtml);
+
 return failedTaskshtml;
 	
 };
