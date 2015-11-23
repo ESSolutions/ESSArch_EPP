@@ -4,6 +4,7 @@ import hashlib
 from earkcore.filesystem.chunked import FileBinaryDataChunks
 from earkcore.filesystem.chunked import default_reporter
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+from retrying import retry
 
 class UploadChunkedRestException(Exception):
     """
@@ -23,6 +24,9 @@ class UploadError(UploadChunkedRestException):
     
 class UploadWarning(UploadChunkedRestException):
     """An upload warning occurred."""
+
+class UploadPostWarning(UploadChunkedRestException):
+    """An upload post warning occurred."""
 
 class UploadChunkedRestClient(object):
     """Upload chunked REST client class."""
@@ -86,14 +90,14 @@ class UploadChunkedRestClient(object):
                       )
                 headers={'Content-Type': m.content_type,
                          'Content-Range': HTTP_CONTENT_RANGE}
-                r = self.requests_session.post(self.rest_endpoint, data=m, headers=headers)
-                if r.status_code == 200:
-                    r_json = r.json()
-                    upload_id = r_json['upload_id']
-                    offset = r_json['offset']
-                    expires = r_json['expires']
-                else:
-                    raise UploadError([r.status_code, r.reason, r.text])
+                try:
+                    r = self.requests_session.post(self.rest_endpoint, data=m, headers=headers)
+                except UploadPostWarning as e:
+                    raise UploadError(e)
+                r_json = r.json()
+                upload_id = r_json['upload_id']
+                offset = r_json['offset']
+                expires = r_json['expires']
                 #print 'upload_id: %s, c_num: %s, offset: %s' % (upload_id, num, offset)
                 num += 1 
             m = MultipartEncoder(
@@ -102,12 +106,33 @@ class UploadChunkedRestClient(object):
                      }
               )
             headers={'Content-Type': m.content_type}
-
-            r = self.requests_session.post(self.rest_endpoint+'_complete', data=m, headers=headers)
-            if not r.status_code == 200:
-                raise UploadError([r.status_code, r.reason, r.text])
+            try:
+                r = self.requests_session.post(self.rest_endpoint+'_complete', data=m, headers=headers)
+            except UploadPostWarning as e:
+                raise UploadError(e)
 
         return 'Success to upload %s' % local_file_path
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def requests_post(self, rest_endpoint, data, data, headers):
+        """
+        Post data
+        @type       string
+        @param    rest_endpoint: URL
+        @type       MultipartEncoder
+        @param    data
+        @type       dict
+        @param    headers
+        @rtype:     string
+        @return:    requests return object
+        """
+        r = self.requests_session.post(rest_endpoint, data=data, headers=headers)
+        if not r.status_code == 200:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to upload chunk, (retrying), error: %s' % (e)
+            print msg
+            raise UploadPostWarning(e)
+        return r
 
 def main():
 

@@ -43,6 +43,7 @@ import requests
 from rest_framework.renderers import JSONRenderer
 from urlparse import urljoin
 from api.serializers import ArchiveObjectPlusAICPlusStorageNestedReadSerializer
+from retrying import retry
 
 # Disable https insecure warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
@@ -398,9 +399,10 @@ class StorageMethodWrite:
             for IOQueue_obj in  IOQueue_objs:
                 if not IOQueue_obj.storagemethodtarget in self.st_objs_to_check[ArchiveObject_obj]:                            
                     error_flag = 1
-                    msg = 'There are unknown write requests to the storage target: %s for object: %s (IOuuid: %s)' % (IOQueue_obj.storagemethodtarget.name, 
-                                                                                                                                                                    ArchiveObject_obj.ObjectIdentifierValue, 
-                                                                                                                                                                    IOQueue_obj.id)
+                    msg = 'There are unknown write requests to the storage target: %s for object: %s (IOuuid: %s)' % (
+                                                                                                                      IOQueue_obj.storagemethodtarget.name, 
+                                                                                                                      ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                      IOQueue_obj.id)
                     self.logger.error(msg)
                     error_list.append(msg)
         if not error_flag:
@@ -409,9 +411,10 @@ class StorageMethodWrite:
             for st_obj_to_check in self.st_objs_to_check[ArchiveObject_obj]:
                 if not st_obj_to_check in st_objs_in_IOQueue:
                     error_flag = 1
-                    msg = 'There is no write requests to the storage target: %s for object: %s, storagetarget_list: %s' % (st_obj_to_check.name, 
-                                                                                                                                                ArchiveObject_obj.ObjectIdentifierValue,
-                                                                                                                                                self.st_names_in_IOQueue)
+                    msg = 'There is no write requests to the storage target: %s for object: %s, storagetarget_list: %s' % (
+                                                                                                                                    st_obj_to_check.name, 
+                                                                                                                                    ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                    self.st_names_in_IOQueue)
                     self.logger.error(msg)
                     error_list.append(msg)
         if not error_flag and self.target_list:
@@ -419,7 +422,8 @@ class StorageMethodWrite:
             for target_item in  self.target_list:
                 if not target_item in  target_list_in_IOQueue:
                     error_flag = 1
-                    msg = 'There is no write requests to the storage target: %s for object: %s, target_list: %s' % (target_item, 
+                    msg = 'There is no write requests to the storage target: %s for object: %s, target_list: %s' % (
+                                                                                                                    target_item, 
                                                                                                                     ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                                     self.target_list)
                     self.logger.error(msg)
@@ -427,39 +431,55 @@ class StorageMethodWrite:
         if not error_flag:
             all_storage_objs = ArchiveObject_obj.Storage_set.all()
             all_storage_target_objs = [i.storagemedium.storagetarget for i in all_storage_objs]
-
+            
+            remote_io = False
             for IOQueue_obj in IOQueue_objs:
                 if IOQueue_obj.Status == 0:
                     self.pending_write_flag = 1
                     object_writes_ok_flag = 0
-                    event_info = 'Pending to write object: %s to storage target: %s (IOuuid: %s)' % (ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.storagemethodtarget.name, IOQueue_obj.id)
+                    event_info = 'Pending to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                     ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                     IOQueue_obj.storagemethodtarget.name, 
+                                                                                                     IOQueue_obj.id)
                     self.logger.info(event_info)
                 elif IOQueue_obj.Status < 20:
                     self.progress_write_flag = 1
                     object_writes_ok_flag = 0
-                    event_info = 'Progress to write object: %s to storage target: %s (IOuuid: %s)' % (ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.storagemethodtarget.name, IOQueue_obj.id)
+                    event_info = 'Progress to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                      ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                      IOQueue_obj.storagemethodtarget.name, 
+                                                                                                      IOQueue_obj.id)
                     self.logger.info(event_info)
                 elif IOQueue_obj.Status > 21:
                     self.fail_write_flag = 1
                     object_writes_ok_flag = 0
-                    event_info = 'Failed to write object: %s to storage target: %s (IOuuid: %s)' % (ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.storagemethodtarget.name, IOQueue_obj.id)                                
+                    event_info = 'Failed to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                    ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                    IOQueue_obj.storagemethodtarget.name, 
+                                                                                                    IOQueue_obj.id)                                
                     self.logger.error(event_info)
                     ESSPGM.Events().create('1100','',self.__name__,__version__,'1',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
                 elif IOQueue_obj.Status == 20:
                     if not IOQueue_obj.storagemethodtarget.target in all_storage_target_objs:
                         self.fail_write_flag = 1
                         object_writes_ok_flag = 0
-                        event_info = 'There is no storage entry in the database for the storage target: %s for object: %s (IOuuid: %s)' % (IOQueue_obj.storagemethodtarget.name, ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.id)
+                        event_info = 'There is no storage entry in the database for the storage target: %s for object: %s (IOuuid: %s)' % (
+                                                                                                                                           IOQueue_obj.storagemethodtarget.name, 
+                                                                                                                                           ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                                           IOQueue_obj.id)
                         self.logger.error(event_info)
                     elif not IOQueue_obj.storage in all_storage_objs:
-                        event_info = 'Storage entry id: %s in the database have no relationship to objects: %s (IOuuid: %s)' % (IOQueue_obj.storage.id, ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.id)
+                        event_info = 'Storage entry id: %s in the database have no relationship to objects: %s (IOuuid: %s)' % (
+                                                                                                                                IOQueue_obj.storage.id, 
+                                                                                                                                ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                                IOQueue_obj.id)
                         self.logger.error(event_info)
                     else:
                         timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                         storageMedium_obj = IOQueue_obj.storagemedium
                         storageMedium_obj.storageMediumUsedCapacity = storageMedium_obj.storageMediumUsedCapacity + int(IOQueue_obj.result.get('WriteSize'))
                         storageMedium_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
-                        storageMedium_obj.storageMediumDate =timestamp_utc
+                        storageMedium_obj.storageMediumDate = timestamp_utc
                         storageMedium_obj.LocalDBdatetime = timestamp_utc
                         storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])
                         if self.ExtDBupdate:
@@ -471,7 +491,22 @@ class StorageMethodWrite:
                             else:
                                 storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
                                 storageMedium_obj.save(update_fields=['ExtDBdatetime'])
-                        event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (ArchiveObject_obj.ObjectIdentifierValue, IOQueue_obj.storagemethodtarget.name, IOQueue_obj.id)                            
+                                
+                        # Update remote server
+                        target_obj = IOQueue_obj.storagemethodtarget.target
+                        remote_server = target_obj.remote_server.split(',')
+                        if len(remote_server) == 3:
+                            try:
+                                self._update_remote_archiveobject(remote_server, ArchiveObject_obj)
+                            except DatabasePostRestError as e:
+                                self.logger.error('Failed to update remote DB status for AIP: %s, error: %s' % (
+                                                                                                                ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                e))
+
+                        event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                           ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                           IOQueue_obj.storagemethodtarget.name, 
+                                                                                                           IOQueue_obj.id)                            
                         self.logger.info(event_info)
                         ESSPGM.Events().create('1101', '', self.__name__, __version__, '0', event_info, 2, ArchiveObject_obj.ObjectIdentifierValue)
                         if object_writes_ok_flag:
@@ -479,7 +514,10 @@ class StorageMethodWrite:
                             IOQueue_obj.save(update_fields=['Status'])
                     if len(all_storage_target_objs) < len(self.st_objs_to_check[ArchiveObject_obj]):
                         object_writes_ok_flag = 0
-                        event_info = 'There are fewer storage entrys in the database (%s) of object: %s than is configured in the archive policy (%s)' % (len(all_storage_target_objs), ArchiveObject_obj.ObjectIdentifierValue, len(self.st_objs_to_check))
+                        event_info = 'There are fewer storage entrys in the database (%s) of object: %s than is configured in the archive policy (%s)' % (
+                                                                                                                                                          len(all_storage_target_objs), 
+                                                                                                                                                          ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                                                          len(self.st_objs_to_check))
                         self.logger.debug(event_info)
 
             if error_flag:
@@ -550,13 +588,11 @@ class StorageMethodWrite:
                 else:
                     self.logger.error('Missing receipt email address for AIP: %s' % ArchiveObject_obj.ObjectIdentifierValue)
             
-            # Update remote server
-            remote_io = False        
+            # Delete IOQueue_objs on remote server  
             for IOQueue_obj in IOQueue_objs:
                 target_obj = IOQueue_obj.storagemethodtarget.target
                 remote_server = target_obj.remote_server.split(',')
                 if len(remote_server) == 3:
-                    valid_remote_server = remote_server
                     try:
                         self._delete_remote_IOQueue_obj(remote_server, IOQueue_obj)
                     except DatabasePostRestError as e:
@@ -564,17 +600,10 @@ class StorageMethodWrite:
                                                                                                                      IOQueue_obj.id, 
                                                                                                                      ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                                      e))
-                    remote_io = True
-            if remote_io:
-                try:
-                    self._update_remote_archiveobject(valid_remote_server, ArchiveObject_obj)
-                except DatabasePostRestError as e:
-                    self.logger.error('Failed to update remote DB status for AIP: %s, error: %s' % (
-                                                                                                    ArchiveObject_obj.ObjectIdentifierValue,
-                                                                                                    e))
             # Delete IOQueue_objs for ArchiveObject
             IOQueue_objs.delete()
     
+    @retry(wait_fixed=60000)
     def _update_remote_archiveobject(self, remote_server, ArchiveObject_obj):
         """ Call REST service on remote to update ArchiveObject with nested storage, storageMedium
         
@@ -605,8 +634,14 @@ class StorageMethodWrite:
                                         headers={'Content-Type': 'application/json'}, 
                                         data=ArchiveObject_obj_json)
         if not r.status_code == 200:
-            raise DatabasePostRestError([r.status_code, r.reason, r.text])
-        
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to update remote server status for AIP, storage, storageMedium for object %s, error: %s' % (
+                                                                                                                          ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                          e)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)    
     def _delete_remote_IOQueue_obj(self, remote_server, IO_obj):
         """ Call REST service on remote to remove IOQueue object
         
@@ -622,7 +657,13 @@ class StorageMethodWrite:
         requests_session.auth = (ruser, rpass)
         r = requests_session.delete(IOQueue_rest_endpoint)
         if not r.status_code == 204:
-            raise DatabasePostRestError([r.status_code, r.reason, r.text])
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to delete IOQueue object on remote server for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                              e,
+                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
 
     def notify_external_project(self, ArchiveObject_obj):
         IOQueue_objs = ArchiveObject_obj.ioqueue_set.filter(ReqType__in=[10])
