@@ -228,13 +228,10 @@ function StatusProcessChoices(Process){
    
 function stringifieddate(longdate){
 	    
-	    if (longdate != undefined){
-	    var datestring = longdate.toString();
-	    var shortdate = datestring.substring(0, 10);
-	    return shortdate;
-	    else{
-	        return 'not set';}
-	    }
+	    //if (longdate != undefined){
+	    //var datestring = longdate.toString();
+	    //var shortdate = datestring.substring(0, 10);
+	    return longdate;
 	}
    
 function setaichtml(ajaxinfo){
@@ -297,7 +294,10 @@ function setaichtml(ajaxinfo){
 		        }//IPlist for loop
 		        
 		        
-		}; //End of length test
+		} //End of length test
+		else{
+			console.log('Empty AIC')
+		}
 	};//End of for aic list for loop
 	
 	 
