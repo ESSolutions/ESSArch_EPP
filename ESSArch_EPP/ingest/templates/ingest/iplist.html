@@ -470,6 +470,8 @@ function stringifieddate(longdate){
 function setaichtml(ajaxinfo){
     
     var aicwrapper = ajaxinfo;
+
+    var ipiterator = 0;
     
     nextpage = aicwrapper.next;
     previouspage = aicwrapper.previous;
@@ -504,7 +506,9 @@ function setaichtml(ajaxinfo){
                 var createlink = '/ingest/new/';
                 
                 for (j = 0; j < IPlist.length; j++){
-                     
+                    
+		    ipiterator = ipiterator +1;
+			
                     var IP = IPlist[j];
                     var IPinfo = IP.archiveobjectdata_set[0];
                     
@@ -535,6 +539,11 @@ function setaichtml(ajaxinfo){
 
     };//End of for aic list for loop
     
+    if(ipiterator == 0){
+
+	getnextpage();
+
+	}
      
     document.getElementById("AICtable").innerHTML = tabletext;
 };//End of serAIChtml function
