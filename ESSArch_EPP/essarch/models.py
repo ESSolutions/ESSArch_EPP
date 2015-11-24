@@ -243,7 +243,7 @@ class ArchiveObject(models.Model):
     ObjectUUID = models.CharField(max_length=36, unique=True)
     #PolicyId = models.IntegerField(null=True)
     #PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
-    PolicyId = models.ForeignKey('configuration.ArchivePolicy', db_column='PolicyId', to_field='PolicyID', default=0)
+    PolicyId = models.ForeignKey('configuration.ArchivePolicy', db_column='PolicyId', to_field='PolicyID', blank=True, null=True)
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
     ObjectPackageName = models.CharField(max_length=255, blank=True)
     ObjectSize = models.BigIntegerField(null=True)

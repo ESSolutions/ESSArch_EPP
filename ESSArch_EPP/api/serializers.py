@@ -170,7 +170,8 @@ class ArchiveObjectSerializer(serializers.ModelSerializer):
     PolicyId = relations.SlugRelatedField(label='PolicyId', 
                                           slug_field='PolicyID', 
                                           queryset=ArchivePolicy.objects.all(), 
-                                          required=False,
+                                          required=False, 
+                                          allow_null=True,
                                           )
     class Meta:
         model = ArchiveObject

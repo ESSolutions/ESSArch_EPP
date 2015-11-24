@@ -91,7 +91,8 @@ class UploadChunkedRestClient(object):
                 headers={'Content-Type': m.content_type,
                          'Content-Range': HTTP_CONTENT_RANGE}
                 try:
-                    r = self.requests_session.post(self.rest_endpoint, data=m, headers=headers)
+                    #r = self.requests_session.post(self.rest_endpoint, data=m, headers=headers)
+                    r = self.requests_post(self.rest_endpoint, data=m, headers=headers)
                 except UploadPostWarning as e:
                     raise UploadError(e)
                 r_json = r.json()
@@ -107,14 +108,15 @@ class UploadChunkedRestClient(object):
               )
             headers={'Content-Type': m.content_type}
             try:
-                r = self.requests_session.post(self.rest_endpoint+'_complete', data=m, headers=headers)
+                #r = self.requests_session.post(self.rest_endpoint+'_complete', data=m, headers=headers)
+                r = self.requests_post(self.rest_endpoint+'_complete', data=m, headers=headers)
             except UploadPostWarning as e:
                 raise UploadError(e)
 
         return 'Success to upload %s' % local_file_path
 
     @retry(stop_max_attempt_number=5, wait_fixed=60000)
-    def requests_post(self, rest_endpoint, data, data, headers):
+    def requests_post(self, rest_endpoint, data, headers):
         """
         Post data
         @type       string

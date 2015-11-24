@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                 ('Generation', models.IntegerField(null=True)),
                 ('LocalDBdatetime', models.DateTimeField(null=True)),
                 ('ExtDBdatetime', models.DateTimeField(null=True)),
-                ('PolicyId', models.ForeignKey(db_column=b'PolicyId', default=0, to_field=b'PolicyID', to='configuration.ArchivePolicy')),
+                ('PolicyId', models.ForeignKey(db_column=b'PolicyId', to_field=b'PolicyID', blank=True, to='configuration.ArchivePolicy', null=True)),
             ],
             options={
                 'db_table': 'IngestObject',

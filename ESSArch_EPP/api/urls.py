@@ -53,7 +53,7 @@ from api.views import (TmpWorkareaUploadView,
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'archiveobjects', ArchiveObjectViewSet)
-router.register(r'archiveobjectsandstorage', ArchiveObjectStorageViewSet)
+router.register(r'archiveobjectsandstorage', ArchiveObjectStorageViewSet, 'archiveobjectsandstorage')
 router.register(r'aicobjects', AICObjectViewSet, 'aicobject')
 router.register(r'archivepolicy', ArchivePolicyViewSet)
 router.register(r'archivepolicynested', ArchivePolicyNestedViewSet, 'archivepolicynested')
