@@ -26,16 +26,19 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import os, datetime, time, logging, sys, ESSPGM, ESSMD, csv, ESSMSSQL, pytz, traceback, urllib, re
+import os, datetime, time, logging, sys, ESSPGM, ESSMD, csv, ESSMSSQL, pytz, traceback, urllib, re, tarfile
 
-from essarch.models import IngestQueue, ArchiveObject
+from essarch.models import IngestQueue, AccessQueue, ArchiveObject
 from configuration.models import ESSConfig, ESSProc, ArchivePolicy, StorageTargets
-from Storage.models import IOQueue
+from Storage.models import storage, storageMedium, IOQueue
+from essarch.libs import calcsum, unicode2str
 from django.db.models import Q
 from django import db
 from django.utils import timezone
-from StorageMethodDisk.tasks import WriteStorageMethodDisk
-from StorageMethodTape.tasks import WriteStorageMethodTape
+from StorageMethodDisk.tasks import (WriteStorageMethodDisk,
+                                                        ReadStorageMethodDisk)
+from StorageMethodTape.tasks import (WriteStorageMethodTape,
+                                                        ReadStorageMethodTape)
 from Storage.tasks import TransferWriteIO
 from essarch.libs import ESSArchSMError
 from celery.result import AsyncResult
@@ -67,6 +70,11 @@ class DatabasePostRestException(Exception):
 
 class DatabasePostRestError(DatabasePostRestException):
     """An post request error occurred."""
+
+class AccessError(Exception):
+    def __init__(self, value):
+        self.value = value
+        super(AccessError, self).__init__(value)
 
 class StorageMethodWrite:
     tz = timezone.get_default_timezone()
@@ -432,7 +440,7 @@ class StorageMethodWrite:
             all_storage_objs = ArchiveObject_obj.Storage_set.all()
             all_storage_target_objs = [i.storagemedium.storagetarget for i in all_storage_objs]
             
-            remote_io = False
+            valid_remote_server = None
             for IOQueue_obj in IOQueue_objs:
                 if IOQueue_obj.Status == 0:
                     self.pending_write_flag = 1
@@ -492,16 +500,11 @@ class StorageMethodWrite:
                                 storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
                                 storageMedium_obj.save(update_fields=['ExtDBdatetime'])
                                 
-                        # Update remote server
+                        # Flag to update remote server
                         target_obj = IOQueue_obj.storagemethodtarget.target
                         remote_server = target_obj.remote_server.split(',')
                         if len(remote_server) == 3:
-                            try:
-                                self._update_remote_archiveobject(remote_server, ArchiveObject_obj)
-                            except DatabasePostRestError as e:
-                                self.logger.error('Failed to update remote DB status for AIP: %s, error: %s' % (
-                                                                                                                ArchiveObject_obj.ObjectIdentifierValue,
-                                                                                                                e))
+                            valid_remote_server = remote_server
 
                         event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (
                                                                                                            ArchiveObject_obj.ObjectIdentifierValue, 
@@ -509,9 +512,8 @@ class StorageMethodWrite:
                                                                                                            IOQueue_obj.id)                            
                         self.logger.info(event_info)
                         ESSPGM.Events().create('1101', '', self.__name__, __version__, '0', event_info, 2, ArchiveObject_obj.ObjectIdentifierValue)
-                        if object_writes_ok_flag:
-                            IOQueue_obj.Status = 21
-                            IOQueue_obj.save(update_fields=['Status'])
+                        IOQueue_obj.Status = 21
+                        IOQueue_obj.save(update_fields=['Status'])
                     if len(all_storage_target_objs) < len(self.st_objs_to_check[ArchiveObject_obj]):
                         object_writes_ok_flag = 0
                         event_info = 'There are fewer storage entrys in the database (%s) of object: %s than is configured in the archive policy (%s)' % (
@@ -520,10 +522,22 @@ class StorageMethodWrite:
                                                                                                                                                           len(self.st_objs_to_check))
                         self.logger.debug(event_info)
 
+            if object_writes_ok_flag == 1 and valid_remote_server is not None:
+                # Update remote server
+                try:
+                    self._update_remote_archiveobject(valid_remote_server, ArchiveObject_obj)
+                except DatabasePostRestError as e:
+                    error_flag = 1
+                    msg = 'Failed to update remote DB status for AIP: %s, error: %s' % (
+                                                                                                    ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                    e)
+                    self.logger.error(msg)
+                    error_list.append(msg)
+
             if error_flag:
                 raise ESSArchSMError(error_list)
             elif object_writes_ok_flag == 1:
-                self.object_writes_ok_flag = 1
+                self.object_writes_ok_flag = 1                
         
     def handle_migration_write_status(self, ArchiveObject_obj):
         if self.fail_write_flag:
@@ -603,7 +617,7 @@ class StorageMethodWrite:
             # Delete IOQueue_objs for ArchiveObject
             IOQueue_objs.delete()
     
-    @retry(wait_fixed=60000)
+    @retry(stop_max_attempt_number=1440, wait_fixed=60000)
     def _update_remote_archiveobject(self, remote_server, ArchiveObject_obj):
         """ Call REST service on remote to update ArchiveObject with nested storage, storageMedium
         
@@ -708,6 +722,444 @@ class StorageMethodWrite:
                     if i[0] == 'RECEIPT_EMAIL':
                         RECEIPT_EMAIL = i[1]
         return RECEIPT_EMAIL
+
+    @property
+    def __name__(self):
+        return self.__class__.__name__
+
+class StorageMethodRead:
+    tz = timezone.get_default_timezone()
+    def __init__(self):
+        # Configuration values
+        self.ArchiveObject_objs = []     # ArchiveObjects to write
+        self.TempPath = ''                   # Rootpath for IPs
+        self.target_list = []                   # Only write to specified targets. If not defined default is to write all targets in archivepolicy
+        self.force_write_flag = 0          # Force to write to targets even if the total size of objects is less then minChunkSize in archivepolicy
+        self.retry_write_flag = 0           # Flag to retry failed write jobs
+        self.retry_transfer_flag = 0       # Flag to retry failed transfer jobs
+        self.exitFlag = 0                      # Flag to stop writes
+
+        # Result status flags
+        self.all_writes_ok_flag = 0        # If this flag is True, all writes is done for all objects in self.ArchiveObjects_objs
+        self.pending_write_flag = 0       # If this flag is True, pending writes exists for current object in self.ArchiveObjects_objs
+        self.progress_write_flag = 0      # If this flag is True, progress writes exists for current object in self.ArchiveObjects_objs
+        self.fail_write_flag = 0              # If this flag is True, failed writes exists for current object in self.ArchiveObjects_objs
+        self.object_writes_ok_flag = 0  # If this flag is True, all writes i done for current object in self.ArchiveObjects_objs
+
+        # Default values 
+        self.IOs_to_write = {}
+        self.IOs_to_transfer = {}
+        self.st_objs_to_check = {}
+        self.ActiveTapeIOs = []
+        self.logger = logging.getLogger('Storage')
+        self.AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
+        self.ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
+        if self.ExtDBupdate:
+            self.ext_IngestTable = 'IngestObject'
+        else:
+            self.ext_IngestTable = ''
+
+    def GetObjectsToVerify(self, ReqUUID, complete=False):
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        storageMediumID = AccessQueue_obj.storageMediumID
+
+        storageMedium_obj = storageMedium.objects.get(storageMediumID=storageMediumID)
+                       
+        # get all storage_objs for storageMeduimID
+        storage_objs = storage.objects.filter(storagemedium=storageMedium_obj).extra(
+                                                                     select={'contentLocationValue_int': 'CAST(contentLocationValue AS UNSIGNED)'}
+                                                                     ).order_by('contentLocationValue_int')
+
+        storage_objs_count = storage_objs.count()
+        if complete or storage_objs_count<3:
+            return storage_objs
+        else:
+            return [storage_objs[0], storage_objs[storage_objs_count/2], storage_objs[storage_objs_count-1]]
+
+    def GetObjectToRead(self, ReqUUID):
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        storageMediumID = AccessQueue_obj.storageMediumID
+        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
+        
+        storage_objs = storage.objects.filter(archiveobject__ObjectIdentifierValue=ObjectIdentifierValue, storagemedium__storageMediumStatus__in=[20,30], storagemedium__storageMediumLocationStatus=50)
+        
+        if storageMediumID:
+            if storage_objs.filter(storagemedium__storageMediumID=storageMediumID).exists():
+                storage_objs = storage_objs.filter(storagemedium__storageMediumID=storageMediumID)
+        
+        if len(storage_objs) >= 1:
+            if storage_objs.filter(storagemedium__storageMedium__in=[200,201]).exists():
+                storage_obj = storage_objs.filter(storagemedium__storageMedium__in=[200,201])[0]
+            elif storage_objs.filter(storagemedium__storageMedium__in=[300,330]).exists():
+                storage_obj = storage_objs.filter(storagemedium__storageMedium__in=[300,330])[0]
+            else:
+                storage_obj = storage_objs[0]
+        else:
+            raise AccessError('No storage objects found for object: %s (ReqUUD: %s)' % (ObjectIdentifierValue,ReqUUID) )
+        
+        return [storage_obj]
+        
+    def add_to_ioqueue(self, storage_objs, ReqUUID):
+        """Add storage objects to IOQueue
+        
+        :param storage_objs: List of storage objects
+        :param ReqUUID: AccessQueue request UUID
+        
+        """
+        IOs_to_read = {}
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)     
+        for storage_obj in storage_objs:
+            storageMedium_obj = storage_obj.storagemedium
+            if storageMedium_obj.storageMedium in range(300,330): 
+                ReqType = 20
+                ReqPurpose=u'Read package from tape'
+            elif storageMedium_obj.storageMedium in range(200,201):
+                ReqType = 25
+                ReqPurpose=u'Read package from disk'
+            ArchiveObject_obj = storage_obj.archiveobject
+            IOQueue_objs = IOQueue.objects.filter(storage=storage_obj)
+            if not IOQueue_objs.exists():     
+                IOQueue_obj = IOQueue()
+                IOQueue_obj.ReqType=ReqType
+                IOQueue_obj.ReqPurpose=ReqPurpose
+                IOQueue_obj.user=u'sys'
+                IOQueue_obj.ObjectPath=AccessQueue_obj.Path
+                IOQueue_obj.Status=0
+                IOQueue_obj.archiveobject=ArchiveObject_obj
+                IOQueue_obj.storage=storage_obj
+                IOQueue_obj.accessqueue=AccessQueue_obj
+                IOQueue_obj.save()
+                self.logger.info('Add ReadReq from storageMediumID: %s for object: %s (IOuuid: %s)' % (storageMedium_obj.storageMediumID, 
+                                                                                                                                             ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                                                             IOQueue_obj.id))                    
+            elif IOQueue_objs.count() > 1:
+                self.logger.error('More then one ReadReq from storageMediumID: %s for object: %s exists' % (storageMedium_obj.storageMediumID, 
+                                                                                                                                                    ArchiveObject_obj.ObjectIdentifierValue))
+            else:
+                IOQueue_obj = IOQueue_objs[0]
+
+            if not IOs_to_read.has_key(storageMedium_obj):
+                IOs_to_read[storageMedium_obj] = []
+            IOs_to_read[storageMedium_obj].append(IOQueue_obj)        
+        
+        return IOs_to_read
+
+    def apply_ios_to_read(self, IOs_to_read, ReqUUID):
+        """Apply all IOs to read
+        
+        :param IOs_to_read: Dict with {storageMedium_obj=IOQueue_obj_list,...}
+        :param ReqUUID: AccessQueue request UUID
+        
+        """
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)     
+        for storageMedium_obj, IOQueue_obj_list in IOs_to_read.iteritems():           
+            if storageMedium_obj.storageMedium in range(300,330): 
+                # Read from tape (ReqType=20)
+                IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
+                for  IOQueue_obj in IOQueue_obj_list:
+                    IOQueue_obj.Status=2
+                    IOQueue_obj.save(update_fields=['Status'])                        
+                result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
+                self.logger.info('Apply new read IO process from tape id: %s (AccessReqUUID: %s)' % (storageMedium_obj.storageMediumID, 
+                                                                                                                                           AccessQueue_obj.ReqUUID))         
+                for  IOQueue_obj in IOQueue_obj_list:
+                    IOQueue_obj.task_id = result.task_id
+                    IOQueue_obj.save(update_fields=['task_id'])                        
+            elif storageMedium_obj.storageMedium in range(200,201): 
+                # Read from disk (ReqType=25)
+                for  IOQueue_obj in IOQueue_obj_list:
+                    IOQueue_obj.Status=2
+                    IOQueue_obj.save(update_fields=['Status'])
+                    result = ReadStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
+                    self.logger.info('Apply new read IO process for object: %s from disk id: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                                                      storageMedium_obj.storageMediumID, 
+                                                                                                                                                                                      AccessQueue_obj.ReqUUID, 
+                                                                                                                                                                                      IOQueue_obj.id))
+                    IOQueue_obj.task_id = result.task_id
+                    IOQueue_obj.save(update_fields=['task_id'])        
+
+    def wait_for_all_reading(self, ReqUUID):
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        IOQueue_objs = AccessQueue_obj.ioqueue_set.all()
+        while 1:
+            ReadOK=1
+            loop_num = 1
+            for IOQueue_obj in IOQueue_objs:
+                result = AsyncResult(IOQueue_obj.task_id)
+                if result.failed():
+                    ReadOK=0
+                    self.logger.error('Problem to read object: %s, traceback: %s, result: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                                                 result.traceback, 
+                                                                                                                                                                                 result.result,
+                                                                                                                                                                                 AccessQueue_obj.ReqUUID, 
+                                                                                                                                                                                 IOQueue_obj.id))
+                    raise AccessError(result.traceback)
+                elif result.successful():
+                    self.logger.info('Success to read object: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                         AccessQueue_obj.ReqUUID, 
+                                                                                                                                         IOQueue_obj.id))
+                else:
+                    if loop_num == 60:
+                        if result.state == 'PENDING':
+                            self.logger.warning('Unknown status for read task for object: %s, traceback: %s, result: %s, state: %s (AccessReqUUID: %s, IOuuid: %s)' % (
+                                                                                                                                                            IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                            result.traceback, 
+                                                                                                                                                            result.result,
+                                                                                                                                                            result.state,
+                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            IOQueue_obj.id))
+                        else:
+                            self.logger.info('Wait for read task for object: %s, state: %s (AccessReqUUID: %s, IOuuid: %s)' % (
+                                                                                                                                                            IOQueue_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                            result.state,
+                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            IOQueue_obj.id))
+                        loop_num = 1
+                    ReadOK=0
+            if ReadOK==1:
+                self.logger.info('all reads done!!!')
+                IOQueue_objs.delete()
+                break
+            loop_num += 1
+            time.sleep(1)
+
+    def _IPunpack(self,ReqUUID):
+        """Unpack information package"""
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
+        RootPath = AccessQueue_obj.Path
+        RootPath_iso = unicode2str(RootPath)
+        try:
+            AIPfilename = os.path.join(RootPath,ObjectIdentifierValue + '.tar')
+            AIP_tarObject = tarfile.open(name=AIPfilename, mode='r')
+            AIP_tarObject.extractall(path=RootPath_iso)
+        except (ValueError, IOError, OSError, tarfile.TarError) as e:
+            event_info = 'Problem to unpack object: %s, Message: %s' % (ObjectIdentifierValue, str(e))
+            logging.error(event_info)
+            ESSPGM.Events().create('1210','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+            raise e
+        else:
+            event_info = 'Success to unpack object: %s' % ObjectIdentifierValue
+            logging.info(event_info)
+            ESSPGM.Events().create('1210','',__name__,__version__,'0',event_info,2,ObjectIdentifierValue)
+            
+    def _IPvalidate(self,ReqUUID, mets_flag = 1, VerifyChecksum_flag = 0):
+        """Validate information package"""
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
+        RootPath = AccessQueue_obj.Path
+        ok_flag=1
+        if ok_flag and mets_flag:
+            ###########################################################
+            # find Content_METS file
+            #Cmets_obj = Cmets_obj.replace('{uuid}',ObjectIdentifierValue)
+            PMetaObjectPath = os.path.join(RootPath,ObjectIdentifierValue + '_Package_METS.xml')
+            if not os.path.exists(PMetaObjectPath):
+                event_info = 'Problem to find %s for information package: %s' % (PMetaObjectPath,ObjectIdentifierValue)
+                logging.error(event_info)
+                ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                ok_flag = 0
+            if ok_flag:
+                res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=PMetaObjectPath)
+                if not error:
+                    for res_file in res_files:
+                        if res_file[0] == 'amdSec' and \
+                           res_file[2] == 'techMD' and \
+                           res_file[13] == 'text/xml' and \
+                           res_file[15] == 'OTHER' and \
+                           res_file[16] == 'METS':
+                            if res_file[8][:5] == 'file:':
+                                Cmets_filename = res_file[8][5:]
+                else:
+                    event_info = 'Problem to read package METS %s for information package: %s, error: %s' % (PMetaObjectPath,ObjectIdentifierValue,str(why))
+                    logging.error(event_info)
+                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                    ok_flag = 0
+            #Cmets_obj = Cmets_obj.replace('{uuid}',ObjectIdentifierValue)
+            Meta_filepath = os.path.join(RootPath,Cmets_filename)
+            if not os.path.exists(Meta_filepath):
+                event_info = 'Problem to find %s for information package: %s' % (Meta_filepath,ObjectIdentifierValue)
+                logging.error(event_info)
+                ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                ok_flag = 0
+            if not RootPath == os.path.split(Meta_filepath)[0]:
+                RootPath = os.path.split(Meta_filepath)[0]
+                logging.info('Setting METSrootpath for IP: %s to %s' % (ObjectIdentifierValue, RootPath))
+################################
+#            if os.path.exists('%s/%s_Content_METS.xml' % (RootPath,ObjectIdentifierValue)):
+#                pass
+#            elif os.path.exists('%s/%s/%s_Content_METS.xml' % (RootPath,ObjectIdentifierValue,ObjectIdentifierValue)):
+#                RootPath = os.path.join(RootPath,ObjectIdentifierValue)
+#            else:
+#                event_info = 'Problem to find X_Content_METS.xml file for information package: %s' % ObjectIdentifierValue
+#                logging.error(event_info)
+#                ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+#                ok_flag = 0
+#            Meta_filepath = '%s/%s_Content_METS.xml' % (RootPath,ObjectIdentifierValue)
+        if ok_flag and mets_flag:
+            ###########################################################
+            # get object_list from METS file
+            object_list,errno,why = ESSMD.getAIPObjects(FILENAME=Meta_filepath)
+            if errno == 0:
+                logging.info('Success to get object_list from premis for information package: %s', ObjectIdentifierValue)
+                #logging.debug('Meta_filepath: %s , object_list: %s', Meta_filepath,str(object_list))
+            else:
+                event_info = 'Problem to get object_list from premis for information package: %s, errno: %s, detail: %s' % (ObjectIdentifierValue,errno,str(why))
+                logging.error(event_info)
+                ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                ok_flag = 0
+        if ok_flag and not mets_flag:
+            ###########################################################
+            # get object_list from RES file
+            Meta_filepath = os.path.join(os.path.join(RootPath,ObjectIdentifierValue),'TIFFEdit.RES')
+            object_list,errno,why = ESSMD.getRESObjects(FILENAME=Meta_filepath)
+            if errno == 0:
+                logging.info('Success to get object_list from RES for information package: %s', ObjectIdentifierValue)
+            else:
+                event_info = 'Problem to get object_list from RES for information package: %s, errno: %s, detail: %s' % (ObjectIdentifierValue,errno,str(why))
+                logging.error(event_info)
+                ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                ok_flag = 0
+        if ok_flag and mets_flag:
+            ###########################################################
+            # Start to format validate DIP with object list from METS
+            logging.info('Format validate object: ' + ObjectIdentifierValue)
+            startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+            ObjectNumItems = 0
+            ObjectSize = 0
+            for obj in object_list:
+                messageDigestAlgorithm = obj[1]
+                filepath = os.path.join(RootPath, obj[0])
+                filepath_iso = unicode2str(filepath)
+                if ok_flag and os.access(filepath_iso,os.R_OK):
+                    pass
+                else:
+                    event_info = 'Object path: %s do not exist or is not readable!' % filepath
+                    logging.error(event_info)
+                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                    ok_flag = 0
+                    break
+                if ok_flag and os.access(filepath_iso,os.W_OK):
+                    pass
+                else:
+                    event_info = 'Missing permission, Object path: %s is not writeable!' % filepath
+                    logging.error(event_info)
+                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                    ok_flag = 0
+                    break
+                if ok_flag:
+                    if int(os.stat(filepath_iso)[6]) == int(obj[3]):
+                        ObjectSize += int(obj[3])
+                    else:
+                        event_info = 'Filesize for object path: %s is %s and premis object size is %s. The sizes must match!' % (filepath,str(os.stat(filepath_iso)[6]),str(obj[3]))
+                        logging.error(event_info)
+                        ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                        ok_flag = 0
+                        break
+                    if ok_flag and VerifyChecksum_flag:
+                        #F_messageDigest,errno,why = Check().checksum(filepath_iso,messageDigestAlgorithm) # Checksum
+                        F_messageDigest = calcsum(filepath_iso,messageDigestAlgorithm) # Checksum
+                        #if errno:
+                        #    event_info = 'Failed to get checksum for: %s, Error: %s' % (filepath,str(why))
+                        #    logging.error(event_info)
+                        #    ESSPGM.Events().create('1041','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                        #    ok_flag = 0
+                        #else:
+                        event_info = 'Success to get checksum for: %s, Checksum: %s' % (filepath,F_messageDigest)
+                        logging.info(event_info)
+                        ESSPGM.Events().create('1041','',__name__,__version__,'0',event_info,2,ObjectIdentifierValue)
+                    else:
+                        event_info = 'Skip to verify checksum for: %s' % filepath
+                        logging.info(event_info)
+                    if ok_flag and VerifyChecksum_flag:
+                        if F_messageDigest == obj[2]:
+                            event_info = 'Success to verify checksum for object path: %s' % filepath
+                            logging.info(event_info)
+                            ESSPGM.Events().create('1042','',__name__,__version__,'0',event_info,2,ObjectIdentifierValue)
+                        else:
+                            event_info = 'Checksum for object path: %s is %s and premis object checksum is %s. The checksum must match!' % (filepath,F_messageDigest,obj[2])
+                            logging.error(event_info)
+                            ESSPGM.Events().create('1042','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                            ok_flag = 0
+                            break
+                ObjectNumItems += 1
+        if ok_flag and not mets_flag:
+            ###########################################################
+            # Start to format validate DIP with object list from RESfile
+            logging.info('Format validate object (RES): ' + ObjectIdentifierValue)
+            startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+            ObjectNumItems = 0
+            ObjectSize = 0
+            for obj in object_list:
+                filepath = os.path.join(RootPath, obj[0])
+                if ok_flag and os.access(filepath,os.R_OK):
+                    pass
+                else:
+                    event_info = 'Object path: %s do not exist or is not readable!' % filepath
+                    logging.error(event_info)
+                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                    ok_flag = 0
+                    break
+                if ok_flag and os.access(filepath,os.W_OK):
+                    pass
+                else:
+                    event_info = 'Missing permission, Object path: %s is not writeable!' % filepath
+                    logging.error(event_info)
+                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                    ok_flag = 0
+                    break
+                if ok_flag:
+                    if int(os.stat(filepath)[6]) == int(obj[1]):
+                        ObjectSize += int(obj[1])
+                    else:
+                        event_info = 'Filesize for object path: %s is %s and RES object size is %s. The sizes must match!' % (filepath,str(os.stat(filepath)[6]),str(obj[1]))
+                        logging.error(event_info)
+                        ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                        ok_flag = 0
+                        break
+        if ok_flag:
+            stopTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
+            MeasureTime = stopTime-startTime
+            ObjectSizeMB = ObjectSize/1048576
+            if MeasureTime.seconds < 1: MeasureTime = datetime.timedelta(seconds=1)   #Fix min time to 1 second if it is zero.
+            VerMBperSEC = int(ObjectSizeMB)/int(MeasureTime.seconds)
+        if ok_flag:
+            event_info = 'Success to validate object package: %s, %s MB/Sec and Time: %s' % (ObjectIdentifierValue,str(VerMBperSEC),str(MeasureTime))
+            logging.info(event_info)
+            ESSPGM.Events().create('1043','',__name__,__version__,'0',event_info,2,ObjectIdentifierValue)
+        else:
+            msg = 'Problem to validate IP package: ' + ObjectIdentifierValue
+            raise AccessError(msg)                  
+
+    def _DeleteAccessedIOs(self, storage_objs, ReqUUID):
+        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
+        RootPath = AccessQueue_obj.Path
+        for storage_obj in storage_objs:
+            ObjectIdentifierValue = storage_obj.archiveobject.ObjectIdentifierValue
+            storageMediumFormat = storage_obj.storagemedium.storageMediumFormat
+            PMetaObjectPath = os.path.join(RootPath,ObjectIdentifierValue + '_Package_METS.xml')
+            ip_path = os.path.join(RootPath,ObjectIdentifierValue + '.tar')
+
+            if storageMediumFormat in range(100,102):
+                logging.info('Try to remove ObjectPath: ' + ip_path)
+            else:
+                logging.info('Try to remove ObjectPath: ' + ip_path + ' and ' + PMetaObjectPath)
+            try:
+                os.remove(ip_path)
+                if not storageMediumFormat in range(100,102):
+                    os.remove(PMetaObjectPath)
+            except (IOError, OSError) as e:
+                if storageMediumFormat in range(100,102):
+                    logging.error('Problem to remove ObjectPath: %s, error: %s' % (ip_path,e))
+                else:
+                    logging.error('Problem to remove ObjectPath: %s and %s, error: %s' % (ip_path, PMetaObjectPath, e))
+                raise e
+            else:
+                if storageMediumFormat in range(100,102):
+                    logging.info('Success to removeObjectPath: ' + ip_path)
+                else:
+                    logging.info('Success to removeObjectPath: ' + ip_path + ' and ' + PMetaObjectPath)
+
 
     @property
     def __name__(self):

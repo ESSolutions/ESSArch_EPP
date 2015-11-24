@@ -280,8 +280,8 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
             archiveobjectdata_set_data = aic_data.pop('archiveobjectdata_set')
             archiveobjectmetadata_set_data = aic_data.pop('archiveobjectmetadata_set')
             # Update or create AIC object
-            if aic_data['PolicyId'] is None:
-                aic_data['PolicyId'] = instance.PolicyId
+            if not aic_data['PolicyId'] is None:
+                aic_data['PolicyId'] = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
             ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
             aic_data['PolicyId'] = ArchivePolicy_obj
             AIC_ArchiveObject_obj, aic_created = ArchiveObject.objects.update_or_create(
@@ -477,7 +477,8 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         # Create AIC
         archiveobjectdata_set_data = aic_data.pop('archiveobjectdata_set')
         archiveobjectmetadata_set_data = aic_data.pop('archiveobjectmetadata_set')
-        aic_data['PolicyId'] = ArchivePolicy_obj
+        if not aic_data['PolicyId'] is None:
+            aic_data['PolicyId'] = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
         AIC_ArchiveObject_obj, created = ArchiveObject.objects.get_or_create(
                                                                              ObjectUUID=aic_data['ObjectUUID'], 
                                                                              defaults=aic_data) 
