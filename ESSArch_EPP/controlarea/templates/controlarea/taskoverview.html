@@ -17,10 +17,10 @@ Requests from: <input type="text" value="2" size="3" id="numberofdays" > number 
 <th>Type of error</th>
 <th>Request Result</th>
 </tr>
-<tbody id="failedtasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="failedtasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
 <br>
 <b>Pending requests</b>
@@ -32,10 +32,10 @@ Requests from: <input type="text" value="2" size="3" id="numberofdays" > number 
 <th>Request Status</th>
 <th>Request Result</th>
 </tr>
-<tbody id="pendingtasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="pendingtasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
 <br>
 <b>Requests in progress</b>
@@ -50,12 +50,11 @@ Requests from: <input type="text" value="2" size="3" id="numberofdays" > number 
 <th></th>
 <th>Request Progress</th>
 </tr>
-<tbody id="progresstasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="progresstasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
-
 <b>Successful requests</b>
 <br>
 <br>
@@ -72,10 +71,11 @@ Requests from: <input type="text" value="2" size="3" id="numberofdays" > number 
 <th></th>
 <th>Date completed</th>
 </tr>
-<tbody id="successtasks">
-<td> No tasks</td>
-</tbody>
 </thead>
+<tbody id="successtasks">
+<tr><td> No tasks</td></tr>
+</tbody>
+
 </table>
 {% endblock %}
 {% block app-extra-script %}
