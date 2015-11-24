@@ -488,6 +488,15 @@ function setaichtml(ajaxinfo){
                 var lastIPcounter = IPlist.length - 1;
                 var lastIP = IPlist[lastIPcounter];
                 var lastIPinfo = lastIP.archiveobjectdata_set[0];
+                if (lastIPinfo == undefined){            
+                    var empty = {};                    
+                    empty.EntryAgentIdentifierValue = null;
+                    empty.CreateDate = null;
+                    empty.startdate = null;
+                    empty.enddate =  null;
+                    lastIPinfo = empty;                          
+                    };
+                
             
                 tabletext = tabletext
                 + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
@@ -511,7 +520,15 @@ function setaichtml(ajaxinfo){
 			
                     var IP = IPlist[j];
                     var IPinfo = IP.archiveobjectdata_set[0];
-                    
+                    if (IPinfo == undefined){                        
+                        var empty = {};
+                        
+                        empty.EntryAgentIdentifierValue = null;
+                        empty.CreateDate = null;
+                        empty.startdate = null;
+                        empty.enddate =  null;
+                        IPinfo = empty;                           
+                        };
                     tabletext = tabletext
                     + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
                     + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
@@ -533,15 +550,11 @@ function setaichtml(ajaxinfo){
                 
         } //End of length test
         
-        else{
-        	console.log('Empty AIC');
-        }
 
     };//End of for aic list for loop
     
     if(ipiterator == 0){
 
-    console.log('We get the next page');
 	getnextpage();
 
 	}
