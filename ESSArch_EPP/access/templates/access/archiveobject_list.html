@@ -139,6 +139,9 @@ function accesslist(JSONlink){
 var ajaxinfo = {};
 var tabletext = '';
 //$(document).ready(function(){
+	
+$.ajaxSetup({ cache: false }); // prevent caching
+	
 $.getJSON( JSONlink, function(listinfo1) {
 
       ajaxinfo = listinfo1;

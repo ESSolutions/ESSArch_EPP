@@ -168,6 +168,9 @@ function ingestlist(JSONlink){
 var ajaxinfo = {};
 var tabletext = '';
 //$(document).ready(function(){
+	
+$.ajaxSetup({ cache: false });
+	
 $.getJSON( JSONlink, function(listinfo1) {
 
       ajaxinfo = listinfo1;

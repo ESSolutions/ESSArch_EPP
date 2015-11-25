@@ -91,6 +91,9 @@ var numberofdays = $('#numberofdays').val();
 gettasklist();
 
 function gettasklist(){
+	
+$.ajaxSetup({ cache: false });
+	
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
 	populateAllTasks(allTasks);
