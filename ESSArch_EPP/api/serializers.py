@@ -282,8 +282,6 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
             # Update or create AIC object
             if not aic_data['PolicyId'] is None:
                 aic_data['PolicyId'] = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
-            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
-            aic_data['PolicyId'] = ArchivePolicy_obj
             AIC_ArchiveObject_obj, aic_created = ArchiveObject.objects.update_or_create(
                                                                                      ObjectUUID=aic_data['ObjectUUID'],
                                                                                      defaults=aic_data)
@@ -382,6 +380,7 @@ class ArchiveObjectRelSerializer(serializers.ModelSerializer):
         fields = ('UUID', 'AIC_UUID')
 
 class IOQueueSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=IOQueue.objects.all())])
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
     class Meta:
         model = IOQueue
@@ -543,12 +542,17 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         instance.save()
         return instance
 
-class WriteStorageMethodTapeSerializer(serializers.Serializer):
+class ApplyStorageMethodTapeSerializer(serializers.Serializer):
     IOQueue_objs_id_list = serializers.ListField()
     ArchiveObject_objs_ObjectUUID_list = serializers.ListField()
     queue = serializers.CharField()
 
-class WriteStorageMethodDiskSerializer(serializers.Serializer):
+class ApplyStorageMethodDiskSerializer(serializers.Serializer):
     IOQueue_obj_id = serializers.CharField()
     ArchiveObject_obj_ObjectUUID = serializers.CharField()
+    queue = serializers.CharField()
+
+class MoveToAccessPathSerializer(serializers.Serializer):
+    IOQueue_obj_id = serializers.CharField()
+    filename_list = serializers.ListField()
     queue = serializers.CharField()

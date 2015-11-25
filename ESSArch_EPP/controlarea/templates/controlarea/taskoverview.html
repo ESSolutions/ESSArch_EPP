@@ -7,38 +7,41 @@
 Requests from: <input type="text" value="2" size="3" id="numberofdays" > number of days ago.<button onclick=otherdays()>Get requests</button>
 <br>
 <br>
-Failed requests
+<b>Failed requests</b>
 <br>
-<table>
+<br>
+<table class="table">
 <thead>
 <tr>
 <th>Request Status</th>
 <th>Type of error</th>
 <th>Request Result</th>
 </tr>
-<tbody id="failedtasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="failedtasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
 <br>
-Pending requests
+<b>Pending requests</b>
 <br>
-<table>
+<br>
+<table class="table">
 <thead>
 <tr>
 <th>Request Status</th>
 <th>Request Result</th>
 </tr>
-<tbody id="pendingtasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="pendingtasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
 <br>
-Requests in progress
+<b>Requests in progress</b>
 <br>
-<table>
+<br>
+<table class="table">
 <thead>
 <tr>
 <th>Request purpose</th>
@@ -47,15 +50,15 @@ Requests in progress
 <th></th>
 <th>Request Progress</th>
 </tr>
-<tbody id="progresstasks">
-<td> No requests</td>
-</tbody>
 </thead>
+<tbody id="progresstasks">
+<tr><td> No requests</td></tr>
+</tbody>
 </table>
+<b>Successful requests</b>
 <br>
-
 <br>
-<table>
+<table class="table">
 <thead>
 <tr>
 <th>Request Label</th>
@@ -68,10 +71,11 @@ Requests in progress
 <th></th>
 <th>Date completed</th>
 </tr>
-<tbody id="successtasks">
-<td> No tasks</td>
-</tbody>
 </thead>
+<tbody id="successtasks">
+<tr><td> No tasks</td></tr>
+</tbody>
+
 </table>
 {% endblock %}
 {% block app-extra-script %}
@@ -87,6 +91,9 @@ var numberofdays = $('#numberofdays').val();
 gettasklist();
 
 function gettasklist(){
+	
+$.ajaxSetup({ cache: false });
+	
 $.getJSON( '/controlarea/tasksinfo/' + numberofdays, function(allTasks) {
 
 	populateAllTasks(allTasks);

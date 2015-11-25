@@ -55,8 +55,9 @@ from api.serializers import (
                         IOQueueNestedReadSerializer,
                         IOQueueNestedWriteSerializer,
                         ArchiveObjectRelSerializer,
-                        WriteStorageMethodTapeSerializer,
-                        WriteStorageMethodDiskSerializer,
+                        ApplyStorageMethodTapeSerializer,
+                        ApplyStorageMethodDiskSerializer,
+                        MoveToAccessPathSerializer,
                         )
 from essarch.models import ArchiveObject, ArchiveObjectRel
 from configuration.models import (ArchivePolicy,
@@ -71,9 +72,11 @@ from Storage.models import (storageMedium,
 from rest_framework import viewsets, mixins, permissions, views
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.renderers import JSONRenderer
 from celery.result import AsyncResult
-from StorageMethodDisk.tasks import WriteStorageMethodDisk
-from StorageMethodTape.tasks import WriteStorageMethodTape
+from StorageMethodDisk.tasks import WriteStorageMethodDisk, ReadStorageMethodDisk
+from StorageMethodTape.tasks import WriteStorageMethodTape, ReadStorageMethodTape
+from Storage.tasks import MoveToAccessPath
 
 class AICListView(TemplateView):
     template_name = 'api/aic_list.html'
@@ -299,7 +302,7 @@ class storageNestedViewSet(storageViewSet):
         else:
             return storageSerializer
 
-class IOQueueViewSet(mixins.DestroyModelMixin, CreateListRetrieveViewSet):
+class IOQueueViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateListRetrieveViewSet):
 
     queryset = IOQueue.objects.all()
     serializer_class = IOQueueSerializer
@@ -324,7 +327,7 @@ class IOQueueViewSet(mixins.DestroyModelMixin, CreateListRetrieveViewSet):
                     'remote_status',
                     'transfer_task_id')
 
-class IOQueueNestedViewSet(mixins.UpdateModelMixin, IOQueueViewSet):
+class IOQueueNestedViewSet(IOQueueViewSet):
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return IOQueueNestedReadSerializer
@@ -333,9 +336,9 @@ class IOQueueNestedViewSet(mixins.UpdateModelMixin, IOQueueViewSet):
         else:
             return IOQueueSerializer
 
-class WriteStorageMethodTapeApply(viewsets.ViewSet):    
+class WriteStorageMethodTapeApplyViewSet(viewsets.ViewSet):    
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = WriteStorageMethodTapeSerializer
+    serializer_class = ApplyStorageMethodTapeSerializer
 
     def list(self, request):
         return Response({})
@@ -345,7 +348,7 @@ class WriteStorageMethodTapeApply(viewsets.ViewSet):
         return Response({
             "task_id": pk,
             "state": result.state,
-            "result": result.result,
+            "result": repr(result.result),
             "traceback": result.traceback, 
         })
 
@@ -397,9 +400,9 @@ class WriteStorageMethodTapeApply(viewsets.ViewSet):
         return ret
     '''
 
-class WriteStorageMethodDiskApply(viewsets.ViewSet):    
+class WriteStorageMethodDiskApplyViewSet(viewsets.ViewSet):    
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = WriteStorageMethodDiskSerializer
+    serializer_class = ApplyStorageMethodDiskSerializer
 
     def list(self, request):
         return Response({})
@@ -409,7 +412,7 @@ class WriteStorageMethodDiskApply(viewsets.ViewSet):
         return Response({
             "task_id": pk,
             "state": result.state,
-            "result": result.result,
+            "result": repr(result.result),
             "traceback": result.traceback, 
         })
 
@@ -424,6 +427,108 @@ class WriteStorageMethodDiskApply(viewsets.ViewSet):
                                              ObjectUUID = ArchiveObject_obj_ObjectUUID,
                                              ).update(StatusActivity=5)
                 result = WriteStorageMethodDisk().apply_async((IOQueue_obj_id,), queue=queue)
+                return Response({"task_id": result.task_id, "state": "ok"}, status=201)
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                msg = 'Unknown error, error: %s trace: %s' % (e, repr(traceback.format_tb(exc_traceback)))
+                return Response({"state": 'fail', "error": msg}, status=420)
+        else:
+            return Response({"state": 'not valid'}, status=400)
+
+class ReadStorageMethodTapeApplyViewSet(viewsets.ViewSet):    
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplyStorageMethodTapeSerializer
+
+    def list(self, request):
+        return Response({})
+    
+    def retrieve(self, request, pk=None):
+        result = AsyncResult(pk)
+        data = {
+            "task_id": pk,
+            "state": result.state,
+            "result": repr(result.result),
+            "traceback": result.traceback}        
+        return Response(data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            try:
+                ArchiveObject_objs_ObjectUUID_list = serializer.validated_data['ArchiveObject_objs_ObjectUUID_list']
+                IOQueue_objs_id_list = serializer.validated_data['IOQueue_objs_id_list']
+                queue = serializer.validated_data['queue']
+                ArchiveObject.objects.filter(
+                                             ObjectUUID__in = ArchiveObject_objs_ObjectUUID_list,
+                                             ).update(StatusActivity=5)
+                result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue=queue)
+                return Response({"task_id": result.task_id, "state": "ok"}, status=201)
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                msg = 'Unknown error, error: %s trace: %s' % (e, repr(traceback.format_tb(exc_traceback)))
+                return Response({"state": 'fail', "error": msg}, status=420)
+        else:
+            return Response({"state": 'not valid'}, status=400)
+
+class ReadStorageMethodDiskApplyViewSet(viewsets.ViewSet):    
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = ApplyStorageMethodDiskSerializer
+
+    def list(self, request):
+        return Response({})
+    
+    def retrieve(self, request, pk=None):
+        result = AsyncResult(pk)
+        return Response({
+            "task_id": pk,
+            "state": result.state,
+            "result": repr(result.result),
+            "traceback": result.traceback, 
+        })
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            try:
+                ArchiveObject_obj_ObjectUUID = serializer.validated_data['ArchiveObject_obj_ObjectUUID']
+                IOQueue_obj_id = serializer.validated_data['IOQueue_obj_id']
+                queue = serializer.validated_data['queue']
+                ArchiveObject.objects.filter(
+                                             ObjectUUID = ArchiveObject_obj_ObjectUUID,
+                                             ).update(StatusActivity=5)
+                result = ReadStorageMethodDisk().apply_async((IOQueue_obj_id,), queue=queue)
+                return Response({"task_id": result.task_id, "state": "ok"}, status=201)
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                msg = 'Unknown error, error: %s trace: %s' % (e, repr(traceback.format_tb(exc_traceback)))
+                return Response({"state": 'fail', "error": msg}, status=420)
+        else:
+            return Response({"state": 'not valid'}, status=400)
+
+class MoveToAccessPathViewSet(viewsets.ViewSet):    
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = MoveToAccessPathSerializer
+
+    def list(self, request):
+        return Response({})
+    
+    def retrieve(self, request, pk=None):
+        result = AsyncResult(pk)
+        return Response({
+            "task_id": pk,
+            "state": result.state,
+            "result": repr(result.result),
+            "traceback": result.traceback,
+        })
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            try:
+                filename_list = serializer.validated_data['filename_list']
+                IOQueue_obj_id = serializer.validated_data['IOQueue_obj_id']
+                queue = serializer.validated_data['queue']
+                result = MoveToAccessPath().apply_async((IOQueue_obj_id, filename_list), queue=queue)
                 return Response({"task_id": result.task_id, "state": "ok"}, status=201)
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()

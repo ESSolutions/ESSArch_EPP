@@ -31,6 +31,7 @@ from xml.dom.minidom import Document
 from celery import Task, shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from Storage.models import storage, storageMedium, IOQueue
+from Storage.tasks import TransferReadIO
 from configuration.models import ESSConfig, StorageTargets
 from essarch.libs import GetSize, ESSArchSMError, calcsum, SMTapeFull
 from essarch.models import robotdrives, robotQueue, robot, AccessQueue
@@ -38,7 +39,7 @@ from django.utils import timezone
 import requests
 from rest_framework.renderers import JSONRenderer
 from urlparse import urljoin
-from api.serializers import IOQueueNestedReadSerializer
+from api.serializers import IOQueueNestedReadSerializer, IOQueueSerializer
 from retrying import retry
 
 # Disable https insecure warnings
@@ -922,10 +923,11 @@ class ReadStorageMethodTape(Task):
     """
     tz = timezone.get_default_timezone()
     time_limit = 86400
+    logger = logging.getLogger('StorageMethodTape')
 
     def run(self, req_pk_list, *args, **kwargs):
         """The body of the task executed by workers."""
-        logger = logging.getLogger('StorageMethodTape')
+        logger = self.logger
         #IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
         #NumberOfTasks = IO_objs.count()
         NumberOfTasks = len(req_pk_list)
@@ -941,28 +943,15 @@ class ReadStorageMethodTape(Task):
                 meta={'current': TaskNum, 'total': NumberOfTasks})
     
             try:
+                target_obj = IO_obj.storage.storagemedium.storagetarget
+                master_server = target_obj.master_server.split(',')
+                if len(master_server) == 3:
+                    remote_io = True
+                else:         
+                    remote_io = False
+                
+                # Read tape
                 result = self._ReadTapeProc(IO_obj.id)
-            except ESSArchSMError as e:
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                IO_obj.refresh_from_db()
-                msg = 'Problem to read object %s from tape, error: %s line: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, exc_traceback.tb_lineno)
-                logger.error(msg)
-                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
-                IO_obj.Status = 100
-                IO_obj.save(update_fields=['Status'])
-                #raise self.retry(exc=e, countdown=10, max_retries=2)
-                raise e
-            except Exception as e:
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                IO_obj.refresh_from_db()
-                msg = 'Unknown error to read object %s to tape, error: %s trace: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)))
-                logger.error(msg)
-                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue) 
-                IO_obj.Status = 100
-                IO_obj.save(update_fields=['Status'])
-                raise e
-            else:
-                IO_obj.refresh_from_db()
                 ObjectSizeMB = int(result.get('ReadSize'))/1048576
                 MBperSEC = ObjectSizeMB/int(result.get('ReadTime').seconds)
                 msg = 'Success to read IOuuid: %s for object %s from %s, ReadSize: %s, ReadTime: %s (%s MB/Sec)' % (IO_obj.id, 
@@ -974,10 +963,200 @@ class ReadStorageMethodTape(Task):
                                                                                                                                                                            )
                 logger.info(msg)           
                 ESSPGM.Events().create('1105','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue) 
+
+                if remote_io:
+                    # Transfer to master
+                    result = TransferReadIO().apply_async((IO_obj.id,), queue='default')
+                    self.logger.info('Apply new transfer readIO process for IOQueue_obj: %s with transfer_task: %s' % (
+                                                                                                                        IO_obj.id, 
+                                                                                                                        result.task_id))
+                    IO_obj.refresh_from_db()
+                    IO_obj.transfer_task_id = result.task_id
+                    IO_obj.save(update_fields=['transfer_task_id'])
+                    self._update_master_ioqueue(master_server, IO_obj)
+                    result.wait(timeout=86400)
+                    self.logger.info('Success to transfer readIO process for IOQueue_obj: %s with transfer_task: %s' % (
+                                                                                                                        IO_obj.id, 
+                                                                                                                        result.task_id))
+                    # Move files to accesspath on master
+                    filename_list = result.result['filename_list']
+                    move_task_result = self._move_to_accesspath(master_server, filename_list, IO_obj.id)
+                    self.logger.info('Start to move files to accesspath on master server IOuuid: %s with task_id: %s' % (
+                                                                                                                        IO_obj.id, 
+                                                                                                                        move_task_result.task_id))    
+                    self._wait_for_move_to_accesspath(master_server, move_task_result.task_id)
+            except ESSArchSMError as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Problem to read object %s from tape, error: %s line: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, exc_traceback.tb_lineno)
+                logger.error(msg)
+                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                if remote_io: self._update_master_ioqueue(master_server, IO_obj)
+                #raise self.retry(exc=e, countdown=10, max_retries=2)
+                raise e
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Unknown error to read object %s to tape, error: %s trace: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e, repr(traceback.format_tb(exc_traceback)))
+                logger.error(msg)
+                ESSPGM.Events().create('1105','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue) 
+                IO_obj.Status = 100
+                IO_obj.save(update_fields=['Status'])
+                if remote_io: self._update_master_ioqueue(master_server, IO_obj)
+                raise e
+            else:
+                IO_obj.refresh_from_db()
                 IO_obj.Status = 20
                 IO_obj.save(update_fields=['Status'])
+                if remote_io: self._update_master_ioqueue(master_server, IO_obj)
                 #return result
 
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def _update_master_ioqueue(self, master_server, IO_obj):
+        """ Call REST service on master to update IOQueue
+        
+        :param master_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        logger = self.logger
+        base_url, ruser, rpass = master_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueue/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        IO_obj_data = IOQueueSerializer(IO_obj).data
+        del IO_obj_data['accessqueue']
+        del IO_obj_data['task_id']
+        IO_obj_json = JSONRenderer().render(IO_obj_data)
+        r = requests_session.patch(IOQueue_rest_endpoint,
+                                        headers={'Content-Type': 'application/json'}, 
+                                        data=IO_obj_json)
+        if not r.status_code == 200:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to update master server IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def remote_read_tape_apply_async(self, remote_server, IOQueue_objs_id_list, ArchiveObject_objs_ObjectUUID_list, queue='smtape'):
+        """Remote REST call to appy_async
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param IOQueue_objs_id_list: List of primary keys to IOQueue database table to be performed, ex ['id1', 'id2']
+        :param ArchiveObject_objs_ObjectUUID_list: List of ObjectUUID keys to ArchiveObject database table to be performed, ex ['id1', 'id2']
+        :param queue: celery queue name, ex 'smtape'
+        
+        """
+        logger = logging.getLogger('Storage')
+        base_url, ruser, rpass = remote_server
+        read_tape_rest_endpoint = urljoin(base_url, '/api/read_storage_method_tape_apply/')
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        data = {'queue': queue, 
+                'IOQueue_objs_id_list': IOQueue_objs_id_list, 
+                'ArchiveObject_objs_ObjectUUID_list': ArchiveObject_objs_ObjectUUID_list}
+        r = requests_session.post(read_tape_rest_endpoint,
+                                  headers={'Content-Type': 'application/json'},
+                                  data=JSONRenderer().render(data))
+        if not r.status_code == 201:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to apply read task to remote server for ObjectUUID: %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              ArchiveObject_objs_ObjectUUID_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_objs_id_list)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
+        return apply_result(r.json()['task_id'])
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def _move_to_accesspath(self, master_server, filename_list, IOQueue_obj_id, queue='default'):
+        """Remote REST call to apply_async MoveToAccessPath
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param filename_list: List of filenames to move, ex ['id1', 'id2']
+        :param queue: celery queue name, ex 'smtape'
+        
+        """
+        logger = logging.getLogger('Storage')
+        base_url, ruser, rpass = master_server
+        read_tape_rest_endpoint = urljoin(base_url, '/api/move_to_access_path/')
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        data = {'queue': queue, 
+                'IOQueue_obj_id': IOQueue_obj_id, 
+                'filename_list': filename_list}
+        r = requests_session.post(read_tape_rest_endpoint,
+                                  headers={'Content-Type': 'application/json'},
+                                  data=JSONRenderer().render(data))
+        if not r.status_code == 201:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to apply move_to_accesspath task on master server for filename_list: %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              filename_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_obj_id)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
+        return apply_result(r.json()['task_id'])
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def _wait_for_move_to_accesspath(self, master_server, task_id):
+        """ Call REST service on master to get state for task_id
+        
+        :param master_server: example: [https://servername:port, user, password]
+        :param task_id: task_id to move_to_accesspath task
+        
+        """
+        logger = self.logger
+        base_url, ruser, rpass = master_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/move_to_access_path/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(task_id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        
+        loop_num_total = 0
+        loop_num = 0
+        while True:
+            r = requests_session.get(IOQueue_rest_endpoint,
+                                            headers={'Content-Type': 'application/json'}, 
+                                            )
+            if not r.status_code == 200:
+                e = [r.status_code, r.reason, r.text]
+                msg = 'Problem to get status for task_id: %s, error: %s' % (
+                                                                            task_id,
+                                                                            e)
+                logger.warning(msg)
+                raise DatabasePostRestError(e)
+            else:
+                state = r.json()['state']
+                if state == 'SUCCESS':
+                    logger.info('Success - Status is %s for move to accesspath task_id: %s' % (
+                                                                                     state,
+                                                                                     task_id))
+                    break
+                elif state == 'FAILURE':
+                    msg = 'Failed to move files to accesspath, error: %s' % repr(r.json())
+                    logger.error(msg)
+                    raise ESSArchSMError(msg)
+                elif loop_num == 10:
+                    logger.info('Status is %s for move to accesspath task_id: %s' % (
+                                                                                     state,
+                                                                                     task_id))
+                    loop_num = 0
+            if loop_num_total == 3600:
+                raise  ESSArchSMError('Timeout 1h to wait for move to accesspath task_id: %s' % task_id)
+            loop_num += 1
+            loop_num_total += 1
+            time.sleep(1)
 
     ###############################################
     def _ReadTapeProc(self,IO_obj_uuid):

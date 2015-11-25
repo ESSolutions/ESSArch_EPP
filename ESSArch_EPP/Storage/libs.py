@@ -734,6 +734,15 @@ class StorageMethodRead:
         # Configuration values
         self.AccessQueue_obj = None  # AccessQueue object to read
         self.storage_objs = []                # ArchiveObjects to read
+        self.TempPath = ''                   # Rootpath for IPs
+        self.exitFlag = 0                      # Flag to stop reads
+        
+        # Result status flags
+        self.pending_read_flag = 0       # If this flag is True, pending reads exists for current object in self.AccessQueue_obj
+        self.progress_read_flag = 0      # If this flag is True, progress reads exists for current object in self.AccessQueue_obj
+        self.fail_read_flag = 0              # If this flag is True, failed reads exists for current object in self.AccessQueue_obj
+        self.object_reads_ok_flag = 0  # If this flag is True, all reads i done for current object in self.AccessQueue_obj
+        self.failed_IO_obj = None
 
         # Default values 
         self.IOs_to_read = {}
@@ -797,12 +806,19 @@ class StorageMethodRead:
                 ReqType = 25
                 ReqPurpose=u'Read package from disk'
             ArchiveObject_obj = storage_obj.archiveobject
+            ArchivePolicy_obj = ArchiveObject_obj.PolicyId
+
             target_obj = storageMedium_obj.storagetarget
             remote_server = target_obj.remote_server.split(',')
             if len(remote_server) == 3:
                 remote_status = 0
+                if self.TempPath:
+                    ObjectPath = self.TempPath
+                else:
+                    ObjectPath = ArchivePolicy_obj.AIPpath
             else:
                 remote_status = 20
+                ObjectPath = self.AccessQueue_obj.Path
                 
             IOQueue_objs = IOQueue.objects.filter(storage=storage_obj)
             if not IOQueue_objs.exists():     
@@ -810,7 +826,7 @@ class StorageMethodRead:
                 IOQueue_obj.ReqType=ReqType
                 IOQueue_obj.ReqPurpose=ReqPurpose
                 IOQueue_obj.user=u'sys'
-                IOQueue_obj.ObjectPath=self.AccessQueue_obj.Path
+                IOQueue_obj.ObjectPath=ObjectPath
                 IOQueue_obj.Status=0
                 IOQueue_obj.archiveobject=ArchiveObject_obj
                 IOQueue_obj.storage=storage_obj
@@ -854,22 +870,29 @@ class StorageMethodRead:
         """
         logger = self.logger
         base_url, ruser, rpass = remote_server
-        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueue/')
-        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        IOQueue_rest_endpoint = urljoin(base_url, '/api/ioqueue/')
         requests_session = requests.Session()
         requests_session.verify = False
         requests_session.auth = (ruser, rpass)
         IO_obj_data = IOQueueSerializer(IO_obj).data
+        IO_obj_data['accessqueue'] = None
         IO_obj_json = JSONRenderer().render(IO_obj_data)
         r = requests_session.post(IOQueue_rest_endpoint,
                                         headers={'Content-Type': 'application/json'}, 
                                         data=IO_obj_json)
         if not r.status_code == 201:
             e = [r.status_code, r.reason, r.text]
-            msg = 'Problem to insert IOQueue object on remote for object %s, error: %s (IOuuid: %s)' % (
-                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
-                                                                                                                                              e,
-                                                                                                                                              IO_obj.id)
+            if e == [400, 'BAD REQUEST', u'{"id":["This field must be unique."]}']:
+                self._delete_remote_IOQueue_obj(remote_server, IO_obj)
+                msg = 'The IOQueue object already exists on remote, trying to remove object and then retry insert on remote for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                                  IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                  e,
+                                                                                                                                                  IO_obj.id)                
+            else:
+                msg = 'Problem to insert IOQueue object on remote for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                                  IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                  e,
+                                                                                                                                                  IO_obj.id)
             logger.warning(msg)
             raise DatabasePostRestError(e)
 
@@ -879,16 +902,31 @@ class StorageMethodRead:
         self.IOs_to_read: Dict with {storageMedium_obj=IOQueue_obj_list,...}
         
         """
-        for storageMedium_obj, IOQueue_obj_list in self.IOs_to_read.iteritems():           
+        for storageMedium_obj, IOQueue_obj_list in self.IOs_to_read.iteritems():
+            target_obj = storageMedium_obj.storagetarget
+            remote_server = target_obj.remote_server.split(',')
+            if len(remote_server) == 3:
+                remote_io = True
+            else:
+                remote_io = False                     
             if storageMedium_obj.storageMedium in range(300,330): 
                 # Read from tape (ReqType=20)
+                ArchiveObject_objs_ObjectUUID_list = [i.archiveobject.ObjectUUID for i in IOQueue_obj_list]
                 IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
                 for  IOQueue_obj in IOQueue_obj_list:
                     IOQueue_obj.Status=2
                     IOQueue_obj.save(update_fields=['Status'])                        
-                result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
-                self.logger.info('Apply new read IO process from tape id: %s (AccessReqUUID: %s)' % (storageMedium_obj.storageMediumID, 
-                                                                                                                                           self.AccessQueue_obj.ReqUUID))         
+                if remote_io:
+                    result = ReadStorageMethodTape().remote_read_tape_apply_async(remote_server, 
+                                                                               IOQueue_objs_id_list, 
+                                                                               ArchiveObject_objs_ObjectUUID_list,
+                                                                               queue='smtape')
+                else:
+                    result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
+                self.logger.info('Apply new read IO process from tape id: %s (AccessReqUUID: %s, task_id: %s)' % (
+                                                                                                                  storageMedium_obj.storageMediumID, 
+                                                                                                                  self.AccessQueue_obj.ReqUUID,
+                                                                                                                  result.task_id))         
                 for  IOQueue_obj in IOQueue_obj_list:
                     IOQueue_obj.task_id = result.task_id
                     IOQueue_obj.save(update_fields=['task_id'])                        
@@ -897,15 +935,163 @@ class StorageMethodRead:
                 for  IOQueue_obj in IOQueue_obj_list:
                     IOQueue_obj.Status=2
                     IOQueue_obj.save(update_fields=['Status'])
-                    result = ReadStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
-                    self.logger.info('Apply new read IO process for object: %s from disk id: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
-                                                                                                                                                                                      storageMedium_obj.storageMediumID, 
-                                                                                                                                                                                      self.AccessQueue_obj.ReqUUID, 
-                                                                                                                                                                                      IOQueue_obj.id))
+                    if remote_io:
+                        result = ReadStorageMethodDisk().remote_read_tape_apply_async(remote_server, 
+                                                                               IOQueue_obj.id, 
+                                                                               IOQueue_obj.archiveobject.ObjectUUID,
+                                                                               queue='smdisk')
+                    else:
+                        result = ReadStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
+                    self.logger.info('Apply new read IO process for object: %s from disk id: %s (AccessReqUUID: %s, IOuuid: %s, , task_id: %s)' % (
+                                                                                                                                                   IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                   storageMedium_obj.storageMediumID, 
+                                                                                                                                                   self.AccessQueue_obj.ReqUUID, 
+                                                                                                                                                   IOQueue_obj.id,
+                                                                                                                                                   result.task_id))
                     IOQueue_obj.task_id = result.task_id
                     IOQueue_obj.save(update_fields=['task_id'])        
 
-    def wait_for_all_reading(self):
+    def wait_for_all_reads(self):
+        '''Wait for all reads is done for all objects in access request.
+
+        '''
+        while True:
+            try:
+                self.get_read_status()
+                self.handle_read_status()
+                if self.object_reads_ok_flag == 0:
+                    pass
+            except ESSArchSMError as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                msg = 'Problem to read objects for ReqUUID: %s, error: %s line: %s' % (self.AccessQueue_obj.ReqUUID, e, exc_traceback.tb_lineno)
+                self.logger.error(msg)
+                raise e
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                msg = 'Unknown error to read objects for ReqUUID: %s, error: %s trace: %s' % (self.AccessQueue_obj.ReqUUID, e, repr(traceback.format_tb(exc_traceback)))
+                self.logger.error(msg)
+                raise e
+            if self.object_reads_ok_flag == 1:            # if all reads is done exit loop
+                break
+            else:
+                self.logger.debug('sleep 5 sec')
+                time.sleep(5)           
+            if self.exitFlag:
+                break
+
+    def get_read_status(self):        
+        error_flag = 0
+        error_list = []
+        self.pending_read_flag = 0
+        self.progress_read_flag = 0
+        self.fail_read_flag = 0
+        self.object_reads_ok_flag = 0
+        object_reads_ok_flag = 1
+
+        if not error_flag:
+            IOQueue_objs = self.AccessQueue_obj.ioqueue_set.all()
+            
+            for IOQueue_obj in IOQueue_objs:
+                if IOQueue_obj.Status == 0:
+                    self.pending_read_flag = 1
+                    object_reads_ok_flag = 0
+                    event_info = 'Pending to read object: %s (IOuuid: %s)' % (
+                                                                                      IOQueue_obj.archiveobject.ObjectIdentifierValue,  
+                                                                                      IOQueue_obj.id)
+                    self.logger.info(event_info)
+                elif IOQueue_obj.Status < 20:
+                    self.progress_read_flag = 1
+                    object_reads_ok_flag = 0
+                    event_info = 'Progress to read object: %s (IOuuid: %s)' % (
+                                                                                      IOQueue_obj.archiveobject.ObjectIdentifierValue,  
+                                                                                      IOQueue_obj.id)
+                    self.logger.info(event_info)
+                elif IOQueue_obj.Status > 21:
+                    self.failed_IO_obj  = IOQueue_obj
+                    self.fail_read_flag = 1
+                    object_reads_ok_flag = 0
+                    event_info = 'Failed to read object: %s (IOuuid: %s)' % (
+                                                                                      IOQueue_obj.archiveobject.ObjectIdentifierValue,  
+                                                                                      IOQueue_obj.id)                          
+                    self.logger.error(event_info)
+                    #ESSPGM.Events().create('1100','',self.__name__,__version__,'1',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
+                elif IOQueue_obj.Status == 20:
+                    event_info = 'Succeeded to read object: %s (IOuuid: %s)' % (
+                                                                                      IOQueue_obj.archiveobject.ObjectIdentifierValue,  
+                                                                                      IOQueue_obj.id)                        
+                    self.logger.info(event_info)
+                    #ESSPGM.Events().create('1101', '', self.__name__, __version__, '0', event_info, 2, ArchiveObject_obj.ObjectIdentifierValue)
+                    IOQueue_obj.Status = 21
+                    IOQueue_obj.save(update_fields=['Status'])
+
+            if error_flag:
+                raise ESSArchSMError(error_list)
+            elif object_reads_ok_flag == 1:
+                self.object_reads_ok_flag = 1     
+
+    def handle_read_status(self):
+        if self.fail_read_flag:
+            IOQueue_obj = self.failed_IO_obj
+            result = AsyncResult(IOQueue_obj.task_id)
+            if result.failed():
+                self.logger.error('Problem to read object: %s, traceback: %s, result: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                                                                             result.traceback, 
+                                                                                                                                                                             result.result,
+                                                                                                                                                                             self.AccessQueue_obj.ReqUUID, 
+                                                                                                                                                                             IOQueue_obj.id))
+                raise AccessError(result.traceback)
+            else:
+                raise AccessError('Problem to read objects for ReqUUID: %s' % self.AccessQueue_obj.ReqUUID)
+        elif self.pending_read_flag:
+            pass
+        elif self.progress_read_flag:
+            pass
+        elif self.object_reads_ok_flag:      
+            event_info = 'Succeeded to read all objects for ReqUUID: %s' % (self.AccessQueue_obj.ReqUUID)
+            self.logger.info(event_info)
+            #ESSPGM.Events().create('1100','',self.__name__,__version__,'0',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
+            IOQueue_objs = self.AccessQueue_obj.ioqueue_set.all()
+            
+            # Delete IOQueue_objs on remote server  
+            for IOQueue_obj in IOQueue_objs:
+                target_obj = IOQueue_obj.storage.storagemedium.storagetarget
+                remote_server = target_obj.remote_server.split(',')
+                if len(remote_server) == 3:
+                    try:
+                        self._delete_remote_IOQueue_obj(remote_server, IOQueue_obj)
+                    except DatabasePostRestError as e:
+                        self.logger.error('Failed to delete IOQueue_obj %s from remote DB for AIP: %s, error: %s' % (
+                                                                                                                     IOQueue_obj.id, 
+                                                                                                                     IOQueue_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                                     e))
+            # Delete IOQueue_objs for ArchiveObject
+            IOQueue_objs.delete()
+
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)    
+    def _delete_remote_IOQueue_obj(self, remote_server, IO_obj):
+        """ Call REST service on remote to remove IOQueue object
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        base_url, ruser, rpass = remote_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueue/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        r = requests_session.delete(IOQueue_rest_endpoint)
+        if not r.status_code == 204:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to delete IOQueue object on remote server for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                              e,
+                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    def wait_for_all_reads_async(self):
         IOQueue_objs = self.AccessQueue_obj.ioqueue_set.all()
         while 1:
             ReadOK=1
@@ -1182,7 +1368,6 @@ class StorageMethodRead:
                     logging.info('Success to removeObjectPath: ' + ip_path)
                 else:
                     logging.info('Success to removeObjectPath: ' + ip_path + ' and ' + PMetaObjectPath)
-
 
     @property
     def __name__(self):

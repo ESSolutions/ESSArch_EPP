@@ -46,8 +46,11 @@ from api.views import (TmpWorkareaUploadView,
                     IOQueueViewSet, 
                     IOQueueNestedViewSet,
                     AICListView,
-                    WriteStorageMethodTapeApply,
-                    WriteStorageMethodDiskApply,
+                    WriteStorageMethodTapeApplyViewSet,
+                    WriteStorageMethodDiskApplyViewSet,
+                    ReadStorageMethodTapeApplyViewSet,
+                    ReadStorageMethodDiskApplyViewSet,
+                    MoveToAccessPathViewSet,
                     )
 
 # Create a router and register our viewsets with it.
@@ -65,8 +68,11 @@ router.register(r'storage', storageViewSet)
 router.register(r'storagenested', storageNestedViewSet, 'storagenested')
 router.register(r'ioqueue', IOQueueViewSet)
 router.register(r'ioqueuenested', IOQueueNestedViewSet, 'ioqueuenested')
-router.register(r'write_storage_method_tape_apply', WriteStorageMethodTapeApply, 'api_write_storage_method_tape_apply')
-router.register(r'write_storage_method_disk_apply', WriteStorageMethodDiskApply, 'api_write_storage_method_disk_apply')
+router.register(r'write_storage_method_tape_apply', WriteStorageMethodTapeApplyViewSet, 'write_storage_method_tape_apply')
+router.register(r'write_storage_method_disk_apply', WriteStorageMethodDiskApplyViewSet, 'write_storage_method_disk_apply')
+router.register(r'read_storage_method_tape_apply', ReadStorageMethodTapeApplyViewSet, 'read_storage_method_tape_apply')
+router.register(r'read_storage_method_disk_apply', ReadStorageMethodDiskApplyViewSet, 'read_storage_method_disk_apply')
+router.register(r'move_to_access_path', MoveToAccessPathViewSet, 'move_to_access_path')
 
 urlpatterns = patterns('',
     url(r'^', include(router.urls)),

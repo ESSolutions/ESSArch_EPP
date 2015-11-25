@@ -78,19 +78,19 @@ class Access:
                 StorageMethodRead_obj.get_object_to_read()
                 StorageMethodRead_obj.add_to_ioqueue()
                 StorageMethodRead_obj.apply_ios_to_read()
-                StorageMethodRead_obj.wait_for_all_reading()
+                StorageMethodRead_obj.wait_for_all_reads()
                 StorageMethodRead_obj.ip_unpack()
                 StorageMethodRead_obj.ip_validate()
             elif AccessQueue_obj.ReqType == 3:
                 StorageMethodRead_obj.get_object_to_read()
                 StorageMethodRead_obj.add_to_ioqueue()
                 StorageMethodRead_obj.apply_ios_to_read()
-                StorageMethodRead_obj.wait_for_all_reading()
+                StorageMethodRead_obj.wait_for_all_reads()
             elif AccessQueue_obj.ReqType in [4,5]:
                 StorageMethodRead_obj.get_object_to_read()
                 StorageMethodRead_obj.add_to_ioqueue()
                 StorageMethodRead_obj.apply_ios_to_read()
-                StorageMethodRead_obj.wait_for_all_reading()
+                StorageMethodRead_obj.wait_for_all_reads()
                 StorageMethodRead_obj.ip_unpack()
                 StorageMethodRead_obj.ip_validate()
                 StorageMethodRead_obj.delete_retrieved_ios()
@@ -98,7 +98,7 @@ class Access:
                 StorageMethodRead_obj.get_objects_to_verify()
                 StorageMethodRead_obj.add_to_ioqueue()
                 StorageMethodRead_obj.apply_ios_to_read()
-                StorageMethodRead_obj.wait_for_all_reading()
+                StorageMethodRead_obj.wait_for_all_reads()
                 StorageMethodRead_obj.delete_retrieved_ios()
 
         except AccessError as e:
