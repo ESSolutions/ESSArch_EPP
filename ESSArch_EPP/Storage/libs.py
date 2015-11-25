@@ -47,6 +47,7 @@ from rest_framework.renderers import JSONRenderer
 from urlparse import urljoin
 from api.serializers import ArchiveObjectPlusAICPlusStorageNestedReadSerializer
 from retrying import retry
+from api.serializers import IOQueueSerializer
 
 # Disable https insecure warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
@@ -731,37 +732,16 @@ class StorageMethodRead:
     tz = timezone.get_default_timezone()
     def __init__(self):
         # Configuration values
-        self.ArchiveObject_objs = []     # ArchiveObjects to write
-        self.TempPath = ''                   # Rootpath for IPs
-        self.target_list = []                   # Only write to specified targets. If not defined default is to write all targets in archivepolicy
-        self.force_write_flag = 0          # Force to write to targets even if the total size of objects is less then minChunkSize in archivepolicy
-        self.retry_write_flag = 0           # Flag to retry failed write jobs
-        self.retry_transfer_flag = 0       # Flag to retry failed transfer jobs
-        self.exitFlag = 0                      # Flag to stop writes
-
-        # Result status flags
-        self.all_writes_ok_flag = 0        # If this flag is True, all writes is done for all objects in self.ArchiveObjects_objs
-        self.pending_write_flag = 0       # If this flag is True, pending writes exists for current object in self.ArchiveObjects_objs
-        self.progress_write_flag = 0      # If this flag is True, progress writes exists for current object in self.ArchiveObjects_objs
-        self.fail_write_flag = 0              # If this flag is True, failed writes exists for current object in self.ArchiveObjects_objs
-        self.object_writes_ok_flag = 0  # If this flag is True, all writes i done for current object in self.ArchiveObjects_objs
+        self.AccessQueue_obj = None  # AccessQueue object to read
+        self.storage_objs = []                # ArchiveObjects to read
 
         # Default values 
-        self.IOs_to_write = {}
-        self.IOs_to_transfer = {}
-        self.st_objs_to_check = {}
-        self.ActiveTapeIOs = []
+        self.IOs_to_read = {}
+        #self.IOs_to_transfer = {}
         self.logger = logging.getLogger('Storage')
-        self.AgentIdentifierValue = ESSConfig.objects.get(Name='AgentIdentifierValue').Value
-        self.ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
-        if self.ExtDBupdate:
-            self.ext_IngestTable = 'IngestObject'
-        else:
-            self.ext_IngestTable = ''
 
-    def GetObjectsToVerify(self, ReqUUID, complete=False):
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        storageMediumID = AccessQueue_obj.storageMediumID
+    def get_objects_to_verify(self, complete=False):
+        storageMediumID = self.AccessQueue_obj.storageMediumID
 
         storageMedium_obj = storageMedium.objects.get(storageMediumID=storageMediumID)
                        
@@ -772,43 +752,43 @@ class StorageMethodRead:
 
         storage_objs_count = storage_objs.count()
         if complete or storage_objs_count<3:
-            return storage_objs
+            self.storage_objs = storage_objs
         else:
-            return [storage_objs[0], storage_objs[storage_objs_count/2], storage_objs[storage_objs_count-1]]
+            self.storage_objs = [storage_objs[0], storage_objs[storage_objs_count/2], storage_objs[storage_objs_count-1]]
 
-    def GetObjectToRead(self, ReqUUID):
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        storageMediumID = AccessQueue_obj.storageMediumID
-        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
+    def get_object_to_read(self):
+        storageMediumID = self.AccessQueue_obj.storageMediumID
+        ObjectIdentifierValue = self.AccessQueue_obj.ObjectIdentifierValue
         
-        storage_objs = storage.objects.filter(archiveobject__ObjectIdentifierValue=ObjectIdentifierValue, storagemedium__storageMediumStatus__in=[20,30], storagemedium__storageMediumLocationStatus=50)
+        storage_objs = storage.objects.filter(
+                          archiveobject__ObjectIdentifierValue=ObjectIdentifierValue, 
+                          storagemedium__storageMediumStatus__in=[20,30], 
+                          storagemedium__storageMediumLocationStatus=50)
         
         if storageMediumID:
             if storage_objs.filter(storagemedium__storageMediumID=storageMediumID).exists():
                 storage_objs = storage_objs.filter(storagemedium__storageMediumID=storageMediumID)
         
         if len(storage_objs) >= 1:
-            if storage_objs.filter(storagemedium__storageMedium__in=[200,201]).exists():
-                storage_obj = storage_objs.filter(storagemedium__storageMedium__in=[200,201])[0]
-            elif storage_objs.filter(storagemedium__storageMedium__in=[300,330]).exists():
-                storage_obj = storage_objs.filter(storagemedium__storageMedium__in=[300,330])[0]
+            if storage_objs.filter(storagemedium__storageMedium__range=(200,201)).exists():
+                storage_obj = storage_objs.filter(storagemedium__storageMedium__range=(200,201))[0]
+            elif storage_objs.filter(storagemedium__storageMedium__range=(300,330), storagemedium__storagetarget__remote_server='').exists():
+                storage_obj = storage_objs.filter(storagemedium__storageMedium__range=(300,330), storagemedium__storagetarget__remote_server='')[0]
             else:
                 storage_obj = storage_objs[0]
         else:
-            raise AccessError('No storage objects found for object: %s (ReqUUD: %s)' % (ObjectIdentifierValue,ReqUUID) )
+            raise AccessError('No storage objects found for object: %s (ReqUUID: %s)' % (
+                                                                                         ObjectIdentifierValue, 
+                                                                                         self.AccessQueue_obj.ReqUUID) )
         
-        return [storage_obj]
+        self.storage_objs = [storage_obj]
         
-    def add_to_ioqueue(self, storage_objs, ReqUUID):
+    def add_to_ioqueue(self):
         """Add storage objects to IOQueue
         
-        :param storage_objs: List of storage objects
-        :param ReqUUID: AccessQueue request UUID
-        
         """
-        IOs_to_read = {}
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)     
-        for storage_obj in storage_objs:
+        IOs_to_read = {}  
+        for storage_obj in self.storage_objs:
             storageMedium_obj = storage_obj.storagemedium
             if storageMedium_obj.storageMedium in range(300,330): 
                 ReqType = 20
@@ -817,17 +797,25 @@ class StorageMethodRead:
                 ReqType = 25
                 ReqPurpose=u'Read package from disk'
             ArchiveObject_obj = storage_obj.archiveobject
+            target_obj = storageMedium_obj.storagetarget
+            remote_server = target_obj.remote_server.split(',')
+            if len(remote_server) == 3:
+                remote_status = 0
+            else:
+                remote_status = 20
+                
             IOQueue_objs = IOQueue.objects.filter(storage=storage_obj)
             if not IOQueue_objs.exists():     
                 IOQueue_obj = IOQueue()
                 IOQueue_obj.ReqType=ReqType
                 IOQueue_obj.ReqPurpose=ReqPurpose
                 IOQueue_obj.user=u'sys'
-                IOQueue_obj.ObjectPath=AccessQueue_obj.Path
+                IOQueue_obj.ObjectPath=self.AccessQueue_obj.Path
                 IOQueue_obj.Status=0
                 IOQueue_obj.archiveobject=ArchiveObject_obj
                 IOQueue_obj.storage=storage_obj
-                IOQueue_obj.accessqueue=AccessQueue_obj
+                IOQueue_obj.accessqueue=self.AccessQueue_obj
+                IOQueue_obj.remote_status=remote_status
                 IOQueue_obj.save()
                 self.logger.info('Add ReadReq from storageMediumID: %s for object: %s (IOuuid: %s)' % (storageMedium_obj.storageMediumID, 
                                                                                                                                              ArchiveObject_obj.ObjectIdentifierValue, 
@@ -837,22 +825,61 @@ class StorageMethodRead:
                                                                                                                                                     ArchiveObject_obj.ObjectIdentifierValue))
             else:
                 IOQueue_obj = IOQueue_objs[0]
+            
+            # Insert IOQueue object to remote
+            if len(remote_server) == 3:
+                try:
+                    self._insert_remote_ioqueue(remote_server, IOQueue_obj)
+                except DatabasePostRestError as e:
+                    msg = 'Failed to insert IOQueue object on remote for object: %s, error: %s (IOuuid: %s)' % (
+                                                                                ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                e,
+                                                                                IOQueue_obj.id)
+                    self.logger.error(msg)
+                    raise AccessError(msg)
 
             if not IOs_to_read.has_key(storageMedium_obj):
                 IOs_to_read[storageMedium_obj] = []
             IOs_to_read[storageMedium_obj].append(IOQueue_obj)        
         
-        return IOs_to_read
+        self.IOs_to_read = IOs_to_read
 
-    def apply_ios_to_read(self, IOs_to_read, ReqUUID):
-        """Apply all IOs to read
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
+    def _insert_remote_ioqueue(self, remote_server, IO_obj):
+        """ Call REST service on remote to insert IOQueue (with nested storage, storageMedium)???
         
-        :param IOs_to_read: Dict with {storageMedium_obj=IOQueue_obj_list,...}
-        :param ReqUUID: AccessQueue request UUID
+        :param master_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
         
         """
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)     
-        for storageMedium_obj, IOQueue_obj_list in IOs_to_read.iteritems():           
+        logger = self.logger
+        base_url, ruser, rpass = remote_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueue/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        IO_obj_data = IOQueueSerializer(IO_obj).data
+        IO_obj_json = JSONRenderer().render(IO_obj_data)
+        r = requests_session.post(IOQueue_rest_endpoint,
+                                        headers={'Content-Type': 'application/json'}, 
+                                        data=IO_obj_json)
+        if not r.status_code == 201:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to insert IOQueue object on remote for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
+
+    def apply_ios_to_read(self):
+        """Apply all IOs to read
+
+        self.IOs_to_read: Dict with {storageMedium_obj=IOQueue_obj_list,...}
+        
+        """
+        for storageMedium_obj, IOQueue_obj_list in self.IOs_to_read.iteritems():           
             if storageMedium_obj.storageMedium in range(300,330): 
                 # Read from tape (ReqType=20)
                 IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
@@ -861,7 +888,7 @@ class StorageMethodRead:
                     IOQueue_obj.save(update_fields=['Status'])                        
                 result = ReadStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
                 self.logger.info('Apply new read IO process from tape id: %s (AccessReqUUID: %s)' % (storageMedium_obj.storageMediumID, 
-                                                                                                                                           AccessQueue_obj.ReqUUID))         
+                                                                                                                                           self.AccessQueue_obj.ReqUUID))         
                 for  IOQueue_obj in IOQueue_obj_list:
                     IOQueue_obj.task_id = result.task_id
                     IOQueue_obj.save(update_fields=['task_id'])                        
@@ -873,14 +900,13 @@ class StorageMethodRead:
                     result = ReadStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
                     self.logger.info('Apply new read IO process for object: %s from disk id: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
                                                                                                                                                                                       storageMedium_obj.storageMediumID, 
-                                                                                                                                                                                      AccessQueue_obj.ReqUUID, 
+                                                                                                                                                                                      self.AccessQueue_obj.ReqUUID, 
                                                                                                                                                                                       IOQueue_obj.id))
                     IOQueue_obj.task_id = result.task_id
                     IOQueue_obj.save(update_fields=['task_id'])        
 
-    def wait_for_all_reading(self, ReqUUID):
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        IOQueue_objs = AccessQueue_obj.ioqueue_set.all()
+    def wait_for_all_reading(self):
+        IOQueue_objs = self.AccessQueue_obj.ioqueue_set.all()
         while 1:
             ReadOK=1
             loop_num = 1
@@ -891,12 +917,12 @@ class StorageMethodRead:
                     self.logger.error('Problem to read object: %s, traceback: %s, result: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue, 
                                                                                                                                                                                  result.traceback, 
                                                                                                                                                                                  result.result,
-                                                                                                                                                                                 AccessQueue_obj.ReqUUID, 
+                                                                                                                                                                                 self.AccessQueue_obj.ReqUUID, 
                                                                                                                                                                                  IOQueue_obj.id))
                     raise AccessError(result.traceback)
                 elif result.successful():
                     self.logger.info('Success to read object: %s (AccessReqUUID: %s, IOuuid: %s)' % (IOQueue_obj.archiveobject.ObjectIdentifierValue,
-                                                                                                                                         AccessQueue_obj.ReqUUID, 
+                                                                                                                                         self.AccessQueue_obj.ReqUUID, 
                                                                                                                                          IOQueue_obj.id))
                 else:
                     if loop_num == 60:
@@ -906,13 +932,13 @@ class StorageMethodRead:
                                                                                                                                                             result.traceback, 
                                                                                                                                                             result.result,
                                                                                                                                                             result.state,
-                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            self.AccessQueue_obj.ReqUUID, 
                                                                                                                                                             IOQueue_obj.id))
                         else:
                             self.logger.info('Wait for read task for object: %s, state: %s (AccessReqUUID: %s, IOuuid: %s)' % (
                                                                                                                                                             IOQueue_obj.archiveobject.ObjectIdentifierValue,
                                                                                                                                                             result.state,
-                                                                                                                                                            AccessQueue_obj.ReqUUID, 
+                                                                                                                                                            self.AccessQueue_obj.ReqUUID, 
                                                                                                                                                             IOQueue_obj.id))
                         loop_num = 1
                     ReadOK=0
@@ -923,11 +949,10 @@ class StorageMethodRead:
             loop_num += 1
             time.sleep(1)
 
-    def _IPunpack(self,ReqUUID):
+    def ip_unpack(self):
         """Unpack information package"""
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
-        RootPath = AccessQueue_obj.Path
+        ObjectIdentifierValue = self.AccessQueue_obj.ObjectIdentifierValue
+        RootPath = self.AccessQueue_obj.Path
         RootPath_iso = unicode2str(RootPath)
         try:
             AIPfilename = os.path.join(RootPath,ObjectIdentifierValue + '.tar')
@@ -943,11 +968,10 @@ class StorageMethodRead:
             logging.info(event_info)
             ESSPGM.Events().create('1210','',__name__,__version__,'0',event_info,2,ObjectIdentifierValue)
             
-    def _IPvalidate(self,ReqUUID, mets_flag = 1, VerifyChecksum_flag = 0):
+    def ip_validate(self, mets_flag = 1, VerifyChecksum_flag = 0):
         """Validate information package"""
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        ObjectIdentifierValue = AccessQueue_obj.ObjectIdentifierValue
-        RootPath = AccessQueue_obj.Path
+        ObjectIdentifierValue = self.AccessQueue_obj.ObjectIdentifierValue
+        RootPath = self.AccessQueue_obj.Path
         ok_flag=1
         if ok_flag and mets_flag:
             ###########################################################
@@ -1131,10 +1155,9 @@ class StorageMethodRead:
             msg = 'Problem to validate IP package: ' + ObjectIdentifierValue
             raise AccessError(msg)                  
 
-    def _DeleteAccessedIOs(self, storage_objs, ReqUUID):
-        AccessQueue_obj = AccessQueue.objects.get(ReqUUID=ReqUUID)
-        RootPath = AccessQueue_obj.Path
-        for storage_obj in storage_objs:
+    def delete_retrieved_ios(self):
+        RootPath = self.AccessQueue_obj.Path
+        for storage_obj in self.storage_objs:
             ObjectIdentifierValue = storage_obj.archiveobject.ObjectIdentifierValue
             storageMediumFormat = storage_obj.storagemedium.storageMediumFormat
             PMetaObjectPath = os.path.join(RootPath,ObjectIdentifierValue + '_Package_METS.xml')
