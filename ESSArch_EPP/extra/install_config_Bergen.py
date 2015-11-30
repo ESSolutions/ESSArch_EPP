@@ -46,6 +46,319 @@ site_name = u'Bergen' # Bergen Byarkiv
 medium_location = u'Media_%s' % site_name  
 install_site = u'ESSArch_%s' % site_name 
 
+def createdefaultusers(): # default users, groups and permissions
+    
+    admingroup, created = Group.objects.get_or_create(name='Admin')
+    admingroup.permissions.clear()
+    usergroup, created = Group.objects.get_or_create(name='User')
+    usergroup.permissions.clear()
+    sysgroup, created = Group.objects.get_or_create(name='SysAdmin')
+    sysgroup.permissions.clear()
+
+    # controlarea permissions 
+    permission_list = ['add_permission','change_permission','delete_permission',
+                       'CheckinFromReception','CheckoutToWork','CheckinFromWork',
+                       'CheckoutToGate','CheckinFromGate','DiffCheck','PreserveIP']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='controlarea',
+                                                    content_type__model='permission').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    permission_list = ['add_controlarea','change_controlarea','delete_controlarea','list_controlarea']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='controlarea',
+                                                    content_type__model='controlarea').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # reports permissions
+    permission_list = ['add_reports','change_reports','delete_reports','list_reports']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='reports',
+                                                    content_type__model='reports').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # essarch permissions
+    ct_essarch_permission = ContentType.objects.get(app_label='essarch', model='permission')
+    if not Permission.objects.filter(codename=install_site, name=site_name, content_type=ct_essarch_permission).exists():
+        Permission.objects.create(codename=install_site,name=site_name,content_type=ct_essarch_permission)
+    permission_list = ['essadministrate',install_site,
+                       'list_accessqueue','list_ingestqueue','list_robot','list_storage','list_storageMedium',
+                       'infoclass_0','infoclass_1','infoclass_2','infoclass_3','infoclass_4']
+    exclude_for_user = ['essadministrate']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_permission)
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+    for permission_obj in permission_obj_list.exclude(codename__in=exclude_for_user):
+        usergroup.permissions.add(permission_obj)
+
+    # robot permissions
+    permission_list = ['add_robot','change_robot','delete_robot','list_robot']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='robot').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # storage permissions
+    permission_list = ['add_storage','change_storage','delete_storage','list_storage']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='storage').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # storageMedium permissions
+    permission_list = ['add_storageMedium','change_storageMedium','delete_storageMedium','list_storageMedium']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='storageMedium').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # defaultvalue permissions
+    permission_list = ['add_defaultvalue','change_defaultvalue','delete_defaultvalue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration',
+                                                    content_type__model='defaultvalue').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_essarch_accessqueue = ContentType.objects.get(app_label='essarch', model='accessqueue')
+    permission_list = ['list_accessqueue','add_accessqueue','change_accessqueue','delete_accessqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_accessqueue).all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    ct_essarch_ingestqueue = ContentType.objects.get(app_label='essarch', model='ingestqueue')
+    permission_list = ['list_ingestqueue','add_ingestqueue','change_ingestqueue','delete_ingestqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_essarch_ingestqueue).all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    ct_storagelogistics_permission = ContentType.objects.get(app_label='storagelogistics', model='permission')
+    permission_list = ['StorageLogistics']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_storagelogistics_permission).all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    ct_auth_permission = ContentType.objects.get(app_label='auth', model='permission')
+    permission_list = ['add_permission','change_permission','delete_permission']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_auth_permission).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_auth_group = ContentType.objects.get(app_label='auth', model='group')
+    permission_list = ['add_group','change_group','delete_group']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_auth_group).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_auth_user = ContentType.objects.get(app_label='auth', model='user')
+    permission_list = ['add_user','change_user','delete_user']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_auth_user).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_configuration_parameter = ContentType.objects.get(app_label='configuration', model='parameter')
+    permission_list = ['add_parameter','change_parameter','delete_parameter']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_parameter).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_configuration_path = ContentType.objects.get(app_label='configuration', model='path')
+    permission_list = ['add_path','change_path','delete_path']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_path).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_configuration_schemaprofile = ContentType.objects.get(app_label='configuration', model='schemaprofile')
+    permission_list = ['add_schemaprofile','change_schemaprofile','delete_schemaprofile']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_schemaprofile).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    ct_configuration_ipparameter = ContentType.objects.get(app_label='configuration', model='ipparameter')
+    permission_list = ['add_ipparameter','change_ipparameter','delete_ipparameter']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_ipparameter).all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+#    ct_configuration_essarchpolicy = ContentType.objects.get(app_label='configuration', model='essarchpolicy')
+#    permission_list = ['add_essarchpolicy','change_essarchpolicy','delete_essarchpolicy']
+#    permission_obj_list = Permission.objects.filter(codename__in=permission_list, content_type=ct_configuration_essarchpolicy).all()
+#    for permission_obj in permission_obj_list:
+#        sysgroup.permissions.add(permission_obj)
+
+    # essconfig permissions
+    permission_list = ['add_essconfig','change_essconfig','delete_essconfig']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='essconfig').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+
+    # essproc permissions
+    permission_list = ['add_essproc','change_essproc','delete_essproc']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='essproc').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # monitoring permissions
+    permission_list = ['add_monitoringobject','change_monitoringobject','delete_monitoringobject','list_monitoringobject']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='monitoring', 
+                                                    content_type__model='monitoringobject').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    
+    permission_list = ['add_log','change_log','delete_log']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='monitoring', 
+                                                    content_type__model='log').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+    
+
+    # djcelery permissions
+    permission_list = ['add_intervalschedule','change_intervalschedule','delete_intervalschedule']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='intervalschedule').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    permission_list = ['add_crontabschedule','change_crontabschedule','delete_crontabschedule']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='crontabschedule').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    permission_list = ['add_periodictask','change_periodictask','delete_periodictask']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='djcelery', 
+                                                    content_type__model='periodictask').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # logfileviewer permissions
+    permission_list = ['add_logfile','change_logfile','delete_logfile']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='logfileviewer', 
+                                                    content_type__model='logfile').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+        admingroup.permissions.add(permission_obj)
+
+    # migrationqueue permissions
+    permission_list = ['add_migrationqueue','change_migrationqueue','delete_migrationqueue','list_migrationqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='essarch', 
+                                                    content_type__model='migrationqueue').all()
+    for permission_obj in permission_obj_list:
+        admingroup.permissions.add(permission_obj)
+        usergroup.permissions.add(permission_obj)
+
+    # Storage - ioqueue permissions
+    permission_list = ['add_ioqueue','change_ioqueue','delete_ioqueue']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='Storage', 
+                                                    content_type__model='ioqueue').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - storagetargets permissions
+    permission_list = ['add_storagetargets','change_storagetargets','delete_storagetargets']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagetargets').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+        
+    # configuration - storagetarget permissions
+    permission_list = ['add_storagetarget','change_storagetarget','delete_storagetarget']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagetarget').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - storagemethod permissions
+    permission_list = ['add_storagemethod','change_storagemethod','delete_storagemethod']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='storagemethod').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    # configuration - archivepolicy permissions
+    permission_list = ['add_archivepolicy','change_archivepolicy','delete_archivepolicy']
+    permission_obj_list = Permission.objects.filter(codename__in=permission_list, 
+                                                    content_type__app_label='configuration', 
+                                                    content_type__model='archivepolicy').all()
+    for permission_obj in permission_obj_list:
+        sysgroup.permissions.add(permission_obj)
+
+    try:
+        myuser = User.objects.get(username='admin')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('admin', '', 'admin')
+        myuser.groups.add(admingroup)
+        myuser.is_staff = 1
+        myuser.save()
+
+    try:
+        myuser = User.objects.get(username='sysadmin')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('sysadmin', '', 'sysadmin')
+        myuser.groups.add(sysgroup)
+        myuser.is_staff = 1
+        myuser.save()
+
+    try:
+        myuser = User.objects.get(username='essadmin')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('essadmin', '', 'essadmin')
+        myuser.groups.add(admingroup)
+        myuser.is_staff = 1
+        myuser.is_superuser = 1
+        myuser.save()
+
+    try:
+        myuser = User.objects.get(username='user')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('user', '', 'user')
+        myuser.groups.add(usergroup)
+        myuser.is_staff = 1
+        myuser.save()
+
+    try:
+        myuser = User.objects.get(username='meta')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('meta', '', 'meta123')
+        myuser.groups.add(usergroup)
+        myuser.is_staff = 1
+        myuser.save()
+
+    return 0
+
+
 def installdefaultpaths(): # default paths for site profile
     
     # First remove all existing data 
