@@ -67,7 +67,6 @@ from ESSPGM import Check as g_functions
 import ESSPGM, pytz, datetime, time, logging
 
 
-
 logger = logging.getLogger('essarch.controlarea')
 
 class MyFileList(object):
@@ -428,7 +427,7 @@ class ToWorkListInfoView(View):
                         AIC_IPs.append(AIC_IP)
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
-                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
+                sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))
         return sortedAICs
 
   
@@ -1310,7 +1309,7 @@ class PreserveListInfoView(View):
                 AIC['IPs'] = AIC_IPs
                 AIC_list.append(AIC)
                 sortedAICs = sorted(AIC_list, key=itemgetter('Archivist_organization','Label'))   
-        return sortedAICs  
+        return sortedAICs
    
 
   
