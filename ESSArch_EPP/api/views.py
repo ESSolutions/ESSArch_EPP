@@ -72,11 +72,13 @@ from Storage.models import (storageMedium,
 from rest_framework import viewsets, mixins, permissions, views
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.renderers import JSONRenderer
+#from rest_framework.renderers import JSONRenderer
 from celery.result import AsyncResult
 from StorageMethodDisk.tasks import WriteStorageMethodDisk, ReadStorageMethodDisk
 from StorageMethodTape.tasks import WriteStorageMethodTape, ReadStorageMethodTape
 from Storage.tasks import MoveToAccessPath
+from django.db.models import Q
+from esscore.views.datatables import DatatableBaseView
 
 class AICListView(TemplateView):
     template_name = 'api/aic_list.html'
@@ -84,6 +86,63 @@ class AICListView(TemplateView):
     @method_decorator(permission_required('essarch.change_ingestqueue'))
     def dispatch(self, *args, **kwargs):
         return super(AICListView, self).dispatch( *args, **kwargs)
+
+class ArchiveObjectListView(TemplateView):
+    template_name = 'api/ip_list.html'
+
+    @method_decorator(permission_required('essarch.change_ingestqueue'))
+    def dispatch(self, *args, **kwargs):
+        return super(ArchiveObjectListView, self).dispatch( *args, **kwargs)
+
+class ArchiveObject_dt_view(DatatableBaseView):
+    permission_classes = (permissions.IsAuthenticated,)
+    qs =  ArchiveObject.objects.filter(
+                               Q(OAISPackageType=1) | 
+                               Q(OAISPackageType__in=[0,2], aic_set__isnull=True))
+    columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess', 'archiveobjects']
+    ip_columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess']
+    order_columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess', 'archiveobjects']
+
+    def render_column(self, row, column):
+        """ Renders a column on a row
+        """
+        #if column == 'archiveobjects':
+
+        if hasattr(row, 'get_%s_display' % column):
+            # It's a choice field
+            text = getattr(row, 'get_%s_display' % column)()
+        else:
+            try:
+                text = getattr(row, column)
+            except AttributeError:
+                obj = row
+                for part in column.split('.'):
+                    if obj is None:
+                        break
+                    obj = getattr(obj, part)
+
+                text = obj
+        if text is None:
+            text = self.none_string
+        
+        if hasattr(text,'all'):
+            #print 'column: %s' % column
+            data = []
+            for item in text.all():
+                d={}
+                #for column in self.get_columns():
+                for column in self.ip_columns:
+                    d[column]=self.render_column(item, column)
+                data.append(d)
+            #print 'multi_list: %s' % repr(data)
+            text=data
+        else:
+            print 'column - no rel: %s' % column
+        
+        if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
+            return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
+        else:
+            return text
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'

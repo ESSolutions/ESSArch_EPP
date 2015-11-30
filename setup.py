@@ -94,6 +94,7 @@ if __name__ == '__main__':
             "django-chunked-upload>=1.1.1",
             "jsonpickle>=0.9.2",
             "retrying>=1.3.3",
+            "django-datatables-view>=1.13.0",
             "logfileviewer>=0.6.2",
         ],
         packages=find_packages(),

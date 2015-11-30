@@ -242,9 +242,9 @@ CELERY_TASK_RESULT_EXPIRES = 864000 # clean older than 10 days in celery_taskmet
 from celery.schedules import crontab
 from datetime import timedelta
 
-process_list=["FTPServer.pyc", "AccessEngine.pyc","ESSlogging.pyc", "db_sync_ais.pyc", "TLD.pyc", "AIPPurge.pyc", 
-                    "AIPWriter.pyc", "SIPRemove.pyc", "AIPValidate.pyc", "AIPChecksum.pyc", "AIPCreator.pyc","SIPValidateFormat.pyc",
-                    "SIPValidateApproval.pyc","SIPValidateAIS.pyc","SIPReceiver.pyc"]
+process_list=["FTPServer.py", "AccessEngine.py","ESSlogging.py", "db_sync_ais.py", "TLD.py", "AIPPurge.py", 
+                    "AIPWriter.py", "SIPRemove.py", "AIPValidate.py", "AIPChecksum.py", "AIPCreator.py","SIPValidateFormat.py",
+                    "SIPValidateApproval.py","SIPValidateAIS.py","SIPReceiver.py"]
 WORKERS_ROOT = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
 for i,p in enumerate(process_list):
     process_list[i]=os.path.join(WORKERS_ROOT,p)
