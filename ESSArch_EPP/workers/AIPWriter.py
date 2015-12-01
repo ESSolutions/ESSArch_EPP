@@ -97,6 +97,7 @@ class WorkingThread:
                 StorageMethodWrite_obj.logger = logger
                 StorageMethodWrite_obj.ArchiveObject_objs = ArchiveObject_objs
                 StorageMethodWrite_obj.add_to_ioqueue()
+                StorageMethodWrite_obj.apply_ios_to_transfer()
                 StorageMethodWrite_obj.apply_ios_to_write()
                 for ArchiveObject_obj in ArchiveObject_objs:
                     try:

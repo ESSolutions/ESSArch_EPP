@@ -273,6 +273,7 @@ admin.site.register(ArchivePolicy, ArchivePolicyAdmin)
 # StorageTargets
 class StorageTargetsAdmin( admin.ModelAdmin ):
     list_display = ( 'name', 'target' )
+    sortable_field_name = "name"
     fieldsets = (
         (None,{
             'fields': (
@@ -285,6 +286,8 @@ class StorageTargetsAdmin( admin.ModelAdmin ):
                 'minChunkSize',
                 'minContainerSize',
                 'minCapacityWarning',
+                'remote_server',
+                'master_server',
                 'target',
                 )}),
     )

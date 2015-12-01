@@ -166,6 +166,7 @@ StatusProcess_CHOICES = (
     (1002, 'No empty media available'),
     (1003, 'Problem to mount media'),
     (1004, 'Failed to verify tape after full write'),
+    (1500, 'Remote AIP'),
     (1999, 'Write AIP OK'),
     (2000, 'Try to remove temp AIP object'),
     (2001, 'Failed to remove temp AIP object'),
@@ -242,7 +243,7 @@ class ArchiveObject(models.Model):
     ObjectUUID = models.CharField(max_length=36, unique=True)
     #PolicyId = models.IntegerField(null=True)
     #PolicyId = models.ForeignKey(ESSArchPolicy, db_column='PolicyId', to_field='PolicyID', default=0)
-    PolicyId = models.ForeignKey('configuration.ArchivePolicy', db_column='PolicyId', to_field='PolicyID', default=0)
+    PolicyId = models.ForeignKey('configuration.ArchivePolicy', db_column='PolicyId', to_field='PolicyID', blank=True, null=True)
     ObjectIdentifierValue = models.CharField(max_length=255, unique=True)
     ObjectPackageName = models.CharField(max_length=255, blank=True)
     ObjectSize = models.BigIntegerField(null=True)

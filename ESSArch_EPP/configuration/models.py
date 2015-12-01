@@ -199,11 +199,15 @@ INFORMATIONCLASS_Policy_CHOICES = (
 
 minChunkSize_CHOICES = (
     (0, 'Disabled'),
-    (1000000, '1 MByte'),
+    (1048576, '1 MByte'),
     (1073741824, '1 GByte'),
     (53687091201, '5 GByte'),
     (10737418240, '10 GByte'),
     (107374182400, '100 GByte'),
+    (214748364800, '200 GByte'),
+    (322122547200, '300 GByte'),
+    (429496729600, '400 GByte'),
+    (536870912000, '500 GByte'),
 )
 
 minContainerSize_CHOICES = (
@@ -292,6 +296,8 @@ class ArchivePolicy(models.Model):
     INFORMATIONCLASS = models.IntegerField('Information class', choices=INFORMATIONCLASS_Policy_CHOICES, default=0)
     IngestPath = models.CharField('Ingest directory', max_length=255,default='/ESSArch/ingest')
     IngestDelete = models.IntegerField('Delete SIP after success to create AIP', choices=enabled_disabled_CHOICES,default=1)
+    class Meta:
+        ordering = ['PolicyName']
 
     def __unicode__(self):
         if len(self.PolicyName): return self.PolicyName
@@ -303,6 +309,8 @@ class StorageMethod(models.Model):
     status = models.IntegerField('Storage method status', choices=enabled_disabled_CHOICES,default=0)
     type = models.IntegerField('Type', choices=StorageType_CHOICES,default=200)
     archivepolicy = models.ForeignKey('ArchivePolicy')
+    class Mets:
+        ordering = ['name']
 
     def __unicode__(self):
         if len(self.name): return self.name
@@ -316,6 +324,7 @@ class StorageTarget(models.Model):
     storagemethod = models.ForeignKey('StorageMethod')
     class Meta:
         verbose_name = 'Target'
+        ordering = ['name']
         
     def __unicode__(self):
         if len(self.name): return self.name
@@ -332,9 +341,12 @@ class StorageTargets(models.Model):
     minChunkSize = models.BigIntegerField('Min chunk size', choices=minChunkSize_CHOICES, default=0)
     minContainerSize = models.BigIntegerField('Min container size (0=Disabled)', choices=minContainerSize_CHOICES, default=0)
     minCapacityWarning = models.BigIntegerField('Min capacity warning (0=Disabled)', default=0)
+    remote_server = models.CharField('Remote server (https://hostname,user,password)', max_length=255, blank=True)
+    master_server = models.CharField('Master server (https://hostname,user,password)', max_length=255, blank=True)
     target = models.CharField('Target (URL, path or barcodeprefix)', max_length=255)
     class Meta:
         verbose_name = 'Storage Target'
+        ordering = ['name']
 
     def __unicode__(self):
         if len(self.name): return self.name

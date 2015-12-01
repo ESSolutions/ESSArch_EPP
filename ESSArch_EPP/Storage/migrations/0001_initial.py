@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('configuration', '0001_initial'),
+        ('essarch', '0001_initial'),
     ]
 
     operations = [
@@ -26,9 +27,10 @@ class Migration(migrations.Migration):
                 ('Status', models.IntegerField(default=0, blank=True, choices=[(0, b'Pending'), (2, b'Initiate'), (5, b'Progress'), (20, b'Success'), (100, b'FAIL')])),
                 ('task_id', models.CharField(max_length=36, blank=True)),
                 ('posted', models.DateTimeField(auto_now_add=True)),
-                ('remote_target', models.CharField(max_length=256, blank=True)),
                 ('remote_status', models.IntegerField(default=0, blank=True, choices=[(0, b'Pending'), (2, b'Initiate'), (5, b'Transfer'), (20, b'Success'), (100, b'FAIL')])),
-                ('transfer_taks_id', models.CharField(max_length=36, blank=True)),
+                ('transfer_task_id', models.CharField(max_length=36, blank=True)),
+                ('accessqueue', models.ForeignKey(blank=True, to='essarch.AccessQueue', null=True)),
+                ('archiveobject', models.ForeignKey(to_field=b'ObjectUUID', blank=True, to='essarch.ArchiveObject', null=True)),
             ],
             options={
                 'permissions': (('list_IOQueue', 'Can list IOQueue'),),
@@ -42,6 +44,7 @@ class Migration(migrations.Migration):
                 ('contentLocationValue', models.CharField(max_length=255)),
                 ('LocalDBdatetime', models.DateTimeField(null=True)),
                 ('ExtDBdatetime', models.DateTimeField(null=True)),
+                ('archiveobject', models.ForeignKey(related_name='Storage_set', to='essarch.ArchiveObject', to_field=b'ObjectUUID')),
             ],
             options={
                 'permissions': (('list_storage', 'Can list storage'),),
@@ -72,5 +75,35 @@ class Migration(migrations.Migration):
             options={
                 'permissions': (('list_storageMedium', 'Can list storageMedium'),),
             },
+        ),
+        migrations.AddField(
+            model_name='storage',
+            name='storagemedium',
+            field=models.ForeignKey(to='Storage.storageMedium'),
+        ),
+        migrations.AddField(
+            model_name='ioqueue',
+            name='storage',
+            field=models.ForeignKey(blank=True, to='Storage.storage', null=True),
+        ),
+        migrations.AddField(
+            model_name='ioqueue',
+            name='storagemedium',
+            field=models.ForeignKey(blank=True, to='Storage.storageMedium', null=True),
+        ),
+        migrations.AddField(
+            model_name='ioqueue',
+            name='storagemethod',
+            field=models.ForeignKey(blank=True, to='configuration.StorageMethod', null=True),
+        ),
+        migrations.AddField(
+            model_name='ioqueue',
+            name='storagemethodtarget',
+            field=models.ForeignKey(blank=True, to='configuration.StorageTarget', null=True),
+        ),
+        migrations.AddField(
+            model_name='ioqueue',
+            name='storagetarget',
+            field=models.ForeignKey(blank=True, to='configuration.StorageTargets', null=True),
         ),
     ]

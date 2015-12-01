@@ -35,6 +35,9 @@ class Migration(migrations.Migration):
                 ('IngestPath', models.CharField(default=b'/ESSArch/ingest', max_length=255, verbose_name=b'Ingest directory')),
                 ('IngestDelete', models.IntegerField(default=1, verbose_name=b'Delete SIP after success to create AIP', choices=[(0, b'Disabled'), (1, b'Enabled')])),
             ],
+            options={
+                'ordering': ['PolicyName'],
+            },
         ),
         migrations.CreateModel(
             name='DefaultValue',
@@ -195,6 +198,7 @@ class Migration(migrations.Migration):
                 ('storagemethod', models.ForeignKey(to='configuration.StorageMethod')),
             ],
             options={
+                'ordering': ['name'],
                 'verbose_name': 'Target',
             },
         ),
@@ -208,12 +212,15 @@ class Migration(migrations.Migration):
                 ('format', models.IntegerField(default=103, verbose_name=b'Format', choices=[(103, b'103 (AIC support)'), (102, b'102 (Media label)'), (101, b'101 (Old read only)')])),
                 ('blocksize', models.BigIntegerField(default=1024, verbose_name=b'BlockSize (tape)', choices=[(128, b'64K'), (256, b'128K'), (512, b'256K'), (1024, b'512K'), (2048, b'1024K')])),
                 ('maxCapacity', models.BigIntegerField(default=0, verbose_name=b'Max capacity (0=Disabled)')),
-                ('minChunkSize', models.BigIntegerField(default=0, verbose_name=b'Min chunk size', choices=[(0, b'Disabled'), (1000000, b'1 MByte'), (1073741824, b'1 GByte'), (53687091201, b'5 GByte'), (10737418240, b'10 GByte'), (107374182400, b'100 GByte')])),
+                ('minChunkSize', models.BigIntegerField(default=0, verbose_name=b'Min chunk size', choices=[(0, b'Disabled'), (1048576, b'1 MByte'), (1073741824, b'1 GByte'), (53687091201, b'5 GByte'), (10737418240, b'10 GByte'), (107374182400, b'100 GByte'), (214748364800, b'200 GByte'), (322122547200, b'300 GByte'), (429496729600, b'400 GByte'), (536870912000, b'500 GByte')])),
                 ('minContainerSize', models.BigIntegerField(default=0, verbose_name=b'Min container size (0=Disabled)', choices=[(0, b'Disabled')])),
                 ('minCapacityWarning', models.BigIntegerField(default=0, verbose_name=b'Min capacity warning (0=Disabled)')),
+                ('remote_server', models.CharField(max_length=255, verbose_name=b'Remote server (https://hostname,user,password)', blank=True)),
+                ('master_server', models.CharField(max_length=255, verbose_name=b'Master server (https://hostname,user,password)', blank=True)),
                 ('target', models.CharField(max_length=255, verbose_name=b'Target (URL, path or barcodeprefix)')),
             ],
             options={
+                'ordering': ['name'],
                 'verbose_name': 'Storage Target',
             },
         ),

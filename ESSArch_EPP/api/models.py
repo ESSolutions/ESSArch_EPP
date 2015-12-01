@@ -108,11 +108,14 @@ def TmpWorkarea_filename(instance, filename):
     filename = os.path.join(upload_path, instance.upload_id + '.part')
     return time.strftime(filename)
 
-TmpWorkarea_storage = FileSystemStorage(location=TmpWorkarea_upload_root)
+#TmpWorkarea_storage = FileSystemStorage(location=TmpWorkarea_upload_root)
+class TmpWorkarea_storage(FileSystemStorage):
+    def __init__(self):
+        super(TmpWorkarea_storage, self).__init__(location=TmpWorkarea_upload_root)
 
 class TmpWorkareaUpload(BaseChunkedUpload):
     file = models.FileField(max_length=255, upload_to=TmpWorkarea_filename,
-                            storage=TmpWorkarea_storage)
+                            storage=TmpWorkarea_storage())
 
 # Override the default ChunkedUpload to make the `user` field nullable
 #TmpWorkareaUpload._meta.get_field('user').null = True

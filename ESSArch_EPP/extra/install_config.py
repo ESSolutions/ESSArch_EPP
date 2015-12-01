@@ -356,8 +356,15 @@ def createdefaultusers(): # default users, groups and permissions
         myuser.is_staff = 1
         myuser.save()
 
+    try:
+        myuser = User.objects.get(username='api')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('api', '', 'api2015')
+        myuser.groups.add(usergroup)
+        myuser.is_staff = 1
+        myuser.save()
+
     return 0
-    
 
 def installdefaultpaths(): # default paths
     
@@ -371,19 +378,18 @@ def installdefaultpaths(): # default paths
             'path_reception':'/mottak',
             'path_gate':'/data/ioessarch/',
             'path_work':'/data/test',
-            #'path_control':'/data/control',
             'path_control':'/kontroll',
             'path_ingest':'/data/ingest',
-            'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
+            'TmpWorkarea_upload_path':'/ESSArch/data/epp/temp',
             }
     else:
         dct = {
-            'path_reception':'/ESSArch/reception',
-            'path_gate':'/ESSArch/exchange',
-            'path_work':'/ESSArch/work',
-            'path_control':'/ESSArch/control',
-            'path_ingest':'/ESSArch/ingest',
-            'path_mimetypesdefinition':'/ESSArch/Tools/env/data',
+            'path_reception':'/ESSArch/data/eta/reception',
+            'path_gate':'/ESSArch/data/gate',
+            'path_work':'/ESSArch/data/epp/work',
+            'path_control':'/ESSArch/epp',
+            'path_ingest':'/ESSArch/data/epp/ingest',
+            'TmpWorkarea_upload_path':'/ESSArch/data/epp/temp',
             }
 
     # create according to model with two fields
@@ -567,15 +573,15 @@ def installdefaultESSConfig(): # default ESSConfig
                     (u'RobotReqTable',u'robotreq'),
                     (u'StorageMediumTable',u'storageMedium'),
                     (u'ExtPrjTapedURL',u''),
-                    (u'verifydir',u'/ESSArch/verify'),
+                    (u'verifydir',u'/ESSArch/data/epp/verify'),
                     (u'AgentIdentifierValue',install_site),
                     (u'ExtDBupdate',u'0'),
                     (u'storageMediumLocation',medium_location),
-                    (u'MD_FTP_USER',u'meta'),
-                    (u'MD_FTP_PASS',u'meta123'),
-                    (u'MD_FTP_HOST',u'127.0.0.1'),
+                    (u'MD_FTP_USER',u''),             # u'meta'
+                    (u'MD_FTP_PASS',u''),        # u'meta123'
+                    (u'MD_FTP_HOST',u''),  # u'127.0.0.1'
                     (u'MD_FTP_PORT',u'2222'),
-                    (u'MD_FTP_ROOT_PATH',u'/metadata1'),
+                    (u'MD_FTP_ROOT_PATH',u'/ESSArch/data/store/metadata1'),
                     (u'MD_FTP_ROOT_KEY',u'16'),
                     (u'Robotdev',u'/dev/sg5'),
                     (u'OS',u'FEDORA'),
@@ -593,8 +599,8 @@ def installdefaultESSConfig(): # default ESSConfig
 
 def installdefaultrobotdrives(): # default robotdrives
 
-    robotdrives_list=((0,u'',0,u'Ready',0,u'/dev/nst0',u'IBM_LTO4',u'sn00001',u'fw0001',u'',0),
-                      (1,u'',0,u'Ready',0,u'/dev/nst1',u'IBM_LTO4',u'sn00002',u'fw0001',u'',0),
+    robotdrives_list=((0,u'',0,u'Ready',0,u'/dev/nst0',u'IBM_LTO6',u'sn00001',u'fw0001',u'',0),
+                      (1,u'',0,u'Ready',0,u'/dev/nst1',u'IBM_LTO6',u'sn00002',u'fw0001',u'',0),
     )
     for row in robotdrives_list:
         if not robotdrives.objects.filter(drive_id=row[0]).exists():
@@ -620,7 +626,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         print "Adding test entry to ArchivePolicy..."
         ArchivePolicy_obj = ArchivePolicy()
         ArchivePolicy_obj.id=u'70d0177ddeb7416c800349c2cdfdfdc7'
-        ArchivePolicy_obj.PolicyName=u'EARK policy 1'
+        ArchivePolicy_obj.PolicyName=u'Default policy 1'
         ArchivePolicy_obj.PolicyID=u'1'
         ArchivePolicy_obj.PolicyStat=u'1'
         ArchivePolicy_obj.AISProjectName=u''
@@ -632,11 +638,11 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         ArchivePolicy_obj.ValidateXML=u'1'
         ArchivePolicy_obj.ManualControll=u'0'
         ArchivePolicy_obj.AIPType=u'1'
-        ArchivePolicy_obj.AIPpath=u'/ESSArch/essarch_temp'
+        ArchivePolicy_obj.AIPpath=u'/ESSArch/data/epp/temp'
         ArchivePolicy_obj.PreIngestMetadata=u'0'
         ArchivePolicy_obj.IngestMetadata=u'4'
         ArchivePolicy_obj.INFORMATIONCLASS=u'1'
-        ArchivePolicy_obj.IngestPath=u'/ESSArch/ingest'
+        ArchivePolicy_obj.IngestPath=u'/ESSArch/data/epp/ingest'
         ArchivePolicy_obj.IngestDelete=u'1'
         ArchivePolicy_obj.save()
         
@@ -645,7 +651,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         print "Adding test entry to StorageMethod..."
         StorageMethod_obj = StorageMethod()
         StorageMethod_obj.id=u'caa8458a4c954b65affe8ae9867d7228'
-        StorageMethod_obj.name=u'EARK policy 1 - SM 1'
+        StorageMethod_obj.name=u'Default policy 1 - SM 1'
         StorageMethod_obj.status=1
         StorageMethod_obj.type=200
         StorageMethod_obj.archivepolicy=ArchivePolicy.objects.get(id=u'70d0177ddeb7416c800349c2cdfdfdc7')
@@ -665,7 +671,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         StorageTargets_obj.minChunkSize=0
         StorageTargets_obj.minContainerSize=0
         StorageTargets_obj.minCapacityWarning=0
-        StorageTargets_obj.target=u'/ESSArch/store/disk1'
+        StorageTargets_obj.target=u'/ESSArch/data/store/disk1'
         StorageTargets_obj.save()
 
     if not StorageTarget.objects.filter(id=u'79b902a9f00b4ac696b11fd5ad0f3ae1').exists():
@@ -673,7 +679,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         print "Adding test entry to StorageMethod - Target..."
         StorageTarget_obj = StorageTarget()
         StorageTarget_obj.id=u'79b902a9f00b4ac696b11fd5ad0f3ae1'
-        StorageTarget_obj.name=u'EARK policy 1 - SM 1 - Target 1'
+        StorageTarget_obj.name=u'Default policy 1 - SM 1 - Target 1'
         StorageTarget_obj.status=1
         StorageTarget_obj.storagemethod=StorageMethod.objects.get(id=u'caa8458a4c954b65affe8ae9867d7228')
         StorageTarget_obj.target=StorageTargets.objects.get(id=u'e55194eeb1ea4bf7b8c7494f4f2b0101')
@@ -681,22 +687,22 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
 
 def installdefaultESSProc(): # default ESSProc
     workers_path = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
-    ESSProc_list=(('1','SIPReceiver',os.path.join(workers_path, 'SIPReceiver.pyc'),'/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
-                   ('3','SIPValidateAIS',os.path.join(workers_path, 'SIPValidateAIS.pyc'),'/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
-                   ('4','SIPValidateApproval',os.path.join(workers_path, 'SIPValidateApproval.pyc'),'/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
-                   ('5','SIPValidateFormat',os.path.join(workers_path, 'SIPValidateFormat.pyc'),'/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
-                   ('6','AIPCreator',os.path.join(workers_path, 'AIPCreator.pyc'),'/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
-                   ('7','AIPChecksum',os.path.join(workers_path, 'AIPChecksum.pyc'),'/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
-                   ('8','AIPValidate',os.path.join(workers_path, 'AIPValidate.pyc'),'/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
-                   ('9','SIPRemove',os.path.join(workers_path, 'SIPRemove.pyc'),'/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
-                   ('10','AIPWriter',os.path.join(workers_path, 'AIPWriter.pyc'),'/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
-                   ('11','AIPPurge',os.path.join(workers_path, 'AIPPurge.pyc'),'/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
-                   ('12','TLD',os.path.join(workers_path, 'TLD.pyc'),'/ESSArch/log/TLD.log',2,5,0,0,0,0),
-                   #('13','IOEngine',os.path.join(workers_path, 'IOEngine.pyc'),'/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
-                   ('14','db_sync_ais',os.path.join(workers_path, 'db_sync_ais.pyc'),'/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
-                   ('16','ESSlogging',os.path.join(workers_path, 'ESSlogging.pyc'),'/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
-                   ('17','AccessEngine',os.path.join(workers_path, 'AccessEngine.pyc'),'/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
-                   ('18','FTPServer',os.path.join(workers_path, 'FTPServer.pyc'),'/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
+    ESSProc_list=(('1','SIPReceiver',os.path.join(workers_path, 'SIPReceiver.py'),'/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
+                   ('3','SIPValidateAIS',os.path.join(workers_path, 'SIPValidateAIS.py'),'/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
+                   ('4','SIPValidateApproval',os.path.join(workers_path, 'SIPValidateApproval.py'),'/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
+                   ('5','SIPValidateFormat',os.path.join(workers_path, 'SIPValidateFormat.py'),'/ESSArch/log/SIPValidateFormat.log',1,5,0,0,0,0),
+                   ('6','AIPCreator',os.path.join(workers_path, 'AIPCreator.py'),'/ESSArch/log/AIPCreator.log',1,5,0,0,0,0),
+                   ('7','AIPChecksum',os.path.join(workers_path, 'AIPChecksum.py'),'/ESSArch/log/AIPChecksum.log',1,5,0,0,0,0),
+                   ('8','AIPValidate',os.path.join(workers_path, 'AIPValidate.py'),'/ESSArch/log/AIPValidate.log',1,5,0,0,0,0),
+                   ('9','SIPRemove',os.path.join(workers_path, 'SIPRemove.py'),'/ESSArch/log/SIPRemove.log',1,5,0,0,0,0),
+                   ('10','AIPWriter',os.path.join(workers_path, 'AIPWriter.py'),'/ESSArch/log/AIPWriter.log',1,15,0,0,0,0),
+                   ('11','AIPPurge',os.path.join(workers_path, 'AIPPurge.py'),'/ESSArch/log/AIPPurge.log',1,5,0,0,0,0),
+                   ('12','TLD',os.path.join(workers_path, 'TLD.py'),'/ESSArch/log/TLD.log',2,5,0,0,0,0),
+                   #('13','IOEngine',os.path.join(workers_path, 'IOEngine.py'),'/ESSArch/log/IOEngine.log',8,5,0,0,0,0),
+                   ('14','db_sync_ais',os.path.join(workers_path, 'db_sync_ais.py'),'/ESSArch/log/db_sync_ais.log',1,10,0,0,0,0),
+                   ('16','ESSlogging',os.path.join(workers_path, 'ESSlogging.py'),'/ESSArch/log/ESSlogging.log',2,5,0,0,0,0),
+                   ('17','AccessEngine',os.path.join(workers_path, 'AccessEngine.py'),'/ESSArch/log/AccessEngine.log',3,5,0,0,0,0),
+                   ('18','FTPServer',os.path.join(workers_path, 'FTPServer.py'),'/ESSArch/log/FTPServer.log',2,5,0,0,0,0),
     )
     for row in ESSProc_list:
         if not ESSProc.objects.filter(Name=row[1]).exists():
@@ -717,7 +723,7 @@ def installdefaultESSProc(): # default ESSProc
 def installdefaultdefaultvalues(): # default default values
 
     dct = {
-           'administration_storagemigration__temp_path': '/ESSArch/essarch_temp',
+           'administration_storagemigration__temp_path': '/ESSArch/data/epp/temp',
            'administration_storagemigration__copy_path': '',
            'access_new__ReqType': '5',
            }
