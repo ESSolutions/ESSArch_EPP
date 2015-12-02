@@ -125,7 +125,7 @@ if (aiccheckresult == true ){
 
 var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()">Previous</button>' +
                     '<button id="nextpagebutton" onclick="getnextpage()">Next</button></div>' +
-                    '<table class="collaptable table">' +
+                    '<table id="retable" class="collaptable table">' +
                     '<thead>' +
                     '<tr>' +
                 '<th>Generation</th>' +
@@ -577,8 +577,28 @@ ingestlist(nextpage);
 function getpreviouspage(){
 
 if(previouspage != null){
+
+	var redraw  =  '<thead>' +
+     '<tr>' +
+ '<th>Generation</th>' +
+ '<th>Archivist organization</th>' +
+ '<th>Label</th>' +
+ '<th>Create date</th>' +
+ '<th>Start date</th>' +
+ '<th>End date</th>' +
+ '<th>State</th>' +
+ '<th>Activity</th>' +
+ '<th>AIC-UUID</th>' +
+ '<th>IP-UUID</th>' +
+'</tr>' +
+'</thead>' +
+'<tbody id="AICtable">' +
+'<tr><td>No information</td></tr>' +
+'</tbody>';
+	 document.getElementById("retable").innerHTML = redraw;
 ingestlist(previouspage);
-};
+}
+
 };
 
 function setacitivity(number, presentactivity){
