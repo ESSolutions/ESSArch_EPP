@@ -105,7 +105,8 @@
                     '<option value="-1">All</option>'+
                     '</select> records'
             },
-            "sAjaxSource": Django.url('storagemaintenance-dt'),
+            "sAjaxSource": "/administration/storagemaintenancedt",
+            //"sAjaxSource" : Django.url('storagemaintenance-dt'),
             //"fnRowCallback": Demo.colorRow,
 
             "aoColumnDefs": [
@@ -147,7 +148,8 @@
 	                    "bHeader" : false,
 	                    //"mColumns": [1,],
 	                    //"sFieldSeperator": ",",
-	                    "sAjaxUrl" : Django.url('migration_create_parameter'),
+	                    "sAjaxUrl" : "/administration/migreqnew",
+	                    //"sAjaxUrl" : "{% url 'migration_create_parameter' %}",
 						//if(document.getElementById("copyonlyflag").checked == true && $('#copypath').val() != "" ){
 	                    "fnClick": function( nButton, oConfig ) {
 	                        //var sData = this.fnGetTableData(oConfig);
@@ -234,7 +236,6 @@
 	                        else {alert('Migration canceled');}
 	                    },
 	                    "fnAjaxComplete": function ( json ) {
-	                    	//var CompleteUrl = Django.url('migration_detail');
 	                    	var CompleteUrl = "/administration/migredetail/"
 	                    	var req_pk = json.req_pk;
 	                    	var task_id = json.task_id;

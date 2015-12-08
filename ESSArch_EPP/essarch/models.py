@@ -233,6 +233,12 @@ eventOutcome_CHOICES = (
     (1, 'Failed'),
 )
 
+class ObjectMetadata(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    label = models.CharField(max_length=255, blank=True)
+    startdate = models.DateTimeField(null=True)
+    enddate = models.DateTimeField(null=True)
+
 ###########################################################################
 #
 # General models and forms
@@ -277,6 +283,7 @@ class ArchiveObject(models.Model):
     LocalDBdatetime = models.DateTimeField(null=True)
     ExtDBdatetime = models.DateTimeField(null=True)
     archiveobjects = models.ManyToManyField('self', through='ArchiveObjectRel', through_fields=('AIC_UUID', 'UUID'), related_name='aic_set', symmetrical=False)
+    ObjectMetadata = models.ForeignKey('essarch.ObjectMetadata', blank=True, null=True)
     class Meta:
         db_table = 'IngestObject'
     def __unicode__(self):

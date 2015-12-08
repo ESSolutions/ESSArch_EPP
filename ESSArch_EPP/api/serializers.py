@@ -35,6 +35,7 @@ import django_filters
 from django.db.models import fields
 from essarch.models import (ArchiveObject,
                                         ArchiveObjectRel,
+                                        ObjectMetadata,
                                         ArchiveObjectData,
                                         ArchiveObjectMetadata,
                                         )
@@ -154,6 +155,12 @@ class storageNestedWriteSerializer(storageSerializer):
         storage_obj = storage.objects.create(storagemedium=storageMedium_obj, **validated_data)
         return storage_obj
 
+class ObjectMetadataSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=ObjectMetadata.objects.all())])
+    class Meta:
+        model = ObjectMetadata
+        fields = ('id', 'label', 'startdate', 'enddate')
+
 class ArchiveObjectDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArchiveObjectData
@@ -196,15 +203,18 @@ class ArchiveObjectSerializer(serializers.ModelSerializer):
 
 class ArchiveObjectNestedSerializer(ArchiveObjectSerializer):
     archiveobjectdata_set =  ArchiveObjectDataSerializer(many=True)
+    ObjectMetadata =  ObjectMetadataSerializer()
     archiveobjectmetadata_set =  ArchiveObjectMetadataSerializer(many=True)
     class Meta:
         model = ArchiveObject
         fields = ArchiveObjectSerializer.Meta.fields + ['archiveobjectdata_set',
-                                'archiveobjectmetadata_set']
+                                'archiveobjectmetadata_set', 'ObjectMetadata']
     
     def create(self, validated_data):
         #print 'validated_data: %s' % repr(validated_data)
         archiveobjectdata_set_data = validated_data.pop('archiveobjectdata_set')
+        ObjectMetadata_data = validated_data.pop('ObjectMetadata')
+        validated_data['ObjectMetadata'] = ObjectMetadata.objects.create(**ObjectMetadata_data)
         archiveobjectmetadata_set_data = validated_data.pop('archiveobjectmetadata_set')
         ArchiveObject_obj = ArchiveObject.objects.create(**validated_data)
         for archiveobjectdata_data in archiveobjectdata_set_data:
@@ -236,6 +246,7 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
     archiveobjectmetadata_set = serializers.CharField(validators=[])
     Storage_set = serializers.CharField(validators=[])
     aic_set = serializers.CharField(validators=[])
+    ObjectMetadata = serializers.CharField(validators=[])
     class Meta:
         model = ArchiveObject
         fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['Storage_set']
@@ -280,6 +291,11 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
             archiveobjectdata_set_data = aic_data.pop('archiveobjectdata_set')
             archiveobjectmetadata_set_data = aic_data.pop('archiveobjectmetadata_set')
             # Update or create AIC object
+            if not aic_data['ObjectMetadata'] is None:
+                ObjectMetadata_data = aic_data.pop('ObjectMetadata')
+                aic_data['ObjectMetadata'], created = ObjectMetadata.objects.update_or_create(
+                                                                                  id=ObjectMetadata_data['id'],
+                                                                                  defaults=ObjectMetadata_data)
             if not aic_data['PolicyId'] is None:
                 aic_data['PolicyId'] = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
             AIC_ArchiveObject_obj, aic_created = ArchiveObject.objects.update_or_create(
@@ -296,6 +312,13 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
                                                                ObjectMetadataType=archiveobjectmetadata_data['ObjectMetadataType'],
                                                                ObjectMetadataURL=archiveobjectmetadata_data['ObjectMetadataURL'],
                                                                defaults=archiveobjectmetadata_data)
+
+        # Update metadata for IP
+        if not validated_data['ObjectMetadata'] is None:
+            ObjectMetadata_data = eval(validated_data.pop('ObjectMetadata'))
+            validated_data['ObjectMetadata'], created = ObjectMetadata.objects.update_or_create(
+                                                                              id=ObjectMetadata_data['id'],
+                                                                              defaults=ObjectMetadata_data)
 
         # Update IP "instance" object
         for attr, value in validated_data.iteritems(): 
@@ -336,18 +359,28 @@ class ArchiveObjectIDNestedReadSerializer(ArchiveObjectNestedSerializer):
 
 class AICObjectSerializer(serializers.ModelSerializer):
     archiveobjects = ArchiveObjectIDNestedReadSerializer(many=True)
+    ObjectMetadata = ObjectMetadataSerializer()
     class Meta:
         model = ArchiveObject
         fields = ('ObjectUUID','ObjectIdentifierValue', 'StatusActivity', 
-                  'StatusProcess', 'archiveobjects',)
+                  'StatusProcess', 'archiveobjects', 'ObjectMetadata')
 
     def create(self, validated_data):
         #print 'validated_data: %s' % repr(validated_data)
         archiveobjects_data = validated_data.pop('archiveobjects')
+
+        # Create ObjectMetadata for AIC
+        if not validated_data['ObjectMetadata'] is None:
+            ObjectMetadata_data = validated_data.pop('ObjectMetadata')
+            validated_data['ObjectMetadata'] = ObjectMetadata.objects.create(**ObjectMetadata_data)
+
         AIC_ArchiveObject_obj = ArchiveObject.objects.create(**validated_data)
         for ip_data in archiveobjects_data:
             archiveobjectdata_set_data = ip_data.pop('archiveobjectdata_set')
             archiveobjectmetadata_set_data = ip_data.pop('archiveobjectmetadata_set')
+            if not ip_data['ObjectMetadata'] is None:
+                ObjectMetadata_data = ip_data.pop('ObjectMetadata')
+                ip_data['ObjectMetadata'] = ObjectMetadata.objects.create(**ObjectMetadata_data)
             IP_ArchiveObject_obj = ArchiveObject.objects.create(**ip_data) 
             for archiveobjectdata_data in archiveobjectdata_set_data:
                 ArchiveObjectData.objects.get_or_create(
@@ -457,6 +490,12 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         archiveobjectdata_set_data = ip_data.pop('archiveobjectdata_set')
         archiveobjectmetadata_set_data = ip_data.pop('archiveobjectmetadata_set')
         aic_data = ip_data.pop('aic_set')[0]
+        
+        if not ip_data['ObjectMetadata'] is None:
+            ObjectMetadata_data = ip_data.pop('ObjectMetadata')
+            ip_data['ObjectMetadata'], created = ObjectMetadata.objects.get_or_create(
+                                                                              id=ObjectMetadata_data['id'],
+                                                                              defaults=ObjectMetadata_data)
         ip_data['PolicyId'] = ArchivePolicy_obj
         IP_ArchiveObject_obj, ip_created = ArchiveObject.objects.get_or_create(
                                                                    ObjectUUID=ip_data['ObjectUUID'], 
@@ -476,6 +515,13 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         # Create AIC
         archiveobjectdata_set_data = aic_data.pop('archiveobjectdata_set')
         archiveobjectmetadata_set_data = aic_data.pop('archiveobjectmetadata_set')
+
+        if not aic_data['ObjectMetadata'] is None:
+            ObjectMetadata_data = aic_data.pop('ObjectMetadata')
+            aic_data['ObjectMetadata'], created = ObjectMetadata.objects.update_or_create(
+                                                                              id=ObjectMetadata_data['id'],
+                                                                              defaults=ObjectMetadata_data)
+
         if not aic_data['PolicyId'] is None:
             aic_data['PolicyId'] = ArchivePolicy.objects.get(PolicyID=aic_data['PolicyId'])
         AIC_ArchiveObject_obj, created = ArchiveObject.objects.get_or_create(

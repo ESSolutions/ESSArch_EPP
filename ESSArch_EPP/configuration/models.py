@@ -309,7 +309,7 @@ class StorageMethod(models.Model):
     status = models.IntegerField('Storage method status', choices=enabled_disabled_CHOICES,default=0)
     type = models.IntegerField('Type', choices=StorageType_CHOICES,default=200)
     archivepolicy = models.ForeignKey('ArchivePolicy')
-    class Mets:
+    class Meta:
         ordering = ['name']
 
     def __unicode__(self):

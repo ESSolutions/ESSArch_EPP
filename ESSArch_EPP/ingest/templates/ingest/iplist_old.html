@@ -1,0 +1,637 @@
+{% extends 'admin/base_site.html' %}
+{% load dictionary_extras %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block app-extra-style %}
+{% endblock %}
+
+{% block container %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+
+<div id="aic" class="results">
+  <table id="result_list">
+    <thead>
+      <tr>
+                {% if type == 'FromRec' %}
+                    <th>Media</th>
+                {% else %}
+                    <th>Generation</th>
+                {% endif %}
+                <th>Archivist organization</th>
+                <th>Label</th>
+                <th>Create date</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>IP type</th>
+                <th>AIC (UUID)</th>
+                <th>IP (UUID)</th>
+                <th>Process</th>
+                <th>State</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% if type == 'FromRec' %}
+            {% for ip in filelist %}
+                <tr class="row{% cycle '1' '2' %}">
+                    {% if not ip.uuid == '' %}
+                        <td><a href="{% url 'controlarea_checkinfromreception' ip.uuid %}">{{ ip.media }}</a></td>
+                    {% else %}
+                        <td>{{ ip.media }}</td>
+                    {% endif %}
+                    <td>{{ ip.EntryAgentIdentifierValue }}</td>
+                    <td>{{ ip.label }}</td>
+                    <td>{{ ip.createdate }}</td>
+                    <td>{{ ip.startdate }}</td>
+                    <td>{{ ip.enddate }}</td>
+                    <td>{{ ip.iptype }}</td>
+                    <td>{{ ip.aic_uuid }}</td>
+                    <td>{{ ip.uuid }}</td>
+                    <td>{{ ip.StatusProcess }}</td>
+                    <td>{{ ip.state }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in ip_list %}
+                <tr class="row{% cycle '1' '2' %}">
+                    {% if type == 'ToWork' %}
+                        <td><a href="{% url 'controlarea_checkouttowork' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'FromWork' %}
+                        <td><a href="{% url 'controlarea_checkinfromwork' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'DiffCheck' %}
+                        <td><a href="{% url 'controlarea_diffcheck' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'ToIngest' %}
+                        <td><a href="{% url 'controlarea_preserveip' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% elif type == 'ControlareaDeleteIP' %}
+                        <td><a href="{% url 'controlarea_deleteip' ip_obj.pk %}">IP_{{ ip_obj.Generation }}</a></td>
+                    {% else %}
+                        <td>IP_{{ ip_obj.Generation }}</td>
+                    {% endif %}
+                    <td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
+                    <td>{{ ip_obj_data.label }}</td>
+                    <td>{{ ip_obj.EntryDate }}</td>
+                    <td>{{ ip_obj_data.startdate }}</td>
+                    <td>{{ ip_obj_data.enddate }}</td>
+                    <td>{{ PackageType_CHOICES|access:ip_obj.OAISPackageType }}</td>
+                    <td>{{ aic_obj.ObjectUUID }}</td>
+                    {% if type == 'Access' %}
+                        <td><a href="{% url 'access_create_ip_uuid' ip_obj.ObjectUUID %}" title="Create access request">{{ ip_obj.ObjectUUID }}</a></td>
+                    {% elif type == 'Ingest' %}
+                        <td><a href="{% url 'ingest_create_ip_uuid' ip_obj.ObjectIdentifierValue %}" title="Create ingest request">{{ ip_obj.ObjectIdentifierValue }}</a></td>
+                    {% else %}
+                        <td>{{ ip_obj.ObjectUUID }}</td>
+                    {% endif %}  
+                    <td>{{ StatusProcess_CHOICES|access:ip_obj.StatusProcess }}</td>
+                    {% if type == 'Ingest' %}   
+                        <td>
+                        <form action="{% url 'ingest_listobjupd' ip_obj.pk %}" method="post">
+                        {% csrf_token %}
+                        {{ ip_form.StatusActivity }}
+                        </form>
+                        </td>
+                    {% else %}
+                        <td>{{ ip_obj.StatusActivity }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block app-extra-script %}
+	<script type="text/javascript" src="/static/aCollapTable/aCollapTable.js"></script>
+<script>
+
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 30000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+var aiccheckresult = false;
+
+$.getJSON("{% url 'aiccheck' %}", function(aiccheckresult){
+
+
+if (aiccheckresult == true ){
+
+var aiccheckhtml = '<div><button id="previousbutton" onclick="getpreviouspage()">Previous</button>' +
+                    '<button id="nextpagebutton" onclick="getnextpage()">Next</button></div>' +
+                    '<table class="collaptable table">' +
+                    '<thead>' +
+                    '<tr>' +
+                '<th>Generation</th>' +
+                '<th>Archivist organization</th>' +
+                '<th>Label</th>' +
+                '<th>Create date</th>' +
+                '<th>Start date</th>' +
+                '<th>End date</th>' +
+                '<th>State</th>' +
+                '<th>Activity</th>' +
+                '<th>AIC-UUID</th>' +
+                '<th>IP-UUID</th>' +
+      '</tr>' +
+    '</thead>' +
+    '<tbody id="AICtable">' +
+            '<tr><td>No information</td></tr>' +
+    '</tbody>' +
+  '</table>';
+
+
+document.getElementById("aic").innerHTML = aiccheckhtml;
+
+//var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess=3000' //Access
+var JSONlink = '/api/aicobjects/?archiveobjects__StatusProcess__lt=3000' //ingest
+//var JSONlink = "{% url 'access_list_info' %}"
+
+var nextpage = 'nextpage';
+var previouspage = 'previouspage';
+
+ingestlist(JSONlink);
+
+}
+
+
+});
+
+function ingestlist(JSONlink){
+
+
+var ajaxinfo = {};
+var tabletext = '';
+//$(document).ready(function(){
+	
+$.ajaxSetup({ cache: false });
+	
+$.getJSON( JSONlink, function(listinfo1) {
+
+      ajaxinfo = listinfo1;
+
+      setaichtml(ajaxinfo);
+     
+     $('.collaptable').aCollapTable({
+     startCollapsed: true,
+     addColumn: false,
+     plusButton: '<span class="i">+</span>',
+     minusButton: '<span class="i">-</span>'
+    });
+     
+});
+//});
+
+
+function StatusActivityChoices(Activity){
+    
+    var StatusActivityText = "";
+    
+    switch(Activity){
+  
+    case 0:
+        StatusActivityText =
+       '<option value="0" selected> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';        
+        break;
+    case 1:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1" selected>New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 2:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2" selected>Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 3:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3" selected>Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 4:
+        StatusActivityText =
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4" selected>Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 5:
+        StatusActivityText =
+               '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5" selected>Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 6:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6" selected>Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 7:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7" selected>ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 8:
+        StatusActivityText = 
+        '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8" selected>Workarea</option>'
+       + '<option value="100">FAIL</option>';
+        break;
+    case 100:
+        StatusActivityText = 
+         '<option value="0"> OK</option>'
+       + '<option value="1">New object</option>'
+       + '<option value="2">Receive</option>'
+       + '<option value="3">Checking</option>'
+       + '<option value="4">Need of assistance</option>'
+       + '<option value="5">Progress</option>'
+       + '<option value="6">Pending writes</option>'
+       + '<option value="7">ControlArea</option>'
+       + '<option value="8">Workarea</option>'
+       + '<option value="100" selected>FAIL</option>';
+        break;
+    default:
+        StatusActivityText = '<option value="1000">Not known</option>'
+        console.log('Activity');
+        console.log(Activity);
+    }
+    
+    return StatusActivityText;
+};
+
+function StatusProcessChoices(Process){
+    
+    var StatusProcessText = "";
+    
+    switch(Process){
+    case 0:
+        StatusProcessText = 'Receive new object';
+        break;
+    case 5:
+        StatusProcessText = 'The object is ready to remodel';
+        break;
+    case 9:
+        StatusProcessText = 'New object stable';
+        break;
+    case 10:
+        StatusProcessText = "Object don't exist in AIS";
+        break;
+    case 11: 
+        StatusProcessText = "Object don't have any projectcode in AIS";
+        break;
+    case 12: 
+        StatusProcessText = "Object don't have any local policy";
+        break;
+    case 13: 
+        StatusProcessText = "Object already have an AIP!";
+        break;
+    case 14: 
+        StatusProcessText = "Object is not active!";
+        break;
+    case 19: 
+        StatusProcessText = 'Object got a policy';
+        break;
+    case 20: 
+        StatusProcessText = "Object not updated from AIS";
+        break;
+    case 21:
+        StatusProcessText = 'Object not accepted in AIS';
+        break;
+    case 24:
+        StatusProcessText = 'Object accepted in AIS';
+        break;
+    case 25: 
+        StatusProcessText = 'SIP validate';
+        break;
+    case 26: 
+        StatusProcessText = 'SIP validate failed';
+        break;
+    case 29:
+        StatusProcessText = 'SIP validate OK';
+        break;
+    case 30:
+        StatusProcessText = 'Create AIP package';
+        break;
+    case 31:
+        StatusProcessText = 'AIP create failed';
+        break;
+    case 39:
+        StatusProcessText = 'AIP created OK';
+        break;
+    case 40:
+        StatusProcessText ='Create packge checksum';
+        break;
+    case 49:
+        StatusProcessText = 'AIP checksum created OK';
+        break;
+    case 50:
+        StatusProcessText ='AIP validate';
+        break;
+    case 51:
+        StatusProcessText ='AIP validate failed';
+        break;
+    case 59:
+        StatusProcessText = 'AIP validate OK';
+        break;
+    case 60:
+        StatusProcessText = 'Try to remove IngestObject';
+        break;
+    case 61:
+        StatusProcessText = 'Failed to remove IngestObject';
+        break;
+    case 69:
+        StatusProcessText = 'Remove OK of IngestObject';
+        break;
+    case 1000:
+        StatusProcessText = 'Write AIP to longterm storage';
+        break;
+    case 1001:
+        StatusProcessText = 'Fail to write AIP';
+        break;
+    case 1002:
+        StatusProcessText = 'No empty media available';
+        break;
+    case 1003:
+        StatusProcessText = 'Problem to mount media';
+        break;
+    case 1004:
+        StatusProcessText = 'Failed to verify tape after full write';
+        break;
+    case 1999:
+        StatusProcessText = 'Write AIP OK';
+        break;
+    case 2000:
+        StatusProcessText = 'Try to remove temp AIP object';
+        break;
+    case 2001:
+        StatusProcessText = 'Failed to remove temp AIP object';
+        break;
+    case 2009:
+        StatusProcessText = 'Remove temp AIP object OK';
+        break;
+    case 3000:
+        StatusProcessText = 'Archived';
+        break;
+    case 5000:
+        StatusProcessText = 'ControlArea';
+        break;
+    case 5100:
+        StatusProcessText = 'WorkArea';
+        break;
+    case 9999:
+        StatusProcessText = 'Deleted';
+        break;
+    default:
+             StatusProcessText =' Not known ';
+             console.log('StatusProcess:')
+             console.log(Process);
+    }
+
+     return StatusProcessText;
+};
+
+function stringifieddate(longdate){
+    
+ return longdate;
+}
+
+
+function setaichtml(ajaxinfo){
+    
+    var aicwrapper = ajaxinfo;
+
+    var ipiterator = 0;
+    
+    nextpage = aicwrapper.next;
+    previouspage = aicwrapper.previous;
+    
+    var AIClist = aicwrapper.results;
+
+    for (i = 0; i < AIClist.length; i++){
+        
+        
+        var IPlist = AIClist[i].archiveobjects;
+
+        if(IPlist.length > 0){
+                var AIC = AIClist[i];
+                var lastIPcounter = IPlist.length - 1;
+                var lastIP = IPlist[lastIPcounter];
+                var lastIPinfo = lastIP.archiveobjectdata_set[0];
+                if (lastIPinfo == undefined){            
+                    var empty = {};                    
+                    empty.EntryAgentIdentifierValue = null;
+                    empty.CreateDate = null;
+                    empty.startdate = null;
+                    empty.enddate =  null;
+                    lastIPinfo = empty;                          
+                    };
+                
+            
+                tabletext = tabletext
+                + '<tr data-id="' +  AIC.ObjectUUID+ '" data-parent="">'
+                + '<td>AIC</td>'
+                + '<td>'  + lastIP.EntryAgentIdentifierValue + '</td>'
+                + '<td>' + lastIPinfo.label + '</td>'
+                + '<td>' + stringifieddate(lastIP.CreateDate) + '</td>'
+                + '<td>' + stringifieddate(lastIPinfo.startdate) + '</td>'
+                + '<td>' + stringifieddate(lastIPinfo.enddate) + '</td>'
+                + '<td></td>'
+                + '<td></td>'
+                + '<td>' + AIC.ObjectUUID + '</td>'
+                +'</tr>';
+                
+                var aicparent = AIC.ObjectUUID;
+                var createlink = '/ingest/new/';
+                
+                for (j = 0; j < IPlist.length; j++){
+                    
+		    ipiterator = ipiterator +1;
+			
+                    var IP = IPlist[j];
+                    var IPinfo = IP.archiveobjectdata_set[0];
+                    if (IPinfo == undefined){                        
+                        var empty = {};
+                        
+                        empty.EntryAgentIdentifierValue = null;
+                        empty.CreateDate = null;
+                        empty.startdate = null;
+                        empty.enddate =  null;
+                        IPinfo = empty;                           
+                        };
+                    tabletext = tabletext
+                    + '<tr data-id=' + IP.ObjectUUID + ' ' + 'data-parent=' + aicparent + '>'
+                    + '<td><a href="'+ createlink + IP.ObjectUUID +'/"> IP_' + IP.Generation + '</a></td>'
+                    + '<td>' + IP.EntryAgentIdentifierValue + '</td>'
+                    + '<td>' + IPinfo.label + '</td>'
+                    + '<td>' + stringifieddate(IP.CreateDate) + '</td>'
+                    + '<td>' + stringifieddate(IPinfo.startdate) + '</td>'
+                    + '<td>' + stringifieddate(IPinfo.enddate) + '</td>'
+                    + '<td> ' + StatusProcessChoices(IP.StatusProcess) + ' </td>'
+                    + '<td>' + '<select id="' + IP.ObjectUUID + '" onchange=setacitivity("' + IP.ObjectUUID + '"'  + ',' + IP.StatusProcess + ')>' + StatusActivityChoices(IP.StatusActivity) + '</select>' + '</td>'
+                    + '<td>' + aicparent + '</td>'
+                    + '<td>' + IP.ObjectUUID + '</td>'
+                    + '</tr>';
+
+                    
+                    
+                }//IPlist for loop
+                
+                
+        } //End of length test
+        
+
+    };//End of for aic list for loop
+    
+    if(ipiterator == 0){
+
+	getnextpage();
+
+	}
+     
+    document.getElementById("AICtable").innerHTML = tabletext;
+};//End of serAIChtml function
+    
+};//End of accesslistfunction
+
+function getnextpage(){
+
+if(nextpage != null){
+ingestlist(nextpage);
+};
+};
+
+function getpreviouspage(){
+
+if(previouspage != null){
+ingestlist(previouspage);
+};
+};
+
+function setacitivity(number, presentactivity){
+    
+    console.log('The function is with us');
+    console.log('IP UUID');
+    //console.log(IPUUID);
+    console.log(number);
+    var thevalue = document.getElementById(number).value
+    console.log('NewStatusActivity');
+    console.log(thevalue);
+    var datastringjson = '{ "StatusActivity":' + thevalue + '}';
+    
+    /*
+    var postobject = { '_content' : datastringjson,
+    		                   '_content_type' : 'application/json',
+    		                   '_method' : 'PATCH',
+    		                  // 'csrfmiddlewaretoken': {% csrf_token %}
+    		                  };
+    
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number + '/',
+        type: 'POST',
+        data: postobject,
+        contentType:"application/x-www-form-urlencoded",
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    */
+    
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number + '/',
+        method: 'PATCH',
+        data: datastringjson,
+        //contentType:"application/json; charset=utf-8",
+        contentType:"application/json",
+        processData: false,
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+        },
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    
+
+};
+
+
+</script>
+{% endblock %}

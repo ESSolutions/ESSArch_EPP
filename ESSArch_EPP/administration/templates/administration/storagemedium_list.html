@@ -1,17 +1,20 @@
 {% extends 'admin/base_site.html' %}
-{% load js staticfiles %}
-{% load url from future %}
 
 {% block server-side-base %}active{% endblock %}
+
+{% block app-extra-style %}
+	<link rel="stylesheet" href="/static/datatables_1_9/css/datatables.bootstrap.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="/static/TableTools/media/css/TableTools.css" type="text/css" media="all" />
+{% endblock %}
 
 {% block container %}
 
 
-<H1>{{ label }}</H1>
+<H2>{{ label }}</H2>
 <br/>
 
 <div class="row">
-    <table id="my-table" class="span12 display table table-bordered table-condensed table-striped">
+    <table id="my-table" width=100% class="display table table-bordered table-condensed table-striped">
         <thead>
             <tr>
                 <th>pk</th>
@@ -36,6 +39,8 @@
 {% endblock %}
 
 {% block app-extra-script %}
+	<script type="text/javascript" src="/static/datatables_1_9/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="/static/datatables_1_9/js/datatables.bootstrap.js"></script>
 <script>
 $(document).ready(function() {
 	$('#my-table').dataTable( {
@@ -56,7 +61,8 @@ $(document).ready(function() {
                 '<option value="-1">All</option>'+
                 '</select> records'
         },
-        "sAjaxSource": Django.url('storagemedium-dt'),
+        //"sAjaxSource": Django.url('storagemedium-dt'),
+        "sAjaxSource": "{% url 'storagemedium-dt' %}",
         "aoColumnDefs": [
     	  { 'bVisible': false, 
     	  	'aTargets': [ 0 ] 

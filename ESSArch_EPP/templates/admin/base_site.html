@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
+{% load staticfiles %}
 {% load i18n %}
-{% load js staticfiles eztables %}
 {% load url from future %}
 
 {% block title %}
@@ -8,93 +8,16 @@
 {% endblock %}
 
 {% block extrastyle %}
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<!--
-<link rel="stylesheet" href="/static/superfish/css/superfish.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/static/jquery-ui-1.10.3/themes/base/jquery-ui.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/static/bootstrap3/css/bootstrap.min.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/static/django_tables2/themes/paleblue/css/screen.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/static/essarch.css" type="text/css" media="all" />
-{% datatables_bootstrap_css %}
-
-
-{% css "administration/css/eztables.demo.css" %}
- {% css "administration/css/solarized_dark.css" %}
- {% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
--->
-
-    {% css "superfish/css/superfish.css" %}
-    {% css "bootstrap/css/bootstrap.min.css" %}
-    {% datatables_bootstrap_css %}
-    {% css "TableTools/media/css/TableTools.css" %}
-    {% css "css/essarch.css" %}
-    
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<link rel="stylesheet" href="/static/superfish/css/superfish.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
 	{% block app-extra-style %}{% endblock %}
-
+	<link rel="stylesheet" href="/static/css/essarch.css" type="text/css" media="all" />
 {% endblock %}
 
 {% block extrahead %}
-<!--
-<script type="text/javascript" src="/static/jquery-1.10.2.min.js"></script> 
-<script type="text/javascript" src="/static/bootstrap3/js/bootstrap.min.js"></script> 
-<script type="text/javascript" src="/static/jquery-ui-1.10.3/ui/minified/jquery-ui.min.js"></script> 
-<script type="text/javascript" src="/static/superfish/js/hoverIntent.js"></script>
-<script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
-
-
-
-    	 
-
-
-
-
-<script type="text/javascript" src="/static/admin/js/core.js"></script>
-	{% js_lib "bootstrap.min.js" %}
-	{% js_lib "highlight.pack.js" %}
-	{% js "js/eztables.demo.js" %} 
-{% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
--->
-
-<!--
-<script>
-	jQuery(document).ready(function() {
-		jQuery('ul.sf-menu').superfish({
-			delay:       0,                            // one second delay on mouseout
-			speed:       'fast',                          // faster animation speed
-		});
-	});
-</script>
-
-
-<script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
-<script>
-	//jQuery(document).ready(function() {
-	django.jQuery(document).ready(function() {
-		django.jQuery('ul.sf-menu').superfish({
-			delay:       0,                            // one second delay on mouseout
-			speed:       'fast',                          // faster animation speed
-		});
-	});
-</script>
--->
-
 	{% block app-extrahead %}{% endblock %}
 {% endblock %}
-
-
-
-
-
-    
-    
-  
-<!--
-	 {% js_lib "bootstrap.min.js" %}
-	{% js_lib "highlight.pack.js" %}
-	{% js "js/eztables.demo.js" %} 
-{% js_lib "modernizr-2.5.3-respond-1.1.0.min.js" %}
--->
-
 
 {% block branding %}
   <div id="header-wrapper">
@@ -115,7 +38,6 @@
     <a href="/logout">{% trans 'Log out' %}</a>
   </div>
   {% endif %}
-
 
   <div id="smenu">
 	<ul id="contents" class="sf-menu">
@@ -203,7 +125,9 @@
 {% endblock %}
 
 <!--
-{% block breadcrumbs %} <br/> {% endblock %}
+{% block breadcrumbs %} 
+	<br/> 
+{% endblock %}
 -->
 
 {% block content %}
@@ -213,15 +137,9 @@
 {% endblock %}
 
 {% block extra-script %}
-    <!--
-    {% django_js %}
-    <script type="text/javascript" src="/static/jquery-1.10.2.min.js"></script>
-    {% js_lib "highlight.pack.js" %}
-    {% js "js/libs2/jquery.dataTables.columnFilter.js" %}
-    {% js "TableTools/media/js/TableTools.min.js" %}
-    -->
-    {% django_js %}
-    {% js "superfish/js/superfish.min.js" %}
+	<script type="text/javascript" src="/static/jQuery/js/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
 	<script>
 		jQuery(document).ready(function() {
 			jQuery('ul.sf-menu').superfish({
@@ -230,9 +148,6 @@
 			});
 		});
 	</script>
-    {% js "bootstrap/js/bootstrap.min.js" %}
-    {% datatables_js %}
-    {% datatables_bootstrap_js %}
 
     {% block app-extra-script %}{% endblock %}
 {% endblock %}

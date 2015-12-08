@@ -8,9 +8,6 @@ $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 	
 	});
 */
-
-$.ajaxSetup({ cache: false });
-
 $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
 
 

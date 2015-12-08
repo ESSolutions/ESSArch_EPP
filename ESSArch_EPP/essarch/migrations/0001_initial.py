@@ -228,6 +228,15 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='ObjectMetadata',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, serialize=False, editable=False, primary_key=True)),
+                ('label', models.CharField(max_length=255, blank=True)),
+                ('startdate', models.DateTimeField(null=True)),
+                ('enddate', models.DateTimeField(null=True)),
+            ],
+        ),
+        migrations.CreateModel(
             name='MigrationQueue',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -378,5 +387,10 @@ class Migration(migrations.Migration):
             model_name='archiveobject',
             name='archiveobjects',
             field=models.ManyToManyField(related_name='aic_set', through='essarch.ArchiveObjectRel', to='essarch.ArchiveObject'),
+        ),
+        migrations.AddField(
+            model_name='archiveobject',
+            name='ObjectMetadata',
+            field=models.ForeignKey(blank=True, to='essarch.ObjectMetadata', null=True),
         ),
     ]

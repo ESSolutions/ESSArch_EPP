@@ -48,6 +48,8 @@ from urlparse import urljoin
 from api.serializers import ArchiveObjectPlusAICPlusStorageNestedReadSerializer
 from retrying import retry
 from api.serializers import IOQueueSerializer
+from StorageMethodTape.tasks import ApplyPostRestError as tape_ApplyPostRestError
+from StorageMethodDisk.tasks import ApplyPostRestError as disk_ApplyPostRestError
 
 # Disable https insecure warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
@@ -268,15 +270,18 @@ class StorageMethodWrite:
                         sm_minChunkSize_flag == 1 and
                         IOQueue_obj.remote_status == 20) or \
                         (IOQueue_obj.Status == 2 and        # add to IOs_to_write list if task_id is blank
-                        IOQueue_obj.task_id == '') or \
+                        IOQueue_obj.task_id == '' and
+                        IOQueue_obj.remote_status == 20) or \
                         (IOQueue_obj.Status == 0 and        # add  to IOs_to_write list if force_write_flag
                         IOQueue_obj.remote_status == 20 and
                         self.force_write_flag == 1) or \
                         (IOQueue_obj.Status > 21 and        # if IO job failed, add to IOs_to_write list if retry_write_flag 
-                        self.retry_write_flag == 1) or \
+                        self.retry_write_flag == 1 and
+                        IOQueue_obj.remote_status == 20) or \
                         (IOQueue_obj.Status > 21 and        # if IO job failed, add to IOs_to_write list if status is set to "OK" in GUI.
                          ArchiveObject_obj.StatusProcess == 1000 and 
-                         ArchiveObject_obj.StatusActivity == 0):
+                         ArchiveObject_obj.StatusActivity == 0 and
+                         IOQueue_obj.remote_status == 20):
                     IOQueue_obj.Status=2
                     IOQueue_obj.save(update_fields=['Status'])
                     if not self.IOs_to_write.has_key(st_obj):
@@ -304,6 +309,8 @@ class StorageMethodWrite:
         '''Apply all IOs to write
         
         '''              
+        error_flag = 0
+        error_list = []
         self.ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10, Status__lt=100, Status__gt=2).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]                          
         for st_obj, IOQueue_obj_list in self.IOs_to_write.iteritems():
             target_obj = st_obj.target
@@ -322,10 +329,17 @@ class StorageMethodWrite:
                 #if not target_obj.id in self.ActiveTapeIOs and not ReadTapeIO_flag:
                 if not target_obj.id in self.ActiveTapeIOs:
                     if remote_io:
-                        result = WriteStorageMethodTape().remote_write_tape_apply_async(remote_server, 
+                        try:
+                            result = WriteStorageMethodTape().remote_write_tape_apply_async(remote_server, 
                                                                                IOQueue_objs_id_list, 
                                                                                ArchiveObject_objs_ObjectUUID_list,
                                                                                queue='smtape')
+                        except tape_ApplyPostRestError as e:
+                            error_flag = 1
+                            msg = 'Failed to apply write to remote, error: %s' % e
+                            self.logger.error(msg)
+                            error_list.append(msg)
+                            raise ESSArchSMError(error_list)
                     else:
                         result = WriteStorageMethodTape().apply_async((IOQueue_objs_id_list,), queue='smtape')
                     self.ActiveTapeIOs.append(target_obj.id)
@@ -344,10 +358,17 @@ class StorageMethodWrite:
                 ReqPurpose=u'Write package to disk'
                 for  IOQueue_obj in IOQueue_obj_list:
                     if remote_io:
-                        result = WriteStorageMethodDisk().remote_write_tape_apply_async(remote_server, 
+                        try:
+                            result = WriteStorageMethodDisk().remote_write_tape_apply_async(remote_server, 
                                                                                IOQueue_obj.id, 
                                                                                IOQueue_obj.archiveobject.ObjectUUID,
                                                                                queue='smdisk')
+                        except disk_ApplyPostRestError as e:
+                            error_flag = 1
+                            msg = 'Failed to apply write to remote, error: %s' % e
+                            self.logger.error(msg)
+                            error_list.append(msg)
+                            raise ESSArchSMError(error_list)                    
                     else:
                         result = WriteStorageMethodDisk().apply_async((IOQueue_obj.id,), queue='smdisk')
                     IOQueue_obj.task_id = result.task_id
@@ -463,6 +484,15 @@ class StorageMethodWrite:
                     self.fail_write_flag = 1
                     object_writes_ok_flag = 0
                     event_info = 'Failed to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                    ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                    IOQueue_obj.storagemethodtarget.name, 
+                                                                                                    IOQueue_obj.id)                                
+                    self.logger.error(event_info)
+                    ESSPGM.Events().create('1100','',self.__name__,__version__,'1',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
+                elif IOQueue_obj.remote_status > 21:
+                    self.fail_write_flag = 1
+                    object_writes_ok_flag = 0
+                    event_info = 'Failed to write/transfer object: %s to remote storage target: %s (IOuuid: %s)' % (
                                                                                                     ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                     IOQueue_obj.storagemethodtarget.name, 
                                                                                                     IOQueue_obj.id)                                

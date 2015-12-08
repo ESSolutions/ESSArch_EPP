@@ -30,6 +30,7 @@ import os.path
 import shutil
 import sys
 import traceback
+import datetime
 from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
@@ -78,6 +79,7 @@ from StorageMethodDisk.tasks import WriteStorageMethodDisk, ReadStorageMethodDis
 from StorageMethodTape.tasks import WriteStorageMethodTape, ReadStorageMethodTape
 from Storage.tasks import MoveToAccessPath
 from django.db.models import Q
+from django import forms
 from esscore.views.datatables import DatatableBaseView
 
 class AICListView(TemplateView):
@@ -95,19 +97,41 @@ class ArchiveObjectListView(TemplateView):
         return super(ArchiveObjectListView, self).dispatch( *args, **kwargs)
 
 class ArchiveObject_dt_view(DatatableBaseView):
-    permission_classes = (permissions.IsAuthenticated,)
     qs =  ArchiveObject.objects.filter(
-                               Q(OAISPackageType=1) | 
-                               Q(OAISPackageType__in=[0,2], aic_set__isnull=True))
-    columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess', 'archiveobjects']
-    ip_columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess']
-    order_columns = ['id','ObjectIdentifierValue', 'StatusActivity', 'StatusProcess', 'archiveobjects']
+                               Q(OAISPackageType=1, archiveobjects__isnull=False, aic_set__isnull=True) | 
+                               Q(OAISPackageType__in=[0,2], archiveobjects__isnull=True, aic_set__isnull=True)).distinct()
+    columns = ['id', 'ObjectUUID', 
+          'PolicyId__PolicyID', 'ObjectIdentifierValue',
+          'ObjectPackageName', 'ObjectSize',
+          'ObjectNumItems', 'ObjectMessageDigestAlgorithm',
+          'ObjectMessageDigest', 'ObjectPath',
+          'ObjectActive', 'MetaObjectIdentifier',
+          'MetaObjectSize', 'CMetaMessageDigestAlgorithm',
+          'CMetaMessageDigest', 'PMetaMessageDigestAlgorithm',
+          'PMetaMessageDigest', 'DataObjectSize',
+          'DataObjectNumItems', 'Status',
+          'StatusActivity', 'StatusProcess',
+          'LastEventDate', 'linkingAgentIdentifierValue',
+          'CreateDate', 'CreateAgentIdentifierValue',
+          'EntryDate', 'EntryAgentIdentifierValue',
+          'OAISPackageType', 'preservationLevelValue',
+          'DELIVERYTYPE', 'INFORMATIONCLASS',
+          'Generation', 'LocalDBdatetime',
+          'ExtDBdatetime', 'archiveobjects',
+          'ObjectMetadata__label', 'ObjectMetadata__startdate',
+          'ObjectMetadata__enddate']
+    order_columns = ['id', 'ObjectIdentifierValue', 'EntryAgentIdentifierValue', 
+                     'ObjectMetadata__label', 'ExtDBdatetime', 
+                     'ObjectMetadata__startdate', 'ObjectMetadata__enddate', 
+                     'OAISPackageType', 'Generation', 
+                     'StatusProcess', 'StatusActivity']
+    columns_archiveobjectdata_set = ['creator', 'label', 'startdate', 'enddate']
+    #datetime_format = "%Y-%m-%d %H:%M"
+    datetime_format = "%Y-%m-%d"
 
     def render_column(self, row, column):
         """ Renders a column on a row
         """
-        #if column == 'archiveobjects':
-
         if hasattr(row, 'get_%s_display' % column):
             # It's a choice field
             text = getattr(row, 'get_%s_display' % column)()
@@ -116,33 +140,71 @@ class ArchiveObject_dt_view(DatatableBaseView):
                 text = getattr(row, column)
             except AttributeError:
                 obj = row
-                for part in column.split('.'):
-                    if obj is None:
+                for part in column.split('__'):
+                    if obj is None or hasattr(obj, 'all'):
                         break
                     obj = getattr(obj, part)
-
                 text = obj
+
         if text is None:
             text = self.none_string
         
         if hasattr(text,'all'):
-            #print 'column: %s' % column
             data = []
-            for item in text.all():
+            if column == 'archiveobjects': 
+                qs = self.filter_ip_queryset(text)
+                qs = qs.order_by('Generation') # Sort order for related IPs to AIC
+                columns = self.get_columns()
+            elif column == 'columns_archiveobjectdata_set':
+                qs = text.all()
+                columns = self.columns_archiveobjectdata_set
+            for item in qs:
                 d={}
-                #for column in self.get_columns():
-                for column in self.ip_columns:
-                    d[column]=self.render_column(item, column)
+                for col in columns:
+                    d[col]=self.render_column(item, col)
                 data.append(d)
-            #print 'multi_list: %s' % repr(data)
             text=data
-        else:
-            print 'column - no rel: %s' % column
+
+        if column in ['Generation', 'StatusProcess']  and not row.OAISPackageType != 1: # Remove field for AICs
+            text = ''
+            
+        if column == 'StatusActivity' and row.OAISPackageType != 1:
+            enable_StatusActivity_selection = self._querydict.get('enable_StatusActivity_selection', None)
+            if enable_StatusActivity_selection:
+                if enable_StatusActivity_selection == 'true':
+                    setactivity = 'setactivity(event,"%s")' % row.ObjectUUID
+                    StatusActivityChoices = row._meta.get_field_by_name('StatusActivity')[0].choices
+                    f = forms.ChoiceField(widget=forms.Select(attrs={'onchange':setactivity}), choices=StatusActivityChoices)
+                    #text = f.widget.render('aaa', row.StatusActivity, attrs={'id':row.ObjectUUID})
+                    text = f.widget.render('selectstatusactivity', row.StatusActivity)
+        elif column == 'StatusActivity': # Disable change of StatusActivity for AICs
+            text = ''
+        
+        if column in ['EntryDate', 'ObjectMetadata__startdate', 'ObjectMetadata__enddate']:
+            if type(text) is datetime.datetime:
+                return text.strftime(self.datetime_format)
         
         if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
             return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
         else:
             return text
+
+    def prepare_results(self, qs):
+        data = []
+        for item in qs:
+            d={}
+            for column in self.get_columns():
+                d[column]=self.render_column(item, column)
+            exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
+            if exclude_aic_without_ips:
+                if exclude_aic_without_ips == 'true':
+                    if d['OAISPackageType'] == 'AIC' and len(d['archiveobjects']) == 0: # Skip AICs with no IPs
+                        pass
+                    else:
+                        data.append(d)
+            else:
+                data.append(d)
+        return data
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'

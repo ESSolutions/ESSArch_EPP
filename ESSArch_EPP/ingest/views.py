@@ -46,17 +46,15 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-import datetime, time
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpResponseBadRequest
 
 import uuid, urlparse
 
 class ArchObjectListUpdate(ListView, BaseUpdateView):
     model = ArchiveObject
-    template_name='ingest/iplist.html'
+    template_name='ingest/iplist_old.html'
     form_class=ArchiveObjectStatusForm
     queryset=ArchiveObject.objects.filter(Q(StatusProcess__lt=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
     
@@ -138,7 +136,6 @@ class IngestIPListTemplateView(TemplateView):
         return super(IngestIPListTemplateView, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-
         context = super(IngestIPListTemplateView, self).get_context_data(**kwargs)
         context['label'] = 'INGEST - List information packages'
         return context

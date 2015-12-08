@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/static/js/libs/jquery-2.0.3.min.js"></script>
+
+    <link href="/static/api/datatables/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <script src="/static/api/datatables/jquery.dataTables.js"></script>
+    <link rel="stylesheet" href="/static/api/css/aic.css" type="text/css" media="all" />
+
+    <meta charset=utf-8 />
+    <title>DataTables - IP Collapse</title>
+  </head>
+  <body>
+    <div class="container">
+      <table id="example" class="display" width="100%">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ObjectIdentifierValue</th>
+            <th>StatusActivity</th>
+            <th>StatusProcess</th>
+            <th></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+
+<script>
+function format ( data )
+{
+  if ( ! data.archiveobjects ) {
+    return "No child rows";
+  }
+  
+  var rows = '';
+  
+  for ( var i=0, ien=data.archiveobjects.length ; i<ien ; i++ ) {
+    var ip = data.archiveobjects[i];
+	rows +=
+	  '<tr class="child-row">'+
+		'<td></td>'+
+		'<td>&nbsp;&nbsp;&nbsp;'+ip.ObjectIdentifierValue+'</td>'+
+		'<td>'+ip.StatusActivity+'</td>'+
+		'<td>'+ip.StatusProcess+'</td>'+
+	  '</tr>';
+  }
+  
+  return $(rows);
+}
+
+$(document).ready( function () {
+  var table = $('#example').DataTable( {
+  	processing: true,
+    serverSide: true,
+    "ajax": "{% url 'ingest_ip_list_dt' %}",
+//    ajax: {
+//        processing: true,
+//        url: "/api/aicobjects/",
+//        dataSrc: "results",
+//        type: "GET",
+//        dataType: "json"
+//    }, 
+	"bSortClasses":   false,
+	"aoColumnDefs": [
+	                 { "bSearchable": false, "aTargets": [ 4 ] }
+	               ],
+    "columns": [
+      {
+        "orderable":      false,
+        "data":           null,
+        "defaultContent": '',
+        "createdCell":    function ( cell, data, row ) {
+          if ( row.archiveobjects.length>0 ) {
+            $(cell).addClass( 'details-control' );
+          }
+        }
+      },
+      { "data": "ObjectIdentifierValue" },
+      { "data": "StatusActivity" },
+      { "data": "StatusProcess" },
+      {
+        "data": null,
+        "visible": false,
+        "render": function ( data, type, row ) {
+          str = '';
+          if ( row.archiveobjects ) {
+            for ( var i=0, ien=row.archiveobjects.length ; i<ien ; i++ ) {
+              var ip = row.archiveobjects[i];
+              
+              str +=
+                ip.ObjectIdentifierValue +' '+
+                ip.StatusActivity +' '+
+                ip.StatusProcess +' ';
+            }
+          }
+          return str;
+        }
+      }
+    ],
+    "order": [[1, 'asc']]
+  } );
+  
+  // Add event listener for opening and closing details
+  $('#example tbody').on('click', 'td.details-control', function () {
+
+    var tr = $(this).closest('tr');
+    var row = table.row( tr );
+  
+    if ( row.child.isShown() ) {
+      // This row is already open - close it
+      row.child.hide();
+      tr.removeClass('shown');
+    }
+    else {
+      // Open this row
+      row.child( format(row.data()) ).show();
+      tr.addClass('shown');
+    }
+	
+	//Hide all grandchildren
+	//var rows = $('#example tbody tr');
+	//var grandChildren = rows.filter('.grand-child-row');
+	//grandChildren.hide();
+    //$( this ).closest( 'tr' ).nextUntil('.even, .odd').filter('.grand-child-row').hide();
+	
+  } );
+  
+  // Add event listener for opening and closing child details
+  $('#example tbody').on('click', 'td.child-details-control', function () {
+    $(this).closest( 'tr' ).toggleClass("child-shown");  
+$( this ).closest( 'tr' ).nextUntil('.child-row, .even, .odd').toggle();  } );
+
+} );
+
+function setacitivity(number){
+    
+    console.log('The function is with us');
+    console.log('IP UUID');
+    //console.log(IPUUID);
+    console.log(number);
+    var thevalue = document.getElementById(number).value
+    console.log('NewStatusActivity');
+    console.log(thevalue);
+    var datastringjson = '{ "StatusActivity":' + thevalue + '}';
+    
+    var postobject = { '_content' : datastringjson,
+    		                   '_content_type' : 'application/json',
+    		                   '_method' : 'PATCH',
+    		                   'csrfmiddlewaretoken': '{{ csrf_token }}',
+    		                   //'csrfmiddlewaretoken': {% csrf_token %},
+    		                  };
+    
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number + '/',
+        type: 'POST',
+        data: postobject,
+        contentType:"application/x-www-form-urlencoded",
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    
+    /*
+    $.ajax({ 
+        url: '/api/archiveobjects/' + number + '/',
+        type: 'PATCH',
+        data: datastringjson,
+        //contentType:"application/json; charset=utf-8",
+        success: function(){
+            console.log('Successful patch');
+                            }
+    });
+    */
+
+};
+
+</script>
+
+</html>

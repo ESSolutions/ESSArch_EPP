@@ -26,12 +26,20 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 from django.conf.urls import patterns, url
-from views import ArchObjectListUpdate, IngestList, IngestDetail, IngestCreate, IngestUpdate, IngestDelete, IngestListInfoView, IngestIPListTemplateView
-
-#import views
+from views import (ArchObjectListUpdate,
+                   IngestList, 
+                   IngestDetail, 
+                   IngestCreate, 
+                   IngestUpdate, 
+                   IngestDelete, 
+                   IngestListInfoView, 
+                   IngestIPListTemplateView,
+                   )
 
 urlpatterns = patterns('',   
-    url(r'^listobj/$', ArchObjectListUpdate.as_view(),name='ingest_listobj'),
+    #url(r'^listobj/$', ArchObjectListUpdate.as_view(),name='ingest_listobj'),
+    #url(r'^listobj2/?$', IngestIPListTemplateView.as_view(),name='ingest_listobj2'),
+    url(r'^listobj/?$', IngestIPListTemplateView.as_view(), name='ingest_listobj'),
     url(r'^ingestlistinfo/$', IngestListInfoView.as_view(),name='ingest_list_info'),
     url(r'^listobjupd/(?P<pk>\d+)/$', ArchObjectListUpdate.as_view(),name='ingest_listobjupd'),
     url(r'^list/$', IngestList.as_view(),name='ingest_list'),
@@ -40,5 +48,5 @@ urlpatterns = patterns('',
     url(r'^new/$', IngestCreate.as_view(), name='ingest_create'),
     url(r'^new/(?P<ip_uuid>[^&]*)/$', IngestCreate.as_view(), name='ingest_create_ip_uuid'),
     url(r'^update/(?P<pk>\d+)/$', IngestUpdate.as_view(), name='ingest_update'),
-    url(r'^delete/(?P<pk>\d+)/$', IngestDelete.as_view(), name='ingest_delete'),  
+    url(r'^delete/(?P<pk>\d+)/$', IngestDelete.as_view(), name='ingest_delete'),
 )

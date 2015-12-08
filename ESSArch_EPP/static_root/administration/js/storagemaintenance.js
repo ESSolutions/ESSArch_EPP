@@ -111,7 +111,8 @@
                     '<option value="-1">All</option>'+
                     '</select> records'
             },
-            "sAjaxSource": Django.url('storagemaintenance-dt'),
+            //"sAjaxSource": Django.url('storagemaintenance-dt'),
+            "sAjaxSource": "/administration/storagemaintenancedt",
             //"fnRowCallback": Demo.colorRow,
             "fnServerData": function ( sSource, aoData, fnCallback ) {
                 $.getJSON( sSource, aoData, function (json) {
@@ -159,7 +160,8 @@
 	                    "sButtonText": "Deactivate media",
 	                    "bSelectedOnly": "true",
 	                    "bHeader" : false,
-	                    "sAjaxUrl" : Django.url('deactivatemedia_create'),
+	                    //"sAjaxUrl" : Django.url('deactivatemedia_create'),
+	                    "sAjaxUrl" : "/administration/deactivatemediacreate",
 	                    "fnClick": function( nButton, oConfig ) {
 	                        var aData = this.fnGetSelectedData();
 	                        var aDataCol4 = [];

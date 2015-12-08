@@ -136,7 +136,8 @@ class AICCheckView(View):
         return self.json_response(request)
 
 class ArchObjectList(TemplateView):
-    template_name = 'access/archiveobject_list.html'
+    #template_name = 'access/archiveobject_list.html'
+    template_name = 'access/iplist.html'
 
     @method_decorator(permission_required('essarch.list_accessqueue'))
     def dispatch(self, *args, **kwargs):

@@ -1,0 +1,154 @@
+{% extends "admin/base.html" %}
+{% load js staticfiles %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}
+{% trans 'ESSArch Preservation Platform' %}
+{% endblock %}
+
+{% block extrastyle %}
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<link rel="stylesheet" href="/static/superfish/css/superfish.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
+	{% block app-extra-style %}{% endblock %}
+	<link rel="stylesheet" href="/static/css/essarch.css" type="text/css" media="all" />
+{% endblock %}
+
+{% block extrahead %}
+	{% block app-extrahead %}{% endblock %}
+{% endblock %}
+
+{% block branding %}
+  <div id="header-wrapper">
+    <div id="branding-wrapper">
+      <h2 class="site-name"><a href="/" title="ESSArch">EPP</a></h2>
+      <div class='site-slogan'>(ESSArch Preservation Platform)</div>
+    </div><!-- end branding wrapper -->
+  </div><!-- end header-wrapper -->
+{% endblock %}
+
+{% block nav-global %}
+  
+  {% if user.is_active and not user.is_staff %}
+  <div id="user-tools">
+    {% trans 'Welcome,' %}
+    <strong>{% filter force_escape %}{% firstof user.first_name user.username %}{% endfilter %}</strong>.
+    <a href="/changepassword">{% trans 'Change password' %}</a> /
+    <a href="/logout">{% trans 'Log out' %}</a>
+  </div>
+  {% endif %}
+
+  <div id="smenu">
+	<ul id="contents" class="sf-menu">
+	    {% if perms.controlarea.list_controlarea %}
+		<li>
+			<a href="#vertical" title="Manage information packages etc .." >{% trans 'CONTROL AREA' %}</a>
+			<ul>
+			  <li><a href="{% url 'controlarea_checkinfromreception_list' %}">{% trans 'CheckIn from Reception' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkouttowork_list' %}">{% trans 'CheckOut to Workarea' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromwork_list' %}">{% trans 'CheckIn from Workarea' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkouttogatefromwork' %}">{% trans 'CheckOut to Gatearea from work' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromgatetowork' %}">{% trans 'CheckIn from Gatearea to work' %}</a></li>
+			  <li><a href="{% url 'controlarea_checkinfromgate_list' %}">{% trans 'CheckIn from Gatearea' %}</a></li>
+			  <li><a href="{% url 'controlarea_diffcheck_list' %}">{% trans 'DiffCheck' %}</a></li>
+			  <li><a href="{% url 'controlarea_preserveip_list' %}">{% trans 'Preserve Information Package' %}</a></li>
+			  <li><a href="{% url 'controlarea_deleteip_list' %}">{% trans 'Delete IP in Controlarea' %}</a></li>
+              <li><a href="{% url 'taskoverview' %}">{% trans 'Overview of controlarea requests' %}</a></li>
+			</ul>
+	    </li>
+		{% endif %}
+		<li>
+			<a href="#vertical" title="Ingest information packages etc .." >{% trans 'INGEST' %}</a>
+			<ul>
+			  <li><a href="{% url 'ingest_listobj' %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url 'ingest_create' %}">{% trans 'Create new ingest request' %}</a></li>
+			  <li><a href="{% url 'ingest_list' %}">{% trans 'List ingest request queue' %}</a></li>
+			</ul>
+	    </li>
+ 
+		<li>
+			<a href="#vertical" title="Access information packages etc .." >{% trans 'ACCESS' %}</a>
+			<ul>
+			  <li><a href="{% url 'access_listobj' %}">{% trans 'List information packages' %}</a></li>
+			  <li><a href="{% url 'access_create' %}">{% trans 'Create new access request' %}</a></li>
+			  <li><a href="{% url 'access_list' %}">{% trans 'List access request queue' %}</a></li>
+			</ul>
+	    </li>
+  
+		<li> 
+			<a href="#vertical">ADMINISTRATION</a>
+	    	<ul>
+	    		<li><a href="{% url 'admin_liststoragemedium' %}">{% trans 'List media information' %}</a></li>
+	    		<li><a href="{% url 'admin_listrobot' %}">{% trans 'List robot information' %}</a></li>
+	    		<li><a href="{% url 'admin_storagemigration' %}">{% trans 'Storage Migration' %}</a></li>
+	    		<li><a href="{% url 'admin_storagemaintenance' %}">{% trans 'Storage Maintenance' %}</a><li>
+	    		<li><a href="{% url 'migration_list' %}">{% trans 'Storage Migration list' %}</a></li>
+	    	</ul>
+		</li>
+	    {% if perms.reports.list_reports %}		
+		<li> 
+			<a href="#vertical">REPORTS</a>
+	    	<ul>
+	    		<li><a href="{% url 'reports_deliveryreport' %}">{% trans 'Delivery report' %}</a></li>
+	    		<li><a href="{% url 'reports_eventsreport' %}">{% trans 'Log Events report' %}</a></li>
+	    	</ul>
+		</li>
+      	{% endif %}
+      	{% if user.is_staff %}
+		<li> 
+			<a href="#vertical">MANAGEMENT</a>
+	    	<ul>
+		      {#<li><a href="/admin/ip/informationpackage/">Information Packages</a></li>#}
+		      <li><a href="/admin">Site administration</a></li>
+		      {% if perms.auth %}  <li><a href="/admin/auth">User administration</a></li>  {% endif %}
+		      {% if perms.configuration %}  <li><a href="/admin/configuration">Configuration</a></li>  {% endif %}
+		      {#<li><a href="/admin/configuration/parameter/">Parameters</a></li>#}
+		      {#<li><a href="/admin/configuration/logevent/">Log Event Types</a></li>#}
+		      {#<li><a href="/admin/configuration/schemaprofile/">Schema Profiles</a></li>#}
+		   {#   <li><a href="/configuration/install_defaultparameters"><i>Install Default Parameters</a></i></li> #}
+		      {#<li><a href="/configuration/install_defaultadditionalmetadata"><i>Install Default Additional Metadata</a></i></li>#}
+	          {#<li><a href="/configuration/install_defaultusers"><i>Install Default Users</a></i></li>#}
+		      {#<li><a href="/configuration/install_defaultschemas"><i>Install Default Schema Profiles</a></i></li>#}
+		      {#<li><a href="/configuration/install_defaults"><i>Install Default Log Events</a></i></li>#}
+	    	</ul>
+		</li>
+      	{% endif %}
+		<li> 
+			<a href="#vertical">HELP</a>
+	    	<ul>
+	    		<li><a href="{% url 'monitoring_sysinfo' %}">{% trans 'System information' %}</a></li>
+	    	</ul>
+		</li>
+    </ul>
+  </div>
+{% endblock %}
+
+<!--
+{% block breadcrumbs %} 
+	<br/> 
+{% endblock %}
+-->
+
+{% block content %}
+    <div id="main-container" class="container">
+    {% block container %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block extra-script %}
+	<script type="text/javascript" src="/static/jQuery/js/jquery-2.0.3.js"></script>
+	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+	{% django_js %}
+    <script type="text/javascript" src="/static/superfish/js/superfish.min.js"></script>
+	<script>
+		jQuery(document).ready(function() {
+			jQuery('ul.sf-menu').superfish({
+				delay:       0,                            // one second delay on mouseout
+				speed:       'fast',                          // faster animation speed
+			});
+		});
+	</script>
+
+    {% block app-extra-script %}{% endblock %}
+{% endblock %}

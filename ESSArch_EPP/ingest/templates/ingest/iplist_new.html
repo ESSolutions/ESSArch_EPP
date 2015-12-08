@@ -1,0 +1,219 @@
+{% extends 'admin/base_site.html' %}
+
+{% block server-side-base %}active{% endblock %}
+
+{% block app-extra-style %}
+    <link href="/static/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/api/css/aic.css" rel="stylesheet" type="text/css" />  
+{% endblock %}
+
+{% block container %}
+    <div class="container">
+      <table id="example" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ObjectIdentifierValue</th>
+            <th>Archivist organization</th>
+            <th>Label</th>
+            <th>Create date</th>
+            <th>Start date</th>
+            <th>End date</th>
+            <th>Type</th>
+            <th>Generation</th>
+            <th>State</th>
+            <th>Activity</th>
+            <th>archiveobjects</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+{% endblock %}
+
+{% block app-extra-script %}
+	<script type="text/javascript" src="/static/DataTables/datatables.js"></script>
+<script>
+/*
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 30000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+$(document).ready( function () {
+	var table = $('#example').DataTable( {
+		destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			//"url": "{% url 'ip_list_dt' %}",
+			"url": "/api/ip_list_dt",
+			"type": "GET",
+			"data": { 
+				//archiveobjects__StatusProcess__in: '[3000,5000]',
+				archiveobjects__StatusProcess__lt: '3000',
+				//archiveobjects__StatusActivity__in: '[0, 4]',
+				//archiveobjects__StatusProcess_or_StatusActivity__in: '[[5000, 5100], [7, 8]]',
+				//archiveobjects__exclude_generation_0_and_latest: true,
+				//StatusProcess__in: '[0]',
+				//exclude_ip_without_aic: true,
+				//exclude_aic_without_ips: true,
+				enable_StatusActivity_selection: true,
+			},
+		},
+		//"lengthMenu": [ [10, 25, 50, 100, 1000000], [10, 25, 50, 100, "All"] ],
+		colReorder: true,
+		//fixedColumns: true,
+		//select: 'multi',
+		//select: {
+		//	style:    'os',
+		//	selector: 'td.select-checkbox'
+		//},
+		//dom: 'Blfrtip',
+		//buttons: [
+		//          'colvis','copy', 'excel', 'pdf'
+		//      ],
+		columns: [
+			// Checkboxes
+			{
+				"data": null,         
+				"orderable": false,               
+				"visible": false,
+				"defaultContent": '',
+				"createdCell":    function ( cell, data, row ) {
+					if ( row.archiveobjects.length==0 && row.OAISPackageType!='AIC') {
+						$(cell).addClass( 'select-checkbox' );
+					}
+				},
+			},
+			// ObjectIdentifierValue
+			//<a href="{% url 'ingest_create_ip_uuid' ip_obj.ObjectIdentifierValue %}" title="Create ingest request">{{ ip_obj.ObjectIdentifierValue }}</a>
+			{ 
+				"data": "ObjectIdentifierValue",
+				"createdCell":    function ( cell, data, row ) {
+					if ( row.archiveobjects.length>0 ) {
+						$(cell).addClass( 'collapse-control' );
+					}
+					else {
+						$(cell).addClass( 'ip-object' );
+					}
+				},
+				"render": function ( data, type, row ) {
+					//var linkhtml = '<a href="'+{% url ingest_create_ip_uuid data %}+'" title="Create ingest request">'+ data +'</a>'
+					var linkhtml = data;
+					if ( row.archiveobjects.length>0 ) {
+						return '<img id="theImg" src="/static/images/details_open.png">'+linkhtml;
+					}
+					else {
+						return linkhtml;
+					}
+				},
+			},
+			// Archivist organization ( EntryAgentIdentifierValue )
+			{ "data": "EntryAgentIdentifierValue"},
+			// Label ( Object_data.label )
+			{ "data": null},
+			// Create date ( EntryDate )
+			{ "data": "EntryDate"},
+			// Start date ( Object_data.startdate )
+			{ "data": null},
+			// End date ( Object_data.enddate)
+			{ "data": null},
+			// Type ( OAISPackageType )
+			{ "data": "OAISPackageType"},
+			// Generation ( Generation )
+			{ "data": "Generation"},
+			// State ( StatusProcess )
+			{ "data": "StatusProcess" },
+			// Activity ( StatusActivity )
+			{ "data": "StatusActivity"},
+			{
+				"data": null,
+				"visible": false,
+				"bSearchable": false,
+				"render": function ( data, type, row ) {
+					if ( row.archiveobjects ) {
+						for ( var i=0, ien=row.archiveobjects.length ; i<ien ; i++ ) {
+							var ip = row.archiveobjects[i];
+							var rowNode = table.row.add( {
+								"id": ip.id,
+								"ObjectIdentifierValue":ip.ObjectIdentifierValue,
+								// Label
+								"EntryDate": ip.EntryDate,
+								// Start date
+								// End date
+								"OAISPackageType": ip.OAISPackageType,
+								"Generation": ip.Generation,
+								"StatusProcess": ip.StatusProcess,
+								"StatusActivity": ip.StatusActivity,
+								"archiveobjects": '',
+							} ).node();  
+							$(rowNode).addClass( 'child-row' );
+							$(rowNode).hide();
+							$(rowNode).attr('data-aicuuid', row.ObjectIdentifierValue);
+						}
+					}
+					return ''
+				}
+			},
+			
+		],
+    	"order": [[1, 'asc']],
+    	"searchCols": [
+		]
+	} );
+  
+	// Disable selection of AIC rows
+	table.on('select.dt', function(e, dt, type, indexes ) {
+		indexes.forEach(function(i) {
+			if (table.row(i).nodes().to$().children().hasClass('collapse-control')) {
+				table.row(i).deselect();
+			}    
+		})      
+	});
+  
+	// Add event listener for opening and closing AIC/IP
+	$('#example tbody').on('click', 'img', function () {
+		var tr = $(this).closest('tr');
+		var row = table.row( tr );    
+		if (tr.hasClass( 'shown')) {
+			// This row is already open - close it
+			var rows = $('tr[data-aicuuid='+row.data().ObjectIdentifierValue+']');
+			rows.hide();
+			table.rows(rows).deselect();
+			tr.removeClass('shown');
+			$(this).attr('src', "/static/images/details_open.png")
+		}
+		else {
+			// Open this row
+			var rows = $('tr[data-aicuuid='+row.data().ObjectIdentifierValue+']');
+			rows.show();
+			tr.addClass('shown');
+			$(this).attr('src', "/static/images/details_close.png")
+		} 
+	});
+
+} );
+
+function setactivity(number){
+	var thevalue = document.getElementById(number).value
+	var datastringjson = '{ "StatusActivity":' + thevalue + '}';
+	$.ajax({ 
+		url: '{% url 'archiveobject-list' %}' + number + '/',
+		method: 'PATCH',
+		data: datastringjson,
+		contentType:"application/json",
+		processData: false,
+		headers: {"X-CSRFToken": '{{ csrf_token }}'},
+		success: function(){
+			//console.log('Successful patch');
+		}
+	});
+};
+*/
+</script>
+{% endblock %}

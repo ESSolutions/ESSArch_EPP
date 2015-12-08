@@ -1,207 +1,228 @@
-{% extends 'index.html' %}
-{% load js staticfiles%}
-{% load dictionary_extras %}
+{% extends 'admin/base_site.html' %}
 
-{% block content %}
+{% block server-side-base %}active{% endblock %}
 
-<div style="margin:20px">
-<H1>{{ label }}</H1>
-
-<br/>
-
-<div>
-  <table class="collaptable table">
-    <thead>
-      <tr>
-                <th>Generation</th>
-                <th>Archivist organization</th>
-                <th>Label</th>
-                <th>Create date</th>
-                <th>Start date</th>
-                <th>End date</th>
-                <th>State</th>
-                <th>Activity</th>
-                <th>AIC-UUID</th>
-                <th>IP-UUID</th>                
-      </tr>
-    </thead>
-    <tbody id="AIC-table">
-            <tr><td>No IPs</td></tr>
-    </tbody>
-  </table>
-</div>
-
-
+{% block app-extra-style %}
+    <link href="/static/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/api/css/aic.css" rel="stylesheet" type="text/css" />  
 {% endblock %}
-{% block app-extra-script %}
-    {% js "aCollapTable/aCollapTable.js" %}
-    {% js "controlarea/js/collapsible-aic.js" %}
 
+{% block container %}
+	
+	<H2>{{ label }}</H2>
+	<br>
+    <div>
+      <table id="example" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ObjectIdentifierValue</th>
+            <th>Archivist organization</th>
+            <th>Label</th>
+            <th>Create date</th>
+            <th>Start date</th>
+            <th>End date</th>
+            <th>Type</th>
+            <th>Generation</th>
+            <th>State</th>
+            <th>Activity</th>
+            <th>archiveobjects</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+{% endblock %}
+
+{% block app-extra-script %}
+	<script type="text/javascript" src="/static/DataTables/datatables.js"></script>
 <script>
 
-var JSONlink = "{% url 'controlarea_preserveip_info' %}"
-var createlink = '/controlarea/preserveip/'
-
-preservelist(JSONlink,createlink);
-
-function preservelist(JSONlink, createlink){
-$(document).ready(function(){
-$.getJSON( JSONlink, function(listinfo1) {
-
-     info = listinfo1;
-     populatelist();
-     $('.collaptable').aCollapTable({ 
-     startCollapsed: true,
-     addColumn: false, 
-     plusButton: '<span class="i">+</span>', 
-     minusButton: '<span class="i">-</span>' 
-    });
-});
-});
-
-var info = {};
-var tabletext = '';
-
-function StatusProcessChoices(Process){
-       
-       var StatusProcessText = "";
-       
-       switch(Process){
-            case 0:
-                StatusProcessText = 'Ingest';
-                break;
-            case 3000:
-                StatusProcessText = 'Archived';
-                break;
-            case 5000:
-                StatusProcessText = 'Controlarea';
-                break;
-            case 5100:
-                StatusProcessText = 'Workarea';
-                break;
-            case 9999:
-                StatusProcessText = 'Deleted';
-                break;
-            default:
-                StatusProcessText =' Not known ';
-                console.log('StatusProcess:')
-                console.log(Process);
-       }
-
-        return StatusProcessText;
-   };
-
-   
-   function StatusActivityChoices(Activity){
-        
-        var StatusActivityText = "";
-        
-        switch(Activity){
-            
-        case 0:
-            StatusActivityText = 'OK';
-            break;
-        case 1: 
-            StatusActivityText = 'New object';
-            break;
-        case 2:
-            StatusActivityText = 'Receive';
-        case 3:
-            StatusActivityText = 'Checking';
-            break;
-        case 4:
-            StatusActivityText = 'Need of assistance';
-            break;
-        case 5:
-            StatusActivityText = 'Progress';
-            break;
-        case 6:
-            StatusActivityText = 'Pending writes';
-            break;
-        case 7:
-            StatusActivityText = 'ControlArea';
-            break;
-        case 8:
-            StatusActivityText = 'WorkArea';
-            break;
-        case 100:
-             StatusActivityText = 'FAIL';
-             break
-        default:
-            console.log(Activity)
-            console.log('undetermined activity');
-            StatusActivityText = 'Not known';
-        
-        }
-        
-       return StatusActivityText;
-    }
-   
-   
-function linktest(Process, ID, Generation){
+$(document).ready( function () {
+	var table = $('#example').DataTable( {
+		//destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			"url": "{% url 'ip_list_dt' %}",
+			"type": "GET",
+			"data": { 
+				archiveobjects__StatusProcess__in: '[5000]',
+				//archiveobjects__StatusProcess__lt: '3000',
+				//archiveobjects__StatusActivity__in: '[0, 4]',
+				//archiveobjects__StatusProcess_or_StatusActivity__in: '[[5000], [7]]',
+				//archiveobjects__exclude_generation_0_and_latest: true,
+				//StatusProcess__in: '[0]',
+				exclude_ip_without_aic: true,
+				exclude_aic_without_ips: true,
+				//enable_StatusActivity_selection: true,
+			},
+		},
+		//"lengthMenu": [ [10, 25, 50, 100, 1000000], [10, 25, 50, 100, "All"] ],
+		colReorder: true,
+		//fixedColumns: true,
+		//select: {
+		//	style:    'os',
+		//	selector: 'td.select-checkbox'
+		//},
+		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			//"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+			"<'row'<'col-sm-5'><'col-sm-7'p>>",
+		buttons: [
+			{
+				extend: 'colvis',
+				columns: ':gt(1):lt(9)',
+			}
+		],
+		columns: [
+			// Checkboxes
+			{
+				"data": null,         
+				"orderable": false,               
+				"visible": false,
+				"defaultContent": '',
+				"createdCell":    function ( cell, data, row ) {
+					if ( row.archiveobjects.length==0 && row.OAISPackageType!='AIC') {
+						$(cell).addClass( 'select-checkbox' );
+					}
+				},
+			},
+			// ObjectIdentifierValue
+			{ 
+				"data": "ObjectIdentifierValue",
+				"createdCell":    function ( cell, data, row ) {
+					if ( row.archiveobjects.length>0 ) {
+						$(cell).addClass( 'collapse-control' );
+					}
+					else {
+						$(cell).addClass( 'ip-object' );
+					}
+				},
+				"render": function ( data, type, row ) {
+					if ( row.OAISPackageType=='AIC') {
+						var linkhtml = data
+					}
+					else {
+						var linkhtml = "<a href={% url 'controlarea_preserveip' pk='id' %} title='Check out to work area'>ip_uuid</a>".replace(/id/, row.id).replace(/ip_uuid/g, data);
+					}
+					if ( row.archiveobjects.length>0 ) {
+						return '<img id="theImg" src="/static/images/details_open.png">'+linkhtml;
+					}
+					else {
+						return linkhtml;
+					}
+				},
+			},
+			// Archivist organization ( EntryAgentIdentifierValue )
+			{ "data": "EntryAgentIdentifierValue"},
+			// Label ( Object_data.label )
+			{ "data": "ObjectMetadata__label", "orderable": false,},
+			// Create date ( EntryDate )
+			{ "data": "EntryDate"},
+			// Start date ( Object_data.startdate )
+			{ "data": "ObjectMetadata__startdate", "orderable": false,},
+			// End date ( Object_data.enddate)
+			{ "data": "ObjectMetadata__enddate", "orderable": false,},
+			// Type ( OAISPackageType )
+			{ "data": "OAISPackageType"},
+			// Generation ( Generation )
+			{ "data": "Generation"},
+			// State ( StatusProcess )
+			{ "data": "StatusProcess" },
+			// Activity ( StatusActivity )
+			{ "data": "StatusActivity"},
+			{
+				"data": null,
+				"visible": false,
+				"bSearchable": false,
+				"render": function ( data, type, row ) {
+					if ( row.archiveobjects ) {
+						for ( var i=0, ien=row.archiveobjects.length ; i<ien ; i++ ) {
+							var ip = row.archiveobjects[i];
+							var rowNode = table.row.add( {
+								"id": ip.id,
+								"EntryAgentIdentifierValue": ip.EntryAgentIdentifierValue,
+								"ObjectIdentifierValue":ip.ObjectIdentifierValue,
+								"ObjectMetadata__label": ip.ObjectMetadata__label,
+								"EntryDate": ip.EntryDate,
+								"ObjectMetadata__startdate": ip.ObjectMetadata__startdate,
+								"ObjectMetadata__enddate": ip.ObjectMetadata__enddate,
+								"OAISPackageType": ip.OAISPackageType,
+								"Generation": ip.Generation,
+								"StatusProcess": ip.StatusProcess,
+								"StatusActivity": ip.StatusActivity,
+								"archiveobjects": '',
+							} ).node();  
+							$(rowNode).addClass( 'child-row' );
+							$(rowNode).hide();
+							$(rowNode).attr('data-aicuuid', row.ObjectIdentifierValue);
+						}
+					}
+					return ''
+				}
+			},
+			
+		],
+		rowId: 'ObjectIdentifierValue',
+		"order": [[0, 'asc']],
+    	"searchCols": [
+		],
+	} );
+  
+	// Disable selection of AIC rows
+	table.on('select.dt', function(e, dt, type, indexes ) {
+		indexes.forEach(function(i) {
+			if (table.row(i).nodes().to$().children().hasClass('collapse-control')) {
+				table.row(i).deselect();
+			}    
+		})      
+	});
+  
+	// Add event listener for opening and closing AIC/IP
+	$('#example tbody').on('click', 'img', function () {
+		var tr = $(this).closest('tr');
+		var row = table.row( tr );    
+		if (tr.hasClass( 'shown')) {
+			// This row is already open - close it
+			var rows = $('tr[data-aicuuid='+row.data().ObjectIdentifierValue+']');
+			rows.hide();
+			table.rows(rows).deselect();
+			tr.removeClass('shown');
+			$(this).attr('src', "/static/images/details_open.png")
+		}
+		else {
+			// Open this row
+			var rows = $('tr[data-aicuuid='+row.data().ObjectIdentifierValue+']');
+			//console.log('before open row click -: '+rows.is(":visible"));
+			rows.show();
+			tr.addClass('shown');
+			$(this).attr('src', "/static/images/details_close.png")
+		} 
+	});
 	
-	var linktext = '';
-	 switch(Process){
-	 
-	 case 3000:
-		 linktext = '<td> IP_' + Generation + '</td>';
-		 break;
-      default:
-    	  linktext = '<td><a href="'+ createlink + ID +'/"> IP_' + Generation + '</a></td>'
-	 }
-	
-	return linktext;
-}
-     
-   
-function populatelist(){
-    
-    if(info.length == 0){
-        tabletext = 'List is empty';
-    }
-    
-    for (i = 0; i < info.length; i++){
-    tabletext = tabletext 
-    + '<tr data-id="' 
-    + info[i].AIC_UUID + '" data-parent="">'
-    + '<td>AIC</td>'
-    + '<td>' + info[i].Archivist_organization + '</td>' 
-    + '<td>' + info[i].Label + '</td>' 
-    + '<td>' + info[i].create_date +'</td>'
-    + '<td>' + info[i].startdate + '</td>'
-    + '<td>' + info[i].enddate + '</td>'
-    + '<td>' + '</td>'
-    + '<td>' + '</td>'
-    + '<td>' + info[i].AIC_UUID + '<td>'
-    + '<td></td>'
-    + '</tr>';
-    
-   var IPList = info[i].IPs
-   var parent = info[i].AIC_UUID
-   
-   for (j = 0; j < IPList.length; j++){
-        tabletext = tabletext
-        + '<tr data-id=' + IPList[j].ObjectUUID + ' '
-        + 'data-parent=' + parent + '>'
-        + linktest(IPList[j].Process, IPList[j].id, IPList[j].Generation)
-        + '<td>' + IPList[j].Archivist_organization + '</td>'
-        + '<td>' + IPList[j].Label + '</td>'
-        + '<td>' + IPList[j].create_date + '</td>'
-        + '<td>' + IPList[j].startdate + '</td>'
-        + '<td>' + IPList[j].enddate + '</td>'
-        + '<td>' + StatusProcessChoices(IPList[j].Process) + '</td>'
-        + '<td>' +  StatusActivityChoices(IPList[j].Activity) + '</td>'
-        + '<td>' + parent + ' </td>'
-        + '<td>' + IPList[j].ObjectUUID + '</td>'
-        + '</tr>'
-    }
-    
-    
-    
-        
-    }
- document.getElementById("AIC-table").innerHTML = tabletext;
- };
+	// Refresh data every 60 sec
+	setInterval( function () {
+		table.ajax.reload( null, false ); // user paging is not reset on reload
+	}, 60000 );
+
+} );
+
+// Set StatusActivity
+function setactivity(event,number){
+	var thevalue = event.target.value
+	var datastringjson = '{ "StatusActivity":' + thevalue + '}';
+	$.ajax({ 
+		url: '{% url 'archiveobject-list' %}' + number + '/',
+		method: 'PATCH',
+		data: datastringjson,
+		contentType:"application/json",
+		processData: false,
+		headers: {"X-CSRFToken": '{{ csrf_token }}'},
+		success: function(){
+			//console.log('Successful patch');
+		}
+	});
 };
+
 </script>
 {% endblock %}

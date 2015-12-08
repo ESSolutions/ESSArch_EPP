@@ -93,12 +93,21 @@ class WorkingThread:
                                                   Q(StatusProcess__range = [69,1000]),
                                                   Q(StatusActivity = 0) | Q(StatusActivity__range = [5,6]),
                                                   )
-                StorageMethodWrite_obj = StorageMethodWrite()
-                StorageMethodWrite_obj.logger = logger
-                StorageMethodWrite_obj.ArchiveObject_objs = ArchiveObject_objs
-                StorageMethodWrite_obj.add_to_ioqueue()
-                StorageMethodWrite_obj.apply_ios_to_transfer()
-                StorageMethodWrite_obj.apply_ios_to_write()
+                try:
+                    StorageMethodWrite_obj = StorageMethodWrite()
+                    StorageMethodWrite_obj.logger = logger
+                    StorageMethodWrite_obj.ArchiveObject_objs = ArchiveObject_objs
+                    StorageMethodWrite_obj.add_to_ioqueue()
+                    StorageMethodWrite_obj.apply_ios_to_transfer()
+                    StorageMethodWrite_obj.apply_ios_to_write()
+                except ESSArchSMError as e:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    msg = 'Problem to write objects for policyID %s, error: %s line: %s' % (PolicyID, e, exc_traceback.tb_lineno)
+                    logger.error(msg)
+                except Exception as e:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    msg = 'Unknown error to write objects for policyID %s, error: %s trace: %s' % (PolicyID, e, repr(traceback.format_tb(exc_traceback)))
+                    logger.error(msg)
                 for ArchiveObject_obj in ArchiveObject_objs:
                     try:
                         StorageMethodWrite_obj.get_write_status(ArchiveObject_obj)

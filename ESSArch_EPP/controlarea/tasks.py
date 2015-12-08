@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
 from models import MyFile, RequestFile
-from essarch.models import ArchiveObject, ArchiveObjectData, ArchiveObjectRel, eventIdentifier, PackageType_CHOICES, StatusProcess_CHOICES, \
+from essarch.models import ArchiveObject, ObjectMetadata, ArchiveObjectData, ArchiveObjectRel, eventIdentifier, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
@@ -258,11 +258,17 @@ class CheckInFromMottagTask(JobtasticTask):
                 error_list.append(e)
 
         if status_code == 0:
+
+                
             ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
             if ArchiveObject_qf is False:
                 event_info = 'Add new entry to DB for AIC_UUID: %s' % (AIC_uuid)
                 status_list.append(event_info)
                 logger.info(event_info)
+                ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                                label=METS_LABEL,
+                                                startdate=METS_STARTDATE,
+                                                enddate=METS_ENDDATE)
                 # Add AIC to ArchiveObject DBtable
                 ArchiveObject_aic_new = ArchiveObject()
                 setattr(ArchiveObject_aic_new, 'ObjectUUID', AIC_uuid)
@@ -272,6 +278,9 @@ class CheckInFromMottagTask(JobtasticTask):
                 setattr(ArchiveObject_aic_new, 'StatusActivity', 0)
                 setattr(ArchiveObject_aic_new, 'StatusProcess', 5000)
                 setattr(ArchiveObject_aic_new, 'Generation', 0)
+                setattr(ArchiveObject_aic_new, 'EntryAgentIdentifierValue', EntryAgentIdentifierValue)
+                setattr(ArchiveObject_aic_new, 'EntryDate', EntryDate)
+                setattr(ArchiveObject_aic_new, 'ObjectMetadata', ObjectMetadata_obj)
                 ArchiveObject_aic_new.save()
             else:
                 event_info = 'Entry in DB for AIC_UUID: %s already exist, skip to update.' % (AIC_uuid)
@@ -283,17 +292,23 @@ class CheckInFromMottagTask(JobtasticTask):
                 event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
                 status_list.append(event_info)
                 logger.info(event_info)
+                ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                                label=METS_LABEL,
+                                                startdate=METS_STARTDATE,
+                                                enddate=METS_ENDDATE)
                 # Add IP to ArchiveObject DBtable
                 ArchiveObject_new = ArchiveObject()
                 setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
                 setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
-                setattr(ArchiveObject_new, 'OAISPackageType', 0)
+                #setattr(ArchiveObject_new, 'OAISPackageType', 0)
+                setattr(ArchiveObject_new, 'OAISPackageType', 2)
                 setattr(ArchiveObject_new, 'Status', 0)
                 setattr(ArchiveObject_new, 'StatusActivity', 0)
                 setattr(ArchiveObject_new, 'StatusProcess', 5000)
                 setattr(ArchiveObject_new, 'Generation', 0)
                 setattr(ArchiveObject_new, 'EntryAgentIdentifierValue', EntryAgentIdentifierValue)
                 setattr(ArchiveObject_new, 'EntryDate', EntryDate)
+                setattr(ArchiveObject_new, 'ObjectMetadata', ObjectMetadata_obj)
                 ArchiveObject_new.save()
 
                 # Add rel AIC - IP to Object_rel DBtable
@@ -411,7 +426,7 @@ class CheckOutToWorkTask(JobtasticTask):
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
-	
+
     def calculate_result(self,source_path=None,target_path=None,Package=None,a_uid=None,a_gid=None,a_mode=None,read_only_access=False,ObjectIdentifierValue=None,ReqUUID=None,ReqPurpose=None,linkingAgentIdentifierValue=None):
         status_code = 0
         status_list = []
@@ -494,17 +509,23 @@ class CheckOutToWorkTask(JobtasticTask):
                 event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
                 status_list.append(event_info)
                 logger.info(event_info)
+                ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                label=getattr(source_IP_Object.ObjectMetadata, 'label', ''),
+                                startdate=getattr(source_IP_Object.ObjectMetadata, 'startdate', None),
+                                enddate=getattr(source_IP_Object.ObjectMetadata, 'enddate', None))
                 # Add IP to ArchiveObject DBtable
                 ArchiveObject_new = ArchiveObject()
                 setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
                 setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
-                setattr(ArchiveObject_new, 'OAISPackageType', 0)
+                #setattr(ArchiveObject_new, 'OAISPackageType', 0)
+                setattr(ArchiveObject_new, 'OAISPackageType', 2)
                 setattr(ArchiveObject_new, 'Status', 0)
                 setattr(ArchiveObject_new, 'StatusActivity', 0)
                 setattr(ArchiveObject_new, 'StatusProcess', 5100)
                 setattr(ArchiveObject_new, 'Generation', int(Newest_object.Generation)+1)
                 setattr(ArchiveObject_new, 'EntryAgentIdentifierValue', source_IP_Object.EntryAgentIdentifierValue)
                 setattr(ArchiveObject_new, 'EntryDate', source_IP_Object.EntryDate)
+                setattr(ArchiveObject_new, 'ObjectMetadata', ObjectMetadata_obj)
                 ArchiveObject_new.save()
 
                 # Add rel AIC - IP to Object_rel DBtable
@@ -521,7 +542,7 @@ class CheckOutToWorkTask(JobtasticTask):
                     startdate = Object_data_qf.startdate
                     enddate = Object_data_qf.enddate
                 else:
-                    label = None
+                    label = ''
                     startdate = None
                     enddate = None
                 # Add Object data to Object_data DBtable

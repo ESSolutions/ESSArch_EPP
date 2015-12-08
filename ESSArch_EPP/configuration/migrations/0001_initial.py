@@ -188,6 +188,9 @@ class Migration(migrations.Migration):
                 ('type', models.IntegerField(default=200, verbose_name=b'Type', choices=[(200, b'DISK'), (300, b'TAPE'), (400, b'CAS')])),
                 ('archivepolicy', models.ForeignKey(to='configuration.ArchivePolicy')),
             ],
+            options={
+                'ordering': ['name'],
+            },                               
         ),
         migrations.CreateModel(
             name='StorageTarget',

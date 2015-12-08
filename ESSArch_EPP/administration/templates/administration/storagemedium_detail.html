@@ -1,13 +1,16 @@
 {% extends 'admin/base_site.html' %}
-{% load js staticfiles %}
 {% load url from future %}
 {% load dictionary_extras %}
 
 {% block server-side-base %}active{% endblock %}
 
+{% block app-extra-style %}
+	<link rel="stylesheet" href="/static/datatables_1_9/css/datatables.bootstrap.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="/static/TableTools/media/css/TableTools.css" type="text/css" media="all" />
+{% endblock %}
+
 {% block container %}
-    
-<div style="margin:20px">
+
 <H1>{{ label }}</H1>
 <br/>
 <small>[updated {{object.storageMediumDate|timesince}} ago]</small>
@@ -86,7 +89,7 @@
 </div>
 
 <br/>
-<H1>Medium content</H1>
+<H2>Medium content</H2>
 <br/>
 
 
@@ -106,11 +109,13 @@
 <br/>
 <a href="{% url 'admin_liststoragemedium' %}">list storagemedium</a>
 
-</div>
+
 
 {% endblock %}
 
 {% block app-extra-script %}
+	<script type="text/javascript" src="/static/datatables_1_9/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="/static/datatables_1_9/js/datatables.bootstrap.js"></script>
 <script>
 $(document).ready(function() {
 	$('#storage-objects-table').dataTable( {
@@ -132,7 +137,8 @@ $(document).ready(function() {
                 '<option value="-1">All</option>'+
                 '</select> records'
         },
-        "sAjaxSource": Django.url('storage-dt'),
+        //"sAjaxSource": Django.url('storage-dt'),
+        "sAjaxSource": "{% url 'storage-dt' %}",
         "fnServerParams": function ( aoData ) {
             aoData.push( { 
             	"name": "storageMediumID", "value": $('#storageMediumID').text() } );

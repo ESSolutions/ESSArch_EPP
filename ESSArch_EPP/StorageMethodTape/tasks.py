@@ -751,7 +751,7 @@ class WriteStorageMethodTape(Task):
         else:
             #########################################
             # Try to mount a new tape from robot
-            robot_objs = robot.objects.filter(status='Empty', t_id__startswith=target_obj.target)
+            robot_objs = robot.objects.filter(status='Empty', t_id__startswith=target_obj.target).order_by('t_id')
 
             if robot_objs: 
                 t_id=robot_objs[0].t_id

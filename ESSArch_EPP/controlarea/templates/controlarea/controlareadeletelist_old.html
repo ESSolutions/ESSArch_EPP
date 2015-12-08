@@ -1,0 +1,47 @@
+{% extends 'index.html' %}
+{% load js staticfiles%}
+{% load dictionary_extras %}
+
+{% block content %}
+
+<div style="margin:20px">
+<H1>{{ label }}</H1>
+
+<br/>
+
+<div>
+  <table class="collaptable table">
+    <thead>
+      <tr>
+                <th>Generation</th>
+                <th>Archivist organization</th>
+                <th>Label</th>
+                <th>Create date</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>State</th>
+                <th>Activity</th>
+                <th>AIC-UUID</th>
+                <th>IP-UUID</th>
+      </tr>
+    </thead>
+    <tbody id="AIC-table">
+            <tr><td>No IPs</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock %}
+{% block app-extra-script %}
+    {% js "aCollapTable/aCollapTable.js" %}
+    {% js "controlarea/js/collapsible-aic.js" %}
+
+<script>
+
+var JSONlink = "{% url 'controlarea_deleteip_info' %}"
+var createlink = '/controlarea/controlareadeleteip/'
+
+aiclist(JSONlink,createlink);
+</script>
+{% endblock %}
