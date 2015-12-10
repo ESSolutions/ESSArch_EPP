@@ -246,7 +246,7 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
     archiveobjectmetadata_set = serializers.CharField(validators=[])
     Storage_set = serializers.CharField(validators=[])
     aic_set = serializers.CharField(validators=[])
-    ObjectMetadata = serializers.CharField(validators=[])
+    ObjectMetadata = serializers.UUIDField(allow_null=True, required=False, validators=[])
     class Meta:
         model = ArchiveObject
         fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['Storage_set']
