@@ -257,7 +257,7 @@ class StorageMethodWrite:
                          IOQueue_obj.remote_status > 21 and
                          ArchiveObject_obj.StatusProcess == 1000 and 
                          ArchiveObject_obj.StatusActivity == 0):
-                    IOQueue_obj.remote_tatus=2
+                    IOQueue_obj.remote_status=2
                     IOQueue_obj.save(update_fields=['remote_status'])
                     if not self.IOs_to_transfer.has_key(remote_server[0]):
                         self.IOs_to_transfer[remote_server[0]] = {}

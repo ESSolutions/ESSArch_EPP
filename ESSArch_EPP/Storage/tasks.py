@@ -142,7 +142,7 @@ class TransferWriteIO(Task):
                 #ESSPGM.Events().create('1102','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
                 IO_obj.remote_status = 20
                 IO_obj.save(update_fields=['remote_status'])
-                return result
+                #return result
 
     #def on_failure(self, exc, task_id, args, kwargs, einfo):
     #    logger = logging.getLogger('StorageTransfer')

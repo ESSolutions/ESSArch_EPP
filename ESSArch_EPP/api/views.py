@@ -225,7 +225,10 @@ class ArchiveObject_dt_view(DatatableBaseView):
             if archiveobjects__exclude_generation_0_and_latest:
                 if archiveobjects__exclude_generation_0_and_latest == 'true':
                     if qs.count() > 0:
-                        latest_generation = qs.order_by('-Generation')[:1].get()
+                        qs2 =  ArchiveObject.objects.filter(
+                                                            Q(OAISPackageType=1) | 
+                                                            Q(OAISPackageType__in=[0,2], archiveobjects__isnull=True, aic_set__isnull=True)).distinct()
+                        latest_generation = qs[0].aic_set.get().archiveobjects.order_by('-Generation')[:1].get()
                         qs = qs.exclude(StatusProcess__in=[5000,5100], Generation__in=[0,latest_generation.Generation])
                     else:
                         qs = qs.exclude(Generation=0)
@@ -258,7 +261,6 @@ class ArchiveObject_dt_view(DatatableBaseView):
             archiveobjects__StatusProcess__in = self._querydict.get('archiveobjects__StatusProcess__in', None)
             archiveobjects__StatusActivity__in = self._querydict.get('archiveobjects__StatusActivity__in', None)
             archiveobjects__StatusProcess_or_StatusActivity__in = self._querydict.get('archiveobjects__StatusProcess_or_StatusActivity__in', None)
-            #exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
             aic_q = Q(OAISPackageType=1)
             if archiveobjects__StatusProcess__lt:
                 aic_q &= Q(archiveobjects__StatusProcess__lt = archiveobjects__StatusProcess__lt)
@@ -280,6 +282,23 @@ class ArchiveObject_dt_view(DatatableBaseView):
             #        qs = qs.exclude(OAISPackageType=1, archiveobjects__isnull=True)   
 
         return qs
+
+    def prepare_results(self, qs):
+        data = []
+        exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
+        for item in qs:
+            d={}
+            for column in self.get_columns():
+                d[column]=self.render_column(item, column)
+            if exclude_aic_without_ips:
+                if exclude_aic_without_ips == 'true':
+                    if d['OAISPackageType'] == 'AIC' and len(d['archiveobjects']) == 0: # Skip AICs with no IPs
+                        pass
+                    else:
+                        data.append(d)
+            else:
+                data.append(d)
+        return data
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'
