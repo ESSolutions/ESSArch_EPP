@@ -16,7 +16,7 @@
         <thead>
           <tr>
             <th></th>
-            <th>ObjectIdentifierValue</th>
+            <th>Identification</th>
             <th>Archivist organization</th>
             <th>Label</th>
             <th>Create date</th>
@@ -53,8 +53,9 @@ $(document).ready( function () {
 				archiveobjects__exclude_generation_0_and_latest: true,
 				//StatusProcess__in: '[0]',
 				exclude_ip_without_aic: true,
-				exclude_aic_without_ips: true,
+				//exclude_aic_without_ips: true,
 				//enable_StatusActivity_selection: true,
+				exclude_filtered_from_information: true,
 			},
 		},
 		//"lengthMenu": [ [10, 25, 50, 100, 1000000], [10, 25, 50, 100, "All"] ],
@@ -66,8 +67,8 @@ $(document).ready( function () {
 		//},
 		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
 			"<'row'<'col-sm-12'tr>>" +
-			//"<'row'<'col-sm-5'i><'col-sm-7'p>>",
-			"<'row'<'col-sm-5'><'col-sm-7'p>>",
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+			//"<'row'<'col-sm-5'><'col-sm-7'p>>",
 		buttons: [
 			{
 				extend: 'colvis',
@@ -80,6 +81,7 @@ $(document).ready( function () {
 				"data": null,         
 				"orderable": false,               
 				"visible": false,
+				"bSearchable": false,
 				"defaultContent": '',
 				"createdCell":    function ( cell, data, row ) {
 					if ( row.archiveobjects.length==0 && row.OAISPackageType!='AIC') {
@@ -87,9 +89,10 @@ $(document).ready( function () {
 					}
 				},
 			},
-			// ObjectIdentifierValue
+			// Identification ( ObjectIdentifierValue )
 			{ 
 				"data": "ObjectIdentifierValue",
+				"name": "ObjectIdentifierValue",
 				"createdCell":    function ( cell, data, row ) {
 					if ( row.archiveobjects.length>0 ) {
 						$(cell).addClass( 'collapse-control' );
@@ -114,23 +117,23 @@ $(document).ready( function () {
 				},
 			},
 			// Archivist organization ( EntryAgentIdentifierValue )
-			{ "data": "EntryAgentIdentifierValue"},
-			// Label ( Object_data.label )
-			{ "data": "ObjectMetadata__label", "orderable": false,},
+			{ "data": "EntryAgentIdentifierValue", "name": "EntryAgentIdentifierValue"},
+			// Label ( ObjectMetadata.label )
+			{ "data": "ObjectMetadata\\.label", "name": "ObjectMetadata.label"},
 			// Create date ( EntryDate )
-			{ "data": "EntryDate"},
-			// Start date ( Object_data.startdate )
-			{ "data": "ObjectMetadata__startdate", "orderable": false,},
-			// End date ( Object_data.enddate)
-			{ "data": "ObjectMetadata__enddate", "orderable": false,},
+			{ "data": "EntryDate", "name": "EntryDate"},
+			// Start date ( ObjectMetadata.startdate )
+			{ "data": "ObjectMetadata\\.startdate", "name": "ObjectMetadata.startdate"},
+			// End date ( ObjectMetadata.enddate)
+			{ "data": "ObjectMetadata\\.enddate", "name": "ObjectMetadata.enddate"},
 			// Type ( OAISPackageType )
-			{ "data": "OAISPackageType"},
+			{ "data": "OAISPackageType", "name": "OAISPackageType"},
 			// Generation ( Generation )
-			{ "data": "Generation"},
+			{ "data": "Generation", "name": "Generation"},
 			// State ( StatusProcess )
-			{ "data": "StatusProcess" },
+			{ "data": "StatusProcess", "name": "StatusProcess" },
 			// Activity ( StatusActivity )
-			{ "data": "StatusActivity"},
+			{ "data": "StatusActivity", "name": "StatusActivity"},
 			{
 				"data": null,
 				"visible": false,
@@ -140,17 +143,17 @@ $(document).ready( function () {
 						for ( var i=0, ien=row.archiveobjects.length ; i<ien ; i++ ) {
 							var ip = row.archiveobjects[i];
 							var rowNode = table.row.add( {
-								"id": ip.id,
-								"EntryAgentIdentifierValue": ip.EntryAgentIdentifierValue,
-								"ObjectIdentifierValue":ip.ObjectIdentifierValue,
-								"ObjectMetadata__label": ip.ObjectMetadata__label,
-								"EntryDate": ip.EntryDate,
-								"ObjectMetadata__startdate": ip.ObjectMetadata__startdate,
-								"ObjectMetadata__enddate": ip.ObjectMetadata__enddate,
-								"OAISPackageType": ip.OAISPackageType,
-								"Generation": ip.Generation,
-								"StatusProcess": ip.StatusProcess,
-								"StatusActivity": ip.StatusActivity,
+								"id": ip['id'],
+								"EntryAgentIdentifierValue": ip['EntryAgentIdentifierValue'],
+								"ObjectIdentifierValue": ip['ObjectIdentifierValue'],
+								"ObjectMetadata.label": ip['ObjectMetadata.label'],
+								"EntryDate": ip['EntryDate'],
+								"ObjectMetadata.startdate": ip['ObjectMetadata.startdate'],
+								"ObjectMetadata.enddate": ip['ObjectMetadata.enddate'],
+								"OAISPackageType": ip['OAISPackageType'],
+								"Generation": ip['Generation'],
+								"StatusProcess": ip['StatusProcess'],
+								"StatusActivity": ip['StatusActivity'],
 								"archiveobjects": '',
 							} ).node();  
 							$(rowNode).addClass( 'child-row' );

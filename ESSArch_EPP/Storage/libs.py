@@ -294,9 +294,10 @@ class StorageMethodWrite:
         '''
         for remote_host, ArchiveObject_obj_dict in self.IOs_to_transfer.iteritems():
             for ArchiveObject_obj, IOQueue_obj_list in ArchiveObject_obj_dict.iteritems():
+                IOQueue_objs_id_list = [i.id for i in IOQueue_obj_list]
+                result = TransferWriteIO().apply_async((IOQueue_objs_id_list,), queue='default')
                 for IOQueue_obj in IOQueue_obj_list:
                     # transfer IOQueue_obj to remote_host
-                    result = TransferWriteIO().apply_async((IOQueue_obj.id,), queue='default')
                     IOQueue_obj.transfer_task_id = result.task_id
                     IOQueue_obj.save(update_fields=['transfer_task_id'])
                     self.logger.info('Apply new transfer writeIO process for IOQueue_obj: %s with transfer_task: %s' % (

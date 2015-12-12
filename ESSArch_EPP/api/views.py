@@ -98,10 +98,10 @@ class ArchiveObjectListView(TemplateView):
 
 class ArchiveObject_dt_view(DatatableBaseView):
     qs =  ArchiveObject.objects.filter(
-                               Q(OAISPackageType=1, archiveobjects__isnull=False, aic_set__isnull=True) | 
+                               Q(OAISPackageType=1) | 
                                Q(OAISPackageType__in=[0,2], archiveobjects__isnull=True, aic_set__isnull=True)).distinct()
     columns = ['id', 'ObjectUUID', 
-          'PolicyId__PolicyID', 'ObjectIdentifierValue',
+          'PolicyId.PolicyID', 'ObjectIdentifierValue',
           'ObjectPackageName', 'ObjectSize',
           'ObjectNumItems', 'ObjectMessageDigestAlgorithm',
           'ObjectMessageDigest', 'ObjectPath',
@@ -118,11 +118,11 @@ class ArchiveObject_dt_view(DatatableBaseView):
           'DELIVERYTYPE', 'INFORMATIONCLASS',
           'Generation', 'LocalDBdatetime',
           'ExtDBdatetime', 'archiveobjects',
-          'ObjectMetadata__label', 'ObjectMetadata__startdate',
-          'ObjectMetadata__enddate']
+          'ObjectMetadata.label', 'ObjectMetadata.startdate',
+          'ObjectMetadata.enddate']
     order_columns = ['id', 'ObjectIdentifierValue', 'EntryAgentIdentifierValue', 
-                     'ObjectMetadata__label', 'ExtDBdatetime', 
-                     'ObjectMetadata__startdate', 'ObjectMetadata__enddate', 
+                     'ObjectMetadata.label', 'ExtDBdatetime', 
+                     'ObjectMetadata.startdate', 'ObjectMetadata.enddate', 
                      'OAISPackageType', 'Generation', 
                      'StatusProcess', 'StatusActivity']
     columns_archiveobjectdata_set = ['creator', 'label', 'startdate', 'enddate']
@@ -140,7 +140,8 @@ class ArchiveObject_dt_view(DatatableBaseView):
                 text = getattr(row, column)
             except AttributeError:
                 obj = row
-                for part in column.split('__'):
+                #for part in column.split('__'):
+                for part in column.split('.'):
                     if obj is None or hasattr(obj, 'all'):
                         break
                     obj = getattr(obj, part)
@@ -165,8 +166,10 @@ class ArchiveObject_dt_view(DatatableBaseView):
                 data.append(d)
             text=data
 
-        if column in ['Generation', 'StatusProcess']  and not row.OAISPackageType != 1: # Remove field for AICs
+        if column in ['Generation', 'StatusProcess']  and row.OAISPackageType == 1: # Remove field for AICs
             text = ''
+        elif column == 'Generation' and row.OAISPackageType in [0, 2] and len(str(text))>0:
+            text = 'IP_%s' % text
             
         if column == 'StatusActivity' and row.OAISPackageType != 1:
             enable_StatusActivity_selection = self._querydict.get('enable_StatusActivity_selection', None)
@@ -175,12 +178,11 @@ class ArchiveObject_dt_view(DatatableBaseView):
                     setactivity = 'setactivity(event,"%s")' % row.ObjectUUID
                     StatusActivityChoices = row._meta.get_field_by_name('StatusActivity')[0].choices
                     f = forms.ChoiceField(widget=forms.Select(attrs={'onchange':setactivity}), choices=StatusActivityChoices)
-                    #text = f.widget.render('aaa', row.StatusActivity, attrs={'id':row.ObjectUUID})
                     text = f.widget.render('selectstatusactivity', row.StatusActivity)
         elif column == 'StatusActivity': # Disable change of StatusActivity for AICs
             text = ''
         
-        if column in ['EntryDate', 'ObjectMetadata__startdate', 'ObjectMetadata__enddate']:
+        if column in ['EntryDate', 'ObjectMetadata.startdate', 'ObjectMetadata.enddate']:
             if type(text) is datetime.datetime:
                 return text.strftime(self.datetime_format)
         
@@ -189,22 +191,123 @@ class ArchiveObject_dt_view(DatatableBaseView):
         else:
             return text
 
-    def prepare_results(self, qs):
+    def prepare_results_off(self, qs):
         data = []
         for item in qs:
             d={}
             for column in self.get_columns():
                 d[column]=self.render_column(item, column)
-            exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
-            if exclude_aic_without_ips:
-                if exclude_aic_without_ips == 'true':
-                    if d['OAISPackageType'] == 'AIC' and len(d['archiveobjects']) == 0: # Skip AICs with no IPs
-                        pass
-                    else:
-                        data.append(d)
+            #exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
+            #if exclude_aic_without_ips:
+            #    if exclude_aic_without_ips == 'true':
+            #        if d['OAISPackageType'] == 'AIC' and len(d['archiveobjects']) == 0: # Skip AICs with no IPs
+            #            pass
+            #        else:
+                data.append(d)
             else:
                 data.append(d)
         return data
+    
+    def filter_ip_queryset(self, qs):
+        """ If search['value'] is provided then filter all searchable columns using istartswith
+        """
+        if not self.pre_camel_case_notation:
+            ip_search_global = False
+            if ip_search_global:
+                # get global search value
+                search = self._querydict.get('search[value]', None)
+                col_data = self.extract_datatables_column_data()
+                q = Q()
+                for col_no, col in enumerate(col_data):
+                    # apply global search to all searchable columns
+                    if search and col['searchable']:
+                        q |= Q(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): search})
+    
+                qs = qs.filter(q)
+
+            # IP specific filter
+            archiveobjects__StatusProcess__lt = self._querydict.get('archiveobjects__StatusProcess__lt', None)
+            archiveobjects__StatusProcess__in = self._querydict.get('archiveobjects__StatusProcess__in', None)
+            archiveobjects__StatusActivity__in = self._querydict.get('archiveobjects__StatusActivity__in', None)
+            archiveobjects__StatusProcess_or_StatusActivity__in = self._querydict.get('archiveobjects__StatusProcess_or_StatusActivity__in', None)
+            archiveobjects__exclude_generation_0_and_latest = self._querydict.get('archiveobjects__exclude_generation_0_and_latest', None)
+            if archiveobjects__StatusProcess__lt:
+                qs = qs.filter(StatusProcess__lt = archiveobjects__StatusProcess__lt)
+            if archiveobjects__StatusProcess__in:
+                qs = qs.filter(StatusProcess__in = eval(archiveobjects__StatusProcess__in))
+            if archiveobjects__StatusActivity__in:
+                qs = qs.filter(StatusActivity__in = eval(archiveobjects__StatusActivity__in))
+            if archiveobjects__StatusProcess_or_StatusActivity__in:
+                StatusProcess__in, StatusActivity__in = eval(archiveobjects__StatusProcess_or_StatusActivity__in)
+                qs = qs.filter(Q(StatusProcess__in = StatusProcess__in) | Q(StatusActivity__in = StatusActivity__in))
+            if archiveobjects__exclude_generation_0_and_latest:
+                if archiveobjects__exclude_generation_0_and_latest == 'true':
+                    if qs.count() > 0:
+                        latest_generation = qs.order_by('-Generation')[:1].get()
+                        qs = qs.exclude(StatusProcess__in=[5000,5100], Generation__in=[0,latest_generation.Generation])
+                    else:
+                        qs = qs.exclude(Generation=0)
+        return qs
+    
+    def filter_extra_queryset(self, qs):
+        """ If search['value'] is provided then filter all searchable columns using istartswith
+        """
+        if not self.pre_camel_case_notation:
+            # Extra IP filter
+            StatusProcess__lt = self._querydict.get('StatusProcess__lt', None)
+            StatusProcess__in = self._querydict.get('StatusProcess__in', None)
+            StatusActivity__in = self._querydict.get('StatusActivity__in', None)
+            StatusProcess_or_StatusActivity__in = self._querydict.get('StatusProcess_or_StatusActivity__in', None)
+            exclude_ip_without_aic = self._querydict.get('exclude_ip_without_aic', None)
+            #exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
+            ip_q = Q(OAISPackageType__in = [0, 2])
+            if StatusProcess__lt:
+                ip_q &= Q(StatusProcess__lt = StatusProcess__lt)
+                #qs = qs.filter(Q(StatusProcess__lt = StatusProcess__lt) | Q(OAISPackageType=1))
+                #qs = qs.filter(Q(StatusProcess__lt = StatusProcess__lt) | Q(archiveobjects__isnull=True, OAISPackageType=1))
+            if StatusProcess__in:
+                ip_q &= Q(StatusProcess__in = eval(StatusProcess__in))
+                #qs = qs.filter(Q(StatusProcess__in = eval(StatusProcess__in)) | Q(OAISPackageType=1))
+                #qs = qs.filter(Q(StatusProcess__in = eval(StatusProcess__in)) | Q(archiveobjects__isnull=True, OAISPackageType=1))
+            if StatusActivity__in:
+                ip_q &= Q(StatusActivity__in = eval(StatusActivity__in))
+                #qs = qs.filter(StatusActivity__in = eval(StatusActivity__in))
+            if StatusProcess_or_StatusActivity__in:                
+                StatusProcess__in, StatusActivity__in = eval(StatusProcess_or_StatusActivity__in)
+                ip_q &= Q(Q(StatusProcess__in = StatusProcess__in) | Q(StatusActivity__in = StatusActivity__in))
+                #qs = qs.filter(Q(StatusProcess__in = StatusProcess__in) | Q(StatusActivity__in = StatusActivity__in) | Q(OAISPackageType=1))
+            
+            # Extra AIC filter
+            archiveobjects__StatusProcess__lt = self._querydict.get('archiveobjects__StatusProcess__lt', None)
+            archiveobjects__StatusProcess__in = self._querydict.get('archiveobjects__StatusProcess__in', None)
+            archiveobjects__StatusActivity__in = self._querydict.get('archiveobjects__StatusActivity__in', None)
+            archiveobjects__StatusProcess_or_StatusActivity__in = self._querydict.get('archiveobjects__StatusProcess_or_StatusActivity__in', None)
+            #exclude_aic_without_ips = self._querydict.get('exclude_aic_without_ips', None)
+            aic_q = Q(OAISPackageType=1)
+            if archiveobjects__StatusProcess__lt:
+                aic_q &= Q(archiveobjects__StatusProcess__lt = archiveobjects__StatusProcess__lt)
+                #qs = qs.filter(archiveobjects__StatusProcess__lt = archiveobjects__StatusProcess__lt)
+            if archiveobjects__StatusProcess__in:
+                aic_q &= Q(archiveobjects__StatusProcess__in = eval(archiveobjects__StatusProcess__in))
+                #qs = qs.filter(archiveobjects__StatusProcess__in = eval(archiveobjects__StatusProcess__in))
+            if archiveobjects__StatusActivity__in:
+                aic_q &= Q(archiveobjects__StatusActivity__in = eval(archiveobjects__StatusActivity__in))
+                #qs = qs.filter(archiveobjects__StatusActivity__in = eval(archiveobjects__StatusActivity__in))
+            if archiveobjects__StatusProcess_or_StatusActivity__in:
+                StatusProcess__in, StatusActivity__in = eval(archiveobjects__StatusProcess_or_StatusActivity__in)
+                aic_q &= Q(Q(archiveobjects__StatusProcess__in = StatusProcess__in) | Q(archiveobjects__StatusActivity__in = StatusActivity__in))
+                #qs = qs.filter(Q(archiveobjects__StatusProcess__in = StatusProcess__in) | Q(archiveobjects__StatusActivity__in = StatusActivity__in))
+            
+            qs = qs.filter(Q(ip_q) | Q(aic_q))
+            
+            if exclude_ip_without_aic:
+                if exclude_ip_without_aic == 'true':
+                    qs = qs.exclude(OAISPackageType__in=[0,2], aic_set__isnull=True)
+            #if exclude_aic_without_ips:
+            #    if exclude_aic_without_ips == 'true':
+            #        qs = qs.exclude(OAISPackageType=1, archiveobjects__isnull=True)   
+
+        return qs
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'

@@ -1,70 +1,64 @@
-{% extends 'index.html' %}
-{% load js staticfiles%}
-{% load dictionary_extras %}
+{% extends 'admin/base_site.html' %}
+
+{% block server-side-base %}active{% endblock %}
 
 {% block content %}
 
-<div style="margin:20px">
-<H1>{{ label }}</H1>
-
-<br/>
-
-<div>
-  <table class="collaptable table">
-    <thead>
-      <tr>
-                
-                <th>AIC/Media</th>
-                <th>Archivist organization</th>
-                <th>Label</th>
-                <th>Create date</th>
-                <th>Start date</th>
-                <th>End date</th>
-                <th>IP type</th>
-                <th>State</th>
-                <th>AIC (UUID)</th>
-                <th>IP (UUID)</th>
-      </tr>
-    </thead>
-    <tbody>
-	      	{% for ip in filelist %}
-				<tr data-id="{{ ip.aic_uuid }}" data-parent="">
-				<td>AIC</td>
-				<td>{{ ip.EntryAgentIdentifierValue }}</td>
-				<td>{{ ip.label }}</td>
-				<td>{{ ip.createdate }}</td>
-				<td>{{ ip.startdate }}</td>
-				<td>{{ ip.enddate }}</td>
-				<td>AIC</td>
-				<td></td>
-                <td>{{ ip.aic_uuid }}</td>
-				</tr>
-		      	<tr data-id="{{ ip.uuid }}" data-parent="{{ ip.aic_uuid }}"> <!--  class="row{% cycle '1' '2' %}"-->
-					{% if not ip.uuid == '' %}
-						<td><a href="{% url 'controlarea_checkinfromreception' ip.uuid %}">{{ ip.media }}</a></td>
-					{% else %}
-						<td>{{ ip.media }}</td>
-					{% endif %}
+	<H2>{{ label }}</H2>
+	<br>
+	<div>
+	  <table class="collaptable table">
+	    <thead>
+	      <tr>              
+	                <th>AIC/Media</th>
+	                <th>Archivist organization</th>
+	                <th>Label</th>
+	                <th>Create date</th>
+	                <th>Start date</th>
+	                <th>End date</th>
+	                <th>IP type</th>
+	                <th>State</th>
+	                <th>AIC (UUID)</th>
+	                <th>IP (UUID)</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		      	{% for ip in filelist %}
+					<tr data-id="{{ ip.aic_uuid }}" data-parent="">
+					<td>AIC</td>
 					<td>{{ ip.EntryAgentIdentifierValue }}</td>
 					<td>{{ ip.label }}</td>
 					<td>{{ ip.createdate }}</td>
 					<td>{{ ip.startdate }}</td>
 					<td>{{ ip.enddate }}</td>
-					<td>{{ ip.iptype }}</td>
-					<td>{{ ip.StatusProcess }}</td>
-					<td>{{ ip.aic_uuid }}</td>
-					<td>{{ ip.uuid }}</td>
-		      	</tr>
-			{% endfor %}	
-    </tbody>
-  </table>
-</div>
-
-</div>
-
+					<td>AIC</td>
+					<td></td>
+	                <td>{{ ip.aic_uuid }}</td>
+					</tr>
+			      	<tr data-id="{{ ip.uuid }}" data-parent="{{ ip.aic_uuid }}"> <!--  class="row{% cycle '1' '2' %}"-->
+						{% if not ip.uuid == '' %}
+							<td><a href="{% url 'controlarea_checkinfromreception' ip.uuid %}">{{ ip.media }}</a></td>
+						{% else %}
+							<td>{{ ip.media }}</td>
+						{% endif %}
+						<td>{{ ip.EntryAgentIdentifierValue }}</td>
+						<td>{{ ip.label }}</td>
+						<td>{{ ip.createdate }}</td>
+						<td>{{ ip.startdate }}</td>
+						<td>{{ ip.enddate }}</td>
+						<td>{{ ip.iptype }}</td>
+						<td>{{ ip.StatusProcess }}</td>
+						<td>{{ ip.aic_uuid }}</td>
+						<td>{{ ip.uuid }}</td>
+			      	</tr>
+				{% endfor %}	
+	    </tbody>
+	  </table>
+	</div>
 {% endblock %}
+
 {% block app-extra-script %}
-    {% js "aCollapTable/aCollapTable.js" %}
+	<script type="text/javascript" src="/static/aCollapTable/aCollapTable.js"></script>
 <script>
 $(document).ready(function(){
   $('.collaptable').aCollapTable({ 
@@ -75,6 +69,4 @@ $(document).ready(function(){
   });
 });
 </script>
-
-
 {% endblock %}

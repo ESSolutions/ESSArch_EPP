@@ -73,11 +73,11 @@ class TransferWriteIO(Task):
     "ObjectPath"/"ObjectIdentifierValue"_Package_METS.xml
     "ObjectPath"/"aic_uuid"_AIC_METS.xml
     
-    :param req_pk: Primary key to IOQueue database table to be performed
+    :param req_pk_list: List of primary keys to IOQueue database table to be performed
     
     Example:
     from Storage.tasks import TransferWriteIO
-    result = TransferWriteIO().apply_async(('03a33829bad6494e990fe08bfdfb4f6b',), queue='default')
+    result = TransferWriteIO().apply_async((['03a33829bad6494e990fe08bfdfb4f6b'],), queue='default')
     result.status
     result.result
     
@@ -86,66 +86,70 @@ class TransferWriteIO(Task):
     time_limit = 86400
     logger = logging.getLogger('Storage')
 
-    def run(self, req_pk, *args, **kwargs):
+    def run(self, req_pk_list, *args, **kwargs):
         """The body of the task executed by workers."""
         logger = self.logger
-        IO_obj = IOQueue.objects.get(pk=req_pk)
-
-        # Let folks know we started
-        IO_obj.remote_status = 5
-        IO_obj.save(update_fields=['remote_status'])
-
-        try:
-            st_obj = IO_obj.storagemethodtarget
-            target_obj = st_obj.target
-            self.base_url, ruser, rpass = target_obj.remote_server.split(',')
-            self.requests_session = self._initialize_requests_session(ruser, rpass, cert_verify=False, disable_warnings=True)
-            result = self._TransferWriteIOProc(req_pk)
-        except ESSArchSMError as e:
-            IO_obj.refresh_from_db()
-            msg = 'Problem to transfer object %s to remote, error: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e)
-            logger.error(msg)
-            #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
-            IO_obj.remote_status = 100
+        IO_objs = IOQueue.objects.filter(pk__in=req_pk_list)
+        for TaskNum, IO_obj in enumerate(IO_objs):
+            
+            # Let folks know we started
+            IO_obj.remote_status = 5
             IO_obj.save(update_fields=['remote_status'])
-            raise self.retry(exc=e, countdown=60, max_retries=5)
-            #raise e
-        except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            IO_obj.refresh_from_db()
-            msg = 'Unknown error to transfer object %s to remote, error: %s trace: %s (IOuuid: %s)' % (
-                                                                                                       IO_obj.archiveobject.ObjectIdentifierValue, 
-                                                                                                       e, 
-                                                                                                       repr(traceback.format_tb(exc_traceback)), 
-                                                                                                       IO_obj.id)
-            logger.error(msg)
-            #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
-            IO_obj.remote_status = 100
-            IO_obj.save(update_fields=['remote_status'])
-            raise e
-        else:
-            IO_obj.refresh_from_db()
-            ObjectSizeMB = int(result.get('TransferSize'))/1048576
-            MBperSEC = ObjectSizeMB/int(result.get('TransferTime').seconds)
-            msg = 'Success to transfer IOuuid: %s for object %s to %s, TransferSize: %s, TransferTime: %s (%s MB/Sec)' % (IO_obj.id, 
-                                                                                                                                                                       result.get('ObjectIdentifierValue'),
-                                                                                                                                                                       result.get('remote_server'),
-                                                                                                                                                                       result.get('TransferSize'), 
-                                                                                                                                                                       result.get('TransferTime'), 
-                                                                                                                                                                       MBperSEC,
-                                                                                                                                                                       )
-            logger.info(msg)
-            #ESSPGM.Events().create('1102','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
-            IO_obj.remote_status = 20
-            IO_obj.save(update_fields=['remote_status'])
-            return result
+    
+            try:
+                st_obj = IO_obj.storagemethodtarget
+                target_obj = st_obj.target
+                self.base_url, ruser, rpass = target_obj.remote_server.split(',')
+                self.requests_session = self._initialize_requests_session(ruser, rpass, cert_verify=False, disable_warnings=True)
+                if TaskNum == 0:
+                    result = self._TransferWriteIOProc(IO_obj.id)
+                else:
+                    result = self._TransferWriteIOProc(IO_obj.id, skip_file_transfer=True)
+            except ESSArchSMError as e:
+                IO_obj.refresh_from_db()
+                msg = 'Problem to transfer object %s to remote, error: %s' % (IO_obj.archiveobject.ObjectIdentifierValue, e)
+                logger.error(msg)
+                #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                IO_obj.remote_status = 100
+                IO_obj.save(update_fields=['remote_status'])
+                raise self.retry(exc=e, countdown=60, max_retries=5)
+                #raise e
+            except Exception as e:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                IO_obj.refresh_from_db()
+                msg = 'Unknown error to transfer object %s to remote, error: %s trace: %s (IOuuid: %s)' % (
+                                                                                                           IO_obj.archiveobject.ObjectIdentifierValue, 
+                                                                                                           e, 
+                                                                                                           repr(traceback.format_tb(exc_traceback)), 
+                                                                                                           IO_obj.id)
+                logger.error(msg)
+                #ESSPGM.Events().create('1102','',self.__name__,__version__,'1',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)
+                IO_obj.remote_status = 100
+                IO_obj.save(update_fields=['remote_status'])
+                raise e
+            else:
+                IO_obj.refresh_from_db()
+                ObjectSizeMB = int(result.get('TransferSize'))/1048576
+                MBperSEC = ObjectSizeMB/int(result.get('TransferTime').seconds)
+                msg = 'Success to transfer IOuuid: %s for object %s to %s, TransferSize: %s, TransferTime: %s (%s MB/Sec)' % (IO_obj.id, 
+                                                                                                                                                                           result.get('ObjectIdentifierValue'),
+                                                                                                                                                                           result.get('remote_server'),
+                                                                                                                                                                           result.get('TransferSize'), 
+                                                                                                                                                                           result.get('TransferTime'), 
+                                                                                                                                                                           MBperSEC,
+                                                                                                                                                                           )
+                logger.info(msg)
+                #ESSPGM.Events().create('1102','',self.__name__,__version__,'0',msg,2,IO_obj.archiveobject.ObjectIdentifierValue)       
+                IO_obj.remote_status = 20
+                IO_obj.save(update_fields=['remote_status'])
+                return result
 
     #def on_failure(self, exc, task_id, args, kwargs, einfo):
     #    logger = logging.getLogger('StorageTransfer')
     #    logger.exception("Something happened when trying"
     #                     " to resolve %s" % args[0])
 
-    def _TransferWriteIOProc(self,IO_obj_uuid):
+    def _TransferWriteIOProc(self,IO_obj_uuid, skip_file_transfer=False):
         """Transfer IO_obj to remote host
         
         :param IO_obj_uuid: Primary key to entry in IOQueue database table
@@ -281,18 +285,20 @@ class TransferWriteIO(Task):
                                                 data=IO_obj_json)
                 if not r.status_code == 201:
                     raise DatabasePostRestError([r.status_code, r.reason, r.text])
+
                 # Upload IO_obj to remote tmpworkarea
-                upload_rest_endpoint = urljoin(self.base_url, 'api/create_tmpworkarea_upload')
-                upload_rest_client = UploadChunkedRestClient(self.requests_session, 
-                                                             upload_rest_endpoint, 
-                                                             self._custom_progress_reporter)
-                self.upload_file =  ip_tar_path_source
-                upload_rest_client.upload(ip_tar_path_source)
-                self.upload_file = ip_p_mets_path_source
-                upload_rest_client.upload(ip_p_mets_path_source)
-                if target_obj.format == 103:
-                    self.upload_file = aic_mets_path_source
-                    upload_rest_client.upload(aic_mets_path_source)
+                if not skip_file_transfer:
+                    upload_rest_endpoint = urljoin(self.base_url, 'api/create_tmpworkarea_upload')
+                    upload_rest_client = UploadChunkedRestClient(self.requests_session, 
+                                                                 upload_rest_endpoint, 
+                                                                 self._custom_progress_reporter)
+                    self.upload_file =  ip_tar_path_source
+                    upload_rest_client.upload(ip_tar_path_source)
+                    self.upload_file = ip_p_mets_path_source
+                    upload_rest_client.upload(ip_p_mets_path_source)
+                    if target_obj.format == 103:
+                        self.upload_file = aic_mets_path_source
+                        upload_rest_client.upload(aic_mets_path_source)
             except (UploadChunkedRestException, DatabasePostRestError, requests.exceptions.RequestException) as e:
                 msg = 'Problem transfer writeIO %s to target %s on remote: %s, IOuuid: %s, error: %s' % (
                                                                                                          ObjectIdentifierValue, 
