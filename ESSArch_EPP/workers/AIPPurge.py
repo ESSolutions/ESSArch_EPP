@@ -107,7 +107,8 @@ class WorkingThread:
                         if not os.path.exists(self.AIC_GatePath):
                             logging.warning('AIC not found in gate area, %s' % self.AIC_GatePath)
                             self.AIC_GatePath = None
-                        self.IP_PreIngestPath = os.path.join(os.path.join(self.PreIngestPath,self.AIC_UUID),self.ObjectUUID)
+                        self.AIC_path_control = os.path.join(self.PreIngestPath,self.AIC_UUID)
+                        self.IP_PreIngestPath = os.path.join(self.AIC_path_control, self.ObjectUUID)
                         if not os.path.exists(self.IP_PreIngestPath):
                             logging.warning('IP not found in control area, %s' % self.IP_PreIngestPath)
                             self.IP_PreIngestPath = None
@@ -133,6 +134,9 @@ class WorkingThread:
                         if self.IP_PreIngestPath: 
                             logging.info('Try to purge IP from control area: %s' % self.IP_PreIngestPath)
                             shutil.rmtree(self.IP_PreIngestPath)
+                            if os.listdir(self.AIC_path_control) == []:
+                                logging.info('Try to purge AIC from control area: %s' % self.AIC_path_control)
+                                shutil.rmtree(self.AIC_path_control)
                     except (IOError,os.error), why:
                         errno,why = ESSPGM.DB().SetAIPstatus(self.IngestTable, self.ext_IngestTable, AgentIdentifierValue, self.ObjectUUID, 2001, 4)
                         if errno: 

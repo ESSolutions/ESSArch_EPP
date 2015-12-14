@@ -657,6 +657,9 @@ class MoveToAccessPath(Task):
             IO_obj = IOQueue.objects.get(pk=req_pk)
             source_path = IO_obj.ObjectPath
             target_path = IO_obj.accessqueue.Path
+            # Create target_path directory if not exists
+            if not os.path.exists(target_path):
+                os.makedirs(target_path)
             for filename in filename_list:
                 source_filepath = os.path.join(source_path, filename)
                 target_filepath = os.path.join(target_path, filename)

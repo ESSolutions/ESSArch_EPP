@@ -1204,15 +1204,23 @@ class ReadStorageMethodTape(Task):
 
         startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
         tmp_target_path = os.path.join(target_path,'.tmpextract')
+
+        # Create DIP directory if not exists
+        if runflag and not os.path.exists(tmp_target_path):
+            try:
+                os.makedirs(tmp_target_path)
+            except OSError as e:
+                msg = 'Problem to create / access DIP directory: %s, IOuuid: %s' % (target_path, IO_obj_uuid)
+                logger.error(msg)
+                error_list.append(msg)
+                runflag = 0
+
         # Check write access to DIP directory
         if not os.access(target_path, 7):
-            msg = 'Problem to access DIP directory: %s, IOuuid: %s' % (target_path, IO_obj_uuid)
+            msg = 'Problem to access DIP directory: %s, IOuuid: %s' % (tmp_target_path, IO_obj_uuid)
             logger.error(msg)
             error_list.append(msg)
             runflag = 0
-        # Check if temp DIP directory exist, if not create tempDIR
-        if runflag and not os.path.exists(tmp_target_path):
-            os.mkdir(tmp_target_path)
 
         if runflag:
             ########################################################
