@@ -387,7 +387,7 @@ def installdefaultpaths(): # default paths
             'path_reception':'/ESSArch/data/eta/reception',
             'path_gate':'/ESSArch/data/gate',
             'path_work':'/ESSArch/data/epp/work',
-            'path_control':'/ESSArch/epp',
+            'path_control':'/ESSArch/data/epp/control',
             'path_ingest':'/ESSArch/data/epp/ingest',
             'TmpWorkarea_upload_path':'/ESSArch/data/epp/temp',
             }
