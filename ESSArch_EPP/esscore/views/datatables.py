@@ -13,7 +13,7 @@ class DatatableBaseView(views.APIView, DatatableMixin):
     qs = None
 
     def get_initial_queryset(self):
-        if self.qs:
+        if self.qs is not None:
             return self.qs
         elif self.model:
             return self.model.objects.all()
