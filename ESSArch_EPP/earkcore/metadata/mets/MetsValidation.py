@@ -10,6 +10,7 @@ import os
 import lxml
 
 from config.config import mets_schema_file
+from config.config import premis_schema_file
 from lxml import etree
 from earkcore.fixity.ChecksumValidation import ChecksumValidation
 from earkcore.metadata.XmlHelper import q
@@ -21,13 +22,14 @@ METS_NS = 'http://www.loc.gov/METS/'
 
 class MetsValidation(object):
     '''
-    Validation of Mets files.
+    Validation of the Mets file. This includes also the validation of Premis files that are linked in the amdSec!
     '''
 
     def __init__(self, root):
         self.validation_errors = []
         self.total_files = 0
-        self.schema = etree.XMLSchema(file=mets_schema_file)
+        self.schema_mets = etree.XMLSchema(file=mets_schema_file)
+        self.schema_premis = etree.XMLSchema(file=premis_schema_file)
         self.rootpath = root
         self.subsequent_mets = []
 
@@ -49,7 +51,7 @@ class MetsValidation(object):
             self.rootpath = mets.rsplit('/', 1)[0]
 
         try:
-            parsed_mets = etree.iterparse(open(mets), events=('start', 'end'), schema=self.schema)
+            parsed_mets = etree.iterparse(open(mets), events=('start', 'end'), schema=self.schema_mets)
             for event, element in parsed_mets:
                 # Define what to do with specific tags.
                 if event == 'end' and element.tag == q(METS_NS, 'file'):
@@ -59,31 +61,56 @@ class MetsValidation(object):
                     element.clear()
                     while element.getprevious() is not None:
                         del element.getparent()[0]
-                elif event == 'end' and element.tag == q(METS_NS, 'structMap') and element.attrib['LABEL'] == 'representations':
+                elif event == 'end' and element.tag == q(METS_NS, 'div') and element.attrib['LABEL'] == 'representations':
                     # representation mets files
-                    rep =  element.getchildren()[0].attrib['LABEL']
-                    for child in element.getchildren()[0]:
-                        if child.tag == q(METS_NS, 'mptr'):
-                            metspath = child.attrib[q(XLINK_NS, 'href')]
-                            sub_mets = rep, metspath
-                            self.subsequent_mets.append(sub_mets)
-                    element.clear()
-                    while element.getprevious() is not None:
-                        del element.getparent()[0]
+                    for element in element.getchildren():
+                        rep = element.attrib['LABEL']
+                        for child in element:
+                            if child.tag == q(METS_NS, 'mptr'):
+                                metspath = child.attrib[q(XLINK_NS, 'href')]
+                                sub_mets = rep, metspath
+                                self.subsequent_mets.append(sub_mets)
+                        element.clear()
+                        while element.getprevious() is not None:
+                            del element.getparent()[0]
                 elif event == 'end' and element.tag == q(METS_NS, 'dmdSec'):
                     # dmdSec
                     pass
                 elif event == 'end' and element.tag == q(METS_NS, 'amdSec'):
-                    # amdSec
-                    pass
+                    # pass
+                    if len(element.getchildren()) > 0:
+                        for element in element.getchildren():
+                            # element = didiprovMD
+                            if len(element.getchildren()) > 0:
+                                for element in element.getchildren():
+                                    # element = mdRef
+                                    if element.attrib['MDTYPE'] == 'PREMIS':
+                                        if element.attrib[q(XLINK_NS, 'href')].startswith('file://./'):
+                                            rel_path = element.attrib[q(XLINK_NS, 'href')]
+                                            premis = os.path.join(self.rootpath, rel_path[9:])
+                                            try:
+                                                parsed_premis = etree.iterparse(open(premis), events=('start',), schema=self.schema_premis)
+                                                for event, element in parsed_premis:
+                                                    pass
+                                                print 'Successfully validated Premis file: %s' % premis
+                                            except etree.XMLSyntaxError, e:
+                                                print 'VALIDATION ERROR: The Premis file %s yielded errors:' % premis
+                                                print e.error_log
+                                                self.validation_errors.append(e.error_log)
+                                        else:
+                                            pass
+                                    else:
+                                        pass
         except etree.XMLSyntaxError, e:
             self.validation_errors.append(e.error_log)
 
         if self.total_files != 0:
             self.validation_errors.append('File count yielded %d instead of 0.' % self.total_files)
 
-        # for error in self.validation_errors:
-        #     print error
+        # enable/disable error logging to console
+        print 'Error log for METS file: ', mets
+        for error in self.validation_errors:
+            print error
 
         return True if len(self.validation_errors) == 0 else False
 
@@ -126,6 +153,11 @@ class MetsValidation(object):
             # validate checksum
             checksum_validation = ChecksumValidation()
             checksum_result = checksum_validation.validate_checksum(file_path, attr_checksum, attr_checksumtype)
+
+            # workaround for earkweb.log in AIP metadata/ folder on IP root level
+            if file_path[-22:] == './metadata/earkweb.log':
+                checksum_result = True
+
             if not checksum_result == True:
                 err.append('Checksum validation failed for: %s' % file_path)
 
@@ -137,11 +169,11 @@ class MetsValidation(object):
 
 class TestMetsValidation(unittest.TestCase):
     # TODO: add one test each for a valid and a faulty Mets
-    rootpath = '/var/data/earkweb/work/7449629c-9e67-44d6-a10e-21d1fdfa4ebd/'
+    rootpath = '/var/data/earkweb/work/c214c594-421d-4026-81b1-d71250eb826b/'
 
     def test_IP_mets(self):
         mets_validator = MetsValidation(self.rootpath)
-        mets_validator.validate_mets(os.path.join(self.rootpath, 'IP.xml'))
+        mets_validator.validate_mets(os.path.join(self.rootpath, 'METS.xml'))
         for rep, metspath in mets_validator.subsequent_mets:
             # print 'METS file for representation: %s at path: %s' % (rep, metspath)
             subsequent_mets_validator = MetsValidation(self.rootpath)
