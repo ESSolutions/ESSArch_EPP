@@ -896,7 +896,6 @@ class CheckoutToGateFromWork(CreateView):
         target_path = os.path.join(self.target_path, 'exchange/%s' % ReqUUID)
         source_path = os.path.join(self.source_path, self.request.user.username)
         #status_code, tmp_status_detail = 
-        #ReqUUID = form.cleaned_data.get('ReqUUID')
         ReqType = form.cleaned_data.get('ReqType')
         ReqPurpose = form.cleaned_data.get('ReqPurpose')
         user = form.cleaned_data.get('user')
@@ -959,8 +958,8 @@ class CheckoutToGateFromWork(CreateView):
         #self.request.session['result_status_detail'] = status_detail
         CopyFilelistTask_id = CopyFilelistTask_res.task_id
         self.object.taskid = CopyFilelistTask_id
-        print ('Task ID')
-        print (self.object.taskid)
+        #print ('Task ID')
+        #print (self.object.taskid)
         self.object.save()
         self.success_url = '/controlarea/checkouttogateprogress/' +  CopyFilelistTask_id
         return super(CheckoutToGateFromWork, self).form_valid(form)
@@ -1052,18 +1051,17 @@ class CheckinFromGateToWork(CreateView):
         ReqUUID = form.cleaned_data.get('ReqUUID',uuid.uuid1())
         target_path = os.path.join(self.target_path, '%s/incoming/%s' % (self.request.user.username,ReqUUID))
         source_path = os.path.join(self.source_path, 'exchange/%s' % self.request.user.username)
-        #status_code, tmp_status_detail = 
-        ReqUUID = form.cleaned_data.get('ReqUUID'), 
-        ReqType = form.cleaned_data.get('ReqType'), 
-        ReqPurpose = form.cleaned_data.get('ReqPurpose'), 
-        user = form.cleaned_data.get('user'), 
-        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue'),
+        #status_code, tmp_status_detail =  
+        ReqType = form.cleaned_data.get('ReqType') 
+        ReqPurpose = form.cleaned_data.get('ReqPurpose') 
+        user = form.cleaned_data.get('user')
+        ObjectIdentifierValue = form.cleaned_data.get('ObjectIdentifierValue')
         TimeZone = timezone.get_default_timezone_name()
         loc_timezone=pytz.timezone(TimeZone)
         dt = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
         posted = dt.astimezone(loc_timezone).isoformat()
         #filelist = req_filelist, 
-        reqfilename = os.path.join(target_path,'request.xml'),
+        reqfilename = os.path.join(target_path,'request.xml')
         linkingAgentIdentifierValue=self.request.user.username        
         CopyFilelistTask.delay_or_fail(source_path=source_path,
                                         target_path=target_path,
@@ -1238,9 +1236,9 @@ class DiffCheck(CreateView):
             Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
         METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), Cmets_obj )
         ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue')#self.ip_obj.ObjectUUID
-        print'ObjectIdentifierValue'
-        print ObjectIdentifierValue
-        print ObjectIdentifierValue[0]
+        #print'ObjectIdentifierValue'
+        #print ObjectIdentifierValue
+        #print ObjectIdentifierValue[0]
         ObjectPath=IP_ObjectPath
         ReqUUID=form.cleaned_data.get('ReqUUID',None)
         linkingAgentIdentifierValue=self.request.user.username
@@ -1258,8 +1256,8 @@ class DiffCheck(CreateView):
         #self.request.session['result_status_detail'] = status_detail
         diffchecktaskid = IPtoDiffcheck.task_id
         self.object.taskid = diffchecktaskid
-        print ('Task ID')
-        print (self.object.taskid)
+        #print ('Task ID')
+        #print (self.object.taskid)
         self.object.save()
         #self.success_url = reverse_lazy('taskoverview')
         #self.success_url = '/controlarea/diffcheckprogress/' + taskid
@@ -1577,8 +1575,8 @@ class DeleteIPListInfoView(View):
                 AIC_IPs = []
                 AIC['AIC_UUID'] =(str(obj.ObjectUUID)) 
                 lastgeneration =  AIC_IPs_query.filter(UUID__StatusProcess__in=[5000,5100]).aggregate(Max('UUID__Generation')).values()[0]
-                print 'lastgeneration'
-                print lastgeneration
+                #print 'lastgeneration'
+                #print lastgeneration
                 excludelist = []
                 for pp in AIC_IPs_query:
                     if pp.UUID.StatusProcess == 3000:
@@ -1754,16 +1752,16 @@ class TasksInfo(View):
     def getTaskInfo(self, *args, **kwargs):
 
         numberofdays = int(self.kwargs['days'])
-        print 'numberofdays'
-        print numberofdays
+        #print 'numberofdays'
+        #print numberofdays
 
         enddate = datetime.datetime.now()
-        print 'enddate'
-        print enddate
+        #print 'enddate'
+        #print enddate
 
         startdate = enddate - datetime.timedelta(days=numberofdays)
-        print 'startdate'
-        print startdate
+        #print 'startdate'
+        #print startdate
 
         allTasks = TaskMeta.objects.filter(date_done__range=[startdate, enddate]).order_by('date_done').reverse()
 
@@ -1894,10 +1892,10 @@ class TaskResult(View):
         taskwrapper = {}
         task = {}
         thetaskid = self.kwargs['taskid']
-        print (thetaskid)
+        #print (thetaskid)
         
         kwargstest = TaskMeta.objects.filter(task_id=thetaskid).exists()
-        print (kwargstest)
+        #print (kwargstest)
         if kwargstest:
             #cache._cache.clear()
             thetask = TaskMeta.objects.filter(task_id=thetaskid)

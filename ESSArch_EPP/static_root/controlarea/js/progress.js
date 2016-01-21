@@ -8,6 +8,9 @@ $.getJSON( '/task/' + taskid + '/status/', function(taskinprogressinfo){
 	
 	});
 */
+
+$.ajaxSetup({ cache: false });
+
 $.getJSON( '/controlarea/taskresult/' + taskid + '/', function(taskinprogressinfo){
 
 
@@ -99,10 +102,22 @@ function successtask(result){
     var statuslisthtml = '<br>Status<br><table>';
     
     for (i = 0; i < statuslist.length; i++){
-    
-    statuslisthtml = statuslisthtml + '<tr><td>' + statuslist[i] + '<td></tr>';
-    
-    }
+
+        var statusitem = statuslist[i];
+        var statusiteminfo = "";
+        if(statusitem['py/tuple']){
+
+        statusiteminfo = statusitem['py/tuple'][0];
+
+        }
+        else{
+
+        statusiteminfo = statusitem;
+
+       }
+        statuslisthtml = statuslisthtml + '<tr><td>' + statusiteminfo + '<td></tr>';
+
+        }
 
     statuslisthtml = statuslisthtml + '</table>';
     infohtml = infohtml + statuslisthtml;
