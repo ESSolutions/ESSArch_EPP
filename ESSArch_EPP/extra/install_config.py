@@ -372,18 +372,18 @@ def installdefaultpaths(): # default paths
     Path.objects.all().delete()
 
     # create dictionaries for different sites
-    if install_site == 'ESSArch_RA-OSLO':
-        dct = {
-            #'path_reception':'/data/mottak',
-            'path_reception':'/mottak',
-            'path_gate':'/data/ioessarch/',
-            'path_work':'/data/test',
-            'path_control':'/kontroll',
-            'path_ingest':'/data/ingest',
-            'TmpWorkarea_upload_path':'/ESSArch/data/epp/temp',
-            }
-    else:
-        dct = {
+    #if install_site == 'ESSArch_RA-OSLO':
+    #    dct = {
+    #        #'path_reception':'/data/mottak',
+    #        'path_reception':'/mottak',
+    #        'path_gate':'/data/ioessarch/',
+    #        'path_work':'/data/test',
+    #        'path_control':'/kontroll',
+    #        'path_ingest':'/data/ingest',
+    #        'TmpWorkarea_upload_path':'/ESSArch/data/epp/temp',
+    #        }
+    #else:
+    dct = {
             'path_reception':'/ESSArch/data/eta/reception',
             'path_gate':'/ESSArch/data/gate',
             'path_work':'/ESSArch/data/epp/work',

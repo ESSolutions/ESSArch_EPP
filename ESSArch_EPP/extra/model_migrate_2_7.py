@@ -137,6 +137,65 @@ def migrate_storage_model():
                                                                   storage_old_obj.contentLocationValue,
                                                                   storage_old_obj.contentLocationType))     
 
+def update_or_log(ip_obj, attr, ais_value, update_values):
+    ais_value_set_to_blank = False
+    ais_value_to_check = False
+    local_value_set_to_blank = False
+    local_value_updated = False
+    local_value = getattr(ip_obj, attr)
+    if (local_value is '' or local_value is None) and (ais_value is not '' and ais_value is not None):
+        setattr(ip_obj, attr, ais_value)
+        local_value_updated = True
+    elif local_value is None:
+        setattr(ip_obj, attr, '')
+        local_value_set_to_blank = True
+        local_value_updated = True
+        if ais_value is None:
+            ais_value_set_to_blank = True
+    elif local_value is '' and ais_value is None:
+        ais_value_set_to_blank = True
+    elif not local_value == ais_value:
+        if ais_value is not None:
+            setattr(ip_obj, attr, ais_value)
+            local_value_updated = True
+        elif ais_value is None and attr=='DELIVERYTYPE': # Special solution, EPP can not update DELIVERYTYPE in AIS....
+            setattr(ip_obj, attr, '')
+            local_value_set_to_blank = True
+        else:
+            ais_value_to_check = True
+
+    if ais_value_set_to_blank:
+        update_values['ais_values_set_to_blank'].append(attr)
+    if ais_value_to_check:
+        update_values['ais_values_to_check'].append(attr)
+    if local_value_set_to_blank:
+        update_values['local_values_set_to_blank'].append(attr)
+    if local_value_updated:
+        update_values['local_values_updated'].append(attr)
+    
+    return ip_obj, update_values
+
+def datetime_update_or_log(ip_obj, attr, ais_value, update_values):
+    ais_value_to_check = False
+    local_value_updated = False
+    local_value = getattr(ip_obj, attr)
+    if ais_value is not None:
+        ais_value_dst = ais_value.replace(microsecond=0,tzinfo=tz)
+        ais_value_utc = ais_value_dst.astimezone(pytz.utc)
+        if not local_value == ais_value_utc:       
+            setattr(ip_obj, attr, ais_value_utc)
+            local_value_updated = True
+    
+    if local_value is not None and ais_value is None:
+        ais_value_to_check = True
+
+    if ais_value_to_check:
+        update_values['ais_values_to_check'].append(attr)
+    if local_value_updated:
+        update_values['local_values_updated'].append(attr)
+    
+    return ip_obj, update_values
+
 def update_archive_obj_from_ais(ais=True):
     ip_objs=ArchiveObject.objects.filter(Q(DELIVERYTYPE__isnull=True) | Q(ObjectUUID__isnull=True) | Q(ObjectPackageName__isnull=True))
     for ip_obj in ip_objs:
@@ -233,53 +292,74 @@ def update_archive_obj_from_ais(ais=True):
         elif len(ip_objs_ext) == 1:
             ip_obj_ext = ip_objs_ext[0]
             logger.debug('IngestObjectUUID: %s' % str(uuid.UUID(ip_obj_ext[23])))
-            LastEventDate_dst = ip_obj_ext[19].replace(microsecond=0,tzinfo=tz)
-            LastEventDate_utc = LastEventDate_dst.astimezone(pytz.utc)
-            CreateDate_dst = ip_obj_ext[21].replace(microsecond=0,tzinfo=tz)
-            CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
-            EntryDate_dst = ip_obj_ext[24].replace(microsecond=0,tzinfo=tz)
-            EntryDate_utc = EntryDate_dst.astimezone(pytz.utc)
 
             if ip_obj.check_db_sync(): # Check if ESSArch and centralDB is in sync
                 ###################################################
                 # archive object exist in local "IngestObject" DB try to update
-                logger.info('Found archive object: %s in local "IngestObject" DB, try to update',ip_obj_ext[1])
+                #logger.info('Found archive object: %s in local "IngestObject" DB, try to update',ip_obj_ext[1])
                 timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
                 timestamp_dst = timestamp_utc.astimezone(tz)
                 #ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                 #ip_obj.PolicyId = ArchivePolicy_obj
-                ip_obj.ObjectPackageName = ip_obj_ext[2]
+                update_values = {}
+                update_values['ais_values_set_to_blank'] = []
+                update_values['ais_values_to_check'] = []
+                update_values['local_values_set_to_blank'] = []
+                update_values['local_values_updated'] = []
+                update_local_ip = True
+                ip_obj, update_values = update_or_log(ip_obj, 'ObjectPackageName', ip_obj_ext[2], update_values)    
                 ip_obj.ObjectSize = ip_obj_ext[3]
                 ip_obj.ObjectNumItems = ip_obj_ext[4]
                 ip_obj.ObjectMessageDigestAlgorithm = ip_obj_ext[5]
-                ip_obj.ObjectMessageDigest = ip_obj_ext[6]
-                ip_obj.ObjectPath = ip_obj_ext[7]
-                ip_obj.MetaObjectIdentifier = ip_obj_ext[8]
+                ip_obj, update_values = update_or_log(ip_obj, 'ObjectMessageDigest', ip_obj_ext[6], update_values)
+                ip_obj, update_values = update_or_log(ip_obj, 'ObjectPath', ip_obj_ext[7], update_values)
+                ip_obj, update_values = update_or_log(ip_obj, 'MetaObjectIdentifier', ip_obj_ext[8], update_values)
                 ip_obj.MetaObjectSize = ip_obj_ext[9]
                 ip_obj.CMetaMessageDigestAlgorithm = ip_obj_ext[10]
-                ip_obj.CMetaMessageDigest = ip_obj_ext[11]
+                ip_obj, update_values = update_or_log(ip_obj, 'CMetaMessageDigest', ip_obj_ext[11], update_values)
                 ip_obj.PMetaMessageDigestAlgorithm = ip_obj_ext[12]
-                ip_obj.PMetaMessageDigest = ip_obj_ext[13]
+                ip_obj, update_values = update_or_log(ip_obj, 'PMetaMessageDigest', ip_obj_ext[13], update_values)
                 ip_obj.DataObjectSize = ip_obj_ext[14]
                 ip_obj.DataObjectNumItems = ip_obj_ext[15]
                 ip_obj.Status = ip_obj_ext[16]
                 ip_obj.StatusActivity = ip_obj_ext[17]
                 ip_obj.StatusProcess = ip_obj_ext[18]
-                ip_obj.LastEventDate = LastEventDate_utc
-                ip_obj.linkingAgentIdentifierValue = ip_obj_ext[20]
-                ip_obj.CreateDate = CreateDate_utc
-                ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
+                ip_obj, update_values = datetime_update_or_log(ip_obj, 'LastEventDate', ip_obj_ext[19], update_values)
+                ip_obj, update_values = update_or_log(ip_obj, 'linkingAgentIdentifierValue', ip_obj_ext[20], update_values)
+                ip_obj, update_values = datetime_update_or_log(ip_obj, 'CreateDate', ip_obj_ext[21], update_values)
+                ip_obj, update_values = update_or_log(ip_obj, 'CreateAgentIdentifierValue', ip_obj_ext[22], update_values)
                 ip_obj.ObjectUUID = uuid.UUID(ip_obj_ext[23])
-                ip_obj.EntryDate = EntryDate_utc
-                ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
+                ip_obj, update_values = datetime_update_or_log(ip_obj, 'EntryDate', ip_obj_ext[24], update_values)
+                ip_obj, update_values = update_or_log(ip_obj, 'EntryAgentIdentifierValue', ip_obj_ext[25], update_values)
                 ip_obj.OAISPackageType = ip_obj_ext[26]
                 ip_obj.preservationLevelValue = ip_obj_ext[27]
-                ip_obj.DELIVERYTYPE = ip_obj_ext[28]
+                ip_obj, update_values = update_or_log(ip_obj, 'DELIVERYTYPE', ip_obj_ext[28], update_values)
                 ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                 ip_obj.ObjectActive = ip_obj_ext[30]
                 ip_obj.LocalDBdatetime = timestamp_utc
                 ip_obj.ExtDBdatetime = timestamp_utc
-                ip_obj.save()
+                if update_values['ais_values_set_to_blank']:
+                    logger.warning('Need to manual set fields: %s to blank is AIS for object: %s' % (
+                                                                            repr(update_values['ais_values_set_to_blank']),
+                                                                            ip_obj.ObjectIdentifierValue))
+                if update_values['ais_values_to_check']:
+                    update_local_ip = False
+                    logger.error('Need to manual check values for fields: %s in AIS for object: %s' % (
+                                                                            repr(update_values['ais_values_to_check']),
+                                                                            ip_obj.ObjectIdentifierValue))                    
+                if update_values['local_values_set_to_blank']:
+                    logger.warning('local fields: %s updated to blank for object: %s' % (
+                                                                            repr(update_values['local_values_set_to_blank']),
+                                                                            ip_obj.ObjectIdentifierValue))                      
+                if update_values['local_values_updated']:
+                    logger.warning('local fields: %s updated to new values for object: %s' % (
+                                                                            repr(update_values['local_values_updated']),
+                                                                            ip_obj.ObjectIdentifierValue))
+                if update_local_ip:
+                    logger.info('Found archive object: %s in local "IngestObject" DB, try to update',ip_obj_ext[1])
+                    ip_obj.save()
+                else:
+                    logger.error('Skip to update local object: %s, local DB and central DB is not in sync' % ip_obj.ObjectIdentifierValue)
             else:
                 logger.error('Local DB and central DB is not in sync for object: %s' % ip_obj.ObjectIdentifierValue)
                 continue     

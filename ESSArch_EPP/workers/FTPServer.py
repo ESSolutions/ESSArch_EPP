@@ -117,6 +117,7 @@ class DjangoFtpAuthorizer:
             raise
 
     def validate_authentication(self, username, password, handler):
+        db.close_old_connections()
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
