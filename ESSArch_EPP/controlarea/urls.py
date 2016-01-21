@@ -33,7 +33,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception,\
                   FromWorkListTemplateView,FromWorkListInfoView, CheckinFromWork,\
                   FromWorkProgress,\
                   CheckoutToGateFromWork,CheckoutToGateProgress,\
-                  CheckinFromGateToWork,\
+                  CheckinFromGateToWork,CheckinFromGateProgress,\
                   CheckinFromGateListView,\
                   DiffCheckListTemplateView, DiffCheckListInfoView, DiffCheck,\
                   DiffcheckProgress,\
@@ -61,6 +61,7 @@ urlpatterns = patterns('',
     url(r'^checkouttogatefromwork/$', CheckoutToGateFromWork.as_view(), name='controlarea_checkouttogatefromwork'),
     url(r'^checkouttogateprogress/(?P<taskid>[^&]*)/$', CheckoutToGateProgress.as_view(), name='controlarea_checkouttogate_progress'),
     url(r'^checkinfromgatetowork/$', CheckinFromGateToWork.as_view(), name='controlarea_checkinfromgatetowork'),
+    url(r'^checkinfromgateprogress/(?P<taskid>[^&]*)/$', CheckinFromGateProgress.as_view(), name='controlarea_checkinfromgate_progress'),
     url(r'^checkinfromgatelist/$', CheckinFromGateListView.as_view(),name='controlarea_checkinfromgate_list'),
     url(r'^diffchecklist/$', DiffCheckListTemplateView.as_view(),name='controlarea_diffcheck_list'),
     url(r'^diffcheckinfo/$', DiffCheckListInfoView.as_view() ,name='controlarea_diffcheck_info'),

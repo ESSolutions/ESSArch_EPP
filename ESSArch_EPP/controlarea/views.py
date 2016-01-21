@@ -1063,7 +1063,7 @@ class CheckinFromGateToWork(CreateView):
         #filelist = req_filelist, 
         reqfilename = os.path.join(target_path,'request.xml')
         linkingAgentIdentifierValue=self.request.user.username        
-        CopyFilelistTask.delay_or_fail(source_path=source_path,
+        CopyFilelistTask_res = CopyFilelistTask.delay_or_fail(source_path=source_path,
                                         target_path=target_path,
                                         filelist=filelist,
                                         ReqUUID = ReqUUID, 
@@ -1112,8 +1112,26 @@ class CheckinFromGateToWork(CreateView):
                                                   )'''
         #self.request.session['result_status_code'] = status_code
         #self.request.session['result_status_detail'] = status_detail
-        self.success_url = reverse_lazy('taskoverview')
+        CopyFilelistTask_id = CopyFilelistTask_res.task_id
+        self.object.taskid = CopyFilelistTask_id
+        #print ('Task ID')
+        #print (self.object.taskid)
+        self.object.save()
+        self.success_url = '/controlarea/checkinfromgateprogress/' +  CopyFilelistTask_id
         return super(CheckinFromGateToWork, self).form_valid(form)
+
+class CheckinFromGateProgress(TemplateView):
+    template_name = 'controlarea/checkinfromgateprogress.html'
+
+    @method_decorator(permission_required('controlarea.CheckoutToWork'))
+    def dispatch(self, *args, **kwargs):
+        return super(CheckinFromGateProgress, self).dispatch( *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(CheckinFromGateProgress, self).get_context_data(**kwargs)
+        context['taskid'] = self.kwargs['taskid']
+        return context
 
 '''class CheckinFromGateToWorkResult(DetailView):
     """

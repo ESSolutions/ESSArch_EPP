@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load js staticfiles%}
+
+{% block content %}
+Checkin from gate to workarea
+<br>
+<br>
+<div id="taskinprogress">
+</div>
+<br>
+  
+{% endblock %}
+{% block app-extra-script %}
+     {% js "controlarea/js/progress.js" %}
+<script>
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 24000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+var taskid = "{{ taskid }}";
+
+getTaskInfo(taskid);
+</script>
+
+{% endblock %}

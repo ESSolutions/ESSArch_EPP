@@ -1024,7 +1024,12 @@ class CopyFilelistTask(JobtasticTask):
                               )
         result = {}
         result['category'] = 'controlarea'
-        result['label'] = 'Check infrom or to gatarea'
+        if ReqType=='6':
+            result['label'] = 'Check out to gatarea'
+        elif ReqType=='7':
+            result['label'] = 'Check in from gatarea'
+        else:
+            result['label'] = 'Check out to gatarea'
         result['reqpurpose'] = ReqPurpose
         result['user'] = linkingAgentIdentifierValue
         result['statuslist'] = status_list
