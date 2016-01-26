@@ -559,20 +559,25 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         return IOQueue_obj
 
     def update(self, instance, validated_data):
-        storage_data = eval(validated_data.pop('storage'))
-                        
-        storagemedium_data = storage_data.pop('storagemedium')
-        Target_obj = StorageTargets.objects.get(id=storagemedium_data.pop('storagetarget'))
-        storagemedium_data['storagetarget'] = Target_obj
-        storageMedium_obj, created = storageMedium.objects.update_or_create(
-                                                                   id=storagemedium_data['id'], 
-                                                                   defaults=storagemedium_data)
-        storage_data['storagemedium'] = storageMedium_obj
-        ArchiveObject_obj = ArchiveObject.objects.get(ObjectUUID=storage_data.pop('archiveobject'))
-        storage_data['archiveobject'] = ArchiveObject_obj
-        storage_obj, created = storage.objects.update_or_create(
-                                                                id=storage_data['id'],
-                                                                defaults=storage_data)
+        storage_data_pre = validated_data.pop('storage')
+        if storage_data_pre:
+            storage_data = eval(storage_data_pre)
+        else:
+            storage_data = None
+        
+        if storage_data:
+            storagemedium_data = storage_data.pop('storagemedium')
+            Target_obj = StorageTargets.objects.get(id=storagemedium_data.pop('storagetarget'))
+            storagemedium_data['storagetarget'] = Target_obj
+            storageMedium_obj, created = storageMedium.objects.update_or_create(
+                                                                       id=storagemedium_data['id'], 
+                                                                       defaults=storagemedium_data)
+            storage_data['storagemedium'] = storageMedium_obj
+            ArchiveObject_obj = ArchiveObject.objects.get(ObjectUUID=storage_data.pop('archiveobject'))
+            storage_data['archiveobject'] = ArchiveObject_obj
+            storage_obj, created = storage.objects.update_or_create(
+                                                                    id=storage_data['id'],
+                                                                    defaults=storage_data)
 
         storagemedium_data = validated_data.pop('storagemedium', None)
         if storagemedium_data:
@@ -583,7 +588,8 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
 
         instance.result = validated_data.get('result', instance.result)
         instance.Status = validated_data.get('Status', instance.Status)
-        instance.storage = storage_obj
+        if storage_data:
+            instance.storage = storage_obj
         instance.storagemedium = validated_data.get('storagemedium', instance.storagemedium)
         instance.save()
         return instance

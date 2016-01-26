@@ -1577,7 +1577,7 @@ def MountTape(t_id, IO_obj_id):
             if len(current_lock) > 0:
                 ########################################
                 # Tape is locked, check if req IO_obj_id = lock
-                if current_lock == IO_obj_id:
+                if str(current_lock) == str(IO_obj_id):
                     ########################################
                     # Tape is already locked with req IO_obj_id
                     logger.info('Already Mounted: ' + str(t_id) + ' and locked by req IO_obj_id: ' + str(IO_obj_id))

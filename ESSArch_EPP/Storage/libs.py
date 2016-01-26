@@ -236,7 +236,13 @@ class StorageMethodWrite:
                                                                                                                                          IOQueue_obj.transfer_task_id,
                                                                                                                                          ArchiveObject_obj.ObjectIdentifierValue,
                                                                                                                                          IOQueue_obj.id ))
-                    if result.ready() and result.failed():
+                    if result.successful():
+                        self.logger.info('Transfer to remote is successful for task_id: %s object: %s, setting remote_status to OK(20) (IOuuid: %s)' % (IOQueue_obj.transfer_task_id,
+                                                                                                                                         ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                         IOQueue_obj.id ))
+                        IOQueue_obj.remote_status = 20
+                        IOQueue_obj.save(update_fields=['remote_status'])
+                    elif result.ready() and result.failed():
                         self.logger.error('transfer task_id: %s failed for object: %s, setting transfer task_id to blank and Status=100 in IOqueue, traceback: %s (IOuuid: %s)' % (IOQueue_obj.transfer_task_id,
                                                                                                                                          ArchiveObject_obj.ObjectIdentifierValue,
                                                                                                                                          result.traceback,
