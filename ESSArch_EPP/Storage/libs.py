@@ -42,6 +42,7 @@ from StorageMethodTape.tasks import (WriteStorageMethodTape,
 from Storage.tasks import TransferWriteIO
 from essarch.libs import ESSArchSMError
 from celery.result import AsyncResult
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import requests
 from rest_framework.renderers import JSONRenderer
 from urlparse import urljoin
@@ -465,6 +466,16 @@ class StorageMethodWrite:
             
             valid_remote_server = None
             for IOQueue_obj in IOQueue_objs:
+                if IOQueue_obj.remote_status > 21:
+                    self.fail_write_flag = 1
+                    object_writes_ok_flag = 0
+                    event_info = 'Failed to write/transfer object: %s to remote storage target: %s (IOuuid: %s)' % (
+                                                                                                    ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                    IOQueue_obj.storagemethodtarget.name, 
+                                                                                                    IOQueue_obj.id)                                
+                    self.logger.error(event_info)
+                    ESSPGM.Events().create('1100','',self.__name__,__version__,'1',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
+
                 if IOQueue_obj.Status == 0:
                     self.pending_write_flag = 1
                     object_writes_ok_flag = 0
@@ -485,15 +496,6 @@ class StorageMethodWrite:
                     self.fail_write_flag = 1
                     object_writes_ok_flag = 0
                     event_info = 'Failed to write object: %s to storage target: %s (IOuuid: %s)' % (
-                                                                                                    ArchiveObject_obj.ObjectIdentifierValue, 
-                                                                                                    IOQueue_obj.storagemethodtarget.name, 
-                                                                                                    IOQueue_obj.id)                                
-                    self.logger.error(event_info)
-                    ESSPGM.Events().create('1100','',self.__name__,__version__,'1',event_info,2,ArchiveObject_obj.ObjectIdentifierValue)
-                elif IOQueue_obj.remote_status > 21:
-                    self.fail_write_flag = 1
-                    object_writes_ok_flag = 0
-                    event_info = 'Failed to write/transfer object: %s to remote storage target: %s (IOuuid: %s)' % (
                                                                                                     ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                     IOQueue_obj.storagemethodtarget.name, 
                                                                                                     IOQueue_obj.id)                                
@@ -1377,28 +1379,48 @@ class StorageMethodRead:
         for storage_obj in self.storage_objs:
             ObjectIdentifierValue = storage_obj.archiveobject.ObjectIdentifierValue
             storageMediumFormat = storage_obj.storagemedium.storageMediumFormat
+            target_obj = storage_obj.storagemedium.storagetarget
             PMetaObjectPath = os.path.join(RootPath,ObjectIdentifierValue + '_Package_METS.xml')
             ip_path = os.path.join(RootPath,ObjectIdentifierValue + '.tar')
 
+            if target_obj.format == 103:
+                try:
+                    aic_obj_uuid=storage_obj.archiveobject.aic_set.get().ObjectUUID
+                except ObjectDoesNotExist as e:
+                    logging.warning('Problem to get AIC info for ObjectUUID: %s, error: %s' % (ObjectIdentifierValue, e))
+                else:
+                    logging.info('Succeeded to get AIC_UUID: %s from DB' % aic_obj_uuid)
+                
+                # Check aic_mets_path_source
+                aic_mets_path = os.path.join(RootPath,'%s_AIC_METS.xml' % aic_obj_uuid)
+
             if storageMediumFormat in range(100,102):
                 logging.info('Try to remove ObjectPath: ' + ip_path)
+            elif target_obj.format == 103:
+                logging.info('Try to remove object: %s and %s and %s' % (ip_path, PMetaObjectPath, aic_mets_path))
             else:
-                logging.info('Try to remove ObjectPath: ' + ip_path + ' and ' + PMetaObjectPath)
+                logging.info('Try to remove object: %s and %s' % (ip_path, PMetaObjectPath))
             try:
                 os.remove(ip_path)
                 if not storageMediumFormat in range(100,102):
                     os.remove(PMetaObjectPath)
+                    if target_obj.format == 103:
+                        os.remove(aic_mets_path)
             except (IOError, OSError) as e:
                 if storageMediumFormat in range(100,102):
                     logging.error('Problem to remove ObjectPath: %s, error: %s' % (ip_path,e))
+                elif target_obj.format == 103:
+                    logging.error('Problem to remove ObjectPath: %s and %s and %s, error: %s' % (ip_path, PMetaObjectPath, aic_mets_path, e))
                 else:
                     logging.error('Problem to remove ObjectPath: %s and %s, error: %s' % (ip_path, PMetaObjectPath, e))
                 raise e
             else:
                 if storageMediumFormat in range(100,102):
                     logging.info('Success to removeObjectPath: ' + ip_path)
+                elif target_obj.format == 103:
+                    logging.info('Success to removeObjectPath: %s and %s and %s' % (ip_path, PMetaObjectPath, aic_mets_path))
                 else:
-                    logging.info('Success to removeObjectPath: ' + ip_path + ' and ' + PMetaObjectPath)
+                    logging.info('Success to removeObjectPath: %s and %s' % (ip_path, PMetaObjectPath))
 
     @property
     def __name__(self):

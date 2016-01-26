@@ -411,7 +411,7 @@ class eventIdentifier(models.Model):
     eventApplication = models.CharField(max_length=50)
     eventVersion = models.CharField(max_length=45)
     eventOutcome = models.IntegerField(null=True)
-    eventOutcomeDetailNote = models.CharField(max_length=255)
+    eventOutcomeDetailNote = models.CharField(max_length=1024)
     linkingAgentIdentifierValue = models.CharField(max_length=45)
     linkingObjectIdentifierValue = models.CharField(max_length=255)
     class Meta:
