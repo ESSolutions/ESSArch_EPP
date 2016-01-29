@@ -7,6 +7,9 @@
 	<H1>ACCESS - Create new access request</H1>
 	<p>
 	<p><i>Please fill in the fields or use prefilled data   (* indicates mandatory field)</i></p>
+    {% if media_list %}
+        <p>Available storage media: {{media_list}}</p>
+    {% endif %}
 	<br>
 
     <form action="" method="post">

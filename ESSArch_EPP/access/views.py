@@ -324,6 +324,17 @@ class AccessCreate(CreateView):
             initial['ObjectIdentifierValue'] = self.kwargs['ip_uuid']
         return initial
     
+    def get_context_data(self, **kwargs):
+        context = super(AccessCreate, self).get_context_data(**kwargs)
+        media_str = ''
+        if 'ip_uuid' in self.kwargs:
+            ip=ArchiveObject.objects.get(ObjectUUID=self.kwargs['ip_uuid'])
+            media_list_tmp = ip.Storage_set.values_list('storagemedium__storageMediumID')
+            media_list = [i[0] for i in media_list_tmp]
+            media_str = ', '.join(media_list)
+        context['media_list'] = media_str
+        return context
+    
     def form_valid(self, form):
         self.object = form.save(commit=False)
         num = 0
