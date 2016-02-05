@@ -128,7 +128,13 @@ class UploadChunkedRestClient(object):
         @rtype:     string
         @return:    requests return object
         """
-        r = self.requests_session.post(rest_endpoint, data=data, headers=headers)
+        try:
+            r = self.requests_session.post(rest_endpoint, data=data, headers=headers)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to server, (retrying), error: %s' % (e)
+            print msg
+            raise UploadPostWarning(e)
         if not r.status_code == 200:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to upload chunk, (retrying), error: %s' % (e)

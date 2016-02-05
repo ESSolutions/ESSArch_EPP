@@ -1135,14 +1135,16 @@ class Functions:
                 self.altRecordID_dict = dict(res_info[3])
                 ################################################
                 # Check for POLICYID
-                if 'POLICYID' in self.altRecordID_dict.keys():
-                    try:
-                        self.altRecordID_dict['POLICYID'] = int(self.altRecordID_dict['POLICYID']) 
-                    except:
-                        error_list.append('altRecordID POLICYID is not an int, POLICYID in METS is: %s' % self.altRecordID_dict['POLICYID'])
-                        self.altRecordID_dict['POLICYID'] = None
-                        self.SIP_OK = 0
-                else:
+                #if 'POLICYID' in self.altRecordID_dict.keys():
+                    #self.altRecordID_dict['POLICYID'] = self.altRecordID_dict['POLICYID']
+                    #try:
+                    #    self.altRecordID_dict['POLICYID'] = int(self.altRecordID_dict['POLICYID']) 
+                    #except:
+                    #    error_list.append('altRecordID POLICYID is not an int, POLICYID in METS is: %s' % self.altRecordID_dict['POLICYID'])
+                    #   self.altRecordID_dict['POLICYID'] = None
+                    #    self.SIP_OK = 0
+                #else:
+                if not 'POLICYID' in self.altRecordID_dict.keys():
                     error_list.append('Missing altRecordID POLICYID in METS')
                     self.altRecordID_dict['POLICYID'] = None
                     self.SIP_OK = 0

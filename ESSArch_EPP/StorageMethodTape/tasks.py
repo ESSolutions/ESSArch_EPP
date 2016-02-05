@@ -226,9 +226,18 @@ class WriteStorageMethodTape(Task):
         requests_session.auth = (ruser, rpass)
         IO_obj_data = IOQueueNestedReadSerializer(IO_obj).data
         IO_obj_json = JSONRenderer().render(IO_obj_data)
-        r = requests_session.patch(IOQueue_rest_endpoint,
+        try:
+            r = requests_session.patch(IOQueue_rest_endpoint,
                                         headers={'Content-Type': 'application/json'}, 
                                         data=IO_obj_json)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to master server and update IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 200:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to update master server IOQueue, storage, storageMedium for object %s, error: %s (IOuuid: %s)' % (
@@ -257,9 +266,18 @@ class WriteStorageMethodTape(Task):
         data = {'queue': queue, 
                 'IOQueue_objs_id_list': IOQueue_objs_id_list, 
                 'ArchiveObject_objs_ObjectUUID_list': ArchiveObject_objs_ObjectUUID_list}
-        r = requests_session.post(write_tape_rest_endpoint,
+        try:
+            r = requests_session.post(write_tape_rest_endpoint,
                                   headers={'Content-Type': 'application/json'},
                                   data=JSONRenderer().render(data))
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and apply write task for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              ArchiveObject_objs_ObjectUUID_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_objs_id_list)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
         if not r.status_code == 201:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to apply write task to remote server for ObjectUUID: %s, error: %s (IOuuid: %s)' % (
@@ -1032,9 +1050,18 @@ class ReadStorageMethodTape(Task):
         del IO_obj_data['accessqueue']
         del IO_obj_data['task_id']
         IO_obj_json = JSONRenderer().render(IO_obj_data)
-        r = requests_session.patch(IOQueue_rest_endpoint,
+        try:
+            r = requests_session.patch(IOQueue_rest_endpoint,
                                         headers={'Content-Type': 'application/json'}, 
                                         data=IO_obj_json)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to master server and update IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 200:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to update master server IOQueue for object %s, error: %s (IOuuid: %s)' % (
@@ -1063,9 +1090,18 @@ class ReadStorageMethodTape(Task):
         data = {'queue': queue, 
                 'IOQueue_objs_id_list': IOQueue_objs_id_list, 
                 'ArchiveObject_objs_ObjectUUID_list': ArchiveObject_objs_ObjectUUID_list}
-        r = requests_session.post(read_tape_rest_endpoint,
+        try:
+            r = requests_session.post(read_tape_rest_endpoint,
                                   headers={'Content-Type': 'application/json'},
                                   data=JSONRenderer().render(data))
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and apply read task for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              ArchiveObject_objs_ObjectUUID_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_objs_id_list)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)
         if not r.status_code == 201:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to apply read task to remote server for ObjectUUID: %s, error: %s (IOuuid: %s)' % (
@@ -1094,9 +1130,18 @@ class ReadStorageMethodTape(Task):
         data = {'queue': queue, 
                 'IOQueue_obj_id': IOQueue_obj_id, 
                 'filename_list': filename_list}
-        r = requests_session.post(read_tape_rest_endpoint,
+        try:
+            r = requests_session.post(read_tape_rest_endpoint,
                                   headers={'Content-Type': 'application/json'},
                                   data=JSONRenderer().render(data))
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to master server and apply move_to_accesspath task for filename_list: %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              filename_list,
+                                                                                                                                              e,
+                                                                                                                                              IOQueue_obj_id)
+            logger.warning(msg)
+            raise ApplyPostRestError(e)        
         if not r.status_code == 201:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to apply move_to_accesspath task on master server for filename_list: %s, error: %s (IOuuid: %s)' % (
@@ -1126,9 +1171,17 @@ class ReadStorageMethodTape(Task):
         loop_num_total = 0
         loop_num = 0
         while True:
-            r = requests_session.get(IOQueue_rest_endpoint,
+            try:
+                r = requests_session.get(IOQueue_rest_endpoint,
                                             headers={'Content-Type': 'application/json'}, 
                                             )
+            except requests.ConnectionError as e:
+                e = [1, 'ConnectionError', repr(e)]
+                msg = 'Problem to connect to server and get status for task_id: %s, error: %s' % (
+                                                                                                  task_id,
+                                                                                                  e)
+                logger.warning(msg)
+                raise DatabasePostRestError(e)
             if not r.status_code == 200:
                 e = [r.status_code, r.reason, r.text]
                 msg = 'Problem to get status for task_id: %s, error: %s' % (

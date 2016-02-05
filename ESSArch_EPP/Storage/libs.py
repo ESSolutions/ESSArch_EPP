@@ -684,9 +684,17 @@ class StorageMethodWrite:
         ArchiveObject_obj_data['Storage_set'] = new_Storage_set
         # JSONRenderer
         ArchiveObject_obj_json = JSONRenderer().render(ArchiveObject_obj_data)
-        r = requests_session.patch(ArchiveObject_rest_endpoint,
+        try:
+            r = requests_session.patch(ArchiveObject_rest_endpoint,
                                         headers={'Content-Type': 'application/json'}, 
                                         data=ArchiveObject_obj_json)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and update status fpr AIP, storage, storageMedium for for object %s, error: %s' % (
+                                                                                                                                              ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                              e)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 200:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to update remote server status for AIP, storage, storageMedium for object %s, error: %s' % (
@@ -709,7 +717,16 @@ class StorageMethodWrite:
         requests_session = requests.Session()
         requests_session.verify = False
         requests_session.auth = (ruser, rpass)
-        r = requests_session.delete(IOQueue_rest_endpoint)
+        try:
+            r = requests_session.delete(IOQueue_rest_endpoint)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and delete IOQueue object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 204:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to delete IOQueue object on remote server for object %s, error: %s (IOuuid: %s)' % (
@@ -916,9 +933,18 @@ class StorageMethodRead:
         IO_obj_data = IOQueueSerializer(IO_obj).data
         IO_obj_data['accessqueue'] = None
         IO_obj_json = JSONRenderer().render(IO_obj_data)
-        r = requests_session.post(IOQueue_rest_endpoint,
+        try:
+            r = requests_session.post(IOQueue_rest_endpoint,
                                         headers={'Content-Type': 'application/json'}, 
                                         data=IO_obj_json)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and insert IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 201:
             e = [r.status_code, r.reason, r.text]
             if e == [400, 'BAD REQUEST', u'{"id":["This field must be unique."]}']:
@@ -1120,7 +1146,16 @@ class StorageMethodRead:
         requests_session = requests.Session()
         requests_session.verify = False
         requests_session.auth = (ruser, rpass)
-        r = requests_session.delete(IOQueue_rest_endpoint)
+        try:
+            r = requests_session.delete(IOQueue_rest_endpoint)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and delete IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
+            raise DatabasePostRestError(e)
         if not r.status_code == 204:
             e = [r.status_code, r.reason, r.text]
             msg = 'Problem to delete IOQueue object on remote server for object %s, error: %s (IOuuid: %s)' % (

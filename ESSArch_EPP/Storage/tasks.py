@@ -280,9 +280,13 @@ class TransferWriteIO(Task):
                 if IO_obj_data['archiveobject']['aic_set'][0]['PolicyId'] == None:
                     IO_obj_data['archiveobject']['aic_set'][0]['PolicyId'] = IO_obj_data['archiveobject']['PolicyId']['PolicyID']
                 IO_obj_json = JSONRenderer().render(IO_obj_data)
-                r = self.requests_session.post(IOQueue_rest_endpoint,
+                try:
+                    r = self.requests_session.post(IOQueue_rest_endpoint,
                                                 headers={'Content-Type': 'application/json'}, 
                                                 data=IO_obj_json)
+                except requests.ConnectionError as e:
+                    e = [1, 'ConnectionError', repr(e)]
+                    raise DatabasePostRestError(e)
                 if not r.status_code == 201:
                     raise DatabasePostRestError([r.status_code, r.reason, r.text])
 

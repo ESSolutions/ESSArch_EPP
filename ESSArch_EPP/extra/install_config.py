@@ -657,12 +657,13 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         StorageMethod_obj.archivepolicy=ArchivePolicy.objects.get(PolicyName=u'Default policy 1')
         StorageMethod_obj.save()
 
-    if not StorageTargets.objects.filter(name=u'disk1').exists():
+    if not StorageTargets.objects.filter(name__startswith=u'disk1').exists():
 #id=u'e55194eeb1ea4bf7b8c7494f4f2b0101'
         print "Adding test entry to StorageTargets..."
+        disk_uuid = uuid.uuid4().hex
         StorageTargets_obj = StorageTargets()
-        StorageTargets_obj.id=uuid.uuid4().hex
-        StorageTargets_obj.name=u'disk1'
+        StorageTargets_obj.id=disk_uuid
+        StorageTargets_obj.name=u'disk1_%s' % disk_uuid
         StorageTargets_obj.status=1
         StorageTargets_obj.type=200
         StorageTargets_obj.format=103
