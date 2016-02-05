@@ -38,7 +38,7 @@ from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, Pac
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
                            eventIdentifier, eventOutcome_CHOICES, IngestQueue
-from configuration.models import Path, Parameter
+from configuration.models import Path, Parameter, ArchivePolicy
 
 
 from controlarea.tasks import CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
@@ -313,8 +313,14 @@ class CheckinFromReception(CreateView):
         initial['Status'] = 0
         initial['ReqType'] = 1
         initial['ReqPurpose'] = ''
-        initial['POLICYID'] = 1
-        initial['INFORMATIONCLASS'] = 1
+        ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat=1)
+        if ArchivePolicy_objs:
+            ArchivePolicy_obj = ArchivePolicy_objs[0]
+            initial['POLICYID'] = ArchivePolicy_obj.PolicyID
+            initial['INFORMATIONCLASS'] = ArchivePolicy_obj.INFORMATIONCLASS
+        else:
+            initial['POLICYID'] = 1
+            initial['INFORMATIONCLASS'] = 1
         initial['DELIVERYTYPE'] = 'N/A'
         initial['DELIVERYSPECIFICATION'] = 'N/A'
         initial['allow_unknown_filetypes'] = True

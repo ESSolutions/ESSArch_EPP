@@ -35,7 +35,7 @@ from Storage.models import storage, storageMedium, IOQueue
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
-import sys,datetime,os
+import sys,datetime,os,uuid
 
 import django
 django.setup()
@@ -621,13 +621,13 @@ def installdefaultrobotdrives(): # default robotdrives
 
 def installdefaultArchivePolicy(): # default ArchivePolicy
 
-    if not ArchivePolicy.objects.filter(id=u'70d0177ddeb7416c800349c2cdfdfdc7').exists():
-
+    if not ArchivePolicy.objects.filter(PolicyName=u'Default policy 1').exists():
+#id=u'70d0177ddeb7416c800349c2cdfdfdc7'
         print "Adding test entry to ArchivePolicy..."
         ArchivePolicy_obj = ArchivePolicy()
-        ArchivePolicy_obj.id=u'70d0177ddeb7416c800349c2cdfdfdc7'
+        ArchivePolicy_obj.id=uuid.uuid4().hex
         ArchivePolicy_obj.PolicyName=u'Default policy 1'
-        ArchivePolicy_obj.PolicyID=u'1'
+        ArchivePolicy_obj.PolicyID=uuid.uuid4().hex
         ArchivePolicy_obj.PolicyStat=u'1'
         ArchivePolicy_obj.AISProjectName=u''
         ArchivePolicy_obj.AISProjectID=u''
@@ -646,22 +646,22 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         ArchivePolicy_obj.IngestDelete=u'1'
         ArchivePolicy_obj.save()
         
-    if not StorageMethod.objects.filter(id=u'caa8458a4c954b65affe8ae9867d7228').exists():
-
+    if not StorageMethod.objects.filter(name=u'Default policy 1 - SM 1').exists():
+#id=u'caa8458a4c954b65affe8ae9867d7228'
         print "Adding test entry to StorageMethod..."
         StorageMethod_obj = StorageMethod()
-        StorageMethod_obj.id=u'caa8458a4c954b65affe8ae9867d7228'
+        StorageMethod_obj.id=uuid.uuid4().hex
         StorageMethod_obj.name=u'Default policy 1 - SM 1'
         StorageMethod_obj.status=1
         StorageMethod_obj.type=200
-        StorageMethod_obj.archivepolicy=ArchivePolicy.objects.get(id=u'70d0177ddeb7416c800349c2cdfdfdc7')
+        StorageMethod_obj.archivepolicy=ArchivePolicy.objects.get(PolicyName=u'Default policy 1')
         StorageMethod_obj.save()
 
-    if not StorageTargets.objects.filter(id=u'e55194eeb1ea4bf7b8c7494f4f2b0101').exists():
-
+    if not StorageTargets.objects.filter(name=u'disk1').exists():
+#id=u'e55194eeb1ea4bf7b8c7494f4f2b0101'
         print "Adding test entry to StorageTargets..."
         StorageTargets_obj = StorageTargets()
-        StorageTargets_obj.id=u'e55194eeb1ea4bf7b8c7494f4f2b0101'
+        StorageTargets_obj.id=uuid.uuid4().hex
         StorageTargets_obj.name=u'disk1'
         StorageTargets_obj.status=1
         StorageTargets_obj.type=200
@@ -674,15 +674,15 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         StorageTargets_obj.target=u'/ESSArch/data/store/disk1'
         StorageTargets_obj.save()
 
-    if not StorageTarget.objects.filter(id=u'79b902a9f00b4ac696b11fd5ad0f3ae1').exists():
-
+    if not StorageTarget.objects.filter(name=u'Default policy 1 - SM 1 - Target 1').exists():
+#id=u'79b902a9f00b4ac696b11fd5ad0f3ae1'
         print "Adding test entry to StorageMethod - Target..."
         StorageTarget_obj = StorageTarget()
-        StorageTarget_obj.id=u'79b902a9f00b4ac696b11fd5ad0f3ae1'
+        StorageTarget_obj.id=uuid.uuid4().hex
         StorageTarget_obj.name=u'Default policy 1 - SM 1 - Target 1'
         StorageTarget_obj.status=1
-        StorageTarget_obj.storagemethod=StorageMethod.objects.get(id=u'caa8458a4c954b65affe8ae9867d7228')
-        StorageTarget_obj.target=StorageTargets.objects.get(id=u'e55194eeb1ea4bf7b8c7494f4f2b0101')
+        StorageTarget_obj.storagemethod=StorageMethod.objects.get(name=u'Default policy 1 - SM 1')
+        StorageTarget_obj.target=StorageTargets.objects.get(name=u'disk1')
         StorageTarget_obj.save()
 
 def installdefaultESSProc(): # default ESSProc
