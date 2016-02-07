@@ -684,7 +684,9 @@ class StorageMethodWrite:
         ArchiveObject_obj_data['StatusProcess'] = 1999        # 'Write AIP OK'
         ArchiveObject_obj_data['StatusActivity'] = 0              # 'OK'
         # Remove local disk storage type 200 from Storage_set
-        exclude_targets = [i.id for i in StorageTargets.objects.filter(type=200, remote_server='')]
+        #exclude_targets = [i.id for i in StorageTargets.objects.filter(type=200, remote_server='')]
+        # Remove all storage that not belong to specific remote server from Storage_set
+        exclude_targets = [i.id for i in StorageTargets.objects.exclude(remote_server=remote_server)]        
         new_Storage_set = []
         for storage_data in ArchiveObject_obj_data['Storage_set']:
             if not storage_data['storagemedium']['storagetarget'] in exclude_targets:
