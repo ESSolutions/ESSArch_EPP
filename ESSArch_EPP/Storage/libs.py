@@ -226,6 +226,14 @@ class StorageMethodWrite:
                         IOQueue_obj.task_id = ''
                         IOQueue_obj.Status = 100
                         IOQueue_obj.save(update_fields=['task_id', 'Status'])
+                    elif result.status == 'PENDING':
+                        if len(remote_server) == 3:
+                            master_server = target_obj.master_server.split(',')
+                            if len(master_server) == 3:
+                                self.logger.info('Try to fetch remote IOQueue status for task_id: %s for object: %s (IOuuid: %s)' % (IOQueue_obj.task_id,
+                                                                                                                                         ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                                         IOQueue_obj.id ))
+                                self._get_remote_IOQueue_obj(remote_server, master_server, IOQueue_obj)
                         
                 if (IOQueue_obj.remote_status in [2, 5] and        # if transfer task_id failed and status is set to "OK" in GUI then set task_id='' and Status=100
                          IOQueue_obj.transfer_task_id and
@@ -735,6 +743,66 @@ class StorageMethodWrite:
                                                                                                               IO_obj.id)
             self.logger.warning(msg)
             raise DatabasePostRestError(e)
+
+    def _get_remote_IOQueue_obj(self, remote_server, master_server, IO_obj):
+        """ Call REST service on remote to get IOQueue object and update 
+             local IOQueue object on master
+        
+        :param remote_server: example: [https://servername:port, user, password]
+        :param master_server: example: [https://servername:port, user, password]
+        :param IO_obj: IOQueue database instance to be performed
+        
+        """
+        base_url, ruser, rpass = remote_server
+        IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueuenested/')
+        IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+        requests_session = requests.Session()
+        requests_session.verify = False
+        requests_session.auth = (ruser, rpass)
+        try:
+            r = requests_session.get(IOQueue_rest_endpoint)
+        except requests.ConnectionError as e:
+            e = [1, 'ConnectionError', repr(e)]
+            msg = 'Problem to connect to remote server and get IOQueue status for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
+        if r.status_code == 200:
+            IO_obj_data = r.json()
+            if IO_obj_data['Status'] in [20, 100]:
+                base_url, ruser, rpass = master_server
+                IOQueue_rest_endpoint_base = urljoin(base_url, '/api/ioqueuenested/')
+                IOQueue_rest_endpoint = urljoin(IOQueue_rest_endpoint_base, '%s/' % str(IO_obj.id))
+                requests_session = requests.Session()
+                requests_session.verify = False
+                requests_session.auth = (ruser, rpass)
+                IO_obj_json = JSONRenderer().render(IO_obj_data)
+                try:
+                    r = requests_session.patch(IOQueue_rest_endpoint,
+                                                headers={'Content-Type': 'application/json'}, 
+                                                data=IO_obj_json)
+                except requests.ConnectionError as e:
+                    e = [1, 'ConnectionError', repr(e)]
+                    msg = 'Problem to connect to master server and update IOQueue for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                                      IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                      e,
+                                                                                                                                                      IO_obj.id)
+                    self.logger.warning(msg)
+                if not r.status_code == 200:
+                    e = [r.status_code, r.reason, r.text]
+                    msg = 'Problem to update master server IOQueue, storage, storageMedium for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                                      IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                                      e,
+                                                                                                                                                      IO_obj.id)
+                    self.logger.warning(msg)      
+        else:
+            e = [r.status_code, r.reason, r.text]
+            msg = 'Problem to get IOQueue status from remote server for object %s, error: %s (IOuuid: %s)' % (
+                                                                                                                                              IO_obj.archiveobject.ObjectIdentifierValue,
+                                                                                                                                              e,
+                                                                                                                                              IO_obj.id)
+            self.logger.warning(msg)
 
     def notify_external_project(self, ArchiveObject_obj):
         IOQueue_objs = ArchiveObject_obj.ioqueue_set.filter(ReqType__in=[10])

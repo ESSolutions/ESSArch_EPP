@@ -240,7 +240,7 @@ class WriteStorageMethodDisk(Task):
             msg = 'Problem to connect to remote server and apply write task for object %s, error: %s (IOuuid: %s)' % (
                                                                                                                                               ArchiveObject_obj_ObjectUUID,
                                                                                                                                               e,
-                                                                                                                                              IOQueue_obj_id))
+                                                                                                                                              IOQueue_obj_id)
             logger.warning(msg)
             raise ApplyPostRestError(e)
         if not r.status_code == 201:
