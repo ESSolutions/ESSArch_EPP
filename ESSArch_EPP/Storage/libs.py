@@ -478,7 +478,6 @@ class StorageMethodWrite:
             all_storage_objs = ArchiveObject_obj.Storage_set.all()
             all_storage_target_objs = [i.storagemedium.storagetarget for i in all_storage_objs]
             
-            valid_remote_server = None
             for IOQueue_obj in IOQueue_objs:
                 if IOQueue_obj.remote_status > 21:
                     self.fail_write_flag = 1
@@ -552,8 +551,17 @@ class StorageMethodWrite:
                         target_obj = IOQueue_obj.storagemethodtarget.target
                         remote_server = target_obj.remote_server.split(',')
                         if len(remote_server) == 3:
-                            valid_remote_server = remote_server
-
+                            # Update remote server
+                            try:
+                                self._update_remote_archiveobject(remote_server, ArchiveObject_obj)
+                            except DatabasePostRestError as e:
+                                error_flag = 1
+                                msg = 'Failed to update remote DB status for AIP: %s, error: %s' % (
+                                                                                                                ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                                e)
+                                self.logger.error(msg)
+                                error_list.append(msg)
+                            
                         event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (
                                                                                                            ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                            IOQueue_obj.storagemethodtarget.name, 
@@ -569,18 +577,6 @@ class StorageMethodWrite:
                                                                                                                                                           ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                                                                           len(self.st_objs_to_check))
                         self.logger.debug(event_info)
-
-            if object_writes_ok_flag == 1 and valid_remote_server is not None:
-                # Update remote server
-                try:
-                    self._update_remote_archiveobject(valid_remote_server, ArchiveObject_obj)
-                except DatabasePostRestError as e:
-                    error_flag = 1
-                    msg = 'Failed to update remote DB status for AIP: %s, error: %s' % (
-                                                                                                    ArchiveObject_obj.ObjectIdentifierValue,
-                                                                                                    e)
-                    self.logger.error(msg)
-                    error_list.append(msg)
 
             if error_flag:
                 raise ESSArchSMError(error_list)
@@ -686,11 +682,16 @@ class StorageMethodWrite:
         # Remove local disk storage type 200 from Storage_set
         #exclude_targets = [i.id for i in StorageTargets.objects.filter(type=200, remote_server='')]
         # Remove all storage that not belong to specific remote server from Storage_set
-        exclude_targets = [i.id for i in StorageTargets.objects.exclude(remote_server=remote_server)]        
+        exclude_targets = [i.id for i in StorageTargets.objects.exclude(remote_server='%s,%s,%s' % (base_url,ruser,rpass))]        
         new_Storage_set = []
+        update_info = []
         for storage_data in ArchiveObject_obj_data['Storage_set']:
             if not storage_data['storagemedium']['storagetarget'] in exclude_targets:
                 new_Storage_set.append(storage_data)
+                update_info.append('MediumID: %s, UsedCapacity: %s, MediumDate %s' % (
+                                                                                      storage_data['storagemedium']['storageMediumID'], 
+                                                                                      storage_data['storagemedium']['storageMediumUsedCapacity'], 
+                                                                                      storage_data['storagemedium']['storageMediumDate']))
         ArchiveObject_obj_data['Storage_set'] = new_Storage_set
         # JSONRenderer
         ArchiveObject_obj_json = JSONRenderer().render(ArchiveObject_obj_data)
@@ -712,7 +713,13 @@ class StorageMethodWrite:
                                                                                                                           e)
             self.logger.warning(msg)
             raise DatabasePostRestError(e)
-
+        else:
+            msg = 'Success to update remote server: %s with status(1999) for object: %s, media: %s' % (
+                                                                                              base_url,
+                                                                                              ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                              update_info)
+            self.logger.info(msg)
+            
     @retry(stop_max_attempt_number=5, wait_fixed=60000)    
     def _delete_remote_IOQueue_obj(self, remote_server, IO_obj):
         """ Call REST service on remote to remove IOQueue object
