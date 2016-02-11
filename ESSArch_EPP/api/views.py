@@ -121,7 +121,7 @@ class ArchiveObject_dt_view(DatatableBaseView):
           'ObjectMetadata.label', 'ObjectMetadata.startdate',
           'ObjectMetadata.enddate']
     order_columns = ['id', 'ObjectIdentifierValue', 'EntryAgentIdentifierValue', 
-                     'ObjectMetadata.label', 'ExtDBdatetime', 
+                     'ObjectMetadata.label', 'EntryDate', 
                      'ObjectMetadata.startdate', 'ObjectMetadata.enddate', 
                      'OAISPackageType', 'Generation', 
                      'StatusProcess', 'StatusActivity']
