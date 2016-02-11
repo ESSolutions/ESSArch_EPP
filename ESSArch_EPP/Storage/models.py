@@ -82,6 +82,7 @@ MediumFormat_CHOICES = (
     (103, '103 (AIC support)'),
     (102, '102 (Media label)'),
     (101, '101 (Old read only)'),
+    (100, '100 (Old read only)'),
 )
 
 MediumStatus_CHOICES = (
@@ -101,6 +102,7 @@ MediumLocationStatus_CHOICES = (
 
 MediumBlockSize_CHOICES = (
     (128, '64K'),
+    (250, '125K'),
     (256, '128K'),
     (512, '256K'),
     (1024, '512K'),
