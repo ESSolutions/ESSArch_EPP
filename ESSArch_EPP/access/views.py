@@ -328,7 +328,7 @@ class AccessCreate(CreateView):
         context = super(AccessCreate, self).get_context_data(**kwargs)
         media_str = ''
         if 'ip_uuid' in self.kwargs:
-            ip=ArchiveObject.objects.get(ObjectUUID=self.kwargs['ip_uuid'])
+            ip=ArchiveObject.objects.get(ObjectIdentifierValue=self.kwargs['ip_uuid'])
             media_list_tmp = ip.Storage_set.values_list('storagemedium__storageMediumID')
             media_list = [i[0] for i in media_list_tmp]
             media_str = ', '.join(media_list)
