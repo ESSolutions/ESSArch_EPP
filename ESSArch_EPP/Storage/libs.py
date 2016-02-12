@@ -830,7 +830,7 @@ class StorageMethodWrite:
         #ExtPrjTapedURL = "http://212.181.19.10/web/svarfolder/admin/skanning/update_database.asp?%s"
         self.logger.info('Try to update ExtPrJDB with taped info: ' + str(ObjectIdentifierValue) + ' ExtPrjTapedURL: ' + str(ExtPrjTapedURL) + ' url_params: ' + str(url_params))
         try:
-            url_conn_obj = urllib.urlopen('%s?%s %' % (ExtPrjTapedURL, url_params))
+            url_conn_obj = urllib.urlopen('%s?%s' % (ExtPrjTapedURL, url_params))
         except (IOError), (errno,why):
             self.logger.error('Problem to connect to URL: ' + str(ExtPrjTapedURL) + '?' + str(url_params) + ' Error: ' + str(why) + ' ' + str(errno))
         else:
