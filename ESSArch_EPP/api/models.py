@@ -31,7 +31,6 @@ class BaseChunkedUpload(models.Model):
     status = models.PositiveSmallIntegerField(choices=CHUNKED_UPLOAD_CHOICES,
                                               default=UPLOADING)
     completed_on = models.DateTimeField(null=True, blank=True)
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name='chunked_uploads', blank=True)
 
     @property
     def expires_on(self):
@@ -96,9 +95,11 @@ class BaseChunkedUpload(models.Model):
     class Meta:
         abstract = True
 
+from django.db import ProgrammingError
+from configuration.models import Path
+
+# TmpWorkareaUpload
 try:
-    from django.db import ProgrammingError
-    from configuration.models import Path
     TmpWorkarea_upload_root =  Path.objects.get(entity='TmpWorkarea_upload_path').value
 except (Path.DoesNotExist, ProgrammingError) as e:
     TmpWorkarea_upload_root = settings.MEDIA_ROOT
@@ -108,7 +109,6 @@ def TmpWorkarea_filename(instance, filename):
     filename = os.path.join(upload_path, instance.upload_id + '.part')
     return time.strftime(filename)
 
-#TmpWorkarea_storage = FileSystemStorage(location=TmpWorkarea_upload_root)
 class TmpWorkarea_storage(FileSystemStorage):
     def __init__(self):
         super(TmpWorkarea_storage, self).__init__(location=TmpWorkarea_upload_root)
@@ -116,6 +116,27 @@ class TmpWorkarea_storage(FileSystemStorage):
 class TmpWorkareaUpload(BaseChunkedUpload):
     file = models.FileField(max_length=255, upload_to=TmpWorkarea_filename,
                             storage=TmpWorkarea_storage())
+    user = models.ForeignKey(AUTH_USER_MODEL, related_name='chunked_uploads', blank=True)
+
+# GateareUpload
+try:
+    Gatearea_upload_root =  Path.objects.get(entity='path_gate').value
+except (Path.DoesNotExist, ProgrammingError) as e:
+    Gatearea_upload_root = settings.MEDIA_ROOT
+
+def Gatearea_filename(instance, filename):
+    upload_path = os.path.join(Gatearea_upload_root,'chunked_uploads/%Y/%m/%d')
+    filename = os.path.join(upload_path, instance.upload_id + '.part')
+    return time.strftime(filename)
+
+class Gatearea_storage(FileSystemStorage):
+    def __init__(self):
+        super(Gatearea_storage, self).__init__(location=Gatearea_upload_root)
+
+class GateareaUpload(BaseChunkedUpload):
+    file = models.FileField(max_length=255, upload_to=Gatearea_filename,
+                            storage=Gatearea_storage())
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=True)
 
 # Override the default ChunkedUpload to make the `user` field nullable
 #TmpWorkareaUpload._meta.get_field('user').null = True

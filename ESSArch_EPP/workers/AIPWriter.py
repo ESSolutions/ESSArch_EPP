@@ -33,6 +33,7 @@ from configuration.models import ESSConfig, ESSProc, ArchivePolicy, StorageTarge
 from Storage.models import IOQueue
 from Storage.libs import StorageMethodWrite
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from django import db
 from django.utils import timezone
 from essarch.libs import ESSArchSMError
@@ -50,18 +51,24 @@ class WorkingThread:
     def ThreadMain(self,ProcName):
         logger.info('Starting ' + ProcName)
         ############################################################################
+        try:
+            PauseIngestWhenActiveWrites_flag = int(ESSConfig.objects.get(Name='PauseIngestWhenActiveWrites').Value)
+        except ObjectDoesNotExist:
+            PauseIngestWhenActiveWrites_flag = 1
         # Check if any active Write IO exist to set puase flags for ingest of new objects
-        if IOQueue.objects.filter(ReqType__in=[10, 15], Status__in = [1,19]).exists():
-            ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+        if IOQueue.objects.filter(ReqType__in=[10, 15], Status__in = [1,19]).exists() and PauseIngestWhenActiveWrites_flag:
+            #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+            ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
         else:
-            ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
+            #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
+            ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
         # Get active queue depth for self.TapeIOpool._cache.
         #TapeIOactv = len(self.TapeIOpool._cache)
-        TapeIOactv = 0
-        TapeReadIOtags = 4
-        TapeWriteIOtags = 2
-        ReadTapeIO_flag = 0
-        ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]
+        #TapeIOactv = 0
+        #TapeReadIOtags = 4
+        #TapeWriteIOtags = 2
+        #ReadTapeIO_flag = 0
+        #ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]
         while 1:
             if self.mDieFlag==1: break      # Request for death
             self.mLock.acquire()
@@ -411,12 +418,18 @@ class WorkingThread:
                         ActiveTapeIOs.remove(target_obj_id)
                 '''        
             ############################################################################
-            # Check if any active Write IO exist to set pause flags for ingest of new objects
-            if IOQueue.objects.filter(ReqType__in=[10, 15], Status__in = [1,19]).exists():
-                ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+            try:
+                PauseIngestWhenActiveWrites_flag = int(ESSConfig.objects.get(Name='PauseIngestWhenActiveWrites').Value)
+            except ObjectDoesNotExist:
+                PauseIngestWhenActiveWrites_flag = 1
+            # Check if any active Write IO exist to set puase flags for ingest of new objects
+            if IOQueue.objects.filter(ReqType__in=[10, 15], Status__in = [1,19]).exists() and PauseIngestWhenActiveWrites_flag:
+                #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+                ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
             else:
-                ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
-           
+                #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
+                ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+
             #db.close_old_connections()
             self.mLock.release()
             time.sleep(int(PauseTime))

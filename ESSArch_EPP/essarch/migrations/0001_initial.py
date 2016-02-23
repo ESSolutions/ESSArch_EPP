@@ -365,7 +365,7 @@ class Migration(migrations.Migration):
                 ('storageMediumBlockSize', models.IntegerField(null=True)),
                 ('storageMediumUsedCapacity', models.BigIntegerField(null=True)),
                 ('storageMediumStatus', models.IntegerField(null=True, choices=[(0, b'Inactive'), (20, b'Write'), (30, b'Full'), (100, b'FAIL')])),
-                ('storageMediumFormat', models.IntegerField(null=True, choices=[(103, b'103 (AIC support)'), (102, b'102 (Media label)'), (101, b'101 (Old read only)')])),
+                ('storageMediumFormat', models.IntegerField(null=True, choices=[(103, b'103 (AIC support)'), (102, b'102 (Media label)'), (101, b'101 (Old read only)'), (100, b'100 (Old read only)')])),
                 ('storageMediumMounts', models.IntegerField(null=True)),
                 ('linkingAgentIdentifierValue', models.CharField(max_length=45)),
                 ('CreateDate', models.DateTimeField(null=True)),

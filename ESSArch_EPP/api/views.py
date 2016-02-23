@@ -31,13 +31,20 @@ import shutil
 import sys
 import traceback
 import datetime
+import uuid
 from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 from django.conf import settings
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
-from configuration.models import Path
-from api.models import TmpWorkareaUpload
+from configuration.models import (
+                                  Path,
+                                  Parameter,
+                                  )
+from api.models import (
+                        TmpWorkareaUpload,
+                        GateareaUpload,
+                        )
 from api.serializers import (
                         ArchiveObjectSerializer,
                         ArchiveObjectPlusAICPlusStorageNestedReadSerializer,
@@ -347,6 +354,131 @@ class CreateTmpWorkareaUploadCompleteView(views.APIView, ChunkedUploadCompleteVi
         self.move_to_destination(chunked_upload)
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
                             (chunked_upload.filename, chunked_upload.offset))}
+
+class CreateGateUploadView(views.APIView, ChunkedUploadView):
+
+    model = GateareaUpload
+    field_name = 'the_file'
+    permission_classes = (permissions.IsAuthenticated,)
+
+class CreateGateUploadCompleteView(views.APIView, ChunkedUploadCompleteView):
+
+    model = GateareaUpload
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def on_completion(self, uploaded_file, request):
+        # Do something with the uploaded file. E.g.:
+        # * Store the uploaded file on another model:
+        # SomeModel.objects.create(user=request.user, file=uploaded_file)
+        # * Pass it as an argument to a function:
+        # function_that_process_file(uploaded_file)
+        #print dir(uploaded_file)
+        #print 'filename: %s, type(file): %s' % (uploaded_file.name, type(uploaded_file.file))
+        pass
+
+    def move_to_destination(self, chunked_upload, request):
+        """
+        Move file to destination path and remove uploaded file from database
+        """
+        try:
+            Gatearea_upload_root =  Path.objects.get(entity='path_gate').value
+        except  Path.DoesNotExist as e:
+            Gatearea_upload_root = settings.MEDIA_ROOT
+
+        # get or create IP and AIC structure
+        ip_uuid = request.POST.get('ipuuid', None)
+        if ip_uuid is None:
+            print 'Missing parameter ipuuid in request'
+        gate_reception_path = os.path.join(Gatearea_upload_root, 'reception')
+        aic_uuid = get_or_create_aic_uuid(gate_reception_path, ip_uuid)
+        aic_rootpath = get_or_create_AICdirectory(gate_reception_path, aic_uuid)
+        ip_rootpath = get_or_create_IPdirectory(aic_rootpath, ip_uuid )
+
+        package_descriptionfile = Parameter.objects.get(entity ='package_descriptionfile').value
+        ip_logfile = Parameter.objects.get(entity="ip_logfile").value
+        path_reception = Path.objects.get(entity='path_reception').value
+        copy_dest_file_path = None
+        dest_file_path = None
+        tmp_file_path = chunked_upload.file.path
+
+        if chunked_upload.filename in [package_descriptionfile, '%s.xml' % ip_uuid]:
+            dest_file_path = os.path.join(aic_rootpath, chunked_upload.filename)
+        elif chunked_upload.filename in ['%s.tar' % ip_uuid]:
+            dest_file_path = os.path.join(path_reception, chunked_upload.filename)
+            copy_dest_file_path = os.path.join(os.path.join(ip_rootpath, 'content'), chunked_upload.filename)
+        elif chunked_upload.filename in [ip_logfile, '%s_log.xml' % ip_uuid]:
+            dest_file_path = os.path.join(ip_rootpath, chunked_upload.filename)
+
+        if copy_dest_file_path:
+            #print 'Copy tmp_file_path: %s to dest_path: %s' % (tmp_file_path, copy_dest_file_path)
+            shutil.copy(tmp_file_path, copy_dest_file_path)
+
+        if dest_file_path:
+            #print 'Move tmp_file_path: %s to dest_path: %s' % (tmp_file_path, dest_file_path)
+            shutil.move(tmp_file_path, dest_file_path)
+
+        if dest_file_path or copy_dest_file_path:
+            chunked_upload.delete(delete_file=True)
+
+    def get_response_data(self, chunked_upload, request):
+        self.move_to_destination(chunked_upload, request)
+        return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
+                            (chunked_upload.filename, chunked_upload.offset))}
+
+def get_or_create_aic_uuid(sourceroot, ip_uuid):
+    """
+    Get or create aic_uuid
+    """
+    # get or create AIC_UUID
+    ip_rootpath_list = find_dirs(ip_uuid, sourceroot)
+    if ip_rootpath_list:
+        aicuuid = os.path.split(os.path.split(ip_rootpath_list[0])[0])[1]
+    else:
+        aicuuid = str(uuid.uuid4())
+    return aicuuid
+
+def find_dirs(name, path):
+    result = []
+    for root, dirs, files in os.walk(path):
+        if name in dirs:
+            result.append(os.path.join(root, name))
+    return result
+
+def get_or_create_AICdirectory(sourceroot, aicuuid):
+    """
+    Get or create AIC directory
+    """
+    # create AIC_UUID directory
+    aicroot = os.path.join( sourceroot, aicuuid )
+    if not os.path.exists(aicroot):
+        os.makedirs( aicroot )
+    return aicroot
+
+def get_or_create_IPdirectory(sourceroot, ip_uuid):
+    """
+    Get or create IP directory
+    """    
+    site_profile = Parameter.objects.get(entity='site_profile').value
+    zone = 'zone2'
+    
+    # prepare ip_directory_structure list
+    ip_directory_structure = []
+    ip_rootpath = os.path.join(sourceroot, ip_uuid)
+    ip_directory_structure.append(ip_rootpath)
+    ip_directory_structure.append(os.path.join(ip_rootpath, 'content'))
+    if site_profile == "SE":
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'metadata'))
+    elif site_profile == "NO":
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'descriptive_metadata'))
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'administrative_metadata'))
+        if zone == 'zone2':
+            ip_directory_structure.append(os.path.join(os.path.join(ip_rootpath, 'administrative_metadata'), 'repository_operations'))
+
+    # create ip_directory_structure if not exists
+    for ip_path in ip_directory_structure:
+        if not os.path.exists(ip_path):
+            os.makedirs(ip_path)
+    return ip_rootpath
 
 class TwentyResultsSetPagination(PageNumberPagination):
     page_size = 20

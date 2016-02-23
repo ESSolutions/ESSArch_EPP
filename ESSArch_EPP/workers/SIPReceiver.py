@@ -28,6 +28,7 @@ import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
 import os, shutil, thread, datetime, time, logging, sys, csv, tarfile, stat, ESSDB, ESSMSSQL, ESSPGM, ESSlogging, ESSMD, pytz
+import uuid
 
 from essarch.models import IngestQueue, ArchiveObject
 from configuration.models import ArchivePolicy
@@ -313,6 +314,7 @@ class WorkingThread:
                                     else:
                                         ArchiveObject_obj = ArchiveObject()
                                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
                                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                                         ArchiveObject_obj.StatusActivity = self.StatusActivity
@@ -533,6 +535,7 @@ class WorkingThread:
                                     else:
                                         ArchiveObject_obj = ArchiveObject()
                                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
                                         ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
@@ -758,6 +761,7 @@ class WorkingThread:
                                     else:
                                         ArchiveObject_obj = ArchiveObject()
                                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
                                         ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
@@ -904,6 +908,7 @@ class WorkingThread:
                                 else:
                                     ArchiveObject_obj = ArchiveObject()
                                     ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                                    ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
                                     ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                                     ArchiveObject_obj.StatusProcess = self.StatusProcess
                                     ArchiveObject_obj.StatusActivity = self.StatusActivity

@@ -587,6 +587,7 @@ def installdefaultESSConfig(): # default ESSConfig
                     (u'OS',u'FEDORA'),
                     (u'smtp_server',u''),
                     (u'email_from',u'e-archive@essarch.org'),
+                    (u'PauseIngestWhenActiveWrites',u'1'),
     )
 
     for row in ESSConfig_list:
