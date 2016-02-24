@@ -386,11 +386,19 @@ class CreateGateUploadCompleteView(views.APIView, ChunkedUploadCompleteView):
             Gatearea_upload_root = settings.MEDIA_ROOT
 
         # get or create IP and AIC structure
-        ip_uuid = request.POST.get('ipuuid', None)
-        if ip_uuid is None:
-            print 'Missing parameter ipuuid in request'
+        path = request.POST.get('path', None)
+        if path is None:
+            print 'Missing parameter path in request'
+        elif len(path.split('/')) == 2:
+            path_items = path.split('/')
+            aic_uuid = path_items[0]
+            ip_uuid = path_items[1]
+        else:
+            print 'Path: %s is not identified' % repr(path)
+            aic_uuid = str(uuid.uuid4())
+            ip_uuid = str(uuid.uuid4())
         gate_reception_path = os.path.join(Gatearea_upload_root, 'reception')
-        aic_uuid = get_or_create_aic_uuid(gate_reception_path, ip_uuid)
+        #aic_uuid = get_or_create_aic_uuid(gate_reception_path, ip_uuid)
         aic_rootpath = get_or_create_AICdirectory(gate_reception_path, aic_uuid)
         ip_rootpath = get_or_create_IPdirectory(aic_rootpath, ip_uuid )
 
