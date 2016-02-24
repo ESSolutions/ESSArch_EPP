@@ -61,7 +61,7 @@ class WorkingThread:
             ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
         else:
             #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
-            ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+            ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
         # Get active queue depth for self.TapeIOpool._cache.
         #TapeIOactv = len(self.TapeIOpool._cache)
         #TapeIOactv = 0
@@ -428,7 +428,7 @@ class WorkingThread:
                 ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
             else:
                 #ESSProc.objects.filter(Name__in=['SIPReceiver', 'AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
-                ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=1)
+                ESSProc.objects.filter(Name__in=['AIPCreator', 'AIPChecksum', 'AIPValidate']).update(Pause=0)
 
             #db.close_old_connections()
             self.mLock.release()
