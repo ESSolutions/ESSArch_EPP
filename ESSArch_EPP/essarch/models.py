@@ -153,7 +153,7 @@ StatusProcess_CHOICES = (
     (30, 'Create AIP package'),
     (31, 'AIP create failed'),
     (39, 'AIP created OK'),
-    (40, 'Create packge checksum'),
+    (40, 'Create package checksum'),
     (49, 'AIP checksum created OK'),
     (50, 'AIP validate'),
     (51, 'AIP validate failed'),
