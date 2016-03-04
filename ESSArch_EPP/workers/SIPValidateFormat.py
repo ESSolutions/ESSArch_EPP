@@ -188,17 +188,22 @@ class WorkingThread:
                         #    self.SIPmets_objpath = os.path.join(self.SIPpath,mets_file)
                         else:
                             self.SIPmets_objpath = ''
-                        self.object_list,errno,why = ESSMD.getAIPObjects(FILENAME=self.SIPmets_objpath)
-                        if errno == 0:
-                            logging.info('Succeeded to get object_list from METS for information package: %s', self.ObjectIdentifierValue)
-                            self.F_Checksum,errno,why = ESSPGM.Check().checksum(self.SIPmets_objpath, self.ChecksumAlgorithm) # Checksum
-                            self.F_SIZE = os.stat(self.SIPmets_objpath)[6]
-                            self.object_list.append([mets_file,self.ChecksumAlgorithm_name,self.F_Checksum,self.F_SIZE,''])
-                        else:
-                            self.event_info = 'Problem to get object_list from METS for information package: %s, errno: %s, detail: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
+                            self.event_info = 'Problem to find METS file for information package: %s in path: %s' % (self.ObjectIdentifierValue,self.SIPpath)
                             logging.error(self.event_info)
                             ESSPGM.Events().create('1025','','ESSArch SIPValidateFormat',ProcVersion,'1',self.event_info,2,self.ObjectIdentifierValue)
                             self.ok = 0
+                        if self.SIPmets_objpath:                    
+                            self.object_list,errno,why = ESSMD.getAIPObjects(FILENAME=self.SIPmets_objpath)
+                            if errno == 0:
+                                logging.info('Succeeded to get object_list from METS for information package: %s', self.ObjectIdentifierValue)
+                                self.F_Checksum,errno,why = ESSPGM.Check().checksum(self.SIPmets_objpath, self.ChecksumAlgorithm) # Checksum
+                                self.F_SIZE = os.stat(self.SIPmets_objpath)[6]
+                                self.object_list.append([mets_file,self.ChecksumAlgorithm_name,self.F_Checksum,self.F_SIZE,''])
+                            else:
+                                self.event_info = 'Problem to get object_list from METS for information package: %s, errno: %s, detail: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
+                                logging.error(self.event_info)
+                                ESSPGM.Events().create('1025','','ESSArch SIPValidateFormat',ProcVersion,'1',self.event_info,2,self.ObjectIdentifierValue)
+                                self.ok = 0
                 if self.ok:
                     ###########################################################
                     # update ObjectIdentifierValue to StatusProcess: 25 and StatusActivity: 5
