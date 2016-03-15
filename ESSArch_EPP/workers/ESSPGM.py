@@ -34,6 +34,7 @@ from email.mime.text import MIMEText
 from django.utils import timezone
 #from essarch.models import ArchiveObject, robotQueue, IOqueue, eventIdentifier, storageMedium
 from essarch.models import ArchiveObject, eventIdentifier
+from configuration.models import Path
 from Storage.models import storageMedium
 from django import db
 
@@ -408,7 +409,14 @@ class Check:
     "Get filetree"
     ###############################################
     def GetFiletree2(self,path,checksum=None,allow_unknown_filetypes=False):
-        mimefilepath = '/ESSArch/config/data/mime.types'
+        try:
+            mimefilepath = Path.objects.get(entity='path_mimetypes_definitionfile').value
+        except Path.DoesNotExist as e:
+            if os.path.exists('/ESSArch/config/mime.types'):
+                mimefilepath = '/ESSArch/config/mime.types'
+            else:
+                mimefilepath = '/ESSArch/config/data/mime.types'
+            
         if os.path.exists(mimefilepath):
             mimetypes.suffix_map={}
             mimetypes.encodings_map={}

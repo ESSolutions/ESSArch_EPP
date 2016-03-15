@@ -384,6 +384,7 @@ def installdefaultpaths(): # default paths
     #        }
     #else:
     dct = {
+            'path_mimetypes_definitionfile':'/ESSArch/config/mime.types',
             'path_reception':'/ESSArch/data/eta/reception',
             'path_gate':'/ESSArch/data/gate',
             'path_work':'/ESSArch/data/epp/work',
