@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="EPP (ESSArch Preservation Platform) : EPP (ESSArch Preservation Platform) - an practical implementation of the OAIS (Reference Model for an Open Archival Information System) ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>EPP (ESSArch Preservation Platform)</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ESSolutions/ESSArch_EPP">View on GitHub</a>
+
+          <h1 id="project_title">EPP (ESSArch Preservation Platform)</h1>
+          <h2 id="project_tagline">EPP (ESSArch Preservation Platform) - an practical implementation of the OAIS (Reference Model for an Open Archival Information System) </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ESSolutions/ESSArch_EPP/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ESSolutions/ESSArch_EPP/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="epp-essarch-preservation-platform" class="anchor" href="#epp-essarch-preservation-platform" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EPP (ESSArch Preservation Platform)</h1>
+
+<p>EPP (ESSArch Preservation Platform) - an practical implementation of the OAIS (Reference Model for an Open Archival Information System)</p>
+
+<h1>
+<a id="installation-guide" class="anchor" href="#installation-guide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation Guide</h1>
+
+<h2>
+<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h2>
+
+<p>Hardware configuration for server, network and storage architecture is not affected in this guide. Software configurations for server operating systems occur preferably before the installation of ESSArch begins. The installation is expected to be done as user 'root'.</p>
+
+<h2>
+<a id="supported-os-platforms" class="anchor" href="#supported-os-platforms" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported OS platforms</h2>
+
+<table>
+<thead>
+<tr>
+<th><strong>OS</strong></th>
+<th><strong>Version</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CentOS</td>
+<td>5.5 (x86_64)</td>
+<td></td>
+</tr>
+<tr>
+<td>CentOS</td>
+<td>6.4 (x86_64)</td>
+<td>CentOS release 6.6 (Final)</td>
+</tr>
+<tr>
+<td>Redhat Enterprise Server</td>
+<td>5 (x86_64)</td>
+<td></td>
+</tr>
+<tr>
+<td>SUSE Linux Enterprise Server</td>
+<td>10 (x86_64)</td>
+<td></td>
+</tr>
+<tr>
+<td>SUSE Linux Enterprise Server</td>
+<td>11 (x86_64) SP3</td>
+<td></td>
+</tr>
+<tr>
+<td>Fedora</td>
+<td>11 (x86_64)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="os-packages" class="anchor" href="#os-packages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OS Packages</h2>
+
+<p>Before installing ESSArch you need to verify that the following packages are installed on your platform</p>
+
+<table>
+<thead>
+<tr>
+<th><strong>Package</strong></th>
+<th><strong>Minimum version</strong></th>
+<th><strong>Note</strong></th>
+<th><strong>Verified version</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kernel-devel</td>
+<td>2.6.x</td>
+<td></td>
+<td>kernel-devel-2.6.32-504.el6.x86_64</td>
+</tr>
+<tr>
+<td>sysstat</td>
+<td>7.x</td>
+<td></td>
+<td>sysstat-9.0.4-27.el6.x86_64</td>
+</tr>
+<tr>
+<td>make</td>
+<td>3.81-15</td>
+<td></td>
+<td>make-3.81-20.el6.x86_64</td>
+</tr>
+<tr>
+<td>patch</td>
+<td>2.6.1-1</td>
+<td></td>
+<td>patch-2.6-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>erlang **</td>
+<td>R12B-5.8</td>
+<td></td>
+<td>erlang-R14B-04.3.el6.x86_64</td>
+</tr>
+<tr>
+<td>gcc</td>
+<td>4.1.2</td>
+<td></td>
+<td>gcc-4.4.7-11.el6.x86_64</td>
+</tr>
+<tr>
+<td>gcc-c++</td>
+<td>4.1.2</td>
+<td></td>
+<td>gcc-c++-4.4.7-11.el6.x86_64</td>
+</tr>
+<tr>
+<td>ppenssl</td>
+<td>0.9.8</td>
+<td></td>
+<td>openssl-1.0.1e-30.el6.x86_64</td>
+</tr>
+<tr>
+<td>openssl-devel</td>
+<td>0.9.8</td>
+<td></td>
+<td>openssl-devel-1.0.1e-30.el6.x86_64</td>
+</tr>
+<tr>
+<td>openldap</td>
+<td>2.3.43</td>
+<td></td>
+<td>openldap-2.4.39-8.el6.x86_64</td>
+</tr>
+<tr>
+<td>openldap-devel</td>
+<td>2.3.43</td>
+<td></td>
+<td>openldap-devel-2.4.39-8.el6.x86_64</td>
+</tr>
+<tr>
+<td>mt-st</td>
+<td>0.9b</td>
+<td></td>
+<td>mt-st-1.1-5.el6.x86_64</td>
+</tr>
+<tr>
+<td>mtx</td>
+<td>1.2.18</td>
+<td></td>
+<td>mtx-1.3.12-5.el6.x86_64</td>
+</tr>
+<tr>
+<td>sg3_utils</td>
+<td>1.25</td>
+<td></td>
+<td>sg3_utils-1.28-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>sg3_utils-libs</td>
+<td>1.25</td>
+<td></td>
+<td>sg3_utils-libs-1.28-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>sg3_utils-devel</td>
+<td>1.25</td>
+<td></td>
+<td>sg3_utils-devel-1.28-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>mysql</td>
+<td>5.0.77</td>
+<td></td>
+<td>mysql-5.1.73-3.el6_5.x86_64</td>
+</tr>
+<tr>
+<td>mysql-server</td>
+<td>5.0.77</td>
+<td></td>
+<td>mysql-server-5.1.73-3.el6_5.x86_64</td>
+</tr>
+<tr>
+<td>mysql-devel</td>
+<td>5.0.77</td>
+<td></td>
+<td>mysql-devel-5.1.73-3.el6_5.x86_64</td>
+</tr>
+<tr>
+<td>mysql-libs</td>
+<td>5.0.77</td>
+<td></td>
+<td>mysql-libs-5.1.73-3.el6_5.x86_64</td>
+</tr>
+<tr>
+<td>gnutls</td>
+<td>1.4.1</td>
+<td></td>
+<td>gnutls-2.8.5-14.el6_5.x86_64</td>
+</tr>
+<tr>
+<td>readline</td>
+<td>5.1.3</td>
+<td></td>
+<td>readline-6.0-4.el6.x86_64</td>
+</tr>
+<tr>
+<td>readline-devel</td>
+<td>5.1.3</td>
+<td></td>
+<td>readline-devel-6.0-4.el6.x86_64</td>
+</tr>
+<tr>
+<td>unixODBC</td>
+<td>2.2.11</td>
+<td></td>
+<td>unixODBC-2.2.14-14.el6.x86_64</td>
+</tr>
+<tr>
+<td>unixODBC-devel</td>
+<td>2.2.11</td>
+<td></td>
+<td>unixODBC-devel-2.2.14-14.el6.x86_64</td>
+</tr>
+<tr>
+<td>freetds</td>
+<td>0.64</td>
+<td></td>
+<td>freetds-0.91-2.el6.x86_64</td>
+</tr>
+<tr>
+<td>freetds-devel</td>
+<td>0.64</td>
+<td></td>
+<td>freetds-devel-0.91-2.el6.x86_64</td>
+</tr>
+<tr>
+<td>pcre</td>
+<td>7.8</td>
+<td></td>
+<td>pcre-7.8-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>pcre-devel</td>
+<td>7.8</td>
+<td></td>
+<td>pcre-devel-7.8-6.el6.x86_64</td>
+</tr>
+<tr>
+<td>lzo</td>
+<td>2.03-2</td>
+<td></td>
+<td>lzo-2.03-3.1.el6_5.1.x86_64</td>
+</tr>
+<tr>
+<td>lzo-devel</td>
+<td>2.03-2</td>
+<td></td>
+<td>lzo-devel-2.03-3.1.el6_5.1.x86_64</td>
+</tr>
+<tr>
+<td>xz</td>
+<td>4.999.9-0.1</td>
+<td></td>
+<td>xz-4.999.9-0.5.beta.20091007git.el6.x86_64</td>
+</tr>
+<tr>
+<td>bzip2-devel (libbz2-devel)</td>
+<td>1.0.5-5</td>
+<td></td>
+<td>bzip2-devel-1.0.5-7.el6_0.x86_64</td>
+</tr>
+<tr>
+<td>libffi-devel</td>
+<td>3.0.5-3.2</td>
+<td></td>
+<td>libffi-devel.x86_64 0:3.0.5-3.2.el6</td>
+</tr>
+<tr>
+<td>sqlite-devel</td>
+<td>3.6</td>
+<td></td>
+<td>3.6.20-1.el6.x86_64</td>
+</tr>
+</tbody>
+</table>
+
+<p>** Centos require extra package: <a href="http://ftp.acc.umu.se/mirror/fedora/epel/6/i386/epel-release-6-8.noarch.rpm">epel-release</a></p>
+
+<h2>
+<a id="prepare-environment" class="anchor" href="#prepare-environment" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prepare Environment</h2>
+
+<h3>
+<a id="create-user-and-group" class="anchor" href="#create-user-and-group" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create user and group</h3>
+
+<p>Don't forget to create /home/arch</p>
+
+<pre><code>Please run the following command as user root.
+# groupadd arch
+# useradd -c "ESSArch System Account" -m -g arch arch
+</code></pre>
+
+<h3>
+<a id="set-password-for-arch-user" class="anchor" href="#set-password-for-arch-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Set password for arch user</h3>
+
+<pre><code>Please run the following command as user root.
+# passwd arch
+Changing password for user arch.
+New UNIX password: password
+Retype new UNIX password: password
+</code></pre>
+
+<h3>
+<a id="customize-user-environment-for-arch-user" class="anchor" href="#customize-user-environment-for-arch-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Customize user environment for arch user</h3>
+
+<p>Add the following rows to /home/arch/.bash_profile:</p>
+
+<pre><code>### ESSArch start
+##
+export PATH=/ESSArch/pd/python/bin:$PATH:/usr/sbin
+export LANG=en_US.UTF-8
+export LD_LIBRARY_PATH=/ESSArch/pd/python/lib:/ESSArch/pd/libxslt/lib:/ESSArch/pd/libxml/lib:$LD_LIBRARY_PATH
+export EPP=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP
+export PYTHONPATH=$EPP:$EPP/workers:/ESSArch/config
+export DJANGO_SETTINGS_MODULE=config.settings
+alias bin='cd /ESSArch/bin'
+alias log='cd /ESSArch/log'
+##
+### ESSArch end
+</code></pre>
+
+<h3>
+<a id="create-installation-directory" class="anchor" href="#create-installation-directory" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create installation directory</h3>
+
+<pre><code>Please run the following command as user root.
+# mkdir /ESSArch
+# chown -R arch:arch /ESSArch
+</code></pre>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<h3>
+<a id="epp-installation-script" class="anchor" href="#epp-installation-script" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EPP installation script</h3>
+
+<pre><code>Change to user "arch" with the following command.
+# su - arch
+
+Download and extract ESSArch_EPP_install tarfile.
+[arch@server ~]$ wget http://xxx.xxx.xxx.xxx/ESSArch_EPP_installer_xxxxxxxxxxxx.tar.gz
+[arch@server ~]$ tar xvf ESSArch_EPP_installer_xxxxxxxxxxxx.tar.gz
+[arch@server ~]$ cd ESSArch_EPP_installer
+[arch@server ~]$ ./install
+
+The installation of ESSArch is now running and dependent on hardware configuration, the installation may take some time. To see details of the installation progress please start a new terminal window and run the following command.
+[arch@server ~]$ tail -f /ESSArch/install.log
+
+When installation is finished, search in the log file /ESSArch/install.log for any unexpected errors indicating failure of installation of any modules.
+</code></pre>
+
+<h3>
+<a id="installation-of-advanced-message-queuing-protocol" class="anchor" href="#installation-of-advanced-message-queuing-protocol" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation of Advanced Message Queuing Protocol</h3>
+
+<p>ESSArch is designed to be AMQP (Advanced Message Queuing Protocol) independent. However the installation package is prepared for RabbitMQ and the following instructions assume that you use RabbitMQ.</p>
+
+<p>Follow the instructions below in order to install RabbitMQ required by ESSArch.</p>
+
+<pre><code>Please run the following commands as root user.
+# rpm -i /ESSArch/install/packages/rabbitmq-server.rpm
+# chkconfig rabbitmq-server on
+# service rabbitmq-server start
+</code></pre>
+
+<p>If startup failed and you see an error message in /var/log/rabbitmq/startup_log  after a minute or so like:</p>
+
+<p>ERROR: epmd error for host "yourhostname": timeout (timed out)_</p>
+
+<p>Then you need to update your /etc/hosts file to add your hostname to the list of localhost:</p>
+
+<p>127.0.0.1    yourhostname</p>
+
+<h2>
+<a id="configuring" class="anchor" href="#configuring" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuring</h2>
+
+<h3>
+<a id="apache-httpd-configuration" class="anchor" href="#apache-httpd-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apache httpd configuration</h3>
+
+<pre><code>Edit file /ESSArch/config/httpd-epp.conf and change the configuration entry for "ServerName" to same as the hostname of the ESSArch server.
+
+For test purpose you can use the existing configuration for SSL certificate, but for production environment and for maximum security we recommend generating your own SSL certificate or if you have your own SSL trusted certificate install them in the apache httpd configuration.
+</code></pre>
+
+<h3>
+<a id="essarch-configuration" class="anchor" href="#essarch-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ESSArch configuration</h3>
+
+<pre><code>In /ESSArch/config you will find all the configuration files for ESSArch. The main configuration file for ESSArch WEB GUI is local_settings.py.
+
+For ESSArch you will find the configuration in the local database tables. To change the configuration please login as admin user is EPP and select menu MANAGEMENT &gt; Configuration
+</code></pre>
+
+<h2>
+<a id="database" class="anchor" href="#database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Database</h2>
+
+<p>ESSArch is designed to be RDBMS-independent. However the installation package is prepared for MySQL and the following instructions assume that you use MySQL.</p>
+
+<h3>
+<a id="mysql" class="anchor" href="#mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MySQL</h3>
+
+<p>Please note that the MySQL JDBC driver provided by the installer requires MySQL version 5.x or higher.</p>
+
+<p>Follow the instructions below in order to create the user and tables required by EPP installation.</p>
+
+<pre><code>To enable MySQL on CentOS 5.5 use the following commands.
+/sbin/chkconfig mysqld on
+/sbin/service mysqld start
+/usr/bin/mysql_secure_installation
+
+The MySQL commands listed below can be run within the mysql program, which may be invoked as follows.
+# mysql -u root -p
+
+Create the database. For example, to create a database named "essarch", enter.
+mysql&gt; CREATE DATABASE essarch DEFAULT CHARACTER SET utf8;
+
+Set username, password and permissions for the database. For example, to set the permissions for user "arkiv" with password "password" on database "essarch", enter:
+mysql&gt; GRANT ALL ON essarch.* TO arkiv@localhost IDENTIFIED BY 'password';
+</code></pre>
+
+<h3>
+<a id="create-default-tables-in-database" class="anchor" href="#create-default-tables-in-database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create default tables in database</h3>
+
+<pre><code>Please run the following command as user: arch
+[arch@server ~]$ python $EPP/manage.py migrate
+</code></pre>
+
+<h3>
+<a id="add-default-configuration-data-to-database" class="anchor" href="#add-default-configuration-data-to-database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add default configuration data to database</h3>
+
+<p>Use only this default configuration for test purpose, do not install this default configuration in production.</p>
+
+<p>For production environment you should first make a copy of this configuration file and update for example site_profile, site_name. After you done all your updates you install it.</p>
+
+<pre><code>Please run the following command as user: arch
+[arch@server ~]$ python $EPP/extra/install_config.py
+</code></pre>
+
+<h3>
+<a id="for-productioncustom-installation" class="anchor" href="#for-productioncustom-installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For production/custom installation</h3>
+
+<pre><code>[arch@server ~]$ cp $EPP/extra/install_config.py /home/arch/install_config_epp_custom.py
+</code></pre>
+
+<p>Update /home/arch/install_config_epp_custom.py</p>
+
+<p>Install configuration:</p>
+
+<pre><code>[arch@server ~]$ python /home/arch/install_config_epp_custom.py
+</code></pre>
+
+<h2>
+<a id="enable-automatic-startup-at-system-boot" class="anchor" href="#enable-automatic-startup-at-system-boot" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Enable automatic startup at system boot</h2>
+
+<pre><code>Login as root user and set EPP path variable:
+# export EPP=/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP
+</code></pre>
+
+<h3>
+<a id="enable-workerprocess" class="anchor" href="#enable-workerprocess" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Enable workerprocess</h3>
+
+<pre><code>Please run the following commands as root user.
+# cp $EPP/extra/celeryd.sh /etc/init.d/celeryd
+# chmod 744 /etc/init.d/celeryd
+# chkconfig celeryd on
+# cp $EPP/extra/celerybeat.sh /etc/init.d/celerybeat
+# chmod 744 /etc/init.d/celerybeat
+# chkconfig celerybeat on
+</code></pre>
+
+<h3>
+<a id="enable-automatic-startup-of-apache-httpd" class="anchor" href="#enable-automatic-startup-of-apache-httpd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Enable automatic startup of Apache HTTPD</h3>
+
+<pre><code>Please run the following command as user root.
+# cp $EPP/extra/httpd.sh /etc/init.d/httpd
+# chmod 744 /etc/init.d/httpd
+# chkconfig httpd on
+</code></pre>
+
+<h3>
+<a id="enable-epp-server-processes" class="anchor" href="#enable-epp-server-processes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Enable EPP server processes</h3>
+
+<pre><code>Please run the following command as user root.
+# cp $EPP/extra/ESSArch.sh /etc/init.d/essarch
+# chmod 744 /etc/init.d/essarch
+# chkconfig essarch on
+</code></pre>
+
+<h3>
+<a id="enable-automatic-backup-of-mysql" class="anchor" href="#enable-automatic-backup-of-mysql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Enable automatic backup of MySQL</h3>
+
+<pre><code>Please run the following command as user root.
+# cp /ESSArch/config/automysqlbackup/runmysqlbackup /etc/cron.daily/runmysqlbackup
+# chmod 744 /etc/cron.daily/runmysqlbackup
+</code></pre>
+
+<h1>
+<a id="running-the-epp-server" class="anchor" href="#running-the-epp-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running the EPP Server</h1>
+
+<h2>
+<a id="start-epp-server" class="anchor" href="#start-epp-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Start EPP server</h2>
+
+<p>Note that a startup or shutdown of EPP should always be controlled.</p>
+
+<pre><code>Please run the following command as user root to start EPP.
+# service celeryd start
+# service celerybeat start
+# service essarch start
+# service httpd start
+</code></pre>
+
+<h2>
+<a id="stop-epp-server" class="anchor" href="#stop-epp-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stop EPP server</h2>
+
+<pre><code>Please run the following command as user root to stop EPP.
+# service httpd stop
+# service essarch stop
+# service celeryd stop
+# service celerybeat stop
+</code></pre>
+
+<h2>
+<a id="start-epp-web-interface" class="anchor" href="#start-epp-web-interface" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Start EPP WEB interface</h2>
+
+<p>Start your preferable web browser and connect to EPP Server name or IP address.</p>
+
+<p>URL: <a href="https://xxxxxxxx">https://xxxxxxxx</a></p>
+
+<p>By default, for test purpose, the installation has configured the following users:</p>
+
+<table>
+<thead>
+<tr>
+<th><strong>Username</strong></th>
+<th><strong>Password</strong></th>
+<th><strong>Role/Permissions</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user</td>
+<td>user</td>
+<td>ingest, access, storage</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>admin</td>
+<td>ingest, access, storage, admin</td>
+</tr>
+<tr>
+<td>sysadmin</td>
+<td>sysadmin</td>
+<td>System admin, configuration, users</td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="important-files-to-backup" class="anchor" href="#important-files-to-backup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Important files to backup</h2>
+
+<p>Important data in ESSArch to backup is the configuration, log files and database. All areas which are mounted from external file servers should be backed up.</p>
+
+<p>Everything in the file area /ESSArch should be backed up before and after configuration changes or changes in ESSArch system installation, for example when upgrading and software patches.</p>
+
+<p>Areas that need to be backed up to an external "backup system" daily is the following:</p>
+
+<ul>
+<li>/ESSArch/backups_mysql</li>
+<li>/ESSArch/config</li>
+<li>/ESSArch/log</li>
+<li>/ESSArch/data</li>
+</ul>
+
+<h2>
+<a id="events-and-log-information" class="anchor" href="#events-and-log-information" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Events and log information</h2>
+
+<p>Different types of events are logged both in physical files and tables in ESSArch database. Log entries are tagged with the log level - Debug, Critical, Error, Warning, Info. These log levels can be felt by the EPP's system logs:</p>
+
+<ul>
+<li>/ESSArch/log</li>
+<li>/ESSArch/log/AccessEngine.log</li>
+<li>/ESSArch/log/administration.log</li>
+<li>/ESSArch/log/AIPChecksum.log</li>
+<li>/ESSArch/log/AIPCreator.log</li>
+<li>/ESSArch/log/AIPPurge.log</li>
+<li>/ESSArch/log/AIPValidate.log</li>
+<li>/ESSArch/log/AIPWriter.log</li>
+<li>/ESSArch/log/celerybeat.log</li>
+<li>/ESSArch/log/celery_smdisk1.log</li>
+<li>/ESSArch/log/celery_smtape1.log</li>
+<li>/ESSArch/log/celery_worker1.log</li>
+<li>/ESSArch/log/controlarea.log</li>
+<li>/ESSArch/log/db_sync_ais.log</li>
+<li>/ESSArch/log/ESSArch_db.log</li>
+<li>/ESSArch/log/ESSArch.log</li>
+<li>/ESSArch/log/ESSArch_request.log</li>
+<li>/ESSArch/log/ESSArch.log</li>
+<li>/ESSArch/log/ESSlogging.log</li>
+<li>/ESSArch/log/FTPServer.log</li>
+<li>/ESSArch/log/httpd_access.log</li>
+<li>/ESSArch/log/httpd_error.log</li>
+<li>/ESSArch/log/httpd_ssl_request.log</li>
+<li>/ESSArch/log/install.log</li>
+<li>/ESSArch/log/monitoring.log</li>
+<li>/ESSArch/log/SIPReceiver.log</li>
+<li>/ESSArch/log/SIPRemove.log</li>
+<li>/ESSArch/log/SIPValidateAIS.log</li>
+<li>/ESSArch/log/SIPValidateApproval.log</li>
+<li>/ESSArch/log/SIPValidateFormat.log</li>
+<li>/ESSArch/log/Storage.log</li>
+<li>/ESSArch/log/storageLogistics.log</li>
+<li>/ESSArch/log/storagemaintenance.log</li>
+<li>/ESSArch/log/StorageMethodDisk.log</li>
+<li>/ESSArch/log/StorageMethodTape.log</li>
+<li>/ESSArch/log/TLD.log</li>
+</ul>
+
+<h1>
+<a id="service-och-support" class="anchor" href="#service-och-support" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Service och support</h1>
+
+<p>Service and support on EPP is regulated in maintenance contract with ES Solutions AB. A case is registered on the support portal <a href="http://projects.essolutions.se">http://projects.essolutions.se</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">EPP (ESSArch Preservation Platform) maintained by <a href="https://github.com/ESSolutions">ESSolutions</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
