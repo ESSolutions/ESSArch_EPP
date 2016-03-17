@@ -364,6 +364,14 @@ def createdefaultusers(): # default users, groups and permissions
         myuser.is_staff = 1
         myuser.save()
 
+    try:
+        myuser = User.objects.get(username='gate')
+    except User.DoesNotExist:
+        myuser = User.objects.create_user('gate', '', 'gate2015')
+        myuser.groups.add(usergroup)
+        myuser.is_staff = 1
+        myuser.save()
+
     return 0
 
 def installdefaultpaths(): # default paths

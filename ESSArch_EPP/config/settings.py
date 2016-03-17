@@ -333,6 +333,15 @@ LOGGING = {
             'maxBytes': 1024*1024*5, # 5MB
             'backupCount': 5,
         },
+        'log_file_auth': {
+            'level': 'DEBUG',
+            #'filters': ['require_debug_false'],
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/auth.log',
+            'maxBytes': 1024*1024*100, # 100MB
+            'backupCount': 5,
+        },
         'log_file_controlarea': {
             'level': 'DEBUG',
             #'filters': ['require_debug_false'],
@@ -439,6 +448,11 @@ LOGGING = {
         'essarch': {
             'level': 'INFO',
             'handlers': ['null'],
+            'propagate': True,
+        },
+        'essarch.auth': {
+            'level': 'INFO',
+            'handlers': ['log_file_auth'],
             'propagate': True,
         },
         'essarch.controlarea': {
