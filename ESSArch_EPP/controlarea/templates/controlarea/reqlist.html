@@ -1,12 +1,15 @@
-{% extends 'index.html' %}
+{% extends 'admin/base_site.html' %}
 {% load dictionary_extras %}
 
-{% block content %}
+{% block server-side-base %}active{% endblock %}
 
-<div style="margin:20px">
-<H1>{{ label }}</H1>
+{% block app-extra-style %}
+{% endblock %}
 
-<br/>
+{% block container %}
+
+	<H2>{{ label }}</H2>
+	<br>
 
 <div class="results">
 {% if req_list %}
@@ -38,7 +41,8 @@
 	No request exists
 {% endif %}
 </div>
-
-</div>    
    
+{% endblock %}
+
+{% block app-extra-script %}
 {% endblock %}

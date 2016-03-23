@@ -1,11 +1,14 @@
-{% extends 'index.html' %}
+{% extends 'admin/base_site.html' %}
 {% load dictionary_extras %}
 
-{% block content %}
+{% block server-side-base %}active{% endblock %}
 
-<div style="margin:20px">
+{% block app-extra-style %}
+{% endblock %}
 
-	<H1>Create controlarea request</H1>
+{% block container %}
+
+	<H2>Create controlarea request</H2>
 	<p>
 	<p><i>Please fill in the fields or use prefilled data   (* indicates mandatory field)</i></p>
 	<br>
@@ -88,5 +91,8 @@
 	  </table>
 	</div>
 {% endif %}
-</div>
+
+{% endblock %}
+
+{% block app-extra-script %}
 {% endblock %}
