@@ -38,6 +38,8 @@ from essarch.models import (ArchiveObject,
                                         ObjectMetadata,
                                         ArchiveObjectData,
                                         ArchiveObjectMetadata,
+                                        ProcessStep,
+                                        ProcessTask
                                         )
 from configuration.models import (ArchivePolicy,
                                                 StorageMethod,
@@ -331,6 +333,46 @@ class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICN
                                                                                             AIC_UUID = AIC_ArchiveObject_obj)
         
         return instance
+
+class ProcessStepSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False, read_only=False, validators=[validators.UniqueValidator(queryset=ProcessStep.objects.all())])
+    class Meta:
+        model = ProcessStep
+        fields = ['id',
+                    'name',
+                    'type',
+                    'user',
+                    'result',
+                    'status',
+                    'posted',
+                    'progress',
+                    'archiveobject',
+                    'hidden']
+
+class ProcessTaskSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False, read_only=False, validators=[validators.UniqueValidator(queryset=ProcessTask.objects.all())])
+    class Meta:
+        model = ProcessTask
+        fields = ['id', 'name', 'task_id', 'status', 'result', 
+                  'date_done', 'traceback', 'hidden',
+                  'meta', 'progress', 'processstep']
+
+class ProcessStepNestedReadSerializer(ProcessStepSerializer):
+    processtask_set = ProcessTaskSerializer(many=True)
+    class Meta:
+        model = ProcessStep
+        fields = ProcessStepSerializer.Meta.fields + ['processtask_set']
+
+class ArchiveObjectPlusAICPlusProcessNestedReadSerializer(ArchiveObjectPlusAICNestedReadSerializer):
+    processstep_set = ProcessStepNestedReadSerializer(many=True)
+    class Meta:
+        model = ArchiveObject
+        #fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['processstep_set']
+        fields = ['ObjectUUID',
+                  'ObjectIdentifierValue',
+                  'ObjectMetadata',
+                  'processstep_set']
+        #fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['processstep_set', 'ObjectMetadata__label']
 
 class IPFilter(django_filters.FilterSet):
     archiveobjects__ObjectIdentifierValue = django_filters.CharFilter(name='ObjectIdentifierValue')

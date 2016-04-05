@@ -36,6 +36,7 @@ from api.views import (TmpWorkareaUploadView,
                     CreateGateUploadCompleteView,
                     ArchiveObjectViewSet,
                     ArchiveObjectStorageViewSet,
+                    ArchiveObjectProcessViewSet,
                     AICObjectViewSet,
                     ArchivePolicyViewSet,
                     ArchivePolicyNestedViewSet,
@@ -45,6 +46,9 @@ from api.views import (TmpWorkareaUploadView,
                     storageMediumViewSet,
                     storageViewSet,
                     storageNestedViewSet,
+                    ProcessStepViewSet,
+                    ProcessTaskViewSet,
+                    ProcessStepNestedViewSet,
                     IOQueueViewSet, 
                     IOQueueNestedViewSet,
                     AICListView,
@@ -61,6 +65,7 @@ from api.views import (TmpWorkareaUploadView,
 router = DefaultRouter()
 router.register(r'archiveobjects', ArchiveObjectViewSet)
 router.register(r'archiveobjectsandstorage', ArchiveObjectStorageViewSet, 'archiveobjectsandstorage')
+router.register(r'archiveobjectsandprocess', ArchiveObjectProcessViewSet, 'archiveobjectsandprocess')
 router.register(r'aicobjects', AICObjectViewSet, 'aicobject')
 router.register(r'archivepolicy', ArchivePolicyViewSet)
 router.register(r'archivepolicynested', ArchivePolicyNestedViewSet, 'archivepolicynested')
@@ -70,6 +75,9 @@ router.register(r'storagetargets', StorageTargetsViewSet)
 router.register(r'storagemedium', storageMediumViewSet)
 router.register(r'storage', storageViewSet)
 router.register(r'storagenested', storageNestedViewSet, 'storagenested')
+router.register(r'processstep', ProcessStepViewSet)
+router.register(r'processtask', ProcessTaskViewSet)
+router.register(r'processstepnested', ProcessStepNestedViewSet, 'processstepnested')
 router.register(r'ioqueue', IOQueueViewSet)
 router.register(r'ioqueuenested', IOQueueNestedViewSet, 'ioqueuenested')
 router.register(r'write_storage_method_tape_apply', WriteStorageMethodTapeApplyViewSet, 'write_storage_method_tape_apply')

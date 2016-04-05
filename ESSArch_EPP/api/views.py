@@ -66,8 +66,16 @@ from api.serializers import (
                         ApplyStorageMethodTapeSerializer,
                         ApplyStorageMethodDiskSerializer,
                         MoveToAccessPathSerializer,
+                        ProcessStepSerializer,
+                        ProcessTaskSerializer,
+                        ProcessStepNestedReadSerializer,
+                        ArchiveObjectPlusAICPlusProcessNestedReadSerializer,
                         )
-from essarch.models import ArchiveObject, ArchiveObjectRel
+from essarch.models import (ArchiveObject, 
+                            ArchiveObjectRel,
+                            ProcessStep,
+                            ProcessTask
+                            )
 from configuration.models import (ArchivePolicy,
                                                 StorageMethod,
                                                 StorageTarget,
@@ -551,6 +559,29 @@ class ArchiveObjectStorageViewSet(mixins.UpdateModelMixin, CreateListRetrieveVie
         else:
             return ArchiveObjectPlusAICPlusStorageNestedReadSerializer
 
+class ArchiveObjectProcessViewSet(mixins.ListModelMixin, 
+    mixins.RetrieveModelMixin, 
+    viewsets.GenericViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` actions.
+    """
+    queryset = ArchiveObject.objects.all()
+    queryset = queryset.exclude(processstep=None)
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('ObjectIdentifierValue', 'ObjectUUID', 'PolicyId')
+    lookup_field = 'ObjectUUID'
+    lookup_value_regex = '[0-9a-f-]{36}'
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return ArchiveObjectPlusAICPlusProcessNestedReadSerializer
+        elif self.request.method in ['POST', 'PATCH', 'PUT']:
+            return ArchiveObjectPlusAICPlusProcessNestedReadSerializer
+            #return ArchiveObjectPlusAICPlusProcessNestedWriteSerializer
+        else:
+            return ArchiveObjectPlusAICPlusProcessNestedReadSerializer
+
 class AICObjectViewSet(mixins.UpdateModelMixin, CreateListRetrieveViewSet):
 #class AICObjectViewSet(viewsets.ModelViewSet):
     """
@@ -656,6 +687,41 @@ class storageNestedViewSet(storageViewSet):
             return storageNestedWriteSerializer
         else:
             return storageSerializer
+
+class ProcessStepViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateListRetrieveViewSet):
+
+    queryset = ProcessStep.objects.all()
+    serializer_class = ProcessStepSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('id',
+                    'name',
+                    'type',
+                    'user',
+                    'result',
+                    'status',
+                    'posted',
+                    'progress',
+                    'archiveobject',
+                    'hidden')
+
+class ProcessTaskViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateListRetrieveViewSet):
+
+    queryset = ProcessTask.objects.all()
+    serializer_class = ProcessTaskSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('id', 'name', 'task_id', 'status', 'result', 
+                  'date_done', 'traceback', 'hidden',
+                  'meta', 'progress', 'processstep')
+
+class ProcessStepNestedViewSet(ProcessStepViewSet):
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return ProcessStepNestedReadSerializer
+        elif self.request.method in ['POST', 'PATCH', 'PUT']:
+            return ProcessStepNestedReadSerializer
+            #return ProcessStepNestedWriteSerializer
+        else:
+            return ProcessStepNestedReadSerializer
 
 class IOQueueViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateListRetrieveViewSet):
 
