@@ -803,17 +803,22 @@ class DiffCheckTask(JobtasticTask):
                                                                           METS_ObjectPath=METS_ObjectPath,
                                                                           )
         status_list = []
+        error_list = []
         if status_code:
             #self.object.Status=100
-            event_info = 'Failed to DiffCheck object: %s, ReqUUID: %s, why: %s' % (ObjectIdentifierValue,
+            event_info_1 = 'Failed to DiffCheck object: %s, ReqUUID: %s' % (ObjectIdentifierValue,
                                                                                    ReqUUID,
-                                                                                   status_detail[1],
                                                                                    )
+            event_info_2 = 'why: %s' % (status_detail[1])
+            event_info = '%s, %s' % (event_info_1, event_info_2)
             ESSPGM.Events().create('33000',ReqPurpose,'controlarea views',__version__,'1',
                                    event_info,0,ObjectIdentifierValue=ObjectIdentifierValue,linkingAgentIdentifierValue=linkingAgentIdentifierValue,
                                    )
             logger.error(event_info)
-            status_list.append(event_info)
+            status_list.append(event_info_1)
+            status_list.append(event_info_2)
+            for error_item in status_detail[1]:
+                error_list.append(error_item)
         else:
             #self.object.Status=20
             status_summary = ''
@@ -821,15 +826,17 @@ class DiffCheckTask(JobtasticTask):
             for st in status_detail[0]:
                 if st.startswith('STATUS -'):
                     status_summary = st
-            event_info = 'Success to DiffCheck object: %s, ReqUUID: %s, Result: %s' % (ObjectIdentifierValue,
+            event_info_1 = 'Success to DiffCheck object: %s, ReqUUID: %s' % (ObjectIdentifierValue,
                                                                                        ReqUUID,
-                                                                                       status_summary
                                                                                        )
+            event_info_2 = 'Result: %s' % (status_summary)
+            event_info = '%s, %s' % (event_info_1, event_info_2)
             ESSPGM.Events().create('33000',ReqPurpose,'controlarea views',__version__,'0',
                                    event_info,0,ObjectIdentifierValue=ObjectIdentifierValue,linkingAgentIdentifierValue=linkingAgentIdentifierValue,
                                    )
             logger.info(event_info)
-            status_list.append(event_info)
+            status_list.append(event_info_1)
+            status_list.append(status_summary)
 
         #Test functionality added to test monitoring of tasks in progress
         '''
@@ -849,9 +856,11 @@ class DiffCheckTask(JobtasticTask):
         result['label'] = 'Diffcheck'
         result['reqpurpose'] = ReqPurpose
         result['user'] = linkingAgentIdentifierValue
+        result['statuscode'] = status_code
         result['statusdetail'] = status_detail
-        result['resullist'] = res_list
+        #result['resultlist'] = res_list
         result['statuslist'] = status_list
+        result['errorlist'] = error_list
         result['ipuuid'] = ObjectIdentifierValue
         if status_code != 0:
             raise ControlareaException(result) 
