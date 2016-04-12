@@ -317,19 +317,15 @@
 </table>
 
 <p>** Centos require extra package: <a href="http://ftp.acc.umu.se/mirror/fedora/epel/6/i386/epel-release-6-8.noarch.rpm">CentOS-epel-release</a></p>
-<p>** SUSE require extra package: <a href="http://software.opensuse.org/download.html?project=home%3AZaWertun%3Adb&package=erlang">SUSE-epel-release</a></p>
+<p>** SUSE require extra package: <a href="http://download.opensuse.org/repositories/devel:/languages:/erlang/">SUSE-erlang-release</a></p>
 
 <pre><code>Special notes for SUSE and erlang packages
 
-Extra repo for erlang package:
-# zypper addrepo http://download.opensuse.org/repositories/home:ZaWertun:db/SLE_11_SP3/home:ZaWertun:db.repo
-# zypper refresh
-
-Or install erlang-epmd without dependencies since it requires erlang and vice versa erlang requires erlang-epmd 
-wget http://download.opensuse.org/repositories/devel:/languages:/erlang/SLE_11_SP3/x86_64/erlang-18.1.3-12.1.x86_64.rpm
-wget http://download.opensuse.org/repositories/devel:/languages:/erlang/SLE_11_SP3/x86_64/erlang-epmd-18.1.3-12.1.x86_64.rpm
-rpm -i --nodeps erlang-epmd-18.1.3-12.1.x86_64.rpm
-rpm -i erlang-18.1.3-12.1.x86_64.rpm
+Install erlang-epmd without dependencies since it requires erlang and vice versa erlang requires erlang-epmd 
+wget http://download.opensuse.org/repositories/devel:/languages:/erlang/SLE_11_SP4/x86_64/erlang-18.3-12.1.x86_64.rpm
+wget http://download.opensuse.org/repositories/devel:/languages:/erlang/SLE_11_SP4/x86_64/erlang-epmd-18.3-12.1.x86_64.rpm
+rpm -i --nodeps erlang-epmd-18.3-12.1.x86_64.rpm
+rpm -i erlang-18.3-12.1.x86_64.rpm
 </code></pre>
 
 <h2>
