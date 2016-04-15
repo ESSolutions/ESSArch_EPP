@@ -128,6 +128,8 @@ TIME_ZONE = 'Europe/Stockholm'
 #LANGUAGE_CODE = 'nn'    #Norwegian Nynorsk
 #LANGUAGE_CODE = 'nb'    #Norwegian Bokmal
 
+SESSION_COOKIE_NAME = 'epp'
+
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not

@@ -48,3 +48,19 @@
 </div>    
    
 {% endblock %}
+
+{% block app-extra-script %}
+<script>
+
+//Reload script
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 30000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+
+</script>
+{% endblock %}

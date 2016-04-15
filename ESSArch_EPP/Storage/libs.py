@@ -529,47 +529,6 @@ class StorageMethodWrite:
                                                                                                                                 ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                                                 IOQueue_obj.id)
                         self.logger.error(event_info)
-                    else:
-                        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                        storageMedium_obj = IOQueue_obj.storagemedium
-                        storageMedium_obj.storageMediumUsedCapacity = storageMedium_obj.storageMediumUsedCapacity + int(IOQueue_obj.result.get('WriteSize'))
-                        storageMedium_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
-                        storageMedium_obj.storageMediumDate = timestamp_utc
-                        storageMedium_obj.LocalDBdatetime = timestamp_utc
-                        storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])
-                        if self.ExtDBupdate:
-                            ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumUsedCapacity',storageMedium_obj.storageMediumUsedCapacity,
-                                                                                                            'storageMediumDate',storageMedium_obj.storageMediumDate.astimezone(self.tz).replace(tzinfo=None),
-                                                                                                            'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue),
-                                                                                                           ('storageMediumID',storageMedium_obj.storageMediumID))
-                            if ext_errno: self.logger.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
-                            else:
-                                storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
-                                storageMedium_obj.save(update_fields=['ExtDBdatetime'])
-                                
-                        # Flag to update remote server
-                        target_obj = IOQueue_obj.storagemethodtarget.target
-                        remote_server = target_obj.remote_server.split(',')
-                        if len(remote_server) == 3:
-                            # Update remote server
-                            try:
-                                self._update_remote_archiveobject(remote_server, ArchiveObject_obj)
-                            except DatabasePostRestError as e:
-                                error_flag = 1
-                                msg = 'Failed to update remote DB status for AIP: %s, error: %s' % (
-                                                                                                                ArchiveObject_obj.ObjectIdentifierValue,
-                                                                                                                e)
-                                self.logger.error(msg)
-                                error_list.append(msg)
-                            
-                        event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (
-                                                                                                           ArchiveObject_obj.ObjectIdentifierValue, 
-                                                                                                           IOQueue_obj.storagemethodtarget.name, 
-                                                                                                           IOQueue_obj.id)                            
-                        self.logger.info(event_info)
-                        ESSPGM.Events().create('1101', '', self.__name__, __version__, '0', event_info, 2, ArchiveObject_obj.ObjectIdentifierValue)
-                        IOQueue_obj.Status = 21
-                        IOQueue_obj.save(update_fields=['Status'])
                     if len(all_storage_target_objs) < len(self.st_objs_to_check[ArchiveObject_obj]):
                         object_writes_ok_flag = 0
                         event_info = 'There are fewer storage entrys in the database (%s) of object: %s than is configured in the archive policy (%s)' % (
@@ -577,6 +536,49 @@ class StorageMethodWrite:
                                                                                                                                                           ArchiveObject_obj.ObjectIdentifierValue, 
                                                                                                                                                           len(self.st_objs_to_check))
                         self.logger.debug(event_info)
+            
+            for IOQueue_obj in IOQueue_objs:
+                if IOQueue_obj.Status == 20 and IOQueue_obj.storagemethodtarget.target in all_storage_target_objs and IOQueue_obj.storage in all_storage_objs:                                        
+                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    storageMedium_obj = IOQueue_obj.storagemedium
+                    storageMedium_obj.storageMediumUsedCapacity = storageMedium_obj.storageMediumUsedCapacity + int(IOQueue_obj.result.get('WriteSize'))
+                    storageMedium_obj.linkingAgentIdentifierValue = self.AgentIdentifierValue
+                    storageMedium_obj.storageMediumDate = timestamp_utc
+                    storageMedium_obj.LocalDBdatetime = timestamp_utc
+                    storageMedium_obj.save(update_fields=['storageMediumUsedCapacity','storageMediumDate','linkingAgentIdentifierValue','LocalDBdatetime'])
+                    if self.ExtDBupdate:
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumUsedCapacity',storageMedium_obj.storageMediumUsedCapacity,
+                                                                                                        'storageMediumDate',storageMedium_obj.storageMediumDate.astimezone(self.tz).replace(tzinfo=None),
+                                                                                                        'linkingAgentIdentifierValue',storageMedium_obj.linkingAgentIdentifierValue),
+                                                                                                       ('storageMediumID',storageMedium_obj.storageMediumID))
+                        if ext_errno: self.logger.error('Failed to update External DB: ' + str(storageMedium_obj.storageMediumID) + ' error: ' + str(ext_why))
+                        else:
+                            storageMedium_obj.ExtDBdatetime = storageMedium_obj.LocalDBdatetime
+                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+                            
+                    # Flag to update remote server
+                    target_obj = IOQueue_obj.storagemethodtarget.target
+                    remote_server = target_obj.remote_server.split(',')
+                    if len(remote_server) == 3:
+                        # Update remote server
+                        try:
+                            self._update_remote_archiveobject(remote_server, ArchiveObject_obj, object_writes_ok_flag)
+                        except DatabasePostRestError as e:
+                            error_flag = 1
+                            msg = 'Failed to update remote DB status for AIP: %s, error: %s' % (
+                                                                                                            ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                                            e)
+                            self.logger.error(msg)
+                            error_list.append(msg)
+                        
+                    event_info = 'Succeeded to write object: %s to storage target: %s (IOuuid: %s)' % (
+                                                                                                       ArchiveObject_obj.ObjectIdentifierValue, 
+                                                                                                       IOQueue_obj.storagemethodtarget.name, 
+                                                                                                       IOQueue_obj.id)                            
+                    self.logger.info(event_info)
+                    ESSPGM.Events().create('1101', '', self.__name__, __version__, '0', event_info, 2, ArchiveObject_obj.ObjectIdentifierValue)
+                    IOQueue_obj.Status = 21
+                    IOQueue_obj.save(update_fields=['Status'])
 
             if error_flag:
                 raise ESSArchSMError(error_list)
@@ -662,7 +664,7 @@ class StorageMethodWrite:
             IOQueue_objs.delete()
     
     @retry(stop_max_attempt_number=1440, wait_fixed=60000)
-    def _update_remote_archiveobject(self, remote_server, ArchiveObject_obj):
+    def _update_remote_archiveobject(self, remote_server, ArchiveObject_obj, object_writes_ok_flag = 1):
         """ Call REST service on remote to update ArchiveObject with nested storage, storageMedium
         
         :param remote_server: example: [https://servername:port, user, password]
@@ -676,9 +678,14 @@ class StorageMethodWrite:
         requests_session.verify = False
         requests_session.auth = (ruser, rpass)
         ArchiveObject_obj_data = ArchiveObjectPlusAICPlusStorageNestedReadSerializer(ArchiveObject_obj).data
-        # Set StatusProcess and StatusActivity
-        ArchiveObject_obj_data['StatusProcess'] = 1999        # 'Write AIP OK'
-        ArchiveObject_obj_data['StatusActivity'] = 0              # 'OK'
+        if object_writes_ok_flag == 1:
+            # Set StatusProcess and StatusActivity
+            ArchiveObject_obj_data['StatusProcess'] = 1999        # 'Write AIP OK'
+            ArchiveObject_obj_data['StatusActivity'] = 0              # 'OK'
+        else:
+            # Set StatusProcess and StatusActivity
+            ArchiveObject_obj_data['StatusProcess'] = 1500        # 'Remote AIP'
+            ArchiveObject_obj_data['StatusActivity'] = 6              # 'Pending writes'
         # Remove local disk storage type 200 from Storage_set
         #exclude_targets = [i.id for i in StorageTargets.objects.filter(type=200, remote_server='')]
         # Remove all storage that not belong to specific remote server from Storage_set
@@ -714,10 +721,16 @@ class StorageMethodWrite:
             self.logger.warning(msg)
             raise DatabasePostRestError(e)
         else:
-            msg = 'Success to update remote server: %s with status(1999) for object: %s, media: %s' % (
+            if object_writes_ok_flag == 1:
+                msg = 'Success to update remote server: %s status "all writes are done" for object: %s, media: %s' % (
                                                                                               base_url,
                                                                                               ArchiveObject_obj.ObjectIdentifierValue,
                                                                                               update_info)
+            else:
+                msg = 'Success to update remote server: %s status "all writes are not completed" for object: %s, media: %s' % (
+                                                                                              base_url,
+                                                                                              ArchiveObject_obj.ObjectIdentifierValue,
+                                                                                              update_info)                
             self.logger.info(msg)
             
     @retry(stop_max_attempt_number=5, wait_fixed=60000)    

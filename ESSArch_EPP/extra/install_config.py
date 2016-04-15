@@ -393,7 +393,7 @@ def installdefaultpaths(): # default paths
     #else:
     dct = {
             'path_mimetypes_definitionfile':'/ESSArch/config/mime.types',
-            'path_reception':'/ESSArch/data/eta/reception',
+            'path_reception':'/ESSArch/data/eta/reception/eft',
             'path_gate':'/ESSArch/data/gate',
             'path_work':'/ESSArch/data/epp/work',
             'path_control':'/ESSArch/data/epp/control',
@@ -693,7 +693,7 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         StorageTarget_obj.name=u'Default policy 1 - SM 1 - Target 1'
         StorageTarget_obj.status=1
         StorageTarget_obj.storagemethod=StorageMethod.objects.get(name=u'Default policy 1 - SM 1')
-        StorageTarget_obj.target=StorageTargets.objects.get(name=u'disk1')
+        StorageTarget_obj.target=StorageTargets.objects.get(name__startswith=u'disk1')
         StorageTarget_obj.save()
 
 def installdefaultESSProc(): # default ESSProc
