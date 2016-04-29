@@ -250,6 +250,7 @@ process_list=["FTPServer.py", "AccessEngine.py","ESSlogging.py", "db_sync_ais.py
 WORKERS_ROOT = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
 for i,p in enumerate(process_list):
     process_list[i]=os.path.join(WORKERS_ROOT,p)
+PROCESS_LIST = process_list
 
 CELERYBEAT_SCHEDULE = {
     "CheckProcesses-every-120-seconds": {
