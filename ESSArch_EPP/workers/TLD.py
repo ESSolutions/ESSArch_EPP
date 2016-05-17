@@ -562,7 +562,8 @@ if __name__ == '__main__':
     logger = logging.getLogger(ProcName)
     logger.setLevel(0)
     # create file handler and set log level and formatter
-    fh = logging.handlers.TimedRotatingFileHandler(LogFile, when='W6', backupCount=1040)
+    #fh = logging.handlers.TimedRotatingFileHandler(LogFile, when='W6', backupCount=1040)
+    fh = logging.FileHandler(LogFile)
     fh.setLevel(LogLevel)
     fh.setFormatter(formatter)
     # create console handler and set log level and formatter

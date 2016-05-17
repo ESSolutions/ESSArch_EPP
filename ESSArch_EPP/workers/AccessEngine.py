@@ -54,9 +54,13 @@ class Access:
         
         """
         try:
+            logger.debug('Start ProcessAccessRequest')
+            logger.debug('ReqUUID: %s' % ReqUUID)
             AccessQueue_obj = AccessQueue.objects.get(ReqUUID = ReqUUID)
             process_name = multiprocessing.current_process().name
+            logger.debug('process_name: %s' % process_name)
             process_pid = multiprocessing.current_process().pid
+            logger.debug('process_pid: %s' % process_pid)
 
             AccessQueue_obj.Status = 5
             AccessQueue_obj.save()
@@ -116,7 +120,9 @@ class Access:
             AccessQueue_obj.save(update_fields=['Status'])
             #raise e
         except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()            
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            msg = 'Unknown error, error: %s trace: %s' % (e, repr(traceback.format_tb(exc_traceback)))            
+            logger.error(msg)
             AccessQueue_obj.refresh_from_db()
             msg = 'Unknown error with access ReqUUID: %s, error: %s trace: %s' % (AccessQueue_obj.ReqUUID, e, repr(traceback.format_tb(exc_traceback)))
             logger.error(msg)
@@ -150,6 +156,7 @@ class Access:
             AccessQueue_obj.save(update_fields=['Status'])      
 
 def GenerateDIPProc(DbRow):
+    logger.debug('FuncStart GenerateDIPProc')
     return Access().ProcessAccessRequest(DbRow)
 
 class WorkingThread:
@@ -160,6 +167,7 @@ class WorkingThread:
         # Start Process pool with 2 process
         self.ReqTags = 2
         self.ProcPool = multiprocessing.Pool(self.ReqTags)
+        jobs = []
         while 1:
             if self.mDieFlag==1: break      # Request for death
             self.mLock.acquire()
@@ -198,7 +206,17 @@ class WorkingThread:
                         AccessQueue_DbRow.Status = 2
                         #model.meta.Session.commit()
                         AccessQueue_DbRow.save()
-                        self.ProcPool.apply_async(GenerateDIPProc, (AccessQueue_DbRow.ReqUUID,))
+                        logger.info('Add ReqUUID: %s to GenerateDIPProc' % AccessQueue_DbRow.ReqUUID)
+                        res = self.ProcPool.apply_async(GenerateDIPProc, (AccessQueue_DbRow.ReqUUID,))
+                        jobs.append(res)
+            for job in jobs:
+                try:
+                    msg = 'Result from GenerateDIPProc: %s' % repr(job.get(timeout=1))
+                except multiprocessing.TimeoutError as e:
+                    msg = 'Timeout wait for result from GenerateDIPProc'
+                logger.debug(msg)
+            if len(self.ProcPool._cache) == 0:
+                jobs = []
             logger.debug('ProcPool_cache: %r',self.ProcPool._cache)
             db.close_old_connections()
             time.sleep(5)
