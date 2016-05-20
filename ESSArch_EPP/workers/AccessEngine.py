@@ -31,7 +31,7 @@ import thread, multiprocessing, time, logging, sys, ESSDB, ESSPGM, ESSlogging, o
 
 from essarch.models import AccessQueue, ArchiveObject
 from essarch.libs import calcsum, unicode2str
-from django import db
+from django.db import connection
 from Storage.models import storage, storageMedium, IOQueue
 from Storage.libs import StorageMethodRead
 from StorageMethodDisk.tasks import ReadStorageMethodDisk
@@ -56,6 +56,7 @@ class Access:
         try:
             logger.debug('Start ProcessAccessRequest')
             logger.debug('ReqUUID: %s' % ReqUUID)
+            connection.close() # Fix (2006, 'MySQL server has gone away')
             AccessQueue_obj = AccessQueue.objects.get(ReqUUID = ReqUUID)
             process_name = multiprocessing.current_process().name
             logger.debug('process_name: %s' % process_name)
@@ -218,7 +219,7 @@ class WorkingThread:
             if len(self.ProcPool._cache) == 0:
                 jobs = []
             logger.debug('ProcPool_cache: %r',self.ProcPool._cache)
-            db.close_old_connections()
+            connection.close()
             time.sleep(5)
             self.mLock.release()
         time.sleep(10)

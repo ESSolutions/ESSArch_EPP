@@ -536,7 +536,8 @@ class ArchiveObjectViewSet(mixins.UpdateModelMixin, CreateListRetrieveViewSet):
     queryset = ArchiveObject.objects.all()
     serializer_class = ArchiveObjectSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_fields = ('ObjectIdentifierValue', 'ObjectUUID', 'PolicyId')
+    filter_fields = ('ObjectIdentifierValue', 'ObjectUUID', 'PolicyId',
+                     'StatusActivity', 'StatusProcess')
     lookup_field = 'ObjectUUID'
     lookup_value_regex = '[0-9a-f-]{36}'
 
