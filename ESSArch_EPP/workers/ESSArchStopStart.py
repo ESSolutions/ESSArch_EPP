@@ -110,7 +110,8 @@ def StartStop(action,ProcName=None):
                             break
                         elif int(ESSProc_obj.Status) == 2 and loop_num in time_range:
                             print 'Process %s is going down' % ProcName
-                        elif loop_num == time_range[-1]:
+                        
+                        if loop_num == time_range[-1]:
                             print 'Failed to stop process %s' % ProcName
                             break
                         elif int(ESSProc_obj.Status) > 0 and len(ps_objs) == 0:

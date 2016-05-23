@@ -35,7 +35,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django import db
 
-
 ################# Only for test ##################
 disable_ObjectPackageName = 0
 force_ProjectGroupCode = ''
@@ -51,7 +50,7 @@ class Proc:
             self.ext_IngestTable = ''
 
         # Check if exist extDB and got projektid
-        self.dbget,errno,why = ESSDB.DB().action(self.IngestTable,'GET4',('ObjectIdentifierValue','PolicyID','StatusProcess','StatusActivity'),('StatusActivity','=','0','AND',
+        self.dbget,errno,why = ESSDB.DB().action(self.IngestTable,'GET4',('ObjectIdentifierValue','PolicyID','StatusProcess','StatusActivity','ObjectUUID'),('StatusActivity','=','0','AND',
                                                                                                                'StatusProcess','BETWEEN',9,'AND',14,
                                                                                                                'OR',
                                                                                                                'StatusActivity','=','4','AND',
@@ -62,8 +61,9 @@ class Proc:
             self.PolicyID = self.obj[1]
             self.StatusProcess = self.obj[2]
             self.StatusActivity = self.obj[3]
+            ObjectUUID = self.obj[4]
             self.DBmode = 0
-            self.ext_ObjectGuid = None
+            self.ext_ObjectGuid = ObjectUUID
             self.ext_EntryDate = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
             self.ext_EntryAgentIdentifierValue = None
             self.ext_OAISPackageType = 2

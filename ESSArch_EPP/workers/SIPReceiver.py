@@ -59,897 +59,45 @@ class WorkingThread:
                 self.ext_IngestTable = self.IngestTable
             else:
                 self.ext_IngestTable = ''
-            self.StorageTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageTable'))[0][0]
-            self.StorageMediumTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','StorageMediumTable'))[0][0]
-            self.RobotDrivesTable = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','RobotDrivesTable'))[0][0]
-            self.MediumLocation = ESSDB.DB().action('ESSConfig','GET',('Value',),('Name','storageMediumLocation'))[0][0]
 
             try:
+                IngestPath_dict = {}
+                
                 ArchivePolicy_objs = ArchivePolicy.objects.filter(PolicyStat = 1).all()
                 for ArchivePolicy_obj in ArchivePolicy_objs:
-                    #ArchivePolicy_obj.PolicyID
-                    #ArchivePolicy_obj.Mode
-                    #ArchivePolicy_obj.IngestPath
-                    #########################################################
-                    # PreIngestMetadata 1 = RES SIP
-                    if ArchivePolicy_obj.PreIngestMetadata == 1:
-                        try:
-                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
-                        except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
-                            dir_list = []
-                        for self.ObjectIdentifierValue in dir_list:
-                            self.objectstatus = 0
-                            self.DataObjectSize = 0
-                            self.numfiles = 0
-                            self.dbget = None
-                            # Fix to filter out eveyrything except dirs with lengt of 8 or 9
-                            if len(self.ObjectIdentifierValue) in range(8,10):
-                                SIPpath = ArchivePolicy_obj.IngestPath
-                                SIProotpath = os.path.join(SIPpath,self.ObjectIdentifierValue)
-                                if os.path.exists(os.path.join(SIProotpath,'sip.xml')):
-                                    logging.debug('The SIPtype for object %s is eARD METS' % self.ObjectIdentifierValue)
-                                    self.objectstatus = 0
-                                    self.newobject = 0
-                                    continue
-                                elif os.path.exists(os.path.join(SIProotpath,'TIFFEdit.RES')):
-                                    ###############################################################
-                                    # Try to access ingestpath
-                                    ###############################################################
-                                    self.DataObjectSize, self.numfiles, self.file_list, self.filetree_errno, self.filetree_why = Functions().GetFiletreeSum(SIProotpath)
-    
-                                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    self.newobject = 1
-                                    if self.dbget:
-                                        if int(self.dbget[0][2]) == 5:
-                                            #logging.info('The object %s is ready to remodel.' % self.ObjectIdentifierValue)
-                                            logging.info('The object %s is ready to ingest.' % self.ObjectIdentifierValue)
-                                            self.objectstatus = 0
-                                            self.newobject = 0
-                                        elif int(self.dbget[0][2]) > 9:
-                                            ###############################################################
-                                            # The object %s is already archived
-                                            ###############################################################
-                                            self.objectstatus = 100
-                                            self.newobject = 0
-    
-                                    if not self.filetree_errno:
-                                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,5) and int(self.dbget[0][1]) in range(0,3):
-                                            ###############################################################
-                                            # An already discovered directory found, checking if stable
-                                            ###############################################################
-                                            if self.dbget[0][0] == self.DataObjectSize:
-                                                ###############################################################
-                                                # directory is stable
-                                                ###############################################################
-                                                self.objectstatus = 3
-                                            else:
-                                                ###############################################################
-                                                # directory is still growing
-                                                ###############################################################
-                                                self.objectstatus = 2
-                                        elif self.newobject and not self.dbget:
-                                            ###############################################################
-                                            # A new directory discovered
-                                            ###############################################################
-                                            self.objectstatus = 1
-                                    elif self.filetree_errno and not self.objectstatus == 100:
-                                        ###############################################################
-                                        # Problem to access object
-                                        ###############################################################
-                                        self.objectstatus = 99
+                    if not ArchivePolicy_obj.IngestPath in IngestPath_dict.keys():
+                        IngestPath_dict[ArchivePolicy_obj.IngestPath] = [ArchivePolicy_obj]
+                    else:
+                        IngestPath_dict[ArchivePolicy_obj.IngestPath].append(ArchivePolicy_obj)
+                
+                for IngestPath in IngestPath_dict.keys():
+                    try:
+                        dir_list = os.listdir(IngestPath)
+                    except OSError:
+                        logging.error('Problem to list dir: %s, error: %s' % (IngestPath, str(sys.exc_info())))
+                        dir_list = []
+                    for ArchivePolicy_obj in IngestPath_dict[IngestPath]:
+                        #########################################################
+                        # PreIngestMetadata 1 = RES SIP
+                        if ArchivePolicy_obj.PreIngestMetadata == 1:
+                            self.Convert_RES_to_METS_SIP(dir_list, ArchivePolicy_obj)
+                        
+                        #########################################################
+                        # IngestMetadata 1 or 4 = METS SIP
+                        if ArchivePolicy_obj.IngestMetadata == 1 or ArchivePolicy_obj.IngestMetadata == 4:
+                            self.Check_IngestPath_for_updates(dir_list, ArchivePolicy_obj)
 
-                                if self.objectstatus == 0:
-                                    pass
-                                elif self.objectstatus == 1:
-                                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 1
-                                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 2:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 2
-                                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.DataObjectSize))
-                                elif self.objectstatus == 3:
-                                    logging.info('Object %s, %s is stable start to convert to METS SIP.' % (self.ObjectIdentifierValue,self.DataObjectSize))
-                                    self.ok = 1
-                                    SIPcontentpath = os.path.join(SIProotpath,'c')
-                                    SIPmetapath = os.path.join(SIProotpath,'m')
-                                    Premis_filepath = os.path.join(SIPmetapath,'%s_PREMIS.xml' % self.ObjectIdentifierValue)
-                                    Mets_filepath = os.path.join(SIProotpath,'sip.xml')
-                                    altRecordID_dict = {}
-                                    
-                                    if ArchivePolicy_obj.Mode == 2:
-                                        ############################################
-                                        # Get PolicyId / ProjectGroupCode from AIS
-                                        self.extOBJdbget,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'GET3',('ProjectGroupCode',
-                                                                                                                           'ObjectPackageName',
-                                                                                                                           'ObjectGuid',
-                                                                                                                           'ObjectActive',
-                                                                                                                           'EntryDate',
-                                                                                                                           'EntryAgentIdentifierValue',
-                                                                                                                           'OAISPackageType',
-                                                                                                                           'preservationLevelValue',
-                                                                                                                           'ProjectName'),
-                                                                                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-    
-                                        if self.extOBJdbget and ext_errno == 0:
-                                            altRecordID_dict['POLICYID'] = self.extOBJdbget[0][0]
-                                            try:
-                                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('utf-8')
-                                            except UnicodeDecodeError:
-                                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('unicode-escape')
-                                        else:
-                                            logging.error('Problem to get ProjectGroupCode from AIS, ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, ext_why))
-                                            self.ok = 0
-                                    else:
-                                        altRecordID_dict['POLICYID'] = 10
-                                        altRecordID_dict['PROJECTNAME'] = 'xyz12345'
-                                        logging.info('ESSArch is not in AIS mode setting PolicyId = 10.')
-    
-                                    ############################################
-                                    # Convert SIP filestructur to eARD
-                                    if not os.path.isdir(SIPcontentpath):
-                                        os.mkdir(SIPcontentpath)
-                                    if not os.path.isdir(SIPmetapath):
-                                        os.mkdir(SIPmetapath)
-                                    res,errno,why = ESSMD.getRESObjects(os.path.join(SIProotpath,'TIFFEdit.RES'))
-                                    if not errno:
-                                        for f in res:
-                                            src_f = os.path.join(SIPpath,f[0])
-                                            if not os.path.exists(src_f):
-                                                logging.error('missing file: %s' % src_f)
-                                                self.ok = 0
-                                    else:
-                                        logging.warning('missing RESfile: %s' % os.path.join(SIProotpath,'TIFFEdit.RES'))
-    
-                                    if self.ok:
-                                        for f in res:
-                                            src_f = os.path.join(SIPpath,f[0])
-                                            try:
-                                                shutil.move(src_f,SIPcontentpath)
-                                            except (IOError,os.error,shutil.Error), why:
-                                                logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_f,SIPcontentpath,self.ObjectIdentifierValue, why))
-                                                self.ok = 0
-                                     
-                                    if self.ok:
-                                        try:
-                                            shutil.move(os.path.join(SIProotpath,'TIFFEdit.RES'),SIPcontentpath)
-                                        except (IOError,os.error,shutil.Error), why:
-                                            logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (os.path.join(SIProotpath,'TIFFEdit.RES'),SIPcontentpath,self.ObjectIdentifierValue, why))
-                                            self.ok = 0
-    
-                                    if self.ok:
-                                        ############################################
-                                        # Create PREMIS/mix from RESfile
-                                        res,errno,why = ESSMD.RES2PREMIS(SIProotpath,AgentIdentifierValue,Premis_filepath, eARD=True)
-                                        if errno == 10:
-                                            event_info = 'Failed to parse RESfile, error.num: %s error.det: %s' % (str(errno),str(why))
-                                            logging.error(event_info)
-                                        elif errno == 20:
-                                            event_info = 'I/O error to access RESfile, error.num: %s error.det: %s' % (str(errno),str(why))
-                                            logging.error(event_info)
-                                        elif errno == 30:
-                                            event_info = 'Validation errors for PREMIS file, error.num: %s error.det: %s' % (str(errno),str(why))
-                                            logging.error(event_info)
-                                        elif errno == 40:
-                                            event_info = 'Problem to write PREMIS file, error.num: %s error.det: %s' % (str(errno),str(why))
-                                            logging.error(event_info)
-                                        if errno > 1:
-                                            event_info = 'Problem to create PREMIS/mix for ObjectIdentifierValue: %s, error.num: %s  error.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
-                                            logging.error(event_info)
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'1',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                            self.ok = 0
-                                        elif errno == 1:
-                                            event_info = 'Warning in convert RES to PREMIS for objectIdentifierValue: %s, error.num: %s  warning.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
-                                            logging.warning(event_info)
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                        else:
-                                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                            errno,why = ESSMD.validate(FILENAME=Premis_filepath)
-                                            if errno:
-                                                logging.error('Problem to validate PREMIS/mix for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
-                                                self.ok = 0
-                                    if self.ok:
-                                        ############################################
-                                        # Create eARD METS sip.xml from PREMISfile
-                                        errno,why = ESSMD.PREMIS2METS(SIProotpath,self.ObjectIdentifierValue,AgentIdentifierValue,altRecordID_dict,Mets_filepath)
-                                        if errno:
-                                            logging.error('Problem to convert PREMIS to METS for ObjectIdentifierValue: %s, why: %s, errno: %s' % (self.ObjectIdentifierValue, why, errno))
-                                            self.ok = 0
-                                        errno,why = ESSMD.validate(FILENAME=Mets_filepath)
-                                        if errno:
-                                            logging.error('Problem to validate METS for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
-                                            self.ok = 0
-    
-                                    if self.ok:
-                                        ############################################
-                                        # Clean SIP from "junk" files
-                                        errno,why = ESSPGM.Check().CleanRES_SIP(SIProotpath)
-                                        if errno:
-                                            event_info = 'Problem to clean RES SIP from "junk files" for SIP package: %s, error.num: %s  error.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
-                                            logging.error(event_info)
-                                            self.ok = 0
-                                    
-                                    if self.ok:
-                                        ############################################
-                                        self.StatusProcess = 5
-                                        self.StatusActivity = 0
-                                        logging.info('Success to convert object %s to METS SIP and is now ready to ingest.' % self.ObjectIdentifierValue)
-                                    else:
-                                        ############################################
-                                        self.StatusProcess = 0
-                                        self.StatusActivity = 4
-                                        self.event_info = 'Problem to create METS SIP for object: %s' % self.ObjectIdentifierValue
-                                        logging.error(self.event_info)
-                                        ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                elif self.objectstatus == 100:
-                                    logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 99:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 4
-                                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (SIProotpath,str(self.filetree_errno),self.filetree_why)
-                                    logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-    
-                                if self.objectstatus in range(1,100):
-                                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                    if self.dbget:
-                                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    else:
-                                        ArchiveObject_obj = ArchiveObject()
-                                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
-                                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
-#                                                                                                  'DataObjectSize',self.DataObjectSize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  #'Status','1',
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                                    if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-#                                    if errno == 0 and self.ext_IngestTable:
-                                    if self.ext_IngestTable:
-                                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
-                                                                                                                 'StatusProcess',self.StatusProcess,
-                                                                                                                 'StatusActivity',self.StatusActivity,
-                                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
-                                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
-                                        else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
-                                            ArchiveObject_obj.save()
-#                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-#                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-    
-                    #########################################################
-                    if ArchivePolicy_obj.IngestMetadata == 1 or ArchivePolicy_obj.IngestMetadata == 4: # METS SIP
-                        try:
-                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
-                        except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
-                            dir_list = []
-                        for self.fileitem in dir_list:
-                            self.objectstatus = 0
-                            self.SIPsize = 0
-                            self.POLICYID = 0
-                            self.DELIVERYTYPE = None
-                            self.DELIVERYSPECIFICATION = None
-                            self.SUBMISSIONAGREEMENT = None
-                            self.INFORMATIONCLASS = 0
-                            self.DataObjectSize = 0
-                            self.dbget = None
+                        #########################################################
+                        # IngestMetadata 3 = PREMIS/ADDML SIP
+                        elif ArchivePolicy_obj.IngestMetadata == 3:
+                            self.Check_IngestPath_for_updates_PREMIS(dir_list, ArchivePolicy_obj)
 
-                            self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.fileitem)
-                            try:
-                                if os.path.exists(self.path):
-                                    self.mode = os.stat(self.path)
-                                else:
-                                    logging.warning('Filepath: %s do not exists, continue with next' % self.path)
-                                    continue
-                            except OSError:
-                                exitstatus = sys.exc_info()[1][0]
-                                why = sys.exc_info()[1][1]
-                                logging.warning('Problem to get stat for filepath: %s, exitstatus: %s, error: %s, continue with next' % (self.path,exitstatus,why))
-                                continue
-                            #self.mode = os.stat(self.path)
-                            if stat.S_ISREG(self.mode[0]):
-                                #############################################################################
-                                # It's a file
-                                #############################################################################
-                                if self.fileitem[-17:] == '_Package_METS.xml':
-                                    ###############################################################
-                                    # Try to access ingestpath
-                                    ###############################################################
-                                    self.ObjectIdentifierValue = self.fileitem[:-17]
-                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
-    
-                                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    self.newobject = 1
-                                    if self.dbget:
-                                        if int(self.dbget[0][2]) > 9:
-                                            ###############################################################
-                                            # The object %s is already archived
-                                            ###############################################################
-                                            self.objectstatus = 100
-                                            self.newobject = 0
-                                            logging.debug('The object %s is already archived.' % self.ObjectIdentifierValue)
-                                            continue
-    
-                                    if not errno and not self.objectstatus == 100:
-                                        self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
-                                        if self.SIPinfo[0][1] is not None:
-                                            self.SIPsize += int(self.SIPinfo[0][1])
-                                        if self.SIPinfo[1][1] is not None:
-                                            self.SIPsize += int(self.SIPinfo[1][1])
-                                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
-                                            ###############################################################
-                                            # An already discovered object found, checking if stable
-                                            ###############################################################
-                                            if self.dbget[0][0] == self.SIPsize:
-                                                ###############################################################
-                                                # object is stable
-                                                ###############################################################
-                                                self.SIP_OK = 1
-                                                #######################################
-                                                # Verify package checksum and size
-                                                if self.SIP_OK:
-                                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
-                                                    if not errno:
-                                                        logging.info('Success to verify package checksum and size for object: %s' % self.ObjectIdentifierValue)
-                                                    else:
-                                                        logging.error('Problem to verify package checksum and size for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
-                                                        self.SIP_OK = 0
-                                                #######################################
-                                                # Extract package
-                                                if self.SIP_OK:
-                                                    errno,error_list = Functions().ExtractSIP(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
-                                                    if not errno:
-                                                        logging.info('Success to extract object: %s' % self.ObjectIdentifierValue)
-                                                    else:
-                                                        logging.error('Problem to extract object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
-                                                        self.SIP_OK = 0
-                                                #######################################
-                                                # Get SIP information after Extract
-                                                if self.SIP_OK:
-                                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
-                                                    if not errno:
-                                                        logging.info('Success to get SIP information after extract for object: %s' % self.ObjectIdentifierValue)
-                                                        self.POLICYID = self.SIPinfo[2]['POLICYID']
-                                                        try:
-                                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
-                                                        except ArchivePolicy.DoesNotExist, why:
-                                                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why)) 
-                                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
-                                                            self.objectstatus = 99  
-                                                        if 'DELIVERYTYPE' in self.SIPinfo[2].keys():
-                                                            self.DELIVERYTYPE = self.SIPinfo[2]['DELIVERYTYPE']
-                                                        if 'DELIVERYSPECIFICATION' in self.SIPinfo[2].keys():
-                                                            self.DELIVERYSPECIFICATION = self.SIPinfo[2]['DELIVERYSPECIFICATION']
-                                                        if 'SUBMISSIONAGREEMENT' in self.SIPinfo[2].keys():
-                                                            self.SUBMISSIONAGREEMENT = self.SIPinfo[2]['SUBMISSIONAGREEMENT']
-                                                        if 'INFORMATIONCLASS' in self.SIPinfo[2].keys():
-                                                            self.INFORMATIONCLASS = self.SIPinfo[2]['INFORMATIONCLASS']
-                                                    else:
-                                                        logging.error('Problem to get SIP information after extract for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
-                                                        self.SIP_OK = 0
-                                                #######################################
-                                                # Verify Content_METS checksum and size
-                                                if self.SIP_OK:
-                                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[0])
-                                                    if not errno:
-                                                        logging.info('Success to verify Content_METS checksum and size for object: %s' % self.ObjectIdentifierValue)
-                                                        self.objectstatus = 3
-                                                    else:
-                                                        logging.error('Problem to verify Content_METS checksum and size for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
-                                                        self.objectstatus = 99
-                                            else:
-                                                ###############################################################
-                                                # directory is still growing
-                                                ###############################################################
-                                                self.objectstatus = 2
-                                        elif self.newobject and not self.dbget:
-                                            ###############################################################
-                                            # A new directory discovered
-                                            ###############################################################
-                                            self.objectstatus = 1
-                                    elif errno and not self.objectstatus == 100:
-                                        ###############################################################
-                                        # Problem to access object
-                                        ###############################################################
-                                        self.objectstatus = 99
-                                if self.objectstatus == 0:
-                                    pass
-                                elif self.objectstatus == 1:
-                                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 1
-                                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 2:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 2
-                                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                elif self.objectstatus == 3:
-                                    self.StatusProcess = 9
-                                    self.StatusActivity = 0
-                                    logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                elif self.objectstatus == 100:
-                                    logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 99:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 4
-                                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
-                                    logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-    
-                                if self.objectstatus in range(1,100):
-                                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                    if self.dbget:
-                                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
-                                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
-                                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
-                                        ArchiveObject_obj.DataObjectSize = self.SIPsize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
-#                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
-#                                                                                                  'INFORMATIONCLASS',self.INFORMATIONCLASS,
-#                                                                                                  'DataObjectSize',self.SIPsize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    else:
-                                        ArchiveObject_obj = ArchiveObject()
-                                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
-                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
-                                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
-                                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
-                                        ArchiveObject_obj.DataObjectSize = self.SIPsize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
-#                                                                                                  'PolicyID',self.POLICYID,
-#                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
-#                                                                                                  'INFORMATIONCLASS',self.INFORMATIONCLASS,
-#                                                                                                  'DataObjectSize',self.SIPsize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  #'Status','1',
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                                    if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-#                                    if errno == 0 and self.ext_IngestTable:
-                                    if self.ext_IngestTable: 
-                                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
-                                                                                                                 'DELIVERYTYPE',self.DELIVERYTYPE,
-                                                                                                                 'INFORMATIONCLASS',self.INFORMATIONCLASS,
-                                                                                                                 'DataObjectSize',self.SIPsize,
-                                                                                                                 'StatusProcess',self.StatusProcess,
-                                                                                                                 'StatusActivity',self.StatusActivity,
-                                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
-                                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
-                                        else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
-                                            ArchiveObject_obj.save()
-#                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-#                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-                            
-                            elif stat.S_ISDIR(self.mode[0]): 
-                                #############################################################################
-                                # It's a directory
-                                #############################################################################
-                                self.sipmetspath = None
-                                logging.debug('self.path:%s' % self.path)
-                                if os.path.exists(os.path.join(self.path,'sip.xml')):
-                                    self.sipmetspath = os.path.join(self.path,'sip.xml')
-                                elif os.path.exists(os.path.join(self.path,'mets.xml')):
-                                    self.sipmetspath = os.path.join(self.path,'mets.xml')
-                                #elif os.path.exists(os.path.join(self.path,'%s_Content_METS.xml' % self.fileitem)):
-                                #    self.sipmetspath = os.path.join(self.path,'%s_Content_METS.xml' % self.fileitem)
-                                
-                                if self.sipmetspath:
-                                    logging.debug('self.sipmetspath:%s' % self.sipmetspath)
-                                    ###############################################################
-                                    # Try to access ingestpath
-                                    ###############################################################
-                                    self.ObjectIdentifierValue = self.fileitem
-
-                                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    logging.debug('self.dbget:%s' % str(self.dbget))
-                                    errno = 0
-                                    self.newobject = 1
-                                    if self.dbget:
-                                        if int(self.dbget[0][2]) > 9:
-                                            ###############################################################
-                                            # The object %s is already archived
-                                            ###############################################################
-                                            self.objectstatus = 100
-                                            self.newobject = 0
-                                            logging.debug('The object %s is already archived.' % self.ObjectIdentifierValue)
-                                            continue
-                                        elif int(self.dbget[0][1]) in [4]:
-                                            ###############################################################
-                                            # The object %s need manual assistance, continue with next object
-                                            ###############################################################
-                                            logging.warning('The object %s need manual assistance, continue with next object.' % self.ObjectIdentifierValue)
-                                            continue
-                                    
-                                    if not errno and not self.objectstatus == 100:
-                                        self.SIPinfo,errno,error_list = Functions().GetSIPinfo(self.path,os.path.split(self.sipmetspath)[1])
-                                        if errno and not self.objectstatus == 100:
-                                            ###############################################################
-                                            # Problem to access object
-                                            logging.error('Problem to get information from sip.xml, self.SIPinfo:%s' % (str(self.SIPinfo)))
-                                            self.objectstatus = 99
-                                    if not errno and not self.objectstatus == 100:
-                                        self.DataObjectSize, self.numfiles, self.file_list, errno, error_list = Functions().GetFiletreeSum(self.path)
-                                        if errno and not self.objectstatus == 100:
-                                            ###############################################################
-                                            # Problem to access object
-                                            logging.error('Problem to get SIPinformation from filesystem, self.DataObjectSize:%s,self.numfiles:%s,self.file_list:%s' % (self.DataObjectSize, self.numfiles, str(self.file_list)))
-                                            self.objectstatus = 99
-                                    if not errno and not self.objectstatus == 100:
-                                        if self.SIPinfo[3][0][1][:5] == 'UUID:' or self.SIPinfo[3][0][1][:5] == 'RAID:':
-                                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1][5:]
-                                        else:
-                                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
-                                        logging.debug('self.ObjectIdentifierValue:%s' % self.ObjectIdentifierValue)
-                                        self.SIPsize = self.SIPinfo[2]
-                                        logging.debug('self.SIPsize:%s' % self.SIPsize)
-                                        self.POLICYID = self.SIPinfo[1]['POLICYID']
-                                        try:
-                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
-                                        except ArchivePolicy.DoesNotExist, why:
-                                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why))
-                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
-                                            self.objectstatus = 99  
-                                        logging.debug('self.POLICYID:%s' % self.POLICYID)
-                                        if 'DELIVERYTYPE' in self.SIPinfo[1].keys():
-                                            self.DELIVERYTYPE = self.SIPinfo[1]['DELIVERYTYPE']
-                                        if 'DELIVERYSPECIFICATION' in self.SIPinfo[1].keys():
-                                            self.DELIVERYSPECIFICATION = self.SIPinfo[1]['DELIVERYSPECIFICATION']
-                                        if 'SUBMISSIONAGREEMENT' in self.SIPinfo[1].keys():
-                                            self.SUBMISSIONAGREEMENT = self.SIPinfo[1]['SUBMISSIONAGREEMENT']
-                                        if 'INFORMATIONCLASS' in self.SIPinfo[1].keys():
-                                            self.INFORMATIONCLASS = self.SIPinfo[1]['INFORMATIONCLASS']
-
-                                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
-                                            ###############################################################
-                                            # An already discovered object found, checking if stable
-                                            ###############################################################
-                                            if self.dbget[0][0] == self.DataObjectSize:
-                                                ###############################################################
-                                                # object is stable
-                                                ###############################################################
-                                                if self.SIPsize == self.DataObjectSize:
-                                                    ###############################################################
-                                                    # Check if totalsize for files in filelist in METS == actual size in filesystem
-                                                    ###############################################################
-                                                    self.objectstatus = 3
-                                                else:
-                                                    self.objectstatus = 98
-                                            else:
-                                                ###############################################################
-                                                # directory is still growing
-                                                ###############################################################
-                                                self.objectstatus = 2
-                                        elif self.newobject and not self.dbget:
-                                            ###############################################################
-                                            # A new directory discovered
-                                            ###############################################################
-                                            self.objectstatus = 1
-                                    elif errno and not self.objectstatus == 100:
-                                        ###############################################################
-                                        # Problem to access object
-                                        ###############################################################
-                                        self.objectstatus = 99
-                                elif os.path.split(self.path)[1] == 'user':
-                                    IngestQueue_objs = IngestQueue.objects.filter( Status=0 ).all()
-                                    if IngestQueue_objs:
-                                        for IngestQueue_obj in IngestQueue_objs:
-                                            user_Req = IngestQueue_obj.user
-                                            ObjectIdentifierValue_Req = IngestQueue_obj.ObjectIdentifierValue
-                                            src_name = '%s/%s/%s' % (self.path,user_Req,ObjectIdentifierValue_Req)
-                                            trg_name = os.path.split(self.path)[0]
-                                            try:
-                                                shutil.move(src_name,trg_name)
-                                            except (IOError,os.error,shutil.Error), why:
-                                                logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_name,trg_name,ObjectIdentifierValue_Req, why))
-                                            else:
-                                                logging.info('Success to move %s to %s, ObjectIdentifierValue: %s' % (src_name,trg_name,ObjectIdentifierValue_Req))
-                                                IngestQueue_obj.Status = 2
-                                                #model.meta.Session.commit()
-                                                IngestQueue_obj.save()
-                                if self.objectstatus == 0:
-                                    pass
-                                elif self.objectstatus == 1:
-                                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 1
-                                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 2:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 2
-                                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                elif self.objectstatus == 3:
-                                    self.StatusProcess = 9
-                                    self.StatusActivity = 0
-                                    logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                elif self.objectstatus == 100:
-                                    logging.warning('The object %s is already archived.' % self.ObjectIdentifierValue)
-                                elif self.objectstatus == 98:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 4
-                                    self.event_info = 'Filesize in METS is not equal to tha actual filesize. Totalsize in METS:%s, filesystem:%s' % (str(self.SIPsize),str(self.DataObjectSize))
-                                    logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                                elif self.objectstatus == 99:
-                                    self.StatusProcess = 0
-                                    self.StatusActivity = 4
-                                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
-                                    logging.error(self.event_info)
-                                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-
-                                if self.objectstatus in range(1,100):
-                                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                    if self.dbget:
-                                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
-                                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
-                                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
-                                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
-#                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
-#                                                                                                  'INFORMATIONCLASS',self.INFORMATIONCLASS,
-#                                                                                                  'DataObjectSize',self.DataObjectSize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                                                 ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    else:
-                                        ArchiveObject_obj = ArchiveObject()
-                                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
-                                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
-                                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
-                                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
-                                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                        ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                        ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
-#                                                                                                  'PolicyID',self.POLICYID,
-#                                                                                                  'DELIVERYTYPE',self.DELIVERYTYPE,
-#                                                                                                  'INFORMATIONCLASS',self.INFORMATIONCLASS,
-#                                                                                                  'DataObjectSize',self.DataObjectSize,
-#                                                                                                  'StatusProcess',self.StatusProcess,
-#                                                                                                  'StatusActivity',self.StatusActivity,
-#                                                                                                  #'Status','1',
-#                                                                                                  'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                                  'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                                  'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                                    if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-#                                    if errno == 0 and self.ext_IngestTable:
-                                    if self.ext_IngestTable:
-                                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
-                                                                                                                 'DELIVERYTYPE',self.DELIVERYTYPE,
-                                                                                                                 'INFORMATIONCLASS',self.INFORMATIONCLASS,
-                                                                                                                 'DataObjectSize',self.DataObjectSize,
-                                                                                                                 'StatusProcess',self.StatusProcess,
-                                                                                                                 'StatusActivity',self.StatusActivity,
-                                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
-                                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
-                                        else:
-                                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
-                                            ArchiveObject_obj.save()
-#                                            res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-#                                            if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-
-                    #########################################################
-                    # IngestMetadata 3 = PREMIS/ADDML SIP
-                    elif ArchivePolicy_obj.IngestMetadata == 3:
-                        try:
-                            dir_list = os.listdir(ArchivePolicy_obj.IngestPath)
-                        except OSError:
-                            logging.error('Problem to list dir: %s, error: %s' % (ArchivePolicy_obj.IngestPath, str(sys.exc_info())))
-                            dir_list = []
-                        for self.ObjectIdentifierValue in dir_list:
-                            self.objectstatus = 0
-                            self.DataObjectSize = 0
-                            self.numfiles = 0
-                            self.dbget = None
-                            # Fix to filter out eveyrything except dirs with lengt of 8 or 9
-                            if len(self.ObjectIdentifierValue) in range(8,10):
-                                self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue)
-                                ###############################################################
-                                # Try to access ingestpath
-                                ###############################################################
-                                self.DataObjectSize, self.numfiles, self.file_list, self.filetree_errno, self.filetree_why = Functions().GetFiletreeSum(self.path) 
-
-                                self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                self.newobject = 1
-                                if self.dbget:
-                                    if int(self.dbget[0][2]) == 5:
-                                        logging.info('The object %s is ready to remodel.' % self.ObjectIdentifierValue)
-                                    elif int(self.dbget[0][2]) > 9:
-                                        ###############################################################
-                                        # The object %s is already archived
-                                        ###############################################################
-                                        self.objectstatus = 100
-                                        self.newobject = 0
-
-                                if not self.filetree_errno:
-                                    if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
-                                        ###############################################################
-                                        # An already discovered directory found, checking if stable
-                                        ###############################################################
-                                        if self.dbget[0][0] == self.DataObjectSize:
-                                            ###############################################################
-                                            # directory is stable
-                                            ###############################################################
-                                            self.objectstatus = 3
-                                        else:
-                                            ###############################################################
-                                            # directory is still growing
-                                            ###############################################################
-                                            self.objectstatus = 2
-                                    elif self.newobject and not self.dbget:
-                                        ###############################################################
-                                        # A new directory discovered
-                                        ###############################################################
-                                        self.objectstatus = 1
-                                elif self.filetree_errno and not self.objectstatus == 100:
-                                    ###############################################################
-                                    # Problem to access object
-                                    ###############################################################
-                                    self.objectstatus = 99
-
-                            if self.objectstatus == 0:
-                                pass
-                            elif self.objectstatus == 1:
-                                #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
-                                self.StatusProcess = 0
-                                self.StatusActivity = 1
-                                logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
-                            elif self.objectstatus == 2:
-                                self.StatusProcess = 0
-                                self.StatusActivity = 2
-                                logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.DataObjectSize))
-                            elif self.objectstatus == 3:
-                                self.StatusProcess = 9
-                                self.StatusActivity = 0
-                                logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.DataObjectSize))
-                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-                            elif self.objectstatus == 100:
-                                logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
-                            elif self.objectstatus == 99:
-                                self.StatusProcess = 0
-                                self.StatusActivity = 4
-                                self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.path,str(self.filetree_errno),self.filetree_why)
-                                logging.error(self.event_info)
-                                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
-
-                            if self.objectstatus in range(1,100):
-                                self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
-                                if self.dbget:
-                                    ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
-                                    ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                    ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                    ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                    ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                    ArchiveObject_obj.save()
-#                                    res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
-#                                                                                              'StatusProcess',self.StatusProcess,
-#                                                                                              'StatusActivity',self.StatusActivity,
-#                                                                                              'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                              'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                              'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)),
-#                                                                                             ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                else:
-                                    ArchiveObject_obj = ArchiveObject()
-                                    ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                                    ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
-                                    ArchiveObject_obj.DataObjectSize = self.DataObjectSize
-                                    ArchiveObject_obj.StatusProcess = self.StatusProcess
-                                    ArchiveObject_obj.StatusActivity = self.StatusActivity
-                                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
-                                    ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
-                                    ArchiveObject_obj.save()
-#                                    res,errno,why = ESSDB.DB().action(self.IngestTable,'INS',('ObjectIdentifierValue',self.ObjectIdentifierValue,
-#                                                                                              'DataObjectSize',self.DataObjectSize,
-#                                                                                              'StatusProcess',self.StatusProcess,
-#                                                                                              'StatusActivity',self.StatusActivity,
-#                                                                                              #'Status','1',
-#                                                                                              'LastEventDate',self.timestamp_utc.replace(tzinfo=None),
-#                                                                                              'linkingAgentIdentifierValue',AgentIdentifierValue,
-#                                                                                              'LocalDBdatetime',self.timestamp_utc.replace(tzinfo=None)))
-#                                if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-#                                if errno == 0 and self.ext_IngestTable:
-                                if self.ext_IngestTable:
-                                    ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
-                                                                                                             'StatusProcess',self.StatusProcess,
-                                                                                                             'StatusActivity',self.StatusActivity,
-                                                                                                             'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
-                                                                                                             'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                            ('ObjectIdentifierValue',self.ObjectIdentifierValue))
-                                    if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
-                                    else:
-                                        ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
-                                        ArchiveObject_obj.save()
-#                                        res,errno,why = ESSDB.DB().action(self.IngestTable,'UPD',('ExtDBdatetime',self.timestamp_utc.replace(tzinfo=None)),('ObjectIdentifierValue',self.ObjectIdentifierValue))
-#                                        if errno: logging.error('Failed to update Local DB: %s error: %s' % (self.ObjectIdentifierValue,str(why)))
-                time.sleep(int(self.Time))
-                #model.meta.Session.close()
+                        time.sleep(int(self.Time))
             except:
-                #logger.error('Unexpected error: %s %s' % (sys.exc_info()[0], sys.exc_info()[1]))
                 logger.error('Unexpected error: %s' % (str(sys.exc_info())))
-                #print "Unexpected error:", sys.exc_info()[0], sys.exc_info()[1]
                 raise
             db.close_old_connections()
             self.mLock.release()
-            #time.sleep(int(self.Time))
-            #time.sleep(1)
         self.RunFlag=0
         self.mDieFlag=0
 
@@ -972,6 +120,781 @@ class WorkingThread:
             self.mQueue.append(item)
             self.mLock.release()
             return 1
+
+    def Convert_RES_to_METS_SIP(self, dir_list, ArchivePolicy_obj):
+        #########################################################
+        # PreIngestMetadata 1 = RES SIP
+        for self.ObjectIdentifierValue in dir_list:
+            self.objectstatus = 0
+            self.DataObjectSize = 0
+            self.numfiles = 0
+            self.dbget = None
+            # Fix to filter out eveyrything except dirs with lengt of 8 or 9
+            if len(self.ObjectIdentifierValue) in range(8,10):
+                SIPpath = ArchivePolicy_obj.IngestPath
+                SIProotpath = os.path.join(SIPpath,self.ObjectIdentifierValue)
+                if os.path.exists(os.path.join(SIProotpath,'sip.xml')):
+                    logging.debug('The SIPtype for object %s is eARD METS' % self.ObjectIdentifierValue)
+                    self.objectstatus = 0
+                    self.newobject = 0
+                    continue
+                elif os.path.exists(os.path.join(SIProotpath,'TIFFEdit.RES')):
+                    ###############################################################
+                    # Try to access ingestpath
+                    ###############################################################
+                    self.DataObjectSize, self.numfiles, self.file_list, self.filetree_errno, self.filetree_why = Functions().GetFiletreeSum(SIProotpath)
+
+                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                    self.newobject = 1
+                    if self.dbget:
+                        if int(self.dbget[0][2]) == 5:
+                            #logging.info('The object %s is ready to remodel.' % self.ObjectIdentifierValue)
+                            logging.info('The object %s is ready to ingest.' % self.ObjectIdentifierValue)
+                            self.objectstatus = 0
+                            self.newobject = 0
+                        elif int(self.dbget[0][2]) > 9:
+                            ###############################################################
+                            # The object %s is already archived
+                            ###############################################################
+                            self.objectstatus = 100
+                            self.newobject = 0
+
+                    if not self.filetree_errno:
+                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,5) and int(self.dbget[0][1]) in range(0,3):
+                            ###############################################################
+                            # An already discovered directory found, checking if stable
+                            ###############################################################
+                            if self.dbget[0][0] == self.DataObjectSize:
+                                ###############################################################
+                                # directory is stable
+                                ###############################################################
+                                self.objectstatus = 3
+                            else:
+                                ###############################################################
+                                # directory is still growing
+                                ###############################################################
+                                self.objectstatus = 2
+                        elif self.newobject and not self.dbget:
+                            ###############################################################
+                            # A new directory discovered
+                            ###############################################################
+                            self.objectstatus = 1
+                    elif self.filetree_errno and not self.objectstatus == 100:
+                        ###############################################################
+                        # Problem to access object
+                        ###############################################################
+                        self.objectstatus = 99
+
+                if self.objectstatus == 0:
+                    pass
+                elif self.objectstatus == 1:
+                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
+                    self.StatusProcess = 0
+                    self.StatusActivity = 1
+                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 2:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 2
+                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.DataObjectSize))
+                elif self.objectstatus == 3:
+                    logging.info('Object %s, %s is stable start to convert to METS SIP.' % (self.ObjectIdentifierValue,self.DataObjectSize))
+                    self.ok = 1
+                    SIPcontentpath = os.path.join(SIProotpath,'c')
+                    SIPmetapath = os.path.join(SIProotpath,'m')
+                    Premis_filepath = os.path.join(SIPmetapath,'%s_PREMIS.xml' % self.ObjectIdentifierValue)
+                    Mets_filepath = os.path.join(SIProotpath,'sip.xml')
+                    altRecordID_dict = {}
+                    
+                    if ArchivePolicy_obj.Mode == 2:
+                        ############################################
+                        # Get PolicyId / ProjectGroupCode from AIS
+                        self.extOBJdbget,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'GET3',('ProjectGroupCode',
+                                                                                                           'ObjectPackageName',
+                                                                                                           'ObjectGuid',
+                                                                                                           'ObjectActive',
+                                                                                                           'EntryDate',
+                                                                                                           'EntryAgentIdentifierValue',
+                                                                                                           'OAISPackageType',
+                                                                                                           'preservationLevelValue',
+                                                                                                           'ProjectName'),
+                                                                                                          ('ObjectIdentifierValue',self.ObjectIdentifierValue))
+
+                        if self.extOBJdbget and ext_errno == 0:
+                            altRecordID_dict['POLICYID'] = self.extOBJdbget[0][0]
+                            try:
+                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('utf-8')
+                            except UnicodeDecodeError:
+                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('unicode-escape')
+                        else:
+                            logging.error('Problem to get ProjectGroupCode from AIS, ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, ext_why))
+                            self.ok = 0
+                    else:
+                        altRecordID_dict['POLICYID'] = 10
+                        altRecordID_dict['PROJECTNAME'] = 'xyz12345'
+                        logging.info('ESSArch is not in AIS mode setting PolicyId = 10.')
+
+                    ############################################
+                    # Convert SIP filestructur to eARD
+                    if not os.path.isdir(SIPcontentpath):
+                        os.mkdir(SIPcontentpath)
+                    if not os.path.isdir(SIPmetapath):
+                        os.mkdir(SIPmetapath)
+                    res,errno,why = ESSMD.getRESObjects(os.path.join(SIProotpath,'TIFFEdit.RES'))
+                    if not errno:
+                        for f in res:
+                            src_f = os.path.join(SIPpath,f[0])
+                            if not os.path.exists(src_f):
+                                logging.error('missing file: %s' % src_f)
+                                self.ok = 0
+                    else:
+                        logging.warning('missing RESfile: %s' % os.path.join(SIProotpath,'TIFFEdit.RES'))
+
+                    if self.ok:
+                        for f in res:
+                            src_f = os.path.join(SIPpath,f[0])
+                            try:
+                                shutil.move(src_f,SIPcontentpath)
+                            except (IOError,os.error,shutil.Error), why:
+                                logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_f,SIPcontentpath,self.ObjectIdentifierValue, why))
+                                self.ok = 0
+                     
+                    if self.ok:
+                        try:
+                            shutil.move(os.path.join(SIProotpath,'TIFFEdit.RES'),SIPcontentpath)
+                        except (IOError,os.error,shutil.Error), why:
+                            logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (os.path.join(SIProotpath,'TIFFEdit.RES'),SIPcontentpath,self.ObjectIdentifierValue, why))
+                            self.ok = 0
+
+                    if self.ok:
+                        ############################################
+                        # Create PREMIS/mix from RESfile
+                        res,errno,why = ESSMD.RES2PREMIS(SIProotpath,AgentIdentifierValue,Premis_filepath, eARD=True)
+                        if errno == 10:
+                            event_info = 'Failed to parse RESfile, error.num: %s error.det: %s' % (str(errno),str(why))
+                            logging.error(event_info)
+                        elif errno == 20:
+                            event_info = 'I/O error to access RESfile, error.num: %s error.det: %s' % (str(errno),str(why))
+                            logging.error(event_info)
+                        elif errno == 30:
+                            event_info = 'Validation errors for PREMIS file, error.num: %s error.det: %s' % (str(errno),str(why))
+                            logging.error(event_info)
+                        elif errno == 40:
+                            event_info = 'Problem to write PREMIS file, error.num: %s error.det: %s' % (str(errno),str(why))
+                            logging.error(event_info)
+                        if errno > 1:
+                            event_info = 'Problem to create PREMIS/mix for ObjectIdentifierValue: %s, error.num: %s  error.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
+                            logging.error(event_info)
+                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'1',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                            self.ok = 0
+                        elif errno == 1:
+                            event_info = 'Warning in convert RES to PREMIS for objectIdentifierValue: %s, error.num: %s  warning.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
+                            logging.warning(event_info)
+                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0',event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                        else:
+                            ESSPGM.Events().create('1022','RES2PREMIS','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                            errno,why = ESSMD.validate(FILENAME=Premis_filepath)
+                            if errno:
+                                logging.error('Problem to validate PREMIS/mix for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
+                                self.ok = 0
+                    if self.ok:
+                        ############################################
+                        # Create eARD METS sip.xml from PREMISfile
+                        errno,why = ESSMD.PREMIS2METS(SIProotpath,self.ObjectIdentifierValue,AgentIdentifierValue,altRecordID_dict,Mets_filepath)
+                        if errno:
+                            logging.error('Problem to convert PREMIS to METS for ObjectIdentifierValue: %s, why: %s, errno: %s' % (self.ObjectIdentifierValue, why, errno))
+                            self.ok = 0
+                        errno,why = ESSMD.validate(FILENAME=Mets_filepath)
+                        if errno:
+                            logging.error('Problem to validate METS for ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, why))
+                            self.ok = 0
+
+                    if self.ok:
+                        ############################################
+                        # Clean SIP from "junk" files
+                        errno,why = ESSPGM.Check().CleanRES_SIP(SIProotpath)
+                        if errno:
+                            event_info = 'Problem to clean RES SIP from "junk files" for SIP package: %s, error.num: %s  error.desc: %s' % (self.ObjectIdentifierValue,str(errno),str(why))
+                            logging.error(event_info)
+                            self.ok = 0
+                    
+                    if self.ok:
+                        ############################################
+                        self.StatusProcess = 5
+                        self.StatusActivity = 0
+                        logging.info('Success to convert object %s to METS SIP and is now ready to ingest.' % self.ObjectIdentifierValue)
+                    else:
+                        ############################################
+                        self.StatusProcess = 0
+                        self.StatusActivity = 4
+                        self.event_info = 'Problem to create METS SIP for object: %s' % self.ObjectIdentifierValue
+                        logging.error(self.event_info)
+                        ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                elif self.objectstatus == 100:
+                    logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 99:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 4
+                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (SIProotpath,str(self.filetree_errno),self.filetree_why)
+                    logging.error(self.event_info)
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+
+                if self.objectstatus in range(1,100):
+                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                    if self.dbget:
+                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
+                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+                    else:
+                        ArchiveObject_obj = ArchiveObject()
+                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.OAISPackageType = 0
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+                    if self.ext_IngestTable:
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
+                                                                                                 'StatusProcess',self.StatusProcess,
+                                                                                                 'StatusActivity',self.StatusActivity,
+                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
+                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
+                        else:
+                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
+                            ArchiveObject_obj.save()
+
+    def Check_IngestPath_for_updates(self, dir_list, ArchivePolicy_obj):
+        #########################################################
+        # ArchivePolicy_obj.IngestMetadata == 1 or ArchivePolicy_obj.IngestMetadata == 4: # METS SIP
+        for self.fileitem in dir_list:
+            self.objectstatus = 0
+            self.SIPsize = 0
+            self.POLICYID = 0
+            self.DELIVERYTYPE = None
+            self.DELIVERYSPECIFICATION = None
+            self.SUBMISSIONAGREEMENT = None
+            self.INFORMATIONCLASS = 0
+            self.DataObjectSize = 0
+            self.dbget = None
+
+            self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.fileitem)
+            try:
+                if os.path.exists(self.path):
+                    self.mode = os.stat(self.path)
+                else:
+                    logging.warning('Filepath: %s do not exists, continue with next' % self.path)
+                    continue
+            except OSError:
+                exitstatus = sys.exc_info()[1][0]
+                why = sys.exc_info()[1][1]
+                logging.warning('Problem to get stat for filepath: %s, exitstatus: %s, error: %s, continue with next' % (self.path,exitstatus,why))
+                continue
+            #self.mode = os.stat(self.path)
+            if stat.S_ISREG(self.mode[0]):
+                #############################################################################
+                # It's a file
+                #############################################################################
+                if self.fileitem[-17:] == '_Package_METS.xml':
+                    ###############################################################
+                    # Try to access ingestpath
+                    ###############################################################
+                    self.ObjectIdentifierValue = self.fileitem[:-17]
+                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
+
+                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                    self.newobject = 1
+                    if self.dbget:
+                        if int(self.dbget[0][2]) > 9:
+                            ###############################################################
+                            # The object %s is already archived
+                            ###############################################################
+                            self.objectstatus = 100
+                            self.newobject = 0
+                            logging.debug('The object %s is already archived.' % self.ObjectIdentifierValue)
+                            continue
+
+                    if not errno and not self.objectstatus == 100:
+                        self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
+                        if self.SIPinfo[0][1] is not None:
+                            self.SIPsize += int(self.SIPinfo[0][1])
+                        if self.SIPinfo[1][1] is not None:
+                            self.SIPsize += int(self.SIPinfo[1][1])
+                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
+                            ###############################################################
+                            # An already discovered object found, checking if stable
+                            ###############################################################
+                            if self.dbget[0][0] == self.SIPsize:
+                                ###############################################################
+                                # object is stable
+                                ###############################################################
+                                self.SIP_OK = 1
+                                #######################################
+                                # Verify package checksum and size
+                                if self.SIP_OK:
+                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
+                                    if not errno:
+                                        logging.info('Success to verify package checksum and size for object: %s' % self.ObjectIdentifierValue)
+                                    else:
+                                        logging.error('Problem to verify package checksum and size for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
+                                        self.SIP_OK = 0
+                                #######################################
+                                # Extract package
+                                if self.SIP_OK:
+                                    errno,error_list = Functions().ExtractSIP(ArchivePolicy_obj.IngestPath,self.SIPinfo[1])
+                                    if not errno:
+                                        logging.info('Success to extract object: %s' % self.ObjectIdentifierValue)
+                                    else:
+                                        logging.error('Problem to extract object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
+                                        self.SIP_OK = 0
+                                #######################################
+                                # Get SIP information after Extract
+                                if self.SIP_OK:
+                                    self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
+                                    if not errno:
+                                        logging.info('Success to get SIP information after extract for object: %s' % self.ObjectIdentifierValue)
+                                        self.POLICYID = self.SIPinfo[2]['POLICYID']
+                                        try:
+                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
+                                        except ArchivePolicy.DoesNotExist, why:
+                                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why)) 
+                                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
+                                            self.objectstatus = 99  
+                                        if 'DELIVERYTYPE' in self.SIPinfo[2].keys():
+                                            self.DELIVERYTYPE = self.SIPinfo[2]['DELIVERYTYPE']
+                                        if 'DELIVERYSPECIFICATION' in self.SIPinfo[2].keys():
+                                            self.DELIVERYSPECIFICATION = self.SIPinfo[2]['DELIVERYSPECIFICATION']
+                                        if 'SUBMISSIONAGREEMENT' in self.SIPinfo[2].keys():
+                                            self.SUBMISSIONAGREEMENT = self.SIPinfo[2]['SUBMISSIONAGREEMENT']
+                                        if 'INFORMATIONCLASS' in self.SIPinfo[2].keys():
+                                            self.INFORMATIONCLASS = self.SIPinfo[2]['INFORMATIONCLASS']
+                                    else:
+                                        logging.error('Problem to get SIP information after extract for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
+                                        self.SIP_OK = 0
+                                #######################################
+                                # Verify Content_METS checksum and size
+                                if self.SIP_OK:
+                                    errno,error_list = Functions().VerifySIPchecksum(ArchivePolicy_obj.IngestPath,self.SIPinfo[0])
+                                    if not errno:
+                                        logging.info('Success to verify Content_METS checksum and size for object: %s' % self.ObjectIdentifierValue)
+                                        self.objectstatus = 3
+                                    else:
+                                        logging.error('Problem to verify Content_METS checksum and size for object: %s, Errno: %s, error_list: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list)))
+                                        self.objectstatus = 99
+                            else:
+                                ###############################################################
+                                # directory is still growing
+                                ###############################################################
+                                self.objectstatus = 2
+                        elif self.newobject and not self.dbget:
+                            ###############################################################
+                            # A new directory discovered
+                            ###############################################################
+                            self.objectstatus = 1
+                    elif errno and not self.objectstatus == 100:
+                        ###############################################################
+                        # Problem to access object
+                        ###############################################################
+                        self.objectstatus = 99
+                if self.objectstatus == 0:
+                    pass
+                elif self.objectstatus == 1:
+                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
+                    self.StatusProcess = 0
+                    self.StatusActivity = 1
+                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 2:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 2
+                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.SIPsize))
+                elif self.objectstatus == 3:
+                    self.StatusProcess = 9
+                    self.StatusActivity = 0
+                    logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                elif self.objectstatus == 100:
+                    logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 99:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 4
+                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
+                    logging.error(self.event_info)
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+
+                if self.objectstatus in range(1,100):
+                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                    if self.dbget:
+                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
+                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
+                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
+                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
+                        ArchiveObject_obj.DataObjectSize = self.SIPsize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+
+                    else:
+                        ArchiveObject_obj = ArchiveObject()
+                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
+                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
+                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
+                        ArchiveObject_obj.DataObjectSize = self.SIPsize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+
+                    if self.ext_IngestTable: 
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
+                                                                                                 'DELIVERYTYPE',self.DELIVERYTYPE,
+                                                                                                 'INFORMATIONCLASS',self.INFORMATIONCLASS,
+                                                                                                 'DataObjectSize',self.SIPsize,
+                                                                                                 'StatusProcess',self.StatusProcess,
+                                                                                                 'StatusActivity',self.StatusActivity,
+                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
+                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
+                        else:
+                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
+                            ArchiveObject_obj.save()
+            
+            elif stat.S_ISDIR(self.mode[0]): 
+                #############################################################################
+                # It's a directory
+                #############################################################################
+                self.sipmetspath = None
+                logging.debug('self.path:%s' % self.path)
+                if os.path.exists(os.path.join(self.path,'sip.xml')):
+                    self.sipmetspath = os.path.join(self.path,'sip.xml')
+                elif os.path.exists(os.path.join(self.path,'mets.xml')):
+                    self.sipmetspath = os.path.join(self.path,'mets.xml')
+                #elif os.path.exists(os.path.join(self.path,'%s_Content_METS.xml' % self.fileitem)):
+                #    self.sipmetspath = os.path.join(self.path,'%s_Content_METS.xml' % self.fileitem)
+                
+                if self.sipmetspath:
+                    logging.debug('self.sipmetspath:%s' % self.sipmetspath)
+                    ###############################################################
+                    # Try to access ingestpath
+                    ###############################################################
+                    self.ObjectIdentifierValue = self.fileitem
+
+                    self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                    logging.debug('self.dbget:%s' % str(self.dbget))
+                    errno = 0
+                    self.newobject = 1
+                    if self.dbget:
+                        if int(self.dbget[0][2]) > 9:
+                            ###############################################################
+                            # The object %s is already archived
+                            ###############################################################
+                            self.objectstatus = 100
+                            self.newobject = 0
+                            logging.debug('The object %s is already archived.' % self.ObjectIdentifierValue)
+                            continue
+                        elif int(self.dbget[0][1]) in [4]:
+                            ###############################################################
+                            # The object %s need manual assistance, continue with next object
+                            ###############################################################
+                            logging.warning('The object %s need manual assistance, continue with next object.' % self.ObjectIdentifierValue)
+                            continue
+                    
+                    if not errno and not self.objectstatus == 100:
+                        self.SIPinfo,errno,error_list = Functions().GetSIPinfo(self.path,os.path.split(self.sipmetspath)[1])
+                        if errno and not self.objectstatus == 100:
+                            ###############################################################
+                            # Problem to access object
+                            logging.error('Problem to get information from sip.xml, self.SIPinfo:%s' % (str(self.SIPinfo)))
+                            self.objectstatus = 99
+                    if not errno and not self.objectstatus == 100:
+                        self.DataObjectSize, self.numfiles, self.file_list, errno, error_list = Functions().GetFiletreeSum(self.path)
+                        if errno and not self.objectstatus == 100:
+                            ###############################################################
+                            # Problem to access object
+                            logging.error('Problem to get SIPinformation from filesystem, self.DataObjectSize:%s,self.numfiles:%s,self.file_list:%s' % (self.DataObjectSize, self.numfiles, str(self.file_list)))
+                            self.objectstatus = 99
+                    if not errno and not self.objectstatus == 100:
+                        if self.SIPinfo[3][0][1][:5] == 'UUID:' or self.SIPinfo[3][0][1][:5] == 'RAID:':
+                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1][5:]
+                        else:
+                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
+                        logging.debug('self.ObjectIdentifierValue:%s' % self.ObjectIdentifierValue)
+                        self.SIPsize = self.SIPinfo[2]
+                        logging.debug('self.SIPsize:%s' % self.SIPsize)
+                        self.POLICYID = self.SIPinfo[1]['POLICYID']
+                        try:
+                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = self.POLICYID)
+                        except ArchivePolicy.DoesNotExist, why:
+                            logging.error('Problem to get ArchivePolicy for object: %s, error: %s' % (self.ObjectIdentifierValue, why))
+                            ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = 0) 
+                            self.objectstatus = 99  
+                        logging.debug('self.POLICYID:%s' % self.POLICYID)
+                        if 'DELIVERYTYPE' in self.SIPinfo[1].keys():
+                            self.DELIVERYTYPE = self.SIPinfo[1]['DELIVERYTYPE']
+                        if 'DELIVERYSPECIFICATION' in self.SIPinfo[1].keys():
+                            self.DELIVERYSPECIFICATION = self.SIPinfo[1]['DELIVERYSPECIFICATION']
+                        if 'SUBMISSIONAGREEMENT' in self.SIPinfo[1].keys():
+                            self.SUBMISSIONAGREEMENT = self.SIPinfo[1]['SUBMISSIONAGREEMENT']
+                        if 'INFORMATIONCLASS' in self.SIPinfo[1].keys():
+                            self.INFORMATIONCLASS = self.SIPinfo[1]['INFORMATIONCLASS']
+
+                        if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
+                            ###############################################################
+                            # An already discovered object found, checking if stable
+                            ###############################################################
+                            if self.dbget[0][0] == self.DataObjectSize:
+                                ###############################################################
+                                # object is stable
+                                ###############################################################
+                                if self.SIPsize == self.DataObjectSize:
+                                    ###############################################################
+                                    # Check if totalsize for files in filelist in METS == actual size in filesystem
+                                    ###############################################################
+                                    self.objectstatus = 3
+                                else:
+                                    self.objectstatus = 98
+                            else:
+                                ###############################################################
+                                # directory is still growing
+                                ###############################################################
+                                self.objectstatus = 2
+                        elif self.newobject and not self.dbget:
+                            ###############################################################
+                            # A new directory discovered
+                            ###############################################################
+                            self.objectstatus = 1
+                    elif errno and not self.objectstatus == 100:
+                        ###############################################################
+                        # Problem to access object
+                        ###############################################################
+                        self.objectstatus = 99
+                elif os.path.split(self.path)[1] == 'user':
+                    IngestQueue_objs = IngestQueue.objects.filter( Status=0 ).all()
+                    if IngestQueue_objs:
+                        for IngestQueue_obj in IngestQueue_objs:
+                            user_Req = IngestQueue_obj.user
+                            ObjectIdentifierValue_Req = IngestQueue_obj.ObjectIdentifierValue
+                            src_name = '%s/%s/%s' % (self.path,user_Req,ObjectIdentifierValue_Req)
+                            trg_name = os.path.split(self.path)[0]
+                            try:
+                                shutil.move(src_name,trg_name)
+                            except (IOError,os.error,shutil.Error), why:
+                                logging.error('Problem to move %s to %s, ObjectIdentifierValue: %s, why: %s' % (src_name,trg_name,ObjectIdentifierValue_Req, why))
+                            else:
+                                logging.info('Success to move %s to %s, ObjectIdentifierValue: %s' % (src_name,trg_name,ObjectIdentifierValue_Req))
+                                IngestQueue_obj.Status = 2
+                                #model.meta.Session.commit()
+                                IngestQueue_obj.save()
+                if self.objectstatus == 0:
+                    pass
+                elif self.objectstatus == 1:
+                    #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
+                    self.StatusProcess = 0
+                    self.StatusActivity = 1
+                    logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 2:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 2
+                    logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.SIPsize))
+                elif self.objectstatus == 3:
+                    self.StatusProcess = 9
+                    self.StatusActivity = 0
+                    logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.SIPsize))
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                elif self.objectstatus == 100:
+                    logging.warning('The object %s is already archived.' % self.ObjectIdentifierValue)
+                elif self.objectstatus == 98:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 4
+                    self.event_info = 'Filesize in METS is not equal to tha actual filesize. Totalsize in METS:%s, filesystem:%s' % (str(self.SIPsize),str(self.DataObjectSize))
+                    logging.error(self.event_info)
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+                elif self.objectstatus == 99:
+                    self.StatusProcess = 0
+                    self.StatusActivity = 4
+                    self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.ObjectIdentifierValue,str(errno),str(error_list))
+                    logging.error(self.event_info)
+                    ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+
+                if self.objectstatus in range(1,100):
+                    self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                    self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                    if self.dbget:
+                        ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
+                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
+                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
+                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
+                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+
+                    else:
+                        ArchiveObject_obj = ArchiveObject()
+                        ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.PolicyId = ArchivePolicy_obj
+                        ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
+                        ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
+                        ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                        ArchiveObject_obj.StatusProcess = self.StatusProcess
+                        ArchiveObject_obj.StatusActivity = self.StatusActivity
+                        ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                        ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save()
+
+                    if self.ext_IngestTable:
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('PolicyID',self.POLICYID,
+                                                                                                 'DELIVERYTYPE',self.DELIVERYTYPE,
+                                                                                                 'INFORMATIONCLASS',self.INFORMATIONCLASS,
+                                                                                                 'DataObjectSize',self.DataObjectSize,
+                                                                                                 'StatusProcess',self.StatusProcess,
+                                                                                                 'StatusActivity',self.StatusActivity,
+                                                                                                 'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
+                                                                                                 'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                                ('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                        if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
+                        else:
+                            ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
+                            ArchiveObject_obj.save()
+
+    def Check_IngestPath_for_updates_PREMIS(self, dir_list, ArchivePolicy_obj):
+        #########################################################
+        # IngestMetadata 3 = PREMIS/ADDML SIP        
+        for self.ObjectIdentifierValue in dir_list:
+            self.objectstatus = 0
+            self.DataObjectSize = 0
+            self.numfiles = 0
+            self.dbget = None
+            # Fix to filter out eveyrything except dirs with lengt of 8 or 9
+            if len(self.ObjectIdentifierValue) in range(8,10):
+                self.path = os.path.join(ArchivePolicy_obj.IngestPath,self.ObjectIdentifierValue)
+                ###############################################################
+                # Try to access ingestpath
+                ###############################################################
+                self.DataObjectSize, self.numfiles, self.file_list, self.filetree_errno, self.filetree_why = Functions().GetFiletreeSum(self.path) 
+
+                self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                self.newobject = 1
+                if self.dbget:
+                    if int(self.dbget[0][2]) == 5:
+                        logging.info('The object %s is ready to remodel.' % self.ObjectIdentifierValue)
+                    elif int(self.dbget[0][2]) > 9:
+                        ###############################################################
+                        # The object %s is already archived
+                        ###############################################################
+                        self.objectstatus = 100
+                        self.newobject = 0
+
+                if not self.filetree_errno:
+                    if self.newobject and self.dbget and int(self.dbget[0][2]) in range(0,9) and int(self.dbget[0][1]) in range(0,3):
+                        ###############################################################
+                        # An already discovered directory found, checking if stable
+                        ###############################################################
+                        if self.dbget[0][0] == self.DataObjectSize:
+                            ###############################################################
+                            # directory is stable
+                            ###############################################################
+                            self.objectstatus = 3
+                        else:
+                            ###############################################################
+                            # directory is still growing
+                            ###############################################################
+                            self.objectstatus = 2
+                    elif self.newobject and not self.dbget:
+                        ###############################################################
+                        # A new directory discovered
+                        ###############################################################
+                        self.objectstatus = 1
+                elif self.filetree_errno and not self.objectstatus == 100:
+                    ###############################################################
+                    # Problem to access object
+                    ###############################################################
+                    self.objectstatus = 99
+
+            if self.objectstatus == 0:
+                pass
+            elif self.objectstatus == 1:
+                #maste kolla mot arkiv tabellen om objektet redan ar skrivit till band
+                self.StatusProcess = 0
+                self.StatusActivity = 1
+                logging.info('Object %s do not exist in DB or receive, Insert object to DB' % self.ObjectIdentifierValue)
+            elif self.objectstatus == 2:
+                self.StatusProcess = 0
+                self.StatusActivity = 2
+                logging.info('Object %s, %s is receive, update DB with new size.' % (self.ObjectIdentifierValue,self.DataObjectSize))
+            elif self.objectstatus == 3:
+                self.StatusProcess = 9
+                self.StatusActivity = 0
+                logging.info('Object %s, %s is stable, moving to next step.' % (self.ObjectIdentifierValue,self.DataObjectSize))
+                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'0','',ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+            elif self.objectstatus == 100:
+                logging.info('The object %s is already archived.' % self.ObjectIdentifierValue)
+            elif self.objectstatus == 99:
+                self.StatusProcess = 0
+                self.StatusActivity = 4
+                self.event_info = 'Problem to access object: %s, errorcode: %s, error: %s' % (self.path,str(self.filetree_errno),self.filetree_why)
+                logging.error(self.event_info)
+                ESSPGM.Events().create('1000','','ESSArch SIPReceiver',ProcVersion,'1',self.event_info,ArchivePolicy_obj.Mode,self.ObjectIdentifierValue)
+
+            if self.objectstatus in range(1,100):
+                self.timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                self.timestamp_dst = self.timestamp_utc.astimezone(self.tz)
+                if self.dbget:
+                    ArchiveObject_obj = ArchiveObject.objects.get(ObjectIdentifierValue = self.ObjectIdentifierValue)
+                    ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                    ArchiveObject_obj.StatusProcess = self.StatusProcess
+                    ArchiveObject_obj.StatusActivity = self.StatusActivity
+                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                    ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                    ArchiveObject_obj.save()
+
+                else:
+                    ArchiveObject_obj = ArchiveObject()
+                    ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
+                    ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                    ArchiveObject_obj.DataObjectSize = self.DataObjectSize
+                    ArchiveObject_obj.StatusProcess = self.StatusProcess
+                    ArchiveObject_obj.StatusActivity = self.StatusActivity
+                    ArchiveObject_obj.LastEventDate = self.timestamp_utc
+                    ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                    ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
+                    ArchiveObject_obj.save()
+
+                if self.ext_IngestTable:
+                    ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(self.IngestTable,'UPD',('DataObjectSize',self.DataObjectSize,
+                                                                                             'StatusProcess',self.StatusProcess,
+                                                                                             'StatusActivity',self.StatusActivity,
+                                                                                             'LastEventDate',self.timestamp_dst.replace(tzinfo=None),
+                                                                                             'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                            ('ObjectIdentifierValue',self.ObjectIdentifierValue))
+                    if ext_errno: logging.error('Failed to update External DB: %s error: %s' % (self.ObjectIdentifierValue,str(ext_why)))
+                    else:
+                        ArchiveObject_obj.ExtDBdatetime = self.timestamp_utc
+                        ArchiveObject_obj.save() 
 
 class Functions:
     "Get filetree"
