@@ -107,28 +107,29 @@ class WorkingThread:
                                 # Tapedrives is available try to mount tape
                                 robotQueue_obj.Status=5
                                 robotQueue_obj.save(update_fields=['Status'])
-                                mountout, returncode = Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
+                                mountout, returncode, tapestatus = Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
                                 if returncode == 0:
                                     robotQueue_obj.delete()
-                                    ######################################################
-                                    # Update StorageMediumTable with num of mounts
-                                    storageMedium_obj=storageMedium.objects.get(storageMediumID=t_id)
-                                    timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
-                                    timestamp_dst = timestamp_utc.astimezone(self.tz)
-                                    storageMedium_obj.storageMediumMounts += 1
-                                    storageMedium_obj.storageMediumLocationStatus = 50
-                                    storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
-                                    storageMedium_obj.LocalDBdatetime = timestamp_utc
-                                    storageMedium_obj.save(update_fields=['storageMediumMounts','storageMediumLocationStatus','linkingAgentIdentifierValue','LocalDBdatetime'])
-                                    if ExtDBupdate:
-                                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',50,
-                                                                                                                        'storageMediumMounts',storageMedium_obj.storageMediumMounts,
-                                                                                                                        'linkingAgentIdentifierValue',AgentIdentifierValue),
-                                                                                                                       ('storageMediumID',t_id))
-                                        if ext_errno: logger.error('Failed to update External DB: ' + str(t_id) + ' error: ' + str(ext_why))
-                                        else:
-                                            storageMedium_obj.ExtDBdatetime = timestamp_utc
-                                            storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+                                    if storageMedium.objects.filter(storageMediumID=t_id).exists():
+                                        ######################################################
+                                        # Update StorageMediumTable with num of mounts
+                                        storageMedium_obj=storageMedium.objects.get(storageMediumID=t_id)
+                                        timestamp_utc = datetime.datetime.utcnow().replace(microsecond=0,tzinfo=pytz.utc)
+                                        timestamp_dst = timestamp_utc.astimezone(self.tz)
+                                        storageMedium_obj.storageMediumMounts += 1
+                                        storageMedium_obj.storageMediumLocationStatus = 50
+                                        storageMedium_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                                        storageMedium_obj.LocalDBdatetime = timestamp_utc
+                                        storageMedium_obj.save(update_fields=['storageMediumMounts','storageMediumLocationStatus','linkingAgentIdentifierValue','LocalDBdatetime'])
+                                        if ExtDBupdate:
+                                            ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',50,
+                                                                                                                            'storageMediumMounts',storageMedium_obj.storageMediumMounts,
+                                                                                                                            'linkingAgentIdentifierValue',AgentIdentifierValue),
+                                                                                                                           ('storageMediumID',t_id))
+                                            if ext_errno: logger.error('Failed to update External DB: ' + str(t_id) + ' error: ' + str(ext_why))
+                                            else:
+                                                storageMedium_obj.ExtDBdatetime = timestamp_utc
+                                                storageMedium_obj.save(update_fields=['ExtDBdatetime'])
                                 else:
                                     logger.error('Problem to mount tape: ' + t_id + ' Message: ' + str(mountout))
                                     robotQueue_obj.Status=100
@@ -217,8 +218,8 @@ class Robot:
         returncode = mount_proc.returncode
         if returncode == 0:
             logger.info('Mount tape: %s Successful (work_uuid: %s), start to verify tape identity', volser, work_uuid)
-            exitcode, why = Robot().check_tape(robotdrives_obj.drive_dev, volser)
-            if exitcode in [0, 1, 2]:
+            tapestatus, why = Robot().check_tape(robotdrives_obj.drive_dev, volser)
+            if tapestatus in [0, 1, 2]:
                 logger.info('Tape identity verify result: %s (work_uuid: %s)', why, work_uuid)
                 ESSPGM.Events().create('2000','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
                 robotdrives_obj.num_mounts += 1
@@ -255,7 +256,7 @@ class Robot:
             robot_obj.save(update_fields=['status', 'drive_id'])
             returncode = 1 
         if Debug: print 'Mountout:', returninfo
-        return returninfo, returncode
+        return returninfo, returncode, tapestatus
 
     "Unmount tape"
     ###############################################

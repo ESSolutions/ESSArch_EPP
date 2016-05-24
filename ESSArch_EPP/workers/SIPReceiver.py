@@ -353,7 +353,7 @@ class WorkingThread:
                     else:
                         ArchiveObject_obj = ArchiveObject()
                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.ObjectUUID = 'ffff%s' % uuid.uuid4().hex
                         ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                         ArchiveObject_obj.StatusProcess = self.StatusProcess
                         ArchiveObject_obj.StatusActivity = self.StatusActivity
@@ -550,7 +550,7 @@ class WorkingThread:
                     else:
                         ArchiveObject_obj = ArchiveObject()
                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.ObjectUUID = 'ffff%s' % uuid.uuid4().hex
                         ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
@@ -753,7 +753,7 @@ class WorkingThread:
                     else:
                         ArchiveObject_obj = ArchiveObject()
                         ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                        ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                        ArchiveObject_obj.ObjectUUID = 'ffff%s' % uuid.uuid4().hex
                         ArchiveObject_obj.PolicyId = ArchivePolicy_obj
                         ArchiveObject_obj.DELIVERYTYPE = self.DELIVERYTYPE
                         ArchiveObject_obj.INFORMATIONCLASS = self.INFORMATIONCLASS
@@ -875,7 +875,7 @@ class WorkingThread:
                 else:
                     ArchiveObject_obj = ArchiveObject()
                     ArchiveObject_obj.ObjectIdentifierValue = self.ObjectIdentifierValue
-                    ArchiveObject_obj.ObjectUUID = 'tmp:%s' % uuid.uuid4().hex
+                    ArchiveObject_obj.ObjectUUID = 'ffff%s' % uuid.uuid4().hex
                     ArchiveObject_obj.DataObjectSize = self.DataObjectSize
                     ArchiveObject_obj.StatusProcess = self.StatusProcess
                     ArchiveObject_obj.StatusActivity = self.StatusActivity
