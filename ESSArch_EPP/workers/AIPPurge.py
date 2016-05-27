@@ -27,7 +27,7 @@ else:
     __version__ = epp.__version__ 
     
 import os, thread, datetime, time, logging, sys, ESSPGM, shutil
-from configuration.models import Path, ArchivePolicy, ESSConfig, ESSProc
+from configuration.models import Path, ESSConfig, ESSProc
 from essarch.models import ArchiveObject
 from django import db
 
@@ -54,7 +54,7 @@ class WorkingThread:
                 # Process Item 
                 lock=thread.allocate_lock()
                 self.IngestTable = 'IngestObject'
-                self.GatePath = Path.objects.get(entity = 'path_gate').value
+                self.path_gate_reception = Path.objects.get(entity = 'path_gate').value
                 self.PreIngestPath = Path.objects.get(entity = 'path_control').value
                 if ExtDBupdate:
                     self.ext_IngestTable = self.IngestTable
@@ -103,7 +103,7 @@ class WorkingThread:
                                 logging.warning('AIC mets object not found, %s' % self.AICmets_objpath)
                                 self.AICmets_objpath = None
                         #TODO parameter for "logs" / "lobby"
-                        self.AIC_GatePath = os.path.join(os.path.join(self.GatePath,'lobby'),self.AIC_UUID)
+                        self.AIC_GatePath = os.path.join(self.path_gate_reception, self.AIC_UUID)
                         if not os.path.exists(self.AIC_GatePath):
                             logging.warning('AIC not found in gate area, %s' % self.AIC_GatePath)
                             self.AIC_GatePath = None

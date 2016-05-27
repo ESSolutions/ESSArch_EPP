@@ -158,7 +158,8 @@ class ArchiveObject_dt_view(DatatableBaseView):
                 for part in column.split('.'):
                     if obj is None or hasattr(obj, 'all'):
                         break
-                    obj = getattr(obj, part)
+                    if obj:
+                        obj = getattr(obj, part)
                 text = obj
 
         if text is None:
@@ -198,7 +199,11 @@ class ArchiveObject_dt_view(DatatableBaseView):
         
         if column in ['EntryDate', 'ObjectMetadata.startdate', 'ObjectMetadata.enddate']:
             if type(text) is datetime.datetime:
-                return text.strftime(self.datetime_format)
+                try:
+                    res = text.strftime(self.datetime_format)
+                except ValueError as e:
+                    res = str(text)
+                return res
         
         if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
             return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)

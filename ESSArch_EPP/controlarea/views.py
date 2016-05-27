@@ -69,16 +69,16 @@ import ESSPGM, pytz, datetime, time, logging
 logger = logging.getLogger('essarch.controlarea')
 
 class MyFileList(object):
-    def __init__(self,filelist=None,source_path='',gate_path='',mets_obj=''):
+    def __init__(self,filelist=None,source_path='',path_gate_reception='',mets_obj=''):
         if filelist is None:
             filelist = []
         self.filelist = filelist
         #self.PreIngestPath = source_path
-        self.gate_path = gate_path
+        self.path_gate_reception = path_gate_reception
         self.mets_obj = mets_obj
         self.source_path = source_path
         #print 'source_path', self.source_path
-        #print 'gate', self.gate_path
+        #print 'gate', self.path_gate_reception
         #print 'mets', self.mets_obj
 
     def get(self,ip_uuid = None):
@@ -95,7 +95,7 @@ class MyFileList(object):
         # if not found at all exception exit
 
         # check for submit description and related ip file
-        for dirname, dirnames, filenames in os.walk( self.gate_path ):
+        for dirname, dirnames, filenames in os.walk( self.path_gate_reception ):
             for f in filenames:
                 ip_file = '' # clear
                 # check for submit description
@@ -156,7 +156,7 @@ class MyFileList(object):
 
                     # if ip file found on gate then exit else check on media
                     if ip_file:
-                        aic_path = os.path.join( self.gate_path, dirname )
+                        aic_path = os.path.join( self.path_gate_reception, dirname )
                         aic_uuid = os.path.split(aic_path)[1]
                         ip.aic_uuid = aic_uuid
                         #ip = MyFile()
@@ -186,7 +186,7 @@ class MyFileList(object):
                                     ip_file = os.path.join(d, ff)
                                     #fil_lista.append(ip_file)
                                     #print 'tar file found on media:', ip_file
-                                    aic_path = os.path.join( self.gate_path, dirname )
+                                    aic_path = os.path.join( self.path_gate_reception, dirname )
                                     aic_uuid = os.path.split(aic_path)[1]
                                     ip.aic_uuid = aic_uuid
                                     #ip = MyFile()
@@ -275,7 +275,7 @@ class CheckinFromReceptionListView(ListView):
     #template_name='archobject/list.html'
     queryset=ArchiveObject.objects.all()
     source_path = Path.objects.get(entity='path_reception').value
-    gate_path = Path.objects.get(entity='path_gate').value
+    path_gate_reception = Path.objects.get(entity='path_gate_reception').value
     Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
@@ -284,7 +284,7 @@ class CheckinFromReceptionListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckinFromReceptionListView, self).get_context_data(**kwargs)
-        originallist = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get()
+        originallist = MyFileList(source_path = self.source_path, path_gate_reception = self.path_gate_reception, mets_obj = self.Pmets_obj).get()
         context['filelist'] = sorted(originallist, key = attrgetter('EntryAgentIdentifierValue','label'))
         context['type'] = 'FromRec'
         context['label'] = 'Select which information package to checkin from reception'
@@ -299,7 +299,7 @@ class CheckinFromReception(CreateView):
     form_class=ControlAreaForm_reception
     source_path = Path.objects.get(entity='path_reception').value
     target_path = Path.objects.get(entity='path_control').value
-    gate_path = Path.objects.get(entity='path_gate').value
+    path_gate_reception = Path.objects.get(entity='path_gate').value
     Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
@@ -325,7 +325,7 @@ class CheckinFromReception(CreateView):
         initial['DELIVERYSPECIFICATION'] = 'N/A'
         initial['allow_unknown_filetypes'] = True
         if 'ip_uuid' in self.kwargs:
-            self.ip_obj = MyFileList(source_path = self.source_path, gate_path = self.gate_path, mets_obj = self.Pmets_obj).get(ip_uuid=self.kwargs['ip_uuid'])
+            self.ip_obj = MyFileList(source_path = self.source_path, path_gate_reception = self.path_gate_reception, mets_obj = self.Pmets_obj).get(ip_uuid=self.kwargs['ip_uuid'])
             if self.ip_obj:
                 initial['ObjectIdentifierValue'] = self.ip_obj.uuid
         return initial

@@ -52,9 +52,9 @@ from time import sleep
 
 
 #TODO lobby in sweden and logs in Norway
-ioessarch = '%s/lobby' % Path.objects.get(entity='path_gate').value
+#ioessarch = '%s/lobby' % Path.objects.get(entity='path_gate').value
 #ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
-#ioessarch = Path.objects.get(entity='path_gate').value
+ioessarch = Path.objects.get(entity='path_gate_reception').value
 
 logger = logging.getLogger('essarch.controlarea')
 

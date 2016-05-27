@@ -27,7 +27,7 @@ else:
     __version__ = epp.__version__ 
     
 import logging, sys, ESSMSSQL, pytz, uuid, datetime
-from essarch.models import storage as storage_old, storageMedium as storageMedium_old, ArchiveObject
+from essarch.models import storage as storage_old, storageMedium as storageMedium_old, ArchiveObject, ArchiveObjectData, ObjectMetadata
 from Storage.models import storage, storageMedium
 from configuration.models import StorageTargets
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -367,6 +367,35 @@ def update_archive_obj_from_ais(ais=True):
             logger.error('Problem to get information about object: %s from central DB' % ip_obj.ObjectIdentifierValue)
             continue     
 
+def migrate_meta_objects():
+    data_objs=ArchiveObjectData.objects.all()
+    for data_obj in data_objs:
+        try:
+            ObjectMetadata_obj = ObjectMetadata()
+            ObjectMetadata_obj.label = data_obj.label
+            ObjectMetadata_obj.startdate = data_obj.startdate
+            ObjectMetadata_obj.enddate = data_obj.enddate
+            ArchiveObject_obj = data_obj.UUID
+        except ObjectDoesNotExist as e:
+            logger.error('ArchiveObject: %s  object not found, error: %s' % (data_obj.UUID_id, e))
+        else:
+            ObjectMetadata_obj.save()
+            ArchiveObject_obj.ObjectMetadata = ObjectMetadata_obj
+            ArchiveObject_obj.save()
+    
+    for aic_obj in ArchiveObject.objects.filter(OAISPackageType=1):
+        ip0_obj = aic_obj.archiveobjects.get(Generation=0)
+        if not ip0_obj.ObjectMetadata is None:
+            ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                            label=ip0_obj.ObjectMetadata.label,
+                                            startdate=ip0_obj.ObjectMetadata.startdate,
+                                            enddate=ip0_obj.ObjectMetadata.enddate)
+            ObjectMetadata_obj.save()
+            aic_obj.ObjectMetadata = ObjectMetadata_obj
+        aic_obj.EntryAgentIdentifierValue = ip0_obj.EntryAgentIdentifierValue
+        aic_obj.EntryDate = ip0_obj.EntryDate
+        aic_obj.save()
+
 if __name__ == '__main__':
     # Run with old model
     update_archive_obj_from_ais()
@@ -375,3 +404,4 @@ if __name__ == '__main__':
     ## Run with new model
     #set_uuid_to_storage()
     #migrate_storage_model()       
+    #migrate_meta_objects()

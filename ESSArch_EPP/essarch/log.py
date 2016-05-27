@@ -40,7 +40,7 @@ if ESSDB_flag == 1:
     from django.utils import timezone
 
 if ESSDB_flag == 0: ioessarch = 'W:\ioessarch\logs'
-elif ESSDB_flag == 1: ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
+elif ESSDB_flag == 1: ioessarch = Path.objects.get(entity='path_gate_reception').value
 
 # Configuration
 eventType_keys = {

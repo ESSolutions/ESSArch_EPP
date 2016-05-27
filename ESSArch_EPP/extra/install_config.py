@@ -395,6 +395,7 @@ def installdefaultpaths(): # default paths
             'path_mimetypes_definitionfile':'/ESSArch/config/mime.types',
             'path_reception':'/ESSArch/data/eta/reception/eft',
             'path_gate':'/ESSArch/data/gate',
+            'path_gate_reception':'/ESSArch/data/gate/reception',
             'path_work':'/ESSArch/data/epp/work',
             'path_control':'/ESSArch/data/epp/control',
             'path_ingest':'/ESSArch/data/epp/ingest',
