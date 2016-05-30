@@ -54,7 +54,7 @@ class WorkingThread:
                 # Process Item 
                 lock=thread.allocate_lock()
                 self.IngestTable = 'IngestObject'
-                self.path_gate_reception = Path.objects.get(entity = 'path_gate').value
+                self.path_gate_reception = Path.objects.get(entity = 'path_gate_reception').value
                 self.PreIngestPath = Path.objects.get(entity = 'path_control').value
                 if ExtDBupdate:
                     self.ext_IngestTable = self.IngestTable

@@ -393,10 +393,12 @@ class CreateGateUploadCompleteView(views.APIView, ChunkedUploadCompleteView):
         """
         Move file to destination path and remove uploaded file from database
         """
-        try:
-            Gatearea_upload_root =  Path.objects.get(entity='path_gate').value
+        try:            
+            path_gate_reception = Path.objects.get(entity = 'path_gate_reception').value
+            #Gatearea_upload_root =  Path.objects.get(entity='path_gate').value
         except  Path.DoesNotExist as e:
-            Gatearea_upload_root = settings.MEDIA_ROOT
+            path_gate_reception = settings.MEDIA_ROOT
+            #Gatearea_upload_root = settings.MEDIA_ROOT
 
         # get or create IP and AIC structure
         path = request.POST.get('path', None)
@@ -410,9 +412,9 @@ class CreateGateUploadCompleteView(views.APIView, ChunkedUploadCompleteView):
             print 'Path: %s is not identified' % repr(path)
             aic_uuid = str(uuid.uuid4())
             ip_uuid = str(uuid.uuid4())
-        gate_reception_path = os.path.join(Gatearea_upload_root, 'reception')
+
         #aic_uuid = get_or_create_aic_uuid(gate_reception_path, ip_uuid)
-        aic_rootpath = get_or_create_AICdirectory(gate_reception_path, aic_uuid)
+        aic_rootpath = get_or_create_AICdirectory(path_gate_reception, aic_uuid)
         ip_rootpath = get_or_create_IPdirectory(aic_rootpath, ip_uuid )
 
         package_descriptionfile = Parameter.objects.get(entity ='package_descriptionfile').value
