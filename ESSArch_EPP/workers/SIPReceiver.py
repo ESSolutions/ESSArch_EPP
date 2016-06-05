@@ -633,9 +633,17 @@ class WorkingThread:
                             self.objectstatus = 99
                     if not errno and not self.objectstatus == 100:
                         if self.SIPinfo[3][0][1][:5] == 'UUID:' or self.SIPinfo[3][0][1][:5] == 'RAID:':
-                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1][5:]
+                            mets_ObjectIdentifierValue = self.SIPinfo[3][0][1][5:]
                         else:
-                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
+                            mets_ObjectIdentifierValue = self.SIPinfo[3][0][1]
+                            
+                        # Check if self.ObjectIdentifierValue and mets_ObjectIdentifierValue match
+                        if not self.ObjectIdentifierValue ==  mets_ObjectIdentifierValue:
+                            event_info = 'Directory name "ObjectIdentifierValue" %s does not match METS "ObjectIdentifierValue" %s' % (self.ObjectIdentifierValue, mets_ObjectIdentifierValue)
+                            error_list.append(event_info)
+                            logger.error(event_info)
+                            self.objectstatus = 99
+                            
                         logging.debug('self.ObjectIdentifierValue:%s' % self.ObjectIdentifierValue)
                         self.SIPsize = self.SIPinfo[2]
                         logging.debug('self.SIPsize:%s' % self.SIPsize)

@@ -738,7 +738,11 @@ def installdefaultdefaultvalues(): # default default values
            'administration_storagemigration__temp_path': '/ESSArch/data/epp/temp',
            'administration_storagemigration__copy_path': '',
            'access_new__ReqType': '5',
+           'ChecksumAlgorithm': '2',
            }
+    
+    if site_profile == "SE":
+        dct['ChecksumAlgorithm'] = '1'
 
     # create according to model with two fields
     for key in dct :

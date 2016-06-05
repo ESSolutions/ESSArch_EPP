@@ -34,9 +34,22 @@ from essarch.models import robotQueue, robotdrives, robot
 from Storage.models import storageMedium
 from configuration.models import ESSProc, ESSConfig
 from django import db
+from retrying import retry
 
 import django
 django.setup()
+
+class RobotException(Exception):
+    """
+    There was an ambiguous exception that occurred while handling your
+    robot.
+    """
+    def __init__(self, value):
+        """
+        Initialize RobotException.
+        """
+        self.value = value
+        super(RobotException, self).__init__(value)
 
 class WorkingThread:
     tz=timezone.get_default_timezone()
@@ -107,8 +120,14 @@ class WorkingThread:
                                 # Tapedrives is available try to mount tape
                                 robotQueue_obj.Status=5
                                 robotQueue_obj.save(update_fields=['Status'])
-                                mountout, returncode, tapestatus = Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
-                                if returncode == 0:
+                                try:
+                                    Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
+                                except RobotException as e:
+                                    logger.error('Problem to mount tape: ' + t_id + ' Message: ' + e)
+                                    robotQueue_obj.Status=100
+                                    robotQueue_obj.save(update_fields=['Status'])
+                                else:
+                                #if returncode == 0:
                                     robotQueue_obj.delete()
                                     if storageMedium.objects.filter(storageMediumID=t_id).exists():
                                         ######################################################
@@ -130,10 +149,10 @@ class WorkingThread:
                                             else:
                                                 storageMedium_obj.ExtDBdatetime = timestamp_utc
                                                 storageMedium_obj.save(update_fields=['ExtDBdatetime'])
-                                else:
-                                    logger.error('Problem to mount tape: ' + t_id + ' Message: ' + str(mountout))
-                                    robotQueue_obj.Status=100
-                                    robotQueue_obj.save(update_fields=['Status'])
+                                #else:
+                                    #logger.error('Problem to mount tape: ' + t_id + ' Message: ' + str(mountout))
+                                    #robotQueue_obj.Status=100
+                                    #robotQueue_obj.save(update_fields=['Status'])
                     elif robotQueue_obj.ReqType in [51, 52]: # Unmount(51), F_Unmount(52)
                         ######################################
                         # Check if tape is mounted
@@ -151,13 +170,19 @@ class WorkingThread:
                                 robotQueue_obj.save(update_fields=['Status'])
                                 robotdrives_obj.status='Unmounting'
                                 robotdrives_obj.save(update_fields=['status'])
-                                mountout, returncode = Robot().Unmount(t_id,robotdrives_obj.drive_id)
-                                if returncode == 0:
-                                    robotQueue_obj.delete()
-                                else:
-                                    logger.error('Problem to unmount tape: ' + t_id + ' Message: ' + str(mountout))
+                                try:
+                                    Robot().Unmount(t_id,robotdrives_obj.drive_id)
+                                except RobotException as e:
+                                    logger.error('Problem to unmount tape: ' + t_id + ' Message: ' + e)
                                     robotQueue_obj.Status=100
                                     robotQueue_obj.save(update_fields=['Status'])
+                                else:
+                                #if returncode == 0:
+                                    robotQueue_obj.delete()
+                                #else:
+                                    #logger.error('Problem to unmount tape: ' + t_id + ' Message: ' + str(mountout))
+                                    #robotQueue_obj.Status=100
+                                    #robotQueue_obj.save(update_fields=['Status'])
                             else:
                                 #################################################
                                 # Tape is locked, skip to unmount
@@ -199,6 +224,7 @@ class Robot:
     ###############################################
     "Mount tape"
     ###############################################
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
     def Mount(self, volser, drive_id=None, work_uuid=''):
         logger.info('Mount tape: ' + volser)
         robotdev = ESSConfig.objects.get(Name='Robotdev').Value
@@ -207,15 +233,16 @@ class Robot:
             robot_obj = robot_objs[0]
         else:
             mountout = 'Missing MediumID: %s in robot' % str(volser)
-            returncode = 1
-            return mountout, returncode
+            raise RobotException(mountout)
+            #returncode = 1
+            #return mountout, returncode
         if not drive_id:
             drive_id = 0
         robotdrives_obj = robotdrives.objects.get(drive_id=drive_id)
         mount_proc = subprocess.Popen(['mtx -f ' + str(robotdev) + ' load ' + str(robot_obj.slot_id) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         mountout = mount_proc.communicate()
-        returninfo = str(mountout)
         returncode = mount_proc.returncode
+        returninfo = '%s, code: %s' % (str(mountout), returncode)
         if returncode == 0:
             logger.info('Mount tape: %s Successful (work_uuid: %s), start to verify tape identity', volser, work_uuid)
             tapestatus, why = Robot().check_tape(robotdrives_obj.drive_dev, volser)
@@ -244,7 +271,7 @@ class Robot:
                 robot_obj.drive_id=drive_id
                 robot_obj.save(update_fields=['status', 'drive_id'])
         else:
-            logger.error('Problem to mount tape: ' + volser + ' Message: ' + str(returninfo))
+            logger.error('Problem to mount tape: ' + volser + ' Message: ' + returninfo)
             robotdrives_obj.status='Fail'
             robotdrives_obj.t_id='??????'
             robotdrives_obj.slot_id = robot_obj.slot_id
@@ -254,12 +281,14 @@ class Robot:
             robot_obj.status='Fail'
             robot_obj.drive_id=drive_id
             robot_obj.save(update_fields=['status', 'drive_id'])
-            returncode = 1 
-        if Debug: print 'Mountout:', returninfo
-        return returninfo, returncode, tapestatus
+            #returncode = 1 
+            raise RobotException(returninfo)
+        #if Debug: print 'Mountout:', returninfo
+        #return returninfo, returncode, tapestatus
 
     "Unmount tape"
     ###############################################
+    @retry(stop_max_attempt_number=5, wait_fixed=60000)
     def Unmount(self, volser, drive_id=None):
         logger.info('Unmount tape: ' + volser)
         robotdev = ESSConfig.objects.get(Name='Robotdev').Value
@@ -268,16 +297,18 @@ class Robot:
             robot_obj = robot_objs[0]
         else:
             unmountout = 'Missing MediumID: %s in robot' % str(volser)
-            returncode = 1
-            return unmountout, returncode
+            raise RobotException(unmountout)
+            #returncode = 1
+            #return unmountout, returncode
         if not drive_id:
             drive_id = 0
         robotdrives_obj = robotdrives.objects.get(drive_id=drive_id)
         unmount_proc = subprocess.Popen(['mtx -f ' + str(robotdev) + ' unload ' + str(robot_obj.slot_id) + ' ' + str(drive_id)], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         unmountout = unmount_proc.communicate()
-        if unmount_proc.returncode == 0:
+        returncode = unmount_proc.returncode
+        returninfo = '%s, code: %s' % (str(unmountout), returncode)
+        if returncode == 0:
             logger.info('Unmount tape: ' + volser + ' Successful')
-            
             ESSPGM.Events().create('2010','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
             robotdrives_obj.status='Ready'
             robotdrives_obj.t_id=''
@@ -296,13 +327,12 @@ class Robot:
                 else:
                     robot_obj.status='Full'
                     robot_obj.drive_id='99'
-
             else:
                 robot_obj.status='New'
                 robot_obj.drive_id='99'
             robot_obj.save(update_fields=['status', 'drive_id'])
         else:
-            logger.error('Problem to unmount tape: ' + volser + 'Message: ' + str(unmountout))
+            logger.error('Problem to unmount tape: ' + volser + 'Message: ' + returninfo)
             robotdrives_obj.status='Fail'
             robotdrives_obj.t_id='??????'
             robotdrives_obj.slot_id = robot_obj.slot_id
@@ -310,8 +340,9 @@ class Robot:
             robot_obj.status='Fail'
             robot_obj.drive_id=drive_id
             robot_obj.save(update_fields=['status', 'drive_id'])
-        if Debug: print 'Unmountout:',unmountout
-        return unmountout, unmount_proc.returncode
+            raise RobotException(returninfo)
+        #if Debug: print 'Unmountout:',unmountout
+        #return unmountout, unmount_proc.returncode
 
     "Idle tapedrive unmount process"
     ###############################################

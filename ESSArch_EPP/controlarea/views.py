@@ -119,7 +119,7 @@ class MyFileList(object):
                     else:
                         ip.uuid = res_info[0][1]
                     ip_tarfile = ip.uuid + '.tar'
-                    ip_zipfile = ip.uuid + ',zip'
+                    ip_zipfile = ip.uuid + '.zip'
 
                     for agent in res_info[2]:
                         if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':

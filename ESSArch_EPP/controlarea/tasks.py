@@ -34,7 +34,7 @@ from essarch.models import ArchiveObject, ObjectMetadata, ArchiveObjectData, Arc
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
                            ControlAreaReqType_CHOICES, ReqStatus_CHOICES, ControlAreaForm_file, \
                            eventOutcome_CHOICES, IngestQueue
-from configuration.models import Path, Parameter, SchemaProfile, IPParameter, ChecksumAlgorithm_CHOICES, ESSConfig
+from configuration.models import Path, Parameter, SchemaProfile, IPParameter, ChecksumAlgorithm_CHOICES, ESSConfig, DefaultValue
 import shutil, errno, essarch.log as logtool, ESSPGM, datetime, tarfile, sys,logging
 import ESSMD
 import os
@@ -94,9 +94,6 @@ class CheckInFromMottagTask(JobtasticTask):
         Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
         premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
         ip_logfile = Parameter.objects.get(entity='ip_logfile').value
-        
-        #TODO Norge ChecksumAlgorithm=2 and Sweden ChecksumAlgorithm=1
-        ChecksumAlgorithm=1
         
         if status_code == 0:
             # Try to find filename for logfile with matching creator, system and version.
@@ -248,7 +245,6 @@ class CheckInFromMottagTask(JobtasticTask):
                                                            METS_LABEL=METS_LABEL,
                                                            PREMIS_ObjectPath=PREMIS_ObjectPath,
                                                            allow_unknown_filetypes=allow_unknown_filetypes,
-                                                           ChecksumAlgorithm=ChecksumAlgorithm,
                                                            )
             if errno:
                 status_code = 8
@@ -635,9 +631,6 @@ class CheckInFromWorkTask(JobtasticTask):
         Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
         premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
         ip_logfile = Parameter.objects.get(entity='ip_logfile').value
-        
-        #TODO Norge ChecksumAlgorithm=2 and Sweden ChecksumAlgorithm=1
-        ChecksumAlgorithm=1
 
         if status_code == 0:
             # Import logentrys to database
@@ -726,7 +719,6 @@ class CheckInFromWorkTask(JobtasticTask):
                                                            METS_LABEL=METS_LABEL,
                                                            PREMIS_ObjectPath=PREMIS_ObjectPath,
                                                            allow_unknown_filetypes=allow_unknown_filetypes,
-                                                           ChecksumAlgorithm=ChecksumAlgorithm,
                                                            )
             if errno:
                 status_code = 5
@@ -1315,7 +1307,7 @@ def AddLogEventsToDB(info_entrys):
 class Functions:
     "Create IP mets"
     ###############################################
-    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None,allow_unknown_filetypes=False,ChecksumAlgorithm=2):
+    def Create_IP_metadata(self,ObjectIdentifierValue,METS_ObjectPath,ObjectPath=None,agent_list=[],agent_default=False,altRecordID_list=[],altRecordID_default=False,file_list=[],namespacedef=None,METS_LABEL=None,METS_PROFILE=None,METS_TYPE='SIP',METS_RECORDSTATUS=None,METS_DocumentID=None,PREMIS_ObjectPath=None,allow_unknown_filetypes=False,ChecksumAlgorithm=None):
         status_code = 0
         status_list = []
         error_list = []
@@ -1324,6 +1316,22 @@ class Functions:
         self.Cmets_objpath = METS_ObjectPath
         self.ObjectIdentifierValue = ObjectIdentifierValue
         IPParameter_obj = IPParameter.objects.filter(type='SIP')[0]
+        
+        if ChecksumAlgorithm is None:
+            try:
+                ChecksumAlgorithm_obj = DefaultValue.objects.get(entity='ChecksumAlgorithm')
+            except DefaultValue.DoesNotExist:
+                ChecksumAlgorithm = 2
+            else:
+                try:
+                    ChecksumAlgorithm = int(ChecksumAlgorithm_obj.value)
+                except ValueError:
+                    ChecksumAlgorithm = 2
+        else:
+            try:
+                ChecksumAlgorithm = int(ChecksumAlgorithm_obj.value)
+            except ValueError:
+                ChecksumAlgorithm = 2
         
         #ChecksumAlgorithm = 2
         CA = dict(ChecksumAlgorithm_CHOICES)[ChecksumAlgorithm]
