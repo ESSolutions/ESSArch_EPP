@@ -253,9 +253,7 @@ class CheckInFromMottagTask(JobtasticTask):
             for e in why[1]:   
                 error_list.append(e)
 
-        if status_code == 0:
-
-                
+        if status_code == 0:    
             ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
             if ArchiveObject_qf is False:
                 event_info = 'Add new entry to DB for AIC_UUID: %s' % (AIC_uuid)
@@ -673,14 +671,6 @@ class CheckInFromWorkTask(JobtasticTask):
                 error_list.append(event_info)
                 logger.error(event_info)
                 status_code = 2
-
-        if status_code == 0:
-            # Update IP in ArchiveObject DBtable
-            ArchiveObject_upd = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid)[:1].get()
-            setattr(ArchiveObject_upd, 'StatusActivity', 0)
-            setattr(ArchiveObject_upd, 'StatusProcess', 5000)
-            # Commit DB updates
-            ArchiveObject_upd.save()
             
         if status_code == 0:
             METS_agent_list = []
@@ -739,6 +729,14 @@ class CheckInFromWorkTask(JobtasticTask):
                 error_list.append(event_info)
                 logger.error(event_info)
                 #/status_code = 3
+
+        if status_code == 0:
+            # Update IP in ArchiveObject DBtable
+            ArchiveObject_upd = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid)[:1].get()
+            setattr(ArchiveObject_upd, 'StatusActivity', 0)
+            setattr(ArchiveObject_upd, 'StatusProcess', 5000)
+            # Commit DB updates
+            ArchiveObject_upd.save()
 
         #return status_code,[status_list,error_list]
         if status_code:
