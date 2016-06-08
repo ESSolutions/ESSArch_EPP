@@ -419,7 +419,8 @@ class CheckOutToWorkTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 86400
+    #time_limit = 86400
+    time_limit = 259200 # 3 days
 
     def calculate_result(self,source_path=None,target_path=None,Package=None,a_uid=None,a_gid=None,a_mode=None,read_only_access=False,ObjectIdentifierValue=None,ReqUUID=None,ReqPurpose=None,linkingAgentIdentifierValue=None):
         status_code = 0
@@ -618,7 +619,8 @@ class CheckInFromWorkTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 86400
+    #time_limit = 86400
+    time_limit = 259200 # 3 days
 
     def calculate_result(self,source_path=None,target_path=None,Package=None,a_uid=None,a_gid=None,a_mode=None,allow_unknown_filetypes=False,ObjectIdentifierValue=None,ReqUUID=None,ReqPurpose=None,linkingAgentIdentifierValue=None):
         status_code = 0
@@ -1309,6 +1311,7 @@ class Functions:
         status_code = 0
         status_list = []
         error_list = []
+        details_flag = False
 
         TimeZone = timezone.get_default_timezone_name()
         self.Cmets_objpath = METS_ObjectPath
@@ -1397,7 +1400,9 @@ class Functions:
             # create amdSec / structMap / fileSec
             self.ms_files = file_list
             if ObjectPath is not None:
+                if details_flag: logger.info('Object: %s, GetFiletree2 - start' % ObjectIdentifierValue)
                 Filetree_list, errno, [status_list2,error_list2]  = ESSPGM.Check().GetFiletree2(ObjectPath,ChecksumAlgorithm,allow_unknown_filetypes)
+                if details_flag: logger.info('Object: %s, GetFiletree2 - len: %s - end' % (ObjectIdentifierValue, len(Filetree_list)))
                 if not errno:
                     for ss in status_list2:
                         status_list.append(ss)
@@ -1440,6 +1445,7 @@ class Functions:
                         error_list.append(ee)
             # Create PREMISfile
             if PREMIS_ObjectPath is not None:
+                if details_flag: logger.info('Object: %s, create PREMIS - len: %s - start' % (ObjectIdentifierValue, len(self.ms_files)))
                 status_list.append('Create new PREMIS: %s' % PREMIS_ObjectPath)
                 P_ObjectIdentifierValue = self.ObjectIdentifierValue  
                 P_preservationLevelValue = 'full'
@@ -1457,14 +1463,19 @@ class Functions:
                         xml_PREMIS = ESSMD.AddPremisFileObject(DOC=xml_PREMIS,FILES=[('simple','','NO/RA',F_objectIdentifierValue,'',[],'0',[[F_messageDigestAlgorithm,F_messageDigest,'ESSArch']],F_size,F_formatName,'',[],[['simple','','AIP',P_ObjectIdentifierValue,'']],[['structural','is part of','NO/RA',P_ObjectIdentifierValue]])])
         
                 xml_PREMIS = ESSMD.AddPremisAgent(xml_PREMIS,[('NO/RA','ESSArch','ESSArch E-Arkiv','software')])
+                if details_flag: logger.info('Object: %s, create PREMIS - len: %s - end' % (ObjectIdentifierValue, len(self.ms_files)))
+                if details_flag: logger.info('Object: %s, validate PREMIS - len: %s - start' % (ObjectIdentifierValue, len(self.ms_files)))
                 errno,why = ESSMD.validate(xml_PREMIS)
                 if errno:
                     status_code = 2
                     error_list.append('Problem to validate "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
+                if details_flag: logger.info('Object: %s, validate PREMIS - len: %s - end' % (ObjectIdentifierValue, len(self.ms_files)))
+                if details_flag: logger.info('Object: %s, write PREMIS - len: %s - start' % (ObjectIdentifierValue, len(self.ms_files)))
                 errno,why = ESSMD.writeToFile(xml_PREMIS,PREMIS_ObjectPath)
                 if errno:
                     status_code = 3
                     error_list.append('Problem to write "PREMISfile: %s", errno: %s, why: %s' % (PREMIS_ObjectPath,errno,str(why)))
+                if details_flag: logger.info('Object: %s, write PREMIS - len: %s - end' % (ObjectIdentifierValue, len(self.ms_files)))
                 #errno,why = ESSMD.validate(FILENAME = PREMIS_ObjectPath, XMLSchema='http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd')
                 #if errno:
                 #    status_code = 2
@@ -1498,6 +1509,7 @@ class Functions:
                 self.namespacedef = namespacedef
     
             if status_code == 0:
+                if details_flag: logger.info('Object: %s, create METS - len: %s - start' % (ObjectIdentifierValue, len(self.ms_files)))
                 errno,info_list = ESSMD.Create_IP_mets(ObjectIdentifierValue = self.ObjectIdentifierValue, 
                                                        METS_ObjectPath = self.Cmets_objpath,
                                                        agent_list = self.METS_agent_list, 
@@ -1515,12 +1527,16 @@ class Functions:
                     status_list.append(s)
                 for e in info_list[1]:
                     error_list.append(e)
+                if details_flag: logger.info('Object: %s, create METS - len: %s - end' % (ObjectIdentifierValue, len(self.ms_files)))
         return status_code,[status_list,error_list]
 
         
 class TestTask(JobtasticTask):
 
-    significant_kwargs = []
+    significant_kwargs = [
+        ('TestString', str),
+        ('timetorun', str),                          
+                          ]
     
     herd_avoidance_timeout = 0 #120  # Give it two minutes
     
@@ -1533,24 +1549,25 @@ class TestTask(JobtasticTask):
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
     time_limit = 86400
 
-    def calculate_result(self,TestString = None):
+    def calculate_result(self,TestString, timetorun,  **kwargs):
         testdrive = 1
-        testtime = 10
         update_frequency = 1
-        while(testdrive < 11):
+        runs = int(timetorun)
+        while(testdrive < runs):
             self.update_progress(completed_count=testdrive,
-                                total_count=testtime,
+                                total_count=runs,
                                 update_frequency=update_frequency,
                                 )
+            logger.info('testdrive nummber: %s, timetorun: %s' % (testdrive, timetorun))
             testdrive = testdrive + 1
-            sleep(0.2)
+            sleep(1)
        
         result = {}
         result['category'] = 'controlarea'
         result['label'] = 'Test task'
         result['reqpurpose'] = TestString
         result['user'] = 'testuser'
-        raise ControlareaException(result)    
+        #raise ControlareaException(result)    
         return result
     
 class ControlareaException(Exception):

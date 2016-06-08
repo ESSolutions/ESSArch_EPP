@@ -17,7 +17,7 @@ CELERYD_CHDIR="/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP"
 #CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
 
 # Extra command-line arguments to the worker
-CELERYD_OPTS="-Q:worker1 default -c:worker1 4 -Q:smdisk1 smdisk -c:smdisk1 2 -Q:smtape1 smtape -c:smtape1 4 --time-limit=300"
+CELERYD_OPTS="-Q:worker1 default -c:worker1 10 -Q:smdisk1 smdisk -c:smdisk1 2 -Q:smtape1 smtape -c:smtape1 4 --time-limit=300 -Ofair"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_LEVEL=INFO

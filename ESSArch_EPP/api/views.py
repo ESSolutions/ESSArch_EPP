@@ -209,15 +209,48 @@ class ArchiveObject_dt_view(DatatableBaseView):
             return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
         else:
             return text
+
+    def filter_queryset(self, qs):
+        """ If search['value'] is provided then filter all searchable columns using istartswith
+        """
+        if not self.pre_camel_case_notation:
+            # get global search value
+            search = self._querydict.get('search[value]', None)
+            if search is not None:
+                if not search.startswith('%ip'):
+                    col_data = self.extract_datatables_column_data()
+                    q = Q()
+                    for col_no, col in enumerate(col_data):
+                        # apply global search to all searchable columns
+                        if search and col['searchable']:
+                            #q |= Q(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): search})
+                            if col['name']:
+                                q |= Q(**{'{0}__icontains'.format(col['name'].replace('.', '__')): search})
+                            else:
+                                print 'WARNING - colums.name is not defined in datatables'
+        
+                        # column specific filter
+                        if col['search.value']:
+                            #qs = qs.filter(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): col['search.value']})
+                            if col['name']:
+                                qs = qs.filter(**{'{0}__icontains'.format(col['name'].replace('.', '__')): col['search.value']})
+                            else:
+                                print 'WARNING - colums.name is not defined in datatables'                    
+                    qs = qs.filter(q)
+            qs = self.filter_extra_queryset(qs)
+        return qs
     
     def filter_ip_queryset(self, qs):
         """ If search['value'] is provided then filter all searchable columns using istartswith
         """
         if not self.pre_camel_case_notation:
-            ip_search_global = False
+            ip_search_global = True
             if ip_search_global:
                 # get global search value
                 search = self._querydict.get('search[value]', None)
+                if search is not None:
+                    if search.startswith('%ip'):
+                        search = search.strip('%ip')
                 col_data = self.extract_datatables_column_data()
                 q = Q()
                 for col_no, col in enumerate(col_data):

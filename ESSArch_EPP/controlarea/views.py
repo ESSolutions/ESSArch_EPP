@@ -1900,7 +1900,12 @@ class TestTaskView(TemplateView):
 
         context = super(TestTaskView, self).get_context_data(**kwargs)
         TestString = 'Teststring'
-        TestToSeeTasks = TestTask.delay_or_fail(TestString)
+        if 'time' in self.kwargs:           
+            timetorun = int(self.kwargs['time'])
+        else:
+            timetorun = 5
+        logger.info('timetorun: %s' % timetorun)
+        TestToSeeTasks = TestTask.delay_or_fail(TestString=TestString,timetorun=timetorun)
         context['task_id'] = TestToSeeTasks.task_id
         context['result'] = TestToSeeTasks.result
         return context

@@ -327,7 +327,8 @@ class StorageMethodWrite:
         '''              
         error_flag = 0
         error_list = []
-        self.ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10, Status__lt=100, Status__gt=2).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]                          
+        #self.ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10, Status__lt=100, Status__gt=2).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]
+        self.ActiveTapeIOs = [i[0] for i in IOQueue.objects.filter(ReqType=10, Status__lt=20, Status__gt=2).order_by('storagemethodtarget__target__id').values_list('storagemethodtarget__target__id').distinct()]                          
         for st_obj, IOQueue_obj_list in self.IOs_to_write.iteritems():
             target_obj = st_obj.target
             remote_server = target_obj.remote_server.split(',')
