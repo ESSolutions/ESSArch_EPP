@@ -237,6 +237,22 @@ class ArchiveObject_dt_view(DatatableBaseView):
                             else:
                                 print 'WARNING - colums.name is not defined in datatables'                    
                     qs = qs.filter(q)
+                else:
+                    search = search.strip('%ip')
+                    #qs = qs.filter(archiveobjects__ObjectIdentifierValue__icontains=search)
+                    col_data = self.extract_datatables_column_data()
+                    q = Q()
+                    for col_no, col in enumerate(col_data):
+                        # apply global search to all searchable columns
+                        if search and col['searchable']:
+                            #q |= Q(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): search})
+                            if col['name']:
+                                q |= Q(**{'archiveobjects__{0}__icontains'.format(col['name'].replace('.', '__')): search})
+                            else:
+                                print 'WARNING - colums.name is not defined in datatables'
+                    qs = qs.filter(q)
+            #for x in qs:
+                #print '###### Object: %s archiveobjects: %s' % (x.ObjectIdentifierValue, x.archiveobjects.count())
             qs = self.filter_extra_queryset(qs)
         return qs
     
@@ -244,21 +260,21 @@ class ArchiveObject_dt_view(DatatableBaseView):
         """ If search['value'] is provided then filter all searchable columns using istartswith
         """
         if not self.pre_camel_case_notation:
-            ip_search_global = True
+            ip_search_global = False
             if ip_search_global:
                 # get global search value
                 search = self._querydict.get('search[value]', None)
                 if search is not None:
                     if search.startswith('%ip'):
                         search = search.strip('%ip')
-                col_data = self.extract_datatables_column_data()
-                q = Q()
-                for col_no, col in enumerate(col_data):
-                    # apply global search to all searchable columns
-                    if search and col['searchable']:
-                        q |= Q(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): search})
-    
-                qs = qs.filter(q)
+                        col_data = self.extract_datatables_column_data()
+                        q = Q()
+                        for col_no, col in enumerate(col_data):
+                            # apply global search to all searchable columns
+                            if search and col['searchable']:
+                                q |= Q(**{'{0}__icontains'.format(self.columns[col_no].replace('.', '__')): search})
+            
+                        qs = qs.filter(q)
 
             # IP specific filter
             archiveobjects__StatusProcess__lt = self._querydict.get('archiveobjects__StatusProcess__lt', None)
@@ -285,6 +301,7 @@ class ArchiveObject_dt_view(DatatableBaseView):
                         qs = qs.exclude(StatusProcess__in=[5000,5100], Generation__in=[0,latest_generation.Generation])
                     else:
                         qs = qs.exclude(Generation=0)
+
         return qs
     
     def filter_extra_queryset(self, qs):
@@ -330,9 +347,10 @@ class ArchiveObject_dt_view(DatatableBaseView):
             if exclude_ip_without_aic:
                 if exclude_ip_without_aic == 'true':
                     qs = qs.exclude(OAISPackageType__in=[0,2], aic_set__isnull=True)
+
             #if exclude_aic_without_ips:
-            #    if exclude_aic_without_ips == 'true':
-            #        qs = qs.exclude(OAISPackageType=1, archiveobjects__isnull=True)   
+            #   if exclude_aic_without_ips == 'true':
+            #        qs = qs.exclude(OAISPackageType=1, archiveobjects__isnull=True)
 
         return qs
 
