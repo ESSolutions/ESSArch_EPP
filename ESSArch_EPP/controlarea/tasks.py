@@ -28,6 +28,7 @@ else:
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
+from django.db import connection
 from models import MyFile, RequestFile
 from essarch.models import ArchiveObject, ObjectMetadata, ArchiveObjectData, ArchiveObjectRel, eventIdentifier, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
@@ -71,7 +72,9 @@ class CheckInFromMottagTask(JobtasticTask):
     #soft_time_limit = None
     
     # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
-    time_limit = 86400
+    #time_limit = 86400
+    time_limit = 259200 # 3 days
+    
     def calculate_result(self,
                         source_path=None,
                         target_path=None,
@@ -253,7 +256,9 @@ class CheckInFromMottagTask(JobtasticTask):
             for e in why[1]:   
                 error_list.append(e)
 
-        if status_code == 0:    
+        connection.close() # Close old MySQL connections
+
+        if status_code == 0:
             ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
             if ArchiveObject_qf is False:
                 event_info = 'Add new entry to DB for AIC_UUID: %s' % (AIC_uuid)
@@ -731,6 +736,8 @@ class CheckInFromWorkTask(JobtasticTask):
                 error_list.append(event_info)
                 logger.error(event_info)
                 #/status_code = 3
+        
+        connection.close() # Close old MySQL connections
 
         if status_code == 0:
             # Update IP in ArchiveObject DBtable
@@ -1493,7 +1500,8 @@ class Functions:
                                      f_checksum, CA, f_size, 'text/xml', f_created,
                                      'PREMIS', None, None,
                                      ])
-                
+
+            connection.close() # Close old MySQL connections
           
             # define namespaces
             if namespacedef is None:

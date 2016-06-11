@@ -139,8 +139,14 @@ class work:
                         logging.info('Found ObjectIdentifierValue: ' + str(ArchiveObject_obj.ObjectIdentifierValue) + ' in AIS, try to update')                  
                         LastEventDate_utc = ArchiveObject_obj.LastEventDate.replace(microsecond=0,tzinfo=pytz.utc)
                         LastEventDate_dst = LastEventDate_utc.astimezone(self.tz)
-                        CreateDate_utc = ArchiveObject_obj.CreateDate.replace(microsecond=0,tzinfo=pytz.utc)
-                        CreateDate_dst = CreateDate_utc.astimezone(self.tz)
+                        if not ArchiveObject_obj.CreateDate is None:
+                            CreateDate_utc = ArchiveObject_obj.CreateDate.replace(microsecond=0,tzinfo=pytz.utc)                        
+                            CreateDate_dst = CreateDate_utc.astimezone(self.tz)
+                            CreateDate_mssql = CreateDate_dst.replace(tzinfo=None)
+                        else:
+                            CreateDate_utc = None
+                            CreateDate_dst = CreateDate_utc
+                            CreateDate_mssql = CreateDate_dst
                         ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('IngestObject','UPD',('PolicyId',ArchiveObject_obj.PolicyId,
                                                                                            'ObjectPackageName',ArchiveObject_obj.ObjectPackageName,
                                                                                            'ObjectSize',ArchiveObject_obj.ObjectSize,
@@ -161,7 +167,7 @@ class work:
                                                                                            'StatusProcess',ArchiveObject_obj.StatusProcess,
                                                                                            'LastEventDate',LastEventDate_dst.replace(tzinfo=None),
                                                                                            'linkingAgentIdentifierValue',ArchiveObject_obj.linkingAgentIdentifierValue,
-                                                                                           'CreateDate',CreateDate_dst.replace(tzinfo=None),
+                                                                                           'CreateDate',CreateDate_mssql,
                                                                                            'CreateAgentIdentifierValue',ArchiveObject_obj.CreateAgentIdentifierValue,
                                                                                            #'EntryDate',ArchiveObject_obj.EntryDate,
                                                                                            #'EntryAgentIdentifierValue',ArchiveObject_obj.EntryAgentIdentifierValue,
