@@ -31,6 +31,7 @@ from Queue import Empty
 from lxml import etree
 from django.utils import timezone
 from essarch.models import robotQueue, robotdrives, robot
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from Storage.models import storageMedium
 from configuration.models import ESSProc, ESSConfig
 from django import db
@@ -126,10 +127,17 @@ class WorkingThread:
                                     logger.error('Problem to mount tape: ' + t_id + ' Message: ' + e)
                                     robotQueue_obj.Status=100
                                     robotQueue_obj.save(update_fields=['Status'])
+                                    try:
+                                        ######################################################
+                                        # Remove storageMedium_obj if tape not contains EPP data.
+                                        storageMedium_obj=storageMedium.objects.get(storageMediumID=t_id, storageMediumUsedCapacity=0)
+                                        if not storageMedium_obj.storage_set.exists():
+                                            storageMedium_obj.delete()
+                                    except ObjectDoesNotExist as e:
+                                        pass                             
                                 else:
                                 #if returncode == 0:
-                                    robotQueue_obj.delete()
-                                    if storageMedium.objects.filter(storageMediumID=t_id).exists():
+                                    try:
                                         ######################################################
                                         # Update StorageMediumTable with num of mounts
                                         storageMedium_obj=storageMedium.objects.get(storageMediumID=t_id)
@@ -149,6 +157,12 @@ class WorkingThread:
                                             else:
                                                 storageMedium_obj.ExtDBdatetime = timestamp_utc
                                                 storageMedium_obj.save(update_fields=['ExtDBdatetime'])
+                                    except ObjectDoesNotExist as e:
+                                        logger.error('After mount of tape: %s, the tape was not found in storageMedium database table.  Message: %s' % (t_id,e))
+                                        robotQueue_obj.Status=100
+                                        robotQueue_obj.save(update_fields=['Status'])
+                                    else:
+                                        robotQueue_obj.delete()
                                 #else:
                                     #logger.error('Problem to mount tape: ' + t_id + ' Message: ' + str(mountout))
                                     #robotQueue_obj.Status=100
@@ -260,7 +274,8 @@ class Robot:
                 robot_obj.drive_id=drive_id
                 robot_obj.save(update_fields=['status', 'drive_id'])
             else:
-                logger.error('Problem to verify tapeid: ' + volser + ' Message: ' + str(why))
+                checktapeinfo = 'Problem to verify tapeid: ' + volser + ' Message: ' + str(why)
+                logger.error(checktapeinfo)
                 robotdrives_obj.status='Fail'
                 robotdrives_obj.t_id='??????'
                 robotdrives_obj.slot_id = robot_obj.slot_id
@@ -270,6 +285,7 @@ class Robot:
                 robot_obj.status='Fail'
                 robot_obj.drive_id=drive_id
                 robot_obj.save(update_fields=['status', 'drive_id'])
+                raise RobotException(checktapeinfo)
         else:
             logger.error('Problem to mount tape: ' + volser + ' Message: ' + returninfo)
             robotdrives_obj.status='Fail'
