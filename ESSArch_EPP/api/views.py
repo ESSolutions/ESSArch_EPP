@@ -70,11 +70,13 @@ from api.serializers import (
                         ProcessTaskSerializer,
                         ProcessStepNestedReadSerializer,
                         ArchiveObjectPlusAICPlusProcessNestedReadSerializer,
+                        AccessQueueSerializer,
                         )
 from essarch.models import (ArchiveObject, 
                             ArchiveObjectRel,
                             ProcessStep,
-                            ProcessTask
+                            ProcessTask,
+                            AccessQueue,
                             )
 from configuration.models import (ArchivePolicy,
                                                 StorageMethod,
@@ -815,6 +817,22 @@ class IOQueueNestedViewSet(IOQueueViewSet):
             return IOQueueNestedWriteSerializer
         else:
             return IOQueueSerializer
+
+class AccessQueueViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateListRetrieveViewSet):
+
+    queryset = AccessQueue.objects.all()
+    serializer_class = AccessQueueSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('id',
+                    'ReqUUID',
+                    'ReqType',
+                    'ReqPurpose',
+                    'user',
+                    'password',
+                    'ObjectIdentifierValue',
+                    'storageMediumID',
+                    'Status',
+                    'Path')
 
 class WriteStorageMethodTapeApplyViewSet(viewsets.ViewSet):    
     permission_classes = (permissions.IsAuthenticated,)

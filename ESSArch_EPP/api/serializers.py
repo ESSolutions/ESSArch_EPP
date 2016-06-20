@@ -39,7 +39,8 @@ from essarch.models import (ArchiveObject,
                                         ArchiveObjectData,
                                         ArchiveObjectMetadata,
                                         ProcessStep,
-                                        ProcessTask
+                                        ProcessTask,
+                                        AccessQueue
                                         )
 from configuration.models import (ArchivePolicy,
                                                 StorageMethod,
@@ -362,6 +363,21 @@ class ProcessStepNestedReadSerializer(ProcessStepSerializer):
     class Meta:
         model = ProcessStep
         fields = ProcessStepSerializer.Meta.fields + ['processtask_set']
+
+class AccessQueueSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False, read_only=False, validators=[validators.UniqueValidator(queryset=ProcessStep.objects.all())])
+    class Meta:
+        model = AccessQueue
+        fields = ['id',
+                    'ReqUUID',
+                    'ReqType',
+                    'ReqPurpose',
+                    'user',
+                    'password',
+                    'ObjectIdentifierValue',
+                    'storageMediumID',
+                    'Status',
+                    'Path']
 
 class ArchiveObjectPlusAICPlusProcessNestedReadSerializer(ArchiveObjectPlusAICNestedReadSerializer):
     processstep_set = ProcessStepNestedReadSerializer(many=True)

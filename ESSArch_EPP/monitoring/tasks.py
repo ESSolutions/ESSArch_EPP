@@ -73,9 +73,9 @@ class CheckProcessTask(JobtasticTask):
         for counter, task in enumerate(tasks):
             if task == tasks_todo.pop(0):
                 ESSProc_objs = ESSProc.objects.filter(Path=task)
+                ps_objs = ps_dict[task]
                 if ESSProc_objs:
                     ESSProc_obj = ESSProc_objs[0]
-                    ps_objs = ps_dict[task]
                     children_pids = []
                     alarm_flag = None
                     logger.debug('ESSProc_obj name: %s, number: %s' % (ESSProc_obj.Name, len(ps_objs)))

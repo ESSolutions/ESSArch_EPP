@@ -51,6 +51,7 @@ from api.views import (TmpWorkareaUploadView,
                     ProcessStepNestedViewSet,
                     IOQueueViewSet, 
                     IOQueueNestedViewSet,
+                    AccessQueueViewSet,
                     AICListView,
                     ArchiveObjectListView,
                     ArchiveObject_dt_view,
@@ -80,6 +81,7 @@ router.register(r'processtask', ProcessTaskViewSet)
 router.register(r'processstepnested', ProcessStepNestedViewSet, 'processstepnested')
 router.register(r'ioqueue', IOQueueViewSet)
 router.register(r'ioqueuenested', IOQueueNestedViewSet, 'ioqueuenested')
+router.register(r'accessqueue', AccessQueueViewSet)
 router.register(r'write_storage_method_tape_apply', WriteStorageMethodTapeApplyViewSet, 'write_storage_method_tape_apply')
 router.register(r'write_storage_method_disk_apply', WriteStorageMethodDiskApplyViewSet, 'write_storage_method_disk_apply')
 router.register(r'read_storage_method_tape_apply', ReadStorageMethodTapeApplyViewSet, 'read_storage_method_tape_apply')
