@@ -967,7 +967,7 @@ class StorageMethodRead:
                 remote_status = 20
                 ObjectPath = self.AccessQueue_obj.Path
                 
-            IOQueue_objs = IOQueue.objects.filter(storage=storage_obj)
+            IOQueue_objs = IOQueue.objects.filter(ReqType=ReqType, storage=storage_obj)
             if not IOQueue_objs.exists():     
                 IOQueue_obj = IOQueue()
                 IOQueue_obj.ReqType=ReqType
