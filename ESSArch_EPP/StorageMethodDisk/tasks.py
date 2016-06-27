@@ -26,9 +26,9 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSMSSQL, ESSPGM, sys, traceback
+import logging, time, os, datetime, shutil, pytz, uuid, ESSMSSQL, ESSPGM
 from celery import Task, shared_task
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from Storage.models import storage, storageMedium, IOQueue
 from Storage.tasks import TransferReadIO

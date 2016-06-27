@@ -28,12 +28,10 @@ else:
 
 import os, datetime, time, logging, sys, ESSPGM, ESSMD, csv, ESSMSSQL, pytz, traceback, urllib, re, tarfile
 
-from essarch.models import IngestQueue, AccessQueue, ArchiveObject
-from configuration.models import ESSConfig, ESSProc, ArchivePolicy, StorageTargets
+from essarch.models import IngestQueue
+from configuration.models import ESSConfig, StorageTargets
 from Storage.models import storage, storageMedium, IOQueue
 from essarch.libs import calcsum, unicode2str
-from django.db.models import Q
-from django import db
 from django.utils import timezone
 from StorageMethodDisk.tasks import (WriteStorageMethodDisk,
                                                         ReadStorageMethodDisk)
@@ -42,7 +40,7 @@ from StorageMethodTape.tasks import (WriteStorageMethodTape,
 from Storage.tasks import TransferWriteIO
 from essarch.libs import ESSArchSMError
 from celery.result import AsyncResult
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 import requests
 from rest_framework.renderers import JSONRenderer
 from urlparse import urljoin

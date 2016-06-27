@@ -28,10 +28,10 @@ else:
 
 import logging, time, os, datetime, pytz, sys, traceback, shutil
 from celery import Task, shared_task
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from Storage.models import IOQueue
 from configuration.models import ESSConfig
-from essarch.libs import GetSize, ESSArchSMError, calcsum
+from essarch.libs import GetSize, ESSArchSMError
 from django.utils import timezone
 from esscore.rest.uploadchunkedrestclient import UploadChunkedRestClient, UploadChunkedRestException
 import requests

@@ -26,7 +26,7 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import logging, time, os, stat, datetime, shutil, pytz, uuid, ESSPGM, ESSMSSQL, tarfile, subprocess, sys, traceback
+import logging, time, os, datetime, shutil, pytz, uuid, ESSPGM, ESSMSSQL, tarfile, subprocess, sys, traceback
 from xml.dom.minidom import Document
 from celery import Task, shared_task
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -1596,14 +1596,6 @@ def MountTape(t_id, IO_obj_id):
                                                                      MediumID=t_id,
                                                                      user='sys',
                                                                      defaults={'Status':0}) 
-        #robotQueue_obj = robotQueue()
-        #robotQueue_obj.ReqUUID = IO_obj_id
-        #robotQueue_obj.ReqType = 50 # Mount
-        #robotQueue_obj.ReqPurpose = 'MountTapePosition'
-        #robotQueue_obj.Status = 0 # Pending
-        #robotQueue_obj.MediumID = t_id
-        #robotQueue_obj.user = 'sys'
-        #robotQueue_obj.save()
         while 1:
             try:
                 robotdrives_obj = robotdrives.objects.get(t_id=t_id, status='Mounted', drive_lock=IO_obj_id)
