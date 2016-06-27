@@ -479,12 +479,24 @@ class work:
                         for ip_obj_ext in ip_objs_ext:
                             #logging.debug('storageMediumID: %s ,IngestObjectUUID: %s',storageMediumID,str(uuid.UUID(bytes_le=ip_obj_ext[23])))
                             logging.debug('storageMediumID: %s ,IngestObjectUUID: %s',storageMediumID,str(uuid.UUID(ip_obj_ext[23])))
-                            LastEventDate_dst = ip_obj_ext[19].replace(microsecond=0,tzinfo=self.tz)
-                            LastEventDate_utc = LastEventDate_dst.astimezone(pytz.utc)
-                            CreateDate_dst = ip_obj_ext[21].replace(microsecond=0,tzinfo=self.tz)
-                            CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
-                            EntryDate_dst = ip_obj_ext[24].replace(microsecond=0,tzinfo=self.tz)
-                            EntryDate_utc = EntryDate_dst.astimezone(pytz.utc)
+                            if not ip_obj_ext[19] is None:
+                                LastEventDate_dst = ip_obj_ext[19].replace(microsecond=0,tzinfo=self.tz)
+                                LastEventDate_utc = LastEventDate_dst.astimezone(pytz.utc)
+                            else:
+                                LastEventDate_dst = None
+                                LastEventDate_utc = LastEventDate_dst
+                            if not ip_obj_ext[21] is None:
+                                CreateDate_dst = ip_obj_ext[21].replace(microsecond=0,tzinfo=self.tz)
+                                CreateDate_utc = CreateDate_dst.astimezone(pytz.utc)
+                            else:
+                                CreateDate_dst = None
+                                CreateDate_utc = LastEventDate_dst
+                            if not ip_obj_ext[24] is None:
+                                EntryDate_dst = ip_obj_ext[24].replace(microsecond=0,tzinfo=self.tz)
+                                EntryDate_utc = EntryDate_dst.astimezone(pytz.utc)
+                            else:
+                                EntryDate_dst = None
+                                EntryDate_utc = LastEventDate_dst
                             ###################################################
                             # Check if archive object exist in local "IngestObject" DB
                             ArchiveObject_objs = ArchiveObject.objects.filter(ObjectIdentifierValue=ip_obj_ext[1])
