@@ -299,7 +299,7 @@ class CheckinFromReception(CreateView):
     form_class=ControlAreaForm_reception
     source_path = Path.objects.get(entity='path_reception').value
     target_path = Path.objects.get(entity='path_control').value
-    path_gate_reception = Path.objects.get(entity='path_gate').value
+    path_gate_reception = Path.objects.get(entity='path_gate_reception').value
     Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
