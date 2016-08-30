@@ -124,7 +124,7 @@ class WorkingThread:
                                 try:
                                     Robot().Mount(t_id,robotdrives_obj.drive_id,robotQueue_obj.ReqUUID)
                                 except RobotException as e:
-                                    logger.error('Problem to mount tape: ' + t_id + ' Message: ' + e)
+                                    logger.error('Problem to mount tape: %s Message: %s' % (t_id, e))
                                     robotQueue_obj.Status=100
                                     robotQueue_obj.save(update_fields=['Status'])
                                     try:
@@ -187,7 +187,7 @@ class WorkingThread:
                                 try:
                                     Robot().Unmount(t_id,robotdrives_obj.drive_id)
                                 except RobotException as e:
-                                    logger.error('Problem to unmount tape: ' + t_id + ' Message: ' + e)
+                                    logger.error('Problem to unmount tape: %s Message: %s' % (t_id, e))
                                     robotQueue_obj.Status=100
                                     robotQueue_obj.save(update_fields=['Status'])
                                 else:
