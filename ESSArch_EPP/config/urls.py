@@ -26,21 +26,26 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
+
+from monitoring import views as monitoring_views
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from configuration import views as configuration_views
+from storagelogistics import views as storagelogistics_views
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Standard URLS:
     #url(r'^$', 'configuration.views.index', name='home'),
-    url(r'^$', 'monitoring.views.sysstat', name='home'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
-    url(r'^admin/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
-    url(r'^changepassword$', 'configuration.views.change_password'),
+    url(r'^$', monitoring_views.sysstat, name='home'),
+    url(r'^logout/$', auth_views.logout, {'next_page': '/'}),
+    url(r'^accounts/login/$', auth_views.login ),
+    url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'} ),
+    url(r'^admin/logout/$', auth_views.logout, {'next_page': '/'} ),
+    url(r'^changepassword$', configuration_views.change_password),
     
     # URLS to include:
     url(r'^configuration/', include('configuration.urls')),
@@ -51,11 +56,11 @@ urlpatterns = patterns('',
     url(r'^reports/', include('reports.urls')),
     url(r'^admin/', include('logfileviewer.admin_urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^js/', include('djangojs.urls')),
+    #url(r'^js/', include('djangojs.urls')),
     url(r'^task/', include('djcelery.urls')),
     url(r'^monitoring/', include('monitoring.urls')),
     url(r'^api/', include('api.urls')),
 
     # StorageLogistics_ws URLS:
-    url(r'^webservice/StorageLogisticsService$', "storagelogistics.views.dispatch"),
-)
+    url(r'^webservice/StorageLogisticsService$', storagelogistics_views.dispatch),
+]

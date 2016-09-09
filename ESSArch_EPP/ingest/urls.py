@@ -25,7 +25,7 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import (ArchObjectListUpdate,
                    IngestList, 
                    IngestDetail, 
@@ -36,7 +36,7 @@ from views import (ArchObjectListUpdate,
                    IngestIPListTemplateView,
                    )
 
-urlpatterns = patterns('',   
+urlpatterns = [   
     #url(r'^listobj/$', ArchObjectListUpdate.as_view(),name='ingest_listobj'),
     #url(r'^listobj2/?$', IngestIPListTemplateView.as_view(),name='ingest_listobj2'),
     url(r'^listobj/?$', IngestIPListTemplateView.as_view(), name='ingest_listobj'),
@@ -49,4 +49,4 @@ urlpatterns = patterns('',
     url(r'^new/(?P<ip_uuid>[^&]*)/$', IngestCreate.as_view(), name='ingest_create_ip_uuid'),
     url(r'^update/(?P<pk>\d+)/$', IngestUpdate.as_view(), name='ingest_update'),
     url(r'^delete/(?P<pk>\d+)/$', IngestDelete.as_view(), name='ingest_delete'),
-)
+]

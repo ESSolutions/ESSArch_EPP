@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load js staticfiles%}
+{% load static %}
 
 {% block content %}
 Request to add information package to preservation queue initiated
@@ -12,7 +12,7 @@ Request to add information package to preservation queue initiated
   
 {% endblock %}
 {% block app-extra-script %}
-     {% js "controlarea/js/progress.js" %}
+     <script type="text/javascript" src="{% static "controlarea/js/progress.js" %}"></script>
 <script>
 //Reload script
 window.onload = setupRefresh;

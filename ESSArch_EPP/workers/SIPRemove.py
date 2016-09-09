@@ -26,11 +26,11 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-import os, thread, datetime, time, logging, sys, shutil, ESSDB, ESSPGM
-from configuration.models import ESSConfig, ESSProc, ArchivePolicy
-
 import django
 django.setup()
+
+import os, thread, datetime, time, logging, sys, shutil, ESSDB, ESSPGM
+from configuration.models import ESSConfig, ESSProc, ArchivePolicy
 
 class WorkingThread:
     "Thread is working in the background"

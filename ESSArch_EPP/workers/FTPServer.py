@@ -56,13 +56,13 @@ class DjangoFtpAuthorizer:
             return False
 
     def get_home_dir(self, username):
-        return '/Metadata'
+        return u'/Metadata'
 
     def get_msg_login(self, username):
-        return 'Welcome to the ESSArch-FTP Server'
+        return u'Welcome to the ESSArch-FTP Server'
 
     def get_msg_quit(self, username):
-        return 'Please come again'
+        return u'Please come again'
 
     def r_perm(self, username, obj=None):
         try:

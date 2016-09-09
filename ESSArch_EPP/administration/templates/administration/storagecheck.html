@@ -1,7 +1,6 @@
 {% extends 'admin/base_site.html' %}
 {% load dictionary_extras %}
-{% load js staticfiles%}
-{% load url from future %}
+{% load static %}
 
 {% block server-side-base %}active{% endblock %}
 
@@ -197,9 +196,9 @@
 {% endblock %}
 
 {% block app-extra-script %}
-    {% js "TableTools/media/js/TableTools.min.js" %}
-    {% js "administration/js/eztables.demo.js" %}
-	{% js "administration/js/storagecheck.js" %}
+    <script type="text/javascript" src="{% static "TableTools/media/js/TableTools.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "administration/js/eztables.demo.js" %}"></script>
+    <script type="text/javascript" src="{% static "administration/js/storagecheck.js" %}"></script>
 <!--
 <script>
 $(document).ready(function() {

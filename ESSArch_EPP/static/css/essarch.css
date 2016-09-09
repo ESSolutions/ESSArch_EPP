@@ -22,6 +22,7 @@ body {
 	position: relative;
 	margin: 0 auto;
 	overflow:visible;
+        padding: 0px 0px;
 }
 
 #branding {
@@ -31,7 +32,7 @@ body {
 
 #user-tools {
         position: absolute;
-        right: 0px;
+        right: 10px;
         top: 0px;
 }
 
@@ -61,6 +62,8 @@ body {
 
 .sf-menu li {
     background: #41769f;
+        font-size: 11px;
+        line-height: 14px;
 }
 
 .sf-menu ul li {

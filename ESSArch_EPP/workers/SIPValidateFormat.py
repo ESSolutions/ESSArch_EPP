@@ -29,6 +29,9 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
+import django
+django.setup()
+
 import os, thread, datetime, time, logging, sys, ESSDB, ESSPGM, ESSMD
 from configuration.models import ChecksumAlgorithm_CHOICES, ArchivePolicy
 from django import db

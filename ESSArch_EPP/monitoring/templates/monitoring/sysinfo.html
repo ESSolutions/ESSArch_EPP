@@ -55,13 +55,13 @@
         <h2>Processes</h2>
         {% if process %}
        	    {% for proc in process %}
-                <p {% if proc.alarm = 1 or proc.Status = "0" %}class="highlight"{% elif proc.alarm = 0 %}class="highlight-green"{% endif %}>{{ proc.Name }}: {{ proc.Status }}</p>
+                <p {% if proc.alarm == 1 or proc.Status == "0" %}class="highlight"{% elif proc.alarm == 0 %}class="highlight-green"{% endif %}>{{ proc.Name }}: {{ proc.Status }}</p>
             {% endfor %}
         {% endif %}
         <h2>Proc logfile alarms</h2>
         {% if proc_alarm %}
        	    {% for proc in proc_alarm %}
-                <p {% if proc.alarm = 1 %}class="highlight"{% elif proc.alarm = 0 %}class="highlight-green"{% endif %}>{{ proc.alarm_sub }}</p>
+                <p {% if proc.alarm == 1 %}class="highlight"{% elif proc.alarm == 0 %}class="highlight-green"{% endif %}>{{ proc.alarm_sub }}</p>
             {% endfor %}
         {% else %}
         	<p class="highlight-green">None</p>

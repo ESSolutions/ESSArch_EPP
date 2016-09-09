@@ -26,6 +26,9 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
+import django
+django.setup()
+
 import sys, logging, logging.handlers, datetime, time, uuid, ESSMSSQL, ESSsched, types, pytz
 from optparse import OptionParser
 from django.utils import timezone

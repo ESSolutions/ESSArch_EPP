@@ -52,6 +52,8 @@ from Storage.models import (storageMedium,
                                         IOQueue,
                                         )
 
+from .fields import StringField
+
 class StorageTargetsSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=StorageTargets.objects.all())])    
     class Meta:
@@ -140,7 +142,7 @@ class storageNestedReadSerializer(storageSerializer):
 
 class storageNestedWriteSerializer(storageSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=IOQueue.objects.all())])
-    storagemedium = serializers.CharField(validators=[])
+    storagemedium = StringField(validators=[])
     class Meta:
         model = storage
         fields = storageSerializer.Meta.fields
@@ -245,11 +247,11 @@ class ArchiveObjectPlusAICPlusStorageNestedReadSerializer(ArchiveObjectPlusAICNe
         fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['Storage_set']
 
 class ArchiveObjectPlusAICPlusStorageNestedWriteSerializer(ArchiveObjectPlusAICNestedReadSerializer):
-    archiveobjectdata_set = serializers.CharField(validators=[])
-    archiveobjectmetadata_set = serializers.CharField(validators=[])
-    Storage_set = serializers.CharField(validators=[])
-    aic_set = serializers.CharField(validators=[])
-    ObjectMetadata = serializers.CharField(allow_null=True, required=False, validators=[])
+    archiveobjectdata_set = StringField(validators=[])
+    archiveobjectmetadata_set = StringField(validators=[])
+    Storage_set = StringField(validators=[])
+    aic_set = StringField(validators=[])
+    ObjectMetadata = StringField(allow_null=True, required=False, validators=[])
     class Meta:
         model = ArchiveObject
         fields = ArchiveObjectPlusAICNestedReadSerializer.Meta.fields + ['Storage_set']
@@ -503,12 +505,13 @@ class IOQueueNestedReadSerializer(IOQueueSerializer):
         model = IOQueue
         fields = IOQueueSerializer.Meta.fields
 
+from rest_framework_recursive.fields import RecursiveField
 
 class IOQueueNestedWriteSerializer(IOQueueSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=IOQueue.objects.all())])
-    archiveobject = serializers.CharField(allow_null=True, required=False, validators=[])
+    archiveobject = StringField(allow_null=True, required=False, validators=[])
     storagemethodtarget = serializers.UUIDField(allow_null=True, required=False, validators=[])
-    storage = serializers.CharField(allow_null=True, required=False, validators=[])
+    storage = StringField(allow_null=True, required=False, validators=[])
     storagemedium = serializers.UUIDField(allow_null=True, required=False, validators=[])
     
     class Meta:
@@ -617,6 +620,7 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
         return IOQueue_obj
 
     def update(self, instance, validated_data):
+        #print 'validated_data: %s' % repr(validated_data)
         storage_data_pre = validated_data.pop('storage')
         if storage_data_pre:
             storage_data = eval(storage_data_pre)
@@ -655,14 +659,14 @@ class IOQueueNestedWriteSerializer(IOQueueSerializer):
 class ApplyStorageMethodTapeSerializer(serializers.Serializer):
     IOQueue_objs_id_list = serializers.ListField()
     ArchiveObject_objs_ObjectUUID_list = serializers.ListField()
-    queue = serializers.CharField()
+    queue = StringField()
 
 class ApplyStorageMethodDiskSerializer(serializers.Serializer):
-    IOQueue_obj_id = serializers.CharField()
-    ArchiveObject_obj_ObjectUUID = serializers.CharField()
-    queue = serializers.CharField()
+    IOQueue_obj_id = StringField()
+    ArchiveObject_obj_ObjectUUID = StringField()
+    queue = StringField()
 
 class MoveToAccessPathSerializer(serializers.Serializer):
-    IOQueue_obj_id = serializers.CharField()
+    IOQueue_obj_id = StringField()
     filename_list = serializers.ListField()
-    queue = serializers.CharField()
+    queue = StringField()

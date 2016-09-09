@@ -25,12 +25,12 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import deliveryReport, eventsReport
 
 #import views
 
-urlpatterns = patterns('',   
+urlpatterns = [   
     url(r'^deliveryreport/$', deliveryReport.as_view(),name='reports_deliveryreport'),
     url(r'^eventsreport/$', eventsReport.as_view(),name='reports_eventsreport'),
-)
+]

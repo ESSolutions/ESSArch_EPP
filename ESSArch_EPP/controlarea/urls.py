@@ -25,7 +25,7 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import CheckinFromReceptionListView, CheckinFromReception,\
                   FromReceptionProgress,\
                   ToWorkListTemplateView,ToWorkListInfoView, CheckoutToWork,\
@@ -45,7 +45,7 @@ from views import CheckinFromReceptionListView, CheckinFromReception,\
 
 #import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^checkinfromreceptionlist/$', CheckinFromReceptionListView.as_view(),name='controlarea_checkinfromreception_list'),
     url(r'^checkinfromreception/(?P<ip_uuid>[^&]*)/$', CheckinFromReception.as_view(), name='controlarea_checkinfromreception'),
     url(r'^fromreceptionprogress/(?P<taskid>[^&]*)/$', FromReceptionProgress.as_view(), name='controlarea_fromreceptionprogress'),
@@ -84,4 +84,4 @@ urlpatterns = patterns('',
     url(r'^testtask/$', TestTaskView.as_view(), name='testtask'),
     url(r'^testtask/(?P<time>[^&]*)/$', TestTaskView.as_view(), name='testtask'),
     url(r'^taskresult/(?P<taskid>[^&]*)/$', TaskResult.as_view(), name='taskresult'),
-)
+]

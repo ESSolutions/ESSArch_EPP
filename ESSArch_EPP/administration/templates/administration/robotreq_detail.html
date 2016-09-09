@@ -1,6 +1,6 @@
 {% extends 'admin/base_site.html' %}
 {% load dictionary_extras %}
-{% load js staticfiles%}
+{% load static %}
 
 {% block content %}
     
@@ -61,7 +61,7 @@
 {% endblock %}
 
 {% block app-extra-script %}
-    {% js_lib "jquery-celery/celery.js" %}
+    <script type="text/javascript" src="{% static "jquery-celery/celery.js" %}"></script>
     <script>
         $(document).ready(function() {
             //$("#task_export").on('click', function (e) {

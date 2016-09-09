@@ -31,6 +31,7 @@ from configuration.models import ESSProc, sm, ArchivePolicy
 import psutil, logging, os
 from django.core.mail import send_mail, mail_admins
 from datetime import datetime
+from django.utils import timezone
 from monitoring.models import MonitoringObject
 from essarch.models import robot
 from Storage.models import storageMedium
@@ -116,7 +117,7 @@ class CheckProcessTask(JobtasticTask):
                         ESSProc_obj.alarm = 0
                     logger.debug('alarm_flag: %s' % alarm_flag)
                     ESSProc_obj.child_pids = children_pids
-                    ESSProc_obj.checked = datetime.now()
+                    ESSProc_obj.checked = timezone.now()
                     ESSProc_obj.save()                    
                 else:
                     ps_pids = []
@@ -210,7 +211,7 @@ class CheckProcFilesTask(JobtasticTask):
             logger.debug('alarm_flag: %s' % alarm_flag)
             MonitoringObject_obj.alarm_sub = alarm_sub
             MonitoringObject_obj.alarm_msg = alarm_msg
-            MonitoringObject_obj.checked = datetime.now()
+            MonitoringObject_obj.checked = timezone.now()
             MonitoringObject_obj.save() 
             #event_info = 'sleep 10'
             #logger.debug(event_info)

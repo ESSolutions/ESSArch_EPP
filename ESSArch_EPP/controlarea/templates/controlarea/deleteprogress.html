@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load js staticfiles%}
+{% load static %}
 
 {% block content %}
 Request to delete IP
@@ -11,7 +11,7 @@ Request to delete IP
   
 {% endblock %}
 {% block app-extra-script %}
-     {% js "controlarea/js/progress.js" %}
+     <script type="text/javascript" src="{% static "controlarea/js/progress.js" %}"></script>
 <script>
 //Reload script
 window.onload = setupRefresh;

@@ -26,7 +26,7 @@ except ImportError:
 else:
     __version__ = epp.__version__
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 
 from api.views import (TmpWorkareaUploadView,
@@ -88,7 +88,7 @@ router.register(r'read_storage_method_tape_apply', ReadStorageMethodTapeApplyVie
 router.register(r'read_storage_method_disk_apply', ReadStorageMethodDiskApplyViewSet, 'read_storage_method_disk_apply')
 router.register(r'move_to_access_path', MoveToAccessPathViewSet, 'move_to_access_path')
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^tmpworkarea_upload', TmpWorkareaUploadView.as_view(), name='chunked_upload'),
     url(r'^aic_list/?$', AICListView.as_view(), name='aic_list'),
@@ -98,4 +98,4 @@ urlpatterns = patterns('',
     url(r'^create_tmpworkarea_upload_complete/?$', CreateTmpWorkareaUploadCompleteView.as_view(), name='api_chunked_upload_complete'),
     url(r'^create_gatearea_upload/?$', CreateGateUploadView.as_view(), name='api_gatearea_upload'),
     url(r'^create_gatearea_upload_complete/?$', CreateGateUploadCompleteView.as_view(), name='api_gatearea_upload_complete'),
-)
+]

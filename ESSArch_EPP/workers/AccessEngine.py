@@ -27,6 +27,9 @@ except ImportError:
 else:
     __version__ = epp.__version__
 
+import django
+django.setup()
+
 import thread, multiprocessing, time, logging, sys, ESSDB, ESSPGM, ESSlogging, os, tarfile, datetime, ESSMD, traceback
 
 from essarch.models import AccessQueue, ArchiveObject
@@ -37,9 +40,6 @@ from Storage.libs import StorageMethodRead
 from StorageMethodDisk.tasks import ReadStorageMethodDisk
 from StorageMethodTape.tasks import ReadStorageMethodTape
 from celery.result import AsyncResult
-
-import django
-django.setup()
 
 class AccessError(Exception):
     def __init__(self, value):

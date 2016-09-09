@@ -26,12 +26,10 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
-from optparse import OptionParser
-
-import ESSPGM,time,os,psutil
-
 import django
 django.setup()
+from optparse import OptionParser
+import ESSPGM,time,os,psutil
 from django.conf import settings
 from configuration.models import ESSProc
 

@@ -26,7 +26,7 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import (
     storageMediumList, 
     storageMediumDatatablesView,
@@ -55,7 +55,7 @@ from views import (
 
 #import views
 
-urlpatterns = patterns('',   
+urlpatterns = [   
     url(r'^liststoragemedium/$', storageMediumList.as_view(),name='admin_liststoragemedium'),
     url(r'^storagemediumdt$', storageMediumDatatablesView.as_view(), name='storagemedium-dt'),
     url(r'^detailstoragemedium/(?P<pk>[^&]*)/$', storageMediumDetail.as_view(), name='admin_detailstoragemedium'),
@@ -82,4 +82,4 @@ urlpatterns = patterns('',
     url(r'^migrequpdate/(?P<pk>\d+)/$', MigrationUpdate.as_view(), name='migration_update'),
     url(r'^migreqdelete/(?P<pk>\d+)/$', MigrationDelete.as_view(), name='migration_delete'),  
     url(r'^deactivatemediacreate/$', DeactivateMedia.as_view(), name='deactivatemedia_create'),
-)
+]

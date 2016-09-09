@@ -26,6 +26,10 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
+
+import django
+django.setup()
+
 import os, thread, datetime, time, pytz, logging, sys, ESSDB, ESSMSSQL, ESSPGM, ESSMD, ESSmetablob, string
 from configuration.models import ChecksumAlgorithm_CHOICES, ArchivePolicy
 from django.utils import timezone

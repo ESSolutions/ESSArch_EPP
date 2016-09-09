@@ -26,6 +26,9 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
+import django
+django.setup()
+
 import thread, time, logging, sys, ESSlogging, traceback
 
 from essarch.models import ArchiveObject
@@ -36,9 +39,6 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from essarch.libs import ESSArchSMError
-
-import django
-django.setup()
 
 class WorkingThread:
     tz = timezone.get_default_timezone()

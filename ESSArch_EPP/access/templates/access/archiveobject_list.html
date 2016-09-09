@@ -1,6 +1,5 @@
 {% extends 'admin/base_site.html' %}
-{% load js staticfiles %}
-{% load url from future %}
+{% load static %}
 
 {% block server-side-base %}active{% endblock %}
 
@@ -39,7 +38,7 @@
 {% endblock %}
 
 {% block app-extra-script %}
-    {% js "aCollapTable/aCollapTable.js" %}
+    <script type="text/javascript" src="{% static "aCollapTable/aCollapTable.js" %}"></script>
 <script>
 
 var aiccheckresult = false;

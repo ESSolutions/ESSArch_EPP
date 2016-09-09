@@ -27,6 +27,9 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
+import django
+django.setup()
+
 import sys, time, logging,  ESSDB, ESSPGM
 
 from essarch.models import IngestQueue

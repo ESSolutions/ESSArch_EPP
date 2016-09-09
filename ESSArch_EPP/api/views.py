@@ -193,7 +193,7 @@ class ArchiveObject_dt_view(DatatableBaseView):
             if enable_StatusActivity_selection:
                 if enable_StatusActivity_selection == 'true':
                     setactivity = 'setactivity(event,"%s")' % row.ObjectUUID
-                    StatusActivityChoices = row._meta.get_field_by_name('StatusActivity')[0].choices
+                    StatusActivityChoices = row._meta.get_field('StatusActivity').choices
                     f = forms.ChoiceField(widget=forms.Select(attrs={'onchange':setactivity}), choices=StatusActivityChoices)
                     text = f.widget.render('selectstatusactivity', row.StatusActivity)
         elif column == 'StatusActivity': # Disable change of StatusActivity for AICs
@@ -795,7 +795,7 @@ class IOQueueViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, CreateLi
                     'user',
                     'ObjectPath',
                     'WriteSize',
-                    'result',
+                    #'result',
                     'Status',
                     'task_id',
                     'posted',

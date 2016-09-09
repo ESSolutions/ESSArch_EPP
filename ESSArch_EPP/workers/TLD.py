@@ -26,6 +26,9 @@ except ImportError:
 else:
     __version__ = epp.__version__ 
 
+import django
+django.setup()
+
 import subprocess, thread, datetime, time, logging, logging.handlers, sys, ESSMSSQL, ESSPGM, multiprocessing, tarfile,pytz
 from Queue import Empty
 from lxml import etree
@@ -36,9 +39,6 @@ from Storage.models import storageMedium
 from configuration.models import ESSProc, ESSConfig
 from django import db
 from retrying import retry
-
-import django
-django.setup()
 
 class RobotException(Exception):
     """

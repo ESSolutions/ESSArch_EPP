@@ -25,13 +25,14 @@ __date__ = "$Date$"
 __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+from configuration import views as configuration_views
 
-urlpatterns = patterns('',
-    url(r'^changepassword$', 'configuration.views.change_password'),
-    url(r'^install_defaultschemas$', 'configuration.views.installdefaultschemaprofiles'),
-    url(r'^install_defaultparameters$', 'configuration.views.installdefaultparameters'),
-    url(r'^install_defaultusers$', 'configuration.views.createdefaultusers'),
+urlpatterns = [
+    url(r'^changepassword$', configuration_views.change_password),
+    url(r'^install_defaultschemas$', configuration_views.installdefaultschemaprofiles),
+    url(r'^install_defaultparameters$', configuration_views.installdefaultparameters),
+    url(r'^install_defaultusers$', configuration_views.createdefaultusers),
     #url(r'^parameters$', 'configuration.views.parameters'),
     #url(r'^parameters/(?P<username>\w+)$', 'configuration.views.userparameters'),
-)
+]

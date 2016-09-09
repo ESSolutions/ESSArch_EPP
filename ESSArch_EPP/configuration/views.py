@@ -35,7 +35,6 @@ from django.contrib.auth.models import User, Group, Permission
 from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
 from django.shortcuts import render_to_response
-from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout

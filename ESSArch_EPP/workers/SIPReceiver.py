@@ -27,6 +27,9 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
+import django
+django.setup()
+
 import os, shutil, thread, datetime, time, logging, sys, csv, tarfile, stat, ESSDB, ESSMSSQL, ESSPGM, ESSlogging, ESSMD, pytz
 import uuid
 

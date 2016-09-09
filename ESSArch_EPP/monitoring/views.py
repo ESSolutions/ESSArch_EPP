@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
 from django.conf import settings
@@ -40,9 +40,7 @@ def sysstat(request):
     context['process'] = ESSProc.objects.all()
     context['proc_alarm'] = MonitoringObject.objects.filter(alarm=1) 
     context['time_checked'] = timezone.now()
-    return render_to_response('monitoring/sysstat.html',
-                              context,
-                              RequestContext(request))
+    return render(request, 'monitoring/sysstat.html', context)
     
 @login_required
 def sysinfo(request):
@@ -79,7 +77,7 @@ def sysinfo(request):
     context = {}
 
     # Versions
-    cwd = settings.SITE_ROOT
+    cwd = settings.BASE_DIR
     for name, shell_command in SHELL_COMMANDS:
         context[name] = run_shell_command(shell_command, cwd)
     
@@ -105,7 +103,5 @@ def sysinfo(request):
     context['process'] = ESSProc.objects.all()
     context['proc_alarm'] = MonitoringObject.objects.filter(alarm=1) 
     context['time_checked'] = timezone.now()
-    return render_to_response('monitoring/sysinfo.html',
-                              context,
-                              RequestContext(request))
+    return render(request, 'monitoring/sysinfo.html', context)
 
