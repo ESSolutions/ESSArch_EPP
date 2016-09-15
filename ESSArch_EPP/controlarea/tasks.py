@@ -178,7 +178,7 @@ class CheckInFromMottagTask(JobtasticTask):
             Package_dmd = os.path.join(Package_root,'descriptive_metadata')
             Package_amd = os.path.join(Package_root,'administrative_metadata')
             Package_ro = os.path.join(Package_amd,'repository_operations')
-            Package_content = os.path.join(Package_root,'content')
+            Package_content = os.path.join(Package_root,'representations')
             try:
                 event_info = 'Copy %s to package content directory: %s' % (Package,Package_content)
                 status_list.append(event_info)
@@ -344,38 +344,47 @@ class CheckInFromMottagTask(JobtasticTask):
 
         if status_code == 0:
             # Import logentrys from log.xml in tarfile to database
-            ip_tarfilename = op.join(Package_content,op.split(Package)[1])
-            if os.path.isfile(ip_tarfilename):
-                try:
-                    tarf = tarfile.open(name=ip_tarfilename,mode='r')
-                    logfile_obj = tarf.extractfile('%s/%s' % (IP_uuid,ip_logfile)) # uuid_xxxx/log.xml
-                    return_code,status,info_entrys =  logtool.get_logxml_info(logfile_obj)
-                    if return_code == 0:
-                        errno,why = AddLogEventsToDB(info_entrys)
-                        if errno:
-                            event_info = 'Failed to Add log events to DB, ERROR: %s' % why
-                            error_list.append(event_info)
-                            logger.error(event_info)
-                            status_code = 10
+            ip_container_filename = op.join(Package_content,op.split(Package)[1])
+            if os.path.isfile(ip_container_filename):
+                if os.path.splitext(ip_container_filename)[1].lower() in ['.tar']:
+                    try:
+                        tarf = tarfile.open(name=ip_container_filename,mode='r')
+                        logfile_obj = tarf.extractfile('%s/%s' % (IP_uuid,ip_logfile)) # uuid_xxxx/log.xml
+                        return_code,status,info_entrys =  logtool.get_logxml_info(logfile_obj)
+                        if return_code == 0:
+                            errno,why = AddLogEventsToDB(info_entrys)
+                            if errno:
+                                event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+                                error_list.append(event_info)
+                                logger.error(event_info)
+                                status_code = 10
+                            else:
+                                for s in why[0]:
+                                    status_list.append(s)
+                                for s in why[1]:
+                                    error_list.append(s)
                         else:
-                            for s in why[0]:
-                                status_list.append(s)
-                            for s in why[1]:
-                                error_list.append(s)
-                    else:
-                        status_code = 11
-                        event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+                            status_code = 11
+                            event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+                            error_list.append(event_info)
+                            logger.info(event_info)
+                        tarf.close()
+                    except KeyError as e:
+                        event_info = 'Logfile %s not found in tarfile, error: %s' % (ip_logfile,repr(e))
                         error_list.append(event_info)
-                        logger.info(event_info)
-                    tarf.close()
-                except:
-                    status_code = 12
-                    event_info = 'Problem to get %s from tarfile, error: %s' % (ip_logfile,str(sys.exc_info()))
-                    error_list.append(event_info)
-                    logger.error(event_info)
+                        logger.error(event_info)                        
+                    except:
+                        status_code = 12
+                        event_info = 'Problem to get %s from tarfile, error: %s' % (ip_logfile,str(sys.exc_info()))
+                        error_list.append(event_info)
+                        logger.error(event_info)
+                else:
+                    event_info = 'The container format "zip" does not support to extract events from logfile %s' % ip_logfile
+                    status_list.append(event_info)
+                    logger.warning(event_info)
             else:
                 status_code = 13
-                event_info = 'Problem to find tarfile in content directory, failed to get %s' % ip_logfile
+                event_info = 'Problem to find tar or zip file in content directory, failed to get %s' % ip_logfile
                 error_list.append(event_info)
                 logger.error = event_info
 
