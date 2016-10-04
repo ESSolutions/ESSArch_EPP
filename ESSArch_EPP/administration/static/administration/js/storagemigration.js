@@ -31,13 +31,7 @@
             $("#filter-"+i).val(),
             i,
             regextest
-            //$("#filter-"+i)
-            //$("#regex-"+i)[0].checked
-           //$('#col'+i+'_regex').prop('checked'),
-            
         );
-    	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
-    	// oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
     }
 
     function createFilter(i) {
@@ -59,24 +53,16 @@
             		regextest = $("#regex-"+i)[0].checked;
             	}
             	filterdict[i] = [$("#filter-"+i).val(), regextest];
-            	//filterdict[i] = [$("#filter-"+i).val(), false];
           }
           return filterdict
         };
-
         oTable.fnMultiFilter( filterlist() );
-        //oTable.fnMultiFilter( {
-        //   "4": "-BSB+DSB",
-        //   "7": "10"
-        //});
     }
     
     function fnShowHide( i )
     {
     	/* Get the DataTables object again - this is not a recreation, just a get of the object */
     	var oTable = $table.dataTable();
-    	
-    	//var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
     	var bVis = $("#filterhide-"+i)[0].checked;
     	oTable.fnSetColumnVis( i, bVis ? false : true );
     }    
@@ -105,66 +91,30 @@
                     '<option value="-1">All</option>'+
                     '</select> records'
             },
-            "sAjaxSource": "/administration/storagemaintenancedt",
-            //"sAjaxSource" : Django.url('storagemaintenance-dt'),
-            //"fnRowCallback": Demo.colorRow,
-
+            "sAjaxSource": "/administration/storagemigrationdt",
             "aoColumnDefs": [
                  { 'bVisible': false, 'aTargets': [ 1 ] },                
                  { 'bRegex': true, 'aTargets': [ 4 ] }
+            ],
+            "aoSearchCols":[
+                            { "sSearch": "initial", "bRegex": false}
             ],
             //"sDom": 'T<"clear">lfrtip',
             "sDom": 'lTrtip',
             "oTableTools": {
             	"sSwfPath": "/static/TableTools/media/swf/copy_csv_xls_pdf.swf",
             	"sRowSelect": "multi",
-            	//"sRowSelect": "single",
         		"aButtons": [
 	             	"select_all",
 	             	"select_none",
-//	                {
-//	                    "sExtends":    "copy",
-//	                    "bSelectedOnly": "true"
-//	                },
-//	                {
-//	                    "sExtends":    "pdf",
-//	                    "bSelectedOnly": "true"
-//	                },
-//	                {
-//	                    "sExtends":    "text",
-//	                    "sButtonText": "testknapp",
-//	                    "fnClick": function ( nButton, oConfig, oFlash, oTable) {
-//	                    	var data = $('#filter-5').val();
-//	                    	//var CSRF_TOKEN = '{{ csrf_token }}';
-//	                    	var CSRF_TOKEN = document.getElementsByName('csrfmiddlewaretoken')[0].value
-//	                    	//var CSRF_TOKEN = $cookies['csrftoken']
-//	                        alert( 'Mouse click'+data+CSRF_TOKEN);
-//	                    }
-//	                },
 	                {
 	                    "sExtends":    "ajax",
 	                    "sButtonText": "Start migration",
 	                    "bSelectedOnly": "true",
 	                    "bHeader" : false,
-	                    //"mColumns": [1,],
-	                    //"sFieldSeperator": ",",
 	                    "sAjaxUrl" : "/administration/migreqnew",
-	                    //"sAjaxUrl" : "{% url 'migration_create_parameter' %}",
-						//if(document.getElementById("copyonlyflag").checked == true && $('#copypath').val() != "" ){
 	                    "fnClick": function( nButton, oConfig ) {
-	                        //var sData = this.fnGetTableData(oConfig);
-	                        var aData = this.fnGetSelectedData();
-	                        //console.log( JSON.stringify(aData) );
-	                        //var aaData = [];
-	                        //for (var i=0;i<aData.length;i++) {
-	                        //    //aaData.push(['row']);
-	                        //	aaData.push([
-	                        //		aData[i]+'\r\n',
-	                        //		//'\n',
-                        	//	]);
-	                        //}
-	                        //alert('aaData:'+aaData+'end')
-	                        //console.dir(aData);	                    
+	                        var aData = this.fnGetSelectedData();                  
 	                        var data = $('#filter-5').val();
 							if (document.getElementById("copyonlyflag").checked == true){
 								data = "Copy  Only";
@@ -241,7 +191,6 @@
 	                    	var task_id = json.task_id;
 		                    alert( 'Success to create migration request' );
 		                    window.location.replace(CompleteUrl + json.req_pk);
-		                    //window.location.href = CompleteUrl + json.req_pk;
 	                    }
 	                },
 	               
@@ -249,29 +198,5 @@
             } 
         });
         $("#filter-submit").click(function () {fnApplyMulitiFilter()});
-/*
-        //$("#global-filter").keyup( fnFilterGlobal );
-        //$("#global-regex").click( fnFilterGlobal );
-        for (var i=0; i<9; i++) {
-        	
-            if(i == 7){
-            	$("#filter-"+i).change(createFilter(i));
-            }
-            else if(i == 5){
-            	$("#filter-"+i).change(createFilter(i));
-            }
-            else{
-            	$("#filter-"+i).keyup(createFilter(i));
-            }
-           
-            // Set initial default values
-            if ($("#filter-"+i).val()) {
-            	fnFilterColumn(i)
-            }
-            //$("#regex-"+i).click(createFilter(i));
-            //$("#filterhide-"+i).click(createFilterHide(i));
-            $("#filterhide-"+i).click(createFilter(i));
-        }
-*/
     });
 }(window.jQuery, window.Django, window.Demo));

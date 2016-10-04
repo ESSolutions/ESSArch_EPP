@@ -29,6 +29,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
 from django.db import connection
+from django.db import utils
 from models import MyFile, RequestFile
 from essarch.models import ArchiveObject, ObjectMetadata, ArchiveObjectData, ArchiveObjectRel, eventIdentifier, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
@@ -51,11 +52,13 @@ from time import sleep
 #from __future__ import absolute_import
 #from celery import shared_task
 
-
-#TODO lobby in sweden and logs in Norway
-#ioessarch = '%s/lobby' % Path.objects.get(entity='path_gate').value
-#ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
-ioessarch = Path.objects.get(entity='path_gate_reception').value
+try:
+    #TODO lobby in sweden and logs in Norway
+    #ioessarch = '%s/lobby' % Path.objects.get(entity='path_gate').value
+    #ioessarch = '%s/logs' % Path.objects.get(entity='path_gate').value
+    ioessarch = Path.objects.get(entity='path_gate_reception').value
+except utils.ProgrammingError:
+    ioessarch = '/tmp'
 
 logger = logging.getLogger('essarch.controlarea')
 

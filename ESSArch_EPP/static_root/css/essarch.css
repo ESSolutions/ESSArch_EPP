@@ -16,6 +16,11 @@ body {
     height: 30px;
 }
 
+/* Delete button in ArchivePolicy admin view */
+.submit-row a.deletelink {
+    height: 35px !important;
+}
+
 /* Django header and logo */
 #header {
 	height: 78px;
@@ -54,7 +59,7 @@ body {
 	font-family: Verdana, Tahoma;
 }
 
-/* Supoerfish */
+/* Superfish */
 
 .sf-menu {
 	margin-bottom: 0em;
@@ -83,10 +88,12 @@ body {
 	content:" *";
 	color:red 
 }
+
 .highlight {
 	background-color:maroon;
 	color:white;
 }
+
 .highlight-green {
 	background-color:green;
 	color:white;
@@ -95,7 +102,6 @@ body {
 /* Table */
 
 #aic-table {
-
 td {
     margin: 6px;
     border: 6px;
@@ -103,10 +109,6 @@ td {
 }
 
 #spacetable {
-	
 	td { 
     padding: 10px;
 }
-	
-	}
-

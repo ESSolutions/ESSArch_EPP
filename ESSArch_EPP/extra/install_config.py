@@ -28,23 +28,25 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
+import django
+django.setup()
+
 # own models etc
 from configuration.models import Parameter, SchemaProfile, IPParameter, Path, ESSConfig, ESSProc, DefaultValue, ArchivePolicy, StorageMethod, StorageTarget, StorageTargets 
 from essarch.models import eventType_codes, robotdrives, ArchiveObject, ArchiveObjectRel
 from Storage.models import storage, storageMedium, IOQueue
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 
 import sys,datetime,os,uuid
-
-import django
-django.setup()
 
 # settings
 site_profile = "SE" # SE_NEW, SE, NO, EC
 site_name = u'Site-X' # RA-OSLO, Marieberg, MKC, SVAR, HLA 
 medium_location = u'Media_%s' % site_name # IT_OSLO, IT_MARIEBERG 
-install_site = u'ESSArch_%s' % site_name 
+install_site = u'ESSArch_%s' % site_name
+EPP = u'/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP'
 
 def createdefaultusers(): # default users, groups and permissions
     
@@ -698,7 +700,8 @@ def installdefaultArchivePolicy(): # default ArchivePolicy
         StorageTarget_obj.save()
 
 def installdefaultESSProc(): # default ESSProc
-    workers_path = '/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_EPP/workers'
+    current_tz = timezone.get_current_timezone()
+    workers_path = '%s/workers' % EPP
     ESSProc_list=(('1','SIPReceiver',os.path.join(workers_path, 'SIPReceiver.py'),'/ESSArch/log/SIPReceiver.log',1,30,0,0,0,0),
                    ('3','SIPValidateAIS',os.path.join(workers_path, 'SIPValidateAIS.py'),'/ESSArch/log/SIPValidateAIS.log',1,5,0,0,0,0),
                    ('4','SIPValidateApproval',os.path.join(workers_path, 'SIPValidateApproval.py'),'/ESSArch/log/SIPValidateApproval.log',1,5,0,0,0,0),
@@ -730,6 +733,7 @@ def installdefaultESSProc(): # default ESSProc
             ESSProc_obj.Run=row[7]
             ESSProc_obj.PID=row[8]
             ESSProc_obj.Pause=row[9]
+            ESSProc_obj.checked=datetime.datetime(2014,1,1,0,1,tzinfo=current_tz)
             ESSProc_obj.save()
 
 def installdefaultdefaultvalues(): # default default values

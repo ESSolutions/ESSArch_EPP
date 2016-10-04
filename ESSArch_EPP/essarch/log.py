@@ -38,9 +38,15 @@ if ESSDB_flag == 1:
     from configuration.models import Parameter, SchemaProfile, Path, IPParameter
     from essarch.models import ArchiveObject, eventIdentifier, PackageType_CHOICES
     from django.utils import timezone
+    from django.db import utils
 
-if ESSDB_flag == 0: ioessarch = 'W:\ioessarch\logs'
-elif ESSDB_flag == 1: ioessarch = Path.objects.get(entity='path_gate_reception').value
+if ESSDB_flag == 0: 
+    ioessarch = 'W:\ioessarch\logs'
+elif ESSDB_flag == 1:
+    try: 
+        ioessarch = Path.objects.get(entity='path_gate_reception').value
+    except utils.ProgrammingError:
+        ioessarch = '/tmp'
 
 # Configuration
 eventType_keys = {
@@ -72,52 +78,58 @@ eventType_keys = {
 }
 
 # Namespaces
-if ESSDB_flag == 0: METS_NAMESPACE = u"http://www.loc.gov/METS/"
-elif ESSDB_flag == 1: METS_NAMESPACE = SchemaProfile.objects.get(entity='mets_namespace').value
-
-MODS_NAMESPACE = u"http://www.loc.gov/mods/v3"
-
-if ESSDB_flag == 0: METS_SCHEMALOCATION = u"http://schema.arkivverket.no/METS/v1.9/DIAS_METS.xsd"
-elif ESSDB_flag == 1: METS_SCHEMALOCATION = SchemaProfile.objects.get(entity='mets_schemalocation').value
-
-if ESSDB_flag == 0: METS_PROFILE = u"http://xml.ra.se/mets/SWEIP.xml"
-elif ESSDB_flag == 1: METS_PROFILE = SchemaProfile.objects.get(entity='mets_profile').value
-
-if ESSDB_flag == 0: PREMIS_NAMESPACE = u"http://arkivverket.no/standarder/PREMIS" 
-elif ESSDB_flag == 1: PREMIS_NAMESPACE = SchemaProfile.objects.get(entity='premis_namespace').value
-
-if ESSDB_flag == 0: PREMIS_SCHEMALOCATION = u"http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd"
-elif ESSDB_flag == 1: PREMIS_SCHEMALOCATION = SchemaProfile.objects.get(entity='premis_schemalocation').value
-
-if ESSDB_flag == 0: PREMIS_VERSION = u"2.0"
-elif ESSDB_flag == 1: PREMIS_VERSION = SchemaProfile.objects.get(entity='premis_version').value
-
-if ESSDB_flag == 0: XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
-elif ESSDB_flag == 1: XLINK_NAMESPACE = SchemaProfile.objects.get(entity='xlink_namespace').value
-
-if ESSDB_flag == 0: XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance"
-elif ESSDB_flag == 1: XSI_NAMESPACE = SchemaProfile.objects.get(entity='xsi_namespace').value
-
-if ESSDB_flag == 0: XSD_NAMESPACE = u"http://www.w3.org/2001/XMLSchema"
-elif ESSDB_flag == 1: XSD_NAMESPACE = SchemaProfile.objects.get(entity='xsd_namespace').value
-
-if ESSDB_flag == 0: MIX_NAMESPACE = u"http://xml.ra.se/MIX"
-elif ESSDB_flag == 1: MIX_NAMESPACE = SchemaProfile.objects.get(entity='mix_namespace').value
-
-if ESSDB_flag == 0: MIX_SCHEMALOCATION = u"http://xml.ra.se/MIX/RA_MIX.xsd"
-elif ESSDB_flag == 1: MIX_SCHEMALOCATION = SchemaProfile.objects.get(entity='mix_schemalocation').value
-
-if ESSDB_flag == 0: ADDML_NAMESPACE = u"http://arkivverket.no/Standarder/addml"
-elif ESSDB_flag == 1: ADDML_NAMESPACE = SchemaProfile.objects.get(entity='addml_namespace').value
-
-if ESSDB_flag == 0: ADDML_SCHEMALOCATION = u"http://schema.arkivverket.no/ADDML/v8.2/addml.xsd"
-elif ESSDB_flag == 1: ADDML_SCHEMALOCATION = SchemaProfile.objects.get(entity='addml_schemalocation').value
-
-if ESSDB_flag == 0: XHTML_NAMESPACE = u"http://www.w3.org/1999/xhtml"
-elif ESSDB_flag == 1: XHTML_NAMESPACE = SchemaProfile.objects.get(entity='xhtml_namespace').value
-
-if ESSDB_flag == 0: XHTML_SCHEMALOCATION = u"http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
-elif ESSDB_flag == 1: XHTML_SCHEMALOCATION = SchemaProfile.objects.get(entity='xhtml_schemalocation').value
+try:
+    if ESSDB_flag == 0: METS_NAMESPACE = u"http://www.loc.gov/METS/"
+    elif ESSDB_flag == 1: METS_NAMESPACE = SchemaProfile.objects.get(entity='mets_namespace').value
+    
+    MODS_NAMESPACE = u"http://www.loc.gov/mods/v3"
+    
+    if ESSDB_flag == 0: METS_SCHEMALOCATION = u"http://schema.arkivverket.no/METS/v1.9/DIAS_METS.xsd"
+    elif ESSDB_flag == 1: METS_SCHEMALOCATION = SchemaProfile.objects.get(entity='mets_schemalocation').value
+    
+    if ESSDB_flag == 0: METS_PROFILE = u"http://xml.ra.se/mets/SWEIP.xml"
+    elif ESSDB_flag == 1: METS_PROFILE = SchemaProfile.objects.get(entity='mets_profile').value
+    
+    if ESSDB_flag == 0: PREMIS_NAMESPACE = u"http://arkivverket.no/standarder/PREMIS" 
+    elif ESSDB_flag == 1: PREMIS_NAMESPACE = SchemaProfile.objects.get(entity='premis_namespace').value
+    
+    if ESSDB_flag == 0: PREMIS_SCHEMALOCATION = u"http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd"
+    elif ESSDB_flag == 1: PREMIS_SCHEMALOCATION = SchemaProfile.objects.get(entity='premis_schemalocation').value
+    
+    if ESSDB_flag == 0: PREMIS_VERSION = u"2.0"
+    elif ESSDB_flag == 1: PREMIS_VERSION = SchemaProfile.objects.get(entity='premis_version').value
+    
+    if ESSDB_flag == 0: XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
+    elif ESSDB_flag == 1: XLINK_NAMESPACE = SchemaProfile.objects.get(entity='xlink_namespace').value
+    
+    if ESSDB_flag == 0: XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance"
+    elif ESSDB_flag == 1: XSI_NAMESPACE = SchemaProfile.objects.get(entity='xsi_namespace').value
+    
+    if ESSDB_flag == 0: XSD_NAMESPACE = u"http://www.w3.org/2001/XMLSchema"
+    elif ESSDB_flag == 1: XSD_NAMESPACE = SchemaProfile.objects.get(entity='xsd_namespace').value
+    
+    if ESSDB_flag == 0: MIX_NAMESPACE = u"http://xml.ra.se/MIX"
+    elif ESSDB_flag == 1: MIX_NAMESPACE = SchemaProfile.objects.get(entity='mix_namespace').value
+    
+    if ESSDB_flag == 0: MIX_SCHEMALOCATION = u"http://xml.ra.se/MIX/RA_MIX.xsd"
+    elif ESSDB_flag == 1: MIX_SCHEMALOCATION = SchemaProfile.objects.get(entity='mix_schemalocation').value
+    
+    if ESSDB_flag == 0: ADDML_NAMESPACE = u"http://arkivverket.no/Standarder/addml"
+    elif ESSDB_flag == 1: ADDML_NAMESPACE = SchemaProfile.objects.get(entity='addml_namespace').value
+    
+    if ESSDB_flag == 0: ADDML_SCHEMALOCATION = u"http://schema.arkivverket.no/ADDML/v8.2/addml.xsd"
+    elif ESSDB_flag == 1: ADDML_SCHEMALOCATION = SchemaProfile.objects.get(entity='addml_schemalocation').value
+    
+    if ESSDB_flag == 0: XHTML_NAMESPACE = u"http://www.w3.org/1999/xhtml"
+    elif ESSDB_flag == 1: XHTML_NAMESPACE = SchemaProfile.objects.get(entity='xhtml_namespace').value
+    
+    if ESSDB_flag == 0: XHTML_SCHEMALOCATION = u"http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
+    elif ESSDB_flag == 1: XHTML_SCHEMALOCATION = SchemaProfile.objects.get(entity='xhtml_schemalocation').value
+except utils.ProgrammingError:
+    METS_NAMESPACE = u"http://www.loc.gov/METS/"
+    METS_SCHEMALOCATION = u"http://www.loc.gov/mets/mets.xsd"
+    XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
+    XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance" 
 
 def eventType_list():
     print '------------------------------------------------------------------------'

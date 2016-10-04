@@ -21,6 +21,7 @@
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
 '''
+from _mysql import ProgrammingError
 __majorversion__ = "2.5"
 __revision__ = "$Revision$"
 __date__ = "$Date$"
@@ -34,63 +35,70 @@ from lxml import etree
 import mets_eARD as m
 from configuration.models import SchemaProfile, ArchivePolicy
 from django.utils import timezone
+from django.db import utils
 
-# Namespaces
-#METS_NAMESPACE = u"http://www.loc.gov/METS/"
-#METS_NAMESPACE = u"http://arkivverket.no/standarder/METS"
-METS_NAMESPACE = SchemaProfile.objects.get(entity = 'mets_namespace').value
-
-MODS_NAMESPACE = u"http://www.loc.gov/mods/v3"
-
-#METS_SCHEMALOCATION = u"http://www.loc.gov/mets/mets.xsd"
-#METS_SCHEMALOCATION = u"http://xml.ra.se/METS/RA_METS_SWERA003.xsd"
-#METS_SCHEMALOCATION = u"http://schema.arkivverket.no/METS/v1.9/DIAS_METS.xsd"
-METS_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'mets_schemalocation').value
-
-#METS_PROFILE = u"http://xml.ra.se/METS/SWERA003.xml"
-#METS_PROFILE = u"http://xml.ra.se/mets/SWEIP.xml"
-METS_PROFILE = SchemaProfile.objects.get(entity = 'mets_profile').value
-
-#PREMIS_NAMESPACE = u"http://xml.ra.se/PREMIS"
-#PREMIS_NAMESPACE = u"http://arkivverket.no/standarder/PREMIS"
-#PREMIS_NAMESPACE = u"info:lc/xmlns/premis-v2"
-PREMIS_NAMESPACE = SchemaProfile.objects.get(entity = 'premis_namespace').value 
-
-#PREMIS_SCHEMALOCATION = u"http://xml.ra.se/PREMIS/RA_PREMIS.xsd"
-#PREMIS_SCHEMALOCATION = u"http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd"
-#PREMIS_SCHEMALOCATION = u"http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd"
-PREMIS_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'premis_schemalocation').value 
-
-#PREMIS_VERSION = u"2.0" 
-PREMIS_VERSION = SchemaProfile.objects.get(entity = 'premis_version').value
-
-#XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
-XLINK_NAMESPACE = SchemaProfile.objects.get(entity = 'xlink_namespace').value
-
-#XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance" 
-XSI_NAMESPACE = SchemaProfile.objects.get(entity = 'xsi_namespace').value
-
-#XSD_NAMESPACE = u"http://www.w3.org/2001/XMLSchema" 
-XSD_NAMESPACE = SchemaProfile.objects.get(entity = 'xsd_namespace').value
-
-#MIX_NAMESPACE = u"http://xml.ra.se/MIX" 
-MIX_NAMESPACE = SchemaProfile.objects.get(entity = 'mix_namespace').value
-
-#MIX_SCHEMALOCATION = u"http://xml.ra.se/MIX/RA_MIX.xsd"
-MIX_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'mix_schemalocation').value 
-
-#ADDML_NAMESPACE = u"http://xml.ra.se/ADDML"
-#ADDML_NAMESPACE = u"http://arkivverket.no/Standarder/addml" 
-ADDML_NAMESPACE = SchemaProfile.objects.get(entity = 'addml_namespace').value
-
-#ADDML_SCHEMALOCATION = u"http://schema.arkivverket.no/ADDML/v8.2/addml.xsd" 
-ADDML_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'addml_schemalocation').value
-
-#XHTML_NAMESPACE = u"http://www.w3.org/1999/xhtml"
-XHTML_NAMESPACE = SchemaProfile.objects.get(entity = 'xhtml_namespace').value
-
-#XHTML_SCHEMALOCATION = u"http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
-XHTML_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'xhtml_schemalocation').value
+try:
+    # Namespaces
+    #METS_NAMESPACE = u"http://www.loc.gov/METS/"
+    #METS_NAMESPACE = u"http://arkivverket.no/standarder/METS"
+    METS_NAMESPACE = SchemaProfile.objects.get(entity = 'mets_namespace').value
+    
+    MODS_NAMESPACE = u"http://www.loc.gov/mods/v3"
+    
+    #METS_SCHEMALOCATION = u"http://www.loc.gov/mets/mets.xsd"
+    #METS_SCHEMALOCATION = u"http://xml.ra.se/METS/RA_METS_SWERA003.xsd"
+    #METS_SCHEMALOCATION = u"http://schema.arkivverket.no/METS/v1.9/DIAS_METS.xsd"
+    METS_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'mets_schemalocation').value
+    
+    #METS_PROFILE = u"http://xml.ra.se/METS/SWERA003.xml"
+    #METS_PROFILE = u"http://xml.ra.se/mets/SWEIP.xml"
+    METS_PROFILE = SchemaProfile.objects.get(entity = 'mets_profile').value
+    
+    #PREMIS_NAMESPACE = u"http://xml.ra.se/PREMIS"
+    #PREMIS_NAMESPACE = u"http://arkivverket.no/standarder/PREMIS"
+    #PREMIS_NAMESPACE = u"info:lc/xmlns/premis-v2"
+    PREMIS_NAMESPACE = SchemaProfile.objects.get(entity = 'premis_namespace').value 
+    
+    #PREMIS_SCHEMALOCATION = u"http://xml.ra.se/PREMIS/RA_PREMIS.xsd"
+    #PREMIS_SCHEMALOCATION = u"http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd"
+    #PREMIS_SCHEMALOCATION = u"http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd"
+    PREMIS_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'premis_schemalocation').value 
+    
+    #PREMIS_VERSION = u"2.0" 
+    PREMIS_VERSION = SchemaProfile.objects.get(entity = 'premis_version').value
+    
+    #XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
+    XLINK_NAMESPACE = SchemaProfile.objects.get(entity = 'xlink_namespace').value
+    
+    #XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance" 
+    XSI_NAMESPACE = SchemaProfile.objects.get(entity = 'xsi_namespace').value
+    
+    #XSD_NAMESPACE = u"http://www.w3.org/2001/XMLSchema" 
+    XSD_NAMESPACE = SchemaProfile.objects.get(entity = 'xsd_namespace').value
+    
+    #MIX_NAMESPACE = u"http://xml.ra.se/MIX" 
+    MIX_NAMESPACE = SchemaProfile.objects.get(entity = 'mix_namespace').value
+    
+    #MIX_SCHEMALOCATION = u"http://xml.ra.se/MIX/RA_MIX.xsd"
+    MIX_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'mix_schemalocation').value 
+    
+    #ADDML_NAMESPACE = u"http://xml.ra.se/ADDML"
+    #ADDML_NAMESPACE = u"http://arkivverket.no/Standarder/addml" 
+    ADDML_NAMESPACE = SchemaProfile.objects.get(entity = 'addml_namespace').value
+    
+    #ADDML_SCHEMALOCATION = u"http://schema.arkivverket.no/ADDML/v8.2/addml.xsd" 
+    ADDML_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'addml_schemalocation').value
+    
+    #XHTML_NAMESPACE = u"http://www.w3.org/1999/xhtml"
+    XHTML_NAMESPACE = SchemaProfile.objects.get(entity = 'xhtml_namespace').value
+    
+    #XHTML_SCHEMALOCATION = u"http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
+    XHTML_SCHEMALOCATION = SchemaProfile.objects.get(entity = 'xhtml_schemalocation').value
+except utils.ProgrammingError:
+    METS_NAMESPACE = u"http://www.loc.gov/METS/"
+    METS_SCHEMALOCATION = u"http://www.loc.gov/mets/mets.xsd"
+    XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"
+    XSI_NAMESPACE = u"http://www.w3.org/2001/XMLSchema-instance" 
 
 def getFileSizeFgrp001(DOC=None,USE=['ALL'],MIMETYPE=["ALL"],FILENAME=None):
     #MIMETYPE=["ALL","image/tiff","text/xml","video/mpeg","application/pdf","audio/mpeg"]

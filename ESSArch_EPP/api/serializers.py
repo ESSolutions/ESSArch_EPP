@@ -505,8 +505,6 @@ class IOQueueNestedReadSerializer(IOQueueSerializer):
         model = IOQueue
         fields = IOQueueSerializer.Meta.fields
 
-from rest_framework_recursive.fields import RecursiveField
-
 class IOQueueNestedWriteSerializer(IOQueueSerializer):
     id = serializers.UUIDField(read_only=False, validators=[validators.UniqueValidator(queryset=IOQueue.objects.all())])
     archiveobject = StringField(allow_null=True, required=False, validators=[])

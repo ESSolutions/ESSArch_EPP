@@ -586,7 +586,9 @@ class StorageMethodWrite:
         
     def handle_migration_write_status(self, ArchiveObject_obj):
         if self.fail_write_flag:
-            pass
+            event_info = 'Failed to write object: %s' % ArchiveObject_obj.ObjectIdentifierValue
+            error_list=[event_info]
+            raise ESSArchSMError(error_list)
         elif self.pending_write_flag:
             pass
         elif self.progress_write_flag:

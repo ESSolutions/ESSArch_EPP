@@ -384,7 +384,7 @@ class WorkingThread:
             self.objectstatus = 0
             self.SIPsize = 0
             self.POLICYID = 0
-            self.DELIVERYTYPE = None
+            self.DELIVERYTYPE = ''
             self.DELIVERYSPECIFICATION = None
             self.SUBMISSIONAGREEMENT = None
             self.INFORMATIONCLASS = 0
@@ -562,6 +562,7 @@ class WorkingThread:
                         ArchiveObject_obj.StatusActivity = self.StatusActivity
                         ArchiveObject_obj.LastEventDate = self.timestamp_utc
                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.OAISPackageType = 0
                         ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                         ArchiveObject_obj.save()
 
@@ -773,6 +774,7 @@ class WorkingThread:
                         ArchiveObject_obj.StatusActivity = self.StatusActivity
                         ArchiveObject_obj.LastEventDate = self.timestamp_utc
                         ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                        ArchiveObject_obj.OAISPackageType = 0
                         ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                         ArchiveObject_obj.save()
 
@@ -892,6 +894,7 @@ class WorkingThread:
                     ArchiveObject_obj.StatusActivity = self.StatusActivity
                     ArchiveObject_obj.LastEventDate = self.timestamp_utc
                     ArchiveObject_obj.linkingAgentIdentifierValue = AgentIdentifierValue
+                    ArchiveObject_obj.OAISPackageType = 0
                     ArchiveObject_obj.LocalDBdatetime = self.timestamp_utc
                     ArchiveObject_obj.save()
 

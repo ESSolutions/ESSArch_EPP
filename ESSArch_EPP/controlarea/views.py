@@ -33,6 +33,7 @@ from django.conf import settings
 from models import MyFile, RequestFile
 from django.db.models import Q
 from django.db.models import Max
+from django.db import utils
 from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, PackageType_CHOICES, StatusProcess_CHOICES, \
                            ControlAreaQueue, ControlAreaForm, ControlAreaForm2, ControlAreaForm_reception, \
                            ControlAreaForm_CheckInFromWork, ControlAreaForm_CheckoutToWork, \
@@ -274,9 +275,14 @@ class CheckinFromReceptionListView(ListView):
     template_name='controlarea/fromrec.html'
     #template_name='archobject/list.html'
     queryset=ArchiveObject.objects.all()
-    source_path = Path.objects.get(entity='path_reception').value
-    path_gate_reception = Path.objects.get(entity='path_gate_reception').value
-    Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+    try:
+        source_path = Path.objects.get(entity='path_reception').value
+        path_gate_reception = Path.objects.get(entity='path_gate_reception').value
+        Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+    except utils.ProgrammingError:
+        source_path = '/tmp'
+        path_gate_reception = '/tmp'
+        Pmets_obj = 'none'
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
     def dispatch(self, *args, **kwargs):
@@ -297,10 +303,16 @@ class CheckinFromReception(CreateView):
     model = ControlAreaQueue
     template_name='controlarea/create.html'
     form_class=ControlAreaForm_reception
-    source_path = Path.objects.get(entity='path_reception').value
-    target_path = Path.objects.get(entity='path_control').value
-    path_gate_reception = Path.objects.get(entity='path_gate_reception').value
-    Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+    try:
+        source_path = Path.objects.get(entity='path_reception').value
+        target_path = Path.objects.get(entity='path_control').value
+        path_gate_reception = Path.objects.get(entity='path_gate_reception').value
+        Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+    except utils.ProgrammingError:
+        source_path = '/tmp'
+        target_path = '/tmp'
+        path_gate_reception = '/tmp'
+        Pmets_obj = 'none'
 
     @method_decorator(permission_required('controlarea.CheckinFromReception'))
     def dispatch(self, *args, **kwargs):
@@ -872,8 +884,12 @@ class CheckoutToGateFromWork(CreateView):
     model = ControlAreaQueue
     template_name='controlarea/create.html'
     form_class=ControlAreaForm_file
-    target_path = Path.objects.get(entity='path_gate').value
-    source_path = Path.objects.get(entity='path_work').value
+    try:
+        target_path = Path.objects.get(entity='path_gate').value
+        source_path = Path.objects.get(entity='path_work').value
+    except utils.ProgrammingError:
+        source_path = '/tmp'
+        target_path = '/tmp'
     
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
     def dispatch(self, *args, **kwargs):
@@ -1007,7 +1023,10 @@ class CheckinFromGateListView(ListView):
     """
     template_name='controlarea/reqlist.html'
     queryset=ArchiveObject.objects.all()
-    gate_path = Path.objects.get(entity='path_gate').value
+    try:
+        gate_path = Path.objects.get(entity='path_gate').value
+    except utils.ProgrammingError:
+        gate_path = '/tmp'
 
     @method_decorator(permission_required('controlarea.CheckinFromGate'))
     def dispatch(self, *args, **kwargs):
@@ -1028,8 +1047,12 @@ class CheckinFromGateToWork(CreateView):
     model = ControlAreaQueue
     template_name='controlarea/create.html'
     form_class=ControlAreaForm_file
-    target_path = Path.objects.get(entity='path_work').value
-    source_path = Path.objects.get(entity='path_gate').value
+    try:
+        target_path = Path.objects.get(entity='path_work').value
+        source_path = Path.objects.get(entity='path_gate').value
+    except utils.ProgrammingError:
+        target_path = '/tmp'
+        source_path = '/tmp'
     
     @method_decorator(permission_required('controlarea.CheckoutToWork'))
     def dispatch(self, *args, **kwargs):
@@ -1228,8 +1251,11 @@ class DiffCheck(CreateView):
     model = ControlAreaQueue
     template_name='controlarea/create.html'
     form_class=ControlAreaForm2
-    target_path = Path.objects.get(entity='path_control').value
-    #Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    try:
+        target_path = Path.objects.get(entity='path_control').value
+        #Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+    except utils.ProgrammingError:
+        target_path = '/tmp'
 
     @method_decorator(permission_required('controlarea.DiffCheck'))
     def dispatch(self, *args, **kwargs):

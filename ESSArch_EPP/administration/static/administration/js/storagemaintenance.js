@@ -18,11 +18,7 @@
     	oTable.fnFilter(
             $("#filter-"+i).val(),
             i
-            //$("#regex-"+i)[0].checked
-            //false
         );
-    	//alert('setdef in JS:'+i+' value:'+$("#filter-"+i).val())
-    	// oTable.fnSetColumnVis( i, $("#filterhide-"+i)[0].checked ? false : true );
     }
 
     function createFilter(i) {
@@ -34,25 +30,17 @@
         var filterlist = function() {
           var filterdict = {};
           for (var i=0; i<9; i++) {
-              //filterdict[i] = [$("#filter-"+i).val(), $("#regex-"+i)[0].checked];
               filterdict[i] = [$("#filter-"+i).val(), false];
             }
           return filterdict
         };
-
         oTable.fnMultiFilter( filterlist() );
-        //oTable.fnMultiFilter( {
-        //   "4": "-BSB+DSB",
-        //   "7": "10"
-        //});
     }
     
     function fnShowHide( i )
     {
     	/* Get the DataTables object again - this is not a recreation, just a get of the object */
     	var oTable = $table.dataTable();
-    	
-    	//var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
     	var bVis = $("#filterhide-"+i)[0].checked;
     	oTable.fnSetColumnVis( i, bVis ? false : true );
     }    
@@ -84,16 +72,6 @@
             	"sSwfPath": "/static/TableTools/media/swf/copy_csv_xls_pdf.swf",
             	"sRowSelect": "multi",
         		"aButtons": [
-//	             	"select_all",
-//	             	"select_none",
-//	                {
-//	                    "sExtends":    "copy",
-//	                    "bSelectedOnly": "true"
-//	                },
-//	                {
-//	                    "sExtends":    "pdf",
-//	                    "bSelectedOnly": "true"
-//	                },
 		         ]
             }
         });
@@ -111,21 +89,15 @@
                     '<option value="-1">All</option>'+
                     '</select> records'
             },
-            //"sAjaxSource": Django.url('storagemaintenance-dt'),
             "sAjaxSource": "/administration/storagemaintenancedt",
-            //"fnRowCallback": Demo.colorRow,
             "fnServerData": function ( sSource, aoData, fnCallback ) {
                 $.getJSON( sSource, aoData, function (json) {
                 	//Here you can do whatever you want with the additional data
                     console.dir(json);
-                    //$('#deactivate_media').html(json.deactivate+*_media_list);
-                    //DeactivateMediaTable(json);
                     NeedToMigrateTable(json);
-                    //Call the standard callback to redraw the table
                     json.aaData=json.deactivate_media_list
                     json.iTotalRecords=json.deactivate_media_list.length
                     json.iTotalDisplayRecords=json.deactivate_media_list.length
-                    //fnCallback(json.deactivate_media_list);
                     fnCallback(json);
                 } );
             },
@@ -141,13 +113,12 @@
                              { 'bVisible': false, 'aTargets': [ 9 ] },
                              { 'bVisible': false, 'aTargets': [ 10 ] },
                              { 'bVisible': false, 'aTargets': [ 11 ] },
-                             { 'bVisible': false, 'aTargets': [ 12 ] },
-                             //{ 'bVisible': false, 'aTargets': [ 13 ] },
-                             //{ 'bVisible': false, 'aTargets': [ 14 ] },
-                             //{ 'bVisible': false, 'aTargets': [ 15 ] },
-                             //{ 'bVisible': false, 'aTargets': [ 16 ] },                         
+                             { 'bVisible': false, 'aTargets': [ 12 ] },         
                              { 'bRegex': true, 'aTargets': [ 4 ] }
-                        ],            
+            ],
+            "aoSearchCols":[
+                            { "sSearch": "initial", "bRegex": false}
+            ],                       
             //"sDom": 'T<"clear">lfrtip',
             "sDom": 'lTrtip',
             "oTableTools": {
@@ -160,8 +131,7 @@
 	                    "sButtonText": "Deactivate media",
 	                    "bSelectedOnly": "true",
 	                    "bHeader" : false,
-	                    //"sAjaxUrl" : Django.url('deactivatemedia_create'),
-	                    "sAjaxUrl" : "/administration/deactivatemediacreate",
+	                    "sAjaxUrl" : "/administration/deactivatemediacreate/",
 	                    "fnClick": function( nButton, oConfig ) {
 	                        var aData = this.fnGetSelectedData();
 	                        var aDataCol4 = [];
@@ -170,7 +140,6 @@
 	                        		aData[i][4],
                         		]);
 	                        }
-	                        //alert('aDataCol4:'+aDataCol4+'end')
 	                        if (confirm ('Do you really want to start deactivate media: '+aDataCol4+'?')){
 		                        $.ajax( {
 		                            "url": oConfig.sAjaxUrl,
@@ -190,8 +159,6 @@
 		                            ],
 		                            "success": function () {
 		                                alert( "Success to deactivate media" );
-		                                //oConfig.ajax.reload();
-		                                //$('#filter-4').trigger('change');
 		                                var oTable = $table.dataTable();
 		                                oTable.fnDraw();
 		                                
@@ -211,29 +178,5 @@
             } 
         });
         $("#filter-submit").click(function () {fnApplyMulitiFilter()});
-        //$("#global-filter").keyup( fnFilterGlobal );
-        //$("#global-regex").click( fnFilterGlobal );
-/*
-        for (var i=0; i<9; i++) {
-        	
-            if(i == 7){
-            	$("#filter-"+i).change(createFilter(i));
-            }
-            else if(i == 4){
-            	$("#filter-"+i).change(createFilter(i));
-            }
-            else{
-            	$("#filter-"+i).keyup(createFilter(i));
-            }
-           
-            // Set initial default values
-            if ($("#filter-"+i).val()) {
-            	fnFilterColumn(i)
-            }
-            //$("#regex-"+i).click(createFilter(i));
-            //$("#filterhide-"+i).click(createFilterHide(i));
-            $("#filterhide-"+i).click(createFilter(i));
-        }
-*/
     });
 }(window.jQuery, window.Django, window.Demo));
