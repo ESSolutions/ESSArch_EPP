@@ -140,8 +140,11 @@ class CheckProcessTask(JobtasticTask):
         for process_item in process_list:
             process_dict[process_item] = []
         for p in psutil.process_iter():
+            p_cmdline = p.cmdline()
+            if len(p_cmdline) == 1:
+                p_cmdline=p_cmdline[0].split(' ')
             for process_item in process_list:
-                if process_item in p.cmdline():
+                if process_item in p_cmdline:
                     process_dict[process_item].append(p)
         return process_dict
 
