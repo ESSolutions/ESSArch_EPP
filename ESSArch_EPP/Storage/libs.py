@@ -1323,6 +1323,12 @@ class StorageMethodRead:
         """Validate information package"""
         ObjectIdentifierValue = self.AccessQueue_obj.ObjectIdentifierValue
         RootPath = self.AccessQueue_obj.Path
+
+        if len(self.storage_objs) == 1:
+            storageMedium_obj = self.storage_objs[0].storagemedium
+            if storageMedium_obj.storageMediumFormat in range(100, 102):
+                mets_flag = 0
+
         ok_flag=1
         if ok_flag and mets_flag:
             ###########################################################

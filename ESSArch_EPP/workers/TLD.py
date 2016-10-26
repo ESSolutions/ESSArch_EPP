@@ -260,7 +260,7 @@ class Robot:
         if returncode == 0:
             logger.info('Mount tape: %s Successful (work_uuid: %s), start to verify tape identity', volser, work_uuid)
             tapestatus, why = Robot().check_tape(robotdrives_obj.drive_dev, volser)
-            if tapestatus in [0, 1, 2]:
+            if tapestatus in [0, 1, 2, 3]:
                 logger.info('Tape identity verify result: %s (work_uuid: %s)', why, work_uuid)
                 ESSPGM.Events().create('2000','','ESSArch TLD',ProcVersion,'0','Tapedrive: '+str(drive_id),2,storageMediumID=volser)
                 robotdrives_obj.num_mounts += 1
@@ -497,7 +497,13 @@ class Robot:
     "Check tape"
     ###############################################
     def check_tape(self, tapedev, volser=None, timeout=120):
-        test_num = 0
+        
+        try:
+            storageMedium_obj=storageMedium.objects.get(storageMediumID=volser)
+        except ObjectDoesNotExist:
+            storageMedium_obj=None
+
+        test_num = 0            
         while 1:
             exitcode_stat, why_stat = Robot().check_online_tape(tapedev)
             if exitcode_stat == 0 or test_num == timeout:
@@ -527,40 +533,47 @@ class Robot:
 
             exitcode, why = Robot().rewind_tape(tapedev)
             if exitcode == 0:
-                try:
-                    tarf = tarfile.open(tapedev,'r|')
-                    tarfile_members = tarf.getmembers()
-                    tarf.close()
-                    if tarfile_members[0].name[-10:] == '_label.xml':
-                        exitcode, why = Robot().rewind_tape(tapedev)
-                        if exitcode == 0:
+                if storageMedium_obj is not None:
+                    if storageMedium_obj.storageMediumFormat in range(100, 102): # Media without label
+                        return 3, 'Media without label (format: %s), skip to verify tapeid: %s in tapedev: %s' % (
+                                                                                                                  storageMedium_obj.storageMediumFormat, 
+                                                                                                                  volser, 
+                                                                                                                  tapedev)
+                    else:                                        
+                        try:
                             tarf = tarfile.open(tapedev,'r|')
-                            label_file = tarf.extractfile(tarfile_members[0]).read()
+                            tarfile_members = tarf.getmembers()
                             tarf.close()
-                            res, exitcode, why = Robot().getTapeLabel(labelstring=label_file)
-                            exitcode, why = Robot().rewind_tape(tapedev)
-                            if exitcode == 0 and volser == res[0]:
-                                return 1, 'Found ESSArch labelfile with tapeid: %s that match requested tapeid: %s in tapedev: %s' % (res[0],volser,tapedev)
-                            elif exitcode == 0:
-                                return 11, 'Found ESSArch labelfile with tapeid: %s that not match requested tapeid: %s in tapedev: %s' % (res[0],volser,tapedev)
+                            if tarfile_members[0].name[-10:] == '_label.xml':
+                                exitcode, why = Robot().rewind_tape(tapedev)
+                                if exitcode == 0:
+                                    tarf = tarfile.open(tapedev,'r|')
+                                    label_file = tarf.extractfile(tarfile_members[0]).read()
+                                    tarf.close()
+                                    res, exitcode, why = Robot().getTapeLabel(labelstring=label_file)
+                                    exitcode, why = Robot().rewind_tape(tapedev)
+                                    if exitcode == 0 and volser == res[0]:
+                                        return 1, 'Found ESSArch labelfile with tapeid: %s that match requested tapeid: %s in tapedev: %s' % (res[0],volser,tapedev)
+                                    elif exitcode == 0:
+                                        return 11, 'Found ESSArch labelfile with tapeid: %s that not match requested tapeid: %s in tapedev: %s' % (res[0],volser,tapedev)
+                                    else:
+                                        return 12, why
+                                else:
+                                    return 13, why
+                            elif tarfile_members[0].name == 'reuse':
+                                exitcode, why = Robot().rewind_tape(tapedev)
+                                if exitcode == 0:
+                                    return 2, 'Found reuse flaged tapeid: %s in tapedev: %s' % (volser,tapedev)
+                                else:
+                                    return 19, why
                             else:
-                                return 12, why
-                        else:
-                            return 13, why
-                    elif tarfile_members[0].name == 'reuse':
-                        exitcode, why = Robot().rewind_tape(tapedev)
-                        if exitcode == 0:
-                            return 2, 'Found reuse flaged tapeid: %s in tapedev: %s' % (volser,tapedev)
-                        else:
-                            return 19, why
-                    else:
-                        exitcode, why = Robot().rewind_tape(tapedev)
-                        if exitcode == 0:
-                            return 18, 'First file on tape is a tarfile but not a ESSArch label file'
-                        else:
-                            return 14, why
-                except:
-                    return 15, 'Tape is not empty and problem to read file, error: %s' % str(sys.exc_info())
+                                exitcode, why = Robot().rewind_tape(tapedev)
+                                if exitcode == 0:
+                                    return 18, 'First file on tape is a tarfile but not a ESSArch label file'
+                                else:
+                                    return 14, why
+                        except:
+                            return 15, 'Tape is not empty and problem to read file, error: %s' % str(sys.exc_info())
             else:
                 return 16, why
         else:

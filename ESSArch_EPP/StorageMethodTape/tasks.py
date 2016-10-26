@@ -1367,7 +1367,8 @@ class ReadStorageMethodTape(Task):
                 ip_tar_path_target = os.path.join(target_path, ip_tar_filename)
                 ip_p_mets_path_target = os.path.join(target_path, ip_p_mets_filename)
                 shutil.move(ip_tar_path_tmp_target, ip_tar_path_target)
-                shutil.move(ip_p_mets_path_tmp_target, ip_p_mets_path_target)
+                if storageMedium_obj.storageMediumFormat >= 102:
+                    shutil.move(ip_p_mets_path_tmp_target, ip_p_mets_path_target)
                 if storageMedium_obj.storageMediumFormat == 103:
                     aic_mets_path_target = os.path.join(target_path, aic_mets_filename)
                     shutil.move(aic_mets_path_tmp_target, aic_mets_path_target)
@@ -1399,18 +1400,21 @@ class ReadStorageMethodTape(Task):
                 error_list.append(msg)            
                 runflag = 0
                 ip_tar_size = 0
+            ReadSize = int(ip_tar_size)
     
             # Check ip_p_mets_path
-            try:
-                ip_p_mets_size = GetSize(ip_p_mets_path_target)
-            except OSError as oe:
-                msg = 'Problem to access metaobject: %s, IOuuid: %s, error: %s' % (ip_p_mets_path_target, IO_obj_uuid, oe)
-                logger.error(msg)
-                error_list.append(msg)
-                runflag = 0
-                ip_p_mets_size = 0
+            if storageMedium_obj.storageMediumFormat >= 102:
+                try:
+                    ip_p_mets_size = GetSize(ip_p_mets_path_target)
+                except OSError as oe:
+                    msg = 'Problem to access metaobject: %s, IOuuid: %s, error: %s' % (ip_p_mets_path_target, IO_obj_uuid, oe)
+                    logger.error(msg)
+                    error_list.append(msg)
+                    runflag = 0
+                    ip_p_mets_size = 0
+    
+                ReadSize +=  int(ip_p_mets_size)
 
-            ReadSize = int(ip_tar_size) + int(ip_p_mets_size)
             if storageMedium_obj.storageMediumFormat == 103:
                 ReadSize += int(aic_mets_size)
 

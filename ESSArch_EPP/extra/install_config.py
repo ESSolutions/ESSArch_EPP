@@ -743,6 +743,7 @@ def installdefaultdefaultvalues(): # default default values
            'administration_storagemigration__copy_path': '',
            'access_new__ReqType': '5',
            'ChecksumAlgorithm': '2',
+           'access_migration__ReqType': '3',
            }
     
     if site_profile == "SE":

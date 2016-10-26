@@ -28,7 +28,7 @@ else:
     
 from jobtastic import JobtasticTask
 import ESSPGM, datetime, uuid, time, os, shutil, logging, subprocess, db_sync_ais, pytz, sys, traceback, re
-from configuration.models import ESSConfig
+from configuration.models import ESSConfig, DefaultValue
 from essarch.models import MigrationQueue, AccessQueue, ArchiveObject, robotQueue, robot, robotdrives
 from Storage.models import storageMedium
 from Storage.libs import StorageMethodWrite
@@ -147,7 +147,11 @@ class MigrationTask(JobtasticTask):
             logger.error(event_info)
         
         ReqUUID = uuid.uuid1()
-        ReqType = u'3'
+        try:
+            ReqType_obj = DefaultValue.objects.get(entity='access_migration__ReqType')
+            ReqType = '%s' % ReqType_obj.value
+        except DefaultValue.DoesNotExist:
+            ReqType = u'3'
         ReqPurpose = u'migrate'
         ObjectIdentifierValue = ArchiveObject_obj.ObjectIdentifierValue
         storageMediumID = u''
@@ -221,20 +225,29 @@ class MigrationTask(JobtasticTask):
         if CopyPath:
             copy_Pmets_objpath = os.path.join(CopyPath,ObjectIdentifierValue + '_Package_METS.xml')
             copy_ObjectPath = os.path.join(CopyPath,ObjectIdentifierValue + '.tar')
-        MetaObjectSize = os.stat(Pmets_objpath)[6]
         ObjectSize = int(ArchiveObject_obj.ObjectSize)
-        WriteSize = ObjectSize + MetaObjectSize
+        WriteSize = ObjectSize
+        if os.path.exists(Pmets_objpath):
+            MetaObjectSize = os.stat(Pmets_objpath)[6]
+            WriteSize += MetaObjectSize
         RemoveFlag='1'
         if RemoveFlag == '1' and CopyPath:
             startTime = datetime.timedelta(seconds=time.localtime()[5],minutes=time.localtime()[4],hours=time.localtime()[3])
-            if CopyOnlyFlag == True: 
-                event_info = 'CopyOnly: Try to move ObjectPath: %s to %s and move PackageMets: %s to %s' % (ObjectPath, copy_ObjectPath, Pmets_objpath, copy_Pmets_objpath)
+            if CopyOnlyFlag == True:
+                if ReqType == '4': 
+                    event_info = 'CopyOnly: Try to move ObjectPath: %s to %s' % (os.path.splitext(ObjectPath)[0], os.path.splitext(copy_ObjectPath)[0])
+                else:
+                    event_info = 'CopyOnly: Try to move ObjectPath: %s to %s and move PackageMets: %s to %s' % (ObjectPath, copy_ObjectPath, Pmets_objpath, copy_Pmets_objpath)
             else:
                 event_info = 'Try to move ObjectPath: %s to %s and move PackageMets: %s to %s' % (ObjectPath, copy_ObjectPath, Pmets_objpath, copy_Pmets_objpath)
             logger.info(event_info)
             try:
-                shutil.move(ObjectPath,copy_ObjectPath)
-                shutil.move(Pmets_objpath,copy_Pmets_objpath)
+                if ReqType == '4':
+                    shutil.move(os.path.splitext(ObjectPath)[0], os.path.splitext(copy_ObjectPath)[0]) 
+                else:
+                    shutil.move(ObjectPath,copy_ObjectPath)
+                if os.path.exists(Pmets_objpath):
+                    shutil.move(Pmets_objpath,copy_Pmets_objpath)
             except (IOError,os.error), why:
                 if CopyOnlyFlag == True:
                     event_info = 'CopyOnly: Problem to move ObjectPath: ' + ObjectPath + ' and ' + Pmets_objpath
@@ -248,7 +261,10 @@ class MigrationTask(JobtasticTask):
                 if ProcTime.seconds < 1: ProcTime = datetime.timedelta(seconds=1)   #Fix min time to 1 second if it is zero.
                 ProcMBperSEC = int(WriteSize)/int(ProcTime.seconds)
                 if CopyOnlyFlag == True:
-                    event_info = 'CopyOnly: Succeeded to move ObjectPath: ' + ObjectPath + ' , ' + str(ProcMBperSEC) + ' MB/Sec and Time: ' + str(ProcTime)
+                    if ReqType == '4': 
+                        event_info = 'CopyOnly: Succeeded to move ObjectPath: ' + os.path.splitext(ObjectPath)[0] + ' , ' + str(ProcMBperSEC) + ' MB/Sec and Time: ' + str(ProcTime)
+                    else:
+                        event_info = 'CopyOnly: Succeeded to move ObjectPath: ' + ObjectPath + ' , ' + str(ProcMBperSEC) + ' MB/Sec and Time: ' + str(ProcTime)
                 else:
                     event_info = 'Succeeded to move ObjectPath: ' + ObjectPath + ' , ' + str(ProcMBperSEC) + ' MB/Sec and Time: ' + str(ProcTime)
                 logger.info(event_info)
@@ -259,7 +275,8 @@ class MigrationTask(JobtasticTask):
             logger.info(event_info)
             try:
                 os.remove(ObjectPath)
-                os.remove(Pmets_objpath)
+                if os.path.exists(Pmets_objpath):
+                    os.remove(Pmets_objpath)
             except (IOError,os.error), why:
                 event_info = 'Problem to remove ObjectPath: ' + ObjectPath + ' and ' + Pmets_objpath
                 logger.error(event_info)
