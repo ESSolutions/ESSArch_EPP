@@ -243,6 +243,8 @@ class MigrationTask(JobtasticTask):
             logger.info(event_info)
             try:
                 if ReqType == '4':
+                    if os.path.isdir(os.path.splitext(copy_ObjectPath)[0]):
+                        shutil.rmtree(os.path.splitext(copy_ObjectPath)[0])
                     shutil.move(os.path.splitext(ObjectPath)[0], os.path.splitext(copy_ObjectPath)[0]) 
                 else:
                     shutil.move(ObjectPath,copy_ObjectPath)
