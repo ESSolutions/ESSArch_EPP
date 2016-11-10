@@ -95,7 +95,7 @@ class MyFileList(object):
         # if ip file found on gate then exit else check on media
         # if not found at all exception exit
         
-        if self.mets_obj == 'ip.xml':
+        if self.mets_obj == '{uuid}.xml':
                 print 'Found IP UUID'
             # check for submit description and related ip file
                 filenames = os.listdir(self.path_gate_reception)
@@ -453,7 +453,7 @@ class CheckinFromReception(CreateView):
         #status_code, status_detail = 
         ReqUUID = form.cleaned_data.get('ReqUUID',None)
         ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        if self.Pmets_obj == 'ip.xml':
+        if self.Pmets_obj == '{uuid}.xml':
             ThisIPfromReception = CheckInFromReceptionTask.delay_or_fail(source_path=self.source_path, 
                                                                     target_path=self.target_path, 
                                                                     Package=objectpath, 

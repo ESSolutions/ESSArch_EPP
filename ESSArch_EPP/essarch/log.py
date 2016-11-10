@@ -447,6 +447,8 @@ def get_logxml_info(logfile):
             EL_eventOutcomeDetailNote = EL_event.find("%seventOutcomeInformation/%seventOutcomeDetail/%seventOutcomeDetailNote" % (premis_NS,premis_NS,premis_NS))
             if EL_eventOutcomeDetailNote is not None:
                 eventOutcomeDetailNote = ESSPGM.Check().str2unicode(EL_eventOutcomeDetailNote.text)
+                if eventOutcomeDetailNote is None:
+                    eventOutcomeDetailNote = ''     
             EL_linkingAgentIdentifierType = EL_event.find("%slinkingAgentIdentifier/%slinkingAgentIdentifierType" % (premis_NS,premis_NS))
             if EL_linkingAgentIdentifierType is not None:
                 linkingAgentIdentifierType = ESSPGM.Check().str2unicode(EL_linkingAgentIdentifierType.text)

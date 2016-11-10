@@ -137,7 +137,6 @@ class CheckInFromReceptionTask(JobtasticTask):
         premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
         ip_logfile = Parameter.objects.get(entity='ip_logfile').value
         
-        '''
         if status_code == 0:
             # Try to find filename for logfile with matching creator, system and version.
             logfilepath = ''
@@ -148,7 +147,8 @@ class CheckInFromReceptionTask(JobtasticTask):
                                                                        path=ioessarch)
             if return_code == 0:
                 if len(file_list) == 1:
-                    logfilepath = os.path.join(ioessarch,file_list[0])
+                    #logfilepath = os.path.join(ioessarch,file_list[0])
+                    logfilepath = file_list[0]
                     event_info = 'Found logfile: %s for package: %s' % (logfilepath,Package)
                     status_list.append(event_info)
                     logger.info(event_info)
@@ -165,16 +165,16 @@ class CheckInFromReceptionTask(JobtasticTask):
             else:
                 status_code = 9
                 error_list.append('Status: %s, Error: %s' % (return_code,str(status))) 
-
+        
         if status_code == 0:
-            # Try to get IP_uuid and AIC_uuid from logfile
+            # Try to get events  from logfile
             return_code,status,info_entrys =  logtool.get_logxml_info(logfilepath)
             if return_code == 0:
-                for i in info_entrys[0]:
-                    IP_uuid = i[1]
-                    for x in i[2]:
-                        if x[0] == 'aic_object':
-                            AIC_uuid = x[1]
+                #for i in info_entrys[0]:
+                    #IP_uuid = i[1]
+                    #for x in i[2]:
+                        #if x[0] == 'aic_object':
+                            #AIC_uuid = x[1]
                 for i in info_entrys[1]:
                     pass
                     #print '------------------------------------------------------------------------'
@@ -184,7 +184,7 @@ class CheckInFromReceptionTask(JobtasticTask):
                 event_info = 'Status: %s, Error: %s' % (return_code,str(status))
                 error_list.append(event_info)
                 logger.error(event_info)
-        '''
+        
         IP_uuid = ObjectIdentifierValue
         AIC_uuid = str(uuid.uuid4())
         Pmets_obj = '%s.xml' % IP_uuid
@@ -376,7 +376,6 @@ class CheckInFromReceptionTask(JobtasticTask):
                 error_list.append(event_info)
                 logger.error(event_info)
 
-        '''
         if status_code == 0:
             # Import logentrys to database
             errno,why = AddLogEventsToDB(info_entrys)
@@ -427,7 +426,7 @@ class CheckInFromReceptionTask(JobtasticTask):
                 event_info = 'Problem to find tarfile in content directory, failed to get %s' % ip_logfile
                 error_list.append(event_info)
                 logger.error = event_info
-        '''
+
         #return status_code,[status_list,error_list]
         if status_code:
             #self.object.Status=100

@@ -385,7 +385,10 @@ def getMETSFileList(DOC=None,SecTYPE=['ALL'],ID=['ALL'],USE=['ALL'],MIMETYPE=["A
     EL_root = DOC.getroot()
     mets_NS = "{%s}" % EL_root.nsmap['mets']
     xlink_NS = "{%s}" % EL_root.nsmap['xlink']
-    ext_NS = "{%s}" % EL_root.nsmap['ext']
+    try:
+        ext_NS = "{%s}" % EL_root.nsmap['ext']
+    except KeyError:
+        ext_NS = ""
 
     ###############################################
     # mets root
