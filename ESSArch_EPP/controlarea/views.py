@@ -42,7 +42,7 @@ from essarch.models import ArchiveObject,ArchiveObjectData,ArchiveObjectRel, Pac
 from configuration.models import Path, Parameter, ArchivePolicy
 
 
-from controlarea.tasks import CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
+from controlarea.tasks import CheckInFromReceptionTask, CheckInFromMottagTask, CheckOutToWorkTask, CheckInFromWorkTask,\
 							                DiffCheckTask, PreserveIPTask, CopyFilelistTask, DeleteIPTask,\
 							                GetExchangeRequestFileContentTask, TestTask
 
@@ -94,129 +94,219 @@ class MyFileList(object):
         # check if ip file exist in relative subfolders on gate
         # if ip file found on gate then exit else check on media
         # if not found at all exception exit
+        
+        if self.mets_obj == 'ip.xml':
+                print 'Found IP UUID'
+            # check for submit description and related ip file
+                filenames = os.listdir(self.path_gate_reception)
+            #for dirname, dirnames, filenames in os.walk( self.path_gate_reception ):
+                for f in filenames:
+                    ip_file = '' # clear
+                    # check for submit description
+                    if os.path.splitext(f.lower())[1] in ['.tar', '.zip']:
+                        ip_containerfile = os.path.join(self.path_gate_reception, f)
+                        submit_description_file = os.path.join(self.path_gate_reception, '%s.xml' % os.path.splitext(f)[0])
+                        if os.path.exists(submit_description_file):
+                            print 'Found IP sdfile: %s' % submit_description_file
+                            ip_file = ip_containerfile
+                        #print '===== new IP ===='
+                        #print 'submit desc exist', submit_description_file
+    
+                        # parse submit description file for ip uuid to get ip file
+                        ip = MyFile()
+                        res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=submit_description_file)
+                        if error != 0:
+                            #print 'could not read metsfile'
+                            logger.error('Problem to read metsfile: %s at gate area, error: %s' % (submit_description_file, str(why)))
+                            break
+                        #else:
+                            #print 'ok to read metsfile'
+                        ip.uuid = ''
+                        if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
+                            ip.uuid = res_info[0][1][5:]
+                        else:
+                            ip.uuid = res_info[0][1]
+    
+                        for agent in res_info[2]:
+                            if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
+                                ip.EntryAgentIdentifierValue = agent[4]
+                                #ip.label = res_info[0][0]
+                                #ip.createdate = res_info[1][0]
 
-        # check for submit description and related ip file
-        for dirname, dirnames, filenames in os.walk( self.path_gate_reception ):
-            for f in filenames:
-                ip_file = '' # clear
-                # check for submit description
-                if f == self.mets_obj:
-                    submit_description_file = os.path.join(dirname, f)
-                    #print '===== new IP ===='
-                    #print 'submit desc exist', submit_description_file
+                        for altRecordID in res_info[3]:
+                            if altRecordID[0] == 'STARTDATE':
+                                ip.startdate = altRecordID[1]
+                            elif altRecordID[0] == 'ENDDATE':
+                                ip.enddate = altRecordID[1]
 
-                    # parse submit description file for ip uuid to get ip file
-                    ip = MyFile()
-                    res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=submit_description_file)
-                    if error != 0:
-                        #print 'could not read metsfile'
-                        logger.error('Problem to read metsfile: %s at gate area, error: %s' % (submit_description_file, str(why)))
-                        break
-                    #else:
-                        #print 'ok to read metsfile'
-                    ip.uuid = ''
-                    if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
-                        ip.uuid = res_info[0][1][5:]
-                    else:
-                        ip.uuid = res_info[0][1]
-                    ip_tarfile = ip.uuid + '.tar'
-                    ip_zipfile = ip.uuid + '.zip'
-
-                    for agent in res_info[2]:
-                        if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
-                            ip.EntryAgentIdentifierValue = agent[4]
-                            ip.label = res_info[0][0]
-                            ip.createdate = res_info[1][0]
-                            for altRecordID in res_info[3]:
-                                if altRecordID[0] == 'STARTDATE':
-                                    ip.startdate = altRecordID[1]
-                                elif altRecordID[0] == 'ENDDATE':
-                                    ip.enddate = altRecordID[1]
-                                    ip.iptype = res_info[0][3]
-                                    ip.state = '0'
-                                    ip.StatusProcess = 'Reception'
-                            #        if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
-                            #            ip.uuid = res_info[0][1][5:]
-                            #        else:
-                            #            ip.uuid = res_info[0][1]
-                            #        ip.aic_uuid = aic_uuid
-
-                    # check if ip file exist in relative subfolders on gate
-                    for d, dn, f in os.walk( dirname ):
-                        for ff in f:
-                            if ff == ip_tarfile:
-                                ip_file = os.path.join(d, ff)
-                                #fil_lista.append(ip_file)
-                                #print 'tar file found on gate:', ip_file
-                                break
-                            if ff == ip_zipfile:
-                                ip_file = os.path.join(d, ff)
-                                #fil_lista.append(ip_file)
-                                #print 'zip file found on gate:', ip_file
-                                break
-
-                    # if ip file found on gate then exit else check on media
-                    if ip_file:
-                        aic_path = os.path.join( self.path_gate_reception, dirname )
-                        aic_uuid = os.path.split(aic_path)[1]
-                        ip.aic_uuid = aic_uuid
-                        #ip = MyFile()
-                        ip.directory = ip_file
-                        ip.media = 'EFT'
-                        #ip.uuid = ''
-                        if ip_uuid is None:
-                            self.filelist.append(ip)
-                        elif ip.uuid == ip_uuid:
-                            self.filelist = ip
-                        #print '----- gate -----'
-                        #print 'gate_aicpath', aic_path
-                        #print 'gate_aicuuid', aic_uuid
-                        #print 'gate_ipdir', ip.directory
-                        #print 'gate_ipmedia', ip.media
-                        #print 'gate_ipuuid', ip_uuid
-                        #print 'gate_ip.uuid', ip.uuid
-                        #print 'ip found at gate and success to read submit description'
-                        logger.info('IP: %s found at gate and success to read submit description: %s' % (ip_file, submit_description_file))
-                        break
-
-                    else:
-                        # check on media for ip file
-                        for d, dn, f in os.walk( self.source_path ):
+                        ip.label = res_info[0][0]
+                        ip.createdate = res_info[1][0]
+                        ip.iptype = res_info[0][3]
+                        ip.state = '0'
+                        ip.StatusProcess = 'Reception'
+                                #        if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
+                                #            ip.uuid = res_info[0][1][5:]
+                                #        else:
+                                #            ip.uuid = res_info[0][1]
+                                #        ip.aic_uuid = aic_uuid
+    
+                        # if ip file found on gate then exit else check on media
+                        if ip_file:
+                            #aic_path = os.path.join( self.path_gate_reception, dirname )
+                            #aic_uuid = os.path.split(aic_path)[1]
+                            #ip.aic_uuid = aic_uuid
+                            ip.aic_uuid = str(uuid.uuid4())
+                            #ip = MyFile()
+                            ip.directory = ip_file
+                            ip.media = 'EFT'
+                            #ip.uuid = ''
+                            if ip_uuid is None:
+                                self.filelist.append(ip)
+                            elif ip.uuid == ip_uuid:
+                                self.filelist = ip
+                            #print '----- gate -----'
+                            #print 'gate_aicpath', aic_path
+                            print 'gate_aicuuid', ip.aic_uuid
+                            print 'gate_iptype', ip.iptype
+                            print 'gate_ipdir', ip.directory
+                            print 'gate_ipmedia', ip.media
+                            print 'gate_ipuuid', ip_uuid
+                            print 'gate_ip.uuid', ip.uuid
+                            print 'ip found at gate and success to read submit description'
+                            logger.info('IP: %s found at gate and success to read submit description: %s' % (ip_file, submit_description_file))
+                            break
+    
+                        if not ip_file:
+                            #print 'ip_file not found anywhere'
+                            logger.error('IP: %s not found anywhere as stated in submit description: %s' % (ip_uuid, submit_description_file))
+    
+                        #fil_lista = ip_file
+                        #fil_lista.append(ip_file_path)
+                        #print 'submit_desc', submit_description_file
+                        #print 'ip_file_path', ip_file_path
+        else:            
+            # check for submit description and related ip file
+            for dirname, dirnames, filenames in os.walk( self.path_gate_reception ):
+                for f in filenames:
+                    ip_file = '' # clear
+                    # check for submit description
+                    if f == self.mets_obj:
+                        submit_description_file = os.path.join(dirname, f)
+                        #print '===== new IP ===='
+                        #print 'submit desc exist', submit_description_file
+    
+                        # parse submit description file for ip uuid to get ip file
+                        ip = MyFile()
+                        res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=submit_description_file)
+                        if error != 0:
+                            #print 'could not read metsfile'
+                            logger.error('Problem to read metsfile: %s at gate area, error: %s' % (submit_description_file, str(why)))
+                            break
+                        #else:
+                            #print 'ok to read metsfile'
+                        ip.uuid = ''
+                        if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
+                            ip.uuid = res_info[0][1][5:]
+                        else:
+                            ip.uuid = res_info[0][1]
+                        ip_tarfile = ip.uuid + '.tar'
+                        ip_zipfile = ip.uuid + '.zip'
+    
+                        for agent in res_info[2]:
+                            if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION':
+                                ip.EntryAgentIdentifierValue = agent[4]
+                                ip.label = res_info[0][0]
+                                ip.createdate = res_info[1][0]
+                                for altRecordID in res_info[3]:
+                                    if altRecordID[0] == 'STARTDATE':
+                                        ip.startdate = altRecordID[1]
+                                    elif altRecordID[0] == 'ENDDATE':
+                                        ip.enddate = altRecordID[1]
+                                        ip.iptype = res_info[0][3]
+                                        ip.state = '0'
+                                        ip.StatusProcess = 'Reception'
+                                #        if res_info[0][1][:5] == 'UUID:' or res_info[0][1][:5] == 'RAID:':
+                                #            ip.uuid = res_info[0][1][5:]
+                                #        else:
+                                #            ip.uuid = res_info[0][1]
+                                #        ip.aic_uuid = aic_uuid
+    
+                        # check if ip file exist in relative subfolders on gate
+                        for d, dn, f in os.walk( dirname ):
                             for ff in f:
                                 if ff == ip_tarfile:
                                     ip_file = os.path.join(d, ff)
                                     #fil_lista.append(ip_file)
-                                    #print 'tar file found on media:', ip_file
-                                    aic_path = os.path.join( self.path_gate_reception, dirname )
-                                    aic_uuid = os.path.split(aic_path)[1]
-                                    ip.aic_uuid = aic_uuid
-                                    #ip = MyFile()
-                                    ip.directory = ip_file
-                                    ip.media = os.path.split(d)[1].upper()
-                                    #ip.uuid = ''
-                                    if ip_uuid is None:
-                                        self.filelist.append(ip)
-                                    elif ip.uuid == ip_uuid:
-                                        self.filelist = ip
-                                    #print '---- media ----'
-                                    #print 'media_aicpath', aic_path
-                                    #print 'media_aicuuid', aic_uuid
-                                    #print 'media_ipdir', ip.directory
-                                    #print 'media_ipmedia', ip.media
-                                    #print 'media_ipuuid', ip_uuid
-                                    #print 'media_ip.uuid', ip.uuid
-                                    #print 'ip found at media and success to read submit description'
-                                    logger.info('IP: %s found at media and success to read submit description: %s' % (ip_file, submit_description_file))
+                                    #print 'tar file found on gate:', ip_file
                                     break
-
-                    if not ip_file:
-                        #print 'ip_file not found anywhere'
-                        logger.error('IP: %s not found anywhere as stated in submit description: %s' % (ip_uuid, submit_description_file))
-
-                    #fil_lista = ip_file
-                    #fil_lista.append(ip_file_path)
-                    #print 'submit_desc', submit_description_file
-                    #print 'ip_file_path', ip_file_path
+                                if ff == ip_zipfile:
+                                    ip_file = os.path.join(d, ff)
+                                    #fil_lista.append(ip_file)
+                                    #print 'zip file found on gate:', ip_file
+                                    break
+    
+                        # if ip file found on gate then exit else check on media
+                        if ip_file:
+                            aic_path = os.path.join( self.path_gate_reception, dirname )
+                            aic_uuid = os.path.split(aic_path)[1]
+                            ip.aic_uuid = aic_uuid
+                            #ip = MyFile()
+                            ip.directory = ip_file
+                            ip.media = 'EFT'
+                            #ip.uuid = ''
+                            if ip_uuid is None:
+                                self.filelist.append(ip)
+                            elif ip.uuid == ip_uuid:
+                                self.filelist = ip
+                            #print '----- gate -----'
+                            #print 'gate_aicpath', aic_path
+                            #print 'gate_aicuuid', aic_uuid
+                            #print 'gate_ipdir', ip.directory
+                            #print 'gate_ipmedia', ip.media
+                            #print 'gate_ipuuid', ip_uuid
+                            #print 'gate_ip.uuid', ip.uuid
+                            #print 'ip found at gate and success to read submit description'
+                            logger.info('IP: %s found at gate and success to read submit description: %s' % (ip_file, submit_description_file))
+                            break
+    
+                        else:
+                            # check on media for ip file
+                            for d, dn, f in os.walk( self.source_path ):
+                                for ff in f:
+                                    if ff == ip_tarfile:
+                                        ip_file = os.path.join(d, ff)
+                                        #fil_lista.append(ip_file)
+                                        #print 'tar file found on media:', ip_file
+                                        aic_path = os.path.join( self.path_gate_reception, dirname )
+                                        aic_uuid = os.path.split(aic_path)[1]
+                                        ip.aic_uuid = aic_uuid
+                                        #ip = MyFile()
+                                        ip.directory = ip_file
+                                        ip.media = os.path.split(d)[1].upper()
+                                        #ip.uuid = ''
+                                        if ip_uuid is None:
+                                            self.filelist.append(ip)
+                                        elif ip.uuid == ip_uuid:
+                                            self.filelist = ip
+                                        #print '---- media ----'
+                                        #print 'media_aicpath', aic_path
+                                        #print 'media_aicuuid', aic_uuid
+                                        #print 'media_ipdir', ip.directory
+                                        #print 'media_ipmedia', ip.media
+                                        #print 'media_ipuuid', ip_uuid
+                                        #print 'media_ip.uuid', ip.uuid
+                                        #print 'ip found at media and success to read submit description'
+                                        logger.info('IP: %s found at media and success to read submit description: %s' % (ip_file, submit_description_file))
+                                        break
+    
+                        if not ip_file:
+                            #print 'ip_file not found anywhere'
+                            logger.error('IP: %s not found anywhere as stated in submit description: %s' % (ip_uuid, submit_description_file))
+    
+                        #fil_lista = ip_file
+                        #fil_lista.append(ip_file_path)
+                        #print 'submit_desc', submit_description_file
+                        #print 'ip_file_path', ip_file_path
 
         #print '---- output ----'
         #print 'filelist', self.filelist
@@ -363,20 +453,36 @@ class CheckinFromReception(CreateView):
         #status_code, status_detail = 
         ReqUUID = form.cleaned_data.get('ReqUUID',None)
         ReqPurpose=form.cleaned_data.get('ReqPurpose','')
-        ThisIPfromReception = CheckInFromMottagTask.delay_or_fail(source_path=self.source_path, 
-                                                                target_path=self.target_path, 
-                                                                Package=objectpath, 
-                                                                ObjectIdentifierValue=ObjectIdentifierValue,
-                                                                ReqUUID = ReqUUID,
-                                                                ReqPurpose=ReqPurpose,
-                                                                creator=None,
-                                                                system=None,
-                                                                version=None,
-                                                                agent_list=[],
-                                                                altRecordID_list=altRecordID_list,
-                                                                allow_unknown_filetypes=allow_unknown_filetypes,
-                                                                linkingAgentIdentifierValue=self.request.user.username
-                                                                )
+        if self.Pmets_obj == 'ip.xml':
+            ThisIPfromReception = CheckInFromReceptionTask.delay_or_fail(source_path=self.source_path, 
+                                                                    target_path=self.target_path, 
+                                                                    Package=objectpath, 
+                                                                    ObjectIdentifierValue=ObjectIdentifierValue,
+                                                                    ReqUUID = ReqUUID,
+                                                                    ReqPurpose=ReqPurpose,
+                                                                    creator=None,
+                                                                    system=None,
+                                                                    version=None,
+                                                                    agent_list=[],
+                                                                    altRecordID_list=altRecordID_list,
+                                                                    allow_unknown_filetypes=allow_unknown_filetypes,
+                                                                    linkingAgentIdentifierValue=self.request.user.username
+                                                                    )
+        else:
+            ThisIPfromReception = CheckInFromMottagTask.delay_or_fail(source_path=self.source_path, 
+                                                                    target_path=self.target_path, 
+                                                                    Package=objectpath, 
+                                                                    ObjectIdentifierValue=ObjectIdentifierValue,
+                                                                    ReqUUID = ReqUUID,
+                                                                    ReqPurpose=ReqPurpose,
+                                                                    creator=None,
+                                                                    system=None,
+                                                                    version=None,
+                                                                    agent_list=[],
+                                                                    altRecordID_list=altRecordID_list,
+                                                                    allow_unknown_filetypes=allow_unknown_filetypes,
+                                                                    linkingAgentIdentifierValue=self.request.user.username
+                                                                    )
         '''if status_code:
             self.object.Status=100
             event_info = 'Failed to CheckIn object: %s from reception, ReqUUID: %s, why: %s' % (form.cleaned_data.get('ObjectIdentifierValue',None),

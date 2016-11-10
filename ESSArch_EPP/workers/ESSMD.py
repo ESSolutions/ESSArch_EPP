@@ -385,13 +385,16 @@ def getMETSFileList(DOC=None,SecTYPE=['ALL'],ID=['ALL'],USE=['ALL'],MIMETYPE=["A
     EL_root = DOC.getroot()
     mets_NS = "{%s}" % EL_root.nsmap['mets']
     xlink_NS = "{%s}" % EL_root.nsmap['xlink']
+    ext_NS = "{%s}" % EL_root.nsmap['ext']
 
     ###############################################
     # mets root
     a_LABEL = EL_root.get('LABEL')
     a_OBJID = EL_root.get('OBJID')
     a_PROFILE = EL_root.get('PROFILE')
-    a_TYPE = EL_root.get('TYPE')
+    a_TYPE = EL_root.get('%sOAISTYPE' % ext_NS)
+    if a_TYPE is None:
+        a_TYPE = EL_root.get('TYPE')
     a_ID = EL_root.get('ID')
     Hdr_res.append([a_LABEL,a_OBJID,a_PROFILE,a_TYPE,a_ID])
 

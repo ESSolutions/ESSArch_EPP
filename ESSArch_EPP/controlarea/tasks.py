@@ -62,6 +62,404 @@ except utils.ProgrammingError:
 
 logger = logging.getLogger('essarch.controlarea')
 
+def get_or_create_AICdirectory(sourceroot, aicuuid):
+    """
+    Get or create AIC directory
+    """
+    # create AIC_UUID directory
+    aicroot = os.path.join( sourceroot, aicuuid )
+    if not os.path.exists(aicroot):
+        os.makedirs( aicroot )
+    return aicroot
+
+def get_or_create_IPdirectory(sourceroot, ip_uuid):
+    """
+    Get or create IP directory
+    """    
+    site_profile = Parameter.objects.get(entity='site_profile').value
+    zone = 'zone2'
+    
+    # prepare ip_directory_structure list
+    ip_directory_structure = []
+    ip_rootpath = os.path.join(sourceroot, ip_uuid)
+    ip_directory_structure.append(ip_rootpath)
+    ip_directory_structure.append(os.path.join(ip_rootpath, 'content'))
+    if site_profile == "SE":
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'metadata'))
+    elif site_profile == "NO":
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'descriptive_metadata'))
+        ip_directory_structure.append(os.path.join(ip_rootpath, 'administrative_metadata'))
+        if zone == 'zone2':
+            ip_directory_structure.append(os.path.join(os.path.join(ip_rootpath, 'administrative_metadata'), 'repository_operations'))
+
+    # create ip_directory_structure if not exists
+    for ip_path in ip_directory_structure:
+        if not os.path.exists(ip_path):
+            os.makedirs(ip_path)
+    return ip_rootpath
+
+class CheckInFromReceptionTask(JobtasticTask):
+
+    significant_kwargs = []
+
+    herd_avoidance_timeout = 0 #120  # Give it two minutes
+    
+    # Cache for 10 minutes if they haven't added any todos
+    cache_duration = 0 #600
+    
+    # Soft time limit. Defaults to the CELERYD_TASK_SOFT_TIME_LIMIT setting.
+    #soft_time_limit = None
+    
+    # Hard time limit. Defaults to the CELERYD_TASK_TIME_LIMIT setting.
+    #time_limit = 86400
+    time_limit = 259200 # 3 days
+    
+    def calculate_result(self,
+                        source_path=None,
+                        target_path=None,
+                        Package=None,
+                        ObjectIdentifierValue=None,
+                        ReqUUID=None,
+                        ReqPurpose=None,
+                        creator=None,
+                        system=None,
+                        version=None,
+                        agent_list=[],
+                        altRecordID_list=[],
+                        allow_unknown_filetypes=False,
+                        linkingAgentIdentifierValue=None,
+                        ):
+        status_code = 0
+        status_list = []
+        error_list = []
+        Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
+        Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
+        premis_obj = Parameter.objects.get(entity='preservation_descriptionfile').value
+        ip_logfile = Parameter.objects.get(entity='ip_logfile').value
+        
+        '''
+        if status_code == 0:
+            # Try to find filename for logfile with matching creator, system and version.
+            logfilepath = ''
+            return_code,status,file_list = logtool.get_logxml_filename(ObjectIdentifierValue=ObjectIdentifierValue,
+                                                                       creator=creator,
+                                                                       system=system,
+                                                                       version=version,
+                                                                       path=ioessarch)
+            if return_code == 0:
+                if len(file_list) == 1:
+                    logfilepath = os.path.join(ioessarch,file_list[0])
+                    event_info = 'Found logfile: %s for package: %s' % (logfilepath,Package)
+                    status_list.append(event_info)
+                    logger.info(event_info)
+                elif len(file_list) > 1:
+                    status_code = 1
+                    event_info = 'ObjectIdentifierValue: %s match more then one logfile, logfilelist: %s' % (ObjectIdentifierValue,str(file_list))
+                    error_list.append(event_info)
+                    logger.error(event_info)
+                else:
+                    status_code = 2
+                    event_info = 'ObjectIdentifierValue: %s do not match any logfile' % (ObjectIdentifierValue)
+                    error_list.append(event_info)
+                    logger.error(event_info)
+            else:
+                status_code = 9
+                error_list.append('Status: %s, Error: %s' % (return_code,str(status))) 
+
+        if status_code == 0:
+            # Try to get IP_uuid and AIC_uuid from logfile
+            return_code,status,info_entrys =  logtool.get_logxml_info(logfilepath)
+            if return_code == 0:
+                for i in info_entrys[0]:
+                    IP_uuid = i[1]
+                    for x in i[2]:
+                        if x[0] == 'aic_object':
+                            AIC_uuid = x[1]
+                for i in info_entrys[1]:
+                    pass
+                    #print '------------------------------------------------------------------------'
+                    #print 'EventIndentifierValue: %s, EventType: %s, EventDateTime: %s, eventDetail: %s, outcome: %s, outcomeDetail: %s, linkingObject: %s' % (i[1],i[2],i[3],i[4],i[5],i[6],i[10])
+            else:
+                status_code = 3
+                event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+                error_list.append(event_info)
+                logger.error(event_info)
+        '''
+        IP_uuid = ObjectIdentifierValue
+        AIC_uuid = str(uuid.uuid4())
+        Pmets_obj = '%s.xml' % IP_uuid
+        
+        if status_code == 0:
+            # Check if IP_uuid already exist in database.
+            ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
+            if ArchiveObject_qf is True:
+                status_code = 6
+                event_info = 'Entry in DB for IP_UUID: %s already exist, abort checkin.' % (IP_uuid)
+                error_list.append(event_info)
+                logger.info(event_info)
+        '''
+        if status_code == 0:    
+            # Copy AIC/IP structure from ioessarch to mottag area.
+            aic_source_path = os.path.join(ioessarch,AIC_uuid)
+            aic_target_path = os.path.join(target_path,AIC_uuid)
+            try:
+                event_info = 'Copy package structure %s to %s' % (aic_source_path,aic_target_path)
+                status_list.append(event_info)
+                logger.info(event_info)
+                shutil.copytree(aic_source_path,aic_target_path)
+                # After copy AIC/ip structure remove info.xml metsfile
+                old_mets_filepath = op.join( aic_target_path, Pmets_obj )
+                if op.exists(old_mets_filepath):
+                    os.remove(old_mets_filepath)
+            except (IOError, os.error), why:
+                status_code = 4
+                event_info = 'Problem to copy package structure %s to %s, ERROR: %s' % (aic_source_path,aic_target_path,str(why))
+                error_list.append(event_info)
+                logger.error(event_info)
+        '''
+        if status_code == 0:
+            # Copy IP_information/data from CD/USB to "content" directory in AIC/IP structure in mottag area. 
+            aic_rootpath = get_or_create_AICdirectory(target_path, AIC_uuid)
+            Package_root = get_or_create_IPdirectory(aic_rootpath, IP_uuid )              
+            #Package_root = os.path.join(aic_target_path,IP_uuid)
+            Package_dmd = os.path.join(Package_root,'descriptive_metadata')
+            Package_amd = os.path.join(Package_root,'administrative_metadata')
+            Package_ro = os.path.join(Package_amd,'repository_operations')
+            Package_content = os.path.join(Package_root,'content')
+            try:
+                event_info = 'Copy %s to package content directory: %s' % (Package,Package_content)
+                status_list.append(event_info)
+                logger.info(event_info)
+                if op.isdir(op.join(source_path,Package)):
+                    shutil.copytree(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
+                else:
+                    shutil.copy2(op.join(source_path,Package),op.join(Package_content,op.split(Package)[1]))
+            except (IOError, os.error), why:
+                status_code = 5
+                event_info = 'Problem to Copy %s to package content directory: %s, ERROR: %s' % (Package,Package_content,str(why))
+                error_list.append(event_info)
+                logger.error(event_info)
+
+        if status_code == 0:
+            METS_agent_list = []
+            METS_altRecordID_list = []
+            METS_LABEL = None
+            EntryAgentIdentifierValue = None
+            EntryDate = ''
+            METS_STARTDATE = None
+            METS_ENDDATE = None
+            #Package_root_source = os.path.join(aic_source_path,IP_uuid)
+            #METS_ObjectPath_source = os.path.join( aic_source_path, Pmets_obj )
+            METS_ObjectPath_source = os.path.join( ioessarch, Pmets_obj )
+            if os.path.exists(METS_ObjectPath_source):        
+                res_info, res_files, res_struct, error, why = ESSMD.getMETSFileList(FILENAME=METS_ObjectPath_source)
+                EntryDate = res_info[1][0]
+                for agent in res_info[2]:
+                    if agent[0] == 'ARCHIVIST' and agent[2] == 'ORGANIZATION' and agent[3] == None:
+                        EntryAgentIdentifierValue = agent[4]
+                    METS_agent_list.append(agent)
+                METS_LABEL = res_info[0][0]
+                for altRecordID in res_info[3]:
+                    if altRecordID[0] == 'STARTDATE':
+                        METS_STARTDATE = altRecordID[1]
+                    elif altRecordID[0] == 'ENDDATE':
+                        METS_ENDDATE = altRecordID[1]
+                    METS_altRecordID_list.append(altRecordID)
+                event_info = 'Success to get METS agents,altRecords and label from %s' % Pmets_obj
+                status_list.append(event_info)
+                logger.info(event_info)
+                # Add extra agent and altRecordID
+                for agent in agent_list:
+                    METS_agent_list.append(agent)
+                    event_info = 'Add agent %s to metsfile' % agent
+                    status_list.append(event_info)
+                    logger.info(event_info)
+                for altRecordID in altRecordID_list:
+                    METS_altRecordID_list.append(altRecordID)
+                    event_info = 'Add altRecordID %s to metsfile' % altRecordID
+                    status_list.append(event_info)
+                    logger.info(event_info)
+            else:
+                event_info = '%s not found in SIP' % Pmets_obj
+                status_list.append(event_info)
+                logger.info(event_info)
+            METS_ObjectPath = os.path.join( Package_root, Cmets_obj )
+            PREMIS_ObjectPath = os.path.join( Package_root, premis_obj )
+            errno, why = Functions().Create_IP_metadata(ObjectIdentifierValue=IP_uuid, 
+                                                           METS_ObjectPath=METS_ObjectPath, 
+                                                           ObjectPath=Package_root,
+                                                           altRecordID_default=False,
+                                                           agent_default=False,
+                                                           agent_list=METS_agent_list,
+                                                           altRecordID_list=METS_altRecordID_list,
+                                                           file_list=[],
+                                                           METS_LABEL=METS_LABEL,
+                                                           PREMIS_ObjectPath=PREMIS_ObjectPath,
+                                                           allow_unknown_filetypes=allow_unknown_filetypes,
+                                                           )
+            if errno:
+                status_code = 8
+            for s in why[0]:
+                status_list.append(s)
+            for e in why[1]:   
+                error_list.append(e)
+
+        connection.close() # Close old MySQL connections
+
+        if status_code == 0:
+            ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = AIC_uuid).exists()
+            if ArchiveObject_qf is False:
+                event_info = 'Add new entry to DB for AIC_UUID: %s' % (AIC_uuid)
+                status_list.append(event_info)
+                logger.info(event_info)
+                ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                                label=METS_LABEL,
+                                                startdate=METS_STARTDATE,
+                                                enddate=METS_ENDDATE)
+                # Add AIC to ArchiveObject DBtable
+                ArchiveObject_aic_new = ArchiveObject()
+                setattr(ArchiveObject_aic_new, 'ObjectUUID', AIC_uuid)
+                setattr(ArchiveObject_aic_new, 'ObjectIdentifierValue', AIC_uuid)
+                setattr(ArchiveObject_aic_new, 'OAISPackageType', 1)
+                setattr(ArchiveObject_aic_new, 'Status', 0)
+                setattr(ArchiveObject_aic_new, 'StatusActivity', 0)
+                setattr(ArchiveObject_aic_new, 'StatusProcess', 5000)
+                setattr(ArchiveObject_aic_new, 'Generation', 0)
+                setattr(ArchiveObject_aic_new, 'EntryAgentIdentifierValue', EntryAgentIdentifierValue)
+                setattr(ArchiveObject_aic_new, 'EntryDate', EntryDate)
+                setattr(ArchiveObject_aic_new, 'ObjectMetadata', ObjectMetadata_obj)
+                ArchiveObject_aic_new.save()
+            else:
+                event_info = 'Entry in DB for AIC_UUID: %s already exist, skip to update.' % (AIC_uuid)
+                status_list.append(event_info)
+                logger.info(event_info)
+
+            ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
+            if ArchiveObject_qf is False:
+                event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
+                status_list.append(event_info)
+                logger.info(event_info)
+                ObjectMetadata_obj = ObjectMetadata.objects.create(
+                                                label=METS_LABEL,
+                                                startdate=METS_STARTDATE,
+                                                enddate=METS_ENDDATE)
+                # Add IP to ArchiveObject DBtable
+                ArchiveObject_new = ArchiveObject()
+                setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
+                setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
+                setattr(ArchiveObject_new, 'OAISPackageType', 0)
+                #setattr(ArchiveObject_new, 'OAISPackageType', 2)
+                setattr(ArchiveObject_new, 'Status', 0)
+                setattr(ArchiveObject_new, 'StatusActivity', 0)
+                setattr(ArchiveObject_new, 'StatusProcess', 5000)
+                setattr(ArchiveObject_new, 'Generation', 0)
+                setattr(ArchiveObject_new, 'EntryAgentIdentifierValue', EntryAgentIdentifierValue)
+                setattr(ArchiveObject_new, 'EntryDate', EntryDate)
+                setattr(ArchiveObject_new, 'ObjectMetadata', ObjectMetadata_obj)
+                ArchiveObject_new.save()
+
+                # Add rel AIC - IP to Object_rel DBtable
+                Object_rel_new = ArchiveObjectRel()
+                setattr(Object_rel_new, 'AIC_UUID', ArchiveObject_aic_new)
+                setattr(Object_rel_new, 'UUID', ArchiveObject_new)
+                Object_rel_new.save()
+
+                Object_data_new = ArchiveObjectData()
+                setattr(Object_data_new, 'UUID', ArchiveObject_new)
+                setattr(Object_data_new, 'label', METS_LABEL)
+                setattr(Object_data_new, 'startdate', METS_STARTDATE)
+                setattr(Object_data_new, 'enddate', METS_ENDDATE)
+                Object_data_new.save()
+            else:
+                status_code = 6
+                event_info = 'Entry in DB for IP_UUID: %s already exist, skip to update.' % (IP_uuid)
+                error_list.append(event_info)
+                logger.error(event_info)
+
+        '''
+        if status_code == 0:
+            # Import logentrys to database
+            errno,why = AddLogEventsToDB(info_entrys)
+            if errno:
+                event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+                error_list.append(event_info)
+                logger.error(event_info)
+                status_code = 7
+            else:
+                for s in why[0]:
+                    status_list.append(s)
+                for s in why[1]:
+                    error_list.append(s)
+
+        if status_code == 0:
+            # Import logentrys from log.xml in tarfile to database
+            ip_tarfilename = op.join(Package_content,op.split(Package)[1])
+            if os.path.isfile(ip_tarfilename):
+                try:
+                    tarf = tarfile.open(name=ip_tarfilename,mode='r')
+                    logfile_obj = tarf.extractfile('%s/%s' % (IP_uuid,ip_logfile)) # uuid_xxxx/log.xml
+                    return_code,status,info_entrys =  logtool.get_logxml_info(logfile_obj)
+                    if return_code == 0:
+                        errno,why = AddLogEventsToDB(info_entrys)
+                        if errno:
+                            event_info = 'Failed to Add log events to DB, ERROR: %s' % why
+                            error_list.append(event_info)
+                            logger.error(event_info)
+                            status_code = 10
+                        else:
+                            for s in why[0]:
+                                status_list.append(s)
+                            for s in why[1]:
+                                error_list.append(s)
+                    else:
+                        status_code = 11
+                        event_info = 'Status: %s, Error: %s' % (return_code,str(status))
+                        error_list.append(event_info)
+                        logger.info(event_info)
+                    tarf.close()
+                except:
+                    status_code = 12
+                    event_info = 'Problem to get %s from tarfile, error: %s' % (ip_logfile,str(sys.exc_info()))
+                    error_list.append(event_info)
+                    logger.error(event_info)
+            else:
+                status_code = 13
+                event_info = 'Problem to find tarfile in content directory, failed to get %s' % ip_logfile
+                error_list.append(event_info)
+                logger.error = event_info
+        '''
+        #return status_code,[status_list,error_list]
+        if status_code:
+            #self.object.Status=100
+            event_info = 'Failed to CheckIn object: %s from reception, ReqUUID: %s, why: %s' % (ObjectIdentifierValue,
+                                                                                                ReqUUID,
+                                                                                                error_list,
+                                                                                                )
+            ESSPGM.Events().create('30000',ReqPurpose,'controlarea views',__version__,'1',
+                                   event_info,0,ObjectIdentifierValue=ObjectIdentifierValue,linkingAgentIdentifierValue=linkingAgentIdentifierValue,
+                                   )
+        else:
+            #self.object.Status=20
+            event_info = 'Success to CheckIn object: %s from reception, ReqUUID: %s' % (ObjectIdentifierValue,
+                                                                                        ReqUUID,
+                                                                                        )
+            ESSPGM.Events().create('30000',ReqPurpose,'controlarea views',__version__,'0',
+                                   event_info,0,ObjectIdentifierValue=ObjectIdentifierValue,linkingAgentIdentifierValue=linkingAgentIdentifierValue,
+                                   )
+                                   
+        result = {}
+        result['category'] = 'controlarea'
+        result['label'] = 'Check In from Reception'
+        result['creator'] = creator
+        result['reqpurpose'] = ReqPurpose
+        result['user'] = linkingAgentIdentifierValue
+        result['statuslist'] = status_list
+        result['errorlist'] = error_list
+        result['ipuuid'] = ObjectIdentifierValue
+        if status_code != 0:
+            raise ControlareaException(result) 
+        return result 
+
 class CheckInFromMottagTask(JobtasticTask):
 
     significant_kwargs = []

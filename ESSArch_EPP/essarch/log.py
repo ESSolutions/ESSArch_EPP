@@ -684,7 +684,7 @@ def get_logxml_filename(ObjectIdentifierValue=None, creator=None, system= None, 
     error_list = []
     res = []
     if status_code == 0:
-        return_code,status,filelist = Functions().GetFiletree(path,['test1','log1.xml','log.xml'])
+        return_code,status,filelist = Functions().GetFiletree(path,['test1','log1.xml','log.xml','%s_ipevents.xml' % ObjectIdentifierValue])
         if return_code == 0:
             for i in filelist:
                 match_flag = 1
