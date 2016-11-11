@@ -174,7 +174,7 @@ class MyFileList(object):
                             print 'gate_ip.uuid', ip.uuid
                             print 'ip found at gate and success to read submit description'
                             logger.info('IP: %s found at gate and success to read submit description: %s' % (ip_file, submit_description_file))
-                            break
+                            #break
     
                         if not ip_file:
                             #print 'ip_file not found anywhere'
