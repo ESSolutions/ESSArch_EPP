@@ -264,7 +264,8 @@ class CheckInFromReceptionTask(JobtasticTask):
                         METS_STARTDATE = altRecordID[1]
                     elif altRecordID[0] == 'ENDDATE':
                         METS_ENDDATE = altRecordID[1]
-                    METS_altRecordID_list.append(altRecordID)
+                    if not altRecordID[0].startswith('PROFILE_'):
+                        METS_altRecordID_list.append(altRecordID)
                 event_info = 'Success to get METS agents,altRecords and label from %s' % Pmets_obj
                 status_list.append(event_info)
                 logger.info(event_info)
