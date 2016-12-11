@@ -150,7 +150,7 @@ class work:
                             CreateDate_utc = None
                             CreateDate_dst = CreateDate_utc
                             CreateDate_mssql = CreateDate_dst
-                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('IngestObject','UPD',('PolicyId',ArchiveObject_obj.PolicyId,
+                        ext_res,ext_errno,ext_why = ESSMSSQL.DB().action('IngestObject','UPD',('PolicyId',ArchiveObject_obj.PolicyId.AISProjectID,
                                                                                            'ObjectPackageName',ArchiveObject_obj.ObjectPackageName,
                                                                                            'ObjectSize',ArchiveObject_obj.ObjectSize,
                                                                                            'ObjectNumItems',ArchiveObject_obj.ObjectNumItems,
