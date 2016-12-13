@@ -375,6 +375,111 @@ class ArchiveObject_dt_view(DatatableBaseView):
                 data.append(d)
         return data
 
+class Delivery_dt_view(DatatableBaseView):
+    qs = ArchiveObject.objects.filter(
+            Q(StatusProcess=3000) | Q(OAISPackageType=1)
+        ).order_by('id','Generation')
+    columns = [
+        'Generation', 'EntryAgentIdentifierValue', 'label',
+        'entryDate', 'startdate',
+        'enddate', 'ObjectUUID', 'ObjectUUID'
+    ]
+    order_columns = [
+        'Generation', 'EntryAgentIdentifierValue', 'label',
+        'entryDate', 'startdate',
+        'enddate', 'ObjectUUID', 'ObjectUUID'
+    ]
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+
+    def prepare_results(self, qs):
+        json_data = []
+        for item in qs:
+            for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in item.get_ip_list(StatusProcess=3000):
+                ip = {
+                    'Generation': ip_obj.Generation,
+                    'EntryAgentIdentifierValue': ip_obj.EntryAgentIdentifierValue,
+                    'label': ip_obj_data.label,
+                    'entryDate': self.render_column(ip_obj, 'EntryDate'),
+                    'startdate': self.render_column(ip_obj_data, 'startdate'),
+                    'enddate': self.render_column(ip_obj_data, 'enddate'),
+                    'aic': aic_obj.ObjectUUID,
+                    'ip': ip_obj.ObjectUUID
+                }
+                json_data.append(ip)
+        return json_data
+
+    def render_column(self, row, column):
+        if hasattr(row, 'get_%s_display' % column):
+            # It's a choice field
+            text = getattr(row, 'get_%s_display' % column)()
+        else:
+            try:
+                text = getattr(row, column)
+            except AttributeError:
+                obj = row
+                for part in column.split('.'):
+                    if obj is None:
+                        break
+                    obj = getattr(obj, part)
+
+                text = obj
+        if text is None:
+            text = self.none_string
+
+        if hasattr(text,'all'):
+            data = []
+            for item in text.all():
+                d={}
+                for column in self.get_columns():
+                    d[column]=self.render_column(item, column)
+                data.append(d)
+            text=data
+
+        if column in ['EntryDate', 'startdate', 'enddate']:
+            if type(text) is datetime.datetime:
+                try:
+                    res = text.strftime(self.datetime_format)
+                except ValueError:
+                    res = str(text)
+                return res
+
+        if column in ['object_list']:
+            if type(text) is long:
+                try:
+                    res = "%s (%s)" % (
+                        str(text),
+                        eventType_codes.objects.get(code=text).desc_sv
+                    )
+                except eventType_codes.DoesNotExist:
+                    res = str(text)
+                return res
+
+        if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
+            return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
+        else:
+            return text
+
+class Delivery_number_dt_view(DatatableBaseView):
+    qs = ArchiveObject.objects.filter(Q(StatusProcess=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
+
+    columns = [
+        'EntryAgentIdentifierValue', 'number'
+    ]
+    order_columns = ['EntryAgentIdentifierValue', 'number']
+
+    def prepare_results(self, qs):
+        entries = []
+        unique = []
+        for item in qs:
+            for aic_obj,ip_obj,test,ip_obj_data,ip_obj_metadata in item.get_ip_list(StatusProcess=3000):
+                entries.append(ip_obj.EntryAgentIdentifierValue)
+
+        for i in list(set(entries)):
+            unique.append({'EntryAgentIdentifierValue': i, 'number': entries.count(i)})
+
+        print unique
+        return sorted(unique)
+
 class Event_dt_view(DatatableBaseView):
     qs =  eventIdentifier.objects.all()
     columns = [
