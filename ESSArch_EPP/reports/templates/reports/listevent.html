@@ -1,64 +1,131 @@
-{% extends 'index.html' %}
-{% load dictionary_extras %}
+{% extends 'admin/base_site.html' %}
 
-{% block content %}
+{% block server-side-base %}active{% endblock %}
 
-<div style="margin:20px">
-<H1>{{ label }}</H1>
+{% block app-extra-style %}
+    <link href="/static/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/api/css/aic.css" rel="stylesheet" type="text/css" />
+{% endblock %}
 
-<br/>
+{% block container %}
 
-<div class="results">
-  <table id="result_list">
-    <thead>
-      <tr>
-                <th>Event Type</th>
-				<th>Event Description</th>
-                <th>Number</th>
-      </tr>
-    </thead>
-    <tbody>
-	    	{% for eventType,eventDetail, eventType_num in event_list %}
-		      	<tr class="row{% cycle '1' '2' %}">
-					<td>{{ eventType }}</td>
-					<td>{{eventDetail}}</td>
-					<td>{{ eventType_num }}</td>
-		      	</tr>
-	      	{% endfor %}
-    </tbody>
-  </table>
-</div>
+	<H2>{{ label }}</H2>
+	<br>
+    <div>
+      <table id="eventTypes" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th>EVENT TYPE</th>
+            <th>DESCRIPTION</th>
+            <th>NUMBER</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <hr>
+    <div>
+      <table id="events" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th>Event UUID</th>
+            <th>TYPE</th>
+            <th>DATE</th>
+            <th>OUTCOME</th>
+            <th>NOTE</th>
+            <th>AGENT</th>
+            <th>LINKING OBJECT ID</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+{% endblock %}
 
-</br>
-<div class="results">
-  <table id="result_list">
-    <thead>
-      <tr>
-                <th>Event UUID</th>
-    			<th>Type</th>
-			    <th>Date</th>
-			    <th>Outcome</th>
-			    <th>Note</th>
-			    <th>Agent</th>
-			    <th>Linking Object ID</th>
-      </tr>
-    </thead>
-    <tbody>
-	    	{% for event_obj in object_list %}
-		      	<tr class="row{% cycle '1' '2' %}">
-					<td>{{ event_obj.eventIdentifierValue }}</td>
-					<td>{{ event_obj.eventType }}</td>
-					<td>{{ event_obj.eventDateTime }}</td>
-					<td>{{ event_obj.eventOutcome }}</td>
-					<td>{{ event_obj.eventOutcomeDetailNote }}</td>
-					<td>{{ event_obj.linkingAgentIdentifierValue }}</td>
-					<td>{{ event_obj.linkingObjectIdentifierValue }}</td>
-		      	</tr>
-	      	{% endfor %}
-    </tbody>
-  </table>
-</div>
+{% block app-extra-script %}
+	<script type="text/javascript" src="/static/DataTables/datatables.js"></script>
+<script>
 
-</div>
+$(document).ready( function () {
+	var table = $('#eventTypes').DataTable( {
+		//destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			"url": "{% url 'event_type_list_dt' %}",
+			"type": "GET",
+			"data": {
+				archiveobjects__StatusProcess__in: '[3000]',
+				StatusProcess__in: '[3000]',
+				exclude_filtered_from_information: true,
+			},
+		},
+		colReorder: true,
+		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+		buttons: [
+			{
+				extend: 'colvis',
+			}
+		],
+		columns: [
+			{ "data": "code", "name": "code"},
+			{ "data": "desc_sv", "name": "desc_sv"},
+			{
+                "data": "number",
+                "name": "number",
+                "orderable": false,
+                "bSearchable": false
+            },
+		],
+		rowId: 'code',
+		"order": [[0, 'asc']],
+	} );
 
+	// Refresh data every 60 sec
+	setInterval( function () {
+		table.ajax.reload( null, false ); // user paging is not reset on reload
+	}, 60000 );
+	var table = $('#events').DataTable( {
+		//destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			"url": "{% url 'event_list_dt' %}",
+			"type": "GET",
+			"data": {
+				archiveobjects__StatusProcess__in: '[3000]',
+				StatusProcess__in: '[3000]',
+				exclude_filtered_from_information: true,
+			},
+		},
+		colReorder: true,
+		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+		buttons: [
+			{
+				extend: 'colvis',
+			}
+		],
+		columns: [
+			{ "data": "eventIdentifierValue", "name": "eventIdentifierValue"},
+			{ "data": "eventType", "name": "eventType"},
+			{ "data": "eventDateTime", "name": "eventDateTime"},
+			{ "data": "eventOutcome", "name": "eventOutcome"},
+			{ "data": "eventOutcomeDetailNote", "name": "eventOutcomeDetailNote"},
+			{ "data": "linkingAgentIdentifierValue", "name": "linkingAgentIdentifierValue"},
+			{ "data": "linkingObjectIdentifierValue", "name": "linkingObjectIdentifierValue"},
+		],
+		rowId: 'eventIdentifierValue',
+		"order": [[0, 'asc']],
+	} );
+
+	// Refresh data every 60 sec
+	setInterval( function () {
+		table.ajax.reload( null, false ); // user paging is not reset on reload
+	}, 60000 );
+
+} );
+
+</script>
 {% endblock %}
