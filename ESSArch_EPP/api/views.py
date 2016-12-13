@@ -398,7 +398,7 @@ class Delivery_dt_view(DatatableBaseView):
                 ip = {
                     'Generation': ip_obj.Generation,
                     'EntryAgentIdentifierValue': ip_obj.EntryAgentIdentifierValue,
-                    'label': ip_obj_data.label,
+                    'label': getattr(ip_obj_data, 'label', ''),
                     'entryDate': self.render_column(ip_obj, 'EntryDate'),
                     'startdate': self.render_column(ip_obj_data, 'startdate'),
                     'enddate': self.render_column(ip_obj_data, 'enddate'),
