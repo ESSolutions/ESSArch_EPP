@@ -454,7 +454,6 @@ class Event_type_dt_view(DatatableBaseView):
         for item in qs:
             l = {}
             for column in self.get_columns():
-                print column
                 if column == 'number':
                     l[column] = eventIdentifier.objects.filter(eventType=item.code).count()
                 else:
