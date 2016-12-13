@@ -402,7 +402,7 @@ class Delivery_dt_view(DatatableBaseView):
                     'entryDate': self.render_column(ip_obj, 'EntryDate'),
                     'startdate': self.render_column(ip_obj_data, 'startdate'),
                     'enddate': self.render_column(ip_obj_data, 'enddate'),
-                    'aic': aic_obj.ObjectUUID,
+                    'aic': getattr(aic_obj, 'ObjectUUID', ''),
                     'ip': ip_obj.ObjectUUID
                 }
                 json_data.append(ip)
