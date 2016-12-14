@@ -111,7 +111,13 @@ $(document).ready( function () {
 			{ "data": "eventIdentifierValue", "name": "eventIdentifierValue"},
 			{ "data": "eventType", "name": "eventType"},
 			{ "data": "eventDateTime", "name": "eventDateTime"},
-			{ "data": "eventOutcome", "name": "eventOutcome"},
+			{
+                "data": "eventOutcome",
+                "name": "eventOutcome",
+                "render": function (data, type, row) {
+                    return data == 0 ? "Success" : "Fail";
+                }
+            },
 			{ "data": "eventOutcomeDetailNote", "name": "eventOutcomeDetailNote"},
 			{ "data": "linkingAgentIdentifierValue", "name": "linkingAgentIdentifierValue"},
 			{ "data": "linkingObjectIdentifierValue", "name": "linkingObjectIdentifierValue"},
