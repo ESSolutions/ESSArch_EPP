@@ -122,6 +122,19 @@ class MultiSelectWidget(forms.SelectMultiple):
 #
 # Choices for models and forms
 #
+ObjectActive_CHOICES = (
+    (1, 'Active'),
+    (2, 'Inactive'),
+)
+
+ObjectStatus_CHOICES = (
+    (1, 'DjVu references loaded'),
+    (2, 'ADDML metadata loaded'),
+    (3, 'Not Approved'),
+    (4, 'During work'),
+    (5, 'Available in HSM'),
+)
+
 StatusActivity_CHOICES = (
     (0, 'OK'),
     (1, 'New object'),
@@ -258,7 +271,7 @@ class ArchiveObject(models.Model):
     ObjectMessageDigestAlgorithm = models.IntegerField(null=True)
     ObjectMessageDigest = models.CharField(max_length=128, blank=True)
     ObjectPath = models.CharField(max_length=255, blank=True)
-    ObjectActive = models.IntegerField(null=True)
+    ObjectActive = models.IntegerField(null=True, choices=ObjectActive_CHOICES)
     MetaObjectIdentifier = models.CharField(max_length=255, blank=True)
     MetaObjectSize = models.BigIntegerField(null=True)
     CMetaMessageDigestAlgorithm = models.IntegerField(null=True)
@@ -267,7 +280,7 @@ class ArchiveObject(models.Model):
     PMetaMessageDigest = models.CharField(max_length=128, blank=True)
     DataObjectSize = models.BigIntegerField(null=True)
     DataObjectNumItems = models.IntegerField(null=True)
-    Status = models.IntegerField(null=True)
+    Status = models.IntegerField(null=True, choices=ObjectStatus_CHOICES)
     StatusActivity = models.IntegerField(null=True, choices=StatusActivity_CHOICES)
     StatusProcess = models.IntegerField(null=True, choices=StatusProcess_CHOICES)
     LastEventDate = models.DateTimeField(null=True)

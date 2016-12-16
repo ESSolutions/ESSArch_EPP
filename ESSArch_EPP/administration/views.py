@@ -366,12 +366,14 @@ class StorageMigration(TemplateView):
 
 class StorageMigrationDatatablesView(DatatablesViewEss):
     model = ArchiveObject
+    #queryset = ArchiveObject.objects.filter(StatusProcess=3000, StatusActivity=0).all()
 
     fields = (
         'ObjectIdentifierValue',
         'ObjectUUID',
         'StatusProcess',
         'StatusActivity',
+        'ObjectActive',
         'Storage_set__storagemedium__storageMediumID',
         'Storage_set__contentLocationValue',     
         'PolicyId__PolicyName',
@@ -389,7 +391,7 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
         if self.form.is_valid():
             self.object_list_with_writetapes = self.get_queryset().extra(
                   where=["NOT `Storage_storagemedium`.`storageMediumStatus` = %s"],params=['0']).values(
-                  *self.get_db_fields())
+                  *self.get_db_fields()).filter(StatusProcess=3000, StatusActivity=0)
             self.object_list = []
             for obj in self.object_list_with_writetapes:
                 if not obj['Storage_set__storagemedium__storageMediumStatus'] == 20:
@@ -399,20 +401,20 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
         else:
             return HttpResponseBadRequest()
 
-    def sort_col_qs_4(self, direction, queryset):
-        '''sort for col_5'''
+    def sort_col_qs_5(self, direction, queryset):
+        '''sort for col_6'''
         queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
         orders = ('%sStorage_set__storagemedium__storageMediumID' % direction, '%scontentLocationValue_int' % direction)
         return orders, queryset
 
-    def sort_col_qs_5(self, direction, queryset):
-        '''sort for col_6'''
+    def sort_col_qs_6(self, direction, queryset):
+        '''sort for col_7'''
         queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
         orders = ('%scontentLocationValue_int' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
         return orders, queryset
 
-    def search_col_4(self, search, queryset):
-        idx=4
+    def search_col_5(self, search, queryset):
+        idx=5
         field = self.get_field(idx)
         fields = RE_FORMATTED.findall(field) if RE_FORMATTED.match(field) else [field]
         if not search.startswith('-'):
@@ -428,7 +430,7 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
                     queryset = queryset.filter(search)
         return queryset
 
-    def search_col_5(self, search, queryset):
+    def search_col_6(self, search, queryset):
         '''exclude filter for search terms'''
         #print 'search: %s' % search
         for term in search.split():
