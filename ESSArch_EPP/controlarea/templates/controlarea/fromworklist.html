@@ -46,10 +46,10 @@ $(document).ready( function () {
 			"url": "{% url 'ip_list_dt' %}",
 			"type": "GET",
 			"data": { 
-				//archiveobjects__StatusProcess__in: '[3000,5000]',
+				archiveobjects__StatusProcess__in: '[5100]',
 				//archiveobjects__StatusProcess__lt: '3000',
 				//archiveobjects__StatusActivity__in: '[0, 4]',
-				archiveobjects__StatusProcess_or_StatusActivity__in: '[[5100], [8]]',
+				//archiveobjects__StatusProcess_or_StatusActivity__in: '[[5100], [8]]',
 				//archiveobjects__exclude_generation_0_and_latest: true,
 				//StatusProcess__in: '[0]',
 				exclude_ip_without_aic: true,
