@@ -369,7 +369,8 @@ class CheckinFromReceptionListView(ListView):
         source_path = Path.objects.get(entity='path_reception').value
         path_gate_reception = Path.objects.get(entity='path_gate_reception').value
         Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, Parameter.DoesNotExist,
+            utils.ProgrammingError, utils.OperationalError) as e:
         source_path = '/tmp'
         path_gate_reception = '/tmp'
         Pmets_obj = 'none'
@@ -398,7 +399,8 @@ class CheckinFromReception(CreateView):
         target_path = Path.objects.get(entity='path_control').value
         path_gate_reception = Path.objects.get(entity='path_gate_reception').value
         Pmets_obj = Parameter.objects.get(entity='package_descriptionfile').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, Parameter.DoesNotExist,
+            utils.ProgrammingError, utils.OperationalError) as e:
         source_path = '/tmp'
         target_path = '/tmp'
         path_gate_reception = '/tmp'
@@ -993,7 +995,7 @@ class CheckoutToGateFromWork(CreateView):
     try:
         target_path = Path.objects.get(entity='path_gate').value
         source_path = Path.objects.get(entity='path_work').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
         source_path = '/tmp'
         target_path = '/tmp'
     
@@ -1131,7 +1133,7 @@ class CheckinFromGateListView(ListView):
     queryset=ArchiveObject.objects.all()
     try:
         gate_path = Path.objects.get(entity='path_gate').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
         gate_path = '/tmp'
 
     @method_decorator(permission_required('controlarea.CheckinFromGate'))
@@ -1156,7 +1158,7 @@ class CheckinFromGateToWork(CreateView):
     try:
         target_path = Path.objects.get(entity='path_work').value
         source_path = Path.objects.get(entity='path_gate').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:        
         target_path = '/tmp'
         source_path = '/tmp'
     
@@ -1360,7 +1362,7 @@ class DiffCheck(CreateView):
     try:
         target_path = Path.objects.get(entity='path_control').value
         #Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
         target_path = '/tmp'
 
     @method_decorator(permission_required('controlarea.DiffCheck'))

@@ -45,7 +45,7 @@ if ESSDB_flag == 0:
 elif ESSDB_flag == 1:
     try: 
         ioessarch = Path.objects.get(entity='path_gate_reception').value
-    except utils.ProgrammingError:
+    except (Path.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
         ioessarch = '/tmp'
 
 # Configuration
@@ -125,7 +125,7 @@ try:
     
     if ESSDB_flag == 0: XHTML_SCHEMALOCATION = u"http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
     elif ESSDB_flag == 1: XHTML_SCHEMALOCATION = SchemaProfile.objects.get(entity='xhtml_schemalocation').value
-except utils.ProgrammingError:
+except (SchemaProfile.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
     METS_NAMESPACE = u"http://www.loc.gov/METS/"
     METS_SCHEMALOCATION = u"http://www.loc.gov/mets/mets.xsd"
     XLINK_NAMESPACE = u"http://www.w3.org/1999/xlink"

@@ -96,12 +96,13 @@ class BaseChunkedUpload(models.Model):
         abstract = True
 
 from django.db import ProgrammingError
+from django.db.utils import OperationalError
 from configuration.models import Path
 
 # TmpWorkareaUpload
 try:
     TmpWorkarea_upload_root =  Path.objects.get(entity='TmpWorkarea_upload_path').value
-except (Path.DoesNotExist, ProgrammingError) as e:
+except (Path.DoesNotExist, ProgrammingError, OperationalError) as e:
     TmpWorkarea_upload_root = settings.MEDIA_ROOT
 
 def TmpWorkarea_filename(instance, filename):
@@ -121,7 +122,7 @@ class TmpWorkareaUpload(BaseChunkedUpload):
 # GateareUpload
 try:
     Gatearea_upload_root =  Path.objects.get(entity='path_gate').value
-except (Path.DoesNotExist, ProgrammingError) as e:
+except (Path.DoesNotExist, ProgrammingError, OperationalError) as e:
     Gatearea_upload_root = settings.MEDIA_ROOT
 
 def Gatearea_filename(instance, filename):

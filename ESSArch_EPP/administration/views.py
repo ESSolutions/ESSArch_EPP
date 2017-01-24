@@ -64,7 +64,7 @@ import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
 
 try:
     ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
-except utils.ProgrammingError:
+except (ESSConfig.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
     ExtDBupdate = 0
 
 '''
