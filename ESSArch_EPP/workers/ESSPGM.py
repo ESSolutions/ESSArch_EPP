@@ -2282,6 +2282,19 @@ class Events:
                 else:
                     logging.error('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why)) 
                     return 10
+            except db.DataError as e:
+                if e[1]=="Data too long for column 'eventOutcomeDetailNote' at row 1":
+                    eventIdentifier_obj.eventOutcomeDetailNote = (eventOutcomeDetailNote_MySQL[:1021] + '...') if len(eventOutcomeDetailNote_MySQL) > 1024 else eventOutcomeDetailNote_MySQL
+                    logging.warning('Problem to update local eventDB for eventType: %s, object: %s, error: Data too long for column eventOutcomeDetailNote,  eventOutcomeDetailNote orginal text: %s, truncated to: %s' % (
+                                                                                                                                                                              eventType,
+                                                                                                                                                                              ObjectIdentifierValue,
+                                                                                                                                                                              eventOutcomeDetailNote_MySQL,
+                                                                                                                                                                              eventIdentifier_obj.eventOutcomeDetailNote,
+                                                                                                                                                                              ))
+                    eventIdentifier_obj.save()
+                else:
+                    logging.error('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(e)) 
+                    return 10
 #            res,errno,why=ESSDB.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.uuid,
 #                                                                     'eventType',eventType,
 #                                                                     'eventDateTime',self.timestamp_utc.replace(tzinfo=None),
@@ -2323,6 +2336,19 @@ class Events:
                 else:
                     logging.error('Problem to insert to local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(why)) 
                     return 11
+            except db.DataError as e:
+                if e[1]=="Data too long for column 'eventOutcomeDetailNote' at row 1":
+                    eventIdentifier_obj.eventOutcomeDetailNote = (eventOutcomeDetailNote_MySQL[:1021] + '...') if len(eventOutcomeDetailNote_MySQL) > 1024 else eventOutcomeDetailNote_MySQL
+                    logging.warning('Problem to update local eventDB for eventType: %s, object: %s, error: Data too long for column eventOutcomeDetailNote,  eventOutcomeDetailNote orginal text: %s, truncated to: %s' % (
+                                                                                                                                                                              eventType,
+                                                                                                                                                                              ObjectIdentifierValue,
+                                                                                                                                                                              eventOutcomeDetailNote_MySQL,
+                                                                                                                                                                              eventIdentifier_obj.eventOutcomeDetailNote,
+                                                                                                                                                                              ))
+                    eventIdentifier_obj.save()
+                else:
+                    logging.error('Problem to update local eventDB for eventType: ' + str(eventType) + ', object: ' + Check().unicode2isostr(ObjectIdentifierValue) + ', why: ' + Check().unicode2isostr(e)) 
+                    return 10
 
 #            res,errno,why=ESSDB.DB().action('eventIdentifier','INS',('eventIdentifierValue',self.uuid,
 #                                                                     'eventType',eventType,

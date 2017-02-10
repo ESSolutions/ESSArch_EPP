@@ -462,6 +462,22 @@ class TargetPrePopulation(View):
             targetlist = []
             sm_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1, type=300)
             for sm_obj in sm_objs:
+                st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 3])
+                sm_targetdict = {}
+                sm_write_target = ''
+                sm_migrate_target = ''
+                for st_obj in st_objs:
+                    if not sm_write_target and st_obj.status==1:
+                        if st_obj.target.status == 1:
+                            target_obj = st_obj.target
+                            sm_write_target=target_obj.target
+                    elif not sm_migrate_target and st_obj.status==3:
+                        if st_obj.target.status == 1:
+                            target_obj = st_obj.target
+                            sm_migrate_target=target_obj.target            
+                sm_targetdict[sm_write_target] = sm_migrate_target
+                targetlist.append(sm_targetdict)
+                '''
                 #st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 2])
                 st_objs = sm_obj.storagetarget_set.filter(status=1)
                 if st_objs.count() == 1:
@@ -478,7 +494,7 @@ class TargetPrePopulation(View):
                 else:
                     #logger.error('The target %s is disabled' % target_obj.name)
                     continue
-            
+                '''
             Policy ={}
             Policy['PolicyID'] = ArchivePolicy_obj.PolicyID
             Policy['PolicyName'] =  ArchivePolicy_obj.PolicyName
@@ -523,8 +539,11 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
         #print '################# step 1 ###############################'
         logger = logging.getLogger('essarch.storagemaintenance')
 
-        current_mediumid_search = self.dt_data.get('sSearch_%s' % '4','xxx')
-        logger.debug('col4 serach: %s' % current_mediumid_search)
+        ObjectActive_filter = self.dt_data.get('sSearch_%s' % '4','')
+        logger.debug('col4 serach: %s' % ObjectActive_filter)
+
+        current_mediumid_search = self.dt_data.get('sSearch_%s' % '5','xxx')
+        logger.debug('col5 serach: %s' % current_mediumid_search)
 
         policy_sm_objs_dict = {}
 
@@ -782,7 +801,15 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
         need_to_migrate_list = []
         #need_to_migrate_dict = {}
         for storageMediumID in redundant_storage_list.keys():
-            storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID).values('storagemedium__storageMediumID',
+            if ObjectActive_filter:
+                storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID, archiveobject__ObjectActive=ObjectActive_filter).values('storagemedium__storageMediumID',
+                                                                                                          'storagemedium__CreateDate',
+                                                                                                          'contentLocationValue',
+                                                                                                          'archiveobject__ObjectIdentifierValue',
+                                                                                                          'archiveobject__ObjectUUID',
+                                                                                                          )
+            else:
+                storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID).values('storagemedium__storageMediumID',
                                                                                                           'storagemedium__CreateDate',
                                                                                                           'contentLocationValue',
                                                                                                           'archiveobject__ObjectIdentifierValue',
