@@ -54,7 +54,8 @@ DATABASES = {
         'PORT': '',                           # Set to empty string for default. Not used with sqlite3.
         # This options for storage_engine have to be set for "south migrate" to work.
         'OPTIONS': {
-           "init_command": "SET storage_engine=MyISAM",
+           #"init_command": "SET storage_engine=MyISAM",     # MySQL (<= 5.5.2)
+           "init_command": "SET default_storage_engine=MyISAM",     # MySQL (>= 5.5.3)
         }
     }
 }

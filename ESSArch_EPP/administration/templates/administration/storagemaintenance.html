@@ -53,7 +53,7 @@
          <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" onchange=populateprefixselection() >
+                	<select id="filter-8" onchange=populateprefixselection() >
 					 </select>
 					</tr>
 					<tr>
@@ -63,8 +63,8 @@
                 </select>
                 </td>
                 <td>
-                <div id="filter-4-storage">
-                <input type='hidden'  id='filter-4' >
+                <div id="filter-5-storage">
+                <input type='hidden'  id='filter-5' >
                 </div>
                 </td>
             </tr>
@@ -78,6 +78,15 @@
                         title="Please specify previous medium prefix. For tape AAA001, write AAA">
                 </td>
             </tr>    
+            <tr class="ipstatus">
+                <td>Status</td>
+                <td>
+                    <select id="filter-4">
+                    	<option value=1>Active</option>
+        	            <option value=''>Any</option>
+                    </select>
+                </td>
+            </tr>                
             <tr>
               <td></td>
               <td>
@@ -122,6 +131,7 @@
             	<th>ObjectUUID</th>
         		<th>Status Process</th>
         		<th>Status Activity</th>
+        		<th>Status</th>        		
         		<th>Current MediumID</th>
         		<th>Location</th>
         		<th>Policy</th>
@@ -135,12 +145,6 @@
         <tfoot></tfoot>
     </table>
 </div>
-
-<!--
-<div class="row">
-    <pre data-url="{% static "administration/js/storagemaintenance.js" %}" class="javascript"/>
-</div>
--->
 
 {% endblock %}
 
@@ -159,116 +163,84 @@
 	        			return old=='+' ?  '-' : '+';
 	    		});
 		});
-	
-		var enabledPolicies = {};
-		var targets = [];
+		</script>
 
-		$.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
-
-			 enabledPolicies = enabledPolicies1;
-			 populatePolicyID();
-			 populateprefixselection();
-			 updateFilter4()
-			});
-
-
-
-		function populatePolicyID(){
-
-
-
-			var text1 = "";
-
-			for (i = 0; i < enabledPolicies.length; i++) {
-			    text1 += "<option value=" + enabledPolicies[i].PolicyID + ">" + enabledPolicies[i].PolicyID + "," + enabledPolicies[i].PolicyName + "</option>"
-			}
-
-			document.getElementById('filter-7').innerHTML = text1;
-
-
-			}
-
-		function populateprefixselection(){
-			
-			var prefixes = "<option value='noprefix'> No prefix selected</option>";
-			
-				
-				
-				var selectedPolicy = document.getElementById("filter-7").value;
-
-			
-				for (i=0; i< enabledPolicies.length; i++){
-
-			   	 if (selectedPolicy == enabledPolicies[i].PolicyID){
-				
-					targets = enabledPolicies[i].targetlist
-					}
-				}
-								
-				for (i = 0; i < targets.length; i++){
-						
-						prefixes += "<option value=" +  targets[i]  + ">" + " " +  targets[i] + " " +"</option>"
-					
-				}
-				document.getElementById("previousmediaimput").value = "";
-				document.getElementById("prefixselection").innerHTML = prefixes;
-				updateFilter4();
-			    
-			}
-		
-		function prefixSelectionAction(){
-			
-			document.getElementById("previousmediaimput").value = "";
-			updateFilter4();
-		}
-			
-		function updateFilter4(){
-			var previousInput  = document.getElementById("previousmediaimput").value;
-			var selectedPrefix = document.getElementById("prefixselection").value;
-			var selectedprefixrecord = "";
-			
-		     if(selectedPrefix == "noprefix" && previousInput.length > 1){
-		    	 alert("Current Band Prefix must be choosen")
-		     }
-			
-		     if(selectedPrefix =="noprefix"){
-		    	 selectedprefixrecord = "";
-		     }
-		     else{
-		    	 if(previousInput.length > 1){
-		    		 selectedprefixrecord = "-" + previousInput + "+" + selectedPrefix;
-		    	 }
-		    	 else{
-		    		 selectedprefixrecord = selectedPrefix;
-		    	 }
-		     }
-			
-			
-			
-			$('#filter-4').val(selectedprefixrecord).trigger('change');
-		}
-			
-
-
-
-	</script>
-<!--
 <script>
-$(document).ready(function() {
-	function deffnFilterColumn(i) {
-    	var oTable = $('#archiveobject-table').dataTable();
-    	oTable.fnFilter(
-            $("#filter-"+i).val(),
-            i
-        );
-        alert('setdef:'+i+' value:'+$("#filter-"+i).val())
-    }
-	var test = $('#filter-3').attr('value');
-	if (test) {
-		deffnFilterColumn('2')
-    	//alert('filter-2'+test)
-   }
-} );
+
+var enabledPolicies = {};
+var targets = [];
+
+$.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
+	 enabledPolicies = enabledPolicies1;
+	 populatePolicyID();
+	 populateprefixselection();
+	 updateFilter4()
+	});
+
+function populatePolicyID(){
+
+	var text1 = "";
+
+	for (i = 0; i < enabledPolicies.length; i++) {
+	    text1 += "<option value=" + enabledPolicies[i].PolicyID + ">" + enabledPolicies[i].PolicyID + "," + enabledPolicies[i].PolicyName + "</option>"
+	}
+	document.getElementById('filter-8').innerHTML = text1;
+
+}
+
+function populateprefixselection(){
+	
+	var prefixes = "<option value='noprefix'> No prefix selected</option>";
+	var selectedPolicy = document.getElementById("filter-8").value;
+
+	for (i=0; i< enabledPolicies.length; i++){
+		if (selectedPolicy == enabledPolicies[i].PolicyID){
+			targets = enabledPolicies[i].targetlist;
+			//console.log(enabledPolicies[i].targetlist);
+		}
+	}
+						
+	for (i = 0; i < targets.length; i++){	
+		prefixes += "<option value=" +  Object.keys(targets[i])  + ">" + " " +  Object.keys(targets[i]) + " " +"</option>"
+	}
+
+	document.getElementById("previousmediaimput").value = "";
+	document.getElementById("prefixselection").innerHTML = prefixes;
+	updateFilter4();	    
+}
+
+function prefixSelectionAction(){
+	var key = $("#prefixselection option:selected").val();
+	targets.forEach(function(target) {
+		if(target[key]) {
+			document.getElementById("previousmediaimput").value = target[key];
+		}
+	});
+	updateFilter4();
+}
+	
+function updateFilter4(){
+	var previousInput  = document.getElementById("previousmediaimput").value;
+	var selectedPrefix = document.getElementById("prefixselection").value;
+	var selectedprefixrecord = "";
+	
+	if(selectedPrefix == "noprefix" && previousInput.length > 1){
+		alert("Current Band Prefix must be choosen")
+	}
+	
+	if(selectedPrefix =="noprefix"){
+		selectedprefixrecord = "";
+	}
+	else{
+		if(previousInput.length > 1){
+    		 selectedprefixrecord = "-" + previousInput + "+" + selectedPrefix;
+		}
+		else{
+			selectedprefixrecord = selectedPrefix;
+		}
+	}
+	$('#filter-5').val(selectedprefixrecord).trigger('change');
+}
+
 </script>
--->
 {% endblock %}

@@ -96,28 +96,4 @@ class eventsReport(ListView):
         context = super(eventsReport, self).get_context_data(**kwargs)
         context['type'] = 'event'
         context['label'] = 'REPORTS - Log Events report'
-        eventobject_list = context['object_list']
-        
-        eventCodes = eventType_codes.objects.values('code','desc_sv')
-        eventCodesDict = {}
-        for e in eventCodes:
-            eventCodesDict[e['code']] = e['desc_sv']
-        print(eventCodesDict)
-        event_list = []
-        for i in eventobject_list:
-            event_list.append(i.eventType)
-        
-        #print '#####################################: %s' % str(event_list)
-        event_list2 = []
-        for i in list(set(event_list)):
-            try:
-                event_desc = eventCodesDict[int(i)]
-            except KeyError:
-                event_desc = '-'
-            event_list2.append([i, event_desc, event_list.count(i)])
-            
-            #event_list2.append([i,event_list[i].eventDetail])
-        #print '#####################################: %s' % str(event_list2)
-        
-        context['event_list'] = sorted(event_list2)
         return context

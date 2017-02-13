@@ -74,6 +74,8 @@ from api.serializers import (
                         )
 from essarch.models import (ArchiveObject, 
                             ArchiveObjectRel,
+                            eventIdentifier,
+                            eventType_codes,
                             ProcessStep,
                             ProcessTask,
                             AccessQueue,
@@ -372,6 +374,230 @@ class ArchiveObject_dt_view(DatatableBaseView):
             else:
                 data.append(d)
         return data
+
+class Delivery_dt_view(DatatableBaseView):
+    qs = ArchiveObject.objects.filter(
+            Q(StatusProcess=3000) | Q(OAISPackageType=1)
+        ).order_by('id','Generation')
+    columns = [
+        'Generation', 'EntryAgentIdentifierValue', 'label',
+        'entryDate', 'startdate',
+        'enddate', 'ObjectUUID', 'ObjectUUID'
+    ]
+    order_columns = [
+        'Generation', 'EntryAgentIdentifierValue', 'label',
+        'entryDate', 'startdate',
+        'enddate', 'ObjectUUID', 'ObjectUUID'
+    ]
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+
+    def prepare_results(self, qs):
+        json_data = []
+        for item in qs:
+            for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in item.get_ip_list(StatusProcess=3000):
+                ip = {
+                    'Generation': ip_obj.Generation,
+                    'EntryAgentIdentifierValue': ip_obj.EntryAgentIdentifierValue,
+                    'label': getattr(ip_obj_data, 'label', ''),
+                    'entryDate': self.render_column(ip_obj, 'EntryDate'),
+                    'startdate': self.render_column(ip_obj_data, 'startdate'),
+                    'enddate': self.render_column(ip_obj_data, 'enddate'),
+                    'aic': getattr(aic_obj, 'ObjectUUID', ''),
+                    'ip': ip_obj.ObjectIdentifierValue
+                }
+                json_data.append(ip)
+        return json_data
+
+    def render_column(self, row, column):
+        if hasattr(row, 'get_%s_display' % column):
+            # It's a choice field
+            text = getattr(row, 'get_%s_display' % column)()
+        else:
+            try:
+                text = getattr(row, column)
+            except AttributeError:
+                obj = row
+                for part in column.split('.'):
+                    if obj is None:
+                        break
+                    obj = getattr(obj, part)
+
+                text = obj
+        if text is None:
+            text = self.none_string
+
+        if hasattr(text,'all'):
+            data = []
+            for item in text.all():
+                d={}
+                for column in self.get_columns():
+                    d[column]=self.render_column(item, column)
+                data.append(d)
+            text=data
+
+        if column in ['EntryDate', 'startdate', 'enddate']:
+            if type(text) is datetime.datetime:
+                try:
+                    res = text.strftime(self.datetime_format)
+                except ValueError:
+                    res = str(text)
+                return res
+
+        if column in ['object_list']:
+            if type(text) is long:
+                try:
+                    res = "%s (%s)" % (
+                        str(text),
+                        eventType_codes.objects.get(code=text).desc_sv
+                    )
+                except eventType_codes.DoesNotExist:
+                    res = str(text)
+                return res
+
+        if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
+            return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
+        else:
+            return text
+
+class Delivery_number_dt_view(DatatableBaseView):
+    qs = ArchiveObject.objects.filter(Q(StatusProcess=3000) | Q(OAISPackageType=1)).order_by('id','Generation')
+
+    columns = [
+        'EntryAgentIdentifierValue', 'number'
+    ]
+    order_columns = ['EntryAgentIdentifierValue', 'number']
+
+    def prepare_results(self, qs):
+        entries = []
+        unique = []
+        for item in qs:
+            for aic_obj,ip_obj,test,ip_obj_data,ip_obj_metadata in item.get_ip_list(StatusProcess=3000):
+                entries.append(ip_obj.EntryAgentIdentifierValue)
+
+        for i in list(set(entries)):
+            unique.append({'EntryAgentIdentifierValue': i, 'number': entries.count(i)})
+
+        print unique
+        return sorted(unique)
+
+class Event_dt_view(DatatableBaseView):
+    qs =  eventIdentifier.objects.all()
+    columns = [
+        'eventIdentifierValue', 'eventType', 'eventDateTime',
+        'eventOutcome', 'eventOutcomeDetailNote',
+        'linkingAgentIdentifierValue', 'linkingObjectIdentifierValue'
+    ]
+    order_columns = [
+        'eventIdentifierValue', 'eventType', 'eventDateTime',
+        'eventOutcome', 'eventOutcomeDetailNote',
+        'linkingAgentIdentifierValue', 'linkingObjectIdentifierValue'
+    ]
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+
+    def render_column(self, row, column):
+        if hasattr(row, 'get_%s_display' % column):
+            # It's a choice field
+            text = getattr(row, 'get_%s_display' % column)()
+        else:
+            try:
+                text = getattr(row, column)
+            except AttributeError:
+                obj = row
+                for part in column.split('.'):
+                    if obj is None:
+                        break
+                    obj = getattr(obj, part)
+
+                text = obj
+        if text is None:
+            text = self.none_string
+
+        if hasattr(text,'all'):
+            data = []
+            for item in text.all():
+                d={}
+                for column in self.get_columns():
+                    d[column]=self.render_column(item, column)
+                data.append(d)
+            text=data
+
+        if column in ['eventDateTime']:
+            if type(text) is datetime.datetime:
+                try:
+                    res = text.strftime(self.datetime_format)
+                except ValueError:
+                    res = str(text)
+                return res
+
+        if column in ['eventType']:
+            if type(text) is long:
+                try:
+                    res = "%s (%s)" % (
+                        str(text),
+                        eventType_codes.objects.get(code=text).desc_sv
+                    )
+                except eventType_codes.DoesNotExist:
+                    res = str(text)
+                return res
+
+        if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
+            return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
+        else:
+            return text
+
+class Event_type_dt_view(DatatableBaseView):
+    qs =  eventType_codes.objects.all()
+    columns = [
+        'code', 'desc_sv', 'number'
+    ]
+    order_columns = [
+        'code', 'desc_sv', ''
+    ]
+
+    def prepare_results(self, qs):
+        json_data = []
+        for item in qs:
+            l = {}
+            for column in self.get_columns():
+                if column == 'number':
+                    l[column] = eventIdentifier.objects.filter(eventType=item.code).count()
+                else:
+                    l[column] = self.render_column(item, column)
+            json_data.append(l)
+        return json_data
+
+    def render_column(self, row, column):
+        if hasattr(row, 'get_%s_display' % column):
+            # It's a choice field
+            text = getattr(row, 'get_%s_display' % column)()
+        else:
+            try:
+                text = getattr(row, column)
+            except AttributeError:
+                obj = row
+                for part in column.split('.'):
+                    if obj is None:
+                        break
+                    obj = getattr(obj, part)
+
+                text = obj
+        if text is None:
+            text = self.none_string
+
+        if hasattr(text,'all'):
+            data = []
+            for item in text.all():
+                d={}
+                for column in self.get_columns():
+                    d[column]=self.render_column(item, column)
+                data.append(d)
+            text=data
+
+        if text and hasattr(row, 'get_absolute_url') and self.absolute_url_link_flag:
+            return '<a href="%s">%s</a>' % (row.get_absolute_url(), text)
+        else:
+            return text
+
 
 class TmpWorkareaUploadView(TemplateView):
     template_name = 'api/tmpworkarea_upload.html'

@@ -87,6 +87,7 @@
                         placeholder="objectUUID search">
                 </td>
             </tr>
+            <!--
             <tr class="statusprocess">
                 <td>Status Process</td>
                 <td>
@@ -105,36 +106,39 @@
                         placeholder="statusactivity search">
                 </td>
             </tr>
+            -->
+            <tr class="ipstatus">
+                <td>Status</td>
+                <td>
+                    <select id="filter-4">
+                    	<option value=1>Active</option>
+        	            <option value=''>Any</option>
+                    </select>
+                </td>
+            </tr>            
             <tr class="storageMediumID">
                 <td>Current MediumID</td>
                 <td>
-                    <input id="filter-4" type="text"
+                    <input id="filter-5" type="text"
                         class="input-xxlarge"
                         placeholder="medium search"
                         title="Specify a media or a range of media, to select media ESA001->ESA009 enter ESA00[0-9].&#013;">
                 </td>
-                
             </tr>
-           
-          
             <tr class="policyid">
                 <td>PolicyID</td>
                 <td>
-                	<select id="filter-7" onchange=populatecheckboxes() >
-
-
+                	<select id="filter-8" onchange=populatecheckboxes() >
                 	<!-- EnabledPolicies -->
-
                     </select>
                 </td>
-                <td>
-                 </td>
+                <td></td>
             </tr>
             <tr>
-              <td></td>
-              <td>
-                  <button type="button" id="filter-submit">Apply filters</button>
-              </td>
+              	<td></td>
+              	<td>
+                  	<button type="button" id="filter-submit">Apply filters</button>
+              	</td>
             </tr>
         </tbody>
     </table>
@@ -145,32 +149,33 @@
 </div>
 
 <div id="storagemediumtarget" class="row collapse in">
-             <table>
-             
-             <tr>
-                <td>Current Medium Prefix</td><td></td><td></td><td></td>
-                
-					<td>
-					   <div id="targetfield">
-							
-                      </div>
+	<table>
+		<tbody>      
+			<tr>
+				<td>Medium Prefix</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>
+					<div id="targetfield"></div>
                 </td>
                 <td>
-                <div id="filter-5-storage">
-                <input type='hidden'  id='filter-5' >
-                </div>
+                	<div id="filter-6-storage">
+                		<input type='hidden'  id='filter-6' >
+                	</div>
                 </td>
-                <td></td><td></td>
+                <td></td>
+                <td></td>
                 <td>
-                <div id="enablePlusBoxField">
+                	<div id="enablePlusBoxField">
                 		<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.
-                </div>
+                	</div>
                 </td>
             </tr>
-            
         </tbody>
     </table>
 </div>
+
 <div class="row">
 	<button type="button" class="btn btn-small" data-toggle="collapse" data-target="#archiveobject-selection">-</button>
 	<span>Selection list</span>
@@ -184,6 +189,7 @@
             	<th>ObjectUUID</th>
         		<th>Status Process</th>
         		<th>Status Activity</th>
+        		<th>Status</th>
         		<th>Current MediumID</th>
         		<th>Location</th>
         		<th>Policy</th>
@@ -197,9 +203,6 @@
         <tfoot></tfoot>
     </table>
 </div>
-
-
-
 
 <!--
 <div class="row">
@@ -217,7 +220,6 @@
 	<script type="text/javascript" src="/static/administration/js/eztables.demo.js"></script>
 	<script type="text/javascript" src="/static/datatablesMultiFilter/fnMultiFilter.js"></script>
 	<script type="text/javascript" src="/static/administration/js/storagemigration.js"></script>
-	
 
 	<script>	
 		$(".btn[data-toggle='collapse']").click(function()
@@ -231,23 +233,17 @@
 
 <script>
 
-
 var enabledPolicies = {};
 var targets = [];
 
 $.getJSON( "{% url 'admin_migrationtarget' %}", function(enabledPolicies1) {
-
 	 enabledPolicies = enabledPolicies1;
 	 populatePolicyID();
 	 populatecheckboxes();
 	 updateFilter5()
 	});
 
-
-
 function populatePolicyID(){
-
-
 
 	var text1 = "";
 
@@ -255,32 +251,26 @@ function populatePolicyID(){
 	    text1 += "<option value=" + enabledPolicies[i].PolicyID + ">" + enabledPolicies[i].PolicyID + "," + enabledPolicies[i].PolicyName + "</option>"
 	}
 
-	document.getElementById('filter-7').innerHTML = text1;
-
+	document.getElementById('filter-8').innerHTML = text1;
 
 	}
 
 function populatecheckboxes(){
 	
 	var targetcheckboxes = "";
-	if (document.getElementById("copyonlyflag").checked == false){
-		
-		
-		var selectedPolicy = document.getElementById("filter-7").value;
-
 	
-		for (i=0; i< enabledPolicies.length; i++){
+	if (document.getElementById("copyonlyflag").checked == false){
+				
+		var selectedPolicy = document.getElementById("filter-8").value;
 
-	   	 if (selectedPolicy == enabledPolicies[i].PolicyID){
-		
-			targets = enabledPolicies[i].targetlist
+		for (i=0; i< enabledPolicies.length; i++){
+	   		if (selectedPolicy == enabledPolicies[i].PolicyID){
+				targets = enabledPolicies[i].targetlist
 			}
 		}
 						
 		for (i = 0; i < targets.length; i++){
-				
 				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " "
-			
 		}
 		document.getElementById("targetfield").innerHTML = targetcheckboxes;
 		updateFilter5();
@@ -306,28 +296,21 @@ function updateFilter5(){
     		targetrecord += targets[i];
     	}
     }
-    	$('#filter-5').val(targetrecord).trigger('change');
+    	$('#filter-6').val(targetrecord).trigger('change');
 }
 	
 function removeTarget(){
 	
 	var noMigration =  'NO MEDIA MIGRATION' ;
 	
-	
-	
-	
 	if (document.getElementById("copyonlyflag").checked == true){
 		document.getElementById("targetfield").innerHTML = noMigration;
 		document.getElementById("enablePlusBoxField").innerHTML = "";
 		<!-- $('#filter-5').val("") -->
-		
-		
 	}
 	else{;
-	    
-	     document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.";		
+	    document.getElementById("enablePlusBoxField").innerHTML = "<input type='checkbox' id='enablePlus' onclick=updateFilter5()> Force additional copies on the same target medium.";		
 		populatecheckboxes()
-		
 	}	
 }
 

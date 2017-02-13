@@ -1,64 +1,136 @@
-{% extends 'index.html' %}
-{% load dictionary_extras %}
+{% extends 'admin/base_site.html' %}
 
-{% block content %}
+{% block server-side-base %}active{% endblock %}
 
-<div style="margin:20px">
-<H1>{{ label }}</H1>
+{% block app-extra-style %}
+    <link href="/static/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/api/css/aic.css" rel="stylesheet" type="text/css" />
+{% endblock %}
 
-<br/>
+{% block container %}
 
-<div class="results">
-  <table id="result_list">
-    <thead>
-      <tr>
-                <th>Archivist organisation</th>
-                <th>Delivery's</th>
-      </tr>
-    </thead>
-    <tbody>
-	    	{% for archivist,archivist_num in Creator_list %}
-		      	<tr class="row{% cycle '1' '2' %}">
-					<td>{{ archivist }}</td>
-					<td>{{ archivist_num }}</td>
-		      	</tr>
-	      	{% endfor %}
-    </tbody>
-  </table>
-</div>
+	<H2>{{ label }}</H2>
+	<br>
+    <div>
+      <table id="numbers" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th>ARCHIVIST ORGANISATION</th>
+            <th>DELIVERY'S</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <hr>
+    <div>
+      <table id="deliveries" width=100% class="display table table-bordered table-condensed table-striped">
+        <thead>
+          <tr>
+            <th>Generation</th>
+            <th>ARCHIVIST ORGANIZATION</th>
+            <th>LABEL</th>
+            <th>CREATE DATE</th>
+            <th>START DATE</th>
+            <th>END DATE</th>
+            <th>AIC (UUID)</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+{% endblock %}
 
-</br>
-<div class="results">
-  <table id="result_list">
-    <thead>
-      <tr>
-            	<th>Generation</th>
-                <th>Archivist organization</th>
-                <th>Label</th>
-                <th>Create date</th>
-                <th>Start date</th>
-                <th>End date</th>
-                <th>AIC (UUID)</th>
-                <th>IP (UUID)</th>
-      </tr>
-    </thead>
-    <tbody>
-	    	{% for aic_obj,ip_obj,ip_form,ip_obj_data,ip_obj_metadata in ip_list %}
-		      	<tr class="row{% cycle '1' '2' %}">
-					<td>IP_{{ ip_obj.Generation }}</td>
-					<td>{{ ip_obj.EntryAgentIdentifierValue }}</td>
-					<td>{{ ip_obj_data.label }}</td>
-					<td>{{ ip_obj.EntryDate }}</td>
-					<td>{{ ip_obj_data.startdate }}</td>
-					<td>{{ ip_obj_data.enddate }}</td>
-					<td>{{ aic_obj.ObjectUUID }}</td>
-					<td>{{ ip_obj.ObjectUUID }}</td>  
-		      	</tr>
-	      	{% endfor %}
-    </tbody>
-  </table>
-</div>
+{% block app-extra-script %}
+	<script type="text/javascript" src="/static/DataTables/datatables.js"></script>
+<script>
 
-</div>
+$(document).ready( function () {
+	var table = $('#numbers').DataTable( {
+		//destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			"url": "{% url 'delivery_number_list_dt' %}",
+			"type": "GET",
+			"data": {
+				archiveobjects__StatusProcess__in: '[3000]',
+				StatusProcess__in: '[3000]',
+				exclude_filtered_from_information: true,
+			},
+		},
+		colReorder: true,
+		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+		buttons: [
+			{
+				extend: 'colvis',
+			}
+		],
+		columns: [
+			{ 
+                "data": "EntryAgentIdentifierValue",
+                "name": "EntryAgentIdentifierValue",
+                "orderable": false,
+                "bSearchable": false
+            },
+			{
+                "data": "number",
+                "name": "number",
+                "orderable": false,
+                "bSearchable": false
+            },
+		],
+		rowId: 'EntryAgentIdentifierValue',
+		"order": [[0, 'asc']],
+	} );
 
+	// Refresh data every 60 sec
+	setInterval( function () {
+		table.ajax.reload( null, false ); // user paging is not reset on reload
+	}, 60000 );
+	var table = $('#deliveries').DataTable( {
+		//destroy: true,
+		processing: true,
+		serverSide: true,
+		ajax: {
+			"url": "{% url 'delivery_list_dt' %}",
+			"type": "GET",
+			"data": {
+				archiveobjects__StatusProcess__in: '[3000]',
+				StatusProcess__in: '[3000]',
+				exclude_filtered_from_information: true,
+			},
+		},
+		colReorder: true,
+		dom: "<'row'<'col-sm-5'l><'col-sm-2'B><'col-sm-5'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+		buttons: [
+			{
+				extend: 'colvis',
+			}
+		],
+		columns: [
+			{ "data": "Generation", "name": "Generation", "orderable": false, "bSearchable": false},
+			{ "data": "EntryAgentIdentifierValue", "name": "EntryAgentIdentifierValue"},
+			{ "data": "label", "name": "label", "orderable": false, "bSearchable": false},
+			{ "data": "entryDate", "name": "entryDate", "orderable": false, "bSearchable": false},
+			{ "data": "startdate", "name": "startdate", "orderable": false, "bSearchable": false},
+			{ "data": "enddate", "name": "enddate", "orderable": false, "bSearchable": false},
+			{ "data": "aic", "name": "aic", "orderable": false, "bSearchable": false},
+			{ "data": "ip", "name": "ip", "orderable": false, "bSearchable": false},
+		],
+		rowId: 'EntryAgentIdentifierValue',
+		"order": [[0, 'asc']],
+	} );
+
+	// Refresh data every 60 sec
+	setInterval( function () {
+		table.ajax.reload( null, false ); // user paging is not reset on reload
+	}, 60000 );
+
+} );
+
+</script>
 {% endblock %}

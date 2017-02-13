@@ -18,7 +18,7 @@
     	
     	var regextest = false;
     	if($("#regex-" + i).length == 0){
-    		if(i==4){
+    		if(i==5){
         		regextest = true;
     	    }
     	}
@@ -45,7 +45,7 @@
           for (var i=0; i<9; i++) {
             	var regextest = false;
             	if($("#regex-" + i).length == 0){
-            		if(i==4){
+            		if(i==5){
                 		regextest = true;
             	    }
             	}
@@ -77,7 +77,7 @@
             "sPaginationType": "bootstrap",
             "bProcessing": true,
             "bServerSide": true,
-            "aaSorting": [[4,'asc']],
+            "aaSorting": [[5,'asc']],
             "iDisplayLength": 10,
             "oLanguage": {
                 "sLengthMenu": 'Display <select>'+
@@ -93,8 +93,10 @@
             },
             "sAjaxSource": "/administration/storagemigrationdt",
             "aoColumnDefs": [
-                 { 'bVisible': false, 'aTargets': [ 1 ] },                
-                 { 'bRegex': true, 'aTargets': [ 4 ] }
+                 { 'bVisible': false, 'aTargets': [ 1 ] },
+                 { 'bVisible': false, 'aTargets': [ 2 ] },
+                 { 'bVisible': false, 'aTargets': [ 3 ] },
+                 { 'bRegex': true, 'aTargets': [ 5 ] }
             ],
             "aoSearchCols":[
                             { "sSearch": "initial", "bRegex": false}
@@ -115,7 +117,7 @@
 	                    "sAjaxUrl" : "/administration/migreqnew",
 	                    "fnClick": function( nButton, oConfig ) {
 	                        var aData = this.fnGetSelectedData();                  
-	                        var data = $('#filter-5').val();
+	                        var data = $('#filter-6').val();
 							if (document.getElementById("copyonlyflag").checked == true){
 								data = "Copy  Only";
 								if ($('#copypath').val() == ""){

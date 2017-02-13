@@ -64,7 +64,7 @@ import uuid, ESSPGM, ESSMSSQL, logging, datetime, pytz
 
 try:
     ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
-except utils.ProgrammingError:
+except (ESSConfig.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
     ExtDBupdate = 0
 
 '''
@@ -366,12 +366,14 @@ class StorageMigration(TemplateView):
 
 class StorageMigrationDatatablesView(DatatablesViewEss):
     model = ArchiveObject
+    #queryset = ArchiveObject.objects.filter(StatusProcess=3000, StatusActivity=0).all()
 
     fields = (
         'ObjectIdentifierValue',
         'ObjectUUID',
         'StatusProcess',
         'StatusActivity',
+        'ObjectActive',
         'Storage_set__storagemedium__storageMediumID',
         'Storage_set__contentLocationValue',     
         'PolicyId__PolicyName',
@@ -389,7 +391,7 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
         if self.form.is_valid():
             self.object_list_with_writetapes = self.get_queryset().extra(
                   where=["NOT `Storage_storagemedium`.`storageMediumStatus` = %s"],params=['0']).values(
-                  *self.get_db_fields())
+                  *self.get_db_fields()).filter(StatusProcess=3000, StatusActivity=0)
             self.object_list = []
             for obj in self.object_list_with_writetapes:
                 if not obj['Storage_set__storagemedium__storageMediumStatus'] == 20:
@@ -399,20 +401,20 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
         else:
             return HttpResponseBadRequest()
 
-    def sort_col_qs_4(self, direction, queryset):
-        '''sort for col_5'''
+    def sort_col_qs_5(self, direction, queryset):
+        '''sort for col_6'''
         queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
         orders = ('%sStorage_set__storagemedium__storageMediumID' % direction, '%scontentLocationValue_int' % direction)
         return orders, queryset
 
-    def sort_col_qs_5(self, direction, queryset):
-        '''sort for col_6'''
+    def sort_col_qs_6(self, direction, queryset):
+        '''sort for col_7'''
         queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`Storage_storage`.`contentLocationValue` AS UNSIGNED)'})
         orders = ('%scontentLocationValue_int' % direction, '%sStorage_set__storagemedium__storageMediumID' % direction)
         return orders, queryset
 
-    def search_col_4(self, search, queryset):
-        idx=4
+    def search_col_5(self, search, queryset):
+        idx=5
         field = self.get_field(idx)
         fields = RE_FORMATTED.findall(field) if RE_FORMATTED.match(field) else [field]
         if not search.startswith('-'):
@@ -428,7 +430,7 @@ class StorageMigrationDatatablesView(DatatablesViewEss):
                     queryset = queryset.filter(search)
         return queryset
 
-    def search_col_5(self, search, queryset):
+    def search_col_6(self, search, queryset):
         '''exclude filter for search terms'''
         #print 'search: %s' % search
         for term in search.split():
@@ -460,6 +462,22 @@ class TargetPrePopulation(View):
             targetlist = []
             sm_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1, type=300)
             for sm_obj in sm_objs:
+                st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 3])
+                sm_targetdict = {}
+                sm_write_target = ''
+                sm_migrate_target = ''
+                for st_obj in st_objs:
+                    if not sm_write_target and st_obj.status==1:
+                        if st_obj.target.status == 1:
+                            target_obj = st_obj.target
+                            sm_write_target=target_obj.target
+                    elif not sm_migrate_target and st_obj.status==3:
+                        if st_obj.target.status == 1:
+                            target_obj = st_obj.target
+                            sm_migrate_target=target_obj.target            
+                sm_targetdict[sm_write_target] = sm_migrate_target
+                targetlist.append(sm_targetdict)
+                '''
                 #st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 2])
                 st_objs = sm_obj.storagetarget_set.filter(status=1)
                 if st_objs.count() == 1:
@@ -476,7 +494,7 @@ class TargetPrePopulation(View):
                 else:
                     #logger.error('The target %s is disabled' % target_obj.name)
                     continue
-            
+                '''
             Policy ={}
             Policy['PolicyID'] = ArchivePolicy_obj.PolicyID
             Policy['PolicyName'] =  ArchivePolicy_obj.PolicyName
@@ -521,8 +539,11 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
         #print '################# step 1 ###############################'
         logger = logging.getLogger('essarch.storagemaintenance')
 
-        current_mediumid_search = self.dt_data.get('sSearch_%s' % '4','xxx')
-        logger.debug('col4 serach: %s' % current_mediumid_search)
+        ObjectActive_filter = self.dt_data.get('sSearch_%s' % '4','')
+        logger.debug('col4 serach: %s' % ObjectActive_filter)
+
+        current_mediumid_search = self.dt_data.get('sSearch_%s' % '5','xxx')
+        logger.debug('col5 serach: %s' % current_mediumid_search)
 
         policy_sm_objs_dict = {}
 
@@ -780,7 +801,15 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
         need_to_migrate_list = []
         #need_to_migrate_dict = {}
         for storageMediumID in redundant_storage_list.keys():
-            storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID).values('storagemedium__storageMediumID',
+            if ObjectActive_filter:
+                storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID, archiveobject__ObjectActive=ObjectActive_filter).values('storagemedium__storageMediumID',
+                                                                                                          'storagemedium__CreateDate',
+                                                                                                          'contentLocationValue',
+                                                                                                          'archiveobject__ObjectIdentifierValue',
+                                                                                                          'archiveobject__ObjectUUID',
+                                                                                                          )
+            else:
+                storage_list = storage.objects.exclude(storagemedium__storageMediumStatus=0).filter(storagemedium__storageMediumID=storageMediumID).values('storagemedium__storageMediumID',
                                                                                                           'storagemedium__CreateDate',
                                                                                                           'contentLocationValue',
                                                                                                           'archiveobject__ObjectIdentifierValue',
