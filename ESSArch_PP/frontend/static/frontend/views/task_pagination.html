@@ -1,0 +1,5 @@
+<div class="pagination step-task-pagination" ng-if="row.branch.expanded && row.branch.page_number && (row.branch.next || row.branch.prev)">
+    <li class="fa fa-backward" ng-click="treeControl.scope.updatePageNumber(row.branch, row.branch.page_number-1)"></li>
+    <b>{{row.branch.page_number}}({{row.branch.pages}})</b>
+    <li class="fa fa-forward" ng-click="treeControl.scope.updatePageNumber(row.branch, row.branch.page_number+1)"></li>
+</div>

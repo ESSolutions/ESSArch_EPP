@@ -1,0 +1,19 @@
+<label class="control-label" for="{{::id}}"
+    uib-popover="{{options.templateOptions.desc}}"
+    popover-trigger="'mouseenter'"
+    popover-placement="top-left"
+    popover-popup-delay="500"
+    popover-append-to-body="true">{{to.label}} {{to.required ? '*' : ''}}</label>
+
+<div class="dropdown">
+    <a class="dropdown-toggle" id="dropdown-{{options.key}}" role="button" data-toggle="dropdown">
+        <div class="input-group">
+            <input set-touched=options.formControl id="{{::id}}" name="{{::id}}" type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="model[options.key]"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+        </div>
+    </a>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+        <datetimepicker
+            data-ng-model="model[options.key]"
+            data-datetimepicker-config="{ dropdownSelector: '#dropdown-' + options.key, minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
+    </ul>
+</div>

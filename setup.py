@@ -1,6 +1,8 @@
-'''
-    ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2014  ES Solutions AB
+"""
+    ESSArch is an open source archiving and digital preservation system
+
+    ESSArch Preservation Platform (EPP)
+    Copyright (C) 2005-2017 ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,19 +15,19 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 
     Contact information:
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
-'''
+"""
 
 import versioneer
 versioneer.VCS = 'git'
-versioneer.versionfile_source = 'ESSArch_EPP/_version.py'
+versioneer.versionfile_source = 'ESSArch_PP/_version.py'
 versioneer.versionfile_build = None
 versioneer.tag_prefix = '' # tags are like 1.2.0
-versioneer.parentdir_prefix = 'ESSArch_EPP-'
+versioneer.parentdir_prefix = 'ESSArch_PP-'
 
 from setuptools import find_packages, setup  
 from setuptools.command.install import install as _install  
@@ -41,15 +43,16 @@ class my_install(_install):
         self.execute(_post_install, [],  
                      msg="Running post install task")
 
+
 if __name__ == '__main__':
     cmdclass=versioneer.get_cmdclass()
     cmdclass.update({'install': my_install})
     setup(
-        name='ESSArch_EPP',
+        name='ESSArch_PP',
         version=versioneer.get_version(),
         description='ESSArch Preservation Platform',
-        author='Henrik Ek',
-        author_email='henrik@essolutions.se',
+        author='Bjorn Skog',
+        author_email='info@essolutions.se',
         url='http://www.essolutions.se',
         install_requires=[
             "MySQL-python>=1.2.5",
@@ -86,15 +89,9 @@ if __name__ == '__main__':
             "celery>=3.1.23",
             "django-celery>=3.2.0a1",
             "jobtastic>=0.3.1",
-            "requests>=2.7.0",
-            "requests-toolbelt>=0.4.0",
             "djangorestframework==3.4.6",
             "django-filter>=0.14.0",
             "djangorestframework-filters>=0.8.0",
-            "django-chunked-upload>=1.1.1",
-            "jsonpickle>=0.9.2",
-            "retrying>=1.3.3",
-            "django-datatables-view>=1.13.0",
             "logfileviewer>=0.6.3",
         ],
         packages=find_packages(),

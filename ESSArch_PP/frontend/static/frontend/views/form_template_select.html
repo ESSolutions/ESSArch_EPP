@@ -1,0 +1,11 @@
+<label class="control-label" for="{{::id}}"
+       uib-popover="{{options.templateOptions.desc}}"
+       popover-trigger="'mouseenter'"
+       popover-placement="top-left"
+       popover-popup-delay="500"
+       popover-append-to-body="true">{{to.label}} {{to.required ? '*' : ''}}</label>
+<select class="form-control"
+       id="{{::id}}"
+       name="{{::id}}"
+       class="form-control"
+       ng-model="model[options.key]" />

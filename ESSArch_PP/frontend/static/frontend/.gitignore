@@ -1,0 +1,15 @@
+node_modules
+scripts/bower_components/
+scripts/scripts.js
+scripts/scripts.min.js
+scripts/vendors.js
+scripts/vendors.min.js
+scripts/scripts.min.js.map
+scripts/vendors.min.js.map
+fonts
+images
+styles/styles.css
+styles/styles.css.map
+styles/styles.min.css
+styles/styles.min.css.map
+scripts/configs/myApp.config.js

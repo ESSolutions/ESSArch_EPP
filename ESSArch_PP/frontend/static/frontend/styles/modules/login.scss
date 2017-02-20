@@ -1,0 +1,40 @@
+.login {
+    .login-box {
+        border-style: solid;
+        border-radius: 30px;
+        padding: 8px;
+        width: 475px;
+        height: 400px;
+        background-color: #fff;
+
+        position: absolute;
+        top:0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        margin: auto;
+    }
+    h2 {
+        margin: auto;
+        margin-top: 10px;
+    }
+    p {
+        width: 80%;
+        margin: auto;
+        margin-top: 10px;
+    }
+    .form-group {
+        width: 80%;
+        margin: auto;
+        margin-top: 10px;
+    }
+    .form-actions {
+        width: 80%;
+        margin: auto;
+        margin-top: 10px;
+    }
+    .login-box h2 {
+        margin-left: 40px;
+    }
+}

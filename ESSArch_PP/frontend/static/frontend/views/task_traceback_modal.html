@@ -1,0 +1,17 @@
+<div class="enter-profile-name">
+    <h3 class="modal-title" id="modal-title" style="margin: 5px;">{{('TASKREPORTFOR' | translate)+ ' ' +currentStepTask.name}}</h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <div class="step-task-info">
+        <b style="margin: 5px;">{{'ID' | translate}}: </b>{{currentStepTask.id}}
+        <div>
+            <pre  style="max-height:500px; overflow-y:auto;" id="traceback_pre">{{currentStepTask.traceback}}</pre>
+            <textarea style="display: none;" readonly="readonly" id="traceback_textarea"></textarea>
+        </div>
+    </div>
+    <button class="btn btn-default" ng-click="copyToClipboard()">{{'COPYTRACEBACK' | translate}}</button>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()" focused="true">{{'CANCEL' | translate}}</button>
+</div>
+

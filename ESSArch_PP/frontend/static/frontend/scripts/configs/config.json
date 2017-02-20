@@ -1,0 +1,32 @@
+{
+    "production": {
+        "appConfig": {
+            "name": "production",
+            "djangoUrl": "/api/",
+            "ipInterval": 10000,
+            "ipIdleInterval": 60000,
+            "stateInterval": 10000,
+            "eventInterval": 10000,
+            "debugInfo": false,
+            "logDebug": false,
+            "commentDirectives": false,
+            "cssClassDirectives": false
+        }
+    },
+    "development": {
+        "appConfig": {
+            "name": "developement",
+            "djangoUrl": "/api/",
+            "ipInterval": 10000,
+            "ipIdleInterval": 60000,
+            "stateInterval": 10000,
+            "eventInterval": 10000,
+            "debugInfo": true,
+            "logDebug": true,
+            "commentDirectives": true,
+            "cssClassDirectives": true
+
+        }
+
+    }
+}

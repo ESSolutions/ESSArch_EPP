@@ -1,0 +1,29 @@
+<html>
+    <body>
+        <div class="login">
+            <div class="login-box">
+                <h2>ESSArch Preservation Platform</h3>
+                <p>{{'LOGIN' | translate}}<p>
+                <div id="login_view" ng-controller="LoginCtrl">
+                    <form role="form" ng-submit="login(loginForm)" name="loginForm" novalidate>
+                        <div class="form-group">
+                            <label for="id_username">{{'USERNAME' | translate}}</label>
+                            <input name="username" id="id_username" type="text" ng-model="model.username" placeholder="Username" class="form-control" required />
+                        </div>
+                        <div class="alert alert-danger" ng-repeat="error in errors.username">{{error}}</div>
+                        <div class="form-group">
+                            <label for="id_password">{{'PASSWORD' | translate}}</label>
+                            <input name="password" id="id_password" type="password" ng-model="model.password" placeholder="Password" class="form-control" required />
+                        </div>
+                        <div class="alert alert-danger" ng-repeat="error in errors.password">{{error}}</div>
+                        <div class="alert alert-danger" ng-repeat="error in errors.non_field_errors">{{error}}</div>
+                        <div class="alert alert-danger" ng-if="error">{{error}}</div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">{{'LOGIN' | translate}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html

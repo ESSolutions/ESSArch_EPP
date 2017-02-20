@@ -1,6 +1,8 @@
-recursive-include * *.js *.html *.txt *.gif *.png *.css *.wsdl *.xml *.xsd *.sh *.map *.ico *.psd *.scss *.json *.swf
+recursive-include * *.js *.html *.txt *.gif *.png *.css *.wsdl *.xml *.xsd *.sh *.map *.ico *.psd *.scss *.json *.swf *.woff2 *.woff *.ttf *.md
 include versioneer.py
-include ESSArch_EPP/_version.py
-include ESSArch_EPP/config/celeryd
-recursive-include ESSArch_EPP/static/bootstrap/fonts *
-recursive-include ESSArch_EPP/static_root/bootstrap/fonts *
+recursive-include ESSArch_PP/config *.conf *.crt *.key
+include ESSArch_PP/config/celerydetp
+recursive-include ESSArch_PP/static *
+recursive-exclude ESSArch_PP_old *
+recursive-exclude SA_test *
+recursive-exclude SIPDocuments *

@@ -1,0 +1,55 @@
+<div ng-if="eventShow" class="event-view">
+    <div ng-controller="EventCtrl as vm" class="table-container">
+        <span style="float: right; margin-bottom: 5px;" ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }"></span>
+        <select class="form-control items-per-page" ng-change="updateEventsPerPage(vm.itemsPerPage)" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]"></select>
+        <table st-table="vm.displayed" st-pipe="eventPipe" class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="clickable" st-sort="eventType">{{'EVENTTYPE' | translate}}</th>
+                    <th class="clickable" st-sort="eventOutcomeDetailNote">{{'COMMENT' | translate}}</th>
+                    <th class="clickable" st-sort="eventOutcome">{{'OUTCOME' | translate}}</th>
+                    <th class="clickable" st-sort="linkingAgentIdentifierValue">{{'AGENT' | translate}}</th>
+                    <th style="min-width: 100px;" class="clickable" st-sort-default="reverse" st-sort="eventDateTime">{{'EVENTTIME' | translate}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="row.class" ng-click="eventClick(row)" ng-repeat="row in vm.displayed">
+                    <td>{{row.eventDetail}}</td>
+                    <td>{{row.eventOutcomeDetailNote}}</td>
+                    <td>{{getEventOutcome(row.eventOutcome)}}</td>
+                    <td>{{row.linkingAgentIdentifierValue.username}}</td>
+                    <td>{{row.eventDateTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="events-footer">
+            <form ng-if="ip.State != 'Created' && ip.State != 'Creating' && ip.State != 'Submitting' && ip.State != 'Submitted'" class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
+
+                <div class="form-group" style="margin-right: 5px;">
+                    <label>{{'EVENTTYPE' | translate}}</label>
+                    <select style="width: 125px;" class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in eventTypeCollection" ng-required="true">
+                        <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{'OUTCOME' | translate}}</label>
+                    <select style="width: 125px;" class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
+                        <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{'COMMENT' | translate}}</label>
+                    <textarea ng-enter="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)" maxlength="255" class="signature form-control" ng-model="newEventForm.comment" ng-required="true" id="signature"></textarea>
+                </div>
+                <button type="submit" class="btn btn-info submit-button">{{'ADDEVENT' | translate}}</button>
+            </form>
+        </div>
+    </div>
+</div>

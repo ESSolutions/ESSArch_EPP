@@ -1,0 +1,52 @@
+<div flow-init="{target: getFlowTarget, query: getQuery}"
+     flow-file-success="updateGridArray(ip)"
+     >
+    <div>
+        <h4>{{'CHOOSEFILES' | translate}}:</h4>
+		<!--
+        <input class="form-control" style="margin-bottom: 5px;" ng-model="vm.flowDestination" placeholder="Destination "type="text"></input>
+		-->
+        <span class="btn btn-default" flow-btn><i class="fa fa-file-o"></i> {{'CHOOSEFILES' | translate}}</span>
+        <span class="btn btn-default" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="fa fa-folder-o"></i> 
+            {{'CHOOSEFOLDER' | translate}}
+        </span>
+        <hr>
+        <p class="bg-warning drop-zone" flow-drop flow-drag-enter="class='bg-success'" flow-drag-leave="class=''">
+           {{'DRAGANDDROPFILEHERE' | translate}}
+        </p>
+    </div>
+    <div flow-transfers>
+        <div ng-if="transfers.length">
+            <h4>{{'UPLOAD' | translate}}:</h4>
+            <a class="btn btn-small btn-success" ng-click="$flow.resume();updateListViewTimeout(1000)"><i class="fa fa-upload"></i> {{'UPLOAD' | translate}}</a>
+            <a class="btn btn-small btn-danger" ng-click="$flow.pause()"><i class="fa fa-pause"></i> {{'PAUSE' | translate}}</a>
+            <a class="btn btn-small btn-info" ng-click="$flow.cancel()"><i class="fa fa-ban"></i> {{'CANCEL' | translate}}</a>
+
+            <h4>{{'TRANSFERS' | translate}}</h4>
+            <p>
+                <span class="label label-info">{{transfers.length}} {{'FILES' | translate}}</span>
+                <span class="label label-info">{{$flow.getSize()}} bytes</span>
+            </p>
+            <div style="height:359px">
+                <table class="table table-hover table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>{{'PATH' | translate}}</th>
+                            <th>{{'SIZE' | translate}}</th>
+                            <th>{{'PROGRESS' | translate}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="file in transfers | filter: fileTransferFilter">
+                            <td style="width: 33%;">{{file.relativePath}}</td>
+                            <td>{{file.size}}</td>
+                            <td>
+                                <uib-progressbar class="progress" value="file.progress()*100" type="success"><b>{{file.progress()*100 | number : 0}}%</b></uib-progressbar>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
