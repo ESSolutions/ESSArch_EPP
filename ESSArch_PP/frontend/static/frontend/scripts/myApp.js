@@ -99,6 +99,67 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }],
                 }
             })
+            .state('home.ingest.ipApproval', {
+                url: '/IP-approval',
+                templateUrl: '/static/frontend/views/ip_approval.html',
+                controller: 'IpApprovalCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.ingest.workarea', {
+                url: '/workarea',
+                templateUrl: '/static/frontend/views/ingest_workarea.html',
+                controller: 'IngestWorkareaCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.access', {
+                url: 'access',
+                templateUrl: '/static/frontend/views/access.html',
+		redirectTo: 'home.access.accessAip',
+                controller: 'AccessAipCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.access.accessAip', {
+                url: '/access-AIP',
+                templateUrl: '/static/frontend/views/access_aip.html',
+                controller: 'AccessAipCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.access.accessRequests', {
+                url: '/access-requests',
+                templateUrl: '/static/frontend/views/access_requests.html',
+                controller: 'AccessRequestsCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.access.workarea', {
+                url: '/workarea',
+                templateUrl: '/static/frontend/views/access_workarea.html',
+                controller: 'AccessWorkareaCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
             .state('restricted', {
                 url: '/restricted',
                 templateUrl: '/static/frontend/views/restricted.html',
