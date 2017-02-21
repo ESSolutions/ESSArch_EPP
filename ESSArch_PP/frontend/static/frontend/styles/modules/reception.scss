@@ -238,10 +238,12 @@
     }
     .eventlog-view .btn-info {
         float: right;
+        margin-top: 10px;
     }
     .eventlog-view .status-note{
     }
     .eventlog-view .checkbox {
+        margin-top: 20px;
     }
     input[type="checkbox"] {
         transform:scale(1.3, 1.3);
@@ -271,6 +273,17 @@
         -webkit-justify-content: flex-end;
         margin-left: 10px;
     }
+    .validator-choices {
+        .formly {
+            display: flex;
+            flex-direction: row;
+            min-height: 70px;
+            select {
+                width: 170px;
+            }
+        }
+    }
+
     .control-label {
         font-size: 10px;
     }
