@@ -24,6 +24,7 @@
 
 angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q){
     vm = this;
+    $scope.$state = $state;
     $scope.updateIpsPerPage = function(items) {
         $cookies.put('epp-ips-per-page', items);
     };

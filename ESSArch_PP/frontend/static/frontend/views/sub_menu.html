@@ -1,9 +1,10 @@
-<div class="sub-menu">
-<!--<button ui-sref="home.createSip.info" type="button" class="btn-primary btn-lg">{{'INFOPAGE' | translate}}</button>-->
-    <button ui-sref="home.createSip.prepareIp" type="button" class="btn-primary btn-lg">{{'PREPAREIP' | translate}}</button>
-    <!-- <button ui-sref="home.createSip.dataSelection" type="button" class="btn-primary btn-lg">{{'DATASELECTION' | translate}}</button>
-        <button ui-sref="home.createSip.dataExtraction" type="button" class="btn-primary btn-lg">{{'DATAEXTRACTION' | translate}}</button>
-        <button ui-sref="home.createSip.manageData" type="button" class="btn-primary btn-lg">{{'MANAGEDATA' | translate}}</button>-->
-        <button ui-sref="home.createSip.ipApproval" type="button" class="btn-primary btn-lg">{{'CREATESIP' | translate}}</button>
-        <!--<button ui-sref="home.createSip.ipManagement" type="button" class="btn-primary btn-lg">{{'IPMANAGEMENT' | translate}}</button>-->
+<div ng-if="'home.ingest' | includedByState" class="sub-menu">
+	<div ui-sref="home.ingest.reception" ng-class="{selected: $state.current.name == 'home.ingest.reception'}" class="btn-lg btn-sub-menu btn-default">Reception</div>
+    <div ui-sref="home.ingest.ipApproval"  ng-class="{selected: $state.current.name == 'home.ingest.ipApproval'}" class="btn-lg btn-sub-menu btn-default">Ip approval</div>
+    <div ui-sref="home.ingest.workarea"  ng-class="{selected: $state.current.name == 'home.ingest.workarea'}" class="btn-lg btn-sub-menu btn-default">Workarea</div>
+</div>
+<div ng-if="'home.access' | includedByState" class="sub-menu">
+    <div ui-sref="home.access.accessAip" ng-class="{selected: $state.current.name == 'home.access.accessAip'}" class="btn-lg btn-sub-menu btn-default">Access AIP</div>
+    <div ui-sref="home.access.accessRequests" ng-class="{selected: $state.current.name == 'home.access.accessRequests'}" class="btn-lg btn-sub-menu btn-default">Access Requests</div>
+    <div ui-sref="home.access.workarea" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn-lg btn-sub-menu btn-default">Workarea</div>
 </div>
