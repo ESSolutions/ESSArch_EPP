@@ -82,13 +82,10 @@ var jsVendorFiles = [
     ],
     jsDest = 'scripts',
     cssFiles = [
-        'styles/modules/create_sip_ip_approval.scss',
-        'styles/modules/create_sip_prepare_ip.scss',
-        'styles/modules/submit_sip_prepare_sip.scss',
+        'styles/modules/reception.scss',
         'styles/modules/index.scss',
         'styles/modules/login.scss',
         'styles/modules/my_page.scss',
-        'styles/modules/submit_sip.scss',
         'styles/styles.scss'
     ],
     cssDest = 'styles';
