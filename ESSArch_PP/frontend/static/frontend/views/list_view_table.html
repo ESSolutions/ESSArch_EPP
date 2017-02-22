@@ -25,7 +25,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-class="row.class" ng-repeat="row in vm.displayedIps" class="table-item">
+            <tr ng-class="row.class" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
                 <td class="clickable" ng-click="ipTableClick(row);selectIp(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.Label}}</td>
                 <td class="clickable" ng-click="ipRowClick(row)">{{row.Responsible.username}}</td>
                 <td class="clickable" ng-click="ipRowClick(row)">{{row.ArchivistOrganization.name}}</td>

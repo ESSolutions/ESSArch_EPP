@@ -122,28 +122,18 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             .state('home.access', {
                 url: 'access',
                 templateUrl: '/static/frontend/views/access.html',
-		redirectTo: 'home.access.accessAip',
-                controller: 'AccessAipCtrl as vm',
+		redirectTo: 'home.access.accessIp',
+                controller: 'AccessIpCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();
                     }],
                 }
             })
-            .state('home.access.accessAip', {
-                url: '/access-AIP',
-                templateUrl: '/static/frontend/views/access_aip.html',
-                controller: 'AccessAipCtrl as vm',
-                resolve: {
-                    authenticated: ['djangoAuth', function(djangoAuth){
-                        return djangoAuth.authenticationStatus();
-                    }],
-                }
-            })
-            .state('home.access.accessRequests', {
-                url: '/access-requests',
-                templateUrl: '/static/frontend/views/access_requests.html',
-                controller: 'AccessRequestsCtrl as vm',
+            .state('home.access.accessIp', {
+                url: '/access-IP',
+                templateUrl: '/static/frontend/views/access_ip.html',
+                controller: 'AccessIpCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();
@@ -154,6 +144,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 url: '/workarea',
                 templateUrl: '/static/frontend/views/access_workarea.html',
                 controller: 'AccessWorkareaCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.orders', {
+                url: '/orders',
+                templateUrl: '/static/frontend/views/orders.html',
+                controller: 'OrdersCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();

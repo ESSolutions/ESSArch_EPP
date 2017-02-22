@@ -4,7 +4,7 @@
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
                         <div class="request-layout">
-                            <form name="request-form" class="request-form">
+                            <form id="request-form" class="request-form">
                             <div class="request-type">
                                 <label>
                                     <input type="radio" ng-model="vm.request.type" value="receive">
@@ -31,7 +31,6 @@
                             </div>
                             </form>
                         </div>
-
                 <div class="select-sub-edit-eventlog-wrapper">
                     <div class="select-view">
 
@@ -44,7 +43,7 @@
                                     <input type="checkBox" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip')) || ip.State != 'Uploaded'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
                                 </label>
                             </div>
-                            <button type="submit" ng-dblClick="" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip'))" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
+                            <button type="submit" form="request-form" ng-dblClick="" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip'))" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
                         </form>
                     </div>
                 </div>

@@ -186,7 +186,6 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.eventTypeCollection = value;
         });
     };
-    $scope.colspan = 9;
     //Decides visibility of stepTask info page
     $scope.stepTaskInfoShow = false;
     //Decides visibility of status view

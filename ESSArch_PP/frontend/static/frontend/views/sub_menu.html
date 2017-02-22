@@ -1,10 +1,10 @@
 <div ng-if="'home.ingest' | includedByState" class="sub-menu">
-	<div ui-sref="home.ingest.reception" ng-class="{selected: $state.current.name == 'home.ingest.reception'}" class="btn-lg btn-sub-menu btn-default">Reception</div>
-    <div ui-sref="home.ingest.ipApproval"  ng-class="{selected: $state.current.name == 'home.ingest.ipApproval'}" class="btn-lg btn-sub-menu btn-default">Ip approval</div>
-    <div ui-sref="home.ingest.workarea"  ng-class="{selected: $state.current.name == 'home.ingest.workarea'}" class="btn-lg btn-sub-menu btn-default">Workarea</div>
+	<div ui-sref="home.ingest.reception" ng-class="{selected: $state.current.name == 'home.ingest.reception'}" class="btn btn-sub-menu btn-default">Reception</div>
+    <div ui-sref="home.ingest.ipApproval"  ng-class="{selected: $state.current.name == 'home.ingest.ipApproval'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Ip approval</div>
+    <div ui-sref="home.ingest.workarea"  ng-class="{selected: $state.current.name == 'home.ingest.workarea'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Workarea</div>
 </div>
 <div ng-if="'home.access' | includedByState" class="sub-menu">
-    <div ui-sref="home.access.accessAip" ng-class="{selected: $state.current.name == 'home.access.accessAip'}" class="btn-lg btn-sub-menu btn-default">Access AIP</div>
-    <div ui-sref="home.access.accessRequests" ng-class="{selected: $state.current.name == 'home.access.accessRequests'}" class="btn-lg btn-sub-menu btn-default">Access Requests</div>
-    <div ui-sref="home.access.workarea" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn-lg btn-sub-menu btn-default">Workarea</div>
+    <div ui-sref="home.access.accessIp" ng-class="{selected: $state.current.name == 'home.access.accessIp'}" class="btn btn-sub-menu btn-default">Access IP</div>
+    <div ui-sref="home.access.workarea" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Workarea</div>
+    <div ng-if="$state.current.name == 'home.access.createDip'" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Workarea</div>
 </div>
