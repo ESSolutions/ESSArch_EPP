@@ -240,6 +240,7 @@ body.modal-open[style] {
         border-style: solid;
         border-color: #666;
         border-radius: 10px 0px 0px 10px;
+        border-right-width: 1.5px;
     }
     .request-params {
         padding: 10px;
@@ -251,6 +252,7 @@ body.modal-open[style] {
         border-style: solid;
         border-color: #666;
         border-radius: 0px 10px 10px 0px;
+        border-left-width: 1.5px;
         .form-control {
             margin-top: 10px;
             width: 75%;
