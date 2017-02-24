@@ -171,6 +171,26 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }],
                 }
             })
+            .state('home.management', {
+                url: '/management',
+                templateUrl: '/static/frontend/views/management.html',
+                controller: 'ManagementCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.administration', {
+                url: '/administration',
+                templateUrl: '/static/frontend/views/administration.html',
+                controller: 'AdministrationCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
             .state('restricted', {
                 url: '/restricted',
                 templateUrl: '/static/frontend/views/restricted.html',
