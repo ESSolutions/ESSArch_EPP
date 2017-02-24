@@ -233,7 +233,7 @@ STATICFILES_DIRS = (
 
 # Celery settings
 BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
-CELERY_IMPORTS = ("ESSArch_Core.WorkflowEngine.tests.tasks",)
+CELERY_IMPORTS = ("workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = 'amqp://'
 
 # Rest auth settings
