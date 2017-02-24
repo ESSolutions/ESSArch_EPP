@@ -34,6 +34,9 @@ def installDefaultConfiguration():
     print "Installing users, groups and permissions..."
     installDefaultUsers()
 
+    print "\nInstalling paths..."
+    installDefaultPaths()
+
     return 0
 
 
@@ -71,6 +74,20 @@ def installDefaultUsers():
     group_user.user_set.add(user_user)
     group_admin.user_set.add(user_admin)
     group_sysadmin.user_set.add(user_sysadmin)
+
+    return 0
+
+
+def installDefaultPaths():
+    dct = {
+        'reception': '/ESSArch/data/gate/reception',
+        'ingest': '/ESSArch/data/epp/ingest',
+        'cache': '/ESSArch/data/epp/cache',
+    }
+
+    for key in dct:
+        print '-> %s: %s' % (key, dct[key])
+        Path.objects.get_or_create(entity=key, value=dct[key])
 
     return 0
 
