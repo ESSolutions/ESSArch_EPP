@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'ESSArch_Core.profiles',
     'ESSArch_Core.essxml.Generator',
     'ESSArch_Core.essxml.ProfileMaker',
+    'ESSArch_Core.storage',
     'ESSArch_Core.WorkflowEngine',
 ]
 
