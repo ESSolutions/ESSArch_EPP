@@ -3,8 +3,8 @@
         <div class="reception">
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-                        <div class="request-layout">
-                            <form id="request-form" class="request-form">
+                        <div ng-if="select" class="request-layout">
+                            <form id="request-form" name="request-form" class="request-form" ng-submit="receive(ip)">
                             <div class="request-type">
                                 <label>
                                     <input type="radio" ng-model="vm.request.type" value="receive">
@@ -14,14 +14,14 @@
                             <div class="request-params">
                                 <label>
                                     Purpose
-                                    <input class="form-control" ng-model="vm.request.purpose">
+                                    <input class="form-control" required="true" ng-model="vm.request.purpose">
                                 </label>
                                 <label>
                                     Archive policy
-                                    <select type="select" class="form-control" ng-model="vm.request.archivePolicy.value" ng-options="x for x in vm.request.archivePolicy.options"></select>
+                                    <select type="select" required="true" class="form-control" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
                                 </label>
                                 <label>
-                                    Information clause
+                                    Information class
                                     <input class="form-control" disabled="true" ng-model="vm.request.informationClause">
                                 </label>
                                 <label>
@@ -31,8 +31,8 @@
                             </div>
                             </form>
                         </div>
-                <div class="select-sub-edit-eventlog-wrapper">
-                    <div class="select-view">
+                <div ng-if="edit || eventlog"class="select-sub-edit-eventlog-wrapper">
+                    <div class="edit-view">
 
                         <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
                     </div>
@@ -40,10 +40,10 @@
                         <form ng-submit="receiveSip(ip)" class="eventlog-form">
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkBox" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip')) || ip.State != 'Uploaded'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
+                                    <input type="checkBox" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
                                 </label>
                             </div>
-                            <button type="submit" form="request-form" ng-dblClick="" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip'))" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
+                            <button type="submit" form="request-form" ng-dblClick="" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
                         </form>
                     </div>
                 </div>

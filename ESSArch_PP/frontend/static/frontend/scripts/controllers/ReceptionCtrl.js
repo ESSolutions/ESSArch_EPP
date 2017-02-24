@@ -25,7 +25,7 @@
 angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller){
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
-    var ipSortString = "Preparing,Prepared";
+    var ipSortString = "Receiving";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
@@ -103,7 +103,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
 
-            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
+            Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -118,7 +118,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 ip.class = "";
             }
         });
-        if(row.id == $scope.selectedIp.id && !$scope.select && !$scope.statusShow && !$scope.eventShow){
+        if(row.id == $scope.selectedIp.id){
             $scope.selectedIp = {id: "", class: ""};
         } else {
             row.class = "selected";
@@ -130,16 +130,21 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id== row.id){
             $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
             $scope.select = true;
+            $scope.eventlog = true;
+            $scope.edit = true;
+            $scope.getArchivePolicies().then(function(result) {
+                vm.request.archivePolicy.options = result;
+            });
             $timeout(function() {
                 $anchorScroll("select-wrap");
             }, 0);
         }
-        $scope.eventlog = false;
-        $scope.edit = false;
         $scope.eventShow = false;
         $scope.statusShow = false;
     };
@@ -349,10 +354,31 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         type: "receive",
         purpose: "",
         archivePolicy: {
-            value: "",
-            options: ["hello", "hej", "hola"]
+            value: null,
+            options: []
         },
-        informationClause: "Information clause",
-        allowUnknownFiles: true
+        informationClass: "Information class",
+        allowUnknownFiles: false
     };
+    $scope.getArchivePolicies = function() {
+        $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'archive_policies/'
+        }).then(function(response) {
+            vm.request.archivePolicy.options = response.data;
+        });
+    }
+    $scope.receive = function(ip) {
+        $http({
+            method: 'POST',
+            url: appConfig.djangoUrl +'ip-reception/'+ ip.id + '/receive/',
+            data: {
+                archive_policy: vm.request.archivePolicy.value.id,
+                purpose: vm.request.purpose,
+                allow_unknown_files: vm.request.allowUnknownFiles
+            }
+        }).then(function(){
+            console.log("receive!");
+        });
+    }
 });

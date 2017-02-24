@@ -90,10 +90,29 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
 	}
+    function getReceptionPage(start, number, pageNumber, params, selected, sort, search, state) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getReceptionIps(pageNumber, number, $rootScope.navigationFilter, sortString, search, state).then(function(value) {
+            var ipCollection = value.data;
+            ipCollection.forEach(function(ip) {
+                if(selected.id == ip.id) {
+                    ip.class = "selected";
+                }
+            });
 
+            return {
+                data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+	}
 	return {
 		getEventPage: getEventPage,
         getIpPage: getIpPage,
+        getReceptionPage: getReceptionPage,
 	};
 
 });

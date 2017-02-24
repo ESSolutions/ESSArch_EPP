@@ -58,6 +58,36 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         });
         return promise;
     }
+    function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state) {
+        var promise = $http({
+            method: 'GET',
+            url: appConfig.djangoUrl+'ip-reception/',
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                archival_institution: filters.institution,
+                archivist_organization: filters.organization,
+                archival_type: filters.type,
+                archival_location: filters.location,
+                other: filters.other,
+                ordering: sortString,
+                state: state,
+                search: searchString
+            }
+        })
+        .then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        }, function errorCallback(response){
+        });
+        return promise;
+    }
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes){
         var promise = $http({
@@ -551,6 +581,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
     return {
         getChildrenForStep: getChildrenForStep,
         getListViewData: getListViewData,
+        getReceptionIps: getReceptionIps,
         addEvent: addEvent,
         getEvents: getEvents,
         getTreeData: getTreeData,
