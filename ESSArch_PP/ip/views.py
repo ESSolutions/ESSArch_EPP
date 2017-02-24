@@ -36,6 +36,7 @@ from ESSArch_Core.configuration.models import (
 )
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
+from ESSArch_Core.pagination import LinkHeaderPagination
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
@@ -96,6 +97,12 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         extracted = self.get_extracted_packages(reception)
 
         ips = contained + extracted
+
+        paginator = LinkHeaderPagination()
+        page = paginator.paginate_queryset(ips, request)
+        if page is not None:
+            return paginator.get_paginated_response(page)
+
         return Response(ips)
 
     @detail_route(methods=['post'], url_path='receive')
