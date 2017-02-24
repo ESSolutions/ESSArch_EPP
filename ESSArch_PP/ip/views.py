@@ -96,7 +96,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         extracted = self.get_extracted_packages(reception)
 
         ips = contained + extracted
-        return Response([ips])
+        return Response(ips)
 
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
