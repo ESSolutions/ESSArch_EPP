@@ -150,6 +150,17 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }],
                 }
             })
+            .state('home.access.createDip', {
+                url: '/create-DIP',
+                templateUrl: '/static/frontend/views/access_create_dip.html',
+                controller: 'CreateDipCtrl as vm',
+                params: {ip: null},
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
             .state('home.orders', {
                 url: '/orders',
                 templateUrl: '/static/frontend/views/orders.html',
