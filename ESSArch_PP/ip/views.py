@@ -25,31 +25,17 @@
 import glob
 import os
 
-from django.db.models import Prefetch
-from django_filters.rest_framework import DjangoFilterBackend
-
 from lxml import etree
 
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from ESSArch_Core.configuration.models import (
     Path,
 )
-from ESSArch_Core.ip.models import (
-    InformationPackage,
-)
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
-
-from ip.filters import (
-    InformationPackageFilter,
-)
-from ip.serializers import (
-    InformationPackageSerializer,
-    InformationPackageDetailSerializer,
-)
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
