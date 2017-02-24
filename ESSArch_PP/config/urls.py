@@ -36,6 +36,7 @@ from ESSArch_Core.auth.views import (
 
 from ESSArch_Core.configuration.views import (
     AgentViewSet,
+    ArchivePolicyViewSet,
     EventTypeViewSet,
     ParameterViewSet,
     PathViewSet,
@@ -51,6 +52,7 @@ admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
 router = routers.DefaultRouter()
 router.register(r'agents', AgentViewSet)
+router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'groups', GroupViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
