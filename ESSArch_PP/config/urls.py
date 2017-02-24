@@ -42,6 +42,10 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
+from ip.views import (
+    InformationPackageReceptionViewSet,
+)
+
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
@@ -49,6 +53,7 @@ router = routers.DefaultRouter()
 router.register(r'agents', AgentViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'groups', GroupViewSet)
+router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)

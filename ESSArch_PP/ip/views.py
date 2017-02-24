@@ -1,0 +1,149 @@
+"""
+    ESSArch is an open source archiving and digital preservation system
+
+    ESSArch Preservation Platform (EPP)
+    Copyright (C) 2005-2017 ES Solutions AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+    Contact information:
+    Web - http://www.essolutions.se
+    Email - essarch@essolutions.se
+"""
+
+import glob
+import os
+
+from django.db.models import Prefetch
+from django_filters.rest_framework import DjangoFilterBackend
+
+from lxml import etree
+
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
+
+from ESSArch_Core.configuration.models import (
+    Path,
+)
+from ESSArch_Core.ip.models import (
+    InformationPackage,
+)
+from ESSArch_Core.util import get_value_from_path
+from ESSArch_Core.WorkflowEngine.models import ProcessTask
+
+from ip.filters import (
+    InformationPackageFilter,
+)
+from ip.serializers import (
+    InformationPackageSerializer,
+    InformationPackageDetailSerializer,
+)
+
+
+class InformationPackageReceptionViewSet(viewsets.ViewSet):
+    def find_xml_files(self, path):
+        for xmlfile in glob.glob(os.path.join(path, "*.xml")):
+            if os.path.isfile(xmlfile) and not xmlfile.endswith('_ipevents.xml'):
+                yield xmlfile
+
+    def get_objectpath(self, el):
+        e = el.xpath('.//*[local-name()="%s"]' % "FLocat")[0]
+        if e is not None:
+            return get_value_from_path(e, "@href").split('file:///')[1]
+
+    def get_container_for_xml(self, xmlfile):
+        doc = etree.parse(xmlfile)
+        root = doc.getroot()
+        return self.get_objectpath(root)
+
+    def get_contained_packages(self, path):
+        ips = []
+
+        for xmlfile in self.find_xml_files(path):
+            container = os.path.join(path, self.get_container_for_xml(xmlfile))
+
+            ip_id = os.path.splitext(os.path.basename(xmlfile))[0]
+
+            ip = {
+                'id': ip_id,
+                'container': container,
+                'xml': xmlfile,
+                'type': 'contained',
+            }
+
+            ips.append(ip)
+
+        return ips
+
+    def get_extracted_packages(self, path):
+        ips = []
+
+        for d in os.listdir(path):
+            if not os.path.isdir(os.path.join(path, d)):
+                continue
+
+            ip = {
+                'id': d,
+                'type': 'extracted',
+            }
+
+            ips.append(ip)
+
+        return ips
+
+    def list(self, request):
+        reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+
+        contained = self.get_contained_packages(reception)
+        extracted = self.get_extracted_packages(reception)
+
+        ips = contained + extracted
+        return Response([ips])
+
+    @detail_route(methods=['post'], url_path='receive')
+    def receive(self, request, pk=None):
+        reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+
+        xmlfile = os.path.join(reception, '%s.xml' % pk)
+
+        if not os.path.isfile(xmlfile):
+            return Response(
+                {'status': '%s does not exist' % xmlfile},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+
+        if not os.path.isfile(container):
+            return Response(
+                {'status': '%s does not exist' % container},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        t = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            params={
+                'xml': xmlfile,
+                'container': container,
+                'purpose': request.data.get('purpose'),
+                'archive_policy': request.data.get('archive_policy'),
+                'allow_unknown_files': request.data.get('allow_unknown_files', False),
+            },
+            responsible=self.request.user,
+        )
+
+        t.run()
+
+        return Response(['Receiving %s...' % container, t.params])
