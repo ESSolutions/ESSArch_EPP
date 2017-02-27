@@ -44,8 +44,11 @@ from ESSArch_Core.configuration.views import (
 )
 
 from ip.views import (
+    InformationPackageViewSet,
     InformationPackageReceptionViewSet,
 )
+
+from tags.views import TagViewSet
 
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
@@ -55,10 +58,12 @@ router.register(r'agents', AgentViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'groups', GroupViewSet)
+router.register(r'ip', InformationPackageViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
+router.register(r'tags', TagViewSet)
 router.register(r'users', UserViewSet)
 
 urlpatterns = [

@@ -34,9 +34,12 @@ from rest_framework.response import Response
 from ESSArch_Core.configuration.models import (
     Path,
 )
+from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
+
+from ip.serializers import InformationPackageSerializer
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
@@ -140,3 +143,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         t.run()
 
         return Response(['Receiving %s...' % container, t.params])
+
+
+class InformationPackageViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows information packages to be viewed or edited.
+    """
+    queryset = InformationPackage.objects.all()
+    serializer_class = InformationPackageSerializer
