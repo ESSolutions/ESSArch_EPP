@@ -39,7 +39,7 @@ from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
-from ip.serializers import InformationPackageSerializer
+from ip.serializers import InformationPackageSerializer, InformationPackageDetailSerializer
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
@@ -150,4 +150,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     API endpoint that allows information packages to be viewed or edited.
     """
     queryset = InformationPackage.objects.all()
-    serializer_class = InformationPackageSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return InformationPackageSerializer
+
+        return InformationPackageDetailSerializer
