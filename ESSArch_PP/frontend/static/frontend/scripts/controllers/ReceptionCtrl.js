@@ -25,7 +25,7 @@
 angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller){
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
-    var ipSortString = "Receiving";
+    var ipSortString = "";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
@@ -180,6 +180,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
         $rootScope.loadNavigation(ipSortString);
+        $rootScope.loadTags();
     };
     // Progress bar max value
     $scope.max = 100;
