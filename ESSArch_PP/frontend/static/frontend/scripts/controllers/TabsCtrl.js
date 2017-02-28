@@ -27,7 +27,7 @@ angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope,
         $state.reload()
     });
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
-        if(toState.name == "home.info" || toState.name == "home.versionInfo") {
+        if(toState.name == "home.myPage" || toState.name == "home.versionInfo") {
             $scope.activeTab = null;
         }
     });

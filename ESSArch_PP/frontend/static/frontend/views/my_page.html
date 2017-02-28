@@ -1,16 +1,85 @@
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="static/frontend/styles/my_page.css">
-        <!--Angular Scripts -->
-    </head>
-    <body>
-        <div>
-            <div class="sub-menu">
-                <!-- <button type="button" class="btn-primary btn-lg">Action</button>-->
-
+<div class="my-page">
+    <div class="content-wrapper">
+        <div class="table-control">
+            <button class="btn btn-default" ng-click="tableControlCollapsed = !tableControlCollapsed">Choose visible requests</button>
+            <div uib-collapse="tableControlCollapsed">
+                <div class="well">
+                    <label>
+                        <input type="checkbox" ng-model="visibleRequests.access"></input>
+                        Access
+                    </label><br>
+                    <label>
+                        <input type="checkbox" ng-model="visibleRequests.workarea"></input>
+                        To/from workarea
+                    </label><br>
+                    <label>
+                        <input type="checkbox" ng-model="visibleRequests.receive"></input>
+                        Receive
+                    </label>
+                </div>
             </div>
-            </br>
-            My page section
         </div>
-    </body>
-</html>
+        <div>
+        Currently showing: <b ng-if="visibleRequests.access">Access requests</b> <b ng-if="visibleRequests.workarea">Workarea requests</b> <b ng-if="visibleRequests.receive">receive requests</b>
+        </div>
+        <div class="list-view">
+            <div id="list-view" class="list-view-table">
+                <table st-table="vm.displayedIps" st-pipe="vm.callServer" class="table table-striped" style="margin-bottom: 0px;">
+                    <thead>
+                        <tr>
+                            <th colspan="{{colspan}}">
+                                <div class="search-prepare-wrapper">
+                                    <label for items-per-page></label>
+                                    <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                                    <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                                    <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
+                                    <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="clickable" st-sort="Label" class="column-label">{{'LABEL' | translate}}</th>
+                            <th class="clickable" st-sort="Responsible" class="column-label">{{'RESPONSIBLE' | translate}}</th>
+                            <th class="clickable" st-sort="CreateDate" st-sort-default="reverse" class="column-label">{{'DATE' | translate}}</th>
+                            <th class="clickable" st-sort="RequestType" st-sort-default="reverse" class="column-label">{{'REQUEST' | translate}}</th>
+                            <th class="clickable" class="column-label"></th>
+                            <th class="clickable" class="column-label">{{'DELETE' | translate}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-class="row.class" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
+                            <td class="clickable" ng-click="ipTableClick(row);selectIp(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.Label}}</td>
+                            <td class="clickable" ng-click="ipRowClick(row)">{{row.Responsible.username}}</td>
+                            <td class="clickable" ng-click="ipRowClick(row)">{{row.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                            <td class="clickable" ng-click="ipRowClick(row)">{{row.RequestType}}</td>
+                            <td class="step-state" style="min-width: 86px;">
+                                <div ng-if="row.step_state == 'SUCCESS'" class="step-state-success"><b>{{'SUCCESS' | translate}}</b></div>
+                                <div ng-if="row.step_state == 'FAILURE'" class="step-state-failure"><b>{{'FAILURE' | translate}}</b></div>
+                                <div ng-if="row.step_state != 'SUCCESS' && row.step_state !='FAILURE'" class="step-state-in-progress"><b>{{'INPROGRESS' | translate}}</b></div>
+                            </td>
+                            <td ng-click="ipRowClick(row)">
+                                <button type="button"
+                                        ng-if="row.Responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
+                                        ng-click="removeIpModal(row)"
+                                        class="fa fa-trash"
+                                        uib-popover="{{'REMOVEIP' | translate}}: {{row.Label}}"
+                                        popover-trigger="'mouseenter'"
+                                        popover-placement="top-left"
+                                        popover-popup-delay="500"
+                                        popover-append-to-body="true"></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td ng-show="!initLoad" colspan="{{colspan}}" class="text-center">
+                                <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>

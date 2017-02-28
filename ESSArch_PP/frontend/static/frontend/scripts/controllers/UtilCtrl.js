@@ -30,6 +30,6 @@ angular.module('myApp').controller('UtilCtrl', function($scope, $state, $locatio
         $window.location.href="/admin/";
     }
     $scope.infoPage = function() {
-        $state.go('home.info');
+        $state.go('home.myPage');
     }
 });

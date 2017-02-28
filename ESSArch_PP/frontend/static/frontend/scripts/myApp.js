@@ -52,6 +52,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             .state('home.myPage', {
                 url: 'my-page',
                 templateUrl: '/static/frontend/views/my_page.html',
+                controller: 'MyPageCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();
@@ -211,7 +212,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }],
                 }
             });
-        $urlRouterProvider.otherwise('info');
+        $urlRouterProvider.otherwise('my-page');
     })
     .config(function($animateProvider) {
         // Only animate elements with the 'angular-animate' class
