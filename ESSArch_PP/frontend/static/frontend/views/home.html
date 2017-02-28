@@ -131,6 +131,17 @@
                              >
                              {{node.name}}
                 </treecontrol>
+                <hr/>
+                <treecontrol class="tree-light"
+                             tree-model="tags"
+                             options="treeOptions"
+                             selected-node="selectedTag"
+                             expanded-nodes="expandedNodes"
+                             on-selection="showSelectedNode(node)"
+                             on-node-toggle="onNodeToggle(node)"
+                             >
+                             <span context-menu="navMenuOptions(item)">{{node.name}}</span>
+                </treecontrol>
                 </p>
             </div>
             <div class="calendar">

@@ -24,6 +24,7 @@
 
 angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth) {
     var $ctrl = this;
+    $ctrl.editMode = false;
     $ctrl.error_messages_old = [];
     $ctrl.error_messages_pw1 = [];
     $ctrl.error_messages_pw2 = [];
@@ -37,9 +38,23 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         };
         $uibModalInstance.close($ctrl.data);
     };
+    $ctrl.saveTag = function() {
+        $ctrl.data = {
+            name: $ctrl.name,
+            desc: $ctrl.desc
+        }
+        $uibModalInstance.close($ctrl.data);
+    }
     $ctrl.prepare = function () {
         $ctrl.data = {
             label: $ctrl.label
+        };
+        $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.addTag = function () {
+        $ctrl.data = {
+            name: $ctrl.name,
+            desc: $ctrl.desc
         };
         $uibModalInstance.close($ctrl.data);
     };

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($scope, $http, $rootScope, appConfig) {
+angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($scope, $http, $rootScope, appConfig, $translate, $uibModal, $log) {
     $scope.treeOptions = {
         nodeChildren: "children",
         dirSelectable: true,
@@ -188,5 +188,144 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
                 other: true
             };
         }
+    }
+
+    //TAGS
+    $scope.tags = [];
+    $rootScope.loadTags = function() {
+        $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'tags/',
+            params: {only_roots: true}
+        }).then(function(response) {
+            response.data.forEach(function(tag, index, array) {
+                $scope.expandedNodes.forEach(function(node) {
+                    if(tag.id == node.id) {
+                        $scope.onNodeToggle(tag);
+                    }
+                });
+            });
+            $scope.tags = response.data;
+        });
+    }
+    $rootScope.loadTags();
+    $scope.onNodeToggle = function(node) {
+        node.children.forEach(function(child, index, array) {
+            $http({
+                method: 'GET',
+                url: child.url
+            }).then(function(response) {
+                array[index] = response.data;
+            });
+        });
+    }
+    $rootScope.ipUrl = null;
+    $scope.showSelectedNode = function(node) {
+        if($rootScope.ipUrl == node.url + 'information-packages/') {
+            $rootScope.ipUrl = null;
+        } else {
+            $rootScope.ipUrl = node.url + 'information-packages/';
+        }
+    };
+    // Remove given node
+    $scope.removeNode = function(node) {
+        if(node.parentNode == null){
+            //$scope.treeElements.splice($scope.treeElements.indexOf(node.node), 1);
+            return;
+        }
+        node.parentNode.children.forEach(function(element) {
+            if(element.name == node.node.name) {
+                node.parentNode.children.splice(node.parentNode.children.indexOf(element), 1);
+                console.log(element)
+                $http({
+                    method: 'DELETE',
+                    url: element.url
+                }).then (function(response){});
+            }
+        });
+    };
+    //Update current node variable with selected node in map structure tree view
+    $scope.updateCurrentNode = function(node, selected, parentNode) {
+        if(selected) {
+            $scope.currentNode = {"node": node, "parentNode": parentNode};
+        } else {
+            $scope.currentNode = null;
+        }
+    };
+    //context menu data
+    $scope.navMenuOptions = function(item) {
+        return [
+            [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
+                console.log($itemScope);
+                $scope.addTagModal($itemScope.node);
+            }],
+
+            [$translate.instant('REMOVE'), function ($itemScope, $event, modelValue, text, $li) {
+                $scope.updateCurrentNode($itemScope.node, true, $itemScope.$parentNode);
+                $scope.removeNode($scope.currentNode);
+                $scope.selectedNode = null;
+            }],
+            [$translate.instant('UPDATE'), function ($itemScope, $event, modelValue, text, $li) {
+                $scope.tagPropertiesModal($itemScope.node);
+            }]
+        ];
+    };
+    // open modal for add tag
+    $scope.addTagModal = function (tag) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/add_tag_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl'
+        })
+        modalInstance.result.then(function (data) {
+            console.log(tag, data);
+            $scope.addTag(tag, data);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    // Add new tag
+    $scope.addTag = function(tag, data) {
+        data.parent = tag.url;
+        data.information_packages = [];
+        if(tag == null){
+            $scope.tags[0].children.push(dir);
+        } else {
+            $http({
+                method: 'POST',
+                url: appConfig.djangoUrl + 'tags/',
+                data: data
+            }).then(function(response) {
+                tag.children.push(response.data);
+            });
+        }
+    };
+    $scope.tagPropertiesModal = function (tag) {
+        $scope.displayedTag = tag;
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/tag_properties_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl'
+        })
+        modalInstance.result.then(function (data) {
+            console.log(tag, data);
+            $http({
+                method: 'PATCH',
+                url: tag.url,
+                data: data
+            }).then(function(response) {
+                $rootScope.loadTags();
+            });
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
     }
 });
