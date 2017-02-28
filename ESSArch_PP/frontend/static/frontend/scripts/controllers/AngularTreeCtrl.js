@@ -236,7 +236,6 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         node.parentNode.children.forEach(function(element) {
             if(element.name == node.node.name) {
                 node.parentNode.children.splice(node.parentNode.children.indexOf(element), 1);
-                console.log(element)
                 $http({
                     method: 'DELETE',
                     url: element.url
@@ -256,7 +255,6 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
     $scope.navMenuOptions = function(item) {
         return [
             [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
-                console.log($itemScope);
                 $scope.addTagModal($itemScope.node);
             }],
 
@@ -282,7 +280,6 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             controllerAs: '$ctrl'
         })
         modalInstance.result.then(function (data) {
-            console.log(tag, data);
             $scope.addTag(tag, data);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
@@ -316,7 +313,6 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             controllerAs: '$ctrl'
         })
         modalInstance.result.then(function (data) {
-            console.log(tag, data);
             $http({
                 method: 'PATCH',
                 url: tag.url,
