@@ -77,18 +77,28 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
     // Remove given node
     $scope.removeNode = function(node) {
         if(node.parentNode == null){
-            //$scope.treeElements.splice($scope.treeElements.indexOf(node.node), 1);
-            return;
+            $scope.tags.forEach(function(element) {
+                if(element.name == node.node.name) {
+                    $http({
+                        method: 'DELETE',
+                        url: element.url
+                    }).then (function(response){
+                        $rootScope.loadTags();
+                    });
+                }
+            });
+        } else {
+            node.parentNode.children.forEach(function(element) {
+                if(element.name == node.node.name) {
+                    $http({
+                        method: 'DELETE',
+                        url: element.url
+                    }).then (function(response){
+                        $rootScope.loadTags();
+                    });
+                }
+            });
         }
-        node.parentNode.children.forEach(function(element) {
-            if(element.name == node.node.name) {
-                node.parentNode.children.splice(node.parentNode.children.indexOf(element), 1);
-                $http({
-                    method: 'DELETE',
-                    url: element.url
-                }).then (function(response){});
-            }
-        });
     };
     //Update current node variable with selected node in map structure tree view
     $scope.updateCurrentNode = function(node, selected, parentNode) {
@@ -102,7 +112,15 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
     $scope.navMenuOptions = function(item) {
         return [
             [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.addTagModal($itemScope.node);
+                $scope.addTagModal($itemScope.node, true);
+            }]
+        ];
+    };
+    //context menu data
+    $scope.navMenuItemOptions = function(item) {
+        return [
+            [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
+                $scope.addTagModal($itemScope.node, false);
             }],
 
             [$translate.instant('REMOVE'), function ($itemScope, $event, modelValue, text, $li) {
@@ -116,7 +134,12 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         ];
     };
     // open modal for add tag
-    $scope.addTagModal = function (tag) {
+    $scope.addTagModal = function (tag, isRoot) {
+        if(isRoot) {
+            $scope.parentTag = null;
+        } else {
+            $scope.parentTag = tag;
+        }
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
@@ -127,24 +150,32 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             controllerAs: '$ctrl'
         })
         modalInstance.result.then(function (data) {
-            $scope.addTag(tag, data);
+            $scope.addTag(tag, data, isRoot);
+            $scope.parentTag = null;
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
     // Add new tag
-    $scope.addTag = function(tag, data) {
-        data.parent = tag.url;
+    $scope.addTag = function(tag, data, isRoot) {
+        isRoot ? data.parent = null : data.parent = tag.url;;
         data.information_packages = [];
-        if(tag == null){
-            $scope.tags[0].children.push(dir);
+        if(isRoot){
+            $http({
+                method: 'POST',
+                url: appConfig.djangoUrl + 'tags/',
+                data: data
+            }).then(function(response) {
+                $rootScope.loadTags();
+            });
+
         } else {
             $http({
                 method: 'POST',
                 url: appConfig.djangoUrl + 'tags/',
                 data: data
             }).then(function(response) {
-                tag.children.push(response.data);
+                $rootScope.loadTags();
             });
         }
     };
@@ -160,15 +191,18 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             controllerAs: '$ctrl'
         })
         modalInstance.result.then(function (data) {
-            $http({
-                method: 'PATCH',
-                url: tag.url,
-                data: data
-            }).then(function(response) {
-                $rootScope.loadTags();
-            });
+            $scope.updateTag(tag, data);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
+    $scope.updateTag = function(tag, data) {
+        $http({
+            method: 'PATCH',
+            url: tag.url,
+            data: data
+        }).then(function(response) {
+            $rootScope.loadTags();
+        });
+    };
 });
