@@ -64,11 +64,6 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
             params: {
                 page: pageNumber,
                 page_size: pageSize,
-                archival_institution: filters.institution,
-                archivist_organization: filters.organization,
-                archival_type: filters.type,
-                archival_location: filters.location,
-                other: filters.other,
                 ordering: sortString,
                 state: state,
                 search: searchString
