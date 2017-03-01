@@ -30,6 +30,7 @@ import tarfile
 import zipfile
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
+from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.ip.models import InformationPackage, InformationPackageRel
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 
@@ -42,10 +43,14 @@ class ReceiveSIP(DBTask):
         ingest = policy.ingest_path
         objid, container_type = os.path.splitext(os.path.basename(container))
 
+        parsed = parse_submit_description(xml)
+
         aip = InformationPackage.objects.create(
             ObjectIdentifierValue=objid,
             policy=policy,
-            package_type=InformationPackage.AIP
+            package_type=InformationPackage.AIP,
+            Label=parsed.get('label'),
+            entry_date=parsed.get('create_date')
         )
 
         aic = InformationPackage.objects.create(
