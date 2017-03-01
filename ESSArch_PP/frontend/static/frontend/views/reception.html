@@ -3,7 +3,7 @@
         <div class="reception">
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-                        <div ng-if="select" class="request-layout">
+                        <div ng-if="requestForm" class="request-layout">
                             <form id="request-form" name="request-form" class="request-form" ng-submit="receive(ip)">
                             <div class="request-type">
                                 <label>
@@ -25,6 +25,15 @@
                                     <input class="form-control" disabled="true" ng-model="vm.request.informationClause">
                                 </label>
                                 <label>
+                                    Tags
+                                    <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
+                                        <ui-select-match placeholder="Select tags...">{{$item.name}}</ui-select-match>
+                                        <ui-select-choices repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
+                                            <div ng-bind-html="x.name | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </label>
+                                <label>
                                     <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
                                     Allow unknown files
                                 </label>
@@ -43,7 +52,7 @@
                                     <input type="checkBox" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
                                 </label>
                             </div>
-                            <button type="submit" form="request-form" ng-dblClick="" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
+                            <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToReceive" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
                         </form>
                     </div>
                 </div>

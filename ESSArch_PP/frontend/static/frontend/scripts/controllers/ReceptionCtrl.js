@@ -129,17 +129,20 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id== row.id){
-            $scope.select = false;
+            $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.edit = false;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
-            $scope.select = true;
+            $scope.requestForm = true;
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.getArchivePolicies().then(function(result) {
                 vm.request.archivePolicy.options = result;
+            });
+            $scope.getTags().then(function(result) {
+                vm.request.tags.options = result;
             });
             $timeout(function() {
                 $anchorScroll("select-wrap");
@@ -205,6 +208,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.edit = false;
     //Decides visibility of eventlog view
     $scope.eventlog = false;
+    $scope.requestForm = false;
     //Html popover template for currently disabled
     $scope.htmlPopover = $sce.trustAsHtml('<font size="3" color="red">Currently disabled</font>');
 
@@ -356,15 +360,27 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             value: null,
             options: []
         },
+        tags: {
+            value: [],
+            options: []
+        },
         informationClass: "Information class",
         allowUnknownFiles: false
     };
     $scope.getArchivePolicies = function() {
-        $http({
+        return $http({
             method: 'GET',
             url: appConfig.djangoUrl + 'archive_policies/'
         }).then(function(response) {
-            vm.request.archivePolicy.options = response.data;
+            return response.data;
+        });
+    }
+    $scope.getTags = function() {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'tags/'
+        }).then(function(response) {
+            return response.data;
         });
     }
     $scope.receive = function(ip) {
@@ -374,10 +390,14 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             data: {
                 archive_policy: vm.request.archivePolicy.value.id,
                 purpose: vm.request.purpose,
+                tags: vm.request.tags.value.map(function(tag){return tag.id}),
                 allow_unknown_files: vm.request.allowUnknownFiles
             }
         }).then(function(){
-            console.log("receive!");
+            $scope.getListViewData();
+                $scope.eventlog = false;
+                $scope.edit = false;
+                $scope.requestForm = false;
         });
     }
 });
