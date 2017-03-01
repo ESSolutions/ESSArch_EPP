@@ -63,75 +63,9 @@
                 </div>
                 </div>
             -->
-            <div ng-controller="AngularTreeCtrl" class="navigation">
+            <div ng-controller="AngularTreeCtrl" class="navigation" context-menu="navMenuOptions(item)">
                 </br>
                 <p>
-                <treecontrol class="tree-light"
-                             tree-model="ArchivalInstitution"
-                             options="treeOptions"
-                             on-selection="showSelectedInstitution(node)"
-                             selected-node="nodeInst"
-                             uib-popover="{{'FILTERBY' | translate}}: Archival institution"
-                             popover-trigger="'mouseenter'"
-                             popover-placement="top-left"
-                             popover-popup-delay="500"
-                             popover-append-to-body="true"
-                             >
-                             {{node.name}}
-                </treecontrol>
-                <treecontrol class="tree-light"
-                             tree-model="ArchivistOrganization"
-                             options="treeOptions"
-                             on-selection="showSelectedOrganization(node)"
-                             selected-node="nodeOrg"
-                             uib-popover="{{'FILTERBY' | translate}}: Archivist organization"
-                             popover-trigger="'mouseenter'"
-                             popover-placement="top-left"
-                             popover-popup-delay="500"
-                             popover-append-to-body="true"
-                             >
-                             {{node.name}}
-                </treecontrol>
-                <treecontrol class="tree-light"
-                             tree-model="ArchivalType"
-                             options="treeOptions"
-                             on-selection="showSelectedType(node)"
-                             selected-node="nodeType"
-                             uib-popover="{{'FILTERBY' | translate}}: Archival type"
-                             popover-trigger="'mouseenter'"
-                             popover-placement="top-left"
-                             popover-popup-delay="500"
-                             popover-append-to-body="true"
-                             >
-                             {{node.name}}
-                </treecontrol>
-                <treecontrol class="tree-light"
-                             tree-model="ArchivalLocation"
-                             options="treeOptions"
-                             on-selection="showSelectedLocation(node)"
-                             selected-node="nodeLoc"
-                             uib-popover="{{'FILTERBY' | translate}}: Archival location"
-                             popover-trigger="'mouseenter'"
-                             popover-placement="top-left"
-                             popover-popup-delay="500"
-                             popover-append-to-body="true"
-                             >
-                             {{node.name}}
-                </treecontrol>
-                <treecontrol class="tree-light"
-                             tree-model="other"
-                             options="treeOptions"
-                             on-selection="showSelectedOther(node)"
-                             selected-node="nodeOther"
-                             uib-popover="{{'FILTERBY' | translate}}: Other"
-                             popover-trigger="'mouseenter'"
-                             popover-placement="top-left"
-                             popover-popup-delay="500"
-                             popover-append-to-body="true"
-                             >
-                             {{node.name}}
-                </treecontrol>
-                <hr/>
                 <treecontrol class="tree-light"
                              tree-model="tags"
                              options="treeOptions"

@@ -65,7 +65,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
-        $rootScope.loadNavigation(ipSortString);
         $rootScope.loadTags();
     };
     //Update ip list view with an interval

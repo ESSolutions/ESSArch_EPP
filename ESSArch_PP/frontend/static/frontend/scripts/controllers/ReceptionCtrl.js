@@ -179,7 +179,6 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
-        $rootScope.loadNavigation(ipSortString);
         $rootScope.loadTags();
     };
     // Progress bar max value
@@ -257,7 +256,6 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.eventlog = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
-            $rootScope.loadNavigation(ipSortString);
         });
     }
     //Update ip list view with an interval
