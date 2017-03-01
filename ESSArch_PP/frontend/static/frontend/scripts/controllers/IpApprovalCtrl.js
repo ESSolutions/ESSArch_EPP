@@ -1,7 +1,8 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "";
+    vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     vm.request = {
         type: "preserve_ip",
@@ -11,6 +12,55 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             options: ["Disk", "Tape(type1)", "Tape(type2)"]
         }
     };
+
+    //Cancel update intervals on state change
+    $rootScope.$on('$stateChangeStart', function() {
+        $interval.cancel(stateInterval);
+        $interval.cancel(listViewInterval);
+    });
+    // Click funtion columns that does not have a relevant click function
+    $scope.ipRowClick = function(row) {
+        $scope.selectIp(row);
+        if($scope.ip == row){
+            row.class = "";
+            $scope.selectedIp = {id: "", class: ""};
+        }
+        if($scope.eventShow) {
+            $scope.eventsClick(row);
+        }
+        if($scope.statusShow) {
+            $scope.stateClicked(row);
+        }
+        if ($scope.select) {
+            $scope.ipTableClick(row);
+        }
+    }
+    //Click function for status view
+    var stateInterval;
+    $scope.stateClicked = function(row){
+        if($scope.statusShow && $scope.ip == row){
+            $scope.statusShow = false;
+        } else {
+            $scope.statusShow = true;
+            $scope.edit = false;
+            $scope.statusViewUpdate(row);
+        }
+        $scope.subSelect = false;
+        $scope.eventlog = false;
+        $scope.select = false;
+        $scope.eventShow = false;
+        $scope.ip = row;
+        $rootScope.ip = row;
+    };
+    //If status view is visible, start update interval
+    $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
+        if(newValue) {
+            $interval.cancel(stateInterval);
+            stateInterval = $interval(function(){$scope.statusViewUpdate($scope.ip)}, appConfig.stateInterval);
+        } else {
+            $interval.cancel(stateInterval);
+        }
+    });
     $scope.$watch(function(){return $rootScope.ipUrl;}, function(newValue, oldValue) {
         $scope.getListViewData();
     }, true);
@@ -106,4 +156,34 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     };
     updateListViewConditional();
 
+    //Click function for Ip table
+    $scope.ipTableClick = function(row) {
+        if($scope.select && $scope.ip.id== row.id){
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.requestForm = false;
+        } else {
+            $scope.ip = row;
+            $rootScope.ip = $scope.ip;
+            $scope.select = true;
+            $scope.eventlog = true;
+            $scope.edit = true;
+            $scope.requestForm = true;
+            $timeout(function() {
+                $anchorScroll("request-form");
+            }, 0);
+        }
+        $scope.eventShow = false;
+        $scope.statusShow = false;
+    };
+    $scope.colspan = 9;
+    $scope.stepTaskInfoShow = false;
+    $scope.statusShow = false;
+    $scope.eventShow = false;
+    $scope.select = false;
+    $scope.subSelect = false;
+    $scope.edit = false;
+    $scope.eventlog = false;
+    $scope.requestForm = false;
 });
