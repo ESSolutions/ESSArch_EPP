@@ -66,6 +66,22 @@ class ReceiveSIPTestCase(TransactionTestCase):
             value=os.path.join(self.root, 'cache')
         )
 
+        self.xmldata = '''
+            <mets:mets
+                xmlns:mets="http://www.loc.gov/METS/"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.loc.gov/METS/ http://xml.essarch.org/METS/info.xsd"
+                ID="IDbc94f115-d6c0-43a1-9be8-a073c467bf1b"
+                OBJID="UUID:2259f52c-39c6-4a82-a9c3-3e7d29742c21"
+                LABEL="test-ip"
+                TYPE="SIP"
+                PROFILE="my profile">
+                <mets:metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
+                </mets:metsHdr>
+            </mets:mets>
+            '''
+
         for path in [self.gate, self.ingest, self.cache]:
             try:
                 os.makedirs(path.value)
@@ -87,23 +103,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         container = os.path.join(self.gate.value, sip + '.tar')
 
         with open(xml, 'w') as xmlf:
-            data = '''
-            <mets:mets
-                xmlns:mets="http://www.loc.gov/METS/"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://www.loc.gov/METS/ http://xml.essarch.org/METS/info.xsd"
-                ID="IDbc94f115-d6c0-43a1-9be8-a073c467bf1b"
-                OBJID="UUID:2259f52c-39c6-4a82-a9c3-3e7d29742c21"
-                LABEL="test-ip"
-                TYPE="SIP"
-                PROFILE="my profile">
-                <mets:metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
-                </mets:metsHdr>
-            </mets:mets>
-            '''
-
-            xmlf.write(data)
+            xmlf.write(self.xmldata)
 
         open(container, 'a').close()
 
@@ -165,7 +165,8 @@ class ReceiveSIPTestCase(TransactionTestCase):
         xml = os.path.join(self.gate.value, sip + '.xml')
         container = os.path.join(self.gate.value, sip + '.tar')
 
-        open(xml, 'a').close()
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
 
         files = []
 
@@ -220,7 +221,8 @@ class ReceiveSIPTestCase(TransactionTestCase):
         xml = os.path.join(self.gate.value, sip + '.xml')
         container = os.path.join(self.gate.value, sip + '.zip')
 
-        open(xml, 'a').close()
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
 
         files = []
 
