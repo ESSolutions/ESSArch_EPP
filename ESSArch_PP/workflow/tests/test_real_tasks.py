@@ -30,6 +30,7 @@ import zipfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TransactionTestCase, override_settings
+from django.utils.timezone import localtime
 
 from ESSArch_Core.configuration.models import (
     ArchivePolicy, Path,
@@ -85,7 +86,25 @@ class ReceiveSIPTestCase(TransactionTestCase):
         xml = os.path.join(self.gate.value, sip + '.xml')
         container = os.path.join(self.gate.value, sip + '.tar')
 
-        open(xml, 'a').close()
+        with open(xml, 'w') as xmlf:
+            data = '''
+            <mets:mets
+                xmlns:mets="http://www.loc.gov/METS/"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.loc.gov/METS/ http://xml.essarch.org/METS/info.xsd"
+                ID="IDbc94f115-d6c0-43a1-9be8-a073c467bf1b"
+                OBJID="UUID:2259f52c-39c6-4a82-a9c3-3e7d29742c21"
+                LABEL="test-ip"
+                TYPE="SIP"
+                PROFILE="my profile">
+                <mets:metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
+                </mets:metsHdr>
+            </mets:mets>
+            '''
+
+            xmlf.write(data)
+
         open(container, 'a').close()
 
         policy = ArchivePolicy.objects.create(
@@ -117,6 +136,10 @@ class ReceiveSIPTestCase(TransactionTestCase):
             package_type=InformationPackage.AIP
         )
         self.assertTrue(aip.exists())
+
+        aip = aip.first()
+        self.assertEqual(aip.Label, 'test-ip')
+        self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
         expected_aic = os.path.join(self.ingest.value, aic_id)
         self.assertTrue(os.path.isdir(expected_aic))
