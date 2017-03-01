@@ -6,7 +6,7 @@ from ESSArch_Core.ip.models import InformationPackage
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = InformationPackage
-        fields = ('url', 'id', 'Label',)
+        fields = ('url', 'id', 'Label', 'ObjectIdentifierValue',)
 
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
