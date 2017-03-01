@@ -29,7 +29,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
     }
     //Gets data for list view i.e information packages
     function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state) {
-        var ipUrl = appConfig.djangoUrl+'ip/';
+        var ipUrl = appConfig.djangoUrl+'information-packages/';
         if($rootScope.ipUrl) {
             ipUrl = $rootScope.ipUrl;
         }
