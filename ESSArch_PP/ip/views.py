@@ -66,6 +66,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             ip_id = os.path.splitext(os.path.basename(xmlfile))[0]
 
+            if InformationPackage.objects.filter(ObjectIdentifierValue=ip_id).exists():
+                continue
+
             ip = {
                 'id': ip_id,
                 'container': container,
@@ -82,6 +85,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         for d in os.listdir(path):
             if not os.path.isdir(os.path.join(path, d)):
+                continue
+
+            if InformationPackage.objects.filter(ObjectIdentifierValue=d).exists():
                 continue
 
             ip = {
