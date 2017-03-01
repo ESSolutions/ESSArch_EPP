@@ -3,7 +3,7 @@
         <div class="access-ip">
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-                        <div class="request-layout">
+                        <div ng-if="requestForm" class="request-layout">
                             <form id="request-form" class="request-form">
                             <div class="request-type">
                                 <label>
@@ -40,15 +40,15 @@
                             </form>
                         </div>
 
-                <div class="select-sub-edit-eventlog-wrapper">
-                    <div ng-if="true" class="eventlog-view">
+                <div ng-if="eventlog" class="select-sub-edit-eventlog-wrapper">
+                    <div ng-if="eventlog" class="eventlog-view">
                         <form ng-submit="receiveSip(ip)" class="eventlog-form">
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkBox" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip')) || ip.State != 'Uploaded'" ng-model="approvedToReceive">{{'REQUESTAPPROVED' | translate}}</input>
+                                    <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
                                 </label>
                             </div>
-                            <button type="submit" form="request-form" ng-dblClick="" ng-disabled="(ip.Responsible.id != auth.id && !checkPermission('ip.create_sip'))" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
+                            <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                         </form>
                     </div>
                 </div>
