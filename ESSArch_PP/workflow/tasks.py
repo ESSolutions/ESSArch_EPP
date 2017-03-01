@@ -26,7 +26,8 @@ from __future__ import absolute_import
 
 import os
 import shutil
-import uuid
+import tarfile
+import zipfile
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, InformationPackageRel
@@ -39,29 +40,48 @@ class ReceiveSIP(DBTask):
     def run(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
         policy = ArchivePolicy.objects.get(pk=archive_policy)
         ingest = policy.ingest_path
-        aip_id = uuid.uuid4()
-        aic_id = uuid.uuid4()
+        objid, container_type = os.path.splitext(os.path.basename(container))
 
         aip = InformationPackage.objects.create(
-            pk=aip_id,
-            ObjectIdentifierValue=aip_id,
+            ObjectIdentifierValue=objid,
             policy=policy,
             package_type=InformationPackage.AIP
         )
 
         aic = InformationPackage.objects.create(
-            pk=aic_id,
-            ObjectIdentifierValue=aic_id,
             package_type=InformationPackage.AIC
         )
 
         InformationPackageRel.objects.create(aic_uuid=aic, uuid=aip)
 
-        aip_dir = os.path.join(ingest.value, str(aip_id))
-        os.mkdir(aip_dir)
+        aip_dir = os.path.join(
+            ingest.value, aic.ObjectIdentifierValue,
+            aip.ObjectIdentifierValue
+        )
+        os.makedirs(aip_dir)
+
+        content = os.path.join(aip_dir, 'content')
+        metadata = os.path.join(aip_dir, 'metadata')
+
+        os.mkdir(content)
+        os.mkdir(metadata)
+
+        if policy.receive_extract_sip:
+            dst = os.path.join(content, objid)
+            os.mkdir(dst)
+
+            if container_type.lower() == '.tar':
+                with tarfile.open(container) as tar:
+                    tar.extractall(dst)
+            elif container_type.lower() == '.zip':
+                with zipfile.ZipFile(container) as zipf:
+                    zipf.extractall(dst)
+        else:
+            dst = os.path.join(aip_dir, 'content', objid + container_type)
+            shutil.copy(container, dst)
 
         self.set_progress(100, total=100)
-        return aip.pk
+        return aic.pk
 
     def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
         pass
