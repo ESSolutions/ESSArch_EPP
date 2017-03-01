@@ -43,7 +43,7 @@ class ReceiveSIP(DBTask):
         ingest = policy.ingest_path
         objid, container_type = os.path.splitext(os.path.basename(container))
 
-        parsed = parse_submit_description(xml)
+        parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
 
         aip = InformationPackage.objects.create(
             ObjectIdentifierValue=objid,
