@@ -3,8 +3,8 @@
         <div class="reception">
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-                        <div ng-if="requestForm" class="request-layout">
-                            <form id="request-form" name="request-form" class="request-form" ng-submit="receive(ip)">
+                <div ng-if="requestForm" class="request-layout">
+                            <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
                             <div class="request-type">
                                 <label>
                                     <input type="radio" ng-model="vm.request.type" value="receive">
@@ -40,13 +40,13 @@
                             </div>
                             </form>
                         </div>
-                <div ng-if="edit || eventlog"class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="edit || eventlog || requestForm"class="select-sub-edit-eventlog-wrapper">
                     <div class="edit-view">
 
                         <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
                     </div>
-                    <div ng-if="true" class="eventlog-view">
-                        <form ng-submit="receiveSip(ip)" class="eventlog-form">
+                    <div ng-if="eventlog || requestForm" class="eventlog-view">
+                        <form class="eventlog-form">
                             <div class="checkbox">
                                 <label>
                                     <input type="checkBox" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>

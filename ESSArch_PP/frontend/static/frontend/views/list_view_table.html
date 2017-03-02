@@ -13,6 +13,7 @@
                 </th>
             </tr>
             <tr>
+                <th ng-if="'home.ingest.reception' | isState" class="clickable" class="column-label"></th>
                 <th class="clickable" st-sort="Label" class="column-label">{{'LABEL' | translate}}</th>
                 <th class="clickable" st-sort="Responsible" class="column-label">{{'RESPONSIBLE' | translate}}</th>
                 <th class="clickable" st-sort="Responsible" class="column-label">{{'ARCHIVISTORGANIZATION' | translate}}</th>
@@ -26,6 +27,14 @@
         </thead>
         <tbody>
             <tr ng-class="row.class" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
+                <td ng-if="'home.ingest.reception' | isState">
+                    <div class="checkbox table-col">
+                        <label>
+                            <input ng-disabled="row.State == 'Receiving'" type="checkbox" ng-model="row.checked" ng-change="includeIp(row)" uib-popover="{{'MARKFORRECEIVE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+                            </input>
+                        </label>
+                    </div>
+                </td>
                 <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.ObjectIdentifierValue}}</td>
                 <td ng-if="'home.ingest.reception' | isState" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.id}}</td>
                 <td class="clickable" ng-click="ipRowClick(row)">{{row.Responsible.username}}</td>

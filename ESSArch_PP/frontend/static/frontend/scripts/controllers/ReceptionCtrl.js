@@ -26,12 +26,40 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "";
+    $scope.includedIps = [];
+    $scope.colspan = 10;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
     });
+    $scope.includeIp = function(row) {
+        var temp = true;
+        $scope.includedIps.forEach(function(included, index, array) {
+
+            if(included.id == row.id) {
+                array.splice(index, 1);
+                temp = false;
+            }
+        });
+        if(temp) {
+            $scope.includedIps.push(row);
+        }
+        if($scope.includedIps.length == 0) {
+            $scope.requestForm = false;
+        } else {
+            if(!$scope.requestForm) {
+                $scope.getArchivePolicies().then(function(result) {
+                    vm.request.archivePolicy.options = result;
+                });
+                $scope.getTags().then(function(result) {
+                    vm.request.tags.options = result;
+                });
+                $scope.requestForm = true;
+            }
+        }
+    }
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
@@ -103,7 +131,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
 
-            Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
+            Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.selectedIp, $scope.includedIps, sorting, search, ipSortString).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -129,27 +157,10 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id== row.id){
-            $scope.requestForm = false;
-            $scope.eventlog = false;
-            $scope.edit = false;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
-            $scope.requestForm = true;
-            $scope.eventlog = true;
-            $scope.edit = true;
-            $scope.getArchivePolicies().then(function(result) {
-                vm.request.archivePolicy.options = result;
-            });
-            $scope.getTags().then(function(result) {
-                vm.request.tags.options = result;
-            });
-            $timeout(function() {
-                $anchorScroll("select-wrap");
-            }, 0);
         }
-        $scope.eventShow = false;
-        $scope.statusShow = false;
     };
     $scope.$watch(function(){return $rootScope.navigationFilter;}, function(newValue, oldValue) {
         $scope.getListViewData();
@@ -383,21 +394,23 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             return response.data;
         });
     }
-    $scope.receive = function(ip) {
-        $http({
-            method: 'POST',
-            url: appConfig.djangoUrl +'ip-reception/'+ ip.id + '/receive/',
-            data: {
-                archive_policy: vm.request.archivePolicy.value.id,
-                purpose: vm.request.purpose,
-                tags: vm.request.tags.value.map(function(tag){return tag.id}),
-                allow_unknown_files: vm.request.allowUnknownFiles
-            }
-        }).then(function(){
-            $scope.getListViewData();
+    $scope.receive = function(ips) {
+        ips.forEach(function(ip) {
+            $http({
+                method: 'POST',
+                url: appConfig.djangoUrl +'ip-reception/'+ ip.id + '/receive/',
+                data: {
+                    archive_policy: vm.request.archivePolicy.value.id,
+                    purpose: vm.request.purpose,
+                    tags: vm.request.tags.value.map(function(tag){return tag.id}),
+                    allow_unknown_files: vm.request.allowUnknownFiles
+                }
+            }).then(function(){
+                $scope.getListViewData();
                 $scope.eventlog = false;
                 $scope.edit = false;
                 $scope.requestForm = false;
+            });
         });
     }
 });
