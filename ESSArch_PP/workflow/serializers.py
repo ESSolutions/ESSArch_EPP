@@ -40,6 +40,41 @@ class ProcessStepSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+class ProcessStepChildrenSerializer(serializers.Serializer):
+    url = serializers.SerializerMethodField()
+    id = serializers.UUIDField()
+    flow_type = serializers.SerializerMethodField()
+    name = serializers.CharField()
+    hidden = serializers.BooleanField()
+    progress = serializers.IntegerField()
+    status = serializers.CharField()
+    responsible = serializers.SerializerMethodField()
+    step_position = serializers.SerializerMethodField()
+    time_started = serializers.DateTimeField()
+    time_done = serializers.DateTimeField()
+
+    def get_url(self, obj):
+        flow_type = self.get_flow_type(obj)
+        request = self.context.get('request')
+        url = '/api/%ss/%s/' % (flow_type, obj.pk)
+        return request.build_absolute_uri(url)
+
+    def get_flow_type(self, obj):
+        return 'task' if type(obj).__name__ == 'ProcessTask' else 'step'
+
+    def get_responsible(self, obj):
+        if type(obj).__name__ == 'ProcessTask':
+            if obj.responsible:
+                return obj.responsible.username
+            return None
+        return obj.user
+
+    def get_step_position(self, obj):
+        if type(obj).__name__ == 'ProcessTask':
+            return obj.processstep_pos
+        return obj.parent_step_pos
+
+
 class ProcessTaskSerializer(serializers.HyperlinkedModelSerializer):
     responsible = serializers.SlugRelatedField(
         slug_field='username', read_only=True
