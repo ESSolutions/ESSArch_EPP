@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Received,Preserving";
@@ -12,7 +12,13 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             options: ["Disk", "Tape(type1)", "Tape(type2)"]
         }
     };
-
+    $scope.preserveIp = function(ip) {
+        listViewService.preserveIp(ip, vm.request).then(function(result) {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+            $scope.getListViewData();
+        });
+    }
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
@@ -49,6 +55,22 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
         $scope.eventlog = false;
         $scope.select = false;
         $scope.eventShow = false;
+        $scope.ip = row;
+        $rootScope.ip = row;
+    };
+
+    //Click funciton for event view
+    $scope.eventsClick = function (row) {
+        if($scope.eventShow && $scope.ip == row){
+            $scope.eventShow = false;
+            $rootScope.stCtrl = null;
+        } else {
+            if($rootScope.stCtrl) {
+                $rootScope.stCtrl.pipe();
+            }
+            $scope.eventShow = true;
+            $scope.statusShow = false;
+        }
         $scope.ip = row;
         $rootScope.ip = row;
     };
@@ -162,6 +184,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
+            $scope.eventShow = false;
             $scope.requestForm = false;
         } else {
             $scope.ip = row;
@@ -170,11 +193,11 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.requestForm = true;
+            $scope.eventsClick(row);
             $timeout(function() {
                 $anchorScroll("request-form");
             }, 0);
         }
-        $scope.eventShow = false;
         $scope.statusShow = false;
     };
     $scope.colspan = 9;

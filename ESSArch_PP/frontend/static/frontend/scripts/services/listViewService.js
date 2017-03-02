@@ -102,6 +102,15 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
     function getTreeData(row, expandedNodes) {
         return getStatusViewData(row, expandedNodes);
     }
+    function preserveIp(ip, request) {
+        return $http({
+            method: 'POST',
+            url: ip.url + 'preserve/',
+            data: {}
+        }).then(function(response) {
+            return response;
+        });
+    }
     //Add a new event
     function addEvent(ip, eventType, eventDetail, outcome) {
         var promise = $http({
@@ -592,6 +601,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         getProfiles: getProfiles,
         getProfilesMin: getProfilesMin,
         getDir: getDir,
+        preserveIp: preserveIp,
     };
 
 });
