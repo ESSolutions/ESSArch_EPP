@@ -181,7 +181,6 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
                 $scope.statusShow = false;
                 $timeout(function(){
                     $scope.getListViewData();
-                    updateListViewConditional();
                 }, 1000);
             }
         });
