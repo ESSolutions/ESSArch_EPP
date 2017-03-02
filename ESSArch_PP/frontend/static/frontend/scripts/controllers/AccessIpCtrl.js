@@ -1,7 +1,7 @@
 angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    var ipSortString = "";
+    var ipSortString = "Preserved,Accessing";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     vm.request = {
@@ -12,7 +12,6 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             options: ["Disk", "Tape(type1)", "Tape(type2)"]
         }
     };
-
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);

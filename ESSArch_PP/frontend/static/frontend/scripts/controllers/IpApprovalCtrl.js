@@ -1,7 +1,7 @@
 angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    var ipSortString = "";
+    var ipSortString = "Received,Preserving";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     vm.request = {
