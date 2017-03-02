@@ -122,15 +122,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
             },
         )
 
-        aic_id = str(task.run().get())
-        aic = InformationPackage.objects.filter(
-            pk=aic_id,
-            ObjectIdentifierValue=aic_id,
-            package_type=InformationPackage.AIC
-        )
-        self.assertTrue(aic.exists())
-
-        aip_id = aic.first().information_packages.first().pk
+        aip_id = task.run().get()
         aip = InformationPackage.objects.filter(
             pk=aip_id,
             ObjectIdentifierValue=sip,
@@ -138,14 +130,20 @@ class ReceiveSIPTestCase(TransactionTestCase):
         )
         self.assertTrue(aip.exists())
 
+        aic_id = str(aip.first().aic_set.first().pk)
+        aic = InformationPackage.objects.filter(
+            pk=aic_id,
+            ObjectIdentifierValue=aic_id,
+            package_type=InformationPackage.AIC
+        )
+        self.assertTrue(aic.exists())
+
         aip = aip.first()
         self.assertEqual(aip.Label, 'test-ip')
         self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
-        expected_aic = os.path.join(self.ingest.value, aic_id)
-        self.assertTrue(os.path.isdir(expected_aic))
-
-        expected_aip = os.path.join(expected_aic, sip)
+        self.assertEqual(sip, aip.ObjectIdentifierValue)
+        expected_aip = os.path.join(self.ingest.value, sip)
         self.assertTrue(os.path.isdir(expected_aip))
 
         expected_content = os.path.join(expected_aip, 'content')
@@ -196,10 +194,9 @@ class ReceiveSIPTestCase(TransactionTestCase):
             },
         )
 
-        aic_id = str(task.run().get())
+        task.run()
 
-        expected_aic = os.path.join(self.ingest.value, aic_id)
-        expected_aip = os.path.join(expected_aic, sip)
+        expected_aip = os.path.join(self.ingest.value, sip)
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
 
@@ -252,10 +249,9 @@ class ReceiveSIPTestCase(TransactionTestCase):
             },
         )
 
-        aic_id = str(task.run().get())
+        task.run()
 
-        expected_aic = os.path.join(self.ingest.value, aic_id)
-        expected_aip = os.path.join(expected_aic, sip)
+        expected_aip = os.path.join(self.ingest.value, sip)
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
 
