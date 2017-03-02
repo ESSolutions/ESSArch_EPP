@@ -36,7 +36,7 @@ from ESSArch_Core.configuration.models import (
 )
 from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.util import get_value_from_path
-from ESSArch_Core.WorkflowEngine.models import ProcessTask
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
 from ip.serializers import InformationPackageSerializer, InformationPackageDetailSerializer
@@ -162,3 +162,20 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             return InformationPackageSerializer
 
         return InformationPackageDetailSerializer
+
+    @detail_route(methods=['post'], url_path='preserve')
+    def preserve(self, request, pk=None):
+        main_step = ProcessStep.objects.create(name='Preserve AIP')
+        tasks = []
+
+        tasks.append(ProcessTask(
+            name='workflow.tasks.CacheAIP',
+            params={'aip': pk},
+            processstep=main_step
+        ))
+
+        ProcessTask.objects.bulk_create(tasks)
+
+        main_step.run()
+
+        return Response(['Preserving AIP %s...' % pk])
