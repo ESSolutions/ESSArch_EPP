@@ -1,6 +1,19 @@
 from rest_framework import serializers
 
-from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.ip.models import EventIP, InformationPackage
+
+
+class EventIPSerializer(serializers.HyperlinkedModelSerializer):
+    eventDetail = serializers.SlugRelatedField(slug_field='eventDetail', source='eventType', read_only=True)
+
+    class Meta:
+        model = EventIP
+        fields = (
+                'url', 'id', 'eventType', 'eventDateTime', 'eventDetail',
+                'eventVersion', 'eventOutcome',
+                'eventOutcomeDetailNote', 'linkingAgentIdentifierValue',
+                'linkingObjectIdentifierValue',
+        )
 
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):

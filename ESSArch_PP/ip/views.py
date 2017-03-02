@@ -34,12 +34,20 @@ from rest_framework.response import Response
 from ESSArch_Core.configuration.models import (
     Path,
 )
-from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.ip.models import EventIP, InformationPackage
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
-from ip.serializers import InformationPackageSerializer, InformationPackageDetailSerializer
+from ip.serializers import EventIPSerializer, InformationPackageSerializer, InformationPackageDetailSerializer
+
+
+class EventIPViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows events to be viewed or edited.
+    """
+    queryset = EventIP.objects.all()
+    serializer_class = EventIPSerializer
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
