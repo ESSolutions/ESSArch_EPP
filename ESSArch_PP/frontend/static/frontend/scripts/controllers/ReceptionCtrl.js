@@ -39,7 +39,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         $scope.includedIps.forEach(function(included, index, array) {
 
             if(included.id == row.id) {
-                array.splice(index, 1);
+                $scope.includedIps.splice(index, 1);
                 temp = false;
             }
         });
@@ -364,20 +364,23 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     ];
 
     //Request form data
-    vm.request = {
-        type: "receive",
-        purpose: "",
-        archivePolicy: {
-            value: null,
-            options: []
-        },
-        tags: {
-            value: [],
-            options: []
-        },
-        informationClass: "Information class",
-        allowUnknownFiles: false
-    };
+    function initRequestData() {
+        vm.request = {
+            type: "receive",
+            purpose: "",
+            archivePolicy: {
+                value: null,
+                options: []
+            },
+            tags: {
+                value: [],
+                options: []
+            },
+            informationClass: "Information class",
+            allowUnknownFiles: false
+        };
+    }
+    initRequestData();
     $scope.getArchivePolicies = function() {
         return $http({
             method: 'GET',
@@ -410,6 +413,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 $scope.eventlog = false;
                 $scope.edit = false;
                 $scope.requestForm = false;
+                initRequestData();
             });
         });
     }
