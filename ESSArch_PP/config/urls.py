@@ -51,6 +51,8 @@ from ip.views import (
 
 from tags.views import TagViewSet
 
+from workflow.views import ProcessStepViewSet
+
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
@@ -65,6 +67,7 @@ router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
+router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'users', UserViewSet)
 
