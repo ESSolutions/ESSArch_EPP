@@ -24,9 +24,13 @@
 
 from rest_framework import viewsets
 
-from ESSArch_Core.WorkflowEngine.models import ProcessStep
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 
-from workflow.serializers import ProcessStepSerializer
+from workflow.serializers import (
+    ProcessStepSerializer,
+    ProcessTaskSerializer,
+    ProcessTaskDetailSerializer
+)
 
 
 class ProcessStepViewSet(viewsets.ModelViewSet):
@@ -35,3 +39,17 @@ class ProcessStepViewSet(viewsets.ModelViewSet):
     """
     queryset = ProcessStep.objects.all()
     serializer_class = ProcessStepSerializer
+
+
+class ProcessTaskViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows tasks to be viewed or edited.
+    """
+    queryset = ProcessTask.objects.select_related('responsible').all()
+    serializer_class = ProcessTaskSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProcessTaskSerializer
+
+        return ProcessTaskDetailSerializer
