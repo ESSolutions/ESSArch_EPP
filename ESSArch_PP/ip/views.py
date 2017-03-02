@@ -194,7 +194,10 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
-        main_step = ProcessStep.objects.create(name='Preserve AIP')
+        main_step = ProcessStep.objects.create(
+            name='Preserve AIP',
+            information_package_id=pk
+        )
         tasks = []
 
         tasks.append(ProcessTask(
