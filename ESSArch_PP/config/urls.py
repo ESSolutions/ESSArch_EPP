@@ -51,7 +51,7 @@ from ip.views import (
 
 from tags.views import TagViewSet
 
-from workflow.views import ProcessStepViewSet
+from workflow.views import ProcessStepViewSet, ProcessTaskViewSet
 
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
@@ -69,6 +69,7 @@ router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
 router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
+router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
 
 urlpatterns = [

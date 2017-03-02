@@ -24,7 +24,7 @@
 
 from rest_framework import serializers
 
-from ESSArch_Core.WorkflowEngine.models import ProcessStep
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 
 
 class ProcessStepSerializer(serializers.HyperlinkedModelSerializer):
@@ -37,4 +37,44 @@ class ProcessStepSerializer(serializers.HyperlinkedModelSerializer):
         )
         read_only_fields = (
             'status', 'progress', 'time_created', 'time_done', 'undone',
+        )
+
+
+class ProcessTaskSerializer(serializers.HyperlinkedModelSerializer):
+    responsible = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        model = ProcessTask
+        fields = (
+            'url', 'id', 'name', 'status', 'progress',
+            'processstep', 'processstep_pos', 'time_started',
+            'time_done', 'undone', 'undo_type', 'retried',
+            'responsible', 'hidden',
+        )
+
+        read_only_fields = (
+            'status', 'progress', 'time_started', 'time_done', 'undone',
+            'undo_type', 'retried', 'hidden',
+        )
+
+
+class ProcessTaskDetailSerializer(ProcessTaskSerializer):
+    params = serializers.SerializerMethodField()
+    result = serializers.SerializerMethodField()
+
+    def get_params(self, obj):
+        return dict((str(k), str(v)) for k, v in obj.params.iteritems())
+
+    def get_result(self, obj):
+        return str(obj.result)
+
+    class Meta:
+        model = ProcessTaskSerializer.Meta.model
+        fields = ProcessTaskSerializer.Meta.fields + (
+            'params', 'result', 'traceback', 'exception',
+        )
+        read_only_fields = ProcessTaskSerializer.Meta.read_only_fields + (
+            'params', 'result', 'traceback', 'exception',
         )
