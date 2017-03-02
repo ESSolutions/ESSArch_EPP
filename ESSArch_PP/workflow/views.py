@@ -22,12 +22,19 @@
     Email - essarch@essolutions.se
 """
 
+import datetime
+import itertools
+import pytz
+
 from rest_framework import viewsets
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 
 from workflow.serializers import (
     ProcessStepSerializer,
+    ProcessStepChildrenSerializer,
     ProcessTaskSerializer,
     ProcessTaskDetailSerializer
 )
@@ -39,6 +46,47 @@ class ProcessStepViewSet(viewsets.ModelViewSet):
     """
     queryset = ProcessStep.objects.all()
     serializer_class = ProcessStepSerializer
+
+
+    @detail_route(methods=['get'], url_path='children')
+    def children(self, request, pk=None):
+        step = self.get_object()
+        child_steps = step.child_steps.all()
+        tasks = step.tasks.filter(hidden=False).select_related('responsible')
+        queryset = sorted(
+            itertools.chain(child_steps, tasks),
+            key=lambda instance: instance.time_started or
+            datetime.datetime(datetime.MAXYEAR, 1, 1, 1, 1, 1, 1, pytz.UTC)
+        )
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializers = ProcessStepChildrenSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+        serializers = ProcessStepChildrenSerializer(queryset, many=True, context={'request': request})
+        return Response(serializers.data)
+
+    @detail_route(methods=['get'], url_path='child-steps')
+    def child_steps(self, request, pk=None):
+        step = self.get_object()
+        child_steps = step.child_steps.all()
+        page = self.paginate_queryset(child_steps)
+        if page is not None:
+            serializers = ProcessStepSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+        serializers = ProcessStepSerializer(child_steps, many=True, context={'request': request})
+        return Response(serializers.data)
+
+    @detail_route(methods=['get'])
+    def tasks(self, request, pk=None):
+        step = self.get_object()
+        tasks = step.tasks.filter(hidden=False).select_related('responsible')
+        page = self.paginate_queryset(tasks)
+        if page is not None:
+            serializers = ProcessTaskSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+        serializers = ProcessTaskSerializer(tasks, many=True, context={'request': request})
+        return Response(serializers.data)
 
 
 class ProcessTaskViewSet(viewsets.ModelViewSet):
