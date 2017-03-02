@@ -62,6 +62,10 @@ class ReceiveSIP(DBTask):
             information_package=aip
         )
 
+        ProcessStep.objects.filter(pk=self.step).update(
+            information_package=aip
+        )
+
         aic = InformationPackage.objects.create(
             package_type=InformationPackage.AIC
         )
@@ -147,3 +151,7 @@ class CacheAIP(DBTask):
 
     def event_outcome_success(self, aip):
         return "Cached AIP '%s'" % aip
+
+
+class UpdateIPStatus(tasks.UpdateIPStatus):
+    event_type = 30280

@@ -143,7 +143,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        t = ProcessTask.objects.create(
+        step = ProcessStep.objects.create(
+            name="Receive SIP", eager=False,
+        )
+
+        t1 = ProcessTask(
             name='workflow.tasks.ReceiveSIP',
             params={
                 'xml': xmlfile,
@@ -151,13 +155,29 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                 'purpose': request.data.get('purpose'),
                 'archive_policy': request.data.get('archive_policy'),
                 'allow_unknown_files': request.data.get('allow_unknown_files', False),
+                'tags': request.data.get('tags', [])
             },
             responsible=self.request.user,
+            processstep=step,
+            processstep_pos=0
         )
 
-        t.run()
+        t2 = ProcessTask(
+            name='ESSArch_Core.tasks.UpdateIPStatus',
+            params={
+                'status': 'Received',
+                'prev': 'Receiving'
+            },
+            result_params={'ip': t1.pk},
+            responsible=self.request.user,
+            processstep=step,
+            processstep_pos=1
+        )
 
-        return Response(['Receiving %s...' % container, t.params])
+        ProcessTask.objects.bulk_create([t1, t2])
+        step.run()
+
+        return Response('Receiving %s...' % container)
 
 
 class InformationPackageViewSet(viewsets.ModelViewSet):
