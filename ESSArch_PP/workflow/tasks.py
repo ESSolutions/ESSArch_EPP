@@ -43,7 +43,7 @@ from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 class ReceiveSIP(DBTask):
     event_type = 20100
 
-    def run(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
+    def run(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=[]):
         policy = ArchivePolicy.objects.get(pk=archive_policy)
         ingest = policy.ingest_path
         objid, container_type = os.path.splitext(os.path.basename(container))
@@ -58,6 +58,9 @@ class ReceiveSIP(DBTask):
             State='Receiving',
             entry_date=parsed.get('create_date')
         )
+
+        aip.tags = tags
+        aip.save()
 
         ProcessTask.objects.filter(pk=self.request.id).update(
             information_package=aip
@@ -99,10 +102,10 @@ class ReceiveSIP(DBTask):
         self.set_progress(100, total=100)
         return aip.pk
 
-    def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
+    def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=None):
         pass
 
-    def event_outcome_success(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
+    def event_outcome_success(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=None):
         ip_id = os.path.splitext(os.path.basename(xml))[0]
         return "Received IP '%s'" % ip_id
 
