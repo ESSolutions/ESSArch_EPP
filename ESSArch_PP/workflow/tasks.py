@@ -24,10 +24,13 @@
 
 from __future__ import absolute_import
 
+import errno
 import os
 import shutil
 import tarfile
 import zipfile
+
+from scandir import walk
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import parse_submit_description
@@ -94,3 +97,50 @@ class ReceiveSIP(DBTask):
     def event_outcome_success(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
         ip_id = os.path.splitext(os.path.basename(xml))[0]
         return "Received IP '%s'" % ip_id
+
+
+class CacheAIP(DBTask):
+    event_type = 20200
+
+    def run(self, aip):
+        srcdir, dstdir, objid = InformationPackage.objects.values_list(
+            'policy__ingest_path__value', 'policy__cache_storage__value',
+            'ObjectIdentifierValue',
+        ).get(pk=aip)
+
+        srcdir = os.path.join(srcdir, objid)
+        dstdir = os.path.join(dstdir, objid)
+        dsttar = dstdir + '.tar'
+
+        try:
+            os.makedirs(dstdir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        with tarfile.open(dsttar, 'w') as tar:
+            for root, dirs, files in walk(srcdir):
+                for d in dirs:
+                    try:
+                        os.makedirs(os.path.join(dstdir, d))
+                    except OSError as e:
+                        if e.errno != errno.EEXIST:
+                            raise
+
+                for f in files:
+                    rel = os.path.relpath(root, srcdir)
+                    src = os.path.join(root, f)
+                    dst = os.path.join(dstdir, rel, f)
+
+                    with open(src, 'r') as srcf, open(dst, 'w') as dstf:
+                        dstf.write(srcf.read())
+                        tar.add(src, os.path.join(objid, rel, f))
+
+        self.set_progress(100, total=100)
+        return aip
+
+    def undo(self, aip):
+        pass
+
+    def event_outcome_success(self, aip):
+        return "Cached AIP '%s'" % aip

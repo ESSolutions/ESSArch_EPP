@@ -22,6 +22,7 @@
     Email - essarch@essolutions.se
 """
 
+import filecmp
 import os
 import shutil
 import tarfile
@@ -273,3 +274,88 @@ class ReceiveSIPTestCase(TransactionTestCase):
 
         expected_metadata = os.path.join(expected_aip, 'metadata')
         self.assertTrue(os.path.isdir(expected_metadata))
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True)
+@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class CacheAIPTestCase(TransactionTestCase):
+    def setUp(self):
+        self.root = os.path.dirname(os.path.realpath(__file__))
+
+        self.ingest = Path.objects.create(
+            entity='ingest',
+            value=os.path.join(self.root, 'ingest')
+        )
+
+        self.cache = Path.objects.create(
+            entity='cache',
+            value=os.path.join(self.root, 'cache')
+        )
+
+        for path in [self.ingest, self.cache]:
+            try:
+                os.makedirs(path.value)
+            except OSError as e:
+                if e.errno != 17:
+                    raise
+
+    def tearDown(self):
+        for path in [self.ingest, self.cache]:
+            try:
+                shutil.rmtree(path.value)
+            except:
+                pass
+
+    def test_cache_aip(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(ObjectIdentifierValue='custom_obj_id', policy=policy)
+
+        aip_dir = os.path.join(policy.ingest_path.value, aip.ObjectIdentifierValue)
+        os.mkdir(aip_dir)
+        os.mkdir(os.path.join(aip_dir, 'content'))
+        os.mkdir(os.path.join(aip_dir, 'metadata'))
+
+        contentfile = os.path.join(
+            aip_dir, 'content', 'myfile.txt'
+        )
+
+        with open(contentfile, 'a') as f:
+            f.write('foo')
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.CacheAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        task.run()
+
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        self.assertTrue(os.path.isdir(cached_dir))
+
+        equal_content = filecmp.cmp(
+            os.path.join(aip_dir, 'content', 'myfile.txt'),
+            os.path.join(cached_dir, 'content', 'myfile.txt'),
+            False
+        )
+        self.assertTrue(equal_content)
+
+        extracted = os.path.join(aip.policy.cache_storage.value, 'extracted')
+        os.mkdir(extracted)
+
+        cached_container = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue + '.tar')
+        self.assertTrue(os.path.isfile(cached_container))
+
+        with tarfile.open(cached_container) as tar:
+            tar.extractall(extracted)
+
+        equal_content = filecmp.cmp(
+            os.path.join(aip_dir, 'content', 'myfile.txt'),
+            os.path.join(extracted, aip.ObjectIdentifierValue, 'content', 'myfile.txt'),
+            False
+        )
+        self.assertTrue(equal_content)
