@@ -27,7 +27,7 @@ import os
 
 from lxml import etree
 
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -187,3 +187,14 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         main_step.run()
 
         return Response(['Preserving AIP %s...' % pk])
+
+    @detail_route()
+    def events(self, request, pk=None):
+        ip = self.get_object()
+        events = filters.OrderingFilter().filter_queryset(request, ip.events.all(), self)
+        page = self.paginate_queryset(events)
+        if page is not None:
+            serializers = EventIPSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializers.data)
+        serializers = EventIPSerializer(events, many=True, context={'request': request})
+        return Response(serializers.data)
