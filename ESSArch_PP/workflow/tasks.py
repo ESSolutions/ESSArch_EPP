@@ -86,7 +86,7 @@ class ReceiveSIP(DBTask):
             shutil.copy(container, dst)
 
         self.set_progress(100, total=100)
-        return aic.pk
+        return aip.pk
 
     def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False):
         pass
