@@ -62,10 +62,7 @@ class ReceiveSIP(DBTask):
 
         InformationPackageRel.objects.create(aic_uuid=aic, uuid=aip)
 
-        aip_dir = os.path.join(
-            ingest.value, aic.ObjectIdentifierValue,
-            aip.ObjectIdentifierValue
-        )
+        aip_dir = os.path.join(ingest.value, aip.ObjectIdentifierValue)
         os.makedirs(aip_dir)
 
         content = os.path.join(aip_dir, 'content')
