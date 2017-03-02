@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Received,Preserving";
@@ -200,6 +200,19 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
         }
         $scope.statusShow = false;
     };
+    $scope.removeIp = function (ipObject) {
+        $http({
+            method: 'DELETE',
+            url: ipObject.url
+        }).then(function() {
+            vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
+        });
+    }
     $scope.colspan = 9;
     $scope.stepTaskInfoShow = false;
     $scope.statusShow = false;

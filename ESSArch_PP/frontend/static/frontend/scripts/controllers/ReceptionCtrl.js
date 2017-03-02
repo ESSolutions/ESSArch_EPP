@@ -413,4 +413,17 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             });
         });
     }
+    $scope.removeIp = function (ipObject) {
+        $http({
+            method: 'DELETE',
+            url: ipObject.url
+        }).then(function() {
+            vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
+        });
+    }
 });
