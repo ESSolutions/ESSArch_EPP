@@ -40,6 +40,7 @@ from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
 from ip.serializers import EventIPSerializer, InformationPackageSerializer, InformationPackageDetailSerializer
+from workflow.serializers import ProcessStepSerializer
 
 
 class EventIPViewSet(viewsets.ModelViewSet):
@@ -198,3 +199,13 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializers.data)
         serializers = EventIPSerializer(events, many=True, context={'request': request})
         return Response(serializers.data)
+
+    @detail_route()
+    def steps(self, request, pk=None):
+        ip = self.get_object()
+        steps = ip.steps.all()
+        serializer = ProcessStepSerializer(
+            data=steps, many=True, context={'request': request}
+        )
+        serializer.is_valid()
+        return Response(serializer.data)
