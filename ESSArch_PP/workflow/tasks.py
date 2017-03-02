@@ -36,6 +36,7 @@ from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.ip.models import InformationPackage, InformationPackageRel
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
+from ESSArch_Core.WorkflowEngine.models import ProcessTask
 
 
 class ReceiveSIP(DBTask):
@@ -53,7 +54,12 @@ class ReceiveSIP(DBTask):
             policy=policy,
             package_type=InformationPackage.AIP,
             Label=parsed.get('label'),
+            State='Receiving',
             entry_date=parsed.get('create_date')
+        )
+
+        ProcessTask.objects.filter(pk=self.request.id).update(
+            information_package=aip
         )
 
         aic = InformationPackage.objects.create(
