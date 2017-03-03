@@ -6,25 +6,25 @@
                 <div ng-if="requestForm" class="request-layout">
                             <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
                             <div class="request-type">
-                                <label>
+                                <label ng-if="checkPermission('ip.receive_ip')">
                                     <input type="radio" ng-model="vm.request.type" value="receive">
                                     Receive
                                 </label><br/>
                             </div>
                             <div class="request-params">
-                                <label>
+                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive_ip')">
                                     Purpose
                                     <input class="form-control" required="true" ng-model="vm.request.purpose">
                                 </label>
-                                <label>
+                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive_ip')">
                                     Archive policy
                                     <select type="select" required="true" class="form-control" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
                                 </label>
-                                <label>
+                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive_ip')">
                                     Information class
                                     <input class="form-control" disabled="true" ng-model="vm.request.informationClause">
                                 </label>
-                                <label>
+                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive_ip')">
                                     Tags
                                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
                                         <ui-select-match placeholder="Select tags...">{{$item.name}}</ui-select-match>
@@ -33,14 +33,14 @@
                                         </ui-select-choices>
                                     </ui-select>
                                 </label>
-                                <label>
+                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive_ip')">
                                     <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
                                     Allow unknown files
                                 </label>
                             </div>
                             </form>
                         </div>
-                <div ng-if="edit || eventlog || requestForm"class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="(edit || eventlog || requestForm) vm.request.type == 'receive' && checkPermission('ip.receive_ip')" class="select-sub-edit-eventlog-wrapper">
                     <div class="edit-view">
 
                         <div ng-include src="'static/frontend/views/validator_choices.html'"></div>

@@ -5,8 +5,8 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     vm.request = {
-        type: "preserve_ip",
-        purpose: "Preservation",
+        type: "",
+        purpose: "",
         storageMedium: {
             value: "",
             options: ["Disk", "Tape(type1)", "Tape(type2)"]

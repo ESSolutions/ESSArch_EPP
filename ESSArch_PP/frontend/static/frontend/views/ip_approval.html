@@ -6,43 +6,39 @@
                 <div ng-if="requestForm" class="request-layout">
                     <form id="request-form" name="request-form" class="request-form" ng-submit="preserveIp(ip)">
                         <div class="request-type">
-                            <label>
+                            <label  ng-if="checkPermission('ip.view_ip')">
                                 <input type="radio" ng-model="vm.request.type" value="view_ip_tar">
                                 View IP
                             </label><br/>
-                            <label>
+                            <label ng-if="checkPermission('ip.edit_as_new')">
                                 <input type="radio" ng-model="vm.request.type" value="edit_as_new">
                                 Edit as new IP
                             </label><br/>
-                            <label>
+                            <label ng-if="checkPermission('ip.diff_check')">
                                 <input type="radio" ng-model="vm.request.type" value="diff_check">
                                 Diff-check
                             </label><br/>
-                            <label>
+                            <label ng-if="checkPermission('ip.preserve_ip')">
                                 <input type="radio" ng-model="vm.request.type" value="preserve_ip">
                                 Preserve IP
                             </label><br/>
                         </div>
                         <div class="request-params">
-                            <label>
+                            <label ng-if="vm.request.type == 'view_ip_tar' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve_ip'">
                                 Purpose
                                 <input required class="form-control" ng-model="vm.request.purpose">
-                            </label>
-                            <label>
-                                Storage medium
-                                <select required type="select" class="form-control" ng-model="vm.request.storageMedium.value" ng-options="x for x in vm.request.storageMedium.options"></select>
                             </label>
                         </div>
                     </form>
                 </div>
 
-                <div ng-if="eventShow || statusShow" class="events-status-wrapper">
+                <div ng-if="(eventShow || statusShow) && (vm.request.type == 'edit_as_new' || vm.request.type == 'view_ip_tar' || vm.request.type == 'diff_check' || vm.request.type == 'preserve_ip')" class="events-status-wrapper">
                     <div ng-include src="'static/frontend/views/event_table.html'"></div>
                     <div ng-if="statusShow" class="status-view">
                         <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
                     </div>
                 </div>
-                <div ng-if="eventlog" class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view_ip_tar' || vm.request.type == 'diff_check' || vm.request.type == 'preserve_ip')" class="select-sub-edit-eventlog-wrapper">
                     <div ng-if="eventlog" class="eventlog-view">
                         <form class="eventlog-form">
                             <div class="checkbox">
