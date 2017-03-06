@@ -25,6 +25,8 @@
 import glob
 import os
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from lxml import etree
 
 from rest_framework import filters, status, viewsets
@@ -39,6 +41,7 @@ from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
+from ip.filters import InformationPackageFilter
 from ip.serializers import EventIPSerializer, InformationPackageSerializer, InformationPackageDetailSerializer
 from workflow.serializers import ProcessStepSerializer
 
@@ -185,6 +188,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     API endpoint that allows information packages to be viewed or edited.
     """
     queryset = InformationPackage.objects.all()
+    filter_backends = DjangoFilterBackend,
+    filter_class = InformationPackageFilter
 
     def get_serializer_class(self):
         if self.action == 'list':
