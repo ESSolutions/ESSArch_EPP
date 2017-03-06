@@ -35,7 +35,7 @@ from scandir import walk
 from ESSArch_Core import tasks
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import parse_submit_description
-from ESSArch_Core.ip.models import InformationPackage, InformationPackageRel
+from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 
@@ -50,13 +50,18 @@ class ReceiveSIP(DBTask):
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
 
+        aic = InformationPackage.objects.create(
+            package_type=InformationPackage.AIC
+        )
+
         aip = InformationPackage.objects.create(
             ObjectIdentifierValue=objid,
             policy=policy,
             package_type=InformationPackage.AIP,
             Label=parsed.get('label'),
             State='Receiving',
-            entry_date=parsed.get('create_date')
+            entry_date=parsed.get('create_date'),
+            aic=aic,
         )
 
         aip.tags = tags
@@ -69,12 +74,6 @@ class ReceiveSIP(DBTask):
         ProcessStep.objects.filter(pk=self.step).update(
             information_package=aip
         )
-
-        aic = InformationPackage.objects.create(
-            package_type=InformationPackage.AIC
-        )
-
-        InformationPackageRel.objects.create(aic_uuid=aic, uuid=aip)
 
         aip_dir = os.path.join(ingest.value, aip.ObjectIdentifierValue)
         os.makedirs(aip_dir)

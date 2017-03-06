@@ -130,13 +130,9 @@ class ReceiveSIPTestCase(TransactionTestCase):
         )
         self.assertTrue(aip.exists())
 
-        aic_id = str(aip.first().aic_set.first().pk)
-        aic = InformationPackage.objects.filter(
-            pk=aic_id,
-            ObjectIdentifierValue=aic_id,
-            package_type=InformationPackage.AIC
-        )
-        self.assertTrue(aic.exists())
+        aic = aip.first().aic
+        self.assertEqual(str(aic.pk), aic.ObjectIdentifierValue)
+        self.assertEqual(aic.package_type, InformationPackage.AIC)
 
         aip = aip.first()
         self.assertEqual(aip.Label, 'test-ip')
