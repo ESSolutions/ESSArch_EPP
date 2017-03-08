@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Received,Preserving";
@@ -111,9 +111,60 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
+            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics).then(function (result) {
 
-            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
-                ctrl.displayedIps = result.data;
+                    for(j=0; j<ctrl.displayedIps.length; j++){
+                    var aipExists = false;
+                    result.data.forEach(function(b, indexb, arrayb) {
+                        if(ctrl.displayedIps[j].ObjectIdentifierValue == b.ObjectIdentifierValue) {
+                            aipExists = true;
+                            if(!ctrl.displayedIps[j].collapsed) {
+                                var tempj = j;
+                                Promise.all(b.information_packages).then(function(data){
+                                    var tempArray = [];
+                                    for(i = 0; i < ctrl.displayedIps[tempj].information_packages.length; i++) {
+                                        var ipExists = false;
+                                        data.forEach(function(ip_b, indexd, arrayd) {
+                                            if(ctrl.displayedIps[tempj].information_packages[i].ObjectIdentifierValue === ip_b.ObjectIdentifierValue) {
+                                                ipExists = true;
+                                                ctrl.displayedIps[tempj].information_packages[i].Responsible = ip_b.Responsible;
+                                                ctrl.displayedIps[tempj].information_packages[i].CreateDate = ip_b.CreateDate;
+                                                ctrl.displayedIps[tempj].information_packages[i].State = ip_b.State;
+                                                ctrl.displayedIps[tempj].information_packages[i].step_state = ip_b.step_state;
+                                                ctrl.displayedIps[tempj].information_packages[i].status = ip_b.status;
+                                                arrayd.splice(indexd,1);
+                                            }
+                                        });
+                                        if(!ipExists) {
+                                            ctrl.displayedIps[tempj].information_packages.splice(i,1);
+                                            i--;
+                                        }
+                                    }
+                                    data.forEach(function(ip_b) {
+                                        ctrl.displayedIps[tempj].information_packages.push(ip_b);
+                                    });
+                                });
+                            } else {
+                                ctrl.displayedIps[j].information_packages = b.information_packages;
+                                b.information_packages = [];
+                            }
+                            ctrl.displayedIps[j].Responsible = b.Responsible;
+                            ctrl.displayedIps[j].CreateDate = b.CreateDate;
+                            ctrl.displayedIps[j].State = b.State;
+                            ctrl.displayedIps[j].step_state = b.step_state;
+                            ctrl.displayedIps[j].status = b.status;
+                            arrayb.splice(indexb, 1);
+                        }
+                    });
+                    if(!aipExists) {
+                        ctrl.displayedIps.splice(j, 1);
+                        j--;
+                    }
+                }
+                result.data.forEach(function(b) {
+                    ctrl.displayedIps.push(b);
+                });
+
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
@@ -123,12 +174,17 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     //Make ip selected and add class to visualize
     $scope.selectIp = function(row) {
         vm.displayedIps.forEach(function(ip) {
-            if(ip.id == $scope.selectedIp.id){
+            if(ip.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
                 ip.class = "";
             }
+            ip.information_packages.forEach(function(subIp) {
+                if(subIp.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue) {
+                    subIp.class = "";
+                }
+            });
         });
-        if(row.id == $scope.selectedIp.id){
-            $scope.selectedIp = {id: "", class: ""};
+        if(row.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
+            $scope.selectedIp = {ObjectIdentifierValue: "", class: ""};
         } else {
             row.class = "selected";
             $scope.selectedIp = row;
@@ -180,6 +236,9 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
+        if(row.package_type == 1) {
+            return;
+        }
         if($scope.select && $scope.ip.id== row.id){
             $scope.select = false;
             $scope.eventlog = false;
@@ -213,7 +272,30 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             $scope.statusShow = false;
         });
     }
-    $scope.colspan = 9;
+    $scope.expandedAics = [];
+    $scope.expandAic = function(row) {
+        row.collapsed = !row.collapsed;
+        if(!row.collapsed) {
+            $scope.expandedAics.push(row.ObjectIdentifierValue);
+        } else {
+            $scope.expandedAics.forEach(function(aic, index, array) {
+                if(aic == row.ObjectIdentifierValue) {
+                   $scope.expandedAics.splice(index,1);
+                }
+            });
+        }
+        row.information_packages.forEach(function(ip, index, array) {
+            if(!ip.ObjectIdentifierValue) {
+                $http({
+                    method: 'GET',
+                    url: ip
+                }).then(function(response) {
+                    array[index] = response.data;
+                })
+            }
+        });
+    }
+    $scope.colspan = 10;
     $scope.stepTaskInfoShow = false;
     $scope.statusShow = false;
     $scope.eventShow = false;

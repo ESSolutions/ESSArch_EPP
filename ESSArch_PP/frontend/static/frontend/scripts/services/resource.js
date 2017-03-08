@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope) {
+angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http) {
 
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
@@ -59,7 +59,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
 	}
     //Get data for IP table
-    function getIpPage(start, number, pageNumber, params, selected, sort, search, state) {
+    function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -67,22 +67,23 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state).then(function(value) {
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
-                if(selected.id == ip.id) {
-                    ip.class = "selected";
-                }
+                ip.collapsed = true;
+                expandedAics.forEach(function(aic, index, array) {
+                    if(ip.ObjectIdentifierValue == aic) {
+                        ip.collapsed = false;
+                        ip.information_packages.forEach(function(information_package, idx, arr) {
+                            if(!information_package.ObjectIdentifierValue) {
+                               arr[idx] = $http({
+                                    method: 'GET',
+                                    url: information_package
+                                }).then(function(response) {
+                                    return response.data;
+                                });
+                            }
+                        });
+                    }
+                });
             });
-            /*
-            console.log("ipCollection: ");
-            console.log(ipCollection);
-
-            var filtered = params.search.predicateObject ? $filter('filter')(ipCollection, params.search.predicateObject) : ipCollection;
-
-            if (params.sort.predicate) {
-                filtered = $filter('orderBy')(filtered, params.sort.predicate, params.sort.reverse);
-            }
-
-            var result = filtered.slice(start, start + number);
-            */
 
             return {
                 data: ipCollection,

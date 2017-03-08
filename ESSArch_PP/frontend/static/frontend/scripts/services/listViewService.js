@@ -41,7 +41,8 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 page_size: pageSize,
                 ordering: sortString,
                 state: state,
-                search: searchString
+                search: searchString,
+                package_type: 1
             }
         })
         .then(function successCallback(response) {
