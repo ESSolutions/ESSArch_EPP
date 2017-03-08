@@ -113,7 +113,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             var pageNumber = start/number+1;
             Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics).then(function (result) {
 
-                    for(j=0; j<ctrl.displayedIps.length; j++){
+                for(j=0; j<ctrl.displayedIps.length; j++){
                     var aipExists = false;
                     result.data.forEach(function(b, indexb, arrayb) {
                         if(ctrl.displayedIps[j].ObjectIdentifierValue == b.ObjectIdentifierValue) {
@@ -164,7 +164,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
                 result.data.forEach(function(b) {
                     ctrl.displayedIps.push(b);
                 });
-
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
@@ -237,6 +236,12 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if(row.package_type == 1) {
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.eventShow = false;
+            $scope.requestForm = false;
+
             return;
         }
         if($scope.select && $scope.ip.id== row.id){
