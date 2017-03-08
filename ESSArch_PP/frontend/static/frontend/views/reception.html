@@ -40,7 +40,7 @@
                             </div>
                             </form>
                         </div>
-                <div ng-if="(edit || eventlog || requestForm) vm.request.type == 'receive' && checkPermission('ip.receive_ip')" class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="(edit || eventlog || requestForm) && vm.request.type == 'receive' && checkPermission('ip.receive_ip')" class="select-sub-edit-eventlog-wrapper">
                     <div class="edit-view">
 
                         <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
