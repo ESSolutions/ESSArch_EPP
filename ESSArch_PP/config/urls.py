@@ -49,6 +49,12 @@ from ip.views import (
     InformationPackageReceptionViewSet,
 )
 
+from storage.views import (
+    StorageObjectViewSet,
+    StorageMediumViewSet,
+    StorageTargetViewSet,
+)
+
 from tags.views import TagViewSet
 
 from workflow.views import ProcessStepViewSet, ProcessTaskViewSet
@@ -71,6 +77,9 @@ router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
+router.register(r'storage-objects', StorageObjectViewSet)
+router.register(r'storage-mediums', StorageMediumViewSet)
+router.register(r'storage-targets', StorageTargetViewSet)
 
 urlpatterns = [
     url(r'^', include('frontend.urls'), name='home'),
