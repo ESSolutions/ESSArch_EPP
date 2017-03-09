@@ -115,10 +115,10 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
             Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics).then(function (result) {
 
                 for(j=0; j<ctrl.displayedIps.length; j++){
-                    var aipExists = false;
+                    var aicExists = false;
                     result.data.forEach(function(b, indexb, arrayb) {
                         if(ctrl.displayedIps[j].ObjectIdentifierValue == b.ObjectIdentifierValue) {
-                            aipExists = true;
+                            aicExists = true;
                             if(!ctrl.displayedIps[j].collapsed) {
                                 var tempj = j;
                                 Promise.all(b.information_packages).then(function(data){
@@ -157,7 +157,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
                             arrayb.splice(indexb, 1);
                         }
                     });
-                    if(!aipExists) {
+                    if(!aicExists) {
                         ctrl.displayedIps.splice(j, 1);
                         j--;
                     }

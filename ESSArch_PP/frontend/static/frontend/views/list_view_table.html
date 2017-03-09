@@ -34,7 +34,7 @@
                         </label>
                     </div>
                 </td>
-                <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="expandAic(row)"><i class="fa fa-plus" ng-if="row.collapsed && row.package_type == 1"></i><i class="fa fa-minus" ng-if="!row.collapsed && row.package_type == 1"></i></td>
+                <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="expandAic(row)"><i class="fa fa-plus" ng-if="row.collapsed && row.information_packages.length > 0"></i><i class="fa fa-minus" ng-if="!row.collapsed && row.information_packages.length > 0"></i></td>
                 <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.ObjectIdentifierValue}}</td>
                 <td ng-if="'home.ingest.reception' | isState" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.id}}</td>
                 <td class="clickable" ng-click="ipRowClick(row)">{{row.Responsible.username}}</td>
