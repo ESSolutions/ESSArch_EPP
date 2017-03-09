@@ -3,6 +3,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Received,Preserving";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
+    vm.ipViewType = $cookies.get('ip-view-type') || 1;
     //Request form data
     vm.request = {
         type: "",

@@ -183,7 +183,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 }
             })
             .state('home.administration', {
-                url: '/administration',
+                url: 'administration',
                 templateUrl: '/static/frontend/views/administration.html',
                 controller: 'AdministrationCtrl as vm',
                 resolve: {

@@ -29,6 +29,9 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     $scope.updateIpsPerPage = function(items) {
         $cookies.put('epp-ips-per-page', items);
     };
+    $scope.changeIpViewType = function(type) {
+        $cookies.put('ip-view-type', type);
+    }
     $scope.menuOptions = [];
     //Status tree view structure
     $scope.tree_data = [];

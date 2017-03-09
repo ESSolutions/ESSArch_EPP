@@ -22,8 +22,8 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http) {
-
+angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies) {
+    var ipViewType = $cookies.get('ip-view-type') || 1;
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
