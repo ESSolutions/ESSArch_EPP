@@ -20,8 +20,9 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.HyperlinkedRelatedField(
         many=True,
-        queryset=InformationPackage.objects.exclude(package_type=InformationPackage.AIC).order_by('generation'),
-        view_name='informationpackage-detail'
+        queryset=InformationPackage.objects.all(),
+        view_name='informationpackage-detail',
+        source='related_ips'
     )
 
     class Meta:

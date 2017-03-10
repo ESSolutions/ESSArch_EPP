@@ -25,6 +25,8 @@
 import glob
 import os
 
+from django.db.models import Q
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from lxml import etree
@@ -190,6 +192,19 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     queryset = InformationPackage.objects.all()
     filter_backends = DjangoFilterBackend,
     filter_class = InformationPackageFilter
+
+    def get_queryset(self):
+        view_type = self.request.query_params.get('view-type', 'aic')
+
+        if self.action == 'list':
+            if view_type == 'ip':
+                return self.queryset.exclude(
+                    package_type=InformationPackage.AIC,
+                ).filter(Q(generation__isnull=True) | Q(generation=0))
+
+            return self.queryset.filter(aic__isnull=True)
+
+        return self.queryset
 
     def get_serializer_class(self):
         if self.action == 'list':
