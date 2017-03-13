@@ -61,7 +61,7 @@
                             popover-append-to-body="true"></button>
                 </td>
             </tr>
-            <tr ng-if="!row.collapsed && !('home.ingest.reception' | isState)" ng-repeat-end ng-repeat="subrow in row.information_packages" class="table-item" ng-class="subrow.class" style="background-color:rgba(50,120,255,.1);">
+            <tr ng-if="!row.collapsed" ng-repeat-end ng-repeat="subrow in row.information_packages" class="table-item" ng-class="subrow.class" style="background-color:rgba(50,120,255,.1);">
                 <td></td>
                 <td class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" uib-popover="{{'LABELDESC' | translate}}: {{subrow.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" style="padding-left: 30px;">{{subrow.ObjectIdentifierValue}}</td>
                 <td class="clickable" ng-click="ipRowClick(subrow)">{{subrow.Responsible.username}}</td>

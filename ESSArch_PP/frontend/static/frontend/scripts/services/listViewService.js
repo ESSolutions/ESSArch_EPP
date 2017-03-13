@@ -28,7 +28,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         $state.go(state);
     }
     //Gets data for list view i.e information packages
-    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state) {
+    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType) {
         var ipUrl = appConfig.djangoUrl+'information-packages/';
         if($rootScope.ipUrl) {
             ipUrl = $rootScope.ipUrl;
@@ -42,10 +42,9 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 ordering: sortString,
                 state: state,
                 search: searchString,
-                package_type: 1
+                view_type: viewType
             }
-        })
-        .then(function successCallback(response) {
+        }).then(function successCallback(response) {
             count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
@@ -54,10 +53,10 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 count: count,
                 data: response.data
             };
-        }, function errorCallback(response){
         });
         return promise;
     }
+
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state) {
         var promise = $http({
             method: 'GET',
@@ -70,16 +69,16 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 search: searchString
             }
         })
-        .then(function successCallback(response) {
-            count = response.headers('Count');
-            if (count == null) {
-                count = response.data.length;
-            }
-            return {
-                count: count,
-                data: response.data
-            };
-        }, function errorCallback(response){
+            .then(function successCallback(response) {
+                count = response.headers('Count');
+                if (count == null) {
+                    count = response.data.length;
+                }
+                return {
+                    count: count,
+                    data: response.data
+                };
+            }, function errorCallback(response){
         });
         return promise;
     }

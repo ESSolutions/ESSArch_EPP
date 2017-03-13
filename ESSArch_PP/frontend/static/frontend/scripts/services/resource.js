@@ -23,7 +23,6 @@
 */
 
 angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies) {
-    var ipViewType = $cookies.get('ip-view-type') || 1;
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
@@ -60,37 +59,44 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
 	}
     //Get data for IP table
     function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics) {
+        var ipViewType = $cookies.get('ip-view-type') || 1;
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state).then(function(value) {
-            var ipCollection = value.data;
-            ipCollection.forEach(function(ip) {
-                ip.collapsed = true;
-                expandedAics.forEach(function(aic, index, array) {
-                    if(ip.ObjectIdentifierValue == aic) {
-                        ip.collapsed = false;
-                        ip.information_packages.forEach(function(information_package, idx, arr) {
-                            if(!information_package.ObjectIdentifierValue) {
-                               arr[idx] = $http({
-                                    method: 'GET',
-                                    url: information_package
-                                }).then(function(response) {
-                                    return response.data;
-                                });
-                            }
-                        });
-                    }
+        var viewType;
+        if(ipViewType === "2") {
+            viewType = "ip";
+        } else {
+            viewType = "aic";
+        }
+            return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType).then(function(value) {
+                var ipCollection = value.data;
+                ipCollection.forEach(function(ip) {
+                    ip.collapsed = true;
+                    expandedAics.forEach(function(aic, index, array) {
+                        if(ip.ObjectIdentifierValue == aic) {
+                            ip.collapsed = false;
+                            ip.information_packages.forEach(function(information_package, idx, arr) {
+                                if(!information_package.ObjectIdentifierValue) {
+                                    arr[idx] = $http({
+                                        method: 'GET',
+                                        url: information_package
+                                    }).then(function(response) {
+                                        return response.data;
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
-            });
 
-            return {
-                data: ipCollection,
-                numberOfPages: Math.ceil(value.count / number)
-            };
-        });
-	}
+                return {
+                    data: ipCollection,
+                    numberOfPages: Math.ceil(value.count / number)
+                };
+            });
+    }
     function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state) {
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -115,11 +121,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                 numberOfPages: Math.ceil(value.count / number)
             };
         });
-	}
-	return {
-		getEventPage: getEventPage,
+    }
+    return {
+        getEventPage: getEventPage,
         getIpPage: getIpPage,
         getReceptionPage: getReceptionPage,
-	};
+    };
 
 });
