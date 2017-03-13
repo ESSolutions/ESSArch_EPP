@@ -31,7 +31,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
             'url', 'id', 'Label', 'ObjectIdentifierValue',
             'package_type', 'Responsible', 'CreateDate',
             'entry_date', 'State', 'status', 'step_state',
-            'aic', 'information_packages',
+            'aic', 'information_packages', 'generation',
         )
 
 
