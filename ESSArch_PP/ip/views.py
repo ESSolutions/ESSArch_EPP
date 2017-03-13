@@ -194,7 +194,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     filter_class = InformationPackageFilter
 
     def get_queryset(self):
-        view_type = self.request.query_params.get('view-type', 'aic')
+        view_type = self.request.query_params.get('view_type', 'aic')
 
         if self.action == 'list':
             if view_type == 'ip':
