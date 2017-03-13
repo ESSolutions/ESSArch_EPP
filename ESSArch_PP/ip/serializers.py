@@ -20,7 +20,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.HyperlinkedRelatedField(
         many=True,
-        queryset=InformationPackage.objects.all(),
+        read_only=True,
         view_name='informationpackage-detail',
         source='related_ips'
     )
