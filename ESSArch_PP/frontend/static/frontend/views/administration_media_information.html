@@ -1,0 +1,45 @@
+<div class="content-wrapper">
+    <div class="list-view">
+        <div id="list-view" class="list-view-table">
+            <table st-table="vm.storageObjects" class="table table-striped" style="margin-bottom: 0px;">
+                <thead>
+                    <tr>
+                        <th colspan="{{colspan}}">
+                            <div class="search-prepare-wrapper">
+                                <label for items-per-page></label>
+                                <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                                <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                                <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
+                                <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="clickable" st-sort="Label" class="column-label">{{'ID' | translate}}</th>
+                        <th class="clickable" st-sort="Responsible" class="column-label">{{'CONTENTLOCATIONTYPE' | translate}}</th>
+                        <th class="clickable" st-sort="CreateDate" st-sort-default="reverse" class="column-label">{{'CONTENTLOCATIONVALUE' | translate}}</th>
+                        <th class="clickable" st-sort="RequestType" st-sort-default="reverse" class="column-label">{{'LASTCHANGEDLOCAL' | translate}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-class="row.class" ng-repeat="row in vm.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
+                        <td class="clickable" ng-click="objectTableClick(row);selectObject(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.id}}</td>
+                        <td class="clickable" ng-click="ipRowClick(row)">{{row.content_location_type}}</td>
+                        <td class="clickable" ng-click="ipRowClick(row)">{{row.content_location_value}}</td>
+                        <td class="clickable" ng-click="ipRowClick(row)">{{row.last_changed_local}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td ng-show="!initLoad" colspan="{{colspan}}" class="text-center">
+                            <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="select-view">
+        </div>
+    </div>
+</div>
+

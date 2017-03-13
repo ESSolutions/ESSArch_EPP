@@ -9,3 +9,8 @@
     <div ui-sref="home.access.workarea" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Workarea</div>
     <div ng-if="$state.current.name == 'home.access.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">Create DIP</div>
 </div>
+<div ng-if="'home.administration' | includedByState" class="sub-menu">
+    <div ui-sref="home.administration.mediaInformation" ng-class="{selected: $state.current.name == 'home.administration.mediaInformation'}" class="btn btn-sub-menu btn-default">Media information</div>
+    <!--<div ui-sref="home.access.workarea" ng-class="{selected: $state.current.name == 'home.access.workarea'}" class="btn btn-sub-menu btn-default" style="margin-left: 5px;">Workarea</div>
+    <div ng-if="$state.current.name == 'home.access.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">Create DIP</div>-->
+</div>

@@ -186,6 +186,17 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 url: 'administration',
                 templateUrl: '/static/frontend/views/administration.html',
                 controller: 'AdministrationCtrl as vm',
+                redirectTo: 'home.administration.mediaInformation',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.administration.mediaInformation', {
+                url: '/media-information',
+                templateUrl: '/static/frontend/views/administration_media_information.html',
+                controller: 'AdministrationCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();
