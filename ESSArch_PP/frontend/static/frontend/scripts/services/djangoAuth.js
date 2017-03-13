@@ -36,10 +36,10 @@ angular.module('myApp')
                 params: params,
                 data: data
             })
-            .success(angular.bind(this,function(data, status, headers, config) {
+            .then(angular.bind(this,function(data, status, headers, config) {
                 deferred.resolve(data, status);
             }))
-            .error(angular.bind(this,function(data, status, headers, config) {
+            .catch(angular.bind(this,function(data, status, headers, config) {
                 console.log("error syncing with: " + url);
                 // Set request status
                 if(data){

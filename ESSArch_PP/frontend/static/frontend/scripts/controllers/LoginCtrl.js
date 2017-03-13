@@ -35,11 +35,11 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
             djangoAuth.login($scope.model.username, $scope.model.password)
                 .then(function(data){
                     // success case
-                    djangoAuth.profile().then(function(data){
-                        $rootScope.auth = data;
+                    djangoAuth.profile().then(function(response){
+                        $rootScope.auth = response.data;
                         PermPermissionStore.clearStore();
                         PermRoleStore.clearStore();
-                        myService.getPermissions(data.permissions);
+                        myService.getPermissions(response.data.permissions);
                     });
                     $state.go('home.myPage');
                 },function(data){
