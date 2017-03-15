@@ -50,8 +50,11 @@ from ip.views import (
 )
 
 from storage.views import (
+    IOQueueViewSet,
     StorageObjectViewSet,
     StorageMediumViewSet,
+    StorageMethodViewSet,
+    StorageMethodTargetRelationViewSet,
     StorageTargetViewSet,
 )
 
@@ -69,6 +72,7 @@ router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
+router.register(r'io-queues', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
@@ -79,6 +83,8 @@ router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'storage-objects', StorageObjectViewSet)
 router.register(r'storage-mediums', StorageMediumViewSet)
+router.register(r'storage-methods', StorageMethodViewSet)
+router.register(r'storage-method-target-relations', StorageMethodTargetRelationViewSet)
 router.register(r'storage-targets', StorageTargetViewSet)
 
 urlpatterns = [

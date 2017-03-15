@@ -24,9 +24,17 @@
 
 from rest_framework import viewsets
 
-from ESSArch_Core.storage.models import StorageMedium, StorageObject, StorageTarget
+from ESSArch_Core.storage.models import IOQueue, StorageMedium, StorageMethod, StorageMethodTargetRelation, StorageObject, StorageTarget
 
-from storage.serializers import StorageObjectSerializer, StorageMediumSerializer, StorageTargetSerializer
+from storage.serializers import IOQueueSerializer, StorageMethodSerializer, StorageMethodTargetRelationSerializer, StorageObjectSerializer, StorageMediumSerializer, StorageTargetSerializer
+
+
+class IOQueueViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for IO queues
+    """
+    queryset = IOQueue.objects.all()
+    serializer_class = IOQueueSerializer
 
 
 class StorageMediumViewSet(viewsets.ModelViewSet):
@@ -35,6 +43,22 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     """
     queryset = StorageMedium.objects.all()
     serializer_class = StorageMediumSerializer
+
+
+class StorageMethodViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for storage method
+    """
+    queryset = StorageMethod.objects.all()
+    serializer_class = StorageMethodSerializer
+
+
+class StorageMethodTargetRelationViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for storage method target relation
+    """
+    queryset = StorageMethodTargetRelation.objects.all()
+    serializer_class = StorageMethodTargetRelationSerializer
 
 
 class StorageObjectViewSet(viewsets.ModelViewSet):
