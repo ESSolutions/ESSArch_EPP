@@ -391,7 +391,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
             var tempElement = {
                 filename: result.ObjectPath,
                 created: result.CreateDate,
-                size: result.ObjectSize
+                size: result.object_size
             };
             array.push(tempElement);
             return array;
