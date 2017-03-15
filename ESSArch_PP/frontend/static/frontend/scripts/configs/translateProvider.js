@@ -29,10 +29,9 @@ angular.module('myApp').config(['$translateProvider', function ($translateProvid
     });
     $translateProvider.useCookieStorage();
     $translateProvider.useSanitizeValueStrategy("escape");
-    $translateProvider.registerAvailableLanguageKeys(['en', 'sv', 'sl'], {
+    $translateProvider.registerAvailableLanguageKeys(['en', 'sv'], {
         'en*': 'en',
         'sv*': 'sv',
-        'sl*': 'sl',
     })
     .fallbackLanguage('en')
     .determinePreferredLanguage().preferredLanguage();
