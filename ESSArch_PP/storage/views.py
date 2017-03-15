@@ -22,29 +22,20 @@
     Email - essarch@essolutions.se
 """
 
-import glob
-import os
+from rest_framework import viewsets
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from lxml import etree
-
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import detail_route
-from rest_framework.response import Response
-
-from ESSArch_Core.configuration.models import (
-    Path,
-)
-from ESSArch_Core.ip.models import EventIP, InformationPackage
-from ESSArch_Core.util import get_value_from_path
-from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.pagination import LinkHeaderPagination
-
-
-from ESSArch_Core.storage.models import StorageMethod, StorageObject, StorageMedium, StorageTarget
+from ESSArch_Core.storage.models import StorageMedium, StorageObject, StorageTarget
 
 from storage.serializers import StorageObjectSerializer, StorageMediumSerializer, StorageTargetSerializer
+
+
+class StorageMediumViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for storage medium
+    """
+    queryset = StorageMedium.objects.all()
+    serializer_class = StorageMediumSerializer
+
 
 class StorageObjectViewSet(viewsets.ModelViewSet):
     """
@@ -53,12 +44,6 @@ class StorageObjectViewSet(viewsets.ModelViewSet):
     queryset = StorageObject.objects.all()
     serializer_class = StorageObjectSerializer
 
-class StorageMediumViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for storage medium
-    """
-    queryset = StorageMedium.objects.all()
-    serializer_class = StorageMediumSerializer
 
 class StorageTargetViewSet(viewsets.ModelViewSet):
     """
