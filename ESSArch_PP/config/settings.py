@@ -50,7 +50,7 @@ SESSION_COOKIE_NAME = 'epp'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Rest framework
 REST_FRAMEWORK = {
