@@ -14,7 +14,7 @@
             </tr>
             <tr>
                 <th class="clickable" class="column-label"></th>
-                <th class="clickable" class="column-label" ng-repeat="col in listViewColumns"><div ng-hide="col.label=='state_visual'">{{col.label}}</div></th>
+                <th class="clickable" class="column-label" ng-repeat="col in listViewColumns"><div ng-hide="col.label=='step_state'">{{col.label.toUpperCase() | translate}}</div></th>
             </tr>
         </thead>
         <tbody ng-repeat="row in vm.displayedIps" >
