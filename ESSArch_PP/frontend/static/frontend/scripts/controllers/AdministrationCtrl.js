@@ -3,7 +3,6 @@ angular.module('myApp').controller('AdministrationCtrl', function($scope, $rootS
     $controller('BaseCtrl', { $scope: $scope });
     vm.ipViewType = $cookies.get('ip-view-type') || 1;
     $scope.selectedObject = {id: "", class: ""};
-
     vm.storageObjects = []
     $scope.getStorageObjects = function() {
         $http.get(appConfig.djangoUrl + 'storage-objects').then(function(response) {
