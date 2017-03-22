@@ -2,7 +2,7 @@
     <table st-table="vm.displayedIps" st-pipe="vm.callServer" class="table table-striped" style="margin-bottom: 0px;">
         <thead>
             <tr>
-                <th colspan="{{colspan}}">
+                <th colspan="{{listViewColumns.length}}">
                     <div class="search-prepare-wrapper">
                         <label for items-per-page></label>
                         <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
@@ -14,7 +14,7 @@
             </tr>
             <tr>
                 <th class="clickable" class="column-label"></th>
-                <th class="clickable" class="column-label" ng-repeat="col in listViewColumns"><div ng-hide="col.label=='step_state'">{{col.label.toUpperCase() | translate}}</div></th>
+                <th class="clickable" class="column-label" st-sort="{{col.sortString}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state'">{{col.label.toUpperCase() | translate}}</span></th>
             </tr>
         </thead>
         <tbody ng-repeat="row in vm.displayedIps" >
@@ -42,7 +42,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td ng-show="!initLoad" colspan="{{colspan}}" class="text-center">
+                <td ng-show="!initLoad" colspan="{{listViewColumns.length}}" class="text-center">
                     <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
                 </td>
             </tr>
