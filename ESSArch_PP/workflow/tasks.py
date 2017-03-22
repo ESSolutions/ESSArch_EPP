@@ -36,6 +36,13 @@ from ESSArch_Core import tasks
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.storage.models import (
+    DISK,
+    TAPE,
+
+    StorageMethod,
+    StorageObject,
+)
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 
@@ -158,3 +165,92 @@ class CacheAIP(DBTask):
 
 class UpdateIPStatus(tasks.UpdateIPStatus):
     event_type = 30280
+
+
+class StoreAIP(DBTask):
+    event_type = 20300
+
+    def create_storage_objs(self, aip, policy):
+        storage_methods = policy.storagemethod_set.all()
+
+        if not storage_methods.count():
+            raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
+
+        for method in storage_methods:
+            for target in method.active_targets:
+                mediums = target.storagemedium_set.filter(used_capacity__lt=target.max_capacity)
+
+                for medium in mediums:
+                    yield StorageObject.objects.create(
+                        ip_id=aip,
+                        storage_medium=medium,
+                        content_location_type=method.type
+                    )
+
+    def run(self, aip):
+        policy = InformationPackage.objects.prefetch_related('policy__storagemethod_set__targets').get(pk=aip).policy
+        storage_objs = self.create_storage_objs(aip, policy)
+
+        step = ProcessStep.objects.create(
+            name="Write Storage Objects",
+            parallel=True,
+            eager=False,
+        )
+        tasks = []
+
+        for s_obj in storage_objs:
+            tasks.append(ProcessTask(
+                name="workflow.tasks.WriteStorageObject",
+                params={
+                    'storage_obj': s_obj.id
+                },
+                processstep=step,
+            ))
+
+        ProcessTask.objects.bulk_create(tasks)
+        step.run()
+
+        """
+        if target.type in range(200, 300):  # disk
+            req_type = 15
+            req_purpose = 'Write package to disk'
+        elif target.type in range(300, 400):  # tape
+            req_type = 10
+            req_purpose = 'Write package to tape'
+        """
+
+    def undo(self, aip):
+        pass
+
+    def event_outcome_success(self, aip):
+        return "Preserved AIP '%s'" % aip
+
+
+class WriteStorageObject(DBTask):
+    def run(self, storage_obj=None):
+        storage_obj = StorageObject.objects.select_related(
+            'storage_medium__storage_target', 'ip'
+        ).get(pk=storage_obj)
+
+        src = storage_obj.ip.ObjectPath
+        dst = storage_obj.storage_medium.storage_target.target
+
+        if storage_obj.content_location_type == DISK:
+            copy_task = ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.CopyFile",
+                params={
+                    "src": src,
+                    "dst": dst
+                },
+            )
+
+            copy_task.run()
+
+        elif storage_obj.content_location_type == TAPE:
+            pass
+
+    def undo(self, storage_obj=None):
+        pass
+
+    def event_outcome_success(self, storage_obj=None):
+        pass

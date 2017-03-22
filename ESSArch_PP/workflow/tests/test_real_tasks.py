@@ -41,6 +41,16 @@ from ESSArch_Core.ip.models import (
     InformationPackage,
 )
 
+from ESSArch_Core.storage.models import (
+    DISK,
+    TAPE,
+
+    StorageMedium,
+    StorageMethod,
+    StorageTarget,
+    StorageMethodTargetRelation,
+)
+
 from ESSArch_Core.WorkflowEngine.models import (
     ProcessTask,
 )
@@ -351,3 +361,147 @@ class CacheAIPTestCase(TransactionTestCase):
             False
         )
         self.assertTrue(equal_content)
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True)
+@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class StoreAIPTestCase(TransactionTestCase):
+    def setUp(self):
+        self.root = os.path.dirname(os.path.realpath(__file__))
+
+        self.ingest = Path.objects.create(
+            entity='ingest',
+            value=os.path.join(self.root, 'ingest')
+        )
+
+        self.cache = Path.objects.create(
+            entity='cache',
+            value=os.path.join(self.root, 'cache')
+        )
+
+        self.datadir = os.path.join(self.root, 'datadir')
+        self.storage_target_dir = os.path.join(self.datadir, 'target')
+
+        self.tarfile = os.path.join(self.datadir, 'file.tar')
+
+        os.mkdir(self.datadir)
+        os.mkdir(self.storage_target_dir)
+
+        open(self.tarfile, 'a').close()
+
+        for path in [self.ingest, self.cache]:
+            try:
+                os.makedirs(path.value)
+            except OSError as e:
+                if e.errno != 17:
+                    raise
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except:
+            pass
+
+        for path in [self.ingest, self.cache]:
+            try:
+                shutil.rmtree(path.value)
+            except:
+                pass
+
+    def test_store_aip_disk(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            ObjectPath=self.tarfile
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=DISK
+        )
+
+        targets = []
+
+        for i in range(2):
+            target_dir = os.path.join(self.storage_target_dir, str(i))
+            targets.append(target_dir)
+            os.mkdir(target_dir)
+
+            target = StorageTarget.objects.create(
+                name='target_%s' % i, max_capacity=1024, target=target_dir
+            )
+
+            StorageMethodTargetRelation.objects.create(
+                storage_method=method, storage_target=target, status=1
+            )
+
+            StorageMedium.objects.create(
+                medium_id='medium_%s' % i, storage_target=target,
+                status=20, location_status=50, block_size=128,
+                format=103, agent=user,
+            )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        task.run().get()
+
+        for target in targets:
+            dst = os.path.join(target, os.path.basename(self.tarfile))
+            self.assertTrue(filecmp.cmp(self.tarfile, dst, False))
+
+    def test_store_aip_tape(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            ObjectPath=self.tarfile
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+
+        targets = []
+
+        for i in range(2):
+            target_dir = os.path.join(self.storage_target_dir, str(i))
+            targets.append(target_dir)
+            os.mkdir(target_dir)
+
+            target = StorageTarget.objects.create(
+                name='target_%s' % i, max_capacity=1024, target=target_dir
+            )
+
+            StorageMethodTargetRelation.objects.create(
+                storage_method=method, storage_target=target, status=1
+            )
+
+            StorageMedium.objects.create(
+                medium_id='medium_%s' % i, storage_target=target,
+                status=20, location_status=50, block_size=128,
+                format=103, agent=user,
+            )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        task.run().get()
+
+        for target in targets:
+            dst = os.path.join(target, os.path.basename(self.tarfile))
+            self.assertTrue(filecmp.cmp(self.tarfile, dst, False))
