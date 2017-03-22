@@ -173,9 +173,20 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 }
             })
             .state('home.management', {
-                url: '/management',
+                url: 'management',
                 templateUrl: '/static/frontend/views/management.html',
                 controller: 'ManagementCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
+            .state('home.appraisal', {
+                url: 'appraisal',
+                templateUrl: '/static/frontend/views/appraisal.html',
+                controller: 'AppraisalCtrl as vm',
+                params: {tag: null, ips: [], archive_policy: null},
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();

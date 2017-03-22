@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($scope, $http, $rootScope, appConfig, $translate, $uibModal, $log) {
+angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
     $scope.treeOptions = {
         nodeChildren: "children",
         dirSelectable: true,
@@ -130,7 +130,11 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             }],
             [$translate.instant('UPDATE'), function ($itemScope, $event, modelValue, text, $li) {
                 $scope.tagPropertiesModal($itemScope.node);
+            }],
+            ["Appraisal", function ($itemScope, $event, modelValue, text, $li) {
+                $state.go("home.appraisal", {tag: $itemScope.node});
             }]
+
         ];
     };
     // open modal for add tag

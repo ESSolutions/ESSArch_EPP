@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate) {
+angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Preserved,Accessing";
@@ -12,6 +12,37 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             options: ["Disk", "Tape(type1)", "Tape(type2)"]
         }
     };
+
+    $scope.menuOptions = function(rowType) {
+        return [
+            ["Appraisal", function ($itemScope, $event, modelValue, text, $li) {
+                var row;
+                if(rowType === "row") {
+                    row = $itemScope.row;
+                } else {
+                    row = $itemScope.subrow;
+                    row.information_packages = [];
+                }
+                var ips = [];
+                if(row.information_packages.length>0) {
+                    if(row.package_type != 1) {
+                        ips.push(row.url);
+                    }
+                    row.information_packages.forEach(function(ip) {
+                        if(ip.url) {
+                            ips.push(ip.url);
+                        } else {
+                            ips.push(ip);
+                        }
+                    });
+                } else {
+                    ips.push(row.url);
+                }
+                $state.go("home.appraisal", {tag: null, ips: ips, archive_policy: null});
+            }]
+        ];
+    };
+
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
