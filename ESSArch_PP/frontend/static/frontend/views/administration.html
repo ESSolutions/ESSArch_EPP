@@ -1,13 +1,6 @@
 <body>
     <div class="administration">
         <div class="content-wrapper">
-            <div style="margin: 5px;">
-                <label>
-                    Ip view type
-                    <select class="form-control" ng-change="changeIpViewType(vm.ipViewType)" ng-model="vm.ipViewType" ng-options="x for x in ['1','2']"></select>
-                </label>
-            </div>
-
             <div ui-view></div>
         </div>
     </div>

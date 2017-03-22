@@ -49,6 +49,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }],
                 }
             })
+            .state('home.userSettings', {
+                url: 'user-settings',
+                templateUrl: '/static/frontend/views/user_settings.html',
+                controller: 'UserSettingsCtrl as vm',
+                resolve: {
+                    authenticated: ['djangoAuth', function(djangoAuth){
+                        return djangoAuth.authenticationStatus();
+                    }],
+                }
+            })
             .state('home.myPage', {
                 url: 'my-page',
                 templateUrl: '/static/frontend/views/my_page.html',
@@ -411,7 +421,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         };
     })
-    .run(function(djangoAuth, $rootScope, $state, $location, $cookies, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
+    .run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
         formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
         formlyValidationMessages.addStringMessage('required', 'This field is required');
 
@@ -419,6 +429,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 
             djangoAuth.profile().then(function(response) {
                 $rootScope.auth = response.data;
+                $window.sessionStorage.setItem("view-type", response.data.ip_list_view_type);
+                $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
                 myService.getPermissions(response.data.permissions);
             }, function() {
                 $state.go('login');

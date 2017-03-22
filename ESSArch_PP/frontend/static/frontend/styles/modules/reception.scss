@@ -337,4 +337,12 @@
         border-bottom-style: solid;
         border-color: #666;
     }
+    .column-picker {
+        display: flex;
+        flex-direction: row;
+        .buttons {
+            display: flex;
+            flex-direction: column;
+        }
+    }
 }

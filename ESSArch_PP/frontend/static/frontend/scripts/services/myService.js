@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('myService', function($location, PermPermissionStore, $anchorScroll, $http, appConfig) {
+angular.module('myApp').factory('myService', function($location, PermPermissionStore, $anchorScroll, $http, appConfig, djangoAuth) {
     function changePath(state) {
         $state.go(state);
     };
@@ -56,10 +56,30 @@ angular.module('myApp').factory('myService', function($location, PermPermissionS
             console.log('error');
         })
     }
+    function getActiveColumns() {
+        return djangoAuth.profile().then(function(response) {
+            return generateColumns(response.data.ip_list_columns);
+        });
+    }
+    function generateColumns(columns) {
+        var allColumns = [{label: "object_identifier_value", template: "static/frontend/views/columns/column_object_identifier_value.html"}, {label: "responsible", template: "static/frontend/views/columns/column_responsible.html"}, {label: "create_date", template: "static/frontend/views/columns/column_create_date.html"}, {label: "state", template: "static/frontend/views/columns/column_state.html"}, {label: "step_state", template: "static/frontend/views/columns/column_step_state.html"}, {label: "events", template: "static/frontend/views/columns/column_events.html"}, {label: "status", template: "static/frontend/views/columns/column_status.html"}, {label: "delete", template: "static/frontend/views/columns/column_delete.html"}];
+        var activeColumns = [];
+        var simpleColumns = allColumns.map(function(a){return a.label});
+        columns.forEach(function(column) {
+            for(i=0; i < simpleColumns.length; i++) {
+                if(column === simpleColumns[i]) {
+                    activeColumns.push(allColumns[i]);
+                }
+            }
+        });
+        return {activeColumns: activeColumns, allColumns: allColumns};
+    }
     return {
         changePath: changePath,
         getPermissions: getPermissions,
         hasChild: hasChild,
-        getVersionInfo: getVersionInfo
+        getVersionInfo: getVersionInfo,
+        getActiveColumns: getActiveColumns,
+        generateColumns: generateColumns
     }
 });

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies) {
+angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies, $window) {
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
@@ -39,8 +39,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                 });
             });
             /*
-            console.log("eventCollection: ");
-            console.log(eventCollection);
 
             var filtered = params.search.predicateObject ? $filter('filter')(eventCollection, params.search.predicateObject) : eventCollection;
 
@@ -59,16 +57,10 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
 	}
     //Get data for IP table
     function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics) {
-        var ipViewType = $cookies.get('ip-view-type') || 1;
+        var viewType = $window.sessionStorage["view-type"] || 'aic';
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
-        }
-        var viewType;
-        if(ipViewType === "2") {
-            viewType = "ip";
-        } else {
-            viewType = "aic";
         }
             return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType).then(function(value) {
                 var ipCollection = value.data;

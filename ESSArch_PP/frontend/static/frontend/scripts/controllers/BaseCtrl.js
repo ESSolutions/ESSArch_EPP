@@ -24,14 +24,11 @@
 
 angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q){
     vm = this;
-    $scope.colspan = 9;
     $scope.$state = $state;
     $scope.updateIpsPerPage = function(items) {
         $cookies.put('epp-ips-per-page', items);
     };
-    $scope.changeIpViewType = function(type) {
-        $cookies.put('ip-view-type', type);
-    }
+    $scope.colspan = 9;
     $scope.menuOptions = [];
     //Status tree view structure
     $scope.tree_data = [];
