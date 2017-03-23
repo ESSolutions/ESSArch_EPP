@@ -346,7 +346,7 @@ class CheckInFromReceptionTask(JobtasticTask):
                                                 enddate=METS_ENDDATE)
                 # Add IP to ArchiveObject DBtable
                 ArchiveObject_new = ArchiveObject()
-                setattr(ArchiveObject_new, 'ObjectUUID', IP_uuid)
+                setattr(ArchiveObject_new, 'ObjectUUID', str(uuid.uuid4()))
                 setattr(ArchiveObject_new, 'ObjectIdentifierValue', IP_uuid)
                 setattr(ArchiveObject_new, 'OAISPackageType', 0)
                 #setattr(ArchiveObject_new, 'OAISPackageType', 2)
@@ -899,13 +899,13 @@ class CheckOutToWorkTask(JobtasticTask):
             ArchiveObject_qf = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid).exists()
             if ArchiveObject_qf is False:
                 # Get AIC_uuid if I now IP_uuid
-                AIC_uuid_test = ArchiveObjectRel.objects.filter(UUID=IP_uuid_source).get().AIC_UUID.ObjectUUID
+                AIC_uuid_test = ArchiveObject.objects.get(ObjectIdentifierValue=IP_uuid_source).reluuid_set.get().AIC_UUID.ObjectUUID
                 # Get AIC_uuid object
                 AIC_Object_qf_IP_source = ArchiveObject.objects.filter(ObjectUUID=AIC_uuid_test).get()
                 # Get the newest archiveObject (highest generation number)
                 Newest_object = AIC_Object_qf_IP_source.relaic_set.order_by('-UUID__Generation')[:1].get().UUID
                 # Get source_IP
-                source_IP_Object = ArchiveObject.objects.filter(ObjectUUID = IP_uuid_source)[:1].get()
+                source_IP_Object = ArchiveObject.objects.filter(ObjectIdentifierValue = IP_uuid_source)[:1].get()
                 
                 event_info = 'Add new entry to DB for IP_UUID: %s' % (IP_uuid)
                 status_list.append(event_info)

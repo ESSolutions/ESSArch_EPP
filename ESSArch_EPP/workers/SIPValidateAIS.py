@@ -110,7 +110,7 @@ class Proc:
                             self.ext_EntryDate = parse_datetime(res_info[1][0]).astimezone(pytz.utc)
                             self.ext_EntryAgentIdentifierValue = res_info[2][0][4]
                             try:
-                                self.ext_ObjectGuid = str(uuid.UUID(self.ObjectIdentifierValue))
+                                self.ext_ObjectGuid = str(uuid.UUID(ObjectUUID))
                             except ValueError, why:
                                 logging.warning('ObjectIdentifierValue: %s is not a valid UUID, why: %s , start to generate a new UUID' % (self.ObjectIdentifierValue, str(why)))
                                 self.ext_ObjectGuid = str(uuid.uuid1())

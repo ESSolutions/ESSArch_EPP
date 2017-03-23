@@ -650,14 +650,14 @@ class CheckoutToWork(CreateView):
         initial['ReqPurpose'] = ''
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
-            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectIdentifierValue
         initial['read_only_access'] = False
         return initial
     
     def form_valid(self, form):
         self.object = form.save(commit=True)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectIdentifierValue)
         source_path = Path.objects.get(entity='path_control').value
         target_path_tmp = Path.objects.get(entity='path_work').value
         target_path = os.path.join(target_path_tmp, self.request.user.username)
@@ -897,14 +897,14 @@ class CheckinFromWork(CreateView):
         initial['ReqPurpose'] = ''
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
-            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectIdentifierValue
         initial['allow_unknown_filetypes'] = True
         return initial
     
     def form_valid(self, form):
         self.object = form.save(commit=True)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectIdentifierValue)
         source_path_tmp = Path.objects.get(entity='path_work').value
         source_path = os.path.join(source_path_tmp, self.request.user.username)
         target_path = Path.objects.get(entity='path_control').value
@@ -1378,21 +1378,21 @@ class DiffCheck(CreateView):
         initial['ReqPurpose'] = ''
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
-            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectIdentifierValue
         return initial
     
     def form_valid(self, form):
         self.object = form.save(commit=True)
-        logger.info('Start to DiffCheck object: %s' % self.ip_obj.ObjectUUID)
+        logger.info('Start to DiffCheck object: %s' % self.ip_obj.ObjectIdentifierValue)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
         # Get IP_0 object
         ip_0_obj = aic_obj.relaic_set.filter(Q(UUID__StatusProcess=5000) | Q(UUID__StatusActivity__in=[ 7, 8 ])).order_by('UUID__Generation')[:1].get().UUID
         AIC_ObjectPath = os.path.join(self.target_path, aic_obj.ObjectUUID)
-        IP_ObjectPath = os.path.join(AIC_ObjectPath, self.ip_obj.ObjectUUID)
+        IP_ObjectPath = os.path.join(AIC_ObjectPath, self.ip_obj.ObjectIdentifierValue)
         Cmets_obj = ip_0_obj.MetaObjectIdentifier
         if Cmets_obj == '':
             Cmets_obj = Parameter.objects.get(entity='content_descriptionfile').value
-        METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectUUID), Cmets_obj )
+        METS_ObjectPath = os.path.join( os.path.join(AIC_ObjectPath,ip_0_obj.ObjectIdentifierValue), Cmets_obj )
         ObjectIdentifierValue=form.cleaned_data.get('ObjectIdentifierValue')#self.ip_obj.ObjectUUID
         #print'ObjectIdentifierValue'
         #print ObjectIdentifierValue
@@ -1563,13 +1563,13 @@ class PreserveIP(CreateView):
         initial['ReqPurpose'] = ''
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
-            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectIdentifierValue
         return initial
     
     def form_valid(self, form):
         self.object = form.save(commit=True)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectIdentifierValue)
         source_path = Path.objects.get(entity='path_control').value
         target_path = Path.objects.get(entity='path_ingest').value
         a_uid = os.getuid()
@@ -1634,16 +1634,16 @@ class PreserveIP(CreateView):
         ip_obj_list = ArchiveObject.objects.filter(reluuid_set__AIC_UUID=aic_obj).order_by('Generation')
         ip_uuid_list = []
         for ip_obj in ip_obj_list:
-            ip_uuid_list.append(ip_obj.ObjectUUID)
+            ip_uuid_list.append(ip_obj.ObjectIdentifierValue)
         event_obj_list = eventIdentifier.objects.filter( linkingObjectIdentifierValue__in = ip_uuid_list ).order_by('linkingObjectIdentifierValue', 'eventDateTime')
         event_list1 = []
         event_list2 = []
         for event_obj in event_obj_list:
             linking_ip_obj = None
             for ip_obj in ip_obj_list:
-                if ip_obj.ObjectUUID == event_obj.linkingObjectIdentifierValue:
+                if ip_obj.ObjectIdentifierValue == event_obj.linkingObjectIdentifierValue:
                     linking_ip_obj = ip_obj
-            if event_obj.linkingObjectIdentifierValue == self.ip_obj.ObjectUUID:                
+            if event_obj.linkingObjectIdentifierValue == self.ip_obj.ObjectIdentifierValue:                
                 event_list1.append([event_obj,linking_ip_obj])
             else:
                 event_list2.append([event_obj,linking_ip_obj])
@@ -1812,13 +1812,13 @@ class ControlareaDeleteIP(CreateView):
         initial['ReqPurpose'] = ''
         if 'pk' in self.kwargs:
             self.ip_obj = ArchiveObject.objects.get(pk=self.kwargs['pk'])
-            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectUUID
+            initial['ObjectIdentifierValue'] = self.ip_obj.ObjectIdentifierValue
         return initial
     
     def form_valid(self, form):
         self.object = form.save(commit=True)
         aic_obj = self.ip_obj.reluuid_set.get().AIC_UUID
-        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectUUID)
+        objectpath = '%s/%s' % (aic_obj.ObjectUUID,self.ip_obj.ObjectIdentifierValue)
         source_path = Path.objects.get(entity='path_control').value
         target_path_tmp = Path.objects.get(entity='path_work').value
         target_path = os.path.join(target_path_tmp, self.request.user.username)
