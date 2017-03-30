@@ -178,6 +178,12 @@
     "SUPPORTROW2": "Click on the support link below, log in/create user and create a new issue and we will take care of it as soon as possible.",
     "SUPPORTROW3": "If the issue is related to a task/step failing you can include the traceback from the step/task and paste it into the issue description to make the problem easier to identify. Click on the step/task label",
     "APPROVEDTORECEIVE": "Approved to receive",
+    "OTHER": "Other",
     "CREATE_DATE": "Create date",
-    "OBJECT_IDENTIFIER_VALUE": "ID"
+    "OBJECT_IDENTIFIER_VALUE": "ID",
+    "OBJECT_SIZE": "Object size",
+    "ARCHIVAL_INSTITUTION": "Archival Institution",
+    "ARCHIVIST_ORGANIZATION": "Archivist organization",
+    "START_DATE": "Start date",
+    "END_DATE": "End date"
 }
