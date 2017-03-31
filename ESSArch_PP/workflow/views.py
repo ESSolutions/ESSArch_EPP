@@ -32,6 +32,11 @@ from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 
+from ESSArch_Core.WorkflowEngine.permissions import (
+    CanUndo,
+    CanRetry,
+)
+
 from workflow.serializers import (
     ProcessStepSerializer,
     ProcessStepChildrenSerializer,
@@ -88,6 +93,26 @@ class ProcessStepViewSet(viewsets.ModelViewSet):
         serializers = ProcessTaskSerializer(tasks, many=True, context={'request': request})
         return Response(serializers.data)
 
+    @detail_route(methods=['post'], permission_classes=[CanUndo])
+    def undo(self, request, pk=None):
+        self.get_object().undo()
+        return Response({'status': 'undoing step'})
+
+    @detail_route(methods=['post'], url_path='undo-failed', permission_classes=[CanUndo])
+    def undo_failed(self, request, pk=None):
+        self.get_object().undo(only_failed=True)
+        return Response({'status': 'undoing failed tasks in step'})
+
+    @detail_route(methods=['post'], permission_classes=[CanRetry])
+    def retry(self, request, pk=None):
+        self.get_object().retry()
+        return Response({'status': 'retrying step'})
+
+    @detail_route(methods=['post'])
+    def resume(self, request, pk=None):
+        self.get_object().resume()
+        return Response({'status': 'resuming step'})
+
 
 class ProcessTaskViewSet(viewsets.ModelViewSet):
     """
@@ -101,3 +126,13 @@ class ProcessTaskViewSet(viewsets.ModelViewSet):
             return ProcessTaskSerializer
 
         return ProcessTaskDetailSerializer
+
+    @detail_route(methods=['post'], permission_classes=[CanUndo])
+    def undo(self, request, pk=None):
+        self.get_object().undo()
+        return Response({'status': 'undoing task'})
+
+    @detail_route(methods=['post'], permission_classes=[CanRetry])
+    def retry(self, request, pk=None):
+        self.get_object().retry()
+        return Response({'status': 'retries task'})
