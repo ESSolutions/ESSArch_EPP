@@ -30,11 +30,22 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
     };
     $scope.selected = [];
     vm.displayed = [];
+    $scope.addEventAlert = null;
+    $scope.alerts = {
+        addEventError: { type: 'danger', msg: 'ERROR_MESSAGE' },
+        addEventSuccess: { type: 'success', msg: 'EVENT_ADDED' }
+    };
+    $scope.closeAlert = function() {
+        $scope.addEventAlert = null;
+    }
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(eventInterval);
     });
     $scope.$on("$destroy", function() {
         $interval.cancel(eventInterval);
+    });
+    $rootScope.$watch(function() {return $rootScope.ip;}, function(){
+        $scope.addEventAlert = null;
     });
     $scope.newEventForm = {
         eventType: "",
@@ -74,13 +85,17 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
         }
     };
     $scope.addEvent = function(ip, eventType, eventDetail, eventOutcome) {
+        $scope.addEventAlert = null;
         listViewService.addEvent(ip, eventType, eventDetail, eventOutcome).then(function(value) {
             $rootScope.stCtrl.pipe();
+            $scope.addEventAlert = $scope.alerts.addEventSuccess;
             $scope.newEventForm = {
                 eventType: "",
                 eventOutcome: "",
                 comment: ""
             };
+        }, function error() {
+            $scope.addEventAlert = $scope.alerts.addEventError;
         });
     }
     var eventInterval;

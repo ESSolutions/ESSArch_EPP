@@ -51,5 +51,6 @@
                 <button type="submit" class="btn btn-info submit-button">{{'ADDEVENT' | translate}}</button>
             </form>
         </div>
+        <div uib-alert ng-if="addEventAlert" style="width:50%; float:right; margin-right: 10px;" ng-class="'alert-' + (addEventAlert.type || 'warning')" close="closeAlert()">{{addEventAlert.msg | translate}}</div>
     </div>
 </div>
