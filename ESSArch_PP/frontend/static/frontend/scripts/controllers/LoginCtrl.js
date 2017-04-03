@@ -37,6 +37,7 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                     // success case
                     djangoAuth.profile().then(function(response){
                         $rootScope.auth = response.data;
+                        $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
                         PermPermissionStore.clearStore();
                         PermRoleStore.clearStore();
                         myService.getPermissions(response.data.permissions);
