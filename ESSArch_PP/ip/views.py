@@ -192,7 +192,20 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     queryset = InformationPackage.objects.all()
     filter_backends = DjangoFilterBackend,
     filter_class = InformationPackageFilter
-
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'Label', 'Responsible', 'CreateDate', 'State', 'eventDateTime',
+        'eventType', 'eventOutcomeDetailNote', 'eventOutcome',
+        'linkingAgentIdentifierValue', 'id'
+    )
+    search_fields = (
+        'ObjectIdentifierValue', 'Label', 'Responsible__first_name',
+        'Responsible__last_name', 'Responsible__username', 'State',
+        'SubmissionAgreement__sa_name', 'Startdate', 'Enddate',
+    )
+    filter_class = InformationPackageFilter
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
 
