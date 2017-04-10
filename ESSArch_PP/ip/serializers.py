@@ -15,13 +15,23 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
                 'linkingObjectIdentifierValue',
         )
 
+class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+    package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
+
+    class Meta:
+        model = InformationPackage
+        fields = (
+            'url', 'id', 'Label', 'ObjectIdentifierValue',
+            'package_type', 'Responsible', 'CreateDate',
+            'entry_date', 'State', 'status', 'step_state',
+            'aic', 'generation',
+        )
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
-    information_packages = serializers.HyperlinkedRelatedField(
+    information_packages = NestedInformationPackageSerializer(
         many=True,
         read_only=True,
-        view_name='informationpackage-detail',
         source='related_ips'
     )
 

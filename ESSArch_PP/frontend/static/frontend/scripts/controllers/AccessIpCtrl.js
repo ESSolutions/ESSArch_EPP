@@ -144,58 +144,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
             Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics).then(function (result) {
-
-                for(j=0; j<ctrl.displayedIps.length; j++){
-                    var aicExists = false;
-                    result.data.forEach(function(b, indexb, arrayb) {
-                        if(ctrl.displayedIps[j].ObjectIdentifierValue == b.ObjectIdentifierValue) {
-                            aicExists = true;
-                            if(!ctrl.displayedIps[j].collapsed) {
-                                var tempj = j;
-                                Promise.all(b.information_packages).then(function(data){
-                                    var tempArray = [];
-                                    for(i = 0; i < ctrl.displayedIps[tempj].information_packages.length; i++) {
-                                        var ipExists = false;
-                                        data.forEach(function(ip_b, indexd, arrayd) {
-                                            if(ctrl.displayedIps[tempj].information_packages[i].ObjectIdentifierValue === ip_b.ObjectIdentifierValue) {
-                                                ipExists = true;
-                                                ctrl.displayedIps[tempj].information_packages[i].Responsible = ip_b.Responsible;
-                                                ctrl.displayedIps[tempj].information_packages[i].CreateDate = ip_b.CreateDate;
-                                                ctrl.displayedIps[tempj].information_packages[i].State = ip_b.State;
-                                                ctrl.displayedIps[tempj].information_packages[i].step_state = ip_b.step_state;
-                                                ctrl.displayedIps[tempj].information_packages[i].status = ip_b.status;
-                                                arrayd.splice(indexd,1);
-                                            }
-                                        });
-                                        if(!ipExists) {
-                                            ctrl.displayedIps[tempj].information_packages.splice(i,1);
-                                            i--;
-                                        }
-                                    }
-                                    data.forEach(function(ip_b) {
-                                        ctrl.displayedIps[tempj].information_packages.push(ip_b);
-                                    });
-                                });
-                            } else {
-                                ctrl.displayedIps[j].information_packages = b.information_packages;
-                                b.information_packages = [];
-                            }
-                            ctrl.displayedIps[j].Responsible = b.Responsible;
-                            ctrl.displayedIps[j].CreateDate = b.CreateDate;
-                            ctrl.displayedIps[j].State = b.State;
-                            ctrl.displayedIps[j].step_state = b.step_state;
-                            ctrl.displayedIps[j].status = b.status;
-                            arrayb.splice(indexb, 1);
-                        }
-                    });
-                    if(!aicExists) {
-                        ctrl.displayedIps.splice(j, 1);
-                        j--;
-                    }
-                }
-                result.data.forEach(function(b) {
-                    ctrl.displayedIps.push(b);
-                });
+                ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;

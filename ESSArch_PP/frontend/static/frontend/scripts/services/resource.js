@@ -69,16 +69,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                     expandedAics.forEach(function(aic, index, array) {
                         if(ip.ObjectIdentifierValue == aic) {
                             ip.collapsed = false;
-                            ip.information_packages.forEach(function(information_package, idx, arr) {
-                                if(!information_package.ObjectIdentifierValue) {
-                                    arr[idx] = $http({
-                                        method: 'GET',
-                                        url: information_package
-                                    }).then(function(response) {
-                                        return response.data;
-                                    });
-                                }
-                            });
                         }
                     });
                 });
