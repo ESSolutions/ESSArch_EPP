@@ -26,7 +26,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from rest_framework import routers
+from rest_framework_extensions.routers import ExtendedDefaultRouter
 
 from ESSArch_Core.auth.views import (
     GroupViewSet,
@@ -62,10 +62,12 @@ from tags.views import TagViewSet
 
 from workflow.views import ProcessStepViewSet, ProcessTaskViewSet
 
+
+router = ExtendedDefaultRouter()
+
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
-router = routers.DefaultRouter()
 router.register(r'agents', AgentViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)
@@ -81,11 +83,21 @@ router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
+
 router.register(r'storage-objects', StorageObjectViewSet)
 router.register(r'storage-mediums', StorageMediumViewSet)
+
 router.register(r'storage-methods', StorageMethodViewSet)
 router.register(r'storage-method-target-relations', StorageMethodTargetRelationViewSet)
 router.register(r'storage-targets', StorageTargetViewSet)
+
+
+router.register(r'storage-mediums', StorageMediumViewSet, base_name='storagemedium').register(
+    r'storage-objects',
+    StorageObjectViewSet,
+    base_name='storagemedium-storageobject',
+    parents_query_lookups=['storage_medium']
+)
 
 urlpatterns = [
     url(r'^', include('frontend.urls'), name='home'),

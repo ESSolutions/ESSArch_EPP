@@ -22,11 +22,28 @@
     Email - essarch@essolutions.se
 """
 
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import viewsets, filters, status
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
+
+from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.storage.models import IOQueue, StorageMedium, StorageMethod, StorageMethodTargetRelation, StorageObject, StorageTarget
 
-from storage.serializers import IOQueueSerializer, StorageMethodSerializer, StorageMethodTargetRelationSerializer, StorageObjectSerializer, StorageMediumSerializer, StorageTargetSerializer
+from storage.serializers import (
+    IOQueueSerializer, 
+    StorageMethodSerializer, 
+    StorageMethodTargetRelationSerializer, 
+    StorageObjectReadSerializer, 
+    StorageObjectWriteSerializer, 
+    StorageMediumReadSerializer, 
+    StorageMediumWriteSerializer, 
+    StorageTargetSerializer,
+)
 
 
 class IOQueueViewSet(viewsets.ModelViewSet):
@@ -42,8 +59,20 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     API endpoint for storage medium
     """
     queryset = StorageMedium.objects.all()
-    serializer_class = StorageMediumSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
+    )
+    search_fields = (
+        'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
+    )
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StorageMediumReadSerializer
+        return StorageMediumWriteSerializer
 
 class StorageMethodViewSet(viewsets.ModelViewSet):
     """
@@ -60,14 +89,27 @@ class StorageMethodTargetRelationViewSet(viewsets.ModelViewSet):
     queryset = StorageMethodTargetRelation.objects.all()
     serializer_class = StorageMethodTargetRelationSerializer
 
-
-class StorageObjectViewSet(viewsets.ModelViewSet):
+class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint for storage object
     """
     queryset = StorageObject.objects.all()
-    serializer_class = StorageObjectSerializer
 
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'ip__ObjectIdentifierValue', 'content_location_value',
+    )
+
+    search_fields = (
+        'ip__ObjectIdentifierValue', 'content_location_value',
+    )
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StorageObjectReadSerializer
+        return StorageObjectWriteSerializer
 
 class StorageTargetViewSet(viewsets.ModelViewSet):
     """

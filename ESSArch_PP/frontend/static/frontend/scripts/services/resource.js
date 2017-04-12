@@ -1,25 +1,25 @@
 /*
-    ESSArch is an open source archiving and digital preservation system
+ESSArch is an open source archiving and digital preservation system
 
-    ESSArch Preservation Platform (EPP)
-    Copyright (C) 2005-2017 ES Solutions AB
+ESSArch Preservation Platform (EPP)
+Copyright (C) 2005-2017 ES Solutions AB
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-    Contact information:
-    Web - http://www.essolutions.se
-    Email - essarch@essolutions.se
+Contact information:
+Web - http://www.essolutions.se
+Email - essarch@essolutions.se
 */
 
 angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies, $window) {
@@ -39,16 +39,16 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                 });
             });
             /*
-
+            
             var filtered = params.search.predicateObject ? $filter('filter')(eventCollection, params.search.predicateObject) : eventCollection;
-
+            
             if (params.sort.predicate) {
                 filtered = $filter('orderBy')(filtered, params.sort.predicate, params.sort.reverse);
             }
-
+            
             var result = filtered.slice(start, start + number);
             */
-
+            
             return {
                 data: eventCollection,
                 numberOfPages: Math.ceil(value.count / number)
@@ -62,22 +62,22 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-            return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType).then(function(value) {
-                var ipCollection = value.data;
-                ipCollection.forEach(function(ip) {
-                    ip.collapsed = true;
-                    expandedAics.forEach(function(aic, index, array) {
-                        if(ip.ObjectIdentifierValue == aic) {
-                            ip.collapsed = false;
-                        }
-                    });
+        return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType).then(function(value) {
+            var ipCollection = value.data;
+            ipCollection.forEach(function(ip) {
+                ip.collapsed = true;
+                expandedAics.forEach(function(aic, index, array) {
+                    if(ip.ObjectIdentifierValue == aic) {
+                        ip.collapsed = false;
+                    }
                 });
-
-                return {
-                    data: ipCollection,
-                    numberOfPages: Math.ceil(value.count / number)
-                };
             });
+            
+            return {
+                data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
     }
     function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state) {
         var sortString = sort.predicate;
@@ -97,9 +97,40 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                     ip.class = "selected";
                 }
             });
-
+            
             return {
                 data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+    function getStorageMediums(start, number, pageNumber, params, selected, sort, search) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
+            var storageMediumCollection = value.data;
+            storageMediumCollection.forEach(function(medium){
+                if(selected.id == medium.id) {
+                    medium.class = "selected";
+                }
+            });
+            return {
+                data: storageMediumCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+    function getStorageObjects(start, number, pageNumber, params, medium, sort, search) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getStorageObjects(pageNumber, number, medium, sortString, search).then(function(value) {
+            var storageObjectCollection = value.data;
+            return {
+                data: storageObjectCollection,
                 numberOfPages: Math.ceil(value.count / number)
             };
         });
@@ -108,6 +139,8 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getEventPage: getEventPage,
         getIpPage: getIpPage,
         getReceptionPage: getReceptionPage,
+        getStorageMediums: getStorageMediums,
+        getStorageObjects: getStorageObjects,
     };
-
+    
 });

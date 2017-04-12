@@ -1,25 +1,25 @@
 /*
-    ESSArch is an open source archiving and digital preservation system
+ESSArch is an open source archiving and digital preservation system
 
-    ESSArch Preservation Platform (EPP)
-    Copyright (C) 2005-2017 ES Solutions AB
+ESSArch Preservation Platform (EPP)
+Copyright (C) 2005-2017 ES Solutions AB
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-    Contact information:
-    Web - http://www.essolutions.se
-    Email - essarch@essolutions.se
+Contact information:
+Web - http://www.essolutions.se
+Email - essarch@essolutions.se
 */
 
 angular.module('myApp').factory('listViewService', function ($q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
@@ -56,7 +56,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         });
         return promise;
     }
-
+    
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state) {
         var promise = $http({
             method: 'GET',
@@ -69,18 +69,60 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 search: searchString
             }
         })
-            .then(function successCallback(response) {
-                count = response.headers('Count');
-                if (count == null) {
-                    count = response.data.length;
-                }
-                return {
-                    count: count,
-                    data: response.data
-                };
-            }, function errorCallback(response){
+        .then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        }, function errorCallback(response){
         });
         return promise;
+    }
+    function getStorageMediums(pageNumber, pageSize, filters, sortString, searchString) {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + "storage-mediums/",
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString
+            }
+        }).then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+    }
+    function getStorageObjects(pageNumber, pageSize, medium, sortString, searchString) {
+        return $http({
+            method: 'GET',
+            url: medium.url + "storage-objects/",
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString
+            }
+        }).then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
     }
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes){
@@ -122,11 +164,11 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 "eventOutcome": outcome.value,
                 "information_package": ip.id
             }
-
+            
         }).then(function(response) {
             return response.data;
         }, function(){
-
+            
         });
         return promise;
     }
@@ -161,7 +203,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         }, function errorCallback(response){
         });
         return promise;
-
+        
     }
     //Returns map structure for a profile
     function getStructure(profileUrl) {
@@ -183,7 +225,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
             entity: "PROFILE_SUBMISSION_AGREEMENT",
             profile: null,
             profiles: [
-
+            
             ],
         };
         var promise = $http({
@@ -206,34 +248,34 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         });
         return promise;
     }
-
+    
     function getProfileByTypeFromSA(sa, type){
         return sa['profile_' + type];
     }
-
+    
     function getProfileByTypeFromIP(ip, type){
         return ip['profile_' + type];
     }
-
+    
     function findProfileByUrl(url, profiles){
         var p = null;
-
+        
         profiles.forEach(function(profile){
             if (profile.url == url){
                 p = profile;
             }
         });
-
+        
         return p;
     }
-
+    
     //Ligher fetching of profiles start
     function createProfileObjMinified(type, profiles, ip, sa){
         var required = false;
         var locked = false;
         var checked = false;
         var profile = null;
-
+        
         p = getProfileByTypeFromIP(ip, type);
         if (p) {
             profile_from_ip = p;
@@ -263,7 +305,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
             locked: locked
         };
     }
-
+    
     function getProfilesFromIp(sa, ip) {
         var selectCollapse = [];
         if(sa == null) {
@@ -352,7 +394,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         };
         return typeMap[type];
     }
-
+    
     //Execute prepare ip, which creates a new IP
     function prepareIp(label){
         return $http({
@@ -362,7 +404,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         }).then(function (response){
             return "created";
         });
-
+        
     }
     //Returns IP
     function getIp(url) {
@@ -397,7 +439,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
             return array;
         });
     }
-
+    
     function getDir(ip, pathStr) {
         if(pathStr == "") {
             sendData = {};
@@ -415,7 +457,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
     /*******************/
     /*HELPER FUNCTIONS*/
     /*****************/
-
+    
     //Set expanded nodes in array of steps
     function setExpanded(steps, expandedNodes) {
         expandedNodes.forEach(function(node) {
@@ -477,15 +519,15 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 tempChildArray.push(child);
             });
             step.children = tempChildArray;
-
-
-                step.children = step.children.map(function(c){
-                    c.time_started = $filter('date')(c.time_started, "yyyy-MM-dd HH:mm:ss");
-                    return c
-                });
+            
+            
+            step.children = step.children.map(function(c){
+                c.time_started = $filter('date')(c.time_started, "yyyy-MM-dd HH:mm:ss");
+                return c
+            });
         });
     }
-
+    
     //Gets all profiles of a specific profile type for an IP
     function getProfiles(type){
         var promise = $http({
@@ -516,7 +558,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         });
         return promise;
     };
-
+    
     //Checks if a given sa is locked to a given ip
     function saLocked(sa, ip) {
         locked = false;
@@ -527,7 +569,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         });
         return locked;
     }
-
+    
     //Checks if a profile is locked
     function profileLocked(profileObject, sa, locks) {
         profileObject.locked = false;
@@ -553,24 +595,24 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
                 }
             });
             child.tasks = preserved_tasks;
-
+            
             child.children = child.child_steps.concat(child.tasks);
             if(child.children.length == 0){
                 stepsToRemove.push(idx);
             }
             child.isCollapsed = false;
             child.tasksCollapsed = true;
-
+            
             child.children.sort(function(a, b){
                 if(a.time_created != null && b.time_created == null) return -1;
                 if(a.time_created == null && b.time_created != null) return 1;
                 var a = new Date(a.time_created),
-                    b = new Date(b.time_created);
+                b = new Date(b.time_created);
                 if(a < b) return -1;
                 if(a > b) return 1;
                 return 0;
             });
-
+            
             child.children = child.children.map(function(c){
                 c.time_created = $filter('date')(c.time_created, "yyyy-MM-dd HH:mm:ss");
                 return c
@@ -585,6 +627,8 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         getChildrenForStep: getChildrenForStep,
         getListViewData: getListViewData,
         getReceptionIps: getReceptionIps,
+        getStorageMediums: getStorageMediums,
+        getStorageObjects: getStorageObjects,
         addEvent: addEvent,
         getEvents: getEvents,
         getTreeData: getTreeData,
@@ -603,6 +647,6 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         getDir: getDir,
         preserveIp: preserveIp,
     };
-
+    
 });
 

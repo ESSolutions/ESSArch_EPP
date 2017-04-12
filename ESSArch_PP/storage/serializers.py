@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from ip.serializers import InformationPackageSerializer
+
 from ESSArch_Core.storage.models import (
     IOQueue,
     StorageMedium,
@@ -23,8 +25,8 @@ class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
             'remote_status', 'transfer_task_id'
         )
 
-
-class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
+class StorageObjectReadSerializer(serializers.HyperlinkedModelSerializer):
+    ip = InformationPackageSerializer()
     class Meta:
         model = StorageObject
         fields = (
@@ -32,13 +34,37 @@ class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
             'last_changed_external', 'ip', 'storage_medium'
         )
 
+class StorageObjectWriteSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = StorageObject
+        fields = (
+            'url', 'id', 'content_location_type', 'content_location_value', 'last_changed_local',
+            'last_changed_external', 'ip', 'storage_medium'
+        )
 
-class StorageMediumSerializer(serializers.HyperlinkedModelSerializer):
+class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = StorageTarget
+        fields = (
+            'url', 'id', 'name', 'status', 'type', 'default_block_size', 'default_format', 'min_chunk_size',
+            'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
+        )
+
+class StorageMediumReadSerializer(serializers.HyperlinkedModelSerializer):
+    storage_target = StorageTargetSerializer(read_only=True)
     class Meta:
         model = StorageMedium
         fields = (
             'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size', 'format',
-            'used_capacity', 'number_of_mounts', 'create_date', 'agent', 'storage_target'
+            'used_capacity', 'number_of_mounts', 'create_date', 'agent', 'storage_target',
+        )
+
+class StorageMediumWriteSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = StorageMedium
+        fields = (
+            'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size', 'format',
+            'used_capacity', 'number_of_mounts', 'create_date', 'agent', 'storage_target',
         )
 
 
@@ -55,13 +81,4 @@ class StorageMethodTargetRelationSerializer(serializers.HyperlinkedModelSerializ
         model = StorageMethodTargetRelation
         fields = (
             'url', 'id', 'name', 'status', 'storage_target', 'storage_method',
-        )
-
-
-class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageTarget
-        fields = (
-            'url', 'id', 'name', 'status', 'type', 'default_block_size', 'default_format', 'min_chunk_size',
-            'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
         )

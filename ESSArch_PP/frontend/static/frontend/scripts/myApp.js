@@ -217,7 +217,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             .state('home.administration.mediaInformation', {
                 url: '/media-information',
                 templateUrl: '/static/frontend/views/administration_media_information.html',
-                controller: 'AdministrationCtrl as vm',
+                controller: 'MediaInformationCtrl as vm',
                 resolve: {
                     authenticated: ['djangoAuth', function(djangoAuth){
                         return djangoAuth.authenticationStatus();

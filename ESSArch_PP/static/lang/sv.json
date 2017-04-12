@@ -150,7 +150,6 @@
     "MYSQLVERSION": "MySQL-version",
     "CONTACT": "Kontakt",
     "LOADING": "Laddar",
-    "DOCS": "Docs",
     "STEPREPORTFOR": "Step-rapport för",
     "SENDER": "Sändare",
     "RECEIVER": "Mottagare",
@@ -185,5 +184,17 @@
     "ARCHIVAL_INSTITUTION": "Arkivinstitution",
     "ARCHIVIST_ORGANIZATION": "Arkivorganisation",
     "START_DATE": "Startdatum",
-    "END_DATE": "Slutdatum"
+    "END_DATE": "Slutdatum",
+    "STORAGEMEDIUM": "Lagringsmedium",
+    "VALUE": "Värde",
+    "STORAGETARGET": "Destination",
+    "LOCATION": "Placering",
+    "LOCATIONSTATUS": "Placeringsstatus",
+    "USEDCAPACITY": "Använd kapacitet",
+    "MEDIUMID": "Medium ID",
+    "BLOCKSIZE": "Blockstorlek",
+    "FORMAT": "Format",
+    "NUMBEROFMOUNTS": "Antal monteringar",
+    "MEDIUMCONTENT": "Mediuminnehåll",
+    "CONTENTLOCATION": "Innehållsplacering"
 }

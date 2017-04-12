@@ -150,7 +150,6 @@
     "MYSQLVERSION": "MySQL version",
     "CONTACT": "Contact",
     "LOADING": "Loading",
-    "DOCS": "Docs",
     "STEPREPORTFOR": "Step report for",
     "SENDER": "Sender",
     "RECEIVER": "Receiver",
@@ -185,5 +184,17 @@
     "ARCHIVAL_INSTITUTION": "Archival Institution",
     "ARCHIVIST_ORGANIZATION": "Archivist organization",
     "START_DATE": "Start date",
-    "END_DATE": "End date"
+    "END_DATE": "End date",
+    "STORAGEMEDIUM": "Storage medium",
+    "VALUE": "Value",
+    "STORAGETARGET": "Storage target",
+    "LOCATION": "Location",
+    "LOCATIONSTATUS": "Colation status",
+    "USEDCAPACITY": "Used capacity",
+    "MEDIUMID": "Medium ID",
+    "BLOCKSIZE": "Block size",
+    "FORMAT": "Format",
+    "NUMBEROFMOUNTS": "Number of mounts",
+    "MEDIUMCONTENT": "Medium content",
+    "CONTENTLOCATION": "Content location"
 }
