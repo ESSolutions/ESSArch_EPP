@@ -270,7 +270,7 @@ function populatecheckboxes(){
 		}
 						
 		for (i = 0; i < targets.length; i++){
-				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  targets[i]  + " onclick=updateFilter5()>" + " " +  targets[i] + " "
+				targetcheckboxes += "<input type='checkbox'" + "id='target" + i + "' checked  value=" +  Object.keys(targets[i])[0]  + " onclick=updateFilter5()>" + " " +  Object.keys(targets[i])[0] + "&nbsp;&nbsp;&nbsp;&nbsp;"
 		}
 		document.getElementById("targetfield").innerHTML = targetcheckboxes;
 		updateFilter5();
@@ -293,10 +293,10 @@ function updateFilter5(){
     		if(document.getElementById('enablePlus').checked == true){
     			targetrecord += "+";
     		}
-    		targetrecord += targets[i];
+    		targetrecord += Object.keys(targets[i])[0];
     	}
     }
-    	$('#filter-6').val(targetrecord).trigger('change');
+   	$('#filter-6').val(targetrecord).trigger('change');
 }
 	
 function removeTarget(){
