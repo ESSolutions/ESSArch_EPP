@@ -22,16 +22,20 @@
     Email - essarch@essolutions.se
 """
 
+import errno
 import filecmp
 import os
 import shutil
 import tarfile
+import tempfile
+import unittest
 import zipfile
 
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TransactionTestCase, override_settings
+from django.test import tag, TransactionTestCase, override_settings
 from django.utils.timezone import localtime
+
+import mock
 
 from ESSArch_Core.configuration.models import (
     ArchivePolicy, Path,
@@ -41,23 +45,45 @@ from ESSArch_Core.ip.models import (
     InformationPackage,
 )
 
+from ESSArch_Core.storage.exceptions import (
+    RobotMountException,
+)
+
 from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
 
+    IOQueue,
+
+    Robot,
+    RobotQueue,
+    TapeDrive,
+    TapeSlot,
+
     StorageMedium,
     StorageMethod,
+    StorageObject,
     StorageTarget,
     StorageMethodTargetRelation,
+)
+
+from ESSArch_Core.storage.tape import (
+    mount_tape,
+    rewind_tape,
+    unmount_tape,
 )
 
 from ESSArch_Core.WorkflowEngine.models import (
     ProcessTask,
 )
 
+from storage.exceptions import (
+    TapeMountedError,
+    TapeMountedAndLockedByOtherError,
+)
 
-@override_settings(CELERY_ALWAYS_EAGER=True)
-@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class ReceiveSIPTestCase(TransactionTestCase):
     def setUp(self):
         self.root = os.path.dirname(os.path.realpath(__file__))
@@ -278,8 +304,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         self.assertTrue(os.path.isdir(expected_metadata))
 
 
-@override_settings(CELERY_ALWAYS_EAGER=True)
-@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class CacheAIPTestCase(TransactionTestCase):
     def setUp(self):
         self.root = os.path.dirname(os.path.realpath(__file__))
@@ -363,38 +388,13 @@ class CacheAIPTestCase(TransactionTestCase):
         self.assertTrue(equal_content)
 
 
-@override_settings(CELERY_ALWAYS_EAGER=True)
-@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class StoreAIPTestCase(TransactionTestCase):
     def setUp(self):
-        self.root = os.path.dirname(os.path.realpath(__file__))
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
 
-        self.ingest = Path.objects.create(
-            entity='ingest',
-            value=os.path.join(self.root, 'ingest')
-        )
-
-        self.cache = Path.objects.create(
-            entity='cache',
-            value=os.path.join(self.root, 'cache')
-        )
-
-        self.datadir = os.path.join(self.root, 'datadir')
-        self.storage_target_dir = os.path.join(self.datadir, 'target')
-
-        self.tarfile = os.path.join(self.datadir, 'file.tar')
-
-        os.mkdir(self.datadir)
-        os.mkdir(self.storage_target_dir)
-
-        open(self.tarfile, 'a').close()
-
-        for path in [self.ingest, self.cache]:
-            try:
-                os.makedirs(path.value)
-            except OSError as e:
-                if e.errno != 17:
-                    raise
+        self.datadir = tempfile.mkdtemp()
 
     def tearDown(self):
         try:
@@ -402,11 +402,40 @@ class StoreAIPTestCase(TransactionTestCase):
         except:
             pass
 
-        for path in [self.ingest, self.cache]:
-            try:
-                shutil.rmtree(path.value)
-            except:
-                pass
+        try:
+            shutil.rmtree(self.storagedir)
+        except:
+            pass
+
+    def test_store_aip_no_policy(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(policy=policy)
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        with self.assertRaises(StorageMethod.DoesNotExist):
+            task.run().get()
+
+    def test_store_aip_no_storage_method(self):
+        aip = InformationPackage.objects.create()
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        with self.assertRaises(ArchivePolicy.DoesNotExist):
+            task.run().get()
 
     def test_store_aip_disk(self):
         policy = ArchivePolicy.objects.create(
@@ -415,93 +444,1110 @@ class StoreAIPTestCase(TransactionTestCase):
         )
         aip = InformationPackage.objects.create(
             ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.tarfile
+            ObjectPath=self.datadir,
         )
         user = User.objects.create()
 
-        method = StorageMethod.objects.create(
-            archive_policy=policy, type=DISK
+        method = StorageMethod.objects.create(archive_policy=policy, type=DISK)
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
         )
-
-        targets = []
-
-        for i in range(2):
-            target_dir = os.path.join(self.storage_target_dir, str(i))
-            targets.append(target_dir)
-            os.mkdir(target_dir)
-
-            target = StorageTarget.objects.create(
-                name='target_%s' % i, max_capacity=1024, target=target_dir
-            )
-
-            StorageMethodTargetRelation.objects.create(
-                storage_method=method, storage_target=target, status=1
-            )
-
-            StorageMedium.objects.create(
-                medium_id='medium_%s' % i, storage_target=target,
-                status=20, location_status=50, block_size=128,
-                format=103, agent=user,
-            )
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.StoreAIP',
             params={
                 'aip': aip.pk
             },
+            responsible=user,
         )
 
         task.run().get()
 
-        for target in targets:
-            dst = os.path.join(target, os.path.basename(self.tarfile))
-            self.assertTrue(filecmp.cmp(self.tarfile, dst, False))
+        queue_entry = IOQueue.objects.filter(
+            req_type=15, status=0, ip=aip, storage_method_target=method_target,
+        )
 
-    def test_store_aip_tape(self):
+        self.assertTrue(queue_entry.exists())
+
+    def test_store_aip_disk_and_tape(self):
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
         aip = InformationPackage.objects.create(
             ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.tarfile
+            ObjectPath=self.datadir,
         )
         user = User.objects.create()
 
-        method = StorageMethod.objects.create(
-            archive_policy=policy, type=TAPE
+        method = StorageMethod.objects.create(archive_policy=policy, type=DISK)
+        method2 = StorageMethod.objects.create(archive_policy=policy, type=TAPE)
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
         )
-
-        targets = []
-
-        for i in range(2):
-            target_dir = os.path.join(self.storage_target_dir, str(i))
-            targets.append(target_dir)
-            os.mkdir(target_dir)
-
-            target = StorageTarget.objects.create(
-                name='target_%s' % i, max_capacity=1024, target=target_dir
-            )
-
-            StorageMethodTargetRelation.objects.create(
-                storage_method=method, storage_target=target, status=1
-            )
-
-            StorageMedium.objects.create(
-                medium_id='medium_%s' % i, storage_target=target,
-                status=20, location_status=50, block_size=128,
-                format=103, agent=user,
-            )
+        method_target2 = StorageMethodTargetRelation.objects.create(
+            storage_method=method2, storage_target=target, status=2
+        )
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.StoreAIP',
             params={
                 'aip': aip.pk
             },
+            responsible=user,
         )
 
         task.run().get()
 
-        for target in targets:
-            dst = os.path.join(target, os.path.basename(self.tarfile))
-            self.assertTrue(filecmp.cmp(self.tarfile, dst, False))
+        queue_entry = IOQueue.objects.filter(
+            req_type=15, status=0, ip=aip, storage_method_target=method_target,
+        )
+        queue_entry2 = IOQueue.objects.filter(
+            req_type=10, status=0, ip=aip, storage_method_target=method_target2,
+        )
+
+        self.assertTrue(queue_entry.exists())
+        self.assertTrue(queue_entry2.exists())
+
+    def test_store_aip_with_same_existing(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            ObjectPath=self.datadir,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy, type=DISK)
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+            responsible=user,
+        )
+
+        task.run().get()
+        task.run().get()
+
+        queue_entry = IOQueue.objects.filter(
+            req_type=15, status=0, ip=aip, storage_method_target=method_target,
+        )
+
+        self.assertEqual(queue_entry.count(), 1)
+
+    def test_store_aip_with_different_existing(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            ObjectPath=self.datadir,
+        )
+        aip2 = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id_2', policy=policy,
+            ObjectPath=self.datadir
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy, type=DISK)
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip.pk
+            },
+            responsible=user,
+        )
+
+        task2 = ProcessTask.objects.create(
+            name='workflow.tasks.StoreAIP',
+            params={
+                'aip': aip2.pk
+            },
+            responsible=user,
+        )
+
+        task.run().get()
+        task2.run().get()
+
+        queue_entry = IOQueue.objects.filter(
+            req_type=15, status=0, ip=aip, storage_method_target=method_target,
+        )
+
+        queue_entry2 = IOQueue.objects.filter(
+            req_type=15, status=0, ip=aip2, storage_method_target=method_target,
+        )
+
+        self.assertTrue(queue_entry.exists())
+        self.assertTrue(queue_entry2.exists())
+
+
+@tag('tape')
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollRobotQueueTestCase(TransactionTestCase):
+    def setUp(self):
+        self.datadir = tempfile.mkdtemp()
+
+        self.label_dir = Path.objects.create(
+            entity='label', value=os.path.join(self.datadir, 'label')
+        )
+
+        self.ingest = Path.objects.create(
+            entity='ingest', value='ingest'
+        )
+
+        self.cache = Path.objects.create(
+            entity='cache', value='cache',
+        )
+
+        try:
+            os.mkdir(self.datadir)
+        except OSError as e:
+            if e.errno != 17:
+                raise
+
+        try:
+            os.mkdir(self.label_dir.value)
+        except OSError as e:
+            if e.errno != 17:
+                raise
+
+        self.robot = Robot.objects.create(device='/dev/sg6')
+        self.device = '/dev/nst0'
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except:
+            pass
+
+    def test_no_entry(self):
+        ProcessTask.objects.create(
+            name='workflow.tasks.PollRobotQueue',
+        ).run().get()
+
+    @mock.patch('ESSArch_Core.tasks.MountTape.run')
+    def test_mount(self, mock_mount_task):
+        mock_mount_task.side_effect = lambda *args, **kwargs: None
+
+        user = User.objects.create()
+
+        tape_drive = TapeDrive.objects.create(
+            id=0, robot=self.robot, device=self.device
+        )
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create(type=301)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        medium = StorageMedium.objects.create(
+            medium_id='AAA001', storage_target=target,
+            status=20, location_status=50, block_size=128,
+            format=103, agent=user, tape_slot=tape_slot
+        )
+
+        io_queue = IOQueue.objects.create(
+            req_type=10, user=user,
+            storage_method_target=method_target,
+        )
+        robot_queue = RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+            io_queue_entry=io_queue,
+        )
+
+        ProcessTask.objects.create(
+            name='workflow.tasks.PollRobotQueue',
+        ).run().get()
+
+        robot_queue.refresh_from_db()
+        tape_drive.refresh_from_db()
+
+        mock_mount_task.assert_called_once_with(drive=tape_drive.pk, medium=medium.pk)
+
+        self.assertEqual(robot_queue.status, 20)
+        self.assertIsNone(robot_queue.robot)
+        self.assertEqual(tape_drive.io_queue_entry, io_queue)
+
+    @mock.patch('ESSArch_Core.tasks.MountTape.run')
+    def test_failing_mount(self, mock_mount_task):
+        mock_mount_task.side_effect = Exception()
+
+        user = User.objects.create()
+
+        tape_drive = TapeDrive.objects.create(
+            id=0, robot=self.robot, device=self.device
+        )
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create(type=301)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        medium = StorageMedium.objects.create(
+            medium_id='AAA001', storage_target=target,
+            status=20, location_status=50, block_size=128,
+            format=103, agent=user, tape_slot=tape_slot
+        )
+
+        io_queue = IOQueue.objects.create(
+            req_type=10, user=user,
+            storage_method_target=method_target,
+        )
+        robot_queue = RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+            io_queue_entry=io_queue,
+        )
+
+        with self.assertRaises(Exception):
+            ProcessTask.objects.create(
+                name='workflow.tasks.PollRobotQueue',
+            ).run().get()
+
+        robot_queue.refresh_from_db()
+        tape_drive.refresh_from_db()
+
+        mock_mount_task.assert_called_once_with(drive=tape_drive.pk, medium=medium.pk)
+
+        self.assertEqual(robot_queue.status, 100)
+        self.assertIsNotNone(robot_queue.robot)
+        self.assertEqual(tape_drive.io_queue_entry, io_queue)
+
+    @mock.patch('ESSArch_Core.tasks.MountTape.run')
+    def test_mounting_already_mounted_medium(self, mock_mount_task):
+        user = User.objects.create()
+
+        target = StorageTarget.objects.create()
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        tape_drive = TapeDrive.objects.create(id=0, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            medium_id='medium', storage_target=target, status=20,
+            location_status=50, block_size=128, format=103, agent=user,
+            tape_slot=tape_slot, tape_drive=tape_drive
+        )
+
+        robot_queue = RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+        )
+
+        with self.assertRaises(TapeMountedError):
+            ProcessTask.objects.create(
+                name='workflow.tasks.PollRobotQueue',
+            ).run().get()
+
+        robot_queue.refresh_from_db()
+
+        self.assertEqual(robot_queue.status, 20)
+        self.assertIsNone(robot_queue.robot)
+        mock_mount_task.assert_not_called()
+
+    @mock.patch('ESSArch_Core.tasks.MountTape.run')
+    def test_mounting_already_mounted_and_locked_medium(self, mock_mount_task):
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        tape_drive = TapeDrive.objects.create(id=0, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            medium_id='medium', storage_target=target, status=20,
+            location_status=50, block_size=128, format=103, agent=user,
+            tape_slot=tape_slot, tape_drive=tape_drive
+        )
+
+        io_queue = IOQueue.objects.create(
+            req_type=10, user=user,
+            storage_method_target=method_target,
+        )
+        robot_queue = RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+            io_queue_entry=io_queue,
+        )
+
+        with self.assertRaises(TapeMountedAndLockedByOtherError):
+            ProcessTask.objects.create(
+                name='workflow.tasks.PollRobotQueue',
+            ).run().get()
+
+        robot_queue.refresh_from_db()
+
+        self.assertEqual(robot_queue.status, 0)
+        self.assertIsNone(robot_queue.robot)
+        mock_mount_task.assert_not_called()
+
+    def test_no_robot_available(self):
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            medium_id='medium', storage_target=target, status=20,
+            location_status=50, block_size=128, format=103, agent=user,
+            tape_slot=tape_slot
+        )
+
+        io_queue = IOQueue.objects.create(
+            req_type=10, user=user,
+            storage_method_target=method_target,
+        )
+        RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+            io_queue_entry=io_queue, robot=self.robot,
+        )
+
+        with self.assertRaisesRegexp(ValueError, 'No robot available'):
+            ProcessTask.objects.create(
+                name='workflow.tasks.PollRobotQueue',
+            ).run().get()
+
+    def test_no_drive_available(self):
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            medium_id='medium', storage_target=target, status=20,
+            location_status=50, block_size=128, format=103, agent=user,
+            tape_slot=tape_slot
+        )
+
+        io_queue = IOQueue.objects.create(
+            req_type=10, user=user,
+            storage_method_target=method_target,
+        )
+        RobotQueue.objects.create(
+            user=user, storage_medium=medium, req_type=10,
+            io_queue_entry=io_queue
+        )
+
+        with self.assertRaisesRegexp(ValueError, 'No tape drive available'):
+            ProcessTask.objects.create(
+                name='workflow.tasks.PollRobotQueue',
+            ).run().get()
+
+
+@tag('tape')
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollIOQueueTestCase(TransactionTestCase):
+    def setUp(self):
+        self.taskname = 'workflow.tasks.PollIOQueue'
+
+        self.ingest = Path.objects.create(
+            entity='ingest', value='ingest'
+        )
+
+        self.cache = Path.objects.create(
+            entity='cache', value='cache',
+        )
+
+    def test_no_entry(self):
+        ProcessTask.objects.create(name=self.taskname,).run().get()
+        self.assertFalse(RobotQueue.objects.exists())
+
+    def test_completed_entry(self):
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE,
+        )
+        target = StorageTarget.objects.create()
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=0,
+            status=20
+        )
+
+        ProcessTask.objects.create(name=self.taskname,).run().get()
+        self.assertFalse(RobotQueue.objects.exists())
+
+
+@tag('tape')
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollIOQueueWriteTapeTestCase(TransactionTestCase):
+    def setUp(self):
+        self.taskname = 'workflow.tasks.PollIOQueue'
+
+        self.datadir = tempfile.mkdtemp()
+
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
+
+        self.robot = Robot.objects.create(device='/dev/sg6')
+        self.device = '/dev/nst0'
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+    def test_write_no_available_tape(self):
+        ip = InformationPackage.objects.create()
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target='target')
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        TapeSlot.objects.create(slot_id=1, robot=self.robot)
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=10,
+            object_path='objpath', ip=ip,
+        )
+
+        with self.assertRaisesRegexp(ValueError, 'No tape available for allocation'):
+            ProcessTask.objects.create(
+                name=self.taskname,
+                responsible=user,
+            ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 100)
+        self.assertFalse(StorageMedium.objects.filter(storage_target=target).exists())
+        self.assertFalse(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
+
+    def test_write_unmounted_tape(self):
+        ip = InformationPackage.objects.create()
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target='target')
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        TapeSlot.objects.create(slot_id=1, robot=self.robot, medium_id=target.target)
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=10,
+            object_path='objpath', ip=ip,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 0)
+        self.assertTrue(StorageMedium.objects.filter(storage_target=target).exists())
+        self.assertTrue(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
+
+    @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
+    @mock.patch('ESSArch_Core.tasks.WriteToTape.run')
+    def test_write_mounted_tape(self, mock_write, mock_set_file_number):
+        mock_write.side_effect = lambda *args, **kwargs: None
+        mock_set_file_number.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        tape_drive = TapeDrive.objects.create(id=0, device=self.device, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=20,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user, tape_slot=tape_slot, tape_drive=tape_drive,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=10,
+            object_path=ip.ObjectPath, ip=ip,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertFalse(RobotQueue.objects.exists())
+        self.assertTrue(StorageObject.objects.filter(content_location_value='1').exists())
+
+        mock_write.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
+
+    @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
+    @mock.patch('ESSArch_Core.tasks.WriteToTape.run')
+    def test_write_mounted_tape_twice(self, mock_write, mock_set_file_number):
+        mock_write.side_effect = lambda *args, **kwargs: None
+        mock_set_file_number.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot)
+        tape_drive = TapeDrive.objects.create(id=0, device=self.device, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=20,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user, tape_slot=tape_slot, tape_drive=tape_drive,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=10,
+            object_path=ip.ObjectPath, ip=ip,
+        )
+
+        io_queue2 = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=10,
+            object_path=ip.ObjectPath, ip=ip,
+        )
+
+        ProcessTask.objects.create(name=self.taskname,).run().get()
+
+        mock_write.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
+        mock_write.reset_mock()
+        mock_set_file_number.reset_mock()
+
+        ProcessTask.objects.create(name=self.taskname,).run().get()
+
+        mock_write.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
+
+        io_queue.refresh_from_db()
+        io_queue2.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertEqual(io_queue2.status, 20)
+
+        self.assertFalse(RobotQueue.objects.exists())
+        self.assertTrue(StorageObject.objects.filter(content_location_value='1').exists())
+        self.assertTrue(StorageObject.objects.filter(content_location_value='2').exists())
+
+
+@tag('tape')
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollIOQueueReadTapeTestCase(TransactionTestCase):
+    def setUp(self):
+        self.taskname = 'workflow.tasks.PollIOQueue'
+
+        self.datadir = tempfile.mkdtemp()
+
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
+
+        self.robot = Robot.objects.create(device='/dev/sg6')
+        self.device = '/dev/nst0'
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+    @mock.patch('ESSArch_Core.tasks.ReadTape.run')
+    def test_read_tape_without_storage_object(self, mock_read):
+        ip = InformationPackage.objects.create()
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot, medium_id=target.target)
+
+        StorageMedium.objects.create(
+            storage_target=target, status=20,
+            location_status=20,
+            block_size=target.default_block_size,
+            format=target.default_format,
+            agent=user, tape_slot=tape_slot,
+        )
+
+        TapeDrive.objects.create(
+            id=0, device=self.device, robot=self.robot,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=20,
+            object_path=ip.ObjectPath, ip=ip,
+        )
+
+        with self.assertRaises(ValueError):
+            ProcessTask.objects.create(
+                name=self.taskname,
+                responsible=user,
+            ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 100)
+        self.assertFalse(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
+        mock_read.assert_not_called()
+
+    @mock.patch('ESSArch_Core.tasks.ReadTape.run')
+    def test_read_unmounted_tape(self, mock_read):
+        ip = InformationPackage.objects.create()
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot, medium_id=target.target)
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20,
+            location_status=20,
+            block_size=target.default_block_size,
+            format=target.default_format,
+            agent=user, tape_slot=tape_slot,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, content_location_value='1', ip=ip,
+            content_location_type=TAPE,
+        )
+
+        TapeDrive.objects.create(
+            id=0, device=self.device, robot=self.robot,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target,
+            storage_object=obj, req_type=20, object_path=ip.ObjectPath,
+            ip=ip,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 0)
+        self.assertTrue(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
+        mock_read.assert_not_called()
+
+    @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
+    @mock.patch('ESSArch_Core.tasks.ReadTape.run')
+    def test_read_mounted_tape(self, mock_read, mock_set_file_number):
+        mock_read.side_effect = lambda *args, **kwargs: None
+        mock_set_file_number.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot, medium_id=target.target)
+        tape_drive = TapeDrive.objects.create(id=0, device=self.device, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=20,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user, tape_slot=tape_slot, tape_drive=tape_drive,
+        )
+        obj = StorageObject.objects.create(
+            storage_medium=medium, content_location_value='1', ip=ip,
+            content_location_type=TAPE,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target,
+            storage_object=obj, req_type=20, object_path=ip.ObjectPath,
+            ip=ip,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertFalse(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
+
+    @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
+    @mock.patch('ESSArch_Core.tasks.ReadTape.run')
+    def test_read_mounted_tape_twice(self, mock_read, mock_set_file_number):
+        mock_read.side_effect = lambda *args, **kwargs: None
+        mock_set_file_number.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        ip2 = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=TAPE
+        )
+        target = StorageTarget.objects.create(target=self.device)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        tape_slot = TapeSlot.objects.create(slot_id=1, robot=self.robot, medium_id=target.target)
+        tape_drive = TapeDrive.objects.create(id=0, device=self.device, robot=self.robot)
+
+        medium = StorageMedium.objects.create(
+            medium_id='medium', storage_target=target, status=20,
+            location_status=50, block_size=128, format=103, agent=user,
+            tape_slot=tape_slot, tape_drive=tape_drive,
+        )
+
+        obj = StorageObject.objects.create(
+            content_location_value='1', content_location_type=TAPE, ip=ip,
+            storage_medium=medium,
+        )
+
+        obj2 = StorageObject.objects.create(
+            content_location_value='2', content_location_type=TAPE, ip=ip2,
+            storage_medium=medium,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_medium=medium, req_type=20,
+            storage_method_target=method_target, storage_object=obj,
+            object_path=ip.ObjectPath,
+        )
+
+        io_queue2 = IOQueue.objects.create(
+            user=user, storage_medium=medium, req_type=20,
+            storage_method_target=method_target, storage_object=obj2,
+            object_path=ip2.ObjectPath,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+        ).run().get()
+
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
+        mock_read.reset_mock()
+        mock_set_file_number.reset_mock()
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+        ).run().get()
+
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
+
+        io_queue.refresh_from_db()
+        io_queue2.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertEqual(io_queue2.status, 20)
+        self.assertFalse(RobotQueue.objects.exists())
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollIOQueueWriteDiskTestCase(TransactionTestCase):
+    def setUp(self):
+        self.taskname = 'workflow.tasks.PollIOQueue'
+
+        self.datadir = tempfile.mkdtemp()
+        self.storagedir = tempfile.mkdtemp()
+
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+        try:
+            shutil.rmtree(self.storagedir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run')
+    def test_write(self, mock_copy):
+        mock_copy.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=DISK
+        )
+        target = StorageTarget.objects.create(target=self.storagedir)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=20,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=15,
+            object_path=self.datadir, ip=ip,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertFalse(RobotQueue.objects.exists())
+        self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
+
+        mock_copy.assert_called_once_with(src=ip.ObjectPath, dst=target.target)
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PollIOQueueReadDiskTestCase(TransactionTestCase):
+    def setUp(self):
+        self.taskname = 'workflow.tasks.PollIOQueue'
+
+        self.datadir = tempfile.mkdtemp()
+        self.storagedir = tempfile.mkdtemp()
+
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+        try:
+            shutil.rmtree(self.storagedir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run')
+    def test_read(self, mock_copy):
+        mock_copy.side_effect = lambda *args, **kwargs: None
+
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        user = User.objects.create()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        method = StorageMethod.objects.create(
+            archive_policy=policy, type=DISK
+        )
+        target = StorageTarget.objects.create(target=self.datadir)
+
+        method_target = StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target,
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20,
+            location_status=20,
+            block_size=target.default_block_size,
+            format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, content_location_value=self.storagedir, ip=ip,
+            content_location_type=DISK,
+        )
+
+        io_queue = IOQueue.objects.create(
+            user=user, storage_method_target=method_target, req_type=25,
+            object_path=self.datadir, ip=ip, storage_object=obj,
+        )
+
+        ProcessTask.objects.create(
+            name=self.taskname,
+            responsible=user,
+        ).run().get()
+
+        io_queue.refresh_from_db()
+
+        self.assertEqual(io_queue.status, 20)
+        self.assertFalse(RobotQueue.objects.exists())
+        self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
+
+        mock_copy.assert_called_once_with(src=obj.content_location_value, dst=ip.ObjectPath)
