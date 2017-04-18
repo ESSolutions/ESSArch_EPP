@@ -33,6 +33,8 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     //Status tree view structure
     $scope.tree_data = [];
     $scope.angular = angular;
+    $scope.statusShow = false;
+    $scope.eventShow = false;
     $translate(['LABEL', 'RESPONSIBLE', 'DATE', 'STATE', 'STATUS']).then(function(translations) {
         $scope.responsible = translations.RESPONSIBLE;
         $scope.label = translations.LABEL;

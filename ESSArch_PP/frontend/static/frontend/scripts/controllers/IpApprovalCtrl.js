@@ -7,7 +7,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	//Request form data
 	vm.request = {
 		type: "",
-		purpose: "Preservation",
+		purpose: "",
 		storageMedium: {
 			value: "",
 			options: ["Disk", "Tape(type1)", "Tape(type2)"]

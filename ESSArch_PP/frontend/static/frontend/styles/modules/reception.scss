@@ -206,18 +206,15 @@
     }
 
     .edit-view {
-        border-top-style: solid;
         border-color: #666;
         margin: 5px;
         padding: 5px;
         position: relative;
-
     }
     .edit-view .btn-danger {
         float: right;
     }
     .eventlog-view {
-        border-top-style: solid;
         border-color: #666;
         display: flex;
         display: -webkit-flex;
@@ -274,6 +271,7 @@
         margin-left: 10px;
     }
     .validator-choices {
+        border-bottom-style: solid;
         .formly {
             display: flex;
             flex-direction: row;
