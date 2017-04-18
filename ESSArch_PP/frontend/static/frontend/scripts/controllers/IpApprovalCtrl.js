@@ -42,7 +42,17 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		}]
 		];
 	};
-	
+	$scope.submitRequest = function(ip) {
+		if(vm.request.type == "preserve") {
+			$scope.preserveIp(ip);
+		}
+		if(vm.request.type == "view") {
+		}
+		if(vm.request.type == "edit_as_new") {
+		}
+		if(vm.request.type == "diff_check") {
+		}
+	}
 	$scope.preserveIp = function(ip) {
 		listViewService.preserveIp(ip, vm.request).then(function(result) {
 			$scope.requestForm = false;

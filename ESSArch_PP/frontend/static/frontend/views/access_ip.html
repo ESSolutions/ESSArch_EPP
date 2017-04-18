@@ -6,16 +6,16 @@
                         <div ng-if="requestForm" class="request-layout">
                             <form id="request-form" class="request-form">
                             <div class="request-type">
-                                <label ng-if="checkPermission('ip.view_ip_tar')">
-                                    <input type="radio" ng-model="vm.request.type" value="view_ip_tar">
+                                <label ng-if="checkPermission('ip.view_tar')">
+                                    <input type="radio" ng-model="vm.request.type" value="view_tar">
                                     View IP (TAR)
                                 </label><br/>
-                                <label ng-if="checkPermission('ip.view_ip')">
-                                    <input type="radio" ng-model="vm.request.type" value="view_ip_ext">
+                                <label ng-if="checkPermission('ip.view')">
+                                    <input type="radio" ng-model="vm.request.type" value="view">
                                     View IP (Extracted)
                                 </label><br/>
-                                <label ng-if="checkPermission('ip.view_ip_tar')">
-                                    <input type="radio" ng-model="vm.request.type" value="view_ip_tar_ext">
+                                <label ng-if="checkPermission('ip.view_tar')">
+                                    <input type="radio" ng-model="vm.request.type" value="view_tar_ext">
                                     View IP (TAR + Extracted)
                                 </label><br/>
                                 <label ng-if="checkPermission('ip.edit_as_new')">
@@ -28,7 +28,7 @@
                                 </label><br/>
                             </div>
                             <div class="request-params">
-                                <label ng-if="vm.request.type == 'view_ip_tar' || vm.request.type == 'view_ip_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
+                                <label ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
                                     Purpose
                                     <input required class="form-control" ng-model="vm.request.purpose">
                                 </label>
@@ -36,7 +36,7 @@
                             </form>
                         </div>
 
-                <div ng-if="eventlog && (vm.request.type == 'view_ip_tar' || vm.request.type == 'view_ip_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query')" class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="eventlog && (vm.request.type == 'view_tar' || vm.request.type == 'view' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query')" class="select-sub-edit-eventlog-wrapper">
                     <div ng-if="eventlog" class="eventlog-view">
                         <form ng-submit="receiveSip(ip)" class="eventlog-form">
                             <div class="checkbox">
