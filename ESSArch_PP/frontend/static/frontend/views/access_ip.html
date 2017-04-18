@@ -10,11 +10,11 @@
                                     <input type="radio" ng-model="vm.request.type" value="view_ip_tar">
                                     View IP (TAR)
                                 </label><br/>
-                                <label ng-if="checkPermission('ip.view_ip_ext')">
+                                <label ng-if="checkPermission('ip.view_ip')">
                                     <input type="radio" ng-model="vm.request.type" value="view_ip_ext">
                                     View IP (Extracted)
                                 </label><br/>
-                                <label ng-if="checkPermission('ip.view_ip_tar_ext')">
+                                <label ng-if="checkPermission('ip.view_ip_tar')">
                                     <input type="radio" ng-model="vm.request.type" value="view_ip_tar_ext">
                                     View IP (TAR + Extracted)
                                 </label><br/>
