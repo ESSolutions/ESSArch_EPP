@@ -25,7 +25,7 @@ Email - essarch@essolutions.se
 angular.module('myApp').controller('MediaInformationCtrl', function($scope, $rootScope, $controller, $cookies, $http, appConfig, Resource, $interval, $anchorScroll, $timeout) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    $scope.colspan = 4;
+    $scope.colspan = 6;
     $scope.selectedStorageMedium = {id: "", class: ""};
     vm.storageObjects = [];
     $scope.select = false;

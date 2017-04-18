@@ -196,5 +196,13 @@
     "FORMAT": "Format",
     "NUMBEROFMOUNTS": "Antal monteringar",
     "MEDIUMCONTENT": "Mediuminnehåll",
-    "CONTENTLOCATION": "Innehållsplacering"
+    "CONTENTLOCATION": "Innehållsplacering",
+    "TAPESLOTS": "Bandplatser",
+    "TAPEDRIVES": "Bandenheter",
+    "DEVICE": "Enhet",
+    "TAPELIBRARY": "Bandbibliotek",
+    "ONLINE": "Aktiv",
+    "OFFLINE": "Inaktiv",
+    "REQUESTAPPROVED": "Förfrågan godkänd",
+    "SUBMIT": "Skicka"
 }

@@ -12,6 +12,7 @@
     </div>
     <div ng-if="'home.administration' | includedByState">
         <div ui-sref="home.administration.mediaInformation" ng-class="{selected: $state.current.name == 'home.administration.mediaInformation'}" class="btn btn-sub-menu btn-default">Media information</div>
+        <div ui-sref="home.administration.robotInformation" ng-class="{selected: $state.current.name == 'home.administration.robotInformation'}" class="btn btn-sub-menu btn-default">Robot information</div>
     </div>
     <div ng-if="$state.current.name == 'home.appraisal'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">Appraisal</div>
 </div>

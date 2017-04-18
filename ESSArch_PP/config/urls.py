@@ -51,11 +51,15 @@ from ip.views import (
 
 from storage.views import (
     IOQueueViewSet,
+    RobotViewSet,
+    RobotQueueViewSet,
     StorageObjectViewSet,
     StorageMediumViewSet,
     StorageMethodViewSet,
     StorageMethodTargetRelationViewSet,
     StorageTargetViewSet,
+    TapeDriveViewSet,
+    TapeSlotViewSet,
 )
 
 from tags.views import TagViewSet
@@ -74,11 +78,13 @@ router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
-router.register(r'io-queues', IOQueueViewSet)
+router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
+router.register(r'robots', RobotViewSet)
+router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
@@ -90,6 +96,8 @@ router.register(r'storage-mediums', StorageMediumViewSet)
 router.register(r'storage-methods', StorageMethodViewSet)
 router.register(r'storage-method-target-relations', StorageMethodTargetRelationViewSet)
 router.register(r'storage-targets', StorageTargetViewSet)
+router.register(r'tape-drives', TapeDriveViewSet)
+router.register(r'tape-slots', TapeSlotViewSet)
 
 
 router.register(r'storage-mediums', StorageMediumViewSet, base_name='storagemedium').register(
@@ -97,6 +105,18 @@ router.register(r'storage-mediums', StorageMediumViewSet, base_name='storagemedi
     StorageObjectViewSet,
     base_name='storagemedium-storageobject',
     parents_query_lookups=['storage_medium']
+)
+router.register(r'robots', RobotViewSet, base_name='robots').register(
+    r'tape-slots',
+    TapeSlotViewSet,
+    base_name='robots-tapeslots',
+    parents_query_lookups=['tape_slots']
+)
+router.register(r'robots', RobotViewSet, base_name='robots').register(
+    r'tape-drives',
+    TapeDriveViewSet,
+    base_name='robots-tapedrives',
+    parents_query_lookups=['tape_drives']
 )
 
 urlpatterns = [

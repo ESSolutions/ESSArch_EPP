@@ -22,29 +22,39 @@
     Email - essarch@essolutions.se
 """
 
-from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, filters, status
-from rest_framework.decorators import detail_route
-from rest_framework.response import Response
+from rest_framework import viewsets, filters
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
-from ESSArch_Core.storage.models import IOQueue, StorageMedium, StorageMethod, StorageMethodTargetRelation, StorageObject, StorageTarget
-
-from storage.serializers import (
-    IOQueueSerializer, 
-    StorageMethodSerializer, 
-    StorageMethodTargetRelationSerializer, 
-    StorageObjectReadSerializer, 
-    StorageObjectWriteSerializer, 
-    StorageMediumReadSerializer, 
-    StorageMediumWriteSerializer, 
-    StorageTargetSerializer,
+from ESSArch_Core.storage.models import (
+    IOQueue,
+    Robot,
+    RobotQueue,
+    StorageMedium,
+    StorageMethod,
+    StorageMethodTargetRelation,
+    StorageObject,
+    StorageTarget,
+    TapeDrive,
+    TapeSlot,
 )
 
+from storage.serializers import (
+    IOQueueSerializer,
+    RobotSerializer,
+    RobotQueueSerializer,
+    StorageMethodSerializer,
+    StorageMethodTargetRelationSerializer,
+    StorageObjectReadSerializer,
+    StorageObjectWriteSerializer,
+    StorageMediumReadSerializer,
+    StorageMediumWriteSerializer,
+    StorageTargetSerializer,
+    TapeDriveSerializer,
+    TapeSlotSerializer,
+)
 
 class IOQueueViewSet(viewsets.ModelViewSet):
     """
@@ -81,7 +91,6 @@ class StorageMethodViewSet(viewsets.ModelViewSet):
     queryset = StorageMethod.objects.all()
     serializer_class = StorageMethodSerializer
 
-
 class StorageMethodTargetRelationViewSet(viewsets.ModelViewSet):
     """
     API endpoint for storage method target relation
@@ -117,3 +126,72 @@ class StorageTargetViewSet(viewsets.ModelViewSet):
     """
     queryset = StorageTarget.objects.all()
     serializer_class = StorageTargetSerializer
+
+class RobotViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for robot
+    """
+    queryset = Robot.objects.all()
+    serializer_class = RobotSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'id', 'label', 'device', 'online',
+    )
+
+    search_fields = (
+        'id', 'label', 'device', 'online',
+    )
+
+class RobotQueueViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for robot
+    """
+    queryset = RobotQueue.objects.all()
+    serializer_class = RobotQueueSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'id', 'user', 'posted', 'robot', 'io_queue_entry',
+        'storage_medium', 'req_type', 'status',
+    )
+
+    search_fields = (
+        'id', 'user', 'posted', 'robot', 'io_queue_entry',
+        'storage_medium', 'req_type', 'status',
+    )
+
+class TapeDriveViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for TapeDrive
+    """
+    queryset = TapeDrive.objects.all()
+    serializer_class = TapeDriveSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'id', 'device', 'num_of_mounts', 'idle_time',
+    )
+    search_fields = (
+        'id', 'device', 'num_of_mounts', 'idle_time',
+    )
+
+class TapeSlotViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for TapeSlot
+    """
+    queryset = TapeSlot.objects.all()
+    serializer_class = TapeSlotSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'id', 'slot_id', 'medium_id',
+    )
+    search_fields = (
+        'id', 'slot_id', 'medium_id',
+
+    )

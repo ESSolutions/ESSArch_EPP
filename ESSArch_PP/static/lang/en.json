@@ -196,5 +196,13 @@
     "FORMAT": "Format",
     "NUMBEROFMOUNTS": "Number of mounts",
     "MEDIUMCONTENT": "Medium content",
-    "CONTENTLOCATION": "Content location"
+    "CONTENTLOCATION": "Content location",
+    "TAPESLOTS": "Tape slots",
+    "TAPEDRIVES": "Tape drives",
+    "DEVICE": "Device",
+    "TAPELIBRARY": "Tape library",
+    "ONLINE": "Online",
+    "OFFLINE": "Offline",
+    "REQUESTAPPROVED": "Request approved",
+    "SUBMIT": "Submit"
 }
