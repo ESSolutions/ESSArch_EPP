@@ -39,7 +39,7 @@ from django.db.models.functions import Cast
 from scandir import walk
 
 from ESSArch_Core import tasks
-from ESSArch_Core.configuration.models import ArchivePolicy, Path
+from ESSArch_Core.configuration.models import ArchivePolicy, Path, Parameter
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
@@ -295,6 +295,19 @@ class PollIOQueue(DBTask):
 
         elif storage_type == DISK:
             if entry.req_type == 15:
+                storage_medium = storage_target.storagemedium_set.filter(
+                    status=20,
+                ).order_by('last_changed_local').first()
+
+                if storage_medium is None:
+                    storage_medium = StorageMedium.objects.create(
+                        medium_id=storage_target.name,
+                        storage_target=storage_target, status=20,
+                        location=Parameter.objects.get(entity='medium_location').value,
+                        location_status=50,
+                        block_size=storage_target.default_block_size,
+                        format=storage_target.default_format, agent=entry.user,
+                    )
                 return storage_target.storagemedium_set.first()
             elif entry.req_type == 25:
                 return entry.storage_object.storage_medium
