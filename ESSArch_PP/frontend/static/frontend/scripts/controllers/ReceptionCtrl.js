@@ -1,26 +1,26 @@
 /*
-    ESSArch is an open source archiving and digital preservation system
+ESSArch is an open source archiving and digital preservation system
 
-    ESSArch Preservation Platform (EPP)
-    Copyright (C) 2005-2017 ES Solutions AB
+ESSArch Preservation Platform (EPP)
+Copyright (C) 2005-2017 ES Solutions AB
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-    Contact information:
-    Web - http://www.essolutions.se
-    Email - essarch@essolutions.se
-    */
+Contact information:
+Web - http://www.essolutions.se
+Email - essarch@essolutions.se
+*/
 
 angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller){
     $controller('BaseCtrl', { $scope: $scope });
@@ -30,6 +30,25 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.colspan = 10;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Cancel update intervals on state change
+    
+    //Request form data
+    function initRequestData() {
+        vm.request = {
+            type: "receive",
+            purpose: "",
+            archivePolicy: {
+                value: null,
+                options: []
+            },
+            tags: {
+                value: [],
+                options: []
+            },
+            informationClass: null,
+            allowUnknownFiles: false
+        };
+    }
+    initRequestData();
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
@@ -37,7 +56,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.includeIp = function(row) {
         var temp = true;
         $scope.includedIps.forEach(function(included, index, array) {
-
+            
             if(included.id == row.id) {
                 $scope.includedIps.splice(index, 1);
                 temp = false;
@@ -47,19 +66,45 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.includedIps.push(row);
         }
         if($scope.includedIps.length == 0) {
+            $scope.informationClassAlert = null;            
             $scope.requestForm = false;
         } else {
             if(!$scope.requestForm) {
                 $scope.getArchivePolicies().then(function(result) {
                     vm.request.archivePolicy.options = result;
+                    $scope.getTags().then(function(result) {
+                        vm.request.tags.options = result;
+                        vm.request.informationClass = row.information_class;
+                        $scope.requestForm = true;
+                    });
                 });
-                $scope.getTags().then(function(result) {
-                    vm.request.tags.options = result;
-                });
-                $scope.requestForm = true;
             }
         }
     }
+    $scope.$watch(function(){return vm.request.archivePolicy.value;}, function() {
+        for(i=0;i<$scope.includedIps.length; i++) {
+            if(vm.request.archivePolicy.value) {
+                if(vm.request.archivePolicy.value.information_class != $scope.includedIps[i].information_class) {
+                    $scope.informationClassAlert = $scope.alerts.matchError;
+                    $scope.informationClassAlert.message = $scope.alerts.matchError.msg + $scope.includedIps[i].id;
+                    break;
+                }
+                $scope.informationClassAlert = null;
+            }
+        };
+    });
+    $scope.$watch(function(){return vm.request.informationClass;}, function() {
+        for(i=0;i<$scope.includedIps.length; i++) {
+            if(vm.request.archivePolicy.value) {
+                if(vm.request.archivePolicy.value.information_class != $scope.includedIps[i].information_class) {
+                    $scope.informationClassAlert = $scope.alerts.matchError;
+                    $scope.informationClassAlert.message = $scope.alerts.matchError.msg + $scope.includedIps[i].id;
+                    break;
+                }
+                $scope.informationClassAlert = null;
+            }
+        };
+    });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
@@ -104,11 +149,11 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         }
     });
     //Get data for status view
-
+    
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
-
+    
     var ctrl = this;
     $scope.selectedIp = {id: "", class: ""};
     $scope.selectedProfileRow = {profile_type: "", class: ""};
@@ -130,7 +175,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-
+            
             Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.selectedIp, $scope.includedIps, sorting, search, ipSortString).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
@@ -153,7 +198,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.selectedIp = row;
         }
     };
-
+    
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id== row.id){
@@ -184,7 +229,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         $scope.ip = row;
         $rootScope.ip = row;
     };
-
+    
     //Adds a new event to the database
     $scope.addEvent = function(ip, eventType, eventDetail) {
         listViewService.addEvent(ip, eventType, eventDetail).then(function(value) {
@@ -222,7 +267,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.requestForm = false;
     //Html popover template for currently disabled
     $scope.htmlPopover = $sce.trustAsHtml('<font size="3" color="red">Currently disabled</font>');
-
+    
     //Toggle visibility of select view
     $scope.toggleSelectView = function () {
         if($scope.select == false){
@@ -305,13 +350,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                     } else {
                         updateListViewConditional();
                     }
-
+                    
                 }, appConfig.ipIdleInterval);
             }
         }, appConfig.ipInterval);
     };
     updateListViewConditional();
-
+    
     //Reload current view
     $scope.reloadPage = function (){
         $state.reload();
@@ -321,66 +366,48 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     vm.validatorModel = {
     };
     vm.validatorFields = [
-        {
-            "templateOptions": {
-                "type": "text",
-                "label": $translate.instant('VALIDATEFILEFORMAT'),
-                "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
-            },
-            "defaultValue": true,
-            "type": "select",
-            "key": "validate_file_format",
+    {
+        "templateOptions": {
+            "type": "text",
+            "label": $translate.instant('VALIDATEFILEFORMAT'),
+            "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
         },
-        {
-            "templateOptions": {
-                "type": "text",
-                "label": $translate.instant('VALIDATEXMLFILE'),
-                "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
-            },
-            "defaultValue": true,
-            "type": "select",
-            "key": "validate_xml_file",
+        "defaultValue": true,
+        "type": "select",
+        "key": "validate_file_format",
+    },
+    {
+        "templateOptions": {
+            "type": "text",
+            "label": $translate.instant('VALIDATEXMLFILE'),
+            "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
         },
-        {
-            "templateOptions": {
-                "type": "text",
-                "label": $translate.instant('VALIDATELOGICALPHYSICALREPRESENTATION'),
-                "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
-            },
-            "defaultValue": true,
-            "type": "select",
-            "key": "validate_logical_physical_representation",
+        "defaultValue": true,
+        "type": "select",
+        "key": "validate_xml_file",
+    },
+    {
+        "templateOptions": {
+            "type": "text",
+            "label": $translate.instant('VALIDATELOGICALPHYSICALREPRESENTATION'),
+            "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
         },
-        {
-            "templateOptions": {
-                "type": "text",
-                "label": $translate.instant('VALIDATEINTEGRITY'),
-                "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
-            },
-            "defaultValue": true,
-            "type": "select",
-            "key": "validate_integrity",
-        }
-    ];
-
-    //Request form data
-    function initRequestData() {
-        vm.request = {
-            type: "receive",
-            purpose: "",
-            archivePolicy: {
-                value: null,
-                options: []
-            },
-            tags: {
-                value: [],
-                options: []
-            },
-            informationClass: "Information class",
-            allowUnknownFiles: false
-        };
+        "defaultValue": true,
+        "type": "select",
+        "key": "validate_logical_physical_representation",
+    },
+    {
+        "templateOptions": {
+            "type": "text",
+            "label": $translate.instant('VALIDATEINTEGRITY'),
+            "options": [{name: $scope.yes, value: true},{name: $scope.no, value: false}],
+        },
+        "defaultValue": true,
+        "type": "select",
+        "key": "validate_integrity",
     }
-    initRequestData();
+    ];
+    
     $scope.getArchivePolicies = function() {
         return $http({
             method: 'GET',
@@ -429,5 +456,12 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.eventShow = false;
             $scope.statusShow = false;
         });
+    }
+    $scope.informationClassAlert = null;
+    $scope.alerts = {
+        matchError: { type: 'danger', msg: $translate.instant('MATCH_ERROR') },
+    };
+    $scope.closeAlert = function() {
+        $scope.informationClassAlert = null;
     }
 });

@@ -216,5 +216,6 @@
     "CUSTOM_IDENTIFICATION": "Egen identifiering",
     "ORDER": "Beställning",
     "ORDERS": "Beställningar",
-    "NEWORDER": "Ny beställning"
+    "NEWORDER": "Ny beställning",
+    "MATCH_ERROR": "Information_class i archive policy matchar inte information_class i ip: "
 }

@@ -22,8 +22,9 @@
                                 </label>
                                 <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     Information class
-                                    <input class="form-control" disabled="true" ng-model="vm.request.informationClause">
+                                    <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
                                 </label>
+                                <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')" close="closeAlert()">{{informationClassAlert.message}}</div>
                                 <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     Tags
                                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">

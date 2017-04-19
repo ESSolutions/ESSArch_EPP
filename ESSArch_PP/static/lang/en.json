@@ -216,5 +216,6 @@
     "CUSTOM_IDENTIFICATION": "Custom identification",
     "ORDER": "Order",
     "ORDERS": "Orders",
-    "NEWORDER": "New order"
+    "NEWORDER": "New order",
+    "MATCH_ERROR": "Information_class in archive policy does not match information_class in ip: "
 }
