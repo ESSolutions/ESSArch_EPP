@@ -284,6 +284,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 }])
+.config(['$uibTooltipProvider', function($uibTooltipProvider) {
+    var parser = new UAParser();
+    var result = parser.getResult();
+    var touch = result.device && (result.device.type === 'tablet' || result.device.type === 'mobile');
+    if ( touch ){
+        $uibTooltipProvider.options({trigger: 'dontTrigger'});
+    } else {
+        $uibTooltipProvider.options({trigger: 'mouseenter'});
+    }
+}])
 .config(['flowFactoryProvider', function (flowFactoryProvider, $cookies) {
     flowFactoryProvider.defaults = {
         target: 'upload.php',

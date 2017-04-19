@@ -6,7 +6,7 @@
         <div class="user-admin">
             <div class="edit-user" ng-controller="DropdownCtrl">
                 <div class="btn-group" uib-dropdown is-open="status.isopen">
-                    <div class="user-dropdown" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}" popover-trigger="'mouseenter'" popover-placement="right" popover-popup-delay="500" popover-append-to-body="true">
+                    <div class="user-dropdown" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="right" popover-popup-delay="500" popover-append-to-body="true">
                         <h4>{{auth.username}}</h4>
                         <span class="fa fa-user-circle-o"></span>
                     </div>
@@ -29,7 +29,6 @@
                         heading="{{t.label}}"
                         ng-click="go(t)"
                         uib-popover="{{'NAVIGATETO' | translate}}: {{t.label}}"
-                        popover-trigger="'mouseenter'"
                         popover-placement="top-left"
                         popover-popup-delay="500"
                         popover-append-to-body="true">
@@ -37,12 +36,12 @@
             </uib-tabset>
         </div>
         <div ng-controller="UtilCtrl" class="tasks-icons">
-            <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-            <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-            <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
 
             <div ng-controller="LanguageCtrl" style="width: 100px; margin-left: 10px;">
-                <select class="form-control" ng-model="currentLanguage" ng-change="changeLanguage(currentLanguage)" ng-options="x | translate for x in availableLanguages" style="width: 100%;" uib-popover="{{'CHOOSELANGUAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                <select class="form-control" ng-model="currentLanguage" ng-change="changeLanguage(currentLanguage)" ng-options="x | translate for x in availableLanguages" style="width: 100%;" uib-popover="{{'CHOOSELANGUAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
             </div>
         </div>
     </div>

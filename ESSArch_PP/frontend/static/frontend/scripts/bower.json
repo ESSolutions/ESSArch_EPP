@@ -42,7 +42,8 @@
     "font-awesome": "~4.7.0",
     "jquery-ui": "~1.12.1",
     "ng-flow": "https://github.com/OskarPersson/ng-flow.git",
-    "select2": "~4.0.3"
+    "select2": "~4.0.3",
+    "ua-parser-js": "^0.7.12"
   },
   "resolutions": {
     "angular": "~1.6"

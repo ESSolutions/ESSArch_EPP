@@ -10,10 +10,10 @@
                                     <th colspan="{{colspan}}">
                                         <div class="search-prepare-wrapper">
                                             <label for items-per-page></label>
-                                            <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                                            <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
-                                            <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
-                                            <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                                            <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                                            <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                                            <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
+                                            <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
                                         </div>
                                     </th>
                                 </tr>
@@ -28,7 +28,7 @@
                             </thead>
                             <tbody>
                                 <tr ng-class="row.class" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
-                                    <td class="clickable" ng-click="ipTableClick(row);selectIp(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-trigger="'mouseenter'" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.Label}}</td>
+                                    <td class="clickable" ng-click="ipTableClick(row);selectIp(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.Label}}</td>
                                     <td class="clickable" ng-click="ipRowClick(row)">{{row.Responsible.username}}</td>
                                     <td class="clickable" ng-click="ipRowClick(row)">{{row.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                     <td class="clickable" ng-click="ipRowClick(row)">{{row.RequestType}}</td>
@@ -42,8 +42,7 @@
                                                 ng-if="row.Responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
                                                 ng-click="removeIpModal(row)"
                                                 class="fa fa-trash"
-                                                uib-popover="{{'REMOVEIP' | translate}}: {{row.Label}}"
-                                                popover-trigger="'mouseenter'"
+                                                uib-popover="{{'REMOVEIP' | translate}}: {{row.Label}}"  
                                                 popover-placement="top-left"
                                                 popover-popup-delay="500"
                                                 popover-append-to-body="true"></button>

@@ -44,6 +44,7 @@ var jsVendorFiles = [
         'scripts/bower_components/api-check/dist/api-check.js',
         'scripts/bower_components/jquery/dist/jquery.js',
         'scripts/bower_components/jquery-ui/jquery-ui.js',
+        'scripts/bower_components/ua-parser-js/src/ua-parser.js',
         'scripts/bower_components/angular/angular.js',
         'scripts/bower_components/angular-animate/angular-animate.js',
         'scripts/bower_components/angular-messages/angular-messages.js',
