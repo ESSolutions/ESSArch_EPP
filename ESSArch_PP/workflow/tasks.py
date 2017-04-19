@@ -213,6 +213,10 @@ class CacheAIP(DBTask):
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.join(objid, rel, f))
 
+        InformationPackage.objects.filter(pk=aip).update(
+            ObjectPath=dsttar,
+        )
+
         self.set_progress(100, total=100)
         return aip
 
