@@ -200,6 +200,86 @@ class ReceiveSIPTestCase(TransactionTestCase):
         self.assertEqual(ArchivistOrganization.objects.get().name, 'my_archivist_organization')
         self.assertIsNotNone(aip.ArchivistOrganization)
 
+    def test_receive_sip_with_information_class_same_as_policy(self):
+        self.xmldata = '''
+            <mets LABEL="test-ip">
+                <metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
+                </metsHdr>
+                <altRecordID TYPE="INFORMATIONCLASS">1</altRecordID>
+            </mets>
+            '''
+        sip = 'sip_objid'
+
+        xml = os.path.join(self.gate.value, sip + '.xml')
+        container = os.path.join(self.gate.value, sip + '.tar')
+
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
+
+        open(container, 'a').close()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+            information_class=1
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            params={
+                'xml': xml,
+                'container': container,
+                'archive_policy': policy.pk
+            },
+        )
+
+        aip_id = task.run().get()
+        aip = InformationPackage.objects.filter(
+            pk=aip_id,
+            ObjectIdentifierValue=sip,
+            package_type=InformationPackage.AIP,
+            information_class=1,
+        )
+        self.assertTrue(aip.exists())
+
+    def test_receive_sip_with_information_class_different_from_policy(self):
+        self.xmldata = '''
+            <mets LABEL="test-ip">
+                <metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
+                </metsHdr>
+                <altRecordID TYPE="INFORMATIONCLASS">2</altRecordID>
+            </mets>
+            '''
+        sip = 'sip_objid'
+
+        xml = os.path.join(self.gate.value, sip + '.xml')
+        container = os.path.join(self.gate.value, sip + '.tar')
+
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
+
+        open(container, 'a').close()
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+            information_class=1
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            params={
+                'xml': xml,
+                'container': container,
+                'archive_policy': policy.pk
+            },
+        )
+
+        with self.assertRaises(ValueError):
+            task.run().get()
+
+        self.assertFalse(InformationPackage.objects.exists())
+
     def test_receive_sip_extract_tar(self):
         sip = 'sip_objid'
 

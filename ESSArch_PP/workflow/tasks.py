@@ -82,6 +82,11 @@ class ReceiveSIP(DBTask):
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
 
+        information_class = int(parsed['altrecordids'].get('INFORMATIONCLASS', policy.information_class))
+
+        if information_class != policy.information_class:
+            raise ValueError('Information class of IP and policy does not match')
+
         aic = InformationPackage.objects.create(
             package_type=InformationPackage.AIC
         )
@@ -97,6 +102,7 @@ class ReceiveSIP(DBTask):
             Responsible_id=self.responsible,
             Startdate=parsed['altrecordids'].get('STARTDATE'),
             Enddate=parsed['altrecordids'].get('ENDDATE'),
+            information_class=information_class,
         )
 
         archival_institution = parsed.get('archival_institution')
