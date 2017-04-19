@@ -94,6 +94,9 @@ class ReceiveSIP(DBTask):
             State='Receiving',
             entry_date=parsed.get('create_date'),
             aic=aic,
+            Responsible_id=self.responsible,
+            Startdate=parsed['altrecordids'].get('STARTDATE'),
+            Enddate=parsed['altrecordids'].get('ENDDATE'),
         )
 
         archival_institution = parsed.get('archival_institution')
