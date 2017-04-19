@@ -235,6 +235,19 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
 CELERY_IMPORTS = ("workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = 'amqp://'
 
+from datetime import timedelta
+
+CELERYBEAT_SCHEDULE = {
+    'PollIOQueue-every-10-seconds': {
+        'task': 'workflow.tasks.PollIOQueue',
+        'schedule': timedelta(seconds=10),
+    },
+    'PollRobotQueue-queue-every-10-seconds': {
+        'task': 'workflow.tasks.PollRobotQueue',
+        'schedule': timedelta(seconds=10),
+    },
+}
+
 # Rest auth settings
 OLD_PASSWORD_FIELD_ENABLED = True
 

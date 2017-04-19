@@ -229,14 +229,23 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     def preserve(self, request, pk=None):
         main_step = ProcessStep.objects.create(
             name='Preserve AIP',
-            information_package_id=pk
+            information_package_id=pk,
+            eager=False,
         )
         tasks = []
 
         tasks.append(ProcessTask(
             name='workflow.tasks.CacheAIP',
             params={'aip': pk},
-            processstep=main_step
+            processstep=main_step,
+            responsible=self.request.user,
+        ))
+
+        tasks.append(ProcessTask(
+            name='workflow.tasks.StoreAIP',
+            params={'aip': pk},
+            processstep=main_step,
+            responsible=self.request.user,
         ))
 
         ProcessTask.objects.bulk_create(tasks)
