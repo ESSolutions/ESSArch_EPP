@@ -41,7 +41,13 @@ from scandir import walk
 from ESSArch_Core import tasks
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import parse_submit_description
-from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.ip.models import (
+    ArchivalInstitution,
+    ArchivistOrganization,
+    ArchivalLocation,
+    ArchivalType,
+    InformationPackage,
+)
 from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
@@ -89,6 +95,40 @@ class ReceiveSIP(DBTask):
             entry_date=parsed.get('create_date'),
             aic=aic,
         )
+
+        archival_institution = parsed.get('archival_institution')
+        archivist_organization = parsed.get('archivist_organization')
+        archival_type = parsed.get('archival_type')
+        archival_location = parsed.get('archival_location')
+
+        if archival_institution:
+            arch, _ = ArchivalInstitution.objects.get_or_create(
+                name=archival_institution
+            )
+            aip.ArchivalInstitution = arch
+
+        if archivist_organization:
+            arch, _ = ArchivistOrganization.objects.get_or_create(
+                name=archivist_organization
+            )
+            aip.ArchivistOrganization = arch
+
+        if archival_type:
+            arch, _ = ArchivalType.objects.get_or_create(
+                name=archival_type
+            )
+            aip.ArchivalType = arch
+
+        if archival_location:
+            arch, _ = ArchivalLocation.objects.get_or_create(
+                name=archival_location
+            )
+            aip.ArchivalLocation = arch
+
+        aip.save(update_fields=[
+            'ArchivalInstitution', 'ArchivistOrganization', 'ArchivalType',
+            'ArchivalLocation',
+        ])
 
         aip.tags = tags
         aip.save()

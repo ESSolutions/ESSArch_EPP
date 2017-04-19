@@ -42,6 +42,10 @@ from ESSArch_Core.configuration.models import (
 )
 
 from ESSArch_Core.ip.models import (
+    ArchivalInstitution,
+    ArchivistOrganization,
+    ArchivalLocation,
+    ArchivalType,
     InformationPackage,
 )
 
@@ -116,6 +120,9 @@ class ReceiveSIPTestCase(TransactionTestCase):
                 PROFILE="my profile">
                 <mets:metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
                 </mets:metsHdr>
+                <agent ROLE="ARCHIVIST" TYPE="ORGANIZATION">
+                    <name>my_archivist_organization</name>
+                </agent>
             </mets:mets>
             '''
 
@@ -189,6 +196,9 @@ class ReceiveSIPTestCase(TransactionTestCase):
 
         expected_metadata = os.path.join(expected_aip, 'metadata')
         self.assertTrue(os.path.isdir(expected_metadata))
+
+        self.assertEqual(ArchivistOrganization.objects.get().name, 'my_archivist_organization')
+        self.assertIsNotNone(aip.ArchivistOrganization)
 
     def test_receive_sip_extract_tar(self):
         sip = 'sip_objid'
