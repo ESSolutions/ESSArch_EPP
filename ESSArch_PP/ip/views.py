@@ -38,6 +38,7 @@ from rest_framework.response import Response
 from ESSArch_Core.configuration.models import (
     Path,
 )
+from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.ip.models import EventIP, InformationPackage
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
@@ -83,13 +84,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             if InformationPackage.objects.filter(ObjectIdentifierValue=ip_id).exists():
                 continue
 
-            ip = {
-                'id': ip_id,
-                'container': container,
-                'xml': xmlfile,
-                'type': 'contained',
-            }
+            ip = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
 
+            ip['container'] = container
+            ip['xml'] = xmlfile
+            ip['type'] = 'contained'
             ips.append(ip)
 
         return ips
