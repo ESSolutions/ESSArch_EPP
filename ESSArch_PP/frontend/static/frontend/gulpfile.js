@@ -46,6 +46,7 @@ var jsVendorFiles = [
         'scripts/bower_components/jquery-ui/jquery-ui.js',
         'scripts/bower_components/ua-parser-js/src/ua-parser.js',
         'scripts/bower_components/angular/angular.js',
+        'scripts/angular-locale_sv.js',
         'scripts/bower_components/angular-animate/angular-animate.js',
         'scripts/bower_components/angular-messages/angular-messages.js',
         'scripts/bower_components/angular-route/angular-route.js',
