@@ -82,7 +82,7 @@ class ReceiveSIP(DBTask):
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
 
-        information_class = int(parsed['altrecordids'].get('INFORMATIONCLASS', policy.information_class))
+        information_class = parsed.get('information_class', policy.information_class)
 
         if information_class != policy.information_class:
             raise ValueError('Information class of IP and policy does not match')
