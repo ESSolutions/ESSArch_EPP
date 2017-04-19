@@ -37,10 +37,11 @@ from ESSArch_Core.ip.models import (
 
 class InformationPackageFilter(django_filters.FilterSet):
     package_type = ListFilter(name='package_type')
+    state = ListFilter(name='State')
 
     class Meta:
         model = InformationPackage
-        fields = ['package_type']
+        fields = ['package_type', 'state']
 
 
 class ArchivalInstitutionFilter(django_filters.FilterSet):
