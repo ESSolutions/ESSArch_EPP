@@ -131,7 +131,6 @@ class ReceiveSIP(DBTask):
         ])
 
         aip.tags = tags
-        aip.save()
 
         ProcessTask.objects.filter(pk=self.request.id).update(
             information_package=aip
