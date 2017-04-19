@@ -1,1 +1,43 @@
-Create DIP
+<div class="ip-approval">
+    <div class="content-wrapper">
+        <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+    </div>
+    <div ng-if="select || subSelect || edit || eventlog" id="select-wrap" class="select-sub-edit-eventlog-wrapper">
+        <div ng-if="select" id="select-view" class="select-view">
+            <div class="file-explorer">
+                <div class="file-explorer-nav">
+                    <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
+                    <b class="dir-path">{{'/' + previousGridArraysString()}}</b>
+                </div>
+                <div class="deckgrid">
+                    <div class="flex-grid">
+                        <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card1.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <button ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
+            <hr />
+            <div class="file-explorer-nav">
+                    <b class="dir-path">{{ip.ObjectIdentifierValue}}/</b>
+                </div>
+            <div class="file-explorer">
+                <div class="deckgrid">
+                    <div class="flex-grid">
+                        <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <button ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
+        </div>
+        <div ng-if="eventlog" class="eventlog-view">
+            <form class="eventlog-form" ng-submit="createDip(ip)">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
+                    </label>
+                </div>
+                <button class="btn btn-info submit-button" ng-dblClick="" ng-disabled="!approvedToCreate" type="submit" style="float: right;">{{'CREATEDIP' | translate}}</button>
+            </form>
+        </div>
+    </div>
+</div>

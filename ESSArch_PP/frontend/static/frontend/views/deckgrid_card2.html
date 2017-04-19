@@ -1,5 +1,5 @@
-<div class="clickable">
-    <div class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="{'card-selected': card == selectedCard}"ng-click="toggleCardSelect(card)">
+<div class="clickable" uib-popover="{{card.name}}" popover-placement="top-left" popover-popup-delay="1000" popover-append-to-body="true">
+    <div class="clickable" ng-dblClick="" ng-class="isSelected(2, card)" ng-click="cardSelect(2, card)">
         <div ng-class="card.type" ng-if="card.type == 'file'">
             <li class="fa fa-file-o fa-3x"></li>
         </div>

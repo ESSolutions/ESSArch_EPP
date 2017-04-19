@@ -1,0 +1,13 @@
+<div class="enter-profile-name">
+    <h3 style="margin: 15px;" class="modal-title" id="modal-title">{{'ENTERIPLABEL' | translate}}</h3>
+</div>
+<form ng-submit="$ctrl.newOrder()">
+    <div class="modal-body" id="modal-body">
+        <label for="label">{{'LABEL' | translate}}</label>
+        <input required focused="true" id="label" class="form-control" ng-model="$ctrl.label"></input>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">{{'OK' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>
+</form>

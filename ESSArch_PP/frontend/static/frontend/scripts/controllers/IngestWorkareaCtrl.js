@@ -4,11 +4,13 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     var ipSortString = "";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //context menu data
-    $scope.menuOptions = [
+    $scope.menuOptions = function() { 
+        return [
             [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
                 $scope.selectIp($itemScope.row);
             }],
-    ];
+        ];
+    }
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
@@ -85,13 +87,16 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-
-            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
+            $http.get('static/frontend/scripts/json_data/ips.json').then(function(response) {
+                vm.displayedIps = response.data.ingest;
+                $scope.ipLoading = false;
+            });
+            /*Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
-            });
+            });*/
         }
     };
     //Make ip selected and add class to visualize

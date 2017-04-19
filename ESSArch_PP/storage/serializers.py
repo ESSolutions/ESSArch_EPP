@@ -98,7 +98,9 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.SerializerMethodField()
     def get_status(self, obj):
-        return obj.storage_medium.get_status_display()
+        if hasattr(obj, 'storage_medium'):
+            return obj.storage_medium.get_status_display()
+        return 'empty'
 
     class Meta:
         model = TapeSlot
@@ -109,7 +111,9 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.SerializerMethodField()
     def get_status(self, obj):
-        return obj.storage_medium.get_status_display()
+        if hasattr(obj, 'storage_medium'):        
+            return obj.storage_medium.get_status_display()
+        return 'empty'
 
     class Meta:
         model = TapeDrive

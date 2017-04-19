@@ -28,9 +28,18 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.error_messages_old = [];
     $ctrl.error_messages_pw1 = [];
     $ctrl.error_messages_pw2 = [];
+    $ctrl.objectIdentifierValue = "";
+    $ctrl.order = "";
+    $ctrl.label = "";
     $ctrl.email = {
         subject: "",
         body: ""
+    };
+    $ctrl.newOrder = function() {
+        $ctrl.data = {
+            label: $ctrl.label
+        }
+        $uibModalInstance.close($ctrl.data);
     };
     $ctrl.save = function () {
         $ctrl.data = {
@@ -47,7 +56,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.prepare = function () {
         $ctrl.data = {
-            label: $ctrl.label
+            label: $ctrl.label,
+            objectIdentifierValue: $ctrl.objectIdentifierValue,
+            order: $ctrl.order
         };
         $uibModalInstance.close($ctrl.data);
     };

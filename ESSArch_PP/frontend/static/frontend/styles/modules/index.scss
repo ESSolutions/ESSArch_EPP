@@ -151,6 +151,7 @@ body.modal-open[style] {
     -webkit-flex-direction: row;
 
     cursor: pointer;
+    user-select: none;
     -webkit-user-select: none;
 }
 .user-dropdown > h4 {
@@ -465,5 +466,74 @@ padding: 0 12px;
 #passwordForm {
     input {
         width: 50%;
+    }
+}
+.file-explorer {
+    margin-top: 10px;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.file-explorer-nav {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: row;
+    -webkit-flex-direction: row;
+    vertical-align: middle;
+}
+.dir-path {
+    margin-left: 10px;
+    vertical-align: middle !important;
+}
+.card-selected {
+    color: rgba(0, 50, 255, .9);
+}
+.arrow-disabled {
+    color: #bcbcbc;
+    cursor: auto;
+}
+.deckgrid {
+    margin-top:10px;
+    padding: 15px;
+    width: 100%;
+    min-width: 520px;
+    min-height: 100px;
+    max-height: 400px;
+    overflow-y: scroll;
+    border-style: solid;
+    border-color: #bbb;
+}
+.flex-grid {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: row;
+    -webkit-flex-direction: row;
+    flex-wrap: wrap;
+    -webkit-flex-wrap: wrap;
+}
+.card {
+    background:#fff center 30px no-repeat;
+    margin:0 2px 2px 0;
+    position:relative;
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    width: 84px;
+    margin: 5px;
+    p {
+        word-wrap: break-word;
+        font-size: 9pt;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .file {
+        text-align: center;
+    }
+    .dir {
+        text-align: center;
     }
 }
