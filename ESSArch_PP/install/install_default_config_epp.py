@@ -27,15 +27,53 @@ import django
 django.setup()
 
 from django.contrib.auth.models import User, Group, Permission
-from ESSArch_Core.configuration.models import EventType, Path
+
+from ESSArch_Core.configuration.models import ArchivePolicy, EventType, Parameter, Path
+from ESSArch_Core.storage.models import (
+    DISK,
+
+    StorageMethod,
+    StorageMethodTargetRelation,
+    StorageTarget,
+)
 
 
 def installDefaultConfiguration():
+    print "\nInstalling parameters..."
+    installDefaultParameters()
+
     print "Installing users, groups and permissions..."
     installDefaultUsers()
 
     print "\nInstalling paths..."
     installDefaultPaths()
+
+    print "\nInstalling archive policies..."
+    installDefaultArchivePolicies()
+
+    print "\nInstalling storage methods..."
+    installDefaultStorageMethods()
+
+    print "\nInstalling storage targets..."
+    installDefaultStorageTargets()
+
+    print "\nInstalling storage method target relations..."
+    installDefaultStorageMethodTargetRelations()
+
+    return 0
+
+
+def installDefaultParameters():
+    site_name = 'Site-X'
+
+    dct = {
+        'site_name': site_name,
+        'medium_location': 'Media_%s' % site_name,
+    }
+
+    for key in dct:
+        print '-> %s: %s' % (key, dct[key])
+        Parameter.objects.get_or_create(entity=key, value=dct[key])
 
     return 0
 
@@ -71,6 +109,20 @@ def installDefaultUsers():
 
     group_user.permissions.add(can_add_ip_event, can_change_ip_event, can_delete_ip_event)
 
+    permission_list = [
+        'receive', 'preserve', 'view', 'view_tar', 'edit_as_new', 'diff-check',
+        'query',
+    ]
+
+    permissions = Permission.objects.filter(
+        codename__in=permission_list, content_type__app_label='ip',
+        content_type__model='informationpackage',
+    )
+
+    for p in permissions:
+        group_user.permissions.add(p)
+        group_admin.permissions.add(p)
+
     group_user.user_set.add(user_user)
     group_admin.user_set.add(user_admin)
     group_sysadmin.user_set.add(user_sysadmin)
@@ -88,6 +140,50 @@ def installDefaultPaths():
     for key in dct:
         print '-> %s: %s' % (key, dct[key])
         Path.objects.get_or_create(entity=key, value=dct[key])
+
+    return 0
+
+
+def installDefaultArchivePolicies():
+    cache = Path.objects.get(entity='cache')
+    ingest = Path.objects.get(entity='ingest')
+
+    ArchivePolicy.objects.get_or_create(
+        policy_name='default', cache_storage=cache, ingest_path=ingest
+    )
+
+    return 0
+
+
+def installDefaultStorageMethods():
+    StorageMethod.objects.get_or_create(
+        name='Default Storage Method 1',
+        archive_policy=ArchivePolicy.objects.get(policy_name='default'),
+        status=True,
+        type=DISK,
+    )
+
+    return 0
+
+
+def installDefaultStorageTargets():
+    StorageTarget.objects.get_or_create(
+        name='Default Storage Target 1',
+        status=True,
+        type=DISK,
+        target=u'/ESSArch/data/store/disk1',
+    )
+
+    return 0
+
+
+def installDefaultStorageMethodTargetRelations():
+    StorageMethodTargetRelation.objects.get_or_create(
+        name='Default Storage Method Target Relation 1',
+        status=True,
+        storage_method=StorageMethod.objects.get(name='Default Storage Method 1'),
+        storage_target=StorageTarget.objects.get(name='Default Storage Target 1'),
+    )
 
     return 0
 
