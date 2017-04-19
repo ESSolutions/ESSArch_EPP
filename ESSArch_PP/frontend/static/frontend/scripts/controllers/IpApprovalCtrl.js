@@ -259,12 +259,12 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			method: 'DELETE',
 			url: ipObject.url
 		}).then(function() {
-			vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
 			$scope.edit = false;
 			$scope.select = false;
 			$scope.eventlog = false;
 			$scope.eventShow = false;
 			$scope.statusShow = false;
+			$scope.getListViewData();
 		});
 	}
 	$scope.expandedAics = [];
