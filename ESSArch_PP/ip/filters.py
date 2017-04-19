@@ -26,7 +26,13 @@ import django_filters
 
 from ESSArch_Core.filters import ListFilter
 
-from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.ip.models import (
+    ArchivalInstitution,
+    ArchivistOrganization,
+    ArchivalType,
+    ArchivalLocation,
+    InformationPackage,
+)
 
 
 class InformationPackageFilter(django_filters.FilterSet):
@@ -35,3 +41,35 @@ class InformationPackageFilter(django_filters.FilterSet):
     class Meta:
         model = InformationPackage
         fields = ['package_type']
+
+
+class ArchivalInstitutionFilter(django_filters.FilterSet):
+    ip_state = ListFilter(name='information_packages__State', distinct=True)
+
+    class Meta:
+        model = ArchivalInstitution
+        fields = ('ip_state',)
+
+
+class ArchivistOrganizationFilter(django_filters.FilterSet):
+    ip_state = ListFilter(name='information_packages__State', distinct=True)
+
+    class Meta:
+        model = ArchivistOrganization
+        fields = ('ip_state',)
+
+
+class ArchivalTypeFilter(django_filters.FilterSet):
+    ip_state = ListFilter(name='information_packages__State', distinct=True)
+
+    class Meta:
+        model = ArchivalType
+        fields = ('ip_state',)
+
+
+class ArchivalLocationFilter(django_filters.FilterSet):
+    ip_state = ListFilter(name='information_packages__State', distinct=True)
+
+    class Meta:
+        model = ArchivalLocation
+        fields = ('ip_state',)

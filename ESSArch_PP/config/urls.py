@@ -44,6 +44,10 @@ from ESSArch_Core.configuration.views import (
 )
 
 from ip.views import (
+    ArchivalInstitutionViewSet,
+    ArchivistOrganizationViewSet,
+    ArchivalTypeViewSet,
+    ArchivalLocationViewSet,
     EventIPViewSet,
     InformationPackageViewSet,
     InformationPackageReceptionViewSet,
@@ -77,6 +81,10 @@ router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
+router.register(r'archival-institutions', ArchivalInstitutionViewSet)
+router.register(r'archivist-organizations', ArchivistOrganizationViewSet)
+router.register(r'archival-types', ArchivalTypeViewSet)
+router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
 router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
