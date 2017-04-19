@@ -1,7 +1,7 @@
 angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    var ipSortString = "Preserved,Accessing";
+    var ipSortString = "Archived,Accessing";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     vm.request = {
