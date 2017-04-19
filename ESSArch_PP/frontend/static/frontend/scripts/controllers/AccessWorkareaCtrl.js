@@ -1,18 +1,19 @@
-angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state) {
+angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http) {
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
 
-    $scope.menuOptions = [
-        [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
-            console.log($itemScope.row);
-        }],
-        [$translate.instant('Create DIP'), function ($itemScope, $event, modelValue, text, $li) {
-            $scope.gotoCreateDip($itemScope.row);
-        }],
-
-    ];
+    $scope.menuOptions = function() { 
+        return [
+            [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
+                console.log($itemScope.row);
+            }],
+                [$translate.instant('Create DIP'), function ($itemScope, $event, modelValue, text, $li) {
+                $scope.gotoCreateDip($itemScope.row);
+            }],
+        ];
+    }
     $scope.gotoCreateDip = function(ip) {
         $state.go('home.access.createDip', {ip: ip});
     }
@@ -91,13 +92,17 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
+            $http.get('static/frontend/scripts/json_data/ips.json').then(function(response) {
+                vm.displayedIps = response.data.access;
+                $scope.ipLoading = false;
+            });
 
-            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
+            /*Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
-            });
+            });*/
         }
     };
     //Make ip selected and add class to visualize

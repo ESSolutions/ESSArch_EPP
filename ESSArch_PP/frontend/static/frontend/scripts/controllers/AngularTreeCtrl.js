@@ -131,7 +131,7 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             [$translate.instant('UPDATE'), function ($itemScope, $event, modelValue, text, $li) {
                 $scope.tagPropertiesModal($itemScope.node);
             }],
-            ["Appraisal", function ($itemScope, $event, modelValue, text, $li) {
+            [$translate.instant('APPRAISAL'), function ($itemScope, $event, modelValue, text, $li) {
                 $state.go("home.appraisal", {tag: $itemScope.node});
             }]
 

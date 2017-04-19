@@ -204,5 +204,17 @@
     "ONLINE": "Online",
     "OFFLINE": "Offline",
     "REQUESTAPPROVED": "Request approved",
-    "SUBMIT": "Submit"
+    "SUBMIT": "Submit",
+    "CREATEDIP": "Create DIP",
+    "APPLYCHANGES": "Apply changes",
+    "SAVED_MESSAGE": "Saved!",
+    "EVENT_ADDED": "Event Added!",
+    "SAVE_ERROR": "An error occured!",
+    "APPRAISAL": "Appraisal",
+    "PREPAREDIP": "Prepare DIP",
+    "OPTIONS": "Options",
+    "CUSTOM_IDENTIFICATION": "Custom identification",
+    "ORDER": "Order",
+    "ORDERS": "Orders",
+    "NEWORDER": "New order"
 }

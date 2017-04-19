@@ -37,8 +37,8 @@ angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope,
     //{ link: 'home.myPage', label: $scope.myPage },
     { link: 'home.ingest', label: 'Ingest' },
     { link: 'home.access', label: 'Access' },
-    { link: 'home.orders', label: 'Orders' },
-    { link: 'home.management', label: 'Management' },
+    { link: 'home.orders', label: $translate.instant('ORDERS') },
+    //{ link: 'home.management', label: 'Management' },
     { link: 'home.administration', label: 'Administration' },
     ];
     $scope.is_active = function(tab) {

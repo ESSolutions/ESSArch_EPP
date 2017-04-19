@@ -31,7 +31,7 @@
     "LOCKPROFILE": "Lås profil",
     "UNLOCKPROFILE": "Lås upp profil",
     "PACKAGEDEPENDENCIES": "Paketberoenden",
-    "APPROVEDTOCREATE": "godkänd för att skapa",
+    "APPROVEDTOCREATE": "Godkänd för att skapa",
     "PACKAGEINFORMATION": "Paketinformation",
     "FILENAME": "Filnamn",
     "CREATED": "Skapad",
@@ -204,5 +204,17 @@
     "ONLINE": "Aktiv",
     "OFFLINE": "Inaktiv",
     "REQUESTAPPROVED": "Förfrågan godkänd",
-    "SUBMIT": "Skicka"
+    "SUBMIT": "Skicka",
+    "CREATEDIP": "Skapa DIP",
+    "APPLYCHANGES": "Spara ändringar",
+    "SAVED_MESSAGE": "Sparad!",
+    "EVENT_ADDED": "Event tillagt!",
+    "SAVE_ERROR": "Ett fel uppstod!",
+    "APPRAISAL": "Gallring",
+    "PREPAREDIP": "Förbered DIP",
+    "OPTIONS": "Alternativ",
+    "CUSTOM_IDENTIFICATION": "Egen identifiering",
+    "ORDER": "Beställning",
+    "ORDERS": "Beställningar",
+    "NEWORDER": "Ny beställning"
 }

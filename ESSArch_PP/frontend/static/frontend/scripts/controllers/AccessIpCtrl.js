@@ -15,7 +15,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
 
     $scope.menuOptions = function(rowType) {
         return [
-            ["Appraisal", function ($itemScope, $event, modelValue, text, $li) {
+            [$translate.instant("APPRAISAL"), function ($itemScope, $event, modelValue, text, $li) {
                 var row;
                 if(rowType === "row") {
                     row = $itemScope.row;
