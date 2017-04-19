@@ -204,6 +204,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         'ObjectIdentifierValue', 'Label', 'Responsible__first_name',
         'Responsible__last_name', 'Responsible__username', 'State',
         'SubmissionAgreement__sa_name', 'Startdate', 'Enddate',
+        'information_packages__ObjectIdentifierValue',
+        'information_packages__Responsible__username',
     )
     filter_class = InformationPackageFilter
     def get_queryset(self):
