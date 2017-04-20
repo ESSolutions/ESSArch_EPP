@@ -69,7 +69,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             
         }
         if($scope.includedIps.length == 0) {
-            $scope,initRequestData();
+            initRequestData();
             $scope.requestForm = false;
         } else {
             if(!$scope.requestForm) {
