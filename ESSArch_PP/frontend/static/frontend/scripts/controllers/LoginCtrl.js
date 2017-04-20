@@ -46,7 +46,6 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                 },function(response){
                     // error case
                     $scope.errors = response.data;
-                    console.log($scope.errors);
                 });
         }
     }
