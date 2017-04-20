@@ -43,9 +43,9 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                         myService.getPermissions(response.data.permissions);
                     });
                     $state.go('home.myPage');
-                },function(data){
+                },function(response){
                     // error case
-                    $scope.errors = data;
+                    $scope.errors = response.data;
                     console.log($scope.errors);
                 });
         }
