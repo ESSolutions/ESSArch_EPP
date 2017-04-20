@@ -18,7 +18,7 @@
                                 </label>
                                 <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     Archive policy
-                                    <select type="select" required="true" class="form-control" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
+                                    <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
                                 </label>
                                 <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     Information class

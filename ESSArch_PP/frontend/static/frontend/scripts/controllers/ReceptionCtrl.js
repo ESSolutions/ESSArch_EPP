@@ -60,10 +60,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             if(included.id == row.id) {
                 $scope.includedIps.splice(index, 1);
                 temp = false;
+                $scope.checkMatch();
             }
         });
         if(temp) {
             $scope.includedIps.push(row);
+            $scope.checkMatch();
+            
         }
         if($scope.includedIps.length == 0) {
             $scope.informationClassAlert = null;            
@@ -74,37 +77,28 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                     vm.request.archivePolicy.options = result;
                     $scope.getTags().then(function(result) {
                         vm.request.tags.options = result;
-                        vm.request.informationClass = row.information_class;
                         $scope.requestForm = true;
                     });
                 });
             }
         }
     }
-    $scope.$watch(function(){return vm.request.archivePolicy.value;}, function() {
-        for(i=0;i<$scope.includedIps.length; i++) {
-            if(vm.request.archivePolicy.value) {
-                if(vm.request.archivePolicy.value.information_class != $scope.includedIps[i].information_class) {
-                    $scope.informationClassAlert = $scope.alerts.matchError;
-                    $scope.informationClassAlert.message = $scope.alerts.matchError.msg + $scope.includedIps[i].id;
-                    break;
-                }
-                $scope.informationClassAlert = null;
-            }
-        };
-    });
-    $scope.$watch(function(){return vm.request.informationClass;}, function() {
-        for(i=0;i<$scope.includedIps.length; i++) {
-            if(vm.request.archivePolicy.value) {
-                if(vm.request.archivePolicy.value.information_class != $scope.includedIps[i].information_class) {
-                    $scope.informationClassAlert = $scope.alerts.matchError;
-                    $scope.informationClassAlert.message = $scope.alerts.matchError.msg + $scope.includedIps[i].id;
-                    break;
-                }
-                $scope.informationClassAlert = null;
-            }
-        };
-    });
+    $scope.archivePolicyChange = function() {
+        vm.request.informationClass = vm.request.archivePolicy.value.information_class;
+        $scope.checkMatch();
+    }
+    $scope.checkMatch = function() {
+        if(vm.request.archivePolicy.value != null) {
+            for(i=0;i<$scope.includedIps.length; i++) {
+                    if(vm.request.archivePolicy.value.information_class != $scope.includedIps[i].information_class) {
+                        $scope.informationClassAlert = $scope.alerts.matchError;
+                        $scope.informationClassAlert.message = $scope.alerts.matchError.msg + $scope.includedIps[i].id;
+                        break;
+                    }
+                    $scope.informationClassAlert = null;
+                };
+        }
+    };
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
