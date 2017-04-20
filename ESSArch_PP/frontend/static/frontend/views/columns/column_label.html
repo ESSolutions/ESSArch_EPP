@@ -1,5 +1,5 @@
 <div ng-if="'home.ingest.reception' | isState" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')">{{row.label}}</div>
-<div class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')">{{row.Label}}</div>
+<div ng-if="!subrow" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')">{{row.Label}}</div>
 <div ng-if="subrow">
     <div class="clickable" style="white-space: nowrap;" ng-click="selectIp(subrow);ipTableClick(subrow)" uib-popover="{{'LABELDESC' | translate}}: {{subrow.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a href="">{{subrow.Label}}</a></div>
 </div>

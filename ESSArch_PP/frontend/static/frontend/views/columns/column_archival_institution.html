@@ -1,4 +1,4 @@
-<div class="clickable" ng-click="selectIp(row)" context-menu="menuOptions('row')">{{row.ArchivalInstitution.name}}</div>
+<div ng-if="!subrow" class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.ArchivalInstitution.name}}</div>
 <div ng-if="subrow">
-    <div class="clickable" ng-click="selectIp(subrow)" context-menu="menuOptions('row')">{{subrow.ArchivalInstitution.name}}</div>
+    <div class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.ArchivalInstitution.name}}</div>
 </div>
