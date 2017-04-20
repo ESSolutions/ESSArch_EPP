@@ -3,6 +3,12 @@
         <div class="access-workarea">
             <div class="content-wrapper">
                 <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+                <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+                    <div ng-include src="'static/frontend/views/event_table.html'"></div>
+                    <div ng-if="statusShow" class="status-view">
+                        <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
