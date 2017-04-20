@@ -24,7 +24,7 @@
                                     Information class
                                     <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
                                 </label>
-                                <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')" close="closeAlert()">{{informationClassAlert.message}}</div>
+                                <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                                 <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     Tags
                                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
@@ -50,7 +50,7 @@
                         <form class="eventlog-form">
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkBox" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
+                                    <input type="checkBox" ng-disabled="informationClassAlert" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
                                 </label>
                             </div>
                             <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToReceive" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
