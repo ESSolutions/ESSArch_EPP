@@ -173,16 +173,18 @@ class ReceiveSIPTestCase(TransactionTestCase):
         )
         self.assertTrue(aip.exists())
 
+        expected_aip = os.path.join(self.ingest.value, sip)
+
         aic = aip.first().aic
         self.assertEqual(str(aic.pk), aic.ObjectIdentifierValue)
         self.assertEqual(aic.package_type, InformationPackage.AIC)
 
         aip = aip.first()
         self.assertEqual(aip.Label, 'test-ip')
+        self.assertEqual(aip.ObjectPath, expected_aip)
         self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
         self.assertEqual(sip, aip.ObjectIdentifierValue)
-        expected_aip = os.path.join(self.ingest.value, sip)
         self.assertTrue(os.path.isdir(expected_aip))
 
         expected_content = os.path.join(expected_aip, 'content')
@@ -322,6 +324,12 @@ class ReceiveSIPTestCase(TransactionTestCase):
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
 
+        aip = InformationPackage.objects.filter(
+            package_type=InformationPackage.AIP
+        ).first()
+
+        self.assertEqual(aip.ObjectPath, expected_aip)
+
         expected_tar = os.path.join(expected_content, sip + '.tar')
         self.assertFalse(os.path.isfile(expected_tar))
 
@@ -376,6 +384,12 @@ class ReceiveSIPTestCase(TransactionTestCase):
         expected_aip = os.path.join(self.ingest.value, sip)
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
+
+        aip = InformationPackage.objects.filter(
+            package_type=InformationPackage.AIP
+        ).first()
+
+        self.assertEqual(aip.ObjectPath, expected_aip)
 
         expected_tar = os.path.join(expected_content, sip + '.tar')
         self.assertFalse(os.path.isfile(expected_tar))

@@ -172,6 +172,9 @@ class ReceiveSIP(DBTask):
             dst = os.path.join(aip_dir, 'content', objid + container_type)
             shutil.copy(container, dst)
 
+        aip.ObjectPath = aip_dir
+        aip.save(update_fields=['ObjectPath'])
+
         self.set_progress(100, total=100)
         return aip.pk
 
