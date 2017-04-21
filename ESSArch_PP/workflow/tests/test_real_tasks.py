@@ -1463,13 +1463,13 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         )
 
         io_queue = IOQueue.objects.create(
-            user=user, storage_medium=medium, req_type=20,
+            user=user, storage_medium=medium, req_type=20, ip=ip,
             storage_method_target=method_target, storage_object=obj,
             object_path=ip.ObjectPath,
         )
 
         io_queue2 = IOQueue.objects.create(
-            user=user, storage_medium=medium, req_type=20,
+            user=user, storage_medium=medium, req_type=20, ip=ip,
             storage_method_target=method_target, storage_object=obj2,
             object_path=ip2.ObjectPath,
         )
