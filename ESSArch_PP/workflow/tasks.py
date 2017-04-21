@@ -414,9 +414,10 @@ class PollIOQueue(DBTask):
                         }
                     ).run().get()
                 elif entry.req_type == 15:  # Write to disk
+                    content_location_value = os.path.join(storage_target.target, os.path.basename(entry.ip.ObjectPath))
                     storage_object = StorageObject.objects.create(
                         content_location_type=storage_method.type,
-                        content_location_value=storage_target.target,
+                        content_location_value=content_location_value,
                         ip=entry.ip, storage_medium=storage_medium
                     )
                     ProcessTask.objects.create(
