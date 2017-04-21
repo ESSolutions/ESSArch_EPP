@@ -100,8 +100,8 @@ class ReceiveSIP(DBTask):
             entry_date=parsed.get('create_date'),
             aic=aic,
             Responsible_id=self.responsible,
-            Startdate=parsed['altrecordids'].get('STARTDATE'),
-            Enddate=parsed['altrecordids'].get('ENDDATE'),
+            Startdate=parsed['altrecordids'].get('STARTDATE')[0],
+            Enddate=parsed['altrecordids'].get('ENDDATE')[0],
             information_class=information_class,
         )
 
