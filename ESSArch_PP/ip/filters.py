@@ -22,6 +22,8 @@
     Email - essarch@essolutions.se
 """
 
+from django.db.models import Q
+
 import django_filters
 
 from ESSArch_Core.filters import ListFilter
@@ -37,7 +39,15 @@ from ESSArch_Core.ip.models import (
 
 class InformationPackageFilter(django_filters.FilterSet):
     package_type = ListFilter(name='package_type')
-    state = ListFilter(name='State')
+    state = ListFilter(name='State', method='filter_state')
+
+    def filter_state(self, queryset, name, value):
+        value_list = value.split(u',')
+
+        return queryset.filter(
+            Q(State__in=value_list) |
+            Q(information_packages__State__in=value_list)
+        )
 
     class Meta:
         model = InformationPackage
