@@ -743,7 +743,7 @@ class AccessAIPTestCase(TransactionTestCase):
         task.run().get()
 
         self.assertFalse(IOQueue.objects.exists())
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.access.value)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.access.value)
 
     def test_on_disk(self):
         policy = ArchivePolicy.objects.create(
@@ -1507,13 +1507,17 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         self.assertTrue(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
         mock_read.assert_not_called()
 
+    @mock.patch('workflow.tasks.tarfile')
     @mock.patch('ESSArch_Core.tasks.CopyFile.run')
     @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
     @mock.patch('ESSArch_Core.tasks.ReadTape.run')
-    def test_read_mounted_tape(self, mock_read, mock_set_file_number, mock_copy):
+    def test_read_mounted_tape(self, mock_read, mock_set_file_number, mock_copy, mock_tar):
         mock_read.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
         mock_copy.side_effect = lambda *args, **kwargs: None
+
+        mocked_tar = mock.Mock()
+        mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
         ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
@@ -1557,20 +1561,24 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.datadir)
 
         io_queue.refresh_from_db()
 
         self.assertEqual(io_queue.status, 20)
         self.assertFalse(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
 
+    @mock.patch('workflow.tasks.tarfile')
     @mock.patch('ESSArch_Core.tasks.CopyFile.run')
     @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
     @mock.patch('ESSArch_Core.tasks.ReadTape.run')
-    def test_read_mounted_tape_twice(self, mock_read, mock_set_file_number, mock_copy):
+    def test_read_mounted_tape_twice(self, mock_read, mock_set_file_number, mock_copy, mock_tar):
         mock_read.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
         mock_copy.side_effect = lambda *args, **kwargs: None
+
+        mocked_tar = mock.Mock()
+        mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
         ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         ip2 = InformationPackage.objects.create(ObjectPath=self.datadir)
@@ -1625,7 +1633,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         ).run().get()
 
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.reset_mock()
         mock_copy.reset_mock()
@@ -1636,7 +1644,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         ).run().get()
 
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.ObjectIdentifierValue), dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.ObjectIdentifierValue) + '.tar', dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
 
         io_queue.refresh_from_db()
@@ -1740,9 +1748,13 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
             if e.errno != errno.ENOENT:
                 raise
 
+    @mock.patch('workflow.tasks.tarfile')
     @mock.patch('ESSArch_Core.tasks.CopyFile.run')
-    def test_read(self, mock_copy):
+    def test_read(self, mock_copy, mock_tar):
         mock_copy.side_effect = lambda *args, **kwargs: None
+
+        mocked_tar = mock.Mock()
+        mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
         ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
@@ -1790,4 +1802,4 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
         self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
 
         mock_copy.assert_any_call(src=obj.content_location_value, dst=self.cache.value)
-        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=ip.ObjectPath)
+        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=ip.ObjectPath)
