@@ -207,7 +207,12 @@ class CacheAIP(DBTask):
 
         with tarfile.open(dsttar, 'w') as tar:
             for root, dirs, files in walk(srcdir):
+                rel = os.path.relpath(root, srcdir)
                 for d in dirs:
+                    src = os.path.join(root, d)
+                    arc = os.path.join(objid, d)
+                    tar.add(src, arc, recursive=False)
+
                     try:
                         os.makedirs(os.path.join(dstdir, d))
                     except OSError as e:
@@ -215,7 +220,6 @@ class CacheAIP(DBTask):
                             raise
 
                 for f in files:
-                    rel = os.path.relpath(root, srcdir)
                     src = os.path.join(root, f)
                     dst = os.path.join(dstdir, rel, f)
 
