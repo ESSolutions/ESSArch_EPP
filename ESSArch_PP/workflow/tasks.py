@@ -61,6 +61,7 @@ from ESSArch_Core.storage.models import (
 
     StorageMedium,
     StorageMethod,
+    StorageMethodTargetRelation,
     StorageObject,
 )
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
@@ -276,6 +277,78 @@ class StoreAIP(DBTask):
         return "Created entries in IO queue for AIP '%s'" % aip
 
 
+class AccessAIP(DBTask):
+    def run(self, aip):
+        aip = InformationPackage.objects.get(pk=aip)
+        dst = Path.objects.get(entity='access').value
+
+        cache = Path.objects.get(entity='cache').value
+        cache_obj = os.path.join(cache, aip.ObjectIdentifierValue) + '.tar'
+        in_cache = os.path.exists(cache_obj)
+
+        if in_cache:
+            with allow_join_result():
+                ProcessTask.objects.create(
+                    name="ESSArch_Core.tasks.CopyFile",
+                    params={
+                        'src': cache_obj,
+                        'dst': dst,
+                    }
+                ).run().get()
+
+            return
+
+        storage_objects = aip.storage
+
+        if not storage_objects.exists():
+            raise StorageObject.DoesNotExist("IP %s not archived" % aip)
+
+        storage_objects = storage_objects.filter(
+            storage_medium__status__in=[20, 30],
+            storage_medium__location_status=50,
+        )
+
+        if not storage_objects.exists():
+            raise StorageObject.DoesNotExist("IP %s not archived on active medium" % aip)
+
+        on_disk = storage_objects.filter(storage_medium__storage_target__type=DISK).first()
+
+        if on_disk is not None:
+            storage_object = on_disk
+            req_type = 25
+        else:
+            on_tape = storage_objects.filter(storage_medium__storage_target__type=TAPE).first()
+            if on_tape is not None:
+                storage_object = on_tape
+                req_type = 20
+            else:
+                raise StorageObject.DoesNotExist()
+
+        target = storage_object.storage_medium.storage_target
+        method_target = StorageMethodTargetRelation.objects.filter(
+            storage_target=target, status__in=[1, 2],
+        ).first()
+
+        if method_target is None:
+            raise StorageMethodTargetRelation.DoesNotExist()
+
+        entry, created = IOQueue.objects.get_or_create(
+            storage_object=storage_object, req_type=req_type, object_path=dst,
+            ip=aip, status__in=[0, 2, 5], defaults={
+                'status': 0, 'user_id': self.responsible,
+                'storage_method_target': method_target,
+            }
+        )
+
+        return
+
+    def undo(self, aip):
+        pass
+
+    def event_outcome_success(self, aip):
+        return "Created entries in IO queue for AIP '%s'" % aip
+
+
 class PollIOQueue(DBTask):
     def get_storage_medium(self, entry, storage_target, storage_type):
         if storage_type == TAPE:
@@ -363,6 +436,9 @@ class PollIOQueue(DBTask):
                 )
             return
 
+        cache = Path.objects.get(entity='cache').value
+        cache_obj = os.path.join(cache, entry.ip.ObjectIdentifierValue) + '.tar'
+
         with allow_join_result():
             try:
                 if entry.req_type == 10:  # Write to tape
@@ -413,9 +489,21 @@ class PollIOQueue(DBTask):
                         name="ESSArch_Core.tasks.ReadTape",
                         params={
                             'medium': storage_medium.pk,
-                            'path': entry.object_path
+                            'path': cache
                         }
                     ).run().get()
+
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_obj,
+                            'dst': entry.object_path,
+                        }
+                    ).run().get()
+
+                    with tarfile.open(cache_obj) as tar:
+                        tar.extractall(cache)
+
                 elif entry.req_type == 15:  # Write to disk
                     content_location_value = os.path.join(storage_target.target, os.path.basename(entry.ip.ObjectPath))
                     storage_object = StorageObject.objects.create(
@@ -436,9 +524,20 @@ class PollIOQueue(DBTask):
                         name="ESSArch_Core.tasks.CopyFile",
                         params={
                             'src': storage_object.content_location_value,
+                            'dst': cache,
+                        }
+                    ).run().get()
+
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_obj,
                             'dst': entry.object_path,
                         }
                     ).run().get()
+
+                    with tarfile.open(cache_obj) as tar:
+                        tar.extractall(cache)
             except:
                 entry.status = 100
                 raise

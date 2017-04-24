@@ -319,6 +319,19 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         return Response(['Preserving AIP %s...' % pk])
 
+    @detail_route(methods=['post'])
+    def access(self, request, pk=None):
+        task = ProcessTask(
+            name='workflow.tasks.AccessAIP',
+            params={'aip': pk},
+            responsible=self.request.user,
+            eager=False,
+        )
+
+        task.run()
+
+        return Response(['Accessing AIP %s...' % pk])
+
     @detail_route()
     def events(self, request, pk=None):
         ip = self.get_object()

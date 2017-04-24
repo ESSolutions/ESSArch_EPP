@@ -135,6 +135,7 @@ def installDefaultPaths():
         'reception': '/ESSArch/data/gate/reception',
         'ingest': '/ESSArch/data/epp/ingest',
         'cache': '/ESSArch/data/epp/cache',
+        'access': '/ESSArch/data/epp/access',
     }
 
     for key in dct:

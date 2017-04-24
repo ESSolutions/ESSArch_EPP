@@ -705,6 +705,133 @@ class StoreAIPTestCase(TransactionTestCase):
         self.assertTrue(queue_entry2.exists())
 
 
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class AccessAIPTestCase(TransactionTestCase):
+    def setUp(self):
+        self.access = Path.objects.create(entity='access', value='access')
+
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+        self.cache = Path.objects.create(entity='cache', value='cache')
+
+    def test_no_storage_objects(self):
+        ip = InformationPackage.objects.create()
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk
+            },
+        )
+
+        with self.assertRaises(StorageObject.DoesNotExist):
+            task.run().get()
+
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.path.exists', return_value=True)
+    def test_in_cache(self, mock_exists, mock_copy):
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id',
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk
+            },
+        )
+
+        task.run().get()
+
+        self.assertFalse(IOQueue.objects.exists())
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.access.value)
+
+    def test_on_disk(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=DISK)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=DISK,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk
+            },
+            responsible=user,
+        )
+
+        task.run().get()
+
+        self.assertTrue(IOQueue.objects.filter(
+            ip=ip, storage_object=obj, req_type=25,
+            status=0, object_path=self.access.value,
+        ).exists())
+
+    def test_on_tape(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=TAPE)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=TAPE,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk
+            },
+            responsible=user,
+        )
+
+        task.run().get()
+
+        self.assertTrue(IOQueue.objects.filter(
+            ip=ip, storage_object=obj, req_type=20,
+            status=0, object_path=self.access.value,
+        ).exists())
+
+
 @tag('tape')
 @override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class PollRobotQueueTestCase(TransactionTestCase):
@@ -1265,7 +1392,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         self.datadir = tempfile.mkdtemp()
 
         self.ingest = Path.objects.create(entity='ingest', value='ingest')
-        self.cache = Path.objects.create(entity='cache', value='cache')
+        self.cache = Path.objects.create(entity='cache', value=tempfile.mkdtemp(dir=self.datadir))
 
         self.robot = Robot.objects.create(device='/dev/sg6')
         self.device = '/dev/nst0'
@@ -1380,11 +1507,13 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         self.assertTrue(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
         mock_read.assert_not_called()
 
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run')
     @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
     @mock.patch('ESSArch_Core.tasks.ReadTape.run')
-    def test_read_mounted_tape(self, mock_read, mock_set_file_number):
+    def test_read_mounted_tape(self, mock_read, mock_set_file_number, mock_copy):
         mock_read.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
+        mock_copy.side_effect = lambda *args, **kwargs: None
 
         ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
@@ -1427,18 +1556,21 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         ).run().get()
 
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
-        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.datadir)
 
         io_queue.refresh_from_db()
 
         self.assertEqual(io_queue.status, 20)
         self.assertFalse(RobotQueue.objects.filter(io_queue_entry=io_queue).exists())
 
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run')
     @mock.patch('ESSArch_Core.tasks.SetTapeFileNumber.run')
     @mock.patch('ESSArch_Core.tasks.ReadTape.run')
-    def test_read_mounted_tape_twice(self, mock_read, mock_set_file_number):
+    def test_read_mounted_tape_twice(self, mock_read, mock_set_file_number, mock_copy):
         mock_read.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
+        mock_copy.side_effect = lambda *args, **kwargs: None
 
         ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         ip2 = InformationPackage.objects.create(ObjectPath=self.datadir)
@@ -1483,7 +1615,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         )
 
         io_queue2 = IOQueue.objects.create(
-            user=user, storage_medium=medium, req_type=20, ip=ip,
+            user=user, storage_medium=medium, req_type=20, ip=ip2,
             storage_method_target=method_target, storage_object=obj2,
             object_path=ip2.ObjectPath,
         )
@@ -1492,16 +1624,19 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
             name=self.taskname,
         ).run().get()
 
-        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.reset_mock()
+        mock_copy.reset_mock()
         mock_set_file_number.reset_mock()
 
         ProcessTask.objects.create(
             name=self.taskname,
         ).run().get()
 
-        mock_read.assert_called_once_with(medium=medium.pk, path=self.datadir)
+        mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.ObjectIdentifierValue), dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
 
         io_queue.refresh_from_db()
@@ -1654,4 +1789,5 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
         self.assertFalse(RobotQueue.objects.exists())
         self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
 
-        mock_copy.assert_called_once_with(src=obj.content_location_value, dst=ip.ObjectPath)
+        mock_copy.assert_any_call(src=obj.content_location_value, dst=self.cache.value)
+        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue), dst=ip.ObjectPath)
