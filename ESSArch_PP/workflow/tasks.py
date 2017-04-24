@@ -176,7 +176,6 @@ class ReceiveSIP(DBTask):
         aip.ObjectPath = aip_dir
         aip.save(update_fields=['ObjectPath'])
 
-        self.set_progress(100, total=100)
         return aip.pk
 
     def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=None):
@@ -227,7 +226,6 @@ class CacheAIP(DBTask):
             ObjectPath=dsttar,
         )
 
-        self.set_progress(100, total=100)
         return aip
 
     def undo(self, aip):
