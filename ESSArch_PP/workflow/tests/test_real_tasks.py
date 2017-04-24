@@ -90,7 +90,7 @@ from storage.exceptions import (
 @override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class ReceiveSIPTestCase(TransactionTestCase):
     def setUp(self):
-        self.root = os.path.dirname(os.path.realpath(__file__))
+        self.root = tempfile.mkdtemp()
 
         self.gate = Path.objects.create(
             entity='gate',
@@ -134,11 +134,10 @@ class ReceiveSIPTestCase(TransactionTestCase):
                     raise
 
     def tearDown(self):
-        for path in [self.gate, self.ingest, self.cache]:
-            try:
-                shutil.rmtree(path.value)
-            except:
-                pass
+        try:
+            shutil.rmtree(self.root)
+        except:
+            pass
 
     def test_receive_sip(self):
         sip = 'sip_objid'
