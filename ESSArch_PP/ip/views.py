@@ -321,9 +321,15 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def access(self, request, pk=None):
+        data = request.data
+
         task = ProcessTask(
             name='workflow.tasks.AccessAIP',
-            params={'aip': pk},
+            params={
+                'aip': pk,
+                'tar': data.get('tar', True),
+                'extracted': data.get('extracted', False),
+            },
             responsible=self.request.user,
             eager=False,
         )

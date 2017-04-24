@@ -280,23 +280,38 @@ class StoreAIP(DBTask):
 
 
 class AccessAIP(DBTask):
-    def run(self, aip):
+    def run(self, aip, tar=True, extracted=False):
         aip = InformationPackage.objects.get(pk=aip)
         dst = Path.objects.get(entity='access').value
 
         cache = Path.objects.get(entity='cache').value
-        cache_obj = os.path.join(cache, aip.ObjectIdentifierValue) + '.tar'
+        cache_obj = os.path.join(cache, aip.ObjectIdentifierValue)
+        cache_tar_obj = cache_obj + '.tar'
         in_cache = os.path.exists(cache_obj)
 
         if in_cache:
             with allow_join_result():
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.CopyFile",
-                    params={
-                        'src': cache_obj,
-                        'dst': dst,
-                    }
-                ).run().get()
+                if tar:
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_tar_obj,
+                            'dst': dst,
+                        }
+                    ).run().get()
+                if extracted:
+                    for root, dirs, filenames in walk(cache_obj):
+                        for fname in filenames:
+                            filepath = os.path.join(root, fname)
+                            relpath = os.path.relpath(filepath, cache_obj)
+
+                            ProcessTask.objects.create(
+                                name="ESSArch_Core.tasks.CopyFile",
+                                params={
+                                    'src': filepath,
+                                    'dst': os.path.join(dst, aip.ObjectIdentifierValue, relpath),
+                                }
+                            ).run().get()
 
             return
 
