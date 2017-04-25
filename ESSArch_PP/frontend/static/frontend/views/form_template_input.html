@@ -1,4 +1,4 @@
-<label class="control-label" for="{{::id}}"
+<label ng-if="options.templateOptions.label !== null" class="control-label" for="{{::id}}"
        uib-popover="{{options.templateOptions.desc}}"
        popover-placement="top-left"
        popover-popup-delay="500"

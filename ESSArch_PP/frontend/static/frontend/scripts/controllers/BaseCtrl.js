@@ -204,6 +204,7 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
         return ret;
     }
 
+    //Modal functions
     $scope.tracebackModal = function (profiles) {
         $scope.profileToSave = profiles;
         var modalInstance = $uibModal.open({
@@ -268,5 +269,114 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
+    }
+    //advanced filter form data
+    $scope.columnFilters = {};
+    $scope.options = [];
+    $scope.filterModels = [];
+    $scope.filterFields = [];
+
+    //Toggle visibility of advanced filters
+    $scope.toggleAdvancedFilters = function() {
+        if($scope.showAdvancedFilters) {
+            $scope.showAdvancedFilters = false;
+        } else {
+            if($scope.filterModels.length === 0) {
+                $scope.initAdvancedFilters();
+            }
+            $timeout(function() {
+                $scope.showAdvancedFilters = true;
+            });
+        }
+    }
+
+    //Merge all filter models before fetching IP's
+    $scope.createFitlerObject = function () {
+        $scope.filterModels.forEach(function (model) {
+            if(model.filterField !== null) {
+                $scope.columnFilters[model.column] = model.filterField;
+            }
+        });
+    }
+
+    //Reset variables for advanced fiters
+    $scope.initAdvancedFilters = function () {
+        $scope.columnFilters = {};
+        $scope.filterModels = [getModelInput()];
+        $scope.filterFields = [];
+    }
+
+    //Removes model on index in fitler models
+    $scope.removeForm = function($index) {
+        if($scope.filterModels.length > 1) {
+            delete $scope.columnFilters[$scope.filterModels[$index].column];
+            if($index === 0) {
+                $scope.filterModels[$index] = $scope.filterModels[$index+1];
+                $scope.filterFields.splice($scope.filterFields.indexOf($scope.filterFields[$index])+1, 1);
+                $scope.filterModels.splice($index+1, 1);
+            } else {
+                $scope.filterFields.splice($scope.filterFields.indexOf($scope.filterFields[$index]), 1);
+                $scope.filterModels.splice($index, 1);
+            }
+        } else {
+            $scope.initAdvancedFilters();
+        }
+    }
+
+    //Get fields for every one model
+    function getFields($index) {
+        var allowedColumns = ["label", "object_identifier_value", "responsible", "create_date",
+            "object_size", "archival_institution", "achivist_organization", "start_date", "end_date"];
+        var columns = [];
+        angular.copy($rootScope.listViewColumns).forEach(function (column) {
+            if (allowedColumns.includes(column.label)) {
+                column.label = $translate.instant(column.label.toUpperCase());
+                columns.push(column);
+            }
+        });
+        var columnLabel = null;
+        var filterLabel = null;
+
+        if($index === 0) {
+            columnLabel = $translate.instant("COLUMN");
+            filterLabel = $translate.instant("FILTER");
+        }
+        return [
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": columnLabel,
+                    "labelProp": "label",
+                    "valueProp": "sortString",
+                    "options": columns,
+                },
+                "type": "select",
+                "key": "column",
+            },
+            {
+                "templateOptions": {
+                    "label": filterLabel,
+                },
+                "type": "input",
+                "key": "filterField",
+            },
+        ];
+    }
+
+    //Add new field set to field array
+    $scope.addFields = function ($index) {
+        $scope.filterFields.push(new getFields($index));
+    }
+
+    //Get new empty model
+    function getModelInput() {
+        return {
+            column: null,
+            filterField: null
+        }
+    }
+    //Add new row of model and fields (fields are genereated automatically)
+    $scope.addFilterRow = function ($index) {
+        $scope.filterModels.push(getModelInput());
     }
 });

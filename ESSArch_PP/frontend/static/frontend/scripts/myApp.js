@@ -389,7 +389,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     });
     moment.locale('sv');
-    
+
     formlyConfigProvider.setType({
         name: 'select-tree-edit',
         template: '<select class="form-control" ng-model="model[options.key]"><option value="" disabled hidden>Choose here</option></select>',
@@ -407,6 +407,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         apiCheck: function apiCheck(check) {
             return {
                 templateOptions: {
+                    label: check.string.optional,
                     options: check.arrayOf(check.object),
                     optionsAttr: check.string.optional,
                     labelProp: check.string.optional,

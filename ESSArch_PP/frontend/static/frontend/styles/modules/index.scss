@@ -537,3 +537,59 @@ padding: 0 12px;
         text-align: center;
     }
 }
+.advanced-filters {
+    position: absolute;
+    border-style: solid;
+    border-width: 1.5px;
+    border-radius: 0px 0px 5px 5px;
+    border-color: rgba(102, 102, 102, 0.4);
+    max-width:400px;
+    background-color: #fff;
+    padding: 10px;
+    z-index: 1000;
+    top: 40px;
+    .formly-buttons-wrapper {
+        display: flex;
+        align-items: flex-end;
+    }
+    .formly {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        max-height: 50px;
+        justify-content: flex-start;
+
+    }
+    .form-group {
+        margin-bottom: 0px !important;
+    }
+    .button-group {
+        display: flex;
+        align-items: flex-end;
+    }
+    .plus-button {
+        height: 26px;
+        margin: 0px !important;
+    }
+    .formly-field {
+        width: 33% !important;
+        margin-bottom: 0px !important;
+    }
+}
+.filter-icon {
+    cursor: pointer;
+    margin: 5px;
+    border-style: solid;
+    border-color: #fff;
+    border-width: 1.5px;
+    &:hover {
+        border-color: rgba(102, 102, 102, 0.4);
+    }
+    &:active {
+        border-color: rgba(102, 102, 102, 0.4);
+    }
+}
+.blue-border {
+    border-color: rgba(102, 102, 102, 0.4);
+}

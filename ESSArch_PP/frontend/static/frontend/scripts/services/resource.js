@@ -56,13 +56,13 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
 	}
     //Get data for IP table
-    function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics) {
+    function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics, columnFilters) {
         var viewType = $window.sessionStorage["view-type"] || 'aic';
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType).then(function(value) {
+        return listViewService.getListViewData(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, viewType, columnFilters).then(function(value) {
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = true;
@@ -79,12 +79,12 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
-    function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state) {
+    function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getReceptionIps(pageNumber, number, $rootScope.navigationFilter, sortString, search, state).then(function(value) {
+        return listViewService.getReceptionIps(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, columnFilters).then(function(value) {
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.checked = false;

@@ -217,5 +217,7 @@
     "ORDER": "Order",
     "ORDERS": "Orders",
     "NEWORDER": "New order",
-    "MATCH_ERROR": "Information_class in archive policy does not match information_class in ip: "
+    "MATCH_ERROR": "Information_class in archive policy does not match information_class in ip: ",
+    "COLUMN": "Column",
+    "FILTER": "Filter"
 }

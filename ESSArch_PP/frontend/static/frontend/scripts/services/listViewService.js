@@ -28,7 +28,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         $state.go(state);
     }
     //Gets data for list view i.e information packages
-    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType) {
+    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters) {
         var ipUrl = appConfig.djangoUrl+'information-packages/';
         if($rootScope.ipUrl) {
             ipUrl = $rootScope.ipUrl;
@@ -36,14 +36,14 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         var promise = $http({
             method: 'GET',
             url: ipUrl,
-            params: {
+            params: angular.extend({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 state: state,
                 search: searchString,
                 view_type: viewType
-            }
+            }, columnFilters)
         }).then(function successCallback(response) {
             count = response.headers('Count');
             if (count == null) {
@@ -57,17 +57,17 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         return promise;
     }
     
-    function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state) {
+    function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state, columnFilters) {
         var promise = $http({
             method: 'GET',
             url: appConfig.djangoUrl+'ip-reception/',
-            params: {
+            params: angular.extend({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 state: state,
                 search: searchString
-            }
+            }, columnFilters)
         })
         .then(function successCallback(response) {
             count = response.headers('Count');
