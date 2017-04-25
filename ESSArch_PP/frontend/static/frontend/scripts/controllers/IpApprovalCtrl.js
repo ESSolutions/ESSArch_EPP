@@ -57,6 +57,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		listViewService.preserveIp(ip, vm.request).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
+			$scope.eventShow = false;
 			$scope.getListViewData();
 		});
 	}
