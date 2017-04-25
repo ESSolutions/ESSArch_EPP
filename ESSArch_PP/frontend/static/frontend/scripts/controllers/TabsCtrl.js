@@ -35,11 +35,11 @@ angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope,
     $scope.myPage = $translate.instant('MYPAGE');
     $scope.tabs = [
     //{ link: 'home.myPage', label: $scope.myPage },
-    { link: 'home.ingest', label: 'Ingest' },
-    { link: 'home.access', label: 'Access' },
+    { link: 'home.ingest', label: $translate.instant('INGEST') },
+    { link: 'home.access', label: $translate.instant('ACCESS') },
     { link: 'home.orders', label: $translate.instant('ORDERS') },
-    //{ link: 'home.management', label: 'Management' },
-    { link: 'home.administration', label: 'Administration' },
+    //{ link: 'home.management', label: $translate.instant('MANAGEMENT') },
+    { link: 'home.administration', label: $translate.instant('ADMINISTRATION') },
     ];
     $scope.is_active = function(tab) {
         var isAncestorOfCurrentRoute = $state.includes(tab.link);

@@ -7,30 +7,28 @@
             <div ng-if="requestForm" class="request-layout">
                 <form id="request-form" class="request-form">
                     <div class="request-type">
-                        <label ng-if="checkPermission('ip.view_tar')">
-                            <input type="radio" ng-model="vm.request.type" value="view_tar">
-                            View IP (TAR)
-                        </label><br/>
-                        <label ng-if="checkPermission('ip.view')">
-                            <input type="radio" ng-model="vm.request.type" value="view">
-                            View IP (Extracted)
-                        </label><br/>
-                        <label ng-if="checkPermission('ip.view_tar')">
-                            <input type="radio" ng-model="vm.request.type" value="view_tar_ext">
-                            View IP (TAR + Extracted)
-                        </label><br/>
-                        <label ng-if="checkPermission('ip.edit_as_new')">
-                            <input type="radio" ng-model="vm.request.type" value="edit_as_new">
-                            Edit as new IP
-                        </label><br/>
-                        <label ng-if="checkPermission('ip.query')">
-                            <input type="radio" ng-model="vm.request.type" value="query">
-                            Query
-                        </label><br/>
+                        <div ng-if="checkPermission('ip.view')">
+                            <label>
+                                <input type="radio" ng-model="vm.request.type" value="view">
+                                {{'GET' | translate}}
+                            </label>
+                        </div>
+                        <div ng-if="checkPermission('ip.view_tar')">
+                            <label>
+                                <input type="radio" ng-model="vm.request.type" value="view_tar">
+                                {{'GET_AS_CONTAINER' | translate}}
+                            </label>
+                        </div>
+                        <div ng-if="checkPermission('ip.edit_as_new')">
+                            <label>
+                                <input type="radio" ng-model="vm.request.type" value="edit_as_new">
+                                {{'GET_AS_NEW_GENERATION' | translate}}
+                            </label>
+                        </div>
                     </div>
                     <div class="request-params">
                         <label ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
-                            Purpose
+                            {{'PURPOSE' | translate}}
                             <input required class="form-control" ng-model="vm.request.purpose">
                         </label>
                     </div>
