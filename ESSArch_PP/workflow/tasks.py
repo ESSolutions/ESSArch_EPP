@@ -28,6 +28,7 @@ import errno
 import os
 import shutil
 import tarfile
+import time
 import zipfile
 
 from celery.result import allow_join_result
@@ -313,6 +314,8 @@ class AccessAIP(DBTask):
                                 }
                             ).run().get()
 
+            aip.State = 'Accessed'
+            aip.save(update_fields=['State'])
             return
 
         storage_objects = aip.storage
@@ -356,6 +359,14 @@ class AccessAIP(DBTask):
                 'storage_method_target': method_target,
             }
         )
+
+        if not self.eager:
+            while entry.status in (0, 2, 5):
+                entry.refresh_from_db()
+                time.sleep(1)
+
+        aip.State = 'Accessed'
+        aip.save(update_fields=['State'])
 
         return
 
