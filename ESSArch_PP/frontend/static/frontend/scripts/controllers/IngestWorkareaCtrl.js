@@ -1,7 +1,7 @@
 angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    var ipSortString = "";
+    var ipSortString = "Accessed";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //context menu data
     $scope.menuOptions = function() { 
@@ -68,6 +68,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
 
     var ctrl = this;
     $scope.selectedIp = {id: "", class: ""};
+    $scope.expandedAics = [];
     $scope.selectedProfileRow = {profile_type: "", class: ""};
     this.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -89,18 +90,13 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             var pageNumber = start/number+1;
             if($scope.filterModels) {
                 $scope.createFitlerObject();
-
             }
-            $http.get('static/frontend/scripts/json_data/ips.json').then(function(response) {
-                vm.displayedIps = response.data.ingest;
-                $scope.ipLoading = false;
-            });
-            /*Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString).then(function (result) {
-                ctrl.displayedIps = result.data;
-                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
-                $scope.ipLoading = false;
-                $scope.initLoad = false;
-            });*/
+	        Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics, $scope.columnFilters).then(function (result) {
+				ctrl.displayedIps = result.data;
+				tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+				$scope.ipLoading = false;
+				$scope.initLoad = false;
+			});
         }
     };
     //Make ip selected and add class to visualize
