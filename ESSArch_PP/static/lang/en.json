@@ -235,5 +235,6 @@
     "PURPOSE": "Purpose",
     "DIFFCHECK": "Diff-check",
     "SEARCH": "Search",
-    "DISSEMINATION": "Dissemination"
+    "DISSEMINATION": "Dissemination",
+    "APPLY": "Apply"
 }

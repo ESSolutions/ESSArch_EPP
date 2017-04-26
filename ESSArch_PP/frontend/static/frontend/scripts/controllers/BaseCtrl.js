@@ -291,7 +291,7 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     }
 
     //Merge all filter models before fetching IP's
-    $scope.createFitlerObject = function () {
+    $scope.createFilterObject = function () {
         $scope.filterModels.forEach(function (model) {
             if(model.filterField !== null) {
                 $scope.columnFilters[model.column] = model.filterField;
@@ -306,7 +306,7 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
         $scope.filterFields = [];
     }
 
-    //Removes model on index in fitler models
+    //Removes model on index in filter models
     $scope.removeForm = function($index) {
         if($scope.filterModels.length > 1) {
             delete $scope.columnFilters[$scope.filterModels[$index].column];
@@ -378,5 +378,9 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     //Add new row of model and fields (fields are genereated automatically)
     $scope.addFilterRow = function ($index) {
         $scope.filterModels.push(getModelInput());
+    }
+    $scope.submitAdvancedFilters = function() {
+        $scope.createFilterObject();
+        $scope.getListViewData();
     }
 });
