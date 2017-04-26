@@ -99,6 +99,12 @@ body {
 	color:white;
 }
 
+/* nested */
+
+.nested-inline {
+    margin: 30px !important;
+}
+
 /* Table */
 
 #aic-table {

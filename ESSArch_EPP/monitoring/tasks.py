@@ -263,6 +263,7 @@ class CheckStorageMediumsTask(JobtasticTask):
             sm_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1)
             for sm_obj in sm_objs:
                 target_obj = None
+                st_obj = None
                 st_objs = sm_obj.storagetarget_set.filter(status=1)
                 if st_objs.count() == 1:
                     st_obj = st_objs[0]
@@ -270,10 +271,11 @@ class CheckStorageMediumsTask(JobtasticTask):
                     logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
                 elif st_objs.count() > 1:
                     logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
-                if st_obj.target.status == 1:
-                    target_obj = st_obj.target
-                else:
-                    logger.error('The target %s is disabled' % st_obj.target.name)
+                if st_obj is not None:
+                    if st_obj.target.status == 1:
+                        target_obj = st_obj.target
+                    else:
+                        logger.error('The target %s is disabled' % st_obj.target.name)
                 
                 if target_obj is not None:
                     if target_obj.minCapacityWarning > 0:
