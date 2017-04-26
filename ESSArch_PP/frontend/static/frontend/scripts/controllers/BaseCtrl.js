@@ -326,11 +326,11 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     //Get fields for every one model
     function getFields($index) {
         var allowedColumns = ["label", "object_identifier_value", "responsible", "create_date",
-            "object_size", "archival_institution", "achivist_organization", "start_date", "end_date"];
+            "object_size", "archival_institution", "archivist_organization", "start_date", "end_date"];
         var columns = [];
         angular.copy($rootScope.listViewColumns).forEach(function (column) {
             if (allowedColumns.includes(column.label)) {
-                column.label = $translate.instant(column.label.toUpperCase());
+                column.label_translated = $translate.instant(column.label.toUpperCase());
                 columns.push(column);
             }
         });
@@ -346,8 +346,8 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
                 "templateOptions": {
                     "type": "text",
                     "label": columnLabel,
-                    "labelProp": "label",
-                    "valueProp": "sortString",
+                    "labelProp": "label_translated",
+                    "valueProp": "label",
                     "options": columns,
                 },
                 "type": "select",

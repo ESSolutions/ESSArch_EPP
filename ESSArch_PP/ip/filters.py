@@ -38,20 +38,39 @@ from ESSArch_Core.ip.models import (
 
 
 class InformationPackageFilter(django_filters.FilterSet):
+    archival_institution = ListFilter(name="ArchivalInstitution__name", method='filter_fields')
+    archivist_organization = ListFilter(name='ArchivistOrganization__name', method='filter_fields')
+    archival_type = ListFilter(name='ArchivalType__name', method='filter_fields')
+    archival_location = ListFilter(name='ArchivalLocation__name', method='filter_fields')
     package_type = ListFilter(name='package_type')
-    state = ListFilter(name='State', method='filter_state')
+    state = ListFilter(name='State', method='filter_fields_in_list')
+    object_identifier_value = ListFilter(name='ObjectIdentifierValue', method='filter_fields')
+    label = ListFilter(name='Label', method='filter_fields')
+    responsible = ListFilter(name='Responsible__username', method='filter_fields')
+    create_date = ListFilter(name='CreateDate', method='filter_fields')
+    object_size = ListFilter(name='object_size', method='filter_fields')
+    start_date = ListFilter(name='Startdate', method='filter_fields')
+    end_date = ListFilter(name='Enddate', method='filter_fields')
 
-    def filter_state(self, queryset, name, value):
+    def filter_fields(self, queryset, name, value):
+        return queryset.filter(
+            Q(**{'%s__icontains' % name: value}) |
+            Q(**{'information_packages__%s__icontains' % name: value})
+        )
+
+    def filter_fields_in_list(self, queryset, name, value):
         value_list = value.split(u',')
 
         return queryset.filter(
-            Q(State__in=value_list) |
-            Q(information_packages__State__in=value_list)
+            Q(**{'%s__in' % name: value_list}) |
+            Q(**{'information_packages__%s__in' % name: value_list})
         )
 
     class Meta:
         model = InformationPackage
-        fields = ['package_type', 'state']
+        fields = ['package_type', 'state', 'label','object_identifier_value',
+        'responsible', 'create_date','object_size', 'start_date', 'end_date',
+        'archival_institution', 'archivist_organization']
 
 
 class ArchivalInstitutionFilter(django_filters.FilterSet):
