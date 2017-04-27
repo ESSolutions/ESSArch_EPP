@@ -1,5 +1,8 @@
 <div class="body-wrapper">
     <div class="logo-search-user-admin-wrapper">
+        <div class="hamburger" ng-show="('home.ingest' | includedByState) || ('home.access' | includedByState)">
+            <i class="fa fa-2x" ng-class="{'fa-times': hamburgerActive, 'fa-bars': !hamburgerActive}" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
+        </div>
         <div class="logo" ng-controller="UtilCtrl">
             <h3 ng-click="infoPage()">ESSArch Preservation Platform</h3>
         </div>
@@ -40,14 +43,14 @@
             <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
 
-            <div ng-controller="LanguageCtrl" style="width: 100px; margin-left: 10px;">
+            <div ng-controller="LanguageCtrl" class="language-select" style="width: 100px; margin-left: 10px;">
                 <select class="form-control" ng-model="currentLanguage" ng-change="changeLanguage(currentLanguage)" ng-options="x | translate for x in availableLanguages" style="width: 100%;" uib-popover="{{'CHOOSELANGUAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
             </div>
         </div>
     </div>
 		<div style="margin-top: 10px;" ng-controller="BaseCtrl" ng-include src="'static/frontend/views/sub_menu.html'"></div>
     <div class="nav-dynamic-wrapper">
-        <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.management' | includedByState) || ('home.administration' | includedByState) || ('home.appraisal' | includedByState)" class="shortcut-nav-calendar-wrapper">
+        <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.management' | includedByState) || ('home.administration' | includedByState) || ('home.appraisal' | includedByState)" class="shortcut-nav-calendar-wrapper" ng-class="{'active-hamburger': hamburgerActive}">
             <!--
                 <div class="shortcut-list" ng-controller="DropdownCtrl">
                 <div class="btn-group" uib-dropdown is-open="status.isopen">

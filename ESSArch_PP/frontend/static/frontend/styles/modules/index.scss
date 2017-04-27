@@ -185,7 +185,7 @@ body.modal-open[style] {
     -webkit-justify-content: center;
     width: 15%;
     height: 100%;
-    margin: auto;
+    margin-right: 15px;
 }
 .tasks-icons > .fa {
     margin-right: 2px;
@@ -201,6 +201,7 @@ body.modal-open[style] {
     min-width: 280px;
     margin: 5px;
     height: 1000px;
+    background-color: transparent;
 }
 .shortcut-list {
     width: 100%;
@@ -218,6 +219,47 @@ body.modal-open[style] {
     height: 60%;
     width: 100%;
     margin-top: 5px;
+}
+.hamburger {
+    display: none;
+}
+.language-select {
+    min-width: 100px!important;
+}
+@media screen and (max-width: 1200px) {
+    .active-hamburger {
+        display: block!important;
+    }
+    .shortcut-nav-calendar-wrapper {
+        cursor: pointer;
+        height: 100%;
+        max-width: 0;
+        overflow: visible !important;
+        padding: 0 !important;
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 100px;
+        z-index: 100;
+        .calendar {
+            display: none;
+        }
+        .navigation {
+            background-color: white;
+        }
+    }
+    body {
+        min-width: 900px;
+    }
+    .hamburger {
+        margin-right: 5px;
+        margin-top: 10px;
+        display: inline;
+        cursor: pointer;
+    }
+    .dynamic-part {
+        width: 100%!important;
+    }
 }
 .step-task-pagination {
     user-select: none;
