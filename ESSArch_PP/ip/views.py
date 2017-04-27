@@ -177,19 +177,30 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         return ips
 
     def list(self, request):
+        filter_fields = ["label", "object_identifier_value", "responsible",
+                         "create_date", "object_size", "archival_institution",
+                         "archivist_organization", "start_date", "end_date"]
+
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
         contained = self.get_contained_packages(reception)
         extracted = self.get_extracted_packages(reception)
 
         ips = contained + extracted
+        new_ips = []
+
+        # Remove all keys not in filter_fields
+        conditions = {key: value for (key, value) in request.query_params.dict().iteritems() if key in filter_fields}
+
+        # Filter ips based on conditions
+        new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k,v) in conditions.iteritems())), ips)
 
         paginator = LinkHeaderPagination()
-        page = paginator.paginate_queryset(ips, request)
+        page = paginator.paginate_queryset(new_ips, request)
         if page is not None:
             return paginator.get_paginated_response(page)
 
-        return Response(ips)
+        return Response(new_ips)
 
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
