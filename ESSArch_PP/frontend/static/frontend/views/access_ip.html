@@ -5,7 +5,7 @@
         <div class="content-wrapper">
             <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
             <div ng-if="requestForm" class="request-layout">
-                <form id="request-form" class="request-form">
+                <form id="request-form" class="request-form" ng-submit="accessIp(ip, vm.request)">
                     <div class="request-type">
                         <div ng-if="checkPermission('ip.view')">
                             <label>

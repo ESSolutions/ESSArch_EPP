@@ -4,14 +4,17 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
     var ipSortString = "Archived,Accessing";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
-    vm.request = {
-        type: "",
-        purpose: "",
-        storageMedium: {
-            value: "",
-            options: ["Disk", "Tape(type1)", "Tape(type2)"]
-        }
-    };
+    $scope.initRequestData = function () {
+        vm.request = {
+            type: "",
+            purpose: "",
+            storageMedium: {
+                value: "",
+                options: ["Disk", "Tape(type1)", "Tape(type2)"]
+            }
+        };
+    }
+    $scope.initRequestData();
 
     $scope.menuOptions = function(rowType) {
         return [
@@ -151,7 +154,16 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             });
         }
     };
-
+    $scope.accessIp = function(ip, request) {
+        var data = { purpose: request.purpose, tar: request.type === "view_tar", extracted: request.type === "view"};
+        $http.post(ip.url + "access/", data).then(function(response) {
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.initRequestData();
+            $scope.getListViewData();
+            $state.go("home.access.workarea");
+        });
+    }
     //Make ip selected and add class to visualize
     $scope.selectIp = function(row) {
         vm.displayedIps.forEach(function(ip) {

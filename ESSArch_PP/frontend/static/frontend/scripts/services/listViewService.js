@@ -148,7 +148,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         return $http({
             method: 'POST',
             url: ip.url + 'preserve/',
-            data: {}
+            data: request
         }).then(function(response) {
             return response;
         });

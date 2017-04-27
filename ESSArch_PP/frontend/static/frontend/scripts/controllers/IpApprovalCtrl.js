@@ -5,14 +5,17 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
 	vm.ipViewType = $cookies.get('ip-view-type') || 1;
 	//Request form data
-	vm.request = {
-		type: "",
-		purpose: "",
-		storageMedium: {
-			value: "",
-			options: ["Disk", "Tape(type1)", "Tape(type2)"]
-		}
-	};
+	$scope.initRequestData = function () {
+		vm.request = {
+			type: "",
+			purpose: "",
+			storageMedium: {
+				value: "",
+				options: ["Disk", "Tape(type1)", "Tape(type2)"]
+			}
+		};
+	}
+  $scope.initRequestData();
 	$scope.menuOptions = function(rowType) {
 		return [
 		[$translate.instant("APPRAISAL"), function ($itemScope, $event, modelValue, text, $li) {
@@ -53,11 +56,12 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		if(vm.request.type == "diff_check") {
 		}
 	}
-	$scope.preserveIp = function(ip) {
-		listViewService.preserveIp(ip, vm.request).then(function(result) {
+	$scope.preserveIp = function(ip, request) {
+		listViewService.preserveIp(ip, {purpose: request.purpose}).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.eventShow = false;
+			$scope.initRequestData();
 			$scope.getListViewData();
 		});
 	}
