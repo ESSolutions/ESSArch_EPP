@@ -1,5 +1,5 @@
 node_modules
-scripts/bower_components/
+bower_components
 scripts/scripts.js
 scripts/scripts.min.js
 scripts/vendors.js

@@ -41,37 +41,37 @@ var argv = require('yargs').argv;
 var isProduction = (argv.production === undefined) ? false : true;
 
 var jsVendorFiles = [
-        'scripts/bower_components/api-check/dist/api-check.js',
-        'scripts/bower_components/jquery/dist/jquery.js',
-        'scripts/bower_components/jquery-ui/jquery-ui.js',
-        'scripts/bower_components/ua-parser-js/src/ua-parser.js',
-        'scripts/bower_components/angular/angular.js',
+        'node_modules/api-check/dist/api-check.js',
+        'node_modules/jquery/dist/jquery.js',
+        'node_modules/jquery-ui/jquery-ui.js',
+        'node_modules/ua-parser-js/src/ua-parser.js',
+        'node_modules/angular/angular.js',
         'scripts/angular-locale_sv.js',
-        'scripts/bower_components/angular-animate/angular-animate.js',
-        'scripts/bower_components/angular-messages/angular-messages.js',
-        'scripts/bower_components/angular-route/angular-route.js',
-        'scripts/bower_components/angular-mocks/angular-mocks.js',
-        'scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
-        'scripts/bower_components/angular-tree-control/angular-tree-control.js',
-        'scripts/bower_components/angular-formly/dist/formly.js',
+        'node_modules/angular-animate/angular-animate.js',
+        'node_modules/angular-messages/angular-messages.js',
+        'node_modules/angular-route/angular-route.js',
+        'node_modules/angular-mocks/angular-mocks.js',
+        'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js',
+        'node_modules/angular-tree-control/angular-tree-control.js',
+        'node_modules/angular-formly/dist/formly.js',
         'node_modules/angular-formly-templates-bootstrap/dist/angular-formly-templates-bootstrap.js',
-        'scripts/bower_components/angular-smart-table/dist/smart-table.js',
-        'scripts/bower_components/angular-bootstrap-grid-tree/src/tree-grid-directive.js',
-        'scripts/bower_components/angular-ui-router/release/angular-ui-router.js',
-        'scripts/bower_components/angular-cookies/angular-cookies.js ',
-        'scripts/bower_components/angular-permission/dist/angular-permission.js',
-        'scripts/bower_components/angular-translate/angular-translate.js',
-        'scripts/bower_components/angular-translate-storage-cookie/angular-translate-storage-cookie.js',
-        'scripts/bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.js',
-        'scripts/bower_components/angular-sanitize/angular-sanitize.js',
-        'scripts/bower_components/angular-bootstrap-contextmenu/contextMenu.js',
-        'scripts/bower_components/angular-ui-select/dist/select.js',
-        'scripts/bower_components/bootstrap/dist/js/bootstrap.js',
-        'scripts/bower_components/ng-flow/dist/ng-flow-standalone.js',
-        'scripts/bower_components/angular-link-header-parser/release/angular-link-header-parser.js',
-        'scripts/bower_components/uri-util/dist/uri-util.js',
-        'scripts/bower_components/marked/lib/marked.js',
-        'scripts/bower_components/angular-marked/dist/angular-marked.js',
+        'node_modules/angular-smart-table/dist/smart-table.js',
+        'node_modules/angular-bootstrap-grid-tree/src/tree-grid-directive.js',
+        'node_modules/angular-ui-router/release/angular-ui-router.js',
+        'node_modules/angular-cookies/angular-cookies.js ',
+        'node_modules/angular-permission/dist/angular-permission.js',
+        'node_modules/angular-translate/dist/angular-translate.js',
+        'node_modules/angular-translate-storage-cookie/angular-translate-storage-cookie.js',
+        'node_modules/angular-translate-loader-static-files/angular-translate-loader-static-files.js',
+        'node_modules/angular-sanitize/angular-sanitize.js',
+        'node_modules/angular-bootstrap-contextmenu/contextMenu.js',
+        'node_modules/ui-select/dist/select.js',
+        'node_modules/bootstrap/dist/js/bootstrap.js',
+        'node_modules/ng-flow/dist/ng-flow-standalone.js',
+        'bower_components/angular-link-header-parser/release/angular-link-header-parser.js',
+        'node_modules/uri-util/dist/uri-util.js',
+        'node_modules/marked/lib/marked.js',
+        'node_modules/angular-marked/dist/angular-marked.js',
         'node_modules/angular-filesize-filter/angular-filesize-filter.js',
         'node_modules/moment/min/moment-with-locales.js',
         'node_modules/angular-date-time-input/src/dateTimeInput.js',
@@ -160,11 +160,11 @@ var compileSass = function() {
     .pipe(gulp.dest('styles'));
 };
 var copyIcons = function() {
-    return gulp.src('scripts/bower_components/font-awesome/fonts/**.*') 
+    return gulp.src('node_modules/font-awesome/fonts/**.*') 
         .pipe(gulp.dest('fonts')); 
 };
 var copyImages = function() {
-    return gulp.src('scripts/bower_components/angular-tree-control/images/**.*') 
+    return gulp.src('node_modules/angular-tree-control/images/**.*') 
         .pipe(gulp.dest('images')); 
 };
 
