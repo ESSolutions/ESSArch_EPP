@@ -43,7 +43,7 @@ var isProduction = (argv.production === undefined) ? false : true;
 var jsVendorFiles = [
         'node_modules/api-check/dist/api-check.js',
         'node_modules/jquery/dist/jquery.js',
-        'node_modules/jquery-ui/jquery-ui.js',
+        'node_modules/jquery-ui-dist/jquery-ui.js',
         'node_modules/ua-parser-js/src/ua-parser.js',
         'node_modules/angular/angular.js',
         'scripts/angular-locale_sv.js',
