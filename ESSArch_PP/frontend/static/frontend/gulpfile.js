@@ -69,7 +69,8 @@ var jsVendorFiles = [
         'node_modules/bootstrap/dist/js/bootstrap.js',
         'node_modules/ng-flow/dist/ng-flow-standalone.js',
         'bower_components/angular-link-header-parser/release/angular-link-header-parser.js',
-        'node_modules/uri-util/dist/uri-util.js',
+        'bower_components/lodash/lodash.js', // required by angular-link-header-parser
+        'bower_components/uri-util/dist/uri-util.js', // required by angular-link-header-parser
         'node_modules/marked/lib/marked.js',
         'node_modules/angular-marked/dist/angular-marked.js',
         'node_modules/angular-filesize-filter/angular-filesize-filter.js',
