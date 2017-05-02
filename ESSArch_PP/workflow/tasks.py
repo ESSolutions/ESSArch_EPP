@@ -371,6 +371,15 @@ class AccessAIP(DBTask):
                 entry.refresh_from_db()
                 time.sleep(1)
 
+        tarpath = os.path.join(dst, aip.ObjectIdentifierValue) + '.tar'
+
+        if extracted:
+            with tarfile.open(tarpath) as tarf:
+                tarf.extractall(dst)
+
+        if not tar:
+            os.remove(tarpath)
+
         aip.State = 'Accessed'
         aip.save(update_fields=['State'])
 
