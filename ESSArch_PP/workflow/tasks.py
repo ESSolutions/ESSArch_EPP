@@ -31,11 +31,13 @@ import tarfile
 import time
 import zipfile
 
+from celery import states as celery_states
 from celery.result import allow_join_result
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
+from django.utils import timezone
 
 from scandir import walk
 
@@ -363,6 +365,7 @@ class AccessAIP(DBTask):
             ip=aip, status__in=[0, 2, 5], defaults={
                 'status': 0, 'user_id': self.responsible,
                 'storage_method_target': method_target,
+                'task_id': self.task_id,
             }
         )
 
@@ -447,6 +450,27 @@ class PollIOQueue(DBTask):
         except IOQueue.DoesNotExist:
             return
 
+        step = ProcessStep(
+            name='Poll IO Queue',
+        )
+
+        if hasattr(entry.task, 'processstep') and entry.task.processstep is not None:
+            step.parent_step = entry.task.processstep
+        else:
+            step.information_package = entry.ip
+
+        step.save()
+
+        ProcessTask.objects.create(
+            pk=self.task_id,
+            name='workflow.tasks.PollIOQueue',
+            hidden=self.hidden,
+            status=celery_states.STARTED,
+            time_started=timezone.now(),
+            processstep=step,
+            processstep_pos=0,
+        )
+
         if entry.req_type in [20, 25]:  # read
             if entry.storage_object is None:
                 entry.status = 100
@@ -501,7 +525,9 @@ class PollIOQueue(DBTask):
                         params={
                             'medium': storage_medium.pk,
                             'num': int(content_location_value),
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=1,
                     ).run().get()
 
                     ProcessTask.objects.create(
@@ -509,7 +535,9 @@ class PollIOQueue(DBTask):
                         params={
                             'medium': storage_medium.pk,
                             'path': entry.object_path,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=2,
                     ).run().get()
 
                     StorageObject.objects.create(
@@ -525,7 +553,9 @@ class PollIOQueue(DBTask):
                         params={
                             'medium': storage_medium.pk,
                             'num': tape_pos,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=1,
                     ).run().get()
 
                     ProcessTask.objects.create(
@@ -533,7 +563,9 @@ class PollIOQueue(DBTask):
                         params={
                             'medium': storage_medium.pk,
                             'path': cache
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=2,
                     ).run().get()
 
                     ProcessTask.objects.create(
@@ -541,7 +573,9 @@ class PollIOQueue(DBTask):
                         params={
                             'src': cache_obj,
                             'dst': entry.object_path,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=3,
                     ).run().get()
 
                     with tarfile.open(cache_obj) as tar:
@@ -559,7 +593,9 @@ class PollIOQueue(DBTask):
                         params={
                             'src': entry.ip.ObjectPath,
                             'dst': storage_target.target,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=1,
                     ).run().get()
 
                 elif entry.req_type == 25:  # Read from disk
@@ -568,7 +604,9 @@ class PollIOQueue(DBTask):
                         params={
                             'src': storage_object.content_location_value,
                             'dst': cache,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=1,
                     ).run().get()
 
                     ProcessTask.objects.create(
@@ -576,7 +614,9 @@ class PollIOQueue(DBTask):
                         params={
                             'src': cache_obj,
                             'dst': entry.object_path,
-                        }
+                        },
+                        processstep=step,
+                        processstep_pos=2,
                     ).run().get()
 
                     with tarfile.open(cache_obj) as tar:
@@ -607,6 +647,27 @@ class PollRobotQueue(DBTask):
             ).select_related('storage_medium').earliest()
         except RobotQueue.DoesNotExist:
             return
+
+        step = ProcessStep(
+            name='Poll Robot Queue',
+        )
+
+        if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
+            step.parent_step = entry.io_queue_entry.task.processstep
+        else:
+            step.information_package = entry.ip
+
+        step.save()
+
+        ProcessTask.objects.create(
+            pk=self.task_id,
+            name='workflow.tasks.PollRobotQueue',
+            hidden=self.hidden,
+            status=celery_states.STARTED,
+            time_started=timezone.now(),
+            processstep=step,
+            processstep_pos=0,
+        )
 
         free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
 
