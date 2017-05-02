@@ -291,6 +291,10 @@ class AccessAIP(DBTask):
         in_cache = os.path.exists(cache_obj)
 
         if in_cache:
+            step = ProcessStep.objects.create(
+                name='Copy from cache',
+                parent_step_id=self.step,
+            )
             with allow_join_result():
                 if tar:
                     ProcessTask.objects.create(
@@ -298,7 +302,8 @@ class AccessAIP(DBTask):
                         params={
                             'src': cache_tar_obj,
                             'dst': dst,
-                        }
+                        },
+                        processstep=step,
                     ).run().get()
                 if extracted:
                     for root, dirs, filenames in walk(cache_obj):
@@ -311,7 +316,8 @@ class AccessAIP(DBTask):
                                 params={
                                     'src': filepath,
                                     'dst': os.path.join(dst, aip.ObjectIdentifierValue, relpath),
-                                }
+                                },
+                                processstep=step,
                             ).run().get()
 
             aip.State = 'Accessed'

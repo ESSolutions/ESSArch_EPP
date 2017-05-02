@@ -334,7 +334,11 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     def access(self, request, pk=None):
         data = request.data
 
-        task = ProcessTask(
+        step = ProcessStep.objects.create(
+            name='Access AIP', eager=False,
+            information_package_id=pk,
+        )
+        task = ProcessTask.objects.create(
             name='workflow.tasks.AccessAIP',
             params={
                 'aip': pk,
@@ -343,9 +347,10 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             },
             responsible=self.request.user,
             eager=False,
+            processstep=step,
         )
 
-        task.run()
+        step.run()
 
         return Response(['Accessing AIP %s...' % pk])
 
