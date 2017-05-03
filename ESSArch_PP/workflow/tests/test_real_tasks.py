@@ -728,8 +728,31 @@ class AccessAIPTestCase(TransactionTestCase):
     @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.path.exists', return_value=True)
     def test_in_cache(self, mock_exists, mock_copy):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id',
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=DISK)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=DISK,
         )
 
         task = ProcessTask.objects.create(

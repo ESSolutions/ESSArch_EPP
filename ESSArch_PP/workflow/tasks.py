@@ -286,6 +286,12 @@ class StoreAIP(DBTask):
 class AccessAIP(DBTask):
     def run(self, aip, tar=True, extracted=False):
         aip = InformationPackage.objects.get(pk=aip)
+
+        storage_objects = aip.storage
+
+        if not storage_objects.exists():
+            raise StorageObject.DoesNotExist("IP %s not archived" % aip)
+
         dst = Path.objects.get(entity='access').value
 
         cache = Path.objects.get(entity='cache').value
@@ -325,11 +331,6 @@ class AccessAIP(DBTask):
 
             Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS)
             return
-
-        storage_objects = aip.storage
-
-        if not storage_objects.exists():
-            raise StorageObject.DoesNotExist("IP %s not archived" % aip)
 
         storage_objects = storage_objects.filter(
             storage_medium__status__in=[20, 30],
