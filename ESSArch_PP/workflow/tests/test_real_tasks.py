@@ -737,6 +737,7 @@ class AccessAIPTestCase(TransactionTestCase):
             params={
                 'aip': ip.pk
             },
+            responsible=User.objects.create()
         )
 
         task.run().get()
