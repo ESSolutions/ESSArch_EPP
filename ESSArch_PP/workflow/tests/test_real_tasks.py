@@ -47,6 +47,7 @@ from ESSArch_Core.ip.models import (
     ArchivalLocation,
     ArchivalType,
     InformationPackage,
+    Workarea,
 )
 
 from ESSArch_Core.storage.exceptions import (
@@ -726,6 +727,8 @@ class AccessAIPTestCase(TransactionTestCase):
         with self.assertRaises(StorageObject.DoesNotExist):
             task.run().get()
 
+        self.assertFalse(Workarea.objects.exists())
+
     @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.path.exists', return_value=True)
@@ -773,6 +776,8 @@ class AccessAIPTestCase(TransactionTestCase):
             dst=os.path.join(self.access.value, str(user.pk))
         )
 
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
+
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     def test_on_disk(self, mock_mkdir):
         policy = ArchivePolicy.objects.create(
@@ -817,6 +822,8 @@ class AccessAIPTestCase(TransactionTestCase):
             status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
 
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
+
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     def test_on_tape(self, mock_mkdir):
         policy = ArchivePolicy.objects.create(
@@ -860,6 +867,8 @@ class AccessAIPTestCase(TransactionTestCase):
             ip=ip, storage_object=obj, req_type=20,
             status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
+
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
 
 
 @tag('tape')
