@@ -729,7 +729,7 @@ class AccessAIPTestCase(TransactionTestCase):
     @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.path.exists', return_value=True)
-    def test_in_cache(self, mock_exists, mock_copy):
+    def test_in_cache(self, mock_exists, mock_mkdir, mock_copy):
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
