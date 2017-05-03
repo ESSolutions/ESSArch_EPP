@@ -293,6 +293,13 @@ class AccessAIP(DBTask):
             raise StorageObject.DoesNotExist("IP %s not archived" % aip)
 
         dst = Path.objects.get(entity='access').value
+        dst = os.path.join(dst, str(self.responsible))
+
+        try:
+            os.mkdir(dst)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
         cache = Path.objects.get(entity='cache').value
         cache_obj = os.path.join(cache, aip.ObjectIdentifierValue)

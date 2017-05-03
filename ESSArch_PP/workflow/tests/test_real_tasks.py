@@ -714,6 +714,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
     def test_no_storage_objects(self):
         ip = InformationPackage.objects.create()
+        user = User.objects.create()
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.AccessAIP',
@@ -726,6 +727,7 @@ class AccessAIPTestCase(TransactionTestCase):
             task.run().get()
 
     @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.path.exists', return_value=True)
     def test_in_cache(self, mock_exists, mock_copy):
         policy = ArchivePolicy.objects.create(
@@ -760,15 +762,19 @@ class AccessAIPTestCase(TransactionTestCase):
             params={
                 'aip': ip.pk
             },
-            responsible=User.objects.create()
+            responsible=user
         )
 
         task.run().get()
 
         self.assertFalse(IOQueue.objects.exists())
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.access.value)
+        mock_copy.assert_called_once_with(
+            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar',
+            dst=os.path.join(self.access.value, str(user.pk))
+        )
 
-    def test_on_disk(self):
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
+    def test_on_disk(self, mock_mkdir):
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
@@ -808,10 +814,11 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=25,
-            status=0, object_path=self.access.value,
+            status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
 
-    def test_on_tape(self):
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
+    def test_on_tape(self, mock_mkdir):
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
@@ -851,7 +858,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=20,
-            status=0, object_path=self.access.value,
+            status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
 
 
