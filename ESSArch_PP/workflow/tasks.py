@@ -108,6 +108,7 @@ class ReceiveSIP(DBTask):
             Startdate=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
             Enddate=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
             information_class=information_class,
+            generation=0,
         )
 
         archival_institution = parsed.get('archival_institution')

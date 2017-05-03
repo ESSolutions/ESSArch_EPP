@@ -169,7 +169,8 @@ class ReceiveSIPTestCase(TransactionTestCase):
         aip = InformationPackage.objects.filter(
             pk=aip_id,
             ObjectIdentifierValue=sip,
-            package_type=InformationPackage.AIP
+            package_type=InformationPackage.AIP,
+            generation=0,
         )
         self.assertTrue(aip.exists())
 
