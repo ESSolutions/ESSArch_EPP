@@ -335,6 +335,17 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     def access(self, request, pk=None):
         data = request.data
 
+        options = ['tar', 'extracted', 'new']
+
+        if not any(x in options for x in data.keys()):
+            return Response('No option set', status=status.HTTP_400_BAD_REQUEST)
+
+        if not any(v for k, v in data.iteritems() if k in options):
+            return Response('Need atleast one option set to true', status=status.HTTP_400_BAD_REQUEST)
+
+        if Workarea.objects.filter(user=request.user, ip_id=pk, type=Workarea.ACCESS).exists():
+            return Response('IP already in workarea', status=status.HTTP_400_BAD_REQUEST)
+
         step = ProcessStep.objects.create(
             name='Access AIP', eager=False,
             information_package_id=pk,
@@ -343,7 +354,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             name='workflow.tasks.AccessAIP',
             params={
                 'aip': pk,
-                'tar': data.get('tar', True),
+                'tar': data.get('tar', False),
                 'extracted': data.get('extracted', False),
             },
             responsible=self.request.user,
