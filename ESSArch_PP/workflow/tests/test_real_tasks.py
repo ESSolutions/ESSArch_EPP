@@ -776,7 +776,7 @@ class AccessAIPTestCase(TransactionTestCase):
             dst=os.path.join(self.access.value, str(user.pk))
         )
 
-        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
 
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     def test_on_disk(self, mock_mkdir):
@@ -822,7 +822,7 @@ class AccessAIPTestCase(TransactionTestCase):
             status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
 
-        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
 
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
     def test_on_tape(self, mock_mkdir):
@@ -868,7 +868,7 @@ class AccessAIPTestCase(TransactionTestCase):
             status=0, object_path=os.path.join(self.access.value, str(user.pk)),
         ).exists())
 
-        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS).exists())
+        self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
 
 
 @tag('tape')

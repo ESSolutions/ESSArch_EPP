@@ -336,7 +336,7 @@ class AccessAIP(DBTask):
                                 processstep=step,
                             ).run().get()
 
-            Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS)
+            Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=True)
             return
 
         storage_objects = storage_objects.filter(
@@ -391,7 +391,7 @@ class AccessAIP(DBTask):
         if not tar:
             os.remove(tarpath)
 
-        Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS)
+        Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=True)
         return
 
     def undo(self, aip):
