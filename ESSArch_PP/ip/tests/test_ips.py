@@ -75,3 +75,44 @@ class AccessTestCase(TestCase):
         res = self.client.post(self.url, {'tar': True}, format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         mock_step.assert_not_called()
+
+
+class WorkareaViewSetTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="admin")
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.ip = InformationPackage.objects.create()
+        self.url = reverse('workarea-list')
+
+    def test_empty(self):
+        res = self.client.get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, [])
+
+    def test_post(self):
+        res = self.client.post(self.url)
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_invalid_workarea(self):
+        Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'non-existing-workarea'})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_ip_in_workarea_by_other_user(self):
+        user2 = User.objects.create()
+        Workarea.objects.create(user=user2, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, [])
+
+    def test_ip_in_workarea_by_current_user(self):
+        Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(self.ip.pk))
