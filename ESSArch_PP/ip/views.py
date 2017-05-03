@@ -45,7 +45,8 @@ from ESSArch_Core.ip.models import (
     ArchivalType,
     ArchivalLocation,
     InformationPackage,
-    EventIP
+    EventIP,
+    Workarea,
 )
 from ESSArch_Core.util import get_value_from_path
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
@@ -374,3 +375,44 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid()
         return Response(serializer.data)
+
+
+class WorkareaViewSet(viewsets.ModelViewSet):
+    queryset = InformationPackage.objects.filter(workareas__type=Workarea.ACCESS)
+    serializer_class = InformationPackageSerializer
+
+    def get_queryset(self):
+        try:
+            workarea_type = self.request.query_params['type'].lower()
+            workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
+
+            try:
+                return self.queryset.filter(
+                    workareas__user=self.request.user,
+                    workareas__type=workarea_type_reverse[workarea_type]
+                )
+            except KeyError:
+                raise Workarea.DoesNotExist(
+                    'Workarea of type "%s" does not exist' % workarea_type
+                )
+        except KeyError:
+            return self.queryset.filter(
+                workareas__user=self.request.user,
+            )
+
+    filter_backends = DjangoFilterBackend,
+    filter_class = InformationPackageFilter
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = (
+        'Label', 'Responsible', 'CreateDate', 'State', 'eventDateTime',
+        'eventType', 'eventOutcomeDetailNote', 'eventOutcome',
+        'linkingAgentIdentifierValue', 'id'
+    )
+    search_fields = (
+        'ObjectIdentifierValue', 'Label', 'Responsible__first_name',
+        'Responsible__last_name', 'Responsible__username', 'State',
+        'SubmissionAgreement__name', 'Startdate', 'Enddate',
+    )
+    filter_class = InformationPackageFilter

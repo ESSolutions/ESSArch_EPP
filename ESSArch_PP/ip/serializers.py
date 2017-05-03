@@ -6,7 +6,7 @@ from ESSArch_Core.ip.models import (
     ArchivalType,
     ArchivalLocation,
     EventIP,
-    InformationPackage
+    InformationPackage,
 )
 
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer

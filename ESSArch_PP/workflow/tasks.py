@@ -50,6 +50,7 @@ from ESSArch_Core.ip.models import (
     ArchivalLocation,
     ArchivalType,
     InformationPackage,
+    Workarea,
 )
 from ESSArch_Core.storage.models import (
     DISK,
@@ -322,8 +323,7 @@ class AccessAIP(DBTask):
                                 processstep=step,
                             ).run().get()
 
-            aip.State = 'Accessed'
-            aip.save(update_fields=['State'])
+            Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS)
             return
 
         storage_objects = aip.storage
@@ -383,9 +383,7 @@ class AccessAIP(DBTask):
         if not tar:
             os.remove(tarpath)
 
-        aip.State = 'Accessed'
-        aip.save(update_fields=['State'])
-
+        Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS)
         return
 
     def undo(self, aip):

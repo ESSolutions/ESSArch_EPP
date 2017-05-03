@@ -51,6 +51,7 @@ from ip.views import (
     EventIPViewSet,
     InformationPackageViewSet,
     InformationPackageReceptionViewSet,
+    WorkareaViewSet,
 )
 
 from storage.views import (
@@ -97,6 +98,7 @@ router.register(r'steps', ProcessStepViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
+router.register(r'workarea', WorkareaViewSet, base_name='workarea')
 
 router.register(r'storage-objects', StorageObjectViewSet)
 router.register(r'storage-mediums', StorageMediumViewSet)
