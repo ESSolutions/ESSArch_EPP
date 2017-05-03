@@ -31,7 +31,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from lxml import etree
 
-from rest_framework import filters, status, viewsets
+from rest_framework import exceptions, filters, permissions, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -391,6 +391,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 class WorkareaViewSet(viewsets.ModelViewSet):
     queryset = InformationPackage.objects.filter(workareas__type=Workarea.ACCESS)
     serializer_class = InformationPackageSerializer
+    http_method_names = [p.lower() for p in permissions.SAFE_METHODS]
 
     def get_queryset(self):
         try:
@@ -403,9 +404,7 @@ class WorkareaViewSet(viewsets.ModelViewSet):
                     workareas__type=workarea_type_reverse[workarea_type]
                 )
             except KeyError:
-                raise Workarea.DoesNotExist(
-                    'Workarea of type "%s" does not exist' % workarea_type
-                )
+                raise exceptions.ParseError('Workarea of type "%s" does not exist' % workarea_type)
         except KeyError:
             return self.queryset.filter(
                 workareas__user=self.request.user,
