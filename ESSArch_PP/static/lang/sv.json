@@ -236,5 +236,6 @@
     "DIFFCHECK": "Diff-check",
     "SEARCH": "Sök",
     "DISSEMINATION": "Utlämnande",
-    "APPLY": "Applicera"
+    "APPLY": "Applicera",
+    "ADVANCED_FILTERS_ON": "Avancerad filtrering aktiv"
 }

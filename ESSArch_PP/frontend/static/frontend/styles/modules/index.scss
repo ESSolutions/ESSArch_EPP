@@ -580,7 +580,7 @@ padding: 0 12px;
     }
 }
 .advanced-filters {
-    position: absolute;
+    position: fixed;
     border-style: solid;
     border-width: 1.5px;
     border-radius: 0px 0px 5px 5px;
@@ -589,7 +589,7 @@ padding: 0 12px;
     background-color: #fff;
     padding: 10px;
     z-index: 1000;
-    top: 40px;
+    margin-top: 31px;
     .formly-buttons-wrapper {
         display: flex;
         align-items: flex-end;

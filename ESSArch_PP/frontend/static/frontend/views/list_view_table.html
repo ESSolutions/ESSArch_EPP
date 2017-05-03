@@ -1,40 +1,55 @@
+<div st-table="vm.displayedIps" st-pipe="vm.callServer">
+<div class="search-prepare-wrapper">
+    <label for items-per-page></label>
+    <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page"
+        ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
+        popover-popup-delay="500" popover-append-to-body="true"></select>
+    <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters}" ng-click="toggleAdvancedFilters()"></span>
+    <div ng-show="showAdvancedFilters" class="advanced-filters">
+        <div ng-repeat="model in filterModels">
+            <form name="form[{{$index}}]" style="position: relative;" novalidate ng-init="addFields($index)">
+                <div class="formly-buttons-wrapper" ng-class="{'field-no-label': $index !== 0}">
+                    <formly-form model="model" fields="filterFields[$index]" options="options[$index]" form="form[$index]">
+                    </formly-form>
+                    <div class="button-group">
+                        <button class="plus-button fa fa-plus btn btn-default" ng-click="addFilterRow($index)"></button>
+                        <button class="plus-button btn btn-default fa fa-minus" ng-click="removeForm($index)" ng-if="model.column || filterModels.length > 1"></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <button class="btn btn-default" style="float: right;margin-top: 5px;" ng-click="submitAdvancedFilters()">{{'APPLY' | translate}}</button>
+    </div>
+    <div ng-if="searchDisabled()" style="width: 50%;" class="input-group margin-bottom-sm">
+        <input ng-disabled="true" class="form-control" placeholder="{{'ADVANCED_FILTERS_ON' | translate}}" type="text"
+            uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
+        />
+        <span class="input-group-addon clickable" ng-click="initAdvancedFilters(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
+    </div>
+    <div ng-if="!searchDisabled()" style="width: 50%;" class="input-group margin-bottom-sm">    
+    <input id="search-input" st-search="" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
+        uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
+    />
+        <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>    
+    </div>
+    <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}"
+        popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREDIP' | translate}}</button>
+    <span style="position:absolute; right:15px; top:5px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg"
+        ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left"
+        popover-popup-delay="500" popover-append-to-body="true"></span>
+</div>
 <div id="list-view" class="list-view-table">
-    <table st-table="vm.displayedIps" st-pipe="vm.callServer" class="table table-striped" style="margin-bottom: 0px;">
+    <table class="table table-striped" style="margin-bottom: 0px;">
         <thead>
             <tr>
-                <th colspan="{{listViewColumns.length}}">
-                    <div class="search-prepare-wrapper">
-                        <label for items-per-page></label>
-                        <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                        <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters}" ng-click="toggleAdvancedFilters()"></span>
-                        <div ng-show="showAdvancedFilters" class="advanced-filters">
-                            <div ng-repeat="model in filterModels">
-                                <form name="form[{{$index}}]" style="position: relative;" novalidate ng-init="addFields($index)">
-                                    <div class="formly-buttons-wrapper" ng-class="{'field-no-label': $index !== 0}">
-                                        <formly-form model="model" fields="filterFields[$index]" options="options[$index]" form="form[$index]">
-                                        </formly-form>
-                                        <div class="button-group">
-                                            <button class="plus-button fa fa-plus btn btn-default" ng-click="addFilterRow($index)"></button>
-                                            <button class="plus-button btn btn-default fa fa-minus clickable" ng-click="removeForm($index)" ng-if="model.column || filterModels.length > 1"></button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <button class="btn btn-default" style="float: right;margin-top: 5px;" ng-click="submitAdvancedFilters()">{{'APPLY' | translate}}</button>
-                        </div>
-                        <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
-                        <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREDIP' | translate}}</button>
-                        <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                    </div>
-                </th>
             </tr>
             <tr>
                 <th class="clickable" class="column-label"></th>
                 <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'CreateDate'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state'">{{col.label.toUpperCase() | translate}}</span></th>
             </tr>
         </thead>
-        <tbody ng-repeat="row in vm.displayedIps" >
-            <tr ng-class="row.class"class="table-item">
+        <tbody class="table-body">
+            <tr  ng-repeat="row in vm.displayedIps" ng-class="row.class"class="table-item">
                 <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row')">
                     <div class="checkbox table-col">
                         <label>
@@ -58,10 +73,11 @@
         </tbody>
         <tfoot>
             <tr>
-                <td ng-show="!initLoad" colspan="{{listViewColumns.length}}" class="text-center">
-                    <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
-                </td>
             </tr>
         </tfoot>
     </table>
+</div>
+    <td ng-show="!initLoad">
+        <div class="text-center" st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+    </td>
 </div>

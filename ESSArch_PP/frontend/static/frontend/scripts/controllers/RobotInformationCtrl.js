@@ -101,4 +101,19 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
     $scope.loadRobots();
+    $scope.searchDisabled = function () {
+        if ($scope.filterModels.length > 0) {
+            if ($scope.filterModels[0].column != null) {
+                delete $scope.tableState.search.predicateObject;
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+    $scope.clearSearch = function () {
+        delete $scope.tableState.search.predicateObject;
+        $('#search-input')[0].value = "";
+        $scope.getListViewData();
+    }
 });

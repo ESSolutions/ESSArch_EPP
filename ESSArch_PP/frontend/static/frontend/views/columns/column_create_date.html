@@ -1,6 +1,6 @@
 <div ng-if="!subrow">
-<div class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</div>
+<div class="clickable" style="white-space: nowrap;" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</div>
 </div>
 <div ng-if="subrow">
-    <div class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</div>
+    <div class="clickable" style="white-space: nowrap;" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.CreateDate | date:"yyyy-MM-dd HH:mm:ss"}}</div>
 </div>

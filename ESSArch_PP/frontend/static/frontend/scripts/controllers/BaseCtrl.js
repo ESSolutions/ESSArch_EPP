@@ -29,6 +29,7 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
         $cookies.put('epp-ips-per-page', items);
     };
     $scope.colspan = 9;
+    $scope.$window = $window;
     $scope.menuOptions = [];
     //Status tree view structure
     $scope.tree_data = [];
@@ -277,17 +278,44 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     $scope.filterFields = [];
 
     //Toggle visibility of advanced filters
-    $scope.toggleAdvancedFilters = function() {
-        if($scope.showAdvancedFilters) {
+    $scope.toggleAdvancedFilters = function () {
+        if ($scope.showAdvancedFilters) {
             $scope.showAdvancedFilters = false;
         } else {
-            if($scope.filterModels.length === 0) {
+            if ($scope.filterModels.length === 0) {
                 $scope.initAdvancedFilters();
             }
-            $timeout(function() {
                 $scope.showAdvancedFilters = true;
-            });
         }
+        /* if ($scope.showAdvancedFilters) {
+            console.log("set window click")
+            $window.onclick = function (event) {
+                closeSearchWhenClickingElsewhere(event, $scope.toggleAdvancedFilters);
+            }
+        } else {
+            $scope.showAdvancedFilters = false;
+            $scope.$window.onClick = null;
+            $scope.$apply();
+         }*/
+         if ($scope.showAdvancedFilters) {
+             $window.onclick = function (event) {
+                 var clickedElement = $(event.target);
+                 if (!clickedElement) return;
+                 var elementClasses = event.target.classList;
+                 var clickedOnAdvancedFilters = elementClasses.contains('filter-icon') || 
+                 elementClasses.contains('advanced-filters') || 
+                 clickedElement.parents('.advanced-filters').length || 
+                 clickedElement.parents('.button-group').length;
+
+                 if (!clickedOnAdvancedFilters) {
+                     $scope.showAdvancedFilters = !$scope.showAdvancedFilters;
+                     $window.onclick = null;
+                     $scope.$apply();
+                 }
+             }
+         } else {
+             $window.onclick = null;
+         }
     }
 
     //Merge all filter models before fetching IP's

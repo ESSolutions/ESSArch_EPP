@@ -38,7 +38,12 @@
         display: flex;
         display: -webkit-flex;
         flex-direction: row;
+        font-weight: bold;
+        margin: 5px 5px 0px 5px;
         -webkit-flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        position: relative;
         button {
             margin-left: 10px;
         }
@@ -52,7 +57,15 @@
         flex-direction: column;
         -webkit-flex-direction: column;
         margin-top: 10px;
+        .list-view-table {
         position: relative;
+        overflow-x: auto;
+
+        }
+    }
+    .text-center {
+        text-align: center;
+        margin: auto;
     }
     .events-footer {
         display: flex;
