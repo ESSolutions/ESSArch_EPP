@@ -487,14 +487,16 @@ class PollIOQueue(DBTask):
 
         step.save()
 
-        ProcessTask.objects.create(
+        ProcessTask.objects.get_or_create(
             pk=self.task_id,
-            name='workflow.tasks.PollIOQueue',
-            hidden=self.hidden,
-            status=celery_states.STARTED,
-            time_started=timezone.now(),
-            processstep=step,
-            processstep_pos=0,
+            defaults={
+                'name': 'workflow.tasks.PollIOQueue',
+                'hidden': self.hidden,
+                'status': celery_states.STARTED,
+                'time_started': timezone.now(),
+                'processstep': step,
+                'processstep_pos': 0,
+            }
         )
 
         if entry.req_type in [20, 25]:  # read
@@ -685,14 +687,16 @@ class PollRobotQueue(DBTask):
 
         step.save()
 
-        ProcessTask.objects.create(
+        ProcessTask.objects.get_or_create(
             pk=self.task_id,
-            name='workflow.tasks.PollRobotQueue',
-            hidden=self.hidden,
-            status=celery_states.STARTED,
-            time_started=timezone.now(),
-            processstep=step,
-            processstep_pos=0,
+            defaults={
+                'name': 'workflow.tasks.PollRobotQueue',
+                'hidden': self.hidden,
+                'status': celery_states.STARTED,
+                'time_started': timezone.now(),
+                'processstep': step,
+                'processstep_pos': 0,
+            }
         )
 
         free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
