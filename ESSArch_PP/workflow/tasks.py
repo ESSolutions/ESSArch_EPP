@@ -35,7 +35,7 @@ from celery import states as celery_states
 from celery.result import allow_join_result
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import IntegerField
+from django.db.models import IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
 
@@ -285,8 +285,26 @@ class StoreAIP(DBTask):
 
 
 class AccessAIP(DBTask):
-    def run(self, aip, tar=True, extracted=False):
+    def run(self, aip, tar=True, extracted=False, new=False, object_identifier_value=None):
         aip = InformationPackage.objects.get(pk=aip)
+
+        if new:
+            old_aip = aip.pk
+            new_aip = aip
+            new_aip.pk = None
+            new_aip.ObjectIdentifierValue = None
+            new_aip.State = 'Access Workarea'
+
+            max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
+            new_aip.generation = max_generation + 1
+            new_aip.save()
+
+            new_aip.ObjectIdentifierValue = object_identifier_value if object_identifier_value else str(new_aip.pk)
+            new_aip.save(update_fields=['ObjectIdentifierValue'])
+
+            aip = InformationPackage.objects.get(pk=old_aip)
+        else:
+            new_aip = aip
 
         storage_objects = aip.storage
 
@@ -318,7 +336,7 @@ class AccessAIP(DBTask):
                         name="ESSArch_Core.tasks.CopyFile",
                         params={
                             'src': cache_tar_obj,
-                            'dst': dst,
+                            'dst': os.path.join(dst, new_aip.ObjectIdentifierValue + '.tar'),
                         },
                         processstep=step,
                     ).run().get()
@@ -332,12 +350,12 @@ class AccessAIP(DBTask):
                                 name="ESSArch_Core.tasks.CopyFile",
                                 params={
                                     'src': filepath,
-                                    'dst': os.path.join(dst, aip.ObjectIdentifierValue, relpath),
+                                    'dst': os.path.join(dst, new_aip.ObjectIdentifierValue, relpath),
                                 },
                                 processstep=step,
                             ).run().get()
 
-            Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=True)
+            Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=not new)
             return
 
         storage_objects = storage_objects.filter(
@@ -369,6 +387,7 @@ class AccessAIP(DBTask):
         if method_target is None:
             raise StorageMethodTargetRelation.DoesNotExist()
 
+        dst = os.path.join(dst, new_aip.ObjectIdentifierValue + '.tar')
         entry, created = IOQueue.objects.get_or_create(
             storage_object=storage_object, req_type=req_type, object_path=dst,
             ip=aip, status__in=[0, 2, 5], defaults={
@@ -383,16 +402,16 @@ class AccessAIP(DBTask):
                 entry.refresh_from_db()
                 time.sleep(1)
 
-        tarpath = os.path.join(dst, aip.ObjectIdentifierValue) + '.tar'
+        tarpath = os.path.join(dst, new_aip.ObjectIdentifierValue) + '.tar'
 
         if extracted:
-            with tarfile.open(tarpath) as tarf:
-                tarf.extractall(dst)
+            with tarfile.open(dst) as tarf:
+                tarf.extractall(dst[:-4])
 
         if not tar:
             os.remove(tarpath)
 
-        Workarea.objects.create(ip=aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=True)
+        Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=not new)
         return
 
     def undo(self, aip):

@@ -356,6 +356,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                 'aip': pk,
                 'tar': data.get('tar', False),
                 'extracted': data.get('extracted', False),
+                'new': data.get('new', False),
+                'object_identifier_value': data.get('object_identifier_value'),
             },
             responsible=self.request.user,
             eager=False,

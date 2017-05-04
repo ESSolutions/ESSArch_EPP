@@ -773,8 +773,8 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertFalse(IOQueue.objects.exists())
         mock_copy.assert_called_once_with(
-            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar',
-            dst=os.path.join(self.access.value, str(user.pk))
+            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue + '.tar'),
+            dst=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar')
         )
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
@@ -820,7 +820,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=25,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk)),
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar'),
         ).exists())
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
@@ -866,10 +866,162 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=20,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk)),
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar'),
         ).exists())
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
+
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
+    def test_new_generation_from_storage(self, mock_mkdir):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            generation=0,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=DISK)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=DISK,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk,
+                'new': True,
+            },
+            responsible=user,
+        )
+
+        task.run().get()
+
+        new_ip = InformationPackage.objects.exclude(pk=ip.pk).first()
+
+        self.assertTrue(IOQueue.objects.filter(
+            ip=ip, storage_object=obj, req_type=25,
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), new_ip.ObjectIdentifierValue + '.tar'),
+        ).exists())
+
+        self.assertFalse(Workarea.objects.filter(ip=ip).exists())
+        self.assertTrue(Workarea.objects.filter(ip__generation=1, user=user, type=Workarea.ACCESS, read_only=False).exists())
+
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.path.exists', return_value=True)
+    def test_new_generation_from_cache(self, mock_exists, mock_mkdir, mock_copy):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            generation=0,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=DISK)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=DISK,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk,
+                'new': True
+            },
+            responsible=user
+        )
+
+        task.run().get()
+
+        new_ip = InformationPackage.objects.exclude(pk=ip.pk).first()
+
+        self.assertFalse(IOQueue.objects.exists())
+        mock_copy.assert_called_once_with(
+            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue + '.tar'),
+            dst=os.path.join(self.access.value, str(user.pk), new_ip.ObjectIdentifierValue + '.tar')
+        )
+
+        self.assertTrue(Workarea.objects.filter(ip=new_ip, user=user, type=Workarea.ACCESS, read_only=False).exists())
+
+    @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
+    @mock.patch('workflow.tasks.os.path.exists', return_value=True)
+    def test_new_generation_twice(self, mock_exists, mock_mkdir, mock_copy):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            generation=0,
+        )
+        user = User.objects.create()
+
+        method = StorageMethod.objects.create(archive_policy=policy)
+        target = StorageTarget.objects.create(type=DISK)
+
+        StorageMethodTargetRelation.objects.create(
+            storage_method=method, storage_target=target, status=1
+        )
+
+        medium = StorageMedium.objects.create(
+            storage_target=target, status=20, location_status=50,
+            block_size=target.default_block_size, format=target.default_format,
+            agent=user,
+        )
+
+        obj = StorageObject.objects.create(
+            storage_medium=medium, ip=ip,
+            content_location_type=DISK,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.AccessAIP',
+            params={
+                'aip': ip.pk,
+                'new': True
+            },
+            responsible=user
+        )
+
+        task.run().get()
+        task.run().get()
+
+        self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=0).count(), 1)
+        self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=1).count(), 1)
+        self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=2).count(), 1)
 
 
 @tag('tape')
