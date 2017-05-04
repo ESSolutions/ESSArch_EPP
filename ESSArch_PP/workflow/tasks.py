@@ -680,10 +680,11 @@ class PollRobotQueue(DBTask):
             name='Poll Robot Queue',
         )
 
-        if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
-            step.parent_step = entry.io_queue_entry.task.processstep
-        else:
-            step.information_package = entry.ip
+        if entry.io_queue_entry:
+            if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
+                step.parent_step = entry.io_queue_entry.task.processstep
+            else:
+                step.information_package = entry.io_queue_entry.ip
 
         step.save()
 
