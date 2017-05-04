@@ -45,11 +45,11 @@
             </tr>
             <tr>
                 <th class="clickable" class="column-label"></th>
-                <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'CreateDate'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state'">{{col.label.toUpperCase() | translate}}</span></th>
+                <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'CreateDate'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state'" style="white-space: nowrap;">{{col.label.toUpperCase() | translate}}</span></th>
             </tr>
         </thead>
-        <tbody class="table-body">
-            <tr  ng-repeat="row in vm.displayedIps" ng-class="row.class"class="table-item">
+        <tbody>
+            <tr ng-repeat-start="row in vm.displayedIps" ng-class="row.class"class="table-item">
                 <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row')">
                     <div class="checkbox table-col">
                         <label>
@@ -62,9 +62,10 @@
                 <td ng-repeat="col in listViewColumns">
                     <div ng-include src="col.template"></div>
                 </td>
+                <td>
+                </td>
             </tr>
-            </tr>
-            <tr ng-if="!row.collapsed" ng-repeat-end ng-repeat="subrow in row.information_packages" class="table-item" ng-class="subrow.class" style="background-color:rgba(50,120,255,.1);">
+            <tr ng-if="!row.collapsed" ng-repeat="subrow in row.information_packages"  ng-repeat-end class="table-item" ng-class="subrow.class" style="background-color:rgba(50,120,255,.1);">
                 <td context-menu="menuOptions('subrow')"></td>
                 <td ng-repeat="col in listViewColumns">
                     <div ng-include src="col.template"></div>
