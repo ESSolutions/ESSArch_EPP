@@ -32,6 +32,7 @@ import time
 import zipfile
 
 from celery import states as celery_states
+from celery.exceptions import Ignore
 from celery.result import allow_join_result
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -474,7 +475,7 @@ class PollIOQueue(DBTask):
         try:
             entry = IOQueue.objects.filter(status=0).select_related('storage_method_target').earliest()
         except IOQueue.DoesNotExist:
-            return
+            raise Ignore()
 
         step = ProcessStep(
             name='Poll IO Queue',
@@ -674,7 +675,7 @@ class PollRobotQueue(DBTask):
                 status=0
             ).select_related('storage_medium').earliest()
         except RobotQueue.DoesNotExist:
-            return
+            raise Ignore()
 
         step = ProcessStep(
             name='Poll Robot Queue',
