@@ -57,6 +57,33 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         return promise;
     }
     
+    //Fetches IP's for given workarea (ingest or access)
+    function getWorkareaData(workarea, pageNumber, pageSize, filters, sortString, searchString, viewType, columnFilters) {
+        var ipUrl = appConfig.djangoUrl+'workarea/';
+        var promise = $http({
+            method: 'GET',
+            url: ipUrl,
+            params: angular.extend({
+                type: workarea,
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+                view_type: viewType
+            }, columnFilters)
+        }).then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+        return promise;
+    }
+
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state, columnFilters) {
         var promise = $http({
             method: 'GET',
@@ -646,6 +673,7 @@ angular.module('myApp').factory('listViewService', function ($q, $http, $state, 
         getProfilesMin: getProfilesMin,
         getDir: getDir,
         preserveIp: preserveIp,
+        getWorkareaData: getWorkareaData,
     };
     
 });

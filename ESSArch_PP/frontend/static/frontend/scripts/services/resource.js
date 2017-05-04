@@ -39,16 +39,16 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                 });
             });
             /*
-            
+
             var filtered = params.search.predicateObject ? $filter('filter')(eventCollection, params.search.predicateObject) : eventCollection;
-            
+
             if (params.sort.predicate) {
                 filtered = $filter('orderBy')(filtered, params.sort.predicate, params.sort.reverse);
             }
-            
+
             var result = filtered.slice(start, start + number);
             */
-            
+
             return {
                 data: eventCollection,
                 numberOfPages: Math.ceil(value.count / number)
@@ -72,13 +72,37 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                     }
                 });
             });
-            
+
             return {
                 data: ipCollection,
                 numberOfPages: Math.ceil(value.count / number)
             };
         });
     }
+
+    function getWorkareaIps(workarea, start, number, pageNumber, params, selected, sort, search, expandedAics, columnFilters) {
+        var viewType = $window.sessionStorage["view-type"] || 'aic';
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getWorkareaData(workarea, pageNumber, number, $rootScope.navigationFilter, sortString, search, viewType, columnFilters).then(function(value) {
+            var ipCollection = value.data;
+            ipCollection.forEach(function(ip) {
+                ip.collapsed = true;
+                expandedAics.forEach(function(aic, index, array) {
+                    if(ip.ObjectIdentifierValue == aic) {
+                        ip.collapsed = false;
+                    }
+                });
+            });
+            return {
+                data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
     function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -97,7 +121,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                     ip.class = "selected";
                 }
             });
-            
+
             return {
                 data: ipCollection,
                 numberOfPages: Math.ceil(value.count / number)
@@ -141,6 +165,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getReceptionPage: getReceptionPage,
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
+        getWorkareaIps: getWorkareaIps,
     };
-    
 });
