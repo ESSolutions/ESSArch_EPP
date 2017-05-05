@@ -6,8 +6,8 @@
         <div ng-if="select" id="select-view" class="select-view">
             <div class="file-explorer">
                 <div class="file-explorer-nav">
-                    <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
-                    <b class="dir-path">{{'/' + previousGridArraysString()}}</b>
+                    <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
+                    <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
                 </div>
                 <div class="deckgrid">
                     <div class="flex-grid">
@@ -17,10 +17,11 @@
             </div>
             <button ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
             <hr />
-            <div class="file-explorer-nav">
-                    <b class="dir-path">{{ip.ObjectIdentifierValue}}/</b>
-                </div>
             <div class="file-explorer">
+                <div class="file-explorer-nav">
+                    <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
+                    <b class="dir-path">{{ip.ObjectIdentifierValue + '/' + previousGridArraysString(2)}}</b>
+                </div>
                 <div class="deckgrid">
                     <div class="flex-grid">
                         <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>
@@ -28,6 +29,7 @@
                 </div>
             </div>
             <button ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
+            <button ng-click="newDirModal()" class="btn btn-default">{{'NEWFOLDER' | translate}}</button>
         </div>
         <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
             <div ng-include src="'static/frontend/views/event_table.html'"></div>

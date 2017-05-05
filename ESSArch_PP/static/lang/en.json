@@ -237,5 +237,10 @@
     "SEARCH": "Search",
     "DISSEMINATION": "Dissemination",
     "APPLY": "Apply",
-    "ADVANCED_FILTERS_ON": "Advanced filter active"
+    "ADVANCED_FILTERS_ON": "Advanced filter active",
+    "NEWFOLDER": "New folder",
+    "FOLDER_NAME": "Name",
+    "ENTERNEWFOLDERNAME": "Enter new folder name",
+    "FILE_EXISTS_IN_DIP": "File with this name already exists!",
+    "FILE_EXISTS_IN_DIP_DESC": "File with this name already exists in the dissemination. Do you want to overwrite current file?"
 }

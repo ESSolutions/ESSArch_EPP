@@ -1,4 +1,4 @@
-angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate) {
+angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService) {
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     $scope.select = true;
@@ -6,41 +6,41 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $http.get("static/frontend/scripts/json_data/orders.json").then(function(response) {
         $scope.orderObjects = response.data.orders;
     });
-    if($scope.ip != null) {
+    if ($scope.ip != null) {
         $scope.selectIp($scope.ip);
     }
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //context menu data
     $scope.menuOptions = function() {
-        return [
-        [$translate.instant('APPLYCHANGES'), function($itemScope, $event, modelValue, text, $li) {
-            $scope.selectIp($itemScope.row);
-        }],
-        ];
-    }
-    //Cancel update intervals on state change
+            return [
+                [$translate.instant('APPLYCHANGES'), function($itemScope, $event, modelValue, text, $li) {
+                    $scope.selectIp($itemScope.row);
+                }],
+            ];
+        }
+        //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-        $scope.selectIp(row);
-        if ($scope.ip == row) {
-            row.class = "";
-            $scope.selectedIp = { id: "", class: "" };
+            $scope.selectIp(row);
+            if ($scope.ip == row) {
+                row.class = "";
+                $scope.selectedIp = { id: "", class: "" };
+            }
+            if ($scope.eventShow) {
+                $scope.eventsClick(row);
+            }
+            if ($scope.statusShow) {
+                $scope.stateClicked(row);
+            }
+            if ($scope.select) {
+                $scope.ipTableClick(row);
+            }
         }
-        if ($scope.eventShow) {
-            $scope.eventsClick(row);
-        }
-        if ($scope.statusShow) {
-            $scope.stateClicked(row);
-        }
-        if ($scope.select) {
-            $scope.ipTableClick(row);
-        }
-    }
-    //Click function for status view
+        //Click function for status view
     var stateInterval;
     $scope.stateClicked = function(row) {
         if ($scope.statusShow && $scope.ip == row) {
@@ -72,7 +72,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
-    
+
     var ctrl = this;
     $scope.selectedIp = { id: "", class: "" };
     $scope.selectedProfileRow = { profile_type: "", class: "" };
@@ -128,7 +128,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     //Update ip list view with an interval
     //Update only if status < 100 and no step has failed in any IP
     var listViewInterval;
-    
+
     function updateListViewConditional() {
         $interval.cancel(listViewInterval);
         listViewInterval = $interval(function() {
@@ -158,13 +158,13 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                     } else {
                         updateListViewConditional();
                     }
-                    
+
                 }, appConfig.ipIdleInterval);
             }
         }, appConfig.ipInterval);
     };
     updateListViewConditional();
-    
+
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if ($scope.select && $scope.ip.id == row.id) {
@@ -209,90 +209,157 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         });
     }
     $scope.createDip = function(ip) {
-        $scope.select = false;
-        $scope.edit = false;
-        $scope.eventlog = false;
-        $scope.selectedCards1 = [];
-        $scope.selectedCards2 = [];
-        $scope.chosenFiles = [];
-        $scope.deckGridData = [];
-        $scope.selectIp(ip);
-        $timeout(function() {
-            $anchorScroll();
-        });
-    }
-    //Deckgrid
+            $scope.select = false;
+            $scope.edit = false;
+            $scope.eventlog = false;
+            $scope.selectedCards1 = [];
+            $scope.selectedCards2 = [];
+            $scope.chosenFiles = [];
+            $scope.deckGridData = [];
+            $scope.selectIp(ip);
+            $timeout(function() {
+                $anchorScroll();
+            });
+        }
+        //Deckgrid
     $scope.chosenFiles = [];
     $scope.chooseFiles = function(files) {
+        var fileExists = false;
         files.forEach(function(file) {
-            $scope.chosenFiles.push(angular.copy(file));
+            $scope.chosenFiles.forEach(function(chosen, index) {
+                if (chosen.name === file.name) {
+                    fileExists = true;
+                    fileExistsModal(index, file);                    
+                }
+            });
+            if (!fileExists) {
+                //$http.post($scope.ip.url + "files/add-file-from-workarea",
+                //    { path: $scope.previousGridArraysString(2), file: file }
+                //).then(function() {
+                    $scope.chosenFiles.push(angular.copy(file));
+                //});
+            }
         });
         $scope.selectedCards1 = [];
     }
+    function fileExistsModal(index, file) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/file-exists-modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl'
+        })
+        modalInstance.result.then(function(data) {
+            //$http.post($scope.ip.url + "files/add-file-from-workarea",
+            //   { path: $scope.previousGridArraysString(2), file: file }
+            //).then(function() {
+                $scope.chosenFiles.splice(index, 1);
+                $scope.chosenFiles.push(angular.copy(file));
+            //});
+        });
+    }
+
     $scope.removeFiles = function(files) {
         $scope.selectedCards2.forEach(function(file) {
-            $scope.chosenFiles.splice($scope.chosenFiles.indexOf(file), 1);
+            //$http.post($scope.ip.url + "/files/remove-file/",
+            //    { path: $scope.previousGridArraysString(2), file: file }
+            //).then(function () {
+                $scope.chosenFiles.splice($scope.chosenFiles.indexOf(file), 1);
+            //});
         });
-        $scope.selectedCards2 = [];        
+        $scope.selectedCards2 = [];
     }
-    $scope.previousGridArrays = [];
-    $scope.previousGridArraysString = function() {
+    $scope.previousGridArrays1 = [];
+    $scope.previousGridArrays2 = [];
+    $scope.previousGridArraysString = function(whichArray) {
         var retString = "";
-        $scope.previousGridArrays.forEach(function(card) {
-            retString = retString.concat(card.name, "/");
-        });
+        if (whichArray === 1) {
+            $scope.previousGridArrays1.forEach(function(card) {
+                retString = retString.concat(card.name, "/");
+            });
+        } else {
+            $scope.previousGridArrays2.forEach(function(card) {
+                retString = retString.concat(card.name, "/");
+            });
+        }
         return retString;
     }
     $scope.deckGridData = [];
     $scope.deckGridInit = function(ip) {
-        $http.get("static/frontend/scripts/json_data/file_list.json").then(function(response) {
-            $scope.deckGridData = response.data.ip_folder_list;
+        listViewService.getWorkareaDir("access", null).then(function(workareaDir) {
+            listViewService.getDipDir(ip, null).then(function(dipDir) {
+                $scope.deckGridData = workareaDir;
+                $scope.chosenFiles = dipDir;
+            });
         });
     };
-    $scope.previousGridArray = function() {
-        $scope.previousGridArrays.pop();
-        if($scope.previousGridArraysString() == "") {
-            $scope.deckGridInit($scope.ip);
+    $scope.previousGridArray = function(whichArray) {
+        if (whichArray === 1) {
+            $scope.previousGridArrays1.pop();
+            if ($scope.previousGridArraysString() == "") {
+                $scope.deckGridInit($scope.ip);
+            } else {
+                listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function(dir) {
+                    $scope.deckGridData = dir;
+                })
+            }
         } else {
-            $http.get("static/frontend/scripts/json_data/file_list.json").then(function(response) {
-                $scope.deckGridData = response.data.file_list;
-            })
+            $scope.previousGridArrays2.pop();
+            if ($scope.previousGridArraysString() == "") {
+                $scope.deckGridInit($scope.ip);
+            } else {
+                listViewService.getDipDir(ip, $scope.previousGridArraysString(2)).then(function(dir) {
+                    $scope.deckGridData = dir;
+                })
+            }
         }
     };
+    $scope.gridArrayLoading = false;
     $scope.updateGridArray = function(ip) {
-        listViewService.getDir($scope.ip, $scope.previousGridArraysString()).then(function(dir) {
+        $scope.gridArrayLoading = true;
+        listViewService.getWorkareaDir("access", $scope.previousGridArraysString()).then(function(dir) {
             $scope.deckGridData = dir;
+            $scope.gridArrayLoading = false;
         });
     };
     $scope.expandFile = function(whichArray, ip, card) {
         if (card.type == "dir") {
             var fileList;
-            if($scope.previousGridArraysString() == "") {
+            if ($scope.previousGridArraysString() == "") {
                 fileList = "file_list";
             } else {
                 fileList = "sub_file_list";
             }
-            $http.get("static/frontend/scripts/json_data/file_list.json").then(function(response) {
-                if(whichArray == 1) {
-                    $scope.deckGridData = response.data[fileList];
+            if (whichArray == 1) {
+                listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function (dir) {
+                    $scope.deckGridData = dir;
                     $scope.selectedCards1 = [];
-                }
-                $scope.previousGridArrays.push(card);
-            });
+                    $scope.previousGridArrays1.push(card);
+                });
+            } else {
+                listViewService.getDipDir(ip, $scope.previousGridArraysString(2)).then(function (dir) {
+                    $scope.chosenFiles = dir;
+                    $scope.selectedCards2 = [];
+                    $scope.previousGridArrays2.push(card);
+                });
+            }
         }
     };
     $scope.selectedCards1 = [];
     $scope.selectedCards2 = [];
     $scope.cardSelect = function(whichArray, card) {
-        if(whichArray == 1) {
+        if (whichArray == 1) {
             if ($scope.selectedCards1.includes(card)) {
-                $scope.selectedCards1.splice($scope.selectedCards1.indexOf(card),1);
+                $scope.selectedCards1.splice($scope.selectedCards1.indexOf(card), 1);
             } else {
                 $scope.selectedCards1.push(card);
             }
         } else {
             if ($scope.selectedCards2.includes(card)) {
-                $scope.selectedCards2.splice($scope.selectedCards2.indexOf(card),1);
+                $scope.selectedCards2.splice($scope.selectedCards2.indexOf(card), 1);
             } else {
                 $scope.selectedCards2.push(card);
             }
@@ -300,21 +367,29 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     };
     $scope.isSelected = function(whichArray, card) {
         var cardClass = "";
-        if(whichArray == 1) {
+        if (whichArray == 1) {
             $scope.selectedCards1.forEach(function(file) {
-                if(card == file) {
+                if (card == file) {
                     cardClass = "card-selected";
                 }
             });
         } else {
             $scope.selectedCards2.forEach(function(file) {
-                if(card == file) {
+                if (card == file) {
                     cardClass = "card-selected";
                 }
             });
         }
         return cardClass;
     };
+
+    $scope.createDipFolder = function(folderName) {
+        var folder =     {
+        "type": "dir",
+        "name": folderName
+    };
+        $scope.chooseFiles([folder]);
+    }
     $scope.prepareDipModal = function() {
         var modalInstance = $uibModal.open({
             animation: true,
@@ -325,10 +400,24 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             controller: 'ModalInstanceCtrl',
             controllerAs: '$ctrl'
         })
-        modalInstance.closed.then(function (data) {
+        modalInstance.closed.then(function(data) {});
+    }
+        
+    $scope.newDirModal = function() {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/new-dir-modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl'
+        })
+        modalInstance.result.then(function(data) {
+            $scope.createDipFolder(data.dir_name);
         });
     }
-    $scope.searchDisabled = function () {
+    $scope.searchDisabled = function() {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {
                 delete $scope.tableState.search.predicateObject;
@@ -338,7 +427,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             return false;
         }
     }
-    $scope.clearSearch = function () {
+    $scope.clearSearch = function() {
         delete $scope.tableState.search.predicateObject;
         $('#search-input')[0].value = "";
         $scope.getListViewData();

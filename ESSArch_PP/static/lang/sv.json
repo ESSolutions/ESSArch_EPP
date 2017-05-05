@@ -237,5 +237,10 @@
     "SEARCH": "Sök",
     "DISSEMINATION": "Utlämnande",
     "APPLY": "Applicera",
-    "ADVANCED_FILTERS_ON": "Avancerad filtrering aktiv"
+    "ADVANCED_FILTERS_ON": "Avancerad filtrering aktiv",
+    "NEWFOLDER": "Ny mapp",
+    "FOLDER_NAME": "Namn",
+    "ENTERNEWFOLDERNAME": "Ange namn för ny mapp",
+    "FILE_EXISTS_IN_DIP": "Det existerar redan en fil med samma namn!",
+    "FILE_EXISTS_IN_DIP_DESC": "Det existerar redan en fil med detta namn i utlämnandet. Vill du skriva över den nuvarande filen?"
 }

@@ -31,6 +31,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.objectIdentifierValue = "";
     $ctrl.order = "";
     $ctrl.label = "";
+    $ctrl.dir_name = "";
     $ctrl.email = {
         subject: "",
         body: ""
@@ -44,6 +45,12 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.save = function () {
         $ctrl.data = {
             name: $ctrl.profileName
+        };
+        $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.saveDir = function () {
+        $ctrl.data = {
+            dir_name: $ctrl.dir_name
         };
         $uibModalInstance.close($ctrl.data);
     };
@@ -91,6 +98,12 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.data = {
             email: $ctrl.email,
             status: "submitting"
+        }
+        $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.overwrite = function () {
+        $ctrl.data = {
+            status: "overwritten"
         }
         $uibModalInstance.close($ctrl.data);
     };
