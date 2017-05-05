@@ -296,7 +296,7 @@ class InformationPackageViewSetTestCase(TestCase):
         aip = InformationPackage.objects.create(generation=0, Label='foo', State='first', aic=aic, package_type=InformationPackage.AIP)
         aip2 = InformationPackage.objects.create(generation=1, Label='bar', State='second', aic=aic, package_type=InformationPackage.AIP)
 
-        res = self.client.get(self.url, data={'view_type': 'ip', 'search': 'foo', 'state': 'first'})
+        res = self.client.get(self.url, data={'view_type': 'ip', 'search': 'bar', 'state': 'second'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
