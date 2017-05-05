@@ -75,11 +75,19 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
-    information_packages = NestedInformationPackageSerializer(
-        many=True,
-        read_only=True,
-        source='related_ips'
-    )
+    information_packages = serializers.SerializerMethodField()
+
+    def get_information_packages(self, obj):
+        request = self.context['request']
+        view_type = request.query_params.get('view_type', 'aic')
+        state = request.query_params.get('state', '').split(u',')
+
+        related = obj.related_ips().filter(State__in=state)
+
+        ips = NestedInformationPackageSerializer(
+            related, many=True, context={'request': request}
+        )
+        return ips.data
 
     ArchivalInstitution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name']

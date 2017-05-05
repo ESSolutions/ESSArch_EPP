@@ -276,13 +276,18 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         'linkingAgentIdentifierValue', 'id'
     )
     search_fields = (
-        'ObjectIdentifierValue', 'Label', 'Responsible__first_name',
-        'Responsible__last_name', 'Responsible__username', 'State',
-        'SubmissionAgreement__name', 'Startdate', 'Enddate',
-        'information_packages__ObjectIdentifierValue',
-        'information_packages__Responsible__username',
+        'ObjectIdentifierValue','aic__information_packages__ObjectIdentifierValue','information_packages__ObjectIdentifierValue',
+        'Label','aic__information_packages__Label','information_packages__Label',
+        'Responsible__first_name','aic__information_packages__Responsible__first_name','information_packages__Responsible__first_name',
+        'Responsible__last_name','aic__information_packages__Responsible__last_name','information_packages__Responsible__last_name',
+        'Responsible__username','aic__information_packages__Responsible__username','information_packages__Responsible__username',
+        'State','aic__information_packages__State','information_packages__State',
+        'SubmissionAgreement__name','aic__information_packages__SubmissionAgreement__name','information_packages__SubmissionAgreement__name',
+        'Startdate','aic__information_packages__Startdate','information_packages__Startdate',
+        'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
     )
     filter_class = InformationPackageFilter
+
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
 
@@ -290,7 +295,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             if view_type == 'ip':
                 return self.queryset.exclude(
                     package_type=InformationPackage.AIC,
-                ).filter(Q(generation__isnull=True) | Q(generation=0))
+                ).filter(generation=0)
 
             return self.queryset.filter(aic__isnull=True)
 

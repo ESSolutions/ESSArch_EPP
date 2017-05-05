@@ -53,18 +53,32 @@ class InformationPackageFilter(django_filters.FilterSet):
     end_date = ListFilter(name='Enddate', method='filter_fields')
 
     def filter_fields(self, queryset, name, value):
+        if self.data.get('view_type') == 'aic':
+            return queryset.filter(
+                **{'information_packages__%s__icontains' % name: value}
+            ).distinct()
+
         return queryset.filter(
-            Q(**{'%s__icontains' % name: value}) |
-            Q(**{'information_packages__%s__icontains' % name: value})
-        )
+            Q(
+                Q(**{'%s__icontains' % name: value}) |
+                Q(**{'aic__information_packages__%s__icontains' % name: value})
+            ), generation=0
+        ).distinct()
 
     def filter_fields_in_list(self, queryset, name, value):
         value_list = value.split(u',')
 
+        if self.data.get('view_type') == 'aic':
+            return queryset.filter(
+                **{'information_packages__%s__in' % name: value_list}
+            ).distinct()
+
         return queryset.filter(
-            Q(**{'%s__in' % name: value_list}) |
-            Q(**{'information_packages__%s__in' % name: value_list})
-        )
+            Q(
+                Q(**{'%s__in' % name: value_list}) |
+                Q(**{'aic__information_packages__%s__in' % name: value_list})
+            ), generation=0
+        ).distinct()
 
     class Meta:
         model = InformationPackage
