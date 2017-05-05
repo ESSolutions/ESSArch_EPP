@@ -265,7 +265,6 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     API endpoint that allows information packages to be viewed or edited.
     """
     queryset = InformationPackage.objects.all()
-    filter_backends = DjangoFilterBackend,
     filter_class = InformationPackageFilter
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -286,7 +285,6 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         'Startdate','aic__information_packages__Startdate','information_packages__Startdate',
         'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
     )
-    filter_class = InformationPackageFilter
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
