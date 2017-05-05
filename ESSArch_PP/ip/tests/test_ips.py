@@ -84,7 +84,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-        self.ip = InformationPackage.objects.create()
+        self.ip = InformationPackage.objects.create(generation=0)
         self.url = reverse('workarea-list')
 
     def test_empty(self):
@@ -110,12 +110,46 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, [])
 
-    def test_ip_in_workarea_by_current_user(self):
+    def test_ip_in_workarea_by_current_user_aic_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.save()
+
         Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
 
-        res = self.client.get(self.url, {'type': 'access'})
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'aic'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(aic.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(self.ip.pk))
+
+    def test_ip_in_workarea_by_current_user_ip_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.save()
+
+        Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'ip'})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data[0]['id'], str(self.ip.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 0)
+
+    def test_ip_in_workarea_by_current_user_ip_view_type_first_generation_not_in_workarea(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.save()
+
+        Workarea.objects.create(user=self.user, ip=ip2, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'ip'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(self.ip.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(ip2.pk))
 
 class InformationPackageViewSetTestCase(TestCase):
     def setUp(self):

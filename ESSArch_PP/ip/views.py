@@ -67,6 +67,7 @@ from ip.serializers import (
     InformationPackageSerializer,
     InformationPackageDetailSerializer,
     EventIPSerializer,
+    WorkareaSerializer,
 )
 from workflow.serializers import ProcessStepSerializer
 
@@ -394,28 +395,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
 
 class WorkareaViewSet(viewsets.ModelViewSet):
-    queryset = InformationPackage.objects.filter(workareas__type=Workarea.ACCESS)
-    serializer_class = InformationPackageSerializer
-    http_method_names = [p.lower() for p in permissions.SAFE_METHODS]
-
-    def get_queryset(self):
-        try:
-            workarea_type = self.request.query_params['type'].lower()
-            workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
-
-            try:
-                return self.queryset.filter(
-                    workareas__user=self.request.user,
-                    workareas__type=workarea_type_reverse[workarea_type]
-                )
-            except KeyError:
-                raise exceptions.ParseError('Workarea of type "%s" does not exist' % workarea_type)
-        except KeyError:
-            return self.queryset.filter(
-                workareas__user=self.request.user,
-            )
-
-    filter_backends = DjangoFilterBackend,
+    queryset = InformationPackage.objects.all()
     filter_class = InformationPackageFilter
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -426,8 +406,53 @@ class WorkareaViewSet(viewsets.ModelViewSet):
         'linkingAgentIdentifierValue', 'id'
     )
     search_fields = (
-        'ObjectIdentifierValue', 'Label', 'Responsible__first_name',
-        'Responsible__last_name', 'Responsible__username', 'State',
-        'SubmissionAgreement__name', 'Startdate', 'Enddate',
+        'ObjectIdentifierValue','aic__information_packages__ObjectIdentifierValue','information_packages__ObjectIdentifierValue',
+        'Label','aic__information_packages__Label','information_packages__Label',
+        'Responsible__first_name','aic__information_packages__Responsible__first_name','information_packages__Responsible__first_name',
+        'Responsible__last_name','aic__information_packages__Responsible__last_name','information_packages__Responsible__last_name',
+        'Responsible__username','aic__information_packages__Responsible__username','information_packages__Responsible__username',
+        'State','aic__information_packages__State','information_packages__State',
+        'SubmissionAgreement__name','aic__information_packages__SubmissionAgreement__name','information_packages__SubmissionAgreement__name',
+        'Startdate','aic__information_packages__Startdate','information_packages__Startdate',
+        'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
     )
-    filter_class = InformationPackageFilter
+    serializer_class = WorkareaSerializer
+    http_method_names = [p.lower() for p in permissions.SAFE_METHODS]
+
+    def get_queryset(self):
+        try:
+            query_wtype = self.request.query_params['type'].lower()
+        except KeyError:
+            return self.queryset.filter(
+                workareas__user=self.request.user,
+            )
+
+        workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
+
+        try:
+            workarea_type = workarea_type_reverse[query_wtype]
+        except KeyError:
+            raise exceptions.ParseError('Workarea of type "%s" does not exist' % query_wtype)
+
+        view_type = self.request.query_params.get('view_type', 'aic')
+
+        if view_type == 'aic':
+            return self.queryset.filter(
+                aic__isnull=True,
+                information_packages__workareas__user=self.request.user,
+                information_packages__workareas__type=workarea_type
+            )
+
+        self.queryset = self.queryset.exclude(
+            package_type=InformationPackage.AIC,
+        ).filter(generation=0)
+
+        return self.queryset.filter(
+            Q(
+                workareas__user=self.request.user,
+                workareas__type=workarea_type
+            ) | Q(
+                aic__information_packages__workareas__user=self.request.user,
+                aic__information_packages__workareas__type=workarea_type
+            )
+        ).only('id')
