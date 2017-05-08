@@ -45,15 +45,23 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		}]
 		];
 	};
-	$scope.submitRequest = function(ip) {
-		if(vm.request.type == "preserve") {
-			$scope.preserveIp(ip);
-		}
-		if(vm.request.type == "view") {
-		}
-		if(vm.request.type == "edit_as_new") {
-		}
-		if(vm.request.type == "diff_check") {
+	$scope.submitRequest = function(ip, request) {
+		switch(request.type) {
+			case "preserve":
+				$scope.preserveIp(ip, request);
+				break; 
+			case "view":
+				console.log("request not implemented");
+				break;
+			case "edit_as_new":
+				console.log("request not implemented");
+				break;
+			case "diff_check":
+				console.log("request not implemented");
+				break;
+			default:
+				console.log("request not matched");
+				break;
 		}
 	}
 	$scope.preserveIp = function(ip, request) {

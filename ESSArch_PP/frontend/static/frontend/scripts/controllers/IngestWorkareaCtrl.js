@@ -11,6 +11,39 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             }],
         ];
     }
+    $scope.initRequestData = function () {
+        vm.request = {
+            type: "",
+            purpose: "",
+            storageMedium: {
+                value: "",
+                options: ["Disk", "Tape(type1)", "Tape(type2)"]
+            }
+        };
+    }
+
+    $scope.submitRequest = function (ip, request) {
+        switch (request.type) {
+            case "preserve":
+                $scope.preserveIp(ip, request);
+                break;
+            case "diff_check":
+                console.log("request not implemented");
+                break;
+            default:
+                console.log("request not matched");
+                break;
+        }
+    }
+    $scope.preserveIp = function (ip, request) {
+        listViewService.preserveIp(ip, { purpose: request.purpose }).then(function (result) {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+            $scope.eventShow = false;
+            $scope.initRequestData();
+            $scope.getListViewData();
+        });
+    }
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
@@ -167,6 +200,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
+            $scope.requestForm = true;
             $timeout(function() {
                 $anchorScroll("request-form");
             }, 0);
