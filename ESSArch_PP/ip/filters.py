@@ -57,12 +57,16 @@ class InformationPackageFilter(django_filters.FilterSet):
             return queryset.filter(
                 **{'information_packages__%s__icontains' % name: value}
             ).distinct()
+        elif self.data.get('view_type') == 'ip':
+            return queryset.filter(
+                Q(
+                    Q(**{'%s__icontains' % name: value}) |
+                    Q(**{'aic__information_packages__%s__icontains' % name: value})
+                ), generation=0
+            ).distinct()
 
         return queryset.filter(
-            Q(
-                Q(**{'%s__icontains' % name: value}) |
-                Q(**{'aic__information_packages__%s__icontains' % name: value})
-            ), generation=0
+            **{'%s__icontains' % name: value}
         ).distinct()
 
     def filter_fields_in_list(self, queryset, name, value):
@@ -72,12 +76,16 @@ class InformationPackageFilter(django_filters.FilterSet):
             return queryset.filter(
                 **{'information_packages__%s__in' % name: value_list}
             ).distinct()
+        elif self.data.get('view_type') == 'ip':
+            return queryset.filter(
+                Q(
+                    Q(**{'%s__in' % name: value_list}) |
+                    Q(**{'aic__information_packages__%s__in' % name: value_list})
+                ), generation=0
+            ).distinct()
 
         return queryset.filter(
-            Q(
-                Q(**{'%s__in' % name: value_list}) |
-                Q(**{'aic__information_packages__%s__in' % name: value_list})
-            ), generation=0
+            **{'%s__in' % name: value_list}
         ).distinct()
 
     class Meta:

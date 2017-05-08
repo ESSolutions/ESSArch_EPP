@@ -12,6 +12,8 @@ from ESSArch_Core.ip.models import (
 
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
+from ip.filters import InformationPackageFilter
+
 class ArchivalInstitutionSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
         model = ArchivalInstitution
@@ -81,9 +83,13 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     def get_information_packages(self, obj):
         request = self.context['request']
         view_type = request.query_params.get('view_type', 'aic')
-        state = request.query_params.get('state', '').split(u',')
 
-        related = obj.related_ips().filter(State__in=state)
+        related = obj.related_ips()
+
+        qp = request.query_params.copy()
+        qp.__setitem__('view_type', 'self')
+
+        related = InformationPackageFilter(qp, queryset=related).qs
 
         ips = NestedInformationPackageSerializer(
             related, many=True, context={'request': request}

@@ -271,9 +271,8 @@ class InformationPackageViewSetTestCase(TestCase):
         res = self.client.get(self.url, data={'view_type': 'aic', 'label': 'foo'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aic.pk))
-        self.assertEqual(len(res.data[0]['information_packages']), 2)
+        self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
-        self.assertEqual(res.data[0]['information_packages'][1]['id'], str(aip2.pk))
 
     def test_ip_view_type_aic_multiple_aips_different_labels_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -283,8 +282,7 @@ class InformationPackageViewSetTestCase(TestCase):
         res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'foo'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aip.pk))
-        self.assertEqual(len(res.data[0]['information_packages']), 1)
-        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip2.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 0)
 
     def test_ip_view_type_aic_multiple_aips_different_labels_all_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
