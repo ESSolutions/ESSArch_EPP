@@ -23,6 +23,8 @@
 """
 
 import os
+import shutil
+import tempfile
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -375,3 +377,57 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aic.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
+
+class InformationPackageViewSetFilesTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="admin", password='admin')
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.datadir = tempfile.mkdtemp()
+
+        self.ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
+        self.url = self.url + 'files/'
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except:
+            pass
+
+    def test_delete_file(self):
+        _, path = tempfile.mkstemp(dir=self.datadir)
+        res = self.client.delete(self.url, {'path': path})
+
+        self.assertFalse(os.path.exists(path))
+
+    def test_delete_folder(self):
+        path = tempfile.mkdtemp(dir=self.datadir)
+        res = self.client.delete(self.url, {'path': path})
+
+        self.assertFalse(os.path.exists(path))
+
+    def test_delete_no_path(self):
+        res = self.client.delete(self.url)
+        res.status = status.HTTP_400_BAD_REQUEST
+
+    def test_list_file(self):
+        _, path = tempfile.mkstemp(dir=self.datadir)
+        res = self.client.get(self.url)
+
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path)}])
+
+    def test_list_folder(self):
+        path = tempfile.mkdtemp(dir=self.datadir)
+        res = self.client.get(self.url)
+
+        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path)}])
+
+    def test_list_folder_content(self):
+        path = tempfile.mkdtemp(dir=self.datadir)
+        _, filepath = tempfile.mkstemp(dir=path)
+        res = self.client.get(self.url, {'path': path})
+
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath)}])

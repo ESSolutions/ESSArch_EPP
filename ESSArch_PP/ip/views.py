@@ -22,8 +22,13 @@
     Email - essarch@essolutions.se
 """
 
+import errno
 import glob
 import os
+import re
+import shutil
+
+from operator import itemgetter
 
 from django.db.models import Q
 
@@ -48,7 +53,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.util import get_value_from_path
+from ESSArch_Core.util import get_value_from_path, get_files_and_dirs
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
@@ -392,6 +397,44 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid()
         return Response(serializer.data)
+
+    @detail_route(methods=['delete', 'get'])
+    def files(self, request, pk=None):
+        ip = self.get_object()
+        if request.method == 'DELETE':
+            try:
+                path = os.path.join(ip.ObjectPath, request.data.__getitem__('path'))
+            except KeyError:
+                return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                shutil.rmtree(path)
+            except OSError as e:
+                if e.errno != errno.ENOTDIR:
+                    raise
+
+                os.remove(path)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        entries = []
+        path = os.path.join(ip.ObjectPath, request.query_params.get('path', ''))
+
+        for entry in get_files_and_dirs(path):
+            entry_type = "dir" if entry.is_dir() else "file"
+
+            if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
+                continue
+
+            entries.append(
+                {
+                    "name": os.path.basename(entry.path),
+                    "type": entry_type
+                }
+            )
+
+        sorted_entries = sorted(entries, key=itemgetter('name'))
+        return Response(sorted_entries)
 
 
 class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
