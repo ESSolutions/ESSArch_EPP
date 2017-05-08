@@ -62,8 +62,6 @@
                 <td ng-repeat="col in listViewColumns">
                     <div ng-include src="col.template"></div>
                 </td>
-                <td>
-                </td>
             </tr>
             <tr ng-if="!row.collapsed" ng-repeat="subrow in row.information_packages"  ng-repeat-end class="table-item" ng-class="subrow.class" style="background-color:rgba(50,120,255,.1);">
                 <td context-menu="menuOptions('subrow')"></td>

@@ -71,6 +71,14 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                         ip.collapsed = false;
                     }
                 });
+                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    ip.class = "selected"
+                }
+                ip.information_packages.forEach(function (subIp) {
+                    if (subIp.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                        subIp.class = "selected"
+                    }
+                });
             });
 
             return {
@@ -95,6 +103,34 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                         ip.collapsed = false;
                     }
                 });
+                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    ip.class="selected"
+                }
+                ip.information_packages.forEach(function(subIp) {
+                    if (subIp.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                        subIp.class="selected"
+                    }
+                });
+            });
+            return {
+                data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+        function getDips(workarea, start, number, pageNumber, params, selected, sort, search, columnFilters) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getDipPage(workarea, pageNumber, number, $rootScope.navigationFilter, sortString, search, columnFilters).then(function(value) {
+            var ipCollection = value.data;
+            ipCollection.forEach(function(ip) {
+                ip.collapsed = false;
+                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    ip.class = "selected"
+                }
             });
             return {
                 data: ipCollection,
@@ -166,5 +202,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
         getWorkareaIps: getWorkareaIps,
+        getDips: getDips,
     };
 });

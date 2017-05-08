@@ -256,6 +256,29 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             return false;
         }
     }
+    $scope.expandedAics = [];
+	$scope.expandAic = function(row) {
+		row.collapsed = !row.collapsed;
+		if(!row.collapsed) {
+			$scope.expandedAics.push(row.ObjectIdentifierValue);
+		} else {
+			$scope.expandedAics.forEach(function(aic, index, array) {
+				if(aic == row.ObjectIdentifierValue) {
+					$scope.expandedAics.splice(index,1);
+				}
+			});
+		}
+		row.information_packages.forEach(function(ip, index, array) {
+			if(!ip.ObjectIdentifierValue) {
+				$http({
+					method: 'GET',
+					url: ip
+				}).then(function(response) {
+					array[index] = response.data;
+				})
+			}
+		});
+	}
     $scope.clearSearch = function () {
         delete $scope.tableState.search.predicateObject;
         $('#search-input')[0].value = "";
