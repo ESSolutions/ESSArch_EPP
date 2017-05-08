@@ -201,6 +201,15 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
+        if(row.package_type == 1) {
+			$scope.select = false;
+			$scope.eventlog = false;
+			$scope.edit = false;
+			$scope.eventShow = false;
+			$scope.requestForm = false;
+			
+			return;
+		}
         if($scope.select && $scope.ip.id== row.id){
             $scope.select = false;
             $scope.eventlog = false;
