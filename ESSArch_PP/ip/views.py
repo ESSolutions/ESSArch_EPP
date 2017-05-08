@@ -31,7 +31,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from lxml import etree
 
-from rest_framework import exceptions, filters, permissions, status, viewsets
+from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -394,7 +394,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class WorkareaViewSet(viewsets.ModelViewSet):
+class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = InformationPackage.objects.all()
     filter_class = InformationPackageFilter
     filter_backends = (
@@ -417,7 +417,6 @@ class WorkareaViewSet(viewsets.ModelViewSet):
         'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
     )
     serializer_class = WorkareaSerializer
-    http_method_names = [p.lower() for p in permissions.SAFE_METHODS]
 
     def get_queryset(self):
         try:
