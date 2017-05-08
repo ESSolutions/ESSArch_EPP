@@ -130,19 +130,24 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
         }
     };
     //Make ip selected and add class to visualize
-    $scope.selectIp = function(row) {
-        vm.displayedIps.forEach(function(ip) {
-            if(ip.id == $scope.selectedIp.id){
-                ip.class = "";
-            }
-        });
-        if(row.id == $scope.selectedIp.id){
-            $scope.selectedIp = {id: "", class: ""};
-        } else {
-            row.class = "selected";
-            $scope.selectedIp = row;
-        }
-    };
+	$scope.selectIp = function(row) {
+		vm.displayedIps.forEach(function(ip) {
+			if(ip.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
+				ip.class = "";
+			}
+			ip.information_packages.forEach(function(subIp) {
+				if(subIp.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue) {
+					subIp.class = "";
+				}
+			});
+		});
+		if(row.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
+			$scope.selectedIp = {ObjectIdentifierValue: "", class: ""};
+		} else {
+			row.class = "selected";
+			$scope.selectedIp = row;
+		}
+	};
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
@@ -195,7 +200,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
 			$scope.edit = false;
 			$scope.eventShow = false;
 			$scope.requestForm = false;
-			
+			$scope.initRequestData();
 			return;
 		}
         if($scope.select && $scope.ip.id== row.id){
@@ -203,6 +208,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             $scope.eventlog = false;
             $scope.edit = false;
             $scope.requestForm = false;
+			$scope.initRequestData();            
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
