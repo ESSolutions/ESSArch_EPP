@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http) {
+angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Accessed";
