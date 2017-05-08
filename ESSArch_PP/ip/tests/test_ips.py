@@ -151,6 +151,37 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(ip2.pk))
 
+    def test_ip_in_workarea_by_current_user_ip_view_type_global_search(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(Label='bar', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.Label = 'foo'
+        self.ip.save()
+
+        Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
+        Workarea.objects.create(user=self.user, ip=ip2, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'ip', 'search': 'foo'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(self.ip.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 0)
+
+    def test_ip_in_workarea_by_current_user_aic_view_type_global_search(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(Label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.Label = 'first'
+        self.ip.save()
+
+        Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
+        Workarea.objects.create(user=self.user, ip=ip2, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'aic', 'search': 'first'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(aic.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(self.ip.pk))
+
 class InformationPackageViewSetTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="admin", password='admin')
@@ -333,3 +364,14 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip2.pk))
+
+    def test_aic_view_type_aic_aips_different_labels_same_aic_global_search(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(Label='first', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        aip2 = InformationPackage.objects.create(Label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
+
+        res = self.client.get(self.url, {'type': 'access', 'view_type': 'aic', 'search': 'first'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(aic.pk))
+        self.assertEqual(len(res.data[0]['information_packages']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
