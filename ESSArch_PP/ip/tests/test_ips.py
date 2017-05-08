@@ -35,6 +35,7 @@ import mock
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from ESSArch_Core.configuration.models import Path
 from ESSArch_Core.ip.models import InformationPackage, Workarea
 
 
@@ -183,6 +184,74 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aic.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(self.ip.pk))
+
+class WorkareaFilesViewTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="admin", password='admin')
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.datadir = tempfile.mkdtemp()
+        Path.objects.create(entity='access', value=self.datadir)
+
+        self.path = os.path.join(self.datadir, str(self.user.pk))
+        os.mkdir(self.path)
+
+        self.url = reverse('workarea-files')
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.datadir)
+        except:
+            pass
+
+    def test_no_type_parameter(self):
+        res = self.client.get(self.url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invalid_type_parameter(self):
+        res = self.client.get(self.url, {'type': 'invalidtype'})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_list_file(self):
+        _, path = tempfile.mkstemp(dir=self.path)
+        res = self.client.get(self.url, {'type': 'access'})
+
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path)}])
+
+    def test_list_file_content(self):
+        _, path = tempfile.mkstemp(dir=self.path)
+        res = self.client.get(self.url, {'type': 'access', 'path': path})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_list_folder(self):
+        path = tempfile.mkdtemp(dir=self.path)
+        res = self.client.get(self.url, {'type': 'access'})
+
+        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path)}])
+
+    def test_list_folder_content(self):
+        path = tempfile.mkdtemp(dir=self.path)
+        _, filepath = tempfile.mkstemp(dir=path)
+        res = self.client.get(self.url, {'type': 'access', 'path': path})
+
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath)}])
+
+    def test_illegal_path(self):
+        path = os.path.join(self.path, '..')
+        res = self.client.get(self.url, {'type': 'access', 'path': path})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_non_existing_path(self):
+        path = os.path.join(self.path, 'does/not/exist')
+        res = self.client.get(self.url, {'type': 'access', 'path': path})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 class InformationPackageViewSetTestCase(TestCase):
     def setUp(self):

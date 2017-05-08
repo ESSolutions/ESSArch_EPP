@@ -39,6 +39,7 @@ from lxml import etree
 from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ESSArch_Core.configuration.models import (
     Path,
@@ -53,7 +54,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.util import get_value_from_path, get_files_and_dirs
+from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
@@ -498,3 +499,47 @@ class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
                 aic__information_packages__workareas__type=workarea_type
             )
         ).only('id')
+
+class WorkareaFilesView(APIView):
+    def get(self, request, format=None):
+        try:
+            query_wtype = self.request.query_params['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
+
+        try:
+            workarea_type = workarea_type_reverse[query_wtype]
+        except KeyError:
+            raise exceptions.ParseError('Workarea of type "%s" does not exist' % query_wtype)
+
+        root = os.path.join(Path.objects.get(entity=query_wtype).value, str(request.user.pk))
+
+        entries = []
+        path = os.path.join(root, request.query_params.get('path', ''))
+
+        if not in_directory(path, root):
+            return Response('Illegal path %s' % path, status=status.HTTP_400_BAD_REQUEST)
+
+        if not os.path.exists(path):
+            return Response('Path "%s" does not exist' % path, status=status.HTTP_400_BAD_REQUEST)
+
+        if os.path.isfile(path):
+            return Response('Path "%s" is a file' % path, status=status.HTTP_400_BAD_REQUEST)
+
+        for entry in get_files_and_dirs(path):
+            entry_type = "dir" if entry.is_dir() else "file"
+
+            if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
+                continue
+
+            entries.append(
+                {
+                    "name": os.path.basename(entry.path),
+                    "type": entry_type
+                }
+            )
+
+        sorted_entries = sorted(entries, key=itemgetter('name'))
+        return Response(sorted_entries)
