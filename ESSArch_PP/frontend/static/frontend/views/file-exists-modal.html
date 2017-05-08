@@ -1,0 +1,12 @@
+<div class="enter-profile-name">
+    <h3 style="margin: 15px;" class="modal-title" id="modal-title">{{'FILE_EXISTS_IN_DIP' | translate}}</h3>
+</div>
+<form ng-submit="$ctrl.overwrite()">
+    <div class="modal-body" id="modal-body">
+        <p for="label">{{'FILE_EXISTS_IN_DIP_DESC' | translate}}</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">{{'OK' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>
+</form>
