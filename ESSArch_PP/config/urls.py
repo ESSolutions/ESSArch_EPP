@@ -51,6 +51,7 @@ from ip.views import (
     EventIPViewSet,
     InformationPackageViewSet,
     InformationPackageReceptionViewSet,
+    OrderViewSet,
     WorkareaViewSet,
     WorkareaFilesViewSet,
 )
@@ -90,6 +91,7 @@ router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
 router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
+router.register(r'orders', OrderViewSet)
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
