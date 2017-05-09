@@ -7,6 +7,7 @@ from ESSArch_Core.ip.models import (
     ArchivalLocation,
     EventIP,
     InformationPackage,
+    Order,
     Workarea,
 )
 
@@ -208,4 +209,19 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
             'tags',
+        )
+
+
+class OrderSerializer(serializers.HyperlinkedModelSerializer):
+    information_packages = serializers.HyperlinkedRelatedField(
+        many=True, required=False, view_name='informationpackage-detail',
+        queryset=InformationPackage.objects.filter(
+            package_type=InformationPackage.DIP
+        )
+    )
+
+    class Meta:
+        model = Order
+        fields = (
+            'url', 'id', 'label', 'responsible', 'information_packages',
         )

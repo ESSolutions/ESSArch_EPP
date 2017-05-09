@@ -137,6 +137,7 @@ def installDefaultPaths():
         'cache': '/ESSArch/data/epp/cache',
         'access': '/ESSArch/data/epp/access',
         'disseminations': '/ESSArch/data/epp/disseminations',
+        'orders': '/ESSArch/data/epp/orders',
     }
 
     for key in dct:

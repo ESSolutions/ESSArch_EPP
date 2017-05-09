@@ -50,6 +50,7 @@ from ESSArch_Core.ip.models import (
     ArchivalType,
     ArchivalLocation,
     InformationPackage,
+    Order,
     EventIP,
     Workarea,
 )
@@ -72,6 +73,7 @@ from ip.serializers import (
     ArchivalLocationSerializer,
     InformationPackageSerializer,
     InformationPackageDetailSerializer,
+    OrderSerializer,
     EventIPSerializer,
     WorkareaSerializer,
 )
@@ -649,3 +651,11 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
                     raise
 
         return Response(root)
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows orders to be viewed or edited.
+    """
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
