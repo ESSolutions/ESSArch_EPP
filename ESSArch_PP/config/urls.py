@@ -52,7 +52,7 @@ from ip.views import (
     InformationPackageViewSet,
     InformationPackageReceptionViewSet,
     WorkareaViewSet,
-    WorkareaFilesView,
+    WorkareaFilesViewSet,
 )
 
 from storage.views import (
@@ -100,6 +100,7 @@ router.register(r'tags', TagViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'workarea', WorkareaViewSet, base_name='workarea')
+router.register(r'workarea-files', WorkareaFilesViewSet, base_name='workarea-files')
 
 router.register(r'storage-objects', StorageObjectViewSet)
 router.register(r'storage-mediums', StorageMediumViewSet)
@@ -137,7 +138,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/', include(router.urls)),
-    url(r'^api/workarea-files/$', WorkareaFilesView.as_view(), name='workarea-files'),
     url(r'^api/sysinfo/', SysInfoView.as_view()),
     url(r'^rest-auth/', include('rest_auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),

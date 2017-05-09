@@ -198,7 +198,7 @@ class WorkareaFilesViewTestCase(TestCase):
         self.path = os.path.join(self.datadir, str(self.user.pk))
         os.mkdir(self.path)
 
-        self.url = reverse('workarea-files')
+        self.url = reverse('workarea-files-list')
 
     def tearDown(self):
         try:
@@ -252,6 +252,99 @@ class WorkareaFilesViewTestCase(TestCase):
         res = self.client.get(self.url, {'type': 'access', 'path': path})
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_to_dip_not_responsible(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        _, src = tempfile.mkstemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = 'foo.txt'
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertFalse(os.path.isfile(os.path.join(dstdir, dst)))
+
+    def test_add_to_dip_file_to_file(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        _, src = tempfile.mkstemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = 'foo.txt'
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+
+        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst)))
+
+    def test_add_to_dip_file_to_file_overwrite(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        _, src = tempfile.mkstemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = 'foo.txt'
+
+        open(os.path.join(dstdir, dst), 'a').close()
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+
+        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst)))
+
+    def test_add_to_dip_file_to_dir(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        _, src = tempfile.mkstemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+
+        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst, os.path.basename(src))))
+
+    def test_add_to_dip_dir_to_dir(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        src = tempfile.mkdtemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = 'foo'
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+
+        self.assertTrue(os.path.isdir(os.path.join(dstdir, dst)))
+
+    def test_add_to_dip_dir_to_dir_overwrite(self):
+        self.url = self.url + 'add-to-dip/'
+
+        srcdir = tempfile.mkdtemp(dir=self.path)
+        src = tempfile.mkdtemp(dir=srcdir)
+
+        dstdir = tempfile.mkdtemp(dir=self.path)
+        dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
+
+        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+
+        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+
+        self.assertTrue(os.path.isdir(os.path.join(dstdir, dst)))
+
 
 class InformationPackageViewSetTestCase(TestCase):
     def setUp(self):

@@ -37,9 +37,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from lxml import etree
 
 from rest_framework import exceptions, filters, status, viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from ESSArch_Core.configuration.models import (
     Path,
@@ -54,6 +53,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
+from ESSArch_Core.ip.permissions import IsResponsibleOrReadOnly
 from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
@@ -510,33 +510,38 @@ class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
             )
         ).only('id')
 
-class WorkareaFilesView(APIView):
-    def get(self, request, format=None):
-        try:
-            query_wtype = self.request.query_params['type'].lower()
-        except KeyError:
-            raise exceptions.ParseError('Missing type parameter')
-
+class WorkareaFilesViewSet(viewsets.ViewSet):
+    def validate_workarea(self, area_type):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
 
         try:
-            workarea_type = workarea_type_reverse[query_wtype]
+            workarea_type_reverse[area_type]
         except KeyError:
-            raise exceptions.ParseError('Workarea of type "%s" does not exist' % query_wtype)
+            raise exceptions.ParseError('Workarea of type "%s" does not exist' % area_type)
 
-        root = os.path.join(Path.objects.get(entity=query_wtype).value, str(request.user.pk))
+    def validate_path(self, path, root):
+        if not in_directory(path, root):
+            raise exceptions.ParseError('Illegal path %s' % path)
+
+        if not os.path.exists(path):
+            raise exceptions.ParseError('Path "%s" does not exist' % path)
+
+    def list(self, request):
+        try:
+            workarea = self.request.query_params['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        self.validate_workarea(workarea)
+        root = os.path.join(Path.objects.get(entity=workarea).value, str(request.user.pk))
 
         entries = []
         path = os.path.join(root, request.query_params.get('path', ''))
 
-        if not in_directory(path, root):
-            return Response('Illegal path %s' % path, status=status.HTTP_400_BAD_REQUEST)
-
-        if not os.path.exists(path):
-            return Response('Path "%s" does not exist' % path, status=status.HTTP_400_BAD_REQUEST)
+        self.validate_path(path, root)
 
         if os.path.isfile(path):
-            return Response('Path "%s" is a file' % path, status=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError('Path "%s" is a file' % path)
 
         for entry in get_files_and_dirs(path):
             entry_type = "dir" if entry.is_dir() else "file"
@@ -553,3 +558,58 @@ class WorkareaFilesView(APIView):
 
         sorted_entries = sorted(entries, key=itemgetter('name'))
         return Response(sorted_entries)
+
+    @list_route(methods=['post'], url_path='add-to-dip')
+    def add_to_dip(self, request):
+        try:
+            workarea = self.request.data['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        self.validate_workarea(workarea)
+        root = os.path.join(Path.objects.get(entity=workarea).value, str(request.user.pk))
+
+        try:
+            dip = self.request.data['dip']
+            ip = InformationPackage.objects.get(pk=dip, package_type=InformationPackage.DIP)
+
+            permission = IsResponsibleOrReadOnly()
+            if not permission.has_object_permission(request, self, ip):
+                self.permission_denied(
+                    request, message=getattr(permission, 'message', None)
+                )
+        except KeyError:
+            raise exceptions.ParseError('Missing dip parameter')
+        except InformationPackage.DoesNotExist:
+            raise exceptions.ParseError('DIP "%s" does not exist' % dip)
+
+        try:
+            src = self.request.data['src']
+        except KeyError:
+            raise exceptions.ParseError('Missing src parameter')
+
+        try:
+            dst = self.request.data['dst']
+        except KeyError:
+            raise exceptions.ParseError('Missing dst parameter')
+
+        self.validate_path(src, root)
+
+        dst = os.path.join(ip.ObjectPath, dst)
+
+        if os.path.isfile(src) and os.path.isdir(dst):
+            dst = os.path.join(dst, os.path.basename(src))
+            shutil.copy2(src, dst)
+        else:
+            try:
+                shutil.copytree(src, dst)
+            except OSError as e:
+                if e.errno == errno.ENOTDIR:
+                    shutil.copy2(src, dst)
+                elif e.errno == errno.EEXIST:
+                    shutil.rmtree(dst)
+                    shutil.copytree(src, dst)
+                else:
+                    raise
+
+        return Response(root)
