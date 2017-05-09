@@ -628,6 +628,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         except KeyError:
             raise exceptions.ParseError('Missing dst parameter')
 
+        src = os.path.join(root, src)
         self.validate_path(src, root)
 
         dst = os.path.join(ip.ObjectPath, dst)
