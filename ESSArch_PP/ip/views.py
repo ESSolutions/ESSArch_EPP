@@ -383,6 +383,41 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         return Response(['Accessing AIP %s...' % pk])
 
+    @list_route(methods=['post'], url_path='prepare-dip')
+    def prepare_dip(self, request):
+        try:
+            label = request.data['label']
+        except KeyError:
+            return Response(
+                {'status': '"label" is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        object_identifier_value = request.data.get('object_identifier_value')
+
+        if object_identifier_value:
+            ip_exists = InformationPackage.objects.filter(ObjectIdentifierValue=object_identifier_value).exists()
+            if ip_exists:
+                return Response(
+                    {'status': 'IP with object identifer value "%s" already exists' % object_identifier_value},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        main_step = ProcessStep.objects.create(name='Prepare DIP',)
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.PrepareDIP',
+            params={
+                'label': label,
+                'object_identifier_value': object_identifier_value,
+            },
+            processstep=main_step,
+            responsible=self.request.user,
+        )
+
+        dip = task.run().get()
+
+        return Response('Prepared DIP %s' % dip)
+
     @detail_route()
     def events(self, request, pk=None):
         ip = self.get_object()

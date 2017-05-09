@@ -422,6 +422,43 @@ class AccessAIP(DBTask):
         return "Created entries in IO queue for AIP '%s'" % aip
 
 
+class PrepareDIP(DBTask):
+    def run(self, label=None, object_identifier_value=None):
+        disseminations = Path.objects.get(entity='disseminations').value
+
+        ip = InformationPackage.objects.create(
+            ObjectIdentifierValue=object_identifier_value,
+            Label=label,
+            Responsible_id=self.responsible,
+            State="Prepared",
+            package_type=InformationPackage.DIP,
+        )
+
+        self.ip = ip.pk
+
+        ProcessTask.objects.filter(pk=self.request.id).update(
+            information_package=ip,
+        )
+
+        ProcessStep.objects.filter(tasks__pk=self.request.id).update(
+            information_package=ip,
+        )
+
+        ip_dir = os.path.join(disseminations, ip.ObjectIdentifierValue)
+        os.mkdir(ip_dir)
+
+        ip.ObjectPath = ip_dir
+        ip.save(update_fields=['ObjectPath'])
+
+        return ip.pk
+
+    def undo(self, label=None, object_identifier_value=None):
+        pass
+
+    def event_outcome_success(self, label=None, object_identifier_value=None):
+        return 'Prepared DIP "%s"' % self.ip
+
+
 class PollIOQueue(DBTask):
     def get_storage_medium(self, entry, storage_target, storage_type):
         if storage_type == TAPE:
