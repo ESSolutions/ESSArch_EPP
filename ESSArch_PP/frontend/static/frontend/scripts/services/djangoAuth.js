@@ -184,9 +184,9 @@ angular.module('myApp')
             }else{
                 // There isn't a stored value, or we're forcing a request back to
                 // the API to get the authentication status.
-                this.authPromise.then(function(){
+                this.authPromise.then(function(response){
                     da.authenticated = true;
-                    getAuthStatus.resolve();
+                    getAuthStatus.resolve(response);
                 },function(){
                     da.authenticated = false;
                     if(restrict){
