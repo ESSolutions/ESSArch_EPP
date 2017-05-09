@@ -312,6 +312,11 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         return InformationPackageDetailSerializer
 
+    def get_serializer_context(self):
+        context = super(InformationPackageViewSet, self).get_serializer_context()
+        context['view'] = self
+        return context
+
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
         main_step = ProcessStep.objects.create(
@@ -461,6 +466,11 @@ class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
         'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
     )
     serializer_class = WorkareaSerializer
+
+    def get_serializer_context(self):
+        context = super(WorkareaViewSet, self).get_serializer_context()
+        context['view'] = self
+        return context
 
     def get_queryset(self):
         try:

@@ -1,4 +1,4 @@
-from rest_framework import exceptions, serializers
+from rest_framework import exceptions, filters, serializers
 
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
@@ -82,6 +82,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_information_packages(self, obj):
         request = self.context['request']
+        view = self.context.get('view')
         view_type = request.query_params.get('view_type', 'aic')
 
         related = obj.related_ips()
@@ -90,6 +91,16 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
         qp.__setitem__('view_type', 'self')
 
         related = InformationPackageFilter(qp, queryset=related).qs
+
+        search_filter = filters.SearchFilter()
+
+        # do not need to check on IPs related to the related IPs
+        view.search_fields = [
+            s for s in view.search_fields
+            if not s.startswith('aic__information_packages__') and
+            not s.startswith('information_packages__')
+        ]
+        related = search_filter.filter_queryset(request, related, view)
 
         ips = NestedInformationPackageSerializer(
             related, many=True, context={'request': request}
@@ -123,37 +134,11 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
 
-    """
-    def get_information_packages(self, obj):
-        request = self.context['request']
-        related = obj.related_ips().filter()
-
-        try:
-            workarea_type = request.query_params['type'].lower()
-            workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
-
-            try:
-                related = related.filter(
-                    workareas__user=request.user,
-                    workareas__type=workarea_type_reverse[workarea_type]
-                )
-            except KeyError:
-                raise exceptions.ParseError('Workarea of type "%s" does not exist' % workarea_type)
-        except KeyError:
-            related = related.filter(
-                workareas__user=request.user,
-            )
-
-
-        ips = NestedInformationPackageSerializer(
-            related, many=True, context={'request': request}
-        )
-        return ips.data
-    """
-
     def get_information_packages(self, obj):
         related = obj.related_ips()
         request = self.context['request']
+        view = self.context.get('view')
+        view_type = request.query_params.get('view_type', 'aic')
 
         try:
             query_wtype = request.query_params['type'].lower()
@@ -174,12 +159,24 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
                 workareas__type=workarea_type
             )
 
-        state = request.query_params.get('state', '').split(u',')
+        qp = request.query_params.copy()
+        qp.__setitem__('view_type', 'self')
+
+        related = InformationPackageFilter(qp, queryset=related).qs
+
+        search_filter = filters.SearchFilter()
+
+        # do not need to check on IPs related to the related IPs
+        view.search_fields = [
+            s for s in view.search_fields
+            if not s.startswith('aic__information_packages__') and
+            not s.startswith('information_packages__')
+        ]
+        related = search_filter.filter_queryset(request, related, view)
 
         ips = NestedInformationPackageSerializer(
             related, many=True, context={'request': request}
         )
-
         return ips.data
 
     ArchivalInstitution = ArchivalInstitutionSerializer(
