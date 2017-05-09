@@ -291,17 +291,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 					$scope.expandedAics.splice(index,1);
 				}
 			});
-		}
-		row.information_packages.forEach(function(ip, index, array) {
-			if(!ip.ObjectIdentifierValue) {
-				$http({
-					method: 'GET',
-					url: ip
-				}).then(function(response) {
-					array[index] = response.data;
-				})
-			}
-		});
+		};
 	}
 	$scope.colspan = 10;
 	$scope.stepTaskInfoShow = false;

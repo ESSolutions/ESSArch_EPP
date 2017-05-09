@@ -119,12 +119,12 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-        function getDips(workarea, start, number, pageNumber, params, selected, sort, search, columnFilters) {
+        function getDips(start, number, pageNumber, params, selected, sort, search, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getDipPage(workarea, pageNumber, number, $rootScope.navigationFilter, sortString, search, columnFilters).then(function(value) {
+        return listViewService.getDipPage(pageNumber, number, $rootScope.navigationFilter, sortString, search, columnFilters).then(function(value) {
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = false;

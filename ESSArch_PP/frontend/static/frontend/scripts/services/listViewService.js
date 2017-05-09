@@ -84,6 +84,32 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         return promise;
     }
 
+        //Fetches IP's for given workarea (ingest or access)
+    function getDipPage(pageNumber, pageSize, filters, sortString, searchString, columnFilters) {
+        var ipUrl = appConfig.djangoUrl + 'information-packages/';
+        var promise = $http({
+            method: 'GET',
+            url: ipUrl,
+            params: angular.extend({
+                package_type: 4,
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }, columnFilters)
+        }).then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+        return promise;
+    }
+
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state, columnFilters) {
         var promise = $http({
                 method: 'GET',
@@ -234,12 +260,10 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
     }
     //Returns map structure for a profile
     function getStructure(profileUrl) {
-        console.log(profileUrl)
         return $http({
             method: 'GET',
             url: profileUrl
         }).then(function(response) {
-            console.log(response.data.structure);
             return response.data.structure;
         }, function(response) {});
     }
@@ -462,7 +486,17 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         });
     }
 
+    function prepareDip(label, objectIdentifierValue) {
+        $http.post(appConfig.djangoUrl + "information-packages/prepare-dip/",
+            {
+                label: label,
+                object_identifier_value: objectIdentifierValue
+            }).then(function (response) {
+                return response.data;
+            });
+    };
     function getWorkareaDir(workareaType, pathStr) {
+        var sendData;
         if (pathStr == "") {
             sendData = {
                 type: workareaType
@@ -473,8 +507,8 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
                 type: workareaType
             };
         }
-        //url = appConfig.djangoUrl + "workarea-files/"
-        return $http.get("static/frontend/scripts/json_data/file_list.json", sendData)
+        var url = appConfig.djangoUrl + "workarea-files/";
+        return $http.get(url, {params: sendData})
             .then(function(response) {
                 return response.data;
             });
@@ -488,12 +522,48 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
                 path: pathStr,
             };
         }
-        //url = ip.url + "files/"
-        return $http.get("static/frontend/scripts/json_data/file_list.json", sendData)
+        var url = ip.url + "files/";
+        return $http.get(url, {params: sendData})
             .then(function(response) {
                 return response.data;
             });
     }
+
+    function addFileToDip(ip, path, file, destination, type) {
+        var src = path + file.name;
+        var dst = destination + file.name;
+        return $http.post(appConfig.djangoUrl + "workarea-files/add-to-dip/", {
+            dip: ip.id,
+            src: src,
+            dst: dst,
+            type: type
+        }).then(function(response){
+            return response;
+        });
+    }
+    function addNewFolder(ip, path, file) {
+        return $http.post(ip.url + "files/",
+        {
+            path: path + file.name, 
+            type: file.type
+        }).then(function(response) {
+            return repsonse;
+        });
+    }
+    function deleteFile(ip, path, file) {
+        return $http({
+            method: "DELETE",
+            url: ip.url + "files/",
+            data: { path: path + file.name },
+            headers: {
+                'Content-type': 'application/json;charset=utf-8'
+            }
+        })
+        .then(function(response) {
+            return response;
+        });
+    }
+
     /*******************/
     /*HELPER FUNCTIONS*/
     /*****************/
@@ -690,5 +760,10 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         getDipDir: getDipDir,
         preserveIp: preserveIp,
         getWorkareaData: getWorkareaData,
+        addFileToDip: addFileToDip,
+        addNewFolder: addNewFolder,
+        deleteFile: deleteFile,
+        prepareDip: prepareDip,
+        getDipPage: getDipPage,
     };
 });
