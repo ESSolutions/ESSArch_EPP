@@ -280,7 +280,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             ariaDescribedBy: 'modal-body',
             templateUrl: 'static/frontend/views/file-exists-modal.html',
             scope: $scope,
-            controller: 'OverWriteModalInstanceCtrl',
+            controller: 'OverwriteModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: function() {
