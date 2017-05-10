@@ -9,6 +9,8 @@
                     <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
                     <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
                 </div>
+                    <span style="float: right; margin-bottom: 5px;" ng-click="updateWorkareaFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate':
+                    gridArrayLoading }" uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
                 <div class="deckgrid">
                     <div class="flex-grid">
                         <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card1.html'"></div>
@@ -22,6 +24,8 @@
                     <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
                     <b class="dir-path">{{ip.ObjectIdentifierValue + '/' + previousGridArraysString(2)}}</b>
                 </div>
+                <span style="float: right; margin-bottom: 5px;" ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+                uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
                 <div class="deckgrid">
                     <div class="flex-grid">
                         <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>

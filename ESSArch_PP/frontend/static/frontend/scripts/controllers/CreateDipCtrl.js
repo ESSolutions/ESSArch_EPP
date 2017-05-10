@@ -22,6 +22,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
+        $interval.cancel(fileBrowserInterval);
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
@@ -57,6 +58,16 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         $scope.ip = row;
         $rootScope.ip = row;
     };
+    //Initialize file browser update interval
+    var fileBrowserInterval;
+    $scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {
+        if (newValue) {
+            $interval.cancel(fileBrowserInterval);
+            fileBrowserInterval = $interval(function() { $scope.updateGridArray() }, appConfig.fileBrowserInterval);
+        } else {
+            $interval.cancel(fileBrowserInterval);
+        }
+    });
     //If status view is visible, start update interval
     $scope.$watch(function() { return $scope.statusShow; }, function(newValue, oldValue) {
         if (newValue) {
@@ -353,17 +364,27 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             }
         }
     };
-    $scope.gridArrayLoading = false;
-    $scope.updateGridArray = function(ip) {
-        $scope.gridArrayLoading = true;
-        listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function (workDir) {
-            listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function (dipDir) {
-                $scope.deckGridData = workDir;
-                $scope.chosenFiles = dipDir;
-                $scope.gridArrayLoading = false;
-            });
-        });
+    $scope.workArrayLoading = false;
+    $scope.dipArrayLoading = false;
+    $scope.updateGridArray = function() {
+        $scope.updateWorkareaFiles();
+        $scope.updateDipFiles();
     };
+    $scope.updateWorkareaFiles = function () {
+        $scope.workArrayLoading = true;
+        return listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function (dir) {
+            $scope.deckGridData = dir;
+            $scope.workArrayLoading = false;
+        });
+
+    }
+    $scope.updateDipFiles = function () {
+        $scope.dipArrayLoading = true;
+        return listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function (dirir) {
+            $scope.chosenFiles = dirir;
+            $scope.dipArrayLoading = false;
+        });
+    }
     $scope.expandFile = function(whichArray, ip, card) {
         if (card.type == "dir") {
             if (whichArray == 1) {
@@ -402,13 +423,13 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         var cardClass = "";
         if (whichArray == 1) {
             $scope.selectedCards1.forEach(function(file) {
-                if (card == file) {
+                if (card.name == file.name) {
                     cardClass = "card-selected";
                 }
             });
         } else {
             $scope.selectedCards2.forEach(function(file) {
-                if (card == file) {
+                if (card.name == file.name) {
                     cardClass = "card-selected";
                 }
             });
