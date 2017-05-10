@@ -540,6 +540,38 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
 
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_no_label(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+        res = self.client.post(self.url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_prepare.assert_not_called()
+
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_no_object_identifier_value(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+        res = self.client.post(self.url, {'label': 'foo'})
+
+        mock_prepare.assert_called_once_with(label='foo', object_identifier_value=None)
+
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_with_object_identifier_value(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+        res = self.client.post(self.url, {'label': 'foo', 'object_identifier_value': 'bar'})
+
+        mock_prepare.assert_called_once_with(label='foo', object_identifier_value='bar')
+
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_with_existing_object_identifier_value(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+
+        InformationPackage.objects.create(ObjectIdentifierValue='bar')
+        res = self.client.post(self.url, {'label': 'foo', 'object_identifier_value': 'bar'})
+
+        mock_prepare.assert_not_called()
+
+
 class InformationPackageViewSetFilesTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="admin", password='admin')
