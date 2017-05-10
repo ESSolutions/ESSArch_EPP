@@ -593,3 +593,15 @@ class InformationPackageViewSetFilesTestCase(TestCase):
         res = self.client.get(self.url, {'path': path})
 
         self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath)}])
+
+    def test_create_folder(self):
+        path = 'foo'
+        res = self.client.post(self.url, {'path': path, 'type': 'dir'})
+
+        self.assertTrue(os.path.isdir(os.path.join(self.ip.ObjectPath, path)))
+
+    def test_create_file(self):
+        path = 'foo.txt'
+        res = self.client.post(self.url, {'path': path, 'type': 'file'})
+
+        self.assertTrue(os.path.isfile(os.path.join(self.ip.ObjectPath, path)))

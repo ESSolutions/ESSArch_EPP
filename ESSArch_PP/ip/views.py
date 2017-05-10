@@ -441,7 +441,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         serializer.is_valid()
         return Response(serializer.data)
 
-    @detail_route(methods=['delete', 'get'])
+    @detail_route(methods=['delete', 'get', 'post'])
     def files(self, request, pk=None):
         ip = self.get_object()
         if request.method == 'DELETE':
@@ -459,6 +459,32 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                 os.remove(path)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            try:
+                path = os.path.join(ip.ObjectPath, request.data['path'])
+            except KeyError:
+                return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                pathtype = request.data['type']
+            except KeyError:
+                return Response('Type parameter missing', status=status.HTTP_400_BAD_REQUEST)
+
+            root = ip.ObjectPath
+            fullpath = os.path.join(root, path)
+
+            if not in_directory(fullpath, root):
+                raise exceptions.ParseError('Illegal path %s' % fullpath)
+
+            if pathtype == 'dir':
+                os.mkdir(fullpath)
+            elif pathtype == 'file':
+                open(fullpath, 'a').close()
+            else:
+                return Response('Type must be either "file" or "dir"', status=status.HTTP_400_BAD_REQUEST)
+
+            return Response('%s created' % path)
 
         entries = []
         path = os.path.join(ip.ObjectPath, request.query_params.get('path', ''))
