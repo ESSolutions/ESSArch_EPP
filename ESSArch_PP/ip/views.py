@@ -428,7 +428,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         dip = task.run().get()
 
-        return Response('Prepared DIP %s' % dip)
+        return Response(dip, status.HTTP_201_CREATED)
 
     @detail_route()
     def events(self, request, pk=None):
@@ -498,7 +498,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             else:
                 return Response('Type must be either "file" or "dir"', status=status.HTTP_400_BAD_REQUEST)
 
-            return Response('%s created' % path)
+            return Response(path, status=status.HTTP_201_CREATED)
 
         entries = []
         path = os.path.join(ip.ObjectPath, request.query_params.get('path', ''))
