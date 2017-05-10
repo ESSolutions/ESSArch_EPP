@@ -13,7 +13,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     //context menu data
     $scope.menuOptions = function() {
             return [
-                [$translate.instant('APPLYCHANGES'), function($itemScope, $event, modelValue, text, $li) {
+                [$translate.instant('PRESERVE'), function($itemScope, $event, modelValue, text, $li) {
                     $scope.selectIp($itemScope.row);
                 }],
             ];
@@ -231,7 +231,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             if (!fileExists) {
                 listViewService.addFileToDip($scope.ip, $scope.previousGridArraysString(1), file, $scope.previousGridArraysString(2), "access")
                     .then(function (result) {
-                        $scope.chosenFiles.push(angular.copy(file));
+                        $scope.updateGridArray();
                     });
             }
         });
@@ -250,6 +250,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         modalInstance.result.then(function (data) {
             listViewService.addFileToDip($scope.ip, $scope.previousGridArraysString(1), file, $scope.previousGridArraysString(2), "access")
                 .then(function (result) {
+                    $scope.updateGridArray();
                 });
         });
     }
@@ -267,8 +268,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         modalInstance.result.then(function(data) {
             listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(2), file)
                 .then(function() {
-                    $scope.chosenFiles.splice(index, 1);
-                    $scope.chosenFiles.push(angular.copy(file));
+                    $scope.updateGridArray();
                 });
         });
     }
@@ -277,7 +277,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         $scope.selectedCards2.forEach(function(file) {
             listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(2), file)
             .then(function () {
-                $scope.chosenFiles.splice($scope.chosenFiles.indexOf(file), 1);
+                $scope.updateGridArray();
             });
         });
         $scope.selectedCards2 = [];
@@ -298,7 +298,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         if (!fileExists) {
             listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(2), folder)
                 .then(function (response) {
-                    $scope.chosenFiles.push(folder);
+                    $scope.updateGridArray();
                 });
         }
     }
@@ -348,7 +348,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                 });
             } else {
                 listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function(dir) {
-                    $scope.deckGridData = dir;
+                    $scope.chosenFiles = dir;
                 })
             }
         }
@@ -356,9 +356,12 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.gridArrayLoading = false;
     $scope.updateGridArray = function(ip) {
         $scope.gridArrayLoading = true;
-        listViewService.getWorkareaDir("access", $scope.previousGridArraysString()).then(function(dir) {
-            $scope.deckGridData = dir;
-            $scope.gridArrayLoading = false;
+        listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function (workDir) {
+            listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function (dipDir) {
+                $scope.deckGridData = workDir;
+                $scope.chosenFiles = dipDir;
+                $scope.gridArrayLoading = false;
+            });
         });
     };
     $scope.expandFile = function(whichArray, ip, card) {
@@ -431,7 +434,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.prepareDip = function(label, objectIdentifierValue, orders) {
         listViewService.prepareDip(label, objectIdentifierValue).then(function(response) {
             $timeout(function() {
-                getListViewData();
+                $scope.getListViewData();
             });
         });
     }

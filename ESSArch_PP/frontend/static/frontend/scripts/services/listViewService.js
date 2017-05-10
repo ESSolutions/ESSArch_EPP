@@ -487,7 +487,7 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
     }
 
     function prepareDip(label, objectIdentifierValue) {
-        $http.post(appConfig.djangoUrl + "information-packages/prepare-dip/",
+        return $http.post(appConfig.djangoUrl + "information-packages/prepare-dip/",
             {
                 label: label,
                 object_identifier_value: objectIdentifierValue
@@ -547,7 +547,7 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
             path: path + file.name, 
             type: file.type
         }).then(function(response) {
-            return repsonse;
+            return response;
         });
     }
     function deleteFile(ip, path, file) {
