@@ -22,9 +22,8 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
+angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth) {
     var $ctrl = this;
-    $ctrl.file = data.file;
     $ctrl.editMode = false;
     $ctrl.error_messages_old = [];
     $ctrl.error_messages_pw1 = [];
@@ -116,6 +115,19 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             $ctrl.error_messages_pw1 = error.new_password1 || [];
             $ctrl.error_messages_pw2 = error.new_password2 || [];
         });
+    };
+    $ctrl.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+})
+.controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
+    var $ctrl = this;
+    $ctrl.file = data.file;
+    $ctrl.overwrite = function () {
+        $ctrl.data = {
+            status: "overwritten"
+        }
+        $uibModalInstance.close($ctrl.data);
     };
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
