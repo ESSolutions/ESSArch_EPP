@@ -25,6 +25,7 @@
 import os
 import shutil
 import tempfile
+import uuid
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -36,7 +37,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ESSArch_Core.configuration.models import Path
-from ESSArch_Core.ip.models import InformationPackage, Workarea
+from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
 
 
 class AccessTestCase(TestCase):
@@ -553,14 +554,14 @@ class InformationPackageViewSetTestCase(TestCase):
         self.url = self.url + 'prepare-dip/'
         res = self.client.post(self.url, {'label': 'foo'})
 
-        mock_prepare.assert_called_once_with(label='foo', object_identifier_value=None)
+        mock_prepare.assert_called_once_with(label='foo', object_identifier_value=None, orders=[])
 
     @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
     def test_prepare_dip_with_object_identifier_value(self, mock_prepare):
         self.url = self.url + 'prepare-dip/'
         res = self.client.post(self.url, {'label': 'foo', 'object_identifier_value': 'bar'})
 
-        mock_prepare.assert_called_once_with(label='foo', object_identifier_value='bar')
+        mock_prepare.assert_called_once_with(label='foo', object_identifier_value='bar', orders=[])
 
     @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
     def test_prepare_dip_with_existing_object_identifier_value(self, mock_prepare):
@@ -568,6 +569,24 @@ class InformationPackageViewSetTestCase(TestCase):
 
         InformationPackage.objects.create(ObjectIdentifierValue='bar')
         res = self.client.post(self.url, {'label': 'foo', 'object_identifier_value': 'bar'})
+
+        mock_prepare.assert_not_called()
+
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_with_orders(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+
+        orders = [str(Order.objects.create(responsible=self.user).pk)]
+        res = self.client.post(self.url, {'label': 'foo', 'orders': orders}, format='json')
+
+        mock_prepare.assert_called_once_with(label='foo', object_identifier_value=None, orders=orders)
+
+    @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
+    def test_prepare_dip_with_non_existing_order(self, mock_prepare):
+        self.url = self.url + 'prepare-dip/'
+
+        orders = [str(Order.objects.create(responsible=self.user).pk), str(uuid.uuid4())]
+        res = self.client.post(self.url, {'label': 'foo', 'orders': orders}, format='json')
 
         mock_prepare.assert_not_called()
 

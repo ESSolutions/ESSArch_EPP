@@ -405,12 +405,22 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+        orders = request.data.get('orders', [])
+
+        for order in orders:
+            if not Order.objects.filter(pk=order, responsible=request.user).exists():
+                return Response(
+                    {'status': 'Order "%s" belonging to current user does not exist' % order},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         main_step = ProcessStep.objects.create(name='Prepare DIP',)
         task = ProcessTask.objects.create(
             name='workflow.tasks.PrepareDIP',
             params={
                 'label': label,
                 'object_identifier_value': object_identifier_value,
+                'orders': orders
             },
             processstep=main_step,
             responsible=self.request.user,

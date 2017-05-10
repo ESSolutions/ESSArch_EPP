@@ -423,7 +423,7 @@ class AccessAIP(DBTask):
 
 
 class PrepareDIP(DBTask):
-    def run(self, label=None, object_identifier_value=None):
+    def run(self, label=None, object_identifier_value=None, orders=[]):
         disseminations = Path.objects.get(entity='disseminations').value
 
         ip = InformationPackage.objects.create(
@@ -435,6 +435,7 @@ class PrepareDIP(DBTask):
         )
 
         self.ip = ip.pk
+        ip.orders.add(*orders)
 
         ProcessTask.objects.filter(pk=self.request.id).update(
             information_package=ip,
@@ -452,10 +453,10 @@ class PrepareDIP(DBTask):
 
         return ip.pk
 
-    def undo(self, label=None, object_identifier_value=None):
+    def undo(self, label=None, object_identifier_value=None, orders=[]):
         pass
 
-    def event_outcome_success(self, label=None, object_identifier_value=None):
+    def event_outcome_success(self, label=None, object_identifier_value=None, orders=[]):
         return 'Prepared DIP "%s"' % self.ip
 
 
