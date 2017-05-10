@@ -549,7 +549,7 @@ class InformationPackageViewSetFilesTestCase(TestCase):
 
         self.datadir = tempfile.mkdtemp()
 
-        self.ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        self.ip = InformationPackage.objects.create(ObjectPath=self.datadir, package_type=InformationPackage.DIP)
         self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
         self.url = self.url + 'files/'
 
