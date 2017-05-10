@@ -243,5 +243,7 @@
     "ENTERNEWFOLDERNAME": "Enter new folder name",
     "FILE_EXISTS_IN_DIP": "File with this name already exists!",
     "FILE_EXISTS_IN_DIP_DESC": "File with this name already exists in the dissemination. Do you want to overwrite current file?",
+    "DIR_EXISTS_IN_DIP": "Folder with this name already exists!",
+    "DIR_EXISTS_IN_DIP_DESC": "Folder with this name already exists in the dissemination. Do you want to overwrite current folder?",
     "REFRESH": "Refresh"
 }

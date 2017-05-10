@@ -255,6 +255,13 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             ariaDescribedBy: 'modal-body',
             templateUrl: 'static/frontend/views/file-exists-modal.html',
             scope: $scope,
+            resolve: {
+                data: function() {
+                    return {
+                        file: file
+                    };
+                }
+            },
             controller: 'ModalInstanceCtrl',
             controllerAs: '$ctrl'
         })
@@ -266,7 +273,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         });
     }
 
-    function folderNameExistsModal(index, file) {
+    function folderNameExistsModal(index, folder) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
@@ -274,7 +281,14 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             templateUrl: 'static/frontend/views/file-exists-modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function() {
+                    return {
+                        file: folder
+                    };
+                }
+            },
         })
         modalInstance.result.then(function(data) {
             listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(2), file)

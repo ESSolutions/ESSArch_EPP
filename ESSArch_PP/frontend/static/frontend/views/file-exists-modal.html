@@ -1,9 +1,12 @@
 <div class="enter-profile-name">
-    <h3 style="margin: 15px;" class="modal-title" id="modal-title">{{'FILE_EXISTS_IN_DIP' | translate}}</h3>
+    <h3 ng-if="$ctrl.file.type == 'file'" style="margin: 15px;" class="modal-title" id="modal-title">{{'FILE_EXISTS_IN_DIP' | translate}}</h3>
+    <h3 ng-if="$ctrl.file.type == 'dir'" style="margin: 15px;" class="modal-title" id="modal-title">{{'DIR_EXISTS_IN_DIP' | translate}}</h3>
 </div>
 <form ng-submit="$ctrl.overwrite()">
     <div class="modal-body" id="modal-body">
-        <p for="label">{{'FILE_EXISTS_IN_DIP_DESC' | translate}}</p>
+        <p ng-if="$ctrl.file.type == 'file'" for="label">{{'FILE_EXISTS_IN_DIP_DESC' | translate}}</p>
+        <p ng-if="$ctrl.file.type == 'dir'" for="label">{{'DIR_EXISTS_IN_DIP_DESC' | translate}}</p>
+        <b>{{$ctrl.file.name}}</b>
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" type="submit">{{'OK' | translate}}</button>

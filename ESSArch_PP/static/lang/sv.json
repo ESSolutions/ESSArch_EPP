@@ -243,6 +243,7 @@
     "ENTERNEWFOLDERNAME": "Ange namn för ny mapp",
     "FILE_EXISTS_IN_DIP": "Det existerar redan en fil med samma namn!",
     "FILE_EXISTS_IN_DIP_DESC": "Det existerar redan en fil med detta namn i utlämnandet. Vill du skriva över den nuvarande filen?",
+    "DIR_EXISTS_IN_DIP": "Det existerar redan en mapp med samma namn!",
+    "DIR_EXISTS_IN_DIP_DESC": "Det existerar redan en mapp med detta namn i utlämnandet. Vill du skriva över den nuvarande mappen?",
     "REFRESH": "Uppdatera"
-
 }
