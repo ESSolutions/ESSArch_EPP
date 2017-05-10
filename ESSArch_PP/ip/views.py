@@ -54,7 +54,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.ip.permissions import IsResponsibleOrReadOnly
+from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
 from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
@@ -699,3 +699,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [IsOrderResponsibleOrAdmin]
+
+    def get_queryset(self):
+        if self.action == 'list':
+            if self.request.user.is_superuser:
+                return self.queryset
+
+            return self.queryset.filter(responsible=self.request.user)
+
+        return self.queryset

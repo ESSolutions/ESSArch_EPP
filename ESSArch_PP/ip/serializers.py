@@ -213,6 +213,10 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
 
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
+    responsible = serializers.HyperlinkedRelatedField(
+        view_name='user-detail', read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
     information_packages = serializers.HyperlinkedRelatedField(
         many=True, required=False, view_name='informationpackage-detail',
         queryset=InformationPackage.objects.filter(

@@ -656,3 +656,76 @@ class InformationPackageViewSetFilesTestCase(TestCase):
         res = self.client.post(self.url, {'path': path, 'type': 'file'})
 
         self.assertTrue(os.path.isfile(os.path.join(self.ip.ObjectPath, path)))
+
+
+class OrderViewSetTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="admin")
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_list_empty(self):
+        url = reverse('order-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.data, [])
+
+    def test_list_only_owned(self):
+        other_user = User.objects.create(username="user")
+        order = Order.objects.create(responsible=self.user)
+        other_order = Order.objects.create(responsible=other_user)
+
+        url = reverse('order-list')
+        res = self.client.get(url)
+
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['id'], str(order.pk))
+
+    def test_list_all_if_superuser(self):
+        other_user = User.objects.create(username="user")
+        order = Order.objects.create(responsible=self.user)
+        other_order = Order.objects.create(responsible=other_user)
+
+        self.user.is_superuser = True
+        self.user.save()
+
+        url = reverse('order-list')
+        res = self.client.get(url)
+
+        self.assertEqual(len(res.data), 2)
+
+    def test_detail_owned(self):
+        order = Order.objects.create(responsible=self.user)
+
+        url = reverse('order-detail', args=[order.pk])
+        res = self.client.get(url)
+
+        self.assertEqual(res.data['id'], str(order.pk))
+
+    def test_detail_non_existing(self):
+        url = reverse('order-detail', args=[uuid.uuid4()])
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_deny_detail_other(self):
+        other_user = User.objects.create(username="user")
+        order = Order.objects.create(responsible=other_user)
+
+        url = reverse('order-detail', args=[order.pk])
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_detail_other_super_user(self):
+        other_user = User.objects.create(username="user")
+        order = Order.objects.create(responsible=other_user)
+
+        self.user.is_superuser = True
+        self.user.save()
+
+        url = reverse('order-detail', args=[order.pk])
+        res = self.client.get(url)
+
+        self.assertEqual(res.data['id'], str(order.pk))
