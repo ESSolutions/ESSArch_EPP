@@ -729,3 +729,28 @@ class OrderViewSetTestCase(TestCase):
         res = self.client.get(url)
 
         self.assertEqual(res.data['id'], str(order.pk))
+
+    def test_create_without_ip(self):
+        url = reverse('order-list')
+        res = self.client.post(url, {'label': 'foo'})
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['label'], 'foo')
+        self.assertTrue(Order.objects.filter(label='foo', responsible=self.user).exists())
+
+    def test_create_with_dip(self):
+        url = reverse('order-list')
+        ip = InformationPackage.objects.create(package_type=InformationPackage.DIP)
+        ip_url = reverse('informationpackage-detail', args=[ip.pk])
+        res = self.client.post(url, {'label': 'foo', 'information_packages': [ip_url]})
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Order.objects.first().information_packages.first(), ip)
+
+    def test_create_with_ip_other_than_dip(self):
+        url = reverse('order-list')
+        ip = InformationPackage.objects.create(package_type=InformationPackage.SIP)
+        ip_url = reverse('informationpackage-detail', args=[ip.pk])
+        res = self.client.post(url, {'label': 'foo', 'information_packages': [ip_url]})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
