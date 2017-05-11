@@ -302,7 +302,10 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             if view_type == 'ip':
                 return self.queryset.exclude(
                     package_type=InformationPackage.AIC,
-                ).filter(generation=0)
+                ).filter(
+                    Q(package_type=InformationPackage.AIP, generation=0) |
+                    ~Q(package_type=InformationPackage.AIP)
+                )
 
             return self.queryset.filter(aic__isnull=True)
 
