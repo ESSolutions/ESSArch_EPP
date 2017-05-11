@@ -20,10 +20,12 @@
                             </div>
                         </div>
                         <div class="request-params">
-                            <label ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
-                                {{'PURPOSE' | translate}}
+                            <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
+                                <label>
+                                    {{'PURPOSE' | translate}}
+                                </label>
                                 <input required class="form-control" ng-model="vm.request.purpose">
-                            </label>
+                            </div>
                         </div>
                     </form>
                 </div>

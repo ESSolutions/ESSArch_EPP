@@ -12,32 +12,42 @@
                                 </label><br/>
                             </div>
                             <div class="request-params">
-                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                                    Purpose
+                                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                                    <label>
+                                        Purpose
+                                    </label>
                                     <input class="form-control" required="true" ng-model="vm.request.purpose">
-                                </label>
-                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                                    Archive policy
+                                </div>
+                                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                                    <label>
+                                        Archive policy
+                                    </label>
                                     <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
-                                </label>
-                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                                    Information class
+                                </div>
+                                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                                    <label>
+                                        Information class
+                                    </label>
                                     <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
-                                </label>
+                                </div>
                                 <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
-                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                                    Tags
+                                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                                    <label>
+                                        Tags
+                                    </label>
                                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
                                         <ui-select-match placeholder="Select tags...">{{$item.name}}</ui-select-match>
                                         <ui-select-choices repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
                                             <div ng-bind-html="x.name | highlight: $select.search"></div>
                                         </ui-select-choices>
                                     </ui-select>
-                                </label>
-                                <label ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                                </div>
+                                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                                     <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
-                                    Allow unknown files
-                                </label>
+                                    <label>
+                                        Allow unknown files
+                                    </label>
+                                </div>
                             </div>
                             </form>
                         </div>

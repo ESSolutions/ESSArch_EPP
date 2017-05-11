@@ -8,29 +8,31 @@
                 <form id="request-form" class="request-form" ng-submit="accessIp(ip, vm.request)">
                     <div class="request-type">
                         <div ng-if="checkPermission('ip.view')">
+                            <input type="radio" ng-model="vm.request.type" value="view">
                             <label>
-                                <input type="radio" ng-model="vm.request.type" value="view">
                                 {{'GET' | translate}}
                             </label>
                         </div>
                         <div ng-if="checkPermission('ip.view_tar')">
+                            <input type="radio" ng-model="vm.request.type" value="view_tar">
                             <label>
-                                <input type="radio" ng-model="vm.request.type" value="view_tar">
                                 {{'GET_AS_CONTAINER' | translate}}
                             </label>
                         </div>
                         <div ng-if="checkPermission('ip.edit_as_new')">
+                            <input type="radio" ng-model="vm.request.type" value="edit_as_new">
                             <label>
-                                <input type="radio" ng-model="vm.request.type" value="edit_as_new">
                                 {{'GET_AS_NEW_GENERATION' | translate}}
                             </label>
                         </div>
                     </div>
                     <div class="request-params">
-                        <label ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
-                            {{'PURPOSE' | translate}}
+                        <div ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
+                            <label>
+                                {{'PURPOSE' | translate}}
+                            </label>
                             <input required class="form-control" ng-model="vm.request.purpose">
-                        </label>
+                        </div>
                     </div>
                 </form>
             </div>
