@@ -109,6 +109,29 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         });
         return promise;
     }
+    function getOrderPage(pageNumber, pageSize, filters, sortString, searchString) {
+        var orderUrl = appConfig.djangoUrl + 'orders/';
+        var promise = $http({
+            method: 'GET',
+            url: orderUrl,
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function successCallback(response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+        return promise;
+    }
 
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state, columnFilters) {
         var promise = $http({
@@ -486,11 +509,12 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         });
     }
 
-    function prepareDip(label, objectIdentifierValue) {
+    function prepareDip(label, objectIdentifierValue, orders) {
         return $http.post(appConfig.djangoUrl + "information-packages/prepare-dip/",
             {
                 label: label,
-                object_identifier_value: objectIdentifierValue
+                object_identifier_value: objectIdentifierValue,
+                orders: orders
             }).then(function (response) {
                 return response.data;
             });
@@ -765,5 +789,6 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         deleteFile: deleteFile,
         prepareDip: prepareDip,
         getDipPage: getDipPage,
+        getOrderPage: getOrderPage,
     };
 });

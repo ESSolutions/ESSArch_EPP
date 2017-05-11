@@ -119,7 +119,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-        function getDips(start, number, pageNumber, params, selected, sort, search, columnFilters) {
+    function getDips(start, number, pageNumber, params, selected, sort, search, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -129,6 +129,26 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             ipCollection.forEach(function(ip) {
                 ip.collapsed = false;
                 if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    ip.class = "selected"
+                }
+            });
+            return {
+                data: ipCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getOrders(start, number, pageNumber, params, selected, sort, search) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return listViewService.getOrderPage(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
+            var ipCollection = value.data;
+            ipCollection.forEach(function(ip) {
+                ip.collapsed = false;
+                if (ip.id === selected.id) {
                     ip.class = "selected"
                 }
             });
@@ -203,5 +223,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getStorageObjects: getStorageObjects,
         getWorkareaIps: getWorkareaIps,
         getDips: getDips,
+        getOrders: getOrders,
     };
 });

@@ -29,7 +29,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.error_messages_pw1 = [];
     $ctrl.error_messages_pw2 = [];
     $ctrl.objectIdentifierValue = "";
-    $ctrl.order = "";
+    $ctrl.orders = [];
     $ctrl.label = "";
     $ctrl.dir_name = "";
     $ctrl.email = {
@@ -65,7 +65,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.data = {
             label: $ctrl.label,
             objectIdentifierValue: $ctrl.objectIdentifierValue,
-            order: $ctrl.order
+            orders: $ctrl.orders
         };
         $uibModalInstance.close($ctrl.data);
     };

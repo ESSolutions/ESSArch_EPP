@@ -3,8 +3,9 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     var vm = this;
     $scope.select = true;
     $scope.ip = $stateParams.ip;
-    $http.get("static/frontend/scripts/json_data/orders.json").then(function(response) {
-        $scope.orderObjects = response.data.orders;
+    $scope.orderObjects = [];
+    listViewService.getOrderPage().then(function(response) {
+        $scope.orderObjects = response.data;
     });
     if ($scope.ip != null) {
         $scope.selectIp($scope.ip);
@@ -462,12 +463,12 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             controllerAs: '$ctrl'
         })
         modalInstance.result.then(function(data) {
-            $scope.prepareDip(data.label, data.objectIdentifierValue, data.order);
+            $scope.prepareDip(data.label, data.objectIdentifierValue, data.orders);
         });
     }
 
     $scope.prepareDip = function(label, objectIdentifierValue, orders) {
-        listViewService.prepareDip(label, objectIdentifierValue).then(function(response) {
+        listViewService.prepareDip(label, objectIdentifierValue, orders).then(function(response) {
             $timeout(function() {
                 $scope.getListViewData();
             });

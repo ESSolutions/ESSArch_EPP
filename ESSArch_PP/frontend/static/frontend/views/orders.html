@@ -19,13 +19,13 @@
                                 </tr>
                                 <tr>
                                     <th class="clickable" st-sort="label" class="column-label">{{'LABEL' | translate}}</th>
-                                    <th class="clickable" st-sort="CreateDate" st-sort-default="reverse" class="column-label">{{'DATE' | translate}}</th>
+                                    <th class="clickable" st-sort="responsible" st-sort-default="reverse" class="column-label">{{'RESPONSIBLE' | translate}}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-class="row.class" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
                                     <td class="clickable" ng-click="ipTableClick(row);selectIp(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.label}}</td>
-                                    <td class="clickable" ng-click="ipRowClick(row)">{{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                                    <td class="clickable" ng-click="ipRowClick(row)">{{row.responsible}}</td>
                                     <td ng-click="ipRowClick(row)">
                                         <button type="button"
                                                 ng-if="row.Responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
