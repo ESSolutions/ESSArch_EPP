@@ -245,5 +245,12 @@
     "FILE_EXISTS_IN_DIP_DESC": "Det existerar redan en fil med detta namn i utlämnandet. Vill du skriva över den nuvarande filen?",
     "DIR_EXISTS_IN_DIP": "Det existerar redan en mapp med samma namn!",
     "DIR_EXISTS_IN_DIP_DESC": "Det existerar redan en mapp med detta namn i utlämnandet. Vill du skriva över den nuvarande mappen?",
-    "REFRESH": "Uppdatera"
+    "REFRESH": "Uppdatera",
+    "ARCHIVE_POLICY": "Archivpolicy",
+    "INFORMATION_CLASS": "Informationsklass",
+    "TAGS": "Taggar",
+    "ALLOW_UNKNOWN_FILES": "Tillåt okända filer",
+    "SELECT_TAGS": "Välj taggar ...",
+    "RECEIVE": "Ta emot",
+    "SELECT_ORDERS": "Välj beställningar .."
 }

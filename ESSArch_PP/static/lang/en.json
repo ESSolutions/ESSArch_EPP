@@ -245,5 +245,12 @@
     "FILE_EXISTS_IN_DIP_DESC": "File with this name already exists in the dissemination. Do you want to overwrite current file?",
     "DIR_EXISTS_IN_DIP": "Folder with this name already exists!",
     "DIR_EXISTS_IN_DIP_DESC": "Folder with this name already exists in the dissemination. Do you want to overwrite current folder?",
-    "REFRESH": "Refresh"
+    "REFRESH": "Refresh",
+    "ARCHIVE_POLICY": "Archive policy",
+    "INFORMATION_CLASS": "Information class",
+    "TAGS": "Tags",
+    "ALLOW_UNKNOWN_FILES": "Allow unknown files",
+    "SELECT_TAGS": "Select tags ...",
+    "RECEIVE": "Receive",
+    "SELECT_ORDERS": "Select orders .."
 }
