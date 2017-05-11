@@ -1,13 +1,18 @@
+from django.db.models import Q
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
+from rest_framework_extensions.mixins import NestedViewSetMixin
+
 from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.tags.models import Tag
 
 from ip.serializers import InformationPackageSerializer
+from ip.views import InformationPackageViewSet
 from tags.filters import TagFilter
 from tags.serializers import TagSerializer
 
@@ -22,15 +27,14 @@ class TagViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = TagFilter
 
-    @detail_route(url_path='information-packages')
-    def information_packages(self, request, pk=None):
-        tag = self.get_object()
-        leaves = tag.get_leafnodes(include_self=True).prefetch_related('information_packages')
-        ips = list(set(ip for l in leaves for ip in l.information_packages.all()))
 
-        page = self.paginate_queryset(ips)
-        if page is not None:
-            serializers = InformationPackageSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializers.data)
-        serializers = InformationPackageSerializer(ips, many=True, context={'request': request})
-        return Response(serializers.data)
+class TagInformationPackagesViewSet(NestedViewSetMixin, InformationPackageViewSet):
+    def filter_queryset_by_parents_lookups(self, queryset):
+        parents_query_dict = self.get_parents_query_dict()
+        tag = parents_query_dict['tag']
+        leaves = Tag.objects.get(pk=tag).get_leafnodes(include_self=True)
+
+        return queryset.filter(
+            Q(tags__in=leaves) | Q(information_packages__tags__in=leaves) |
+            Q(aic__information_packages__tags__in=leaves)
+        ).distinct()

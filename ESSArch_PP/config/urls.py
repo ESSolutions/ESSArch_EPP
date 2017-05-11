@@ -69,7 +69,7 @@ from storage.views import (
     TapeSlotViewSet,
 )
 
-from tags.views import TagViewSet
+from tags.views import TagViewSet, TagInformationPackagesViewSet
 
 from workflow.views import ProcessStepViewSet, ProcessTaskViewSet
 
@@ -98,7 +98,15 @@ router.register(r'permissions', PermissionViewSet)
 router.register(r'robots', RobotViewSet)
 router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
+
 router.register(r'tags', TagViewSet)
+router.register(r'tags', TagViewSet, base_name='tags').register(
+    r'information-packages',
+    TagInformationPackagesViewSet,
+    base_name='tags-informationpackages',
+    parents_query_lookups=['tag']
+)
+
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'workarea', WorkareaViewSet, base_name='workarea')
