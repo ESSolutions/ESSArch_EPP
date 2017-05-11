@@ -53,11 +53,13 @@ class InformationPackageFilter(django_filters.FilterSet):
     end_date = ListFilter(name='Enddate', method='filter_fields')
 
     def filter_fields(self, queryset, name, value):
-        if self.data.get('view_type') == 'aic':
+        view_type = self.data.get('view_type', 'aic')
+
+        if view_type == 'aic':
             return queryset.filter(
                 **{'information_packages__%s__icontains' % name: value}
             ).distinct()
-        elif self.data.get('view_type') == 'ip':
+        elif view_type == 'ip':
             return queryset.filter(
                 Q(
                     Q(**{'%s__icontains' % name: value}) |
@@ -71,12 +73,13 @@ class InformationPackageFilter(django_filters.FilterSet):
 
     def filter_fields_in_list(self, queryset, name, value):
         value_list = value.split(u',')
+        view_type = self.data.get('view_type', 'aic')
 
-        if self.data.get('view_type') == 'aic':
+        if view_type == 'aic':
             return queryset.filter(
                 **{'information_packages__%s__in' % name: value_list}
             ).distinct()
-        elif self.data.get('view_type') == 'ip':
+        elif view_type == 'ip':
             return queryset.filter(
                 Q(
                     Q(**{'%s__in' % name: value_list}) |
