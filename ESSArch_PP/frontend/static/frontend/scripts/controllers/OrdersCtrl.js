@@ -1,4 +1,4 @@
-angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal) {
+angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     //Cancel update intervals on state change
@@ -194,9 +194,18 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             controller: 'ModalInstanceCtrl',
             controllerAs: '$ctrl'
         })
-        modalInstance.closed.then(function (data) {
+        modalInstance.result.then(function (data) {
+            $scope.prepareOrder(data.label);
         });
     }
+    $scope.prepareOrder = function(label) {
+        listViewService.prepareOrder(label).then(function(result) {
+            $timeout(function() {
+                $scope.getListViewData();
+            });
+        });
+    }
+
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {

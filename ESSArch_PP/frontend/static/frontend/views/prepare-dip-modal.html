@@ -8,9 +8,6 @@
         <button type="button" class="btn btn-default" ng-click="optionalOptions = !optionalOptions" style="margin-top: 10px;"><i class="fa fa-minus" ng-if="optionalOptions"></i><i class="fa fa-plus" ng-if="!optionalOptions"></i> {{'OPTIONS' | translate}}</button>
         <div ng-if="optionalOptions" class="form-group" style="margin-top: 15px;">
             <label for="orders" translate="ORDERS"></label>
-            <ul>
-                <li ng-repeat="x in orderObjects">{{x.label}}</li>
-            </ul>
             <select class="form-control" multiple ng-model="$ctrl.orders" ng-options="x.id as x.label for x in orderObjects">x</select>
             <br />
             <label for="objectIdentifierValue">{{'CUSTOM_IDENTIFICATION' | translate}}</label>

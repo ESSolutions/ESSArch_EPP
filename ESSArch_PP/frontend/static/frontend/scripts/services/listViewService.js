@@ -519,6 +519,16 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
                 return response.data;
             });
     };
+
+    function prepareOrder(label) {
+        return $http( {
+            method: 'POST',
+            url: appConfig.djangoUrl + 'orders/',
+            data: {label: label}
+        }).then(function(response){
+            return response.data;
+        })
+    }
     function getWorkareaDir(workareaType, pathStr) {
         var sendData;
         if (pathStr == "") {
@@ -790,5 +800,6 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         prepareDip: prepareDip,
         getDipPage: getDipPage,
         getOrderPage: getOrderPage,
+        prepareOrder: prepareOrder,
     };
 });
