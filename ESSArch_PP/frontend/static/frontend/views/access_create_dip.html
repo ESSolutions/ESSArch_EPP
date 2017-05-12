@@ -17,7 +17,7 @@
                     </div>
                 </div>
             </div>
-            <button ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
+            <button ng-if="selectedCards1.length" ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
             <hr />
             <div class="file-explorer">
                 <div class="file-explorer-nav">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <button ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
+            <button ng-if="selectedCards2.length" ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
             <button ng-click="newDirModal()" class="btn btn-default">{{'NEWFOLDER' | translate}}</button>
         </div>
         <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">

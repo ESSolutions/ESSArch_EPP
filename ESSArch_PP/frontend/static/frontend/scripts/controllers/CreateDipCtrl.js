@@ -421,19 +421,29 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.selectedCards2 = [];
     $scope.cardSelect = function(whichArray, card) {
         if (whichArray == 1) {
-            if ($scope.selectedCards1.includes(card)) {
+            if (includesWithProperty($scope.selectedCards1, "name", card.name)) {
                 $scope.selectedCards1.splice($scope.selectedCards1.indexOf(card), 1);
             } else {
                 $scope.selectedCards1.push(card);
             }
         } else {
-            if ($scope.selectedCards2.includes(card)) {
+            if (includesWithProperty($scope.selectedCards2, "name", card.name)) {
                 $scope.selectedCards2.splice($scope.selectedCards2.indexOf(card), 1);
             } else {
                 $scope.selectedCards2.push(card);
             }
         }
     };
+
+    function includesWithProperty(array, property, value) {
+        for(i=0; i < array.length; i++) {
+            if(array[i][property] === value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     $scope.isSelected = function(whichArray, card) {
         var cardClass = "";
         if (whichArray == 1) {
