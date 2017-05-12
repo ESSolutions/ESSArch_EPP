@@ -56,6 +56,7 @@
     "karma-safari-launcher": "^1.0.0",
     "moment": "^2.17.1",
     "ng-flow": "https://github.com/OskarPersson/ng-flow.git",
+    "normalize-scss": "^6.0.0",
     "protractor": "^4.0.14",
     "select2": "~4.0.3",
     "ua-parser-js": "^0.7.12",
