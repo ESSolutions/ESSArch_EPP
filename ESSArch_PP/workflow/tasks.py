@@ -460,6 +460,34 @@ class PrepareDIP(DBTask):
         return 'Prepared DIP "%s"' % self.ip
 
 
+class CreateDIP(DBTask):
+    def run(self, ip=None):
+        ip = InformationPackage.objects.get(pk=ip)
+
+        ip.State = 'Creating'
+        ip.save(update_fields=['State'])
+
+        src = ip.ObjectPath
+        order_path = Path.objects.get(entity='orders').value
+
+        order_count = ip.orders.count()
+
+        for idx, order in enumerate(ip.orders.all()):
+            dst = os.path.join(order_path, str(order.pk), ip.ObjectIdentifierValue)
+            shutil.copytree(src, dst)
+
+            self.set_progress(idx+1, order_count)
+
+        ip.State = 'Created'
+        ip.save(update_fields=['State'])
+
+    def undo(self, ip=None):
+        pass
+
+    def event_outcome_success(self, ip=None):
+        return 'Created DIP "%s"' % ip
+
+
 class PollIOQueue(DBTask):
     def get_storage_medium(self, entry, storage_target, storage_type):
         if storage_type == TAPE:

@@ -388,6 +388,43 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         return Response(['Accessing AIP %s...' % pk])
 
+    @detail_route(methods=['post'], url_path='create-dip')
+    def create_dip(self, request, pk=None):
+        dip = InformationPackage.objects.get(pk=pk)
+
+        if dip.package_type != InformationPackage.DIP:
+            return Response(
+                {'status': '"%s" is not a DIP, it is a %s' % (dip, dip.package_type)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if dip.State != 'Prepared':
+            return Response(
+                {'status': '"%s" is not in the "Prepared" state'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        step = ProcessStep.objects.create(
+            name="Create DIP",
+            eager=False,
+            information_package=dip,
+        )
+
+        task = ProcessTask.objects.create(
+            name="workflow.tasks.CreateDIP",
+            params={
+                'ip': str(dip.pk),
+            },
+            processstep=step,
+            information_package=dip,
+            responsible=request.user,
+            eager=False,
+        )
+
+        task.run()
+
+        return Response()
+
     @list_route(methods=['post'], url_path='prepare-dip')
     def prepare_dip(self, request):
         try:
