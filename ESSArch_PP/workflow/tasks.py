@@ -464,6 +464,9 @@ class CreateDIP(DBTask):
     def run(self, ip):
         ip = InformationPackage.objects.get(pk=ip)
 
+        if ip.package_type != InformationPackage.DIP:
+            raise ValueError('"%s" is not a DIP, it is a "%s"' % (ip, ip.package_type))
+
         ip.State = 'Creating'
         ip.save(update_fields=['State'])
 

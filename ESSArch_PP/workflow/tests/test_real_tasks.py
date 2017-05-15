@@ -1081,7 +1081,7 @@ class CreateDIPTestCase(TransactionTestCase):
     def setUp(self):
         self.orders = Path.objects.create(entity='orders', value='orders').value
         self.task = "workflow.tasks.CreateDIP"
-        self.ip = InformationPackage.objects.create(ObjectPath='workarea', package_type=InformationPackage.DIP)
+        self.ip = InformationPackage.objects.create(State='initial', ObjectPath='workarea', package_type=InformationPackage.DIP)
         self.user = User.objects.create(username="admin")
 
     @mock.patch('workflow.tasks.shutil.copytree')
@@ -1127,6 +1127,24 @@ class CreateDIPTestCase(TransactionTestCase):
         mock_copy.assert_has_calls(calls)
         self.ip.refresh_from_db()
         self.assertEqual(self.ip.State, 'Created')
+
+    @mock.patch('workflow.tasks.shutil.copytree')
+    def test_not_dip(self, mock_copy):
+        self.ip.package_type = InformationPackage.SIP
+        self.ip.save()
+
+        order = Order.objects.create(label='foo', responsible=self.user)
+        self.ip.orders.add(order)
+
+        with self.assertRaises(ValueError):
+            ProcessTask.objects.create(
+                name=self.task,
+                args=[str(self.ip.pk)],
+            ).run().get()
+
+        mock_copy.assert_not_called()
+        self.ip.refresh_from_db()
+        self.assertEqual(self.ip.State, 'initial')
 
 
 @tag('tape')
