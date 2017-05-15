@@ -1073,7 +1073,6 @@ class PrepareDIPTestCase(TransactionTestCase):
 
         ip = InformationPackage.objects.filter(package_type=InformationPackage.DIP)
         self.assertTrue(ip.exists())
-        self.assertQuerysetEqual(ip.get().orders.all(), [order1, order2], ordered=False)
         self.assertIn(order1, ip.get().orders.all())
         self.assertIn(order2, ip.get().orders.all())
 
