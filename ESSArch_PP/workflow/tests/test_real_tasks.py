@@ -1124,7 +1124,7 @@ class CreateDIPTestCase(TransactionTestCase):
             mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order1.pk), self.ip.ObjectIdentifierValue)),
             mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order2.pk), self.ip.ObjectIdentifierValue))
         ]
-        mock_copy.assert_has_calls(calls)
+        mock_copy.assert_has_calls(calls, any_order=True)
         self.ip.refresh_from_db()
         self.assertEqual(self.ip.State, 'Created')
 
