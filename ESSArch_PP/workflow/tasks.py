@@ -461,7 +461,7 @@ class PrepareDIP(DBTask):
 
 
 class CreateDIP(DBTask):
-    def run(self, ip=None):
+    def run(self, ip):
         ip = InformationPackage.objects.get(pk=ip)
 
         ip.State = 'Creating'
@@ -481,10 +481,10 @@ class CreateDIP(DBTask):
         ip.State = 'Created'
         ip.save(update_fields=['State'])
 
-    def undo(self, ip=None):
+    def undo(self, ip):
         pass
 
-    def event_outcome_success(self, ip=None):
+    def event_outcome_success(self, ip):
         return 'Created DIP "%s"' % ip
 
 
