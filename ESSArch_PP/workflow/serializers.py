@@ -96,8 +96,12 @@ class ProcessTaskSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ProcessTaskDetailSerializer(ProcessTaskSerializer):
+    args = serializers.SerializerMethodField()
     params = serializers.SerializerMethodField()
     result = serializers.SerializerMethodField()
+
+    def get_args(self, obj):
+        return obj.args
 
     def get_params(self, obj):
         return dict((str(k), str(v)) for k, v in obj.params.iteritems())
@@ -108,8 +112,8 @@ class ProcessTaskDetailSerializer(ProcessTaskSerializer):
     class Meta:
         model = ProcessTaskSerializer.Meta.model
         fields = ProcessTaskSerializer.Meta.fields + (
-            'params', 'result', 'traceback', 'exception',
+            'args', 'params', 'result', 'traceback', 'exception',
         )
         read_only_fields = ProcessTaskSerializer.Meta.read_only_fields + (
-            'params', 'result', 'traceback', 'exception',
+            'args', 'params', 'result', 'traceback', 'exception',
         )
