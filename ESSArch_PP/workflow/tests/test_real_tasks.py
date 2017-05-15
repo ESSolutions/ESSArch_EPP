@@ -1077,6 +1077,58 @@ class PrepareDIPTestCase(TransactionTestCase):
         self.assertIn(order2, ip.get().orders.all())
 
 
+class CreateDIPTestCase(TransactionTestCase):
+    def setUp(self):
+        self.orders = Path.objects.create(entity='orders', value='orders').value
+        self.task = "workflow.tasks.CreateDIP"
+        self.ip = InformationPackage.objects.create(ObjectPath='workarea', package_type=InformationPackage.DIP)
+        self.user = User.objects.create(username="admin")
+
+    @mock.patch('workflow.tasks.shutil.copytree')
+    def test_no_orders(self, mock_copy):
+        ProcessTask.objects.create(
+            name=self.task,
+            args=[str(self.ip.pk)],
+        ).run().get()
+
+        mock_copy.assert_not_called()
+        self.ip.refresh_from_db()
+        self.assertEqual(self.ip.State, 'Created')
+
+    @mock.patch('workflow.tasks.shutil.copytree')
+    def test_with_order(self, mock_copy):
+        order = Order.objects.create(label='foo', responsible=self.user)
+        self.ip.orders.add(order)
+
+        ProcessTask.objects.create(
+            name=self.task,
+            args=[str(self.ip.pk)],
+        ).run().get()
+
+        mock_copy.assert_called_once_with(self.ip.ObjectPath, os.path.join(self.orders, str(order.pk), self.ip.ObjectIdentifierValue))
+        self.ip.refresh_from_db()
+        self.assertEqual(self.ip.State, 'Created')
+
+    @mock.patch('workflow.tasks.shutil.copytree')
+    def test_with_multiple_orders(self, mock_copy):
+        order1 = Order.objects.create(label='foo', responsible=self.user)
+        order2 = Order.objects.create(label='bar', responsible=self.user)
+        self.ip.orders.add(order1, order2)
+
+        ProcessTask.objects.create(
+            name=self.task,
+            args=[str(self.ip.pk)],
+        ).run().get()
+
+        calls = [
+            mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order1.pk), self.ip.ObjectIdentifierValue)),
+            mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order2.pk), self.ip.ObjectIdentifierValue))
+        ]
+        mock_copy.assert_has_calls(calls)
+        self.ip.refresh_from_db()
+        self.assertEqual(self.ip.State, 'Created')
+
+
 @tag('tape')
 @override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class PollRobotQueueTestCase(TransactionTestCase):
