@@ -47,6 +47,7 @@ from ESSArch_Core.ip.models import (
     ArchivalLocation,
     ArchivalType,
     InformationPackage,
+    Order,
     Workarea,
 )
 
@@ -1022,6 +1023,59 @@ class AccessAIPTestCase(TransactionTestCase):
         self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=0).count(), 1)
         self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=1).count(), 1)
         self.assertEqual(InformationPackage.objects.filter(aic=ip.aic, generation=2).count(), 1)
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+class PrepareDIPTestCase(TransactionTestCase):
+    def setUp(self):
+        self.disseminations = Path.objects.create(entity='disseminations', value='disseminations')
+        self.task = "workflow.tasks.PrepareDIP"
+
+    @mock.patch('workflow.tasks.os.mkdir')
+    def test_prepare_dip(self, mock_mkdir):
+        ProcessTask.objects.create(
+            name=self.task,
+            args=['new dip'],
+        ).run().get()
+
+        mock_mkdir.assert_called_once()
+        self.assertTrue(InformationPackage.objects.filter(package_type=InformationPackage.DIP).exists())
+
+    @mock.patch('workflow.tasks.os.mkdir')
+    def test_with_object_identifier_value(self, mock_mkdir):
+        ProcessTask.objects.create(
+            name=self.task,
+            args=['new dip'],
+            params={
+                'object_identifier_value': 'myobjid'
+            },
+        ).run().get()
+
+        mock_mkdir.assert_called_once()
+        self.assertTrue(InformationPackage.objects.filter(package_type=InformationPackage.DIP, ObjectIdentifierValue='myobjid').exists())
+
+    @mock.patch('workflow.tasks.os.mkdir')
+    def test_with_orders(self, mock_mkdir):
+        user = User.objects.create(username="admin")
+
+        order1 = Order.objects.create(label='first', responsible=user)
+        order2 = Order.objects.create(label='second', responsible=user)
+
+        ProcessTask.objects.create(
+            name=self.task,
+            args=['new dip'],
+            params={
+                'orders': [order1, order2]
+            },
+        ).run().get()
+
+        mock_mkdir.assert_called_once()
+
+        ip = InformationPackage.objects.filter(package_type=InformationPackage.DIP)
+        self.assertTrue(ip.exists())
+        self.assertQuerysetEqual(ip.get().orders.all(), [order1, order2], ordered=False)
+        self.assertIn(order1, ip.get().orders.all())
+        self.assertIn(order2, ip.get().orders.all())
 
 
 @tag('tape')
