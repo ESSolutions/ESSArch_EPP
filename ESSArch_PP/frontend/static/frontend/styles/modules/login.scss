@@ -1,10 +1,11 @@
+@import 'mixins';
+
 .login {
     .login-box {
-        border-style: solid;
-        border-radius: 30px;
+        @include container;
         padding: 8px;
-        width: 475px;
-        height: 400px;
+        max-width: 475px;
+        height: 450px;
         background-color: #fff;
 
         position: absolute;
@@ -12,7 +13,6 @@
         bottom: 0;
         left: 0;
         right: 0;
-
         margin: auto;
     }
     h2 {
@@ -36,5 +36,10 @@
     }
     .login-box h2 {
         margin-left: 40px;
+    }
+    .alert {
+        width: 80%;
+        margin: auto;
+        margin-top: 10px; 
     }
 }

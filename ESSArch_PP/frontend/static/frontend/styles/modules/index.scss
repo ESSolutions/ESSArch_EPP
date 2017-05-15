@@ -1,11 +1,14 @@
+@import 'colors';
+@import 'mixins';
+
 a {
     cursor: pointer;
 }
 body {
-    background-color: rgba(50, 120, 255, 0.1);
+    background-color: $body-background;
     margin: 0px auto;
-    max-width: 1440px;
-    min-width: 1220px;
+    //max-width: 1440px;
+    min-width: 650px;
     overflow: auto;
 }
 body.modal-open {
@@ -31,7 +34,7 @@ body.modal-open[style] {
     position: relative;
 }
 .selected {
-    background-color: rgba(50, 120, 255, 0.27)!important;
+    background-color: $selected !important;
 }
 .formly-field label {
     font-size: 10px;
@@ -92,16 +95,20 @@ body.modal-open[style] {
     display: -webkit-flex;
     -webkit-flex-direction: column;
     width: 100%;
-    padding: 10px;
-    border-style: solid;
     border-radius: 1px;
-    background-color: white;
     min-height: 1131px;
     height: 100%;
 }
+.header {
+    background-color: $header-color;
+    color: white;
+    padding: 10px;
+    box-shadow: 0px 5px 2px $shadow-color;
+
+}
 .logo-search-user-admin-wrapper {
     display: flex;
-    display: -webkit-flex;
+    align-items:center;
     width: 100%;
     height: 50px;
 }
@@ -135,14 +142,15 @@ body.modal-open[style] {
 }
 .user-admin {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-end;
+    justify-content: flex-end;
     display: -webkit-flex;
-    -webkit-align-items: center;
-    -webkit-justify-content: center;
+    -webkit-align-items: flex-end;
+    -webkit-justify-content: flex-end;
     width: 15%;
     height: 100%;
     float: right;
+    margin-right: 15px;
 }
 .user-dropdown {
     display: flex;
@@ -165,15 +173,15 @@ body.modal-open[style] {
 }
 .menu-task-wrapper {
     display: flex;
-    flex-direction: inline;
+    flex-direction: row;
     display: -webkit-flex;
-    -webkit-flex-direction: inline;
+    -webkit-flex-direction: row;
     width: 100%;
     height: 45px;
 }
 .menu {
     display: inline-block;
-    width: 85%;
+    width: 100%;
     height: 100%;
 }
 .tasks-icons {
@@ -183,9 +191,8 @@ body.modal-open[style] {
     display: -webkit-flex;
     -webkit-align-items: center;
     -webkit-justify-content: center;
-    width: 15%;
+    min-width: 200px;
     height: 100%;
-    margin-right: 15px;
 }
 .tasks-icons > .fa {
     margin-right: 2px;
@@ -197,9 +204,9 @@ body.modal-open[style] {
     flex-direction: column;
     display: -webkit-flex;
     -webkit-flex-direction: column;
-    width: 280px;
-    min-width: 280px;
-    margin: 5px;
+    width: 200px;
+    min-width: 150px;
+    margin: 5px 0 0 0;
     height: 1000px;
     background-color: transparent;
 }
@@ -212,10 +219,8 @@ body.modal-open[style] {
     border-radius: 20px;
 }
 .navigation {
+    @include container;
     padding: 5px;
-    border-style: solid;
-    border-radius: 10px;
-    border-color: #666;
     height: 60%;
     width: 100%;
     margin-top: 5px;
@@ -238,8 +243,8 @@ body.modal-open[style] {
         padding: 0 !important;
         display: none;
         position: fixed;
-        left: 0;
-        top: 100px;
+        left: -10px;
+        top: 95px;
         z-index: 100;
         .calendar {
             display: none;
@@ -248,17 +253,13 @@ body.modal-open[style] {
             background-color: white;
         }
     }
-    body {
-        min-width: 900px;
-    }
     .hamburger {
         margin-right: 5px;
-        margin-top: 10px;
         display: inline;
         cursor: pointer;
     }
     .dynamic-part {
-        width: 100%!important;
+        max-width: 100%!important;
     }
 }
 .step-task-pagination {
@@ -279,25 +280,21 @@ body.modal-open[style] {
     width: 100%;
     min-height: 300px;
     .request-type {
+        @include container;
         padding: 10px;
         width: 50%;
         display: flex;
         flex-direction: column;
-        border-style: solid;
-        border-color: #666;
-        border-radius: 10px 0px 0px 10px;
-        border-right-width: 1.5px;
+        border-right-width: 1px;
     }
     .request-params {
+        @include container;
         padding: 10px;
         width: 50%;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        border-style: solid;
-        border-color: #666;
-        border-radius: 0px 10px 10px 0px;
-        border-left-width: 1.5px;
+        border-left-width: 1px;
         .form-control {
             width: 75%;
         }
@@ -358,36 +355,42 @@ body.modal-open[style] {
 }
 .dynamic-part {
     height: 100%;
-    width: 80%;
+    width: 100%;
 }
-/*Shared styling among views*/
 .sub-menu {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    padding-bottom: 5px;
-    .btn-sub-menu {
-        cursor: pointer;
-        user-select: none;
-        border-radius: 5px !important;
-        border-style: solid;
-        border-width: .5px;
-        border-color: #aaa;
+    justify-content: flex-start;
+    background-color: $sub-menu;
+    color: white;
+    padding: 5px 10px 5px 10px;
+    width: 100%;
+    p {
+        font-size: 12pt;
     }
-    .btn-sub-menu:active {
-        background-color: rgba(50,120,255,1) !important;
+    .sliding-middle-out {
+        display: inline-block;
+        position: relative;
+        padding-bottom: 3px;
     }
-    .btn-sub-menu:hover {
-        background-color: rgba(50,120,255,.1) !important;
+    .sliding-middle-out:after {
+        content: '';
+        display: block;
+        margin: auto;
+        height: 1px;
+        width: 0px;
+        background: transparent;
     }
-    .btn-create-dip {
-        background-color: rgba(50,255,120,.2) !important;
+    .chosen:hover:after {
+        width: 100%;
+        height: 1px;
+        background: white;
     }
-}
-.sub-menu > button {
-    border-radius: 5px;
-    margin-right: 5px;
-    margin-left: 5px;
+    .chosen:after {
+        width: 100%;
+        height: 1px;
+        background: white;
+    }
 }
 .fa.fa-refresh {
     font-size: 20px;
@@ -473,7 +476,7 @@ body.modal-open[style] {
 .step-state-success {
     display: inline;
     color: white;
-    background-color: #4fc388;
+    background-color: $step-success;
     padding: 3px 10px;
     font-size: 9px;
     border-radius: 5px;
@@ -481,7 +484,7 @@ body.modal-open[style] {
 .step-state-failure {
     display: inline;
     color: white;
-    background-color: #f44242;
+    background-color: $step-fail;
     padding: 3px 10px;
     font-size: 9px;
     border-radius: 5px;
@@ -489,7 +492,7 @@ body.modal-open[style] {
 .step-state-in-progress {
     display: inline;
     color: white;
-    background-color: #4d94f2;
+    background-color: $step-in-progress;
     padding: 3px 10px;
     font-size: 9px;
     border-radius: 5px;
@@ -582,11 +585,10 @@ padding: 0 12px;
 .advanced-filters {
     position: absolute;
     border-style: solid;
-    border-width: 1.5px;
-    border-radius: 0px 0px 5px 5px;
-    border-color: rgba(102, 102, 102, 0.4);
+    border-width: 1px;
+    border-color: $border-color;
     max-width:400px;
-    background-color: #fff;
+    background-color: white;
     padding: 10px;
     z-index: 1000;
     margin-top: 31px;
@@ -622,7 +624,7 @@ padding: 0 12px;
     cursor: pointer;
     margin: 5px;
     border-style: solid;
-    border-color: #fff;
+    border-color: white;
     border-width: 1.5px;
     &:hover {
         border-color: rgba(102, 102, 102, 0.4);
@@ -633,4 +635,45 @@ padding: 0 12px;
 }
 .blue-border {
     border-color: rgba(102, 102, 102, 0.4);
+}
+
+/*
+* TEST NAV 
+*/
+
+
+.nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    font-size: 12pt;
+    .sliding-middle-out {
+        display: inline-block;
+        position: relative;
+        padding-bottom: 3px;
+    }
+    .sliding-middle-out:after {
+        content: '';
+        display: block;
+        margin: auto;
+        height: 1px;
+        width: 0px;
+        background: transparent;
+    }
+    .chosen:hover:after {
+        width: 100%;
+        height: 1px;
+        background: #fff;
+    }
+    .chosen:after {
+        width: 100%;
+        height: 1px;
+        background: #fff;
+    }
+}
+.nav-item {
+    cursor: pointer;
+    margin: 0 15px 0 0 !important;
 }
