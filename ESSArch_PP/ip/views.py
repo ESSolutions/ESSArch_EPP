@@ -41,6 +41,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from ESSArch_Core.configuration.models import (
+    ArchivePolicy,
     Path,
 )
 from ESSArch_Core.essxml.util import parse_submit_description
@@ -324,6 +325,23 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
+        ip = self.get_object()
+
+        if ip.package_type == InformationPackage.DIP:
+            policy = request.data.get('policy')
+
+            if not policy:
+                return Response('Policy required', status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                ip.policy = ArchivePolicy.objects.get(pk=policy)
+            except ArchivePolicy.DoesNotExist:
+                return Response('Policy "%s" does not exist' % policy, status=status.HTTP_400_BAD_REQUEST)
+            except ValueError as e:
+                raise exceptions.ParseError(e.message)
+
+            ip.save(update_fields=['policy'])
+
         main_step = ProcessStep.objects.create(
             name='Preserve AIP',
             information_package_id=pk,
@@ -349,7 +367,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         main_step.run()
 
-        return Response(['Preserving AIP %s...' % pk])
+        return Response(['Preserving IP %s...' % pk])
 
     @detail_route(methods=['post'])
     def access(self, request, pk=None):
