@@ -626,11 +626,16 @@ class PollIOQueue(DBTask):
                         processstep_pos=1,
                     ).run().get()
 
+                    if entry.ip.cached:
+                        src = cache_obj
+                    else:
+                        src = entry.ip.ObjectPath
+
                     ProcessTask.objects.create(
                         name="ESSArch_Core.tasks.WriteToTape",
                         params={
                             'medium': storage_medium.pk,
-                            'path': entry.object_path,
+                            'path': src,
                         },
                         processstep=step,
                         processstep_pos=2,
@@ -684,10 +689,16 @@ class PollIOQueue(DBTask):
                         content_location_value=content_location_value,
                         ip=entry.ip, storage_medium=storage_medium
                     )
+
+                    if entry.ip.cached:
+                        src = cache_obj
+                    else:
+                        src = entry.ip.ObjectPath
+
                     ProcessTask.objects.create(
                         name="ESSArch_Core.tasks.CopyFile",
                         params={
-                            'src': entry.ip.ObjectPath,
+                            'src': src,
                             'dst': storage_target.target,
                         },
                         processstep=step,
