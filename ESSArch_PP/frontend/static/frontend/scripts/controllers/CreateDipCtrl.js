@@ -217,6 +217,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         });
     }
     $scope.createDip = function(ip) {
+        listViewService.createDip(ip).then(function(response) {
             $scope.select = false;
             $scope.edit = false;
             $scope.eventlog = false;
@@ -226,8 +227,10 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.deckGridData = [];
             $scope.selectIp(ip);
             $timeout(function() {
+                $scope.getListViewData();
                 $anchorScroll();
             });
+        })
         }
         //Deckgrid
     $scope.chosenFiles = [];

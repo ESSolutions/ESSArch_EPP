@@ -520,6 +520,12 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
             });
     };
 
+    function createDip(ip) {
+        return $http.post(ip.url + 'create-dip/').then(function(response) {
+            return response.data;
+        });
+    }
+
     function prepareOrder(label) {
         return $http( {
             method: 'POST',
@@ -801,5 +807,6 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         getDipPage: getDipPage,
         getOrderPage: getOrderPage,
         prepareOrder: prepareOrder,
+        createDip: createDip,
     };
 });
