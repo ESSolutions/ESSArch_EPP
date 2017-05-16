@@ -216,11 +216,12 @@ class CacheAIP(DBTask):
                 rel = os.path.relpath(root, srcdir)
                 for d in dirs:
                     src = os.path.join(root, d)
-                    arc = os.path.join(objid, d)
+                    arc = os.path.join(objid, rel, d)
+                    arc = os.path.normpath(arc)
                     tar.add(src, arc, recursive=False)
 
                     try:
-                        os.makedirs(os.path.join(dstdir, d))
+                        os.makedirs(os.path.normpath(os.path.join(dstdir, rel, d)))
                     except OSError as e:
                         if e.errno != errno.EEXIST:
                             raise
@@ -228,9 +229,10 @@ class CacheAIP(DBTask):
                 for f in files:
                     src = os.path.join(root, f)
                     dst = os.path.join(dstdir, rel, f)
+                    dst = os.path.normpath(dst)
 
                     shutil.copy2(src, dst)
-                    tar.add(src, os.path.join(objid, rel, f))
+                    tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
 
         InformationPackage.objects.filter(pk=aip).update(
             ObjectPath=dsttar,

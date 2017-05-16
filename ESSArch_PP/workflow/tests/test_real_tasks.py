@@ -493,6 +493,71 @@ class CacheAIPTestCase(TransactionTestCase):
         )
         self.assertTrue(equal_content)
 
+    def test_cache_aip_nested_dir(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        objid = 'custom_obj_id'
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue=objid, policy=policy,
+            ObjectPath=os.path.join(self.ingest.value, objid)
+        )
+
+        os.makedirs(os.path.join(aip.ObjectPath, 'root', 'nested'))
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.CacheAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        task.run()
+
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        self.assertTrue(os.path.isdir(os.path.join(cached_dir, 'root', 'nested')))
+
+        with tarfile.open(cached_dir + '.tar') as tar:
+            expected_members = [
+                os.path.join(objid, 'root'),
+                os.path.join(objid, 'root', 'nested')
+            ]
+            self.assertItemsEqual(tar.getnames(), expected_members)
+
+    def test_cache_aip_nested_file(self):
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+        )
+        objid = 'custom_obj_id'
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue=objid, policy=policy,
+            ObjectPath=os.path.join(self.ingest.value, objid)
+        )
+
+        os.makedirs(os.path.join(aip.ObjectPath, 'root'))
+        open(os.path.join(aip.ObjectPath, 'root', 'nested.txt'), 'a').close()
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.CacheAIP',
+            params={
+                'aip': aip.pk
+            },
+        )
+
+        task.run()
+
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        self.assertTrue(os.path.isfile(os.path.join(cached_dir, 'root', 'nested.txt')))
+
+        with tarfile.open(cached_dir + '.tar') as tar:
+            expected_members = [
+                os.path.join(objid, 'root'),
+                os.path.join(objid, 'root', 'nested.txt')
+            ]
+            self.assertItemsEqual(tar.getnames(), expected_members)
+
 
 @override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class StoreAIPTestCase(TransactionTestCase):
