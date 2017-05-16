@@ -233,10 +233,7 @@ class CacheAIP(DBTask):
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
 
-        InformationPackage.objects.filter(pk=aip).update(
-            ObjectPath=dsttar,
-        )
-
+        InformationPackage.objects.filter(pk=aip).update(cached=True)
         return aip
 
     def undo(self, aip):
