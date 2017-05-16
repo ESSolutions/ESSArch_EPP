@@ -1,55 +1,55 @@
 <div class="create-dip">
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-    </div>
-    <div ng-if="select || subSelect || edit || eventlog" id="select-wrap" class="select-sub-edit-eventlog-wrapper">
-        <div ng-if="select" id="select-view" class="select-view">
-            <div class="file-explorer">
-                <div class="file-explorer-nav">
-                    <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
-                    <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
-                </div>
-                    <span style="float: right; margin-bottom: 5px;" ng-click="updateWorkareaFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate':
-                    gridArrayLoading }" uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                <div class="deckgrid">
-                    <div class="flex-grid">
-                        <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card1.html'"></div>
+        <div ng-if="select || subSelect || edit || eventlog" id="select-wrap" class="select-sub-edit-eventlog-wrapper">
+            <div ng-if="select" id="select-view" class="select-view">
+                <div class="file-explorer">
+                    <div class="file-explorer-nav">
+                        <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
+                        <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
+                    </div>
+                        <span style="float: right; margin-bottom: 5px;" ng-click="updateWorkareaFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate':
+                        gridArrayLoading }" uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                    <div class="deckgrid">
+                        <div class="flex-grid">
+                            <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card1.html'"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <button ng-if="selectedCards1.length" ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
-            <hr />
-            <div class="file-explorer">
-                <div class="file-explorer-nav">
-                    <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
-                    <b class="dir-path">{{ip.ObjectIdentifierValue + '/' + previousGridArraysString(2)}}</b>
-                </div>
-                <span style="float: right; margin-bottom: 5px;" ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
-                uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                <div class="deckgrid">
-                    <div class="flex-grid">
-                        <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>
+                <button ng-if="selectedCards1.length" ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
+                <hr />
+                <div class="file-explorer">
+                    <div class="file-explorer-nav">
+                        <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
+                        <b class="dir-path">{{ip.ObjectIdentifierValue + '/' + previousGridArraysString(2)}}</b>
+                    </div>
+                    <span style="float: right; margin-bottom: 5px;" ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+                    uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                    <div class="deckgrid">
+                        <div class="flex-grid">
+                            <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>
+                        </div>
                     </div>
                 </div>
+                <button ng-if="selectedCards2.length" ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
+                <button ng-click="newDirModal()" class="btn btn-default">{{'NEWFOLDER' | translate}}</button>
             </div>
-            <button ng-if="selectedCards2.length" ng-click="removeFiles(selectedCard)" class="btn btn-default" translate="REMOVE"></button>
-            <button ng-click="newDirModal()" class="btn btn-default">{{'NEWFOLDER' | translate}}</button>
-        </div>
-        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
-            <div ng-include src="'static/frontend/views/event_table.html'"></div>
-            <div ng-if="statusShow" class="status-view">
-                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
-            </div>
-        </div>
-        <div ng-if="eventlog" class="eventlog-view">
-            <form class="eventlog-form" ng-submit="createDip(ip)">
-                <div class="checkbox">
-                    <label>
-                        <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
-                    </label>
+            <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+                <div ng-include src="'static/frontend/views/event_table.html'"></div>
+                <div ng-if="statusShow" class="status-view">
+                    <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
                 </div>
-                <button class="btn btn-info submit-button" ng-dblClick="" ng-disabled="!approvedToCreate" type="submit" style="float: right;">{{'CREATEDIP' | translate}}</button>
-            </form>
+            </div>
+            <div ng-if="eventlog" class="eventlog-view">
+                <form class="eventlog-form" ng-submit="createDip(ip)">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
+                        </label>
+                    </div>
+                    <button class="btn btn-info submit-button" ng-dblClick="" ng-disabled="!approvedToCreate" type="submit" style="float: right;">{{'CREATEDIP' | translate}}</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

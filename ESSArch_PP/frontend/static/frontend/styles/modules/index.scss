@@ -421,10 +421,6 @@ body.modal-open[style] {
 .param-value {
     word-break: break-word;
 }
-.search-prepare-wrapper {
-    width: 100%;
-    padding: 10px;
-}
 .global-search {
     width: 400px;
 }
@@ -676,14 +672,22 @@ padding: 0 12px;
     .ip-view-type {
         margin-bottom: 10px;
     }
-    .active-columns {
-    }
     .column-picker {
         select {
             width: 150px;
         }
         width: 100%;
     }
-    .save-settings {
+}
+
+.table-container {
+    position: relative;
+    overflow-x: auto;
+    thead, tbody {
+        border: 1px solid $border-color;
     }
+}
+.appraisal-page {
+    margin-top: 10px;
+    @include container(10px);
 }

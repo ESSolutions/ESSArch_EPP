@@ -5,13 +5,11 @@
             <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
             <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
             <button type="button" ng-click="newOrderModal()" class="btn btn-info">{{'NEWORDER' | translate}}</button>
-            <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            <span ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
         </div>
         <div id="list-view" class="list-view-table">
             <table class="table table-striped" style="margin-bottom: 0px;">
                 <thead>
-                    <tr>
-                    </tr>
                     <tr>
                         <th class="clickable" st-sort="label" class="column-label">{{'LABEL' | translate}}</th>
                         <th class="clickable" st-sort="responsible" st-sort-default="reverse" class="column-label">{{'RESPONSIBLE' | translate}}</th>
@@ -34,15 +32,11 @@
                         </td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <td ng-show="!initLoad" colspan="4" class="text-center">
-                            <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
-                        </td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
+        <td ng-show="!initLoad" colspan="4" class="text-center">
+            <div class="text-center" st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+        </td>
     </div>
     <div ng-if="select" class="select-sub-edit-eventlog-wrapper">
         <div ng-if="select" class="select-view">

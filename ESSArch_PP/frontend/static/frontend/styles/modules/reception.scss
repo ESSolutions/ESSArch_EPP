@@ -1,3 +1,4 @@
+@import 'colors';
 @import 'mixins';
 
 .content-wrapper {
@@ -45,26 +46,33 @@
     display: -webkit-flex;
     flex-direction: row;
     font-weight: bold;
-    margin: 5px 5px 0px 5px;
     -webkit-flex-direction: row;
     flex-wrap: nowrap;
     align-items: stretch;
     position: relative;
-    button {
+    width: 100%;
+    padding: 0 0 10px 0;
+    .btn-info {
         margin-left: 10px;
+        padding: 2px 12px;
+    }
+    .fa-refresh {
+        position: absolute;
+        top: 12px;
+        right: 0px;
     }
 }
 .list-view {
-    @include container;
+    @include container(10px);
     display: flex;
-    display: -webkit-flex;
     flex-direction: column;
-    -webkit-flex-direction: column;
     margin-top: 10px;
     .list-view-table {
-        margin: 5px;
         position: relative;
         overflow-x: auto;
+        thead, tbody {
+            border: 1px solid $border-color;
+        }
     }
 }
 .text-center {
@@ -281,7 +289,8 @@ input[type="checkbox"] {
 }
 .validator-choices {
     border-bottom-style: solid;
-    border-bottom-width: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: $border-color;
     .formly {
         display: flex;
         flex-direction: row;
