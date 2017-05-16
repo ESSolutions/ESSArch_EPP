@@ -734,8 +734,8 @@ class PollIOQueue(DBTask):
             else:
                 entry.status = 20
 
-                entry.ip.State = 'Archived'
-                entry.ip.save(update_fields=['State'])
+                entry.ip.archived = True
+                entry.ip.save(update_fields=['archived'])
             finally:
                 entry.save(update_fields=['status'])
 
