@@ -2,7 +2,7 @@
 
 .login {
     .login-box {
-        @include container;
+        @include container(8px);
         padding: 8px;
         max-width: 475px;
         height: 450px;

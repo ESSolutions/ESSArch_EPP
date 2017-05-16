@@ -7,8 +7,7 @@ a {
 body {
     background-color: $body-background;
     margin: 0px auto;
-    //max-width: 1440px;
-    min-width: 650px;
+    min-width: 680px;
     overflow: auto;
 }
 body.modal-open {
@@ -204,10 +203,12 @@ body.modal-open[style] {
     flex-direction: column;
     display: -webkit-flex;
     -webkit-flex-direction: column;
-    width: 200px;
-    min-width: 150px;
+    position: relaive;
+    width: 180px;
+    float: left;
+    overflow: hidden;
     margin: 5px 0 0 0;
-    height: 1000px;
+    height: 600px;
     background-color: transparent;
 }
 .shortcut-list {
@@ -219,9 +220,8 @@ body.modal-open[style] {
     border-radius: 20px;
 }
 .navigation {
-    @include container;
-    padding: 5px;
-    height: 60%;
+    @include container(5px);
+    height: 100%;
     width: 100%;
     margin-top: 5px;
 }
@@ -234,6 +234,7 @@ body.modal-open[style] {
 @media screen and (max-width: 1200px) {
     .active-hamburger {
         display: block!important;
+        min-width:180px;
     }
     .shortcut-nav-calendar-wrapper {
         cursor: pointer;
@@ -244,7 +245,7 @@ body.modal-open[style] {
         display: none;
         position: fixed;
         left: -10px;
-        top: 95px;
+        top: 105px;
         z-index: 100;
         .calendar {
             display: none;
@@ -259,7 +260,7 @@ body.modal-open[style] {
         cursor: pointer;
     }
     .dynamic-part {
-        max-width: 100%!important;
+        width: 100%!important;
     }
 }
 .step-task-pagination {
@@ -280,16 +281,14 @@ body.modal-open[style] {
     width: 100%;
     min-height: 300px;
     .request-type {
-        @include container;
-        padding: 10px;
+        @include container(10px);
         width: 50%;
         display: flex;
         flex-direction: column;
         border-right-width: 1px;
     }
     .request-params {
-        @include container;
-        padding: 10px;
+        @include container(10px);
         width: 50%;
         display: flex;
         flex-direction: column;
@@ -347,17 +346,15 @@ body.modal-open[style] {
     padding: 8px 8px;
 }
 .nav-dynamic-wrapper {
-    display: flex;
-    flex-direction: inline;
-    display: -webkit-flex;
-    -webkit-flex-direction: inline;
-    width: 100%;
+    width:100%;
+    padding: 0 10px 0 10px;
 }
 .dynamic-part {
     height: 100%;
-    width: 100%;
+    overflow: hidden;
 }
 .sub-menu {
+    box-shadow: 0px 5px 2px $shadow-color;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -414,9 +411,6 @@ body.modal-open[style] {
     padding: 5px;
     margin: 5px;
 }
-.list-view-table {
-    margin: 5px;
-}
 .well-sm {
     padding: 0px;
 }
@@ -429,6 +423,7 @@ body.modal-open[style] {
 }
 .search-prepare-wrapper {
     width: 100%;
+    padding: 10px;
 }
 .global-search {
     width: 400px;
@@ -637,11 +632,6 @@ padding: 0 12px;
     border-color: rgba(102, 102, 102, 0.4);
 }
 
-/*
-* TEST NAV 
-*/
-
-
 .nav {
     display: flex;
     flex-direction: row;
@@ -676,4 +666,24 @@ padding: 0 12px;
 .nav-item {
     cursor: pointer;
     margin: 0 15px 0 0 !important;
+}
+
+.user-settings {
+    @include container(10px);
+    margin-top: 10px;
+    width:50%;
+    min-width: 400px;
+    .ip-view-type {
+        margin-bottom: 10px;
+    }
+    .active-columns {
+    }
+    .column-picker {
+        select {
+            width: 150px;
+        }
+        width: 100%;
+    }
+    .save-settings {
+    }
 }

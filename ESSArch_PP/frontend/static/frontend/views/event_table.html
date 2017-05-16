@@ -1,8 +1,8 @@
-<div ng-if="eventShow" class="event-view">
-    <div ng-controller="EventCtrl as vm" class="table-container">
+<div ng-if="eventShow"  ng-controller="EventCtrl as vm" class="event-view">
+    <div st-table="vm.displayed" st-pipe="eventPipe" class="table-container">
         <span style="float: right; margin-bottom: 5px;" ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }"></span>
         <select class="form-control items-per-page" ng-change="updateEventsPerPage(vm.itemsPerPage)" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]"></select>
-        <table st-table="vm.displayed" st-pipe="eventPipe" class="table table-striped">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th class="clickable" st-sort="eventType">{{'EVENTTYPE' | translate}}</th>

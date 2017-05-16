@@ -2,7 +2,7 @@
     <div class="header">
     <div class="logo-search-user-admin-wrapper">
         <div class="hamburger" ng-show="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.administration' | includedByState)">
-            <i class="fa fa-2x" ng-class="{'fa-times': hamburgerActive, 'fa-bars': !hamburgerActive}" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
+            <i class="fa fa-2x fa-bars" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
         </div>
         <div class="logo" ng-controller="UtilCtrl">
             <h3 ng-click="infoPage()">ESSArch Preservation Platform</h3>
@@ -24,24 +24,11 @@
         </div>
     </div>
     <div class="menu-task-wrapper">
-        <!--<div class="menu" ng-controller="TabsCtrl">
-            <uib-tabset active="activeTab">
-                <uib-tab
-                        ng-repeat="t in tabs"
-                        heading="{{t.label}}"
-                        ng-click="go(t)"
-                        uib-popover="{{'NAVIGATETO' | translate}}: {{t.label}}"
-                        popover-placement="top-left"
-                        popover-popup-delay="500"
-                        popover-append-to-body="true">
-                </uib-tab>
-            </uib-tabset>
-        </div>-->
         <div class="nav" ng-controller="TabsCtrl">
-                <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest">{{('INGEST' | translate)}}</p>
-                <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access">{{('ACCESS' | translate)}}</p>
-                <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders">{{('ORDERS' | translate)}}</p>
-                <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration">{{('ADMINISTRATION' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest">{{('INGEST' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access">{{('ACCESS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders">{{('ORDERS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration">{{('ADMINISTRATION' | translate)}}</p>
         </div>
         <div ng-controller="UtilCtrl" class="tasks-icons">
             <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
@@ -57,20 +44,6 @@
 	<div ng-controller="BaseCtrl" ng-include src="'static/frontend/views/sub_menu.html'"></div>
     <div class="nav-dynamic-wrapper">
         <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.management' | includedByState) || ('home.administration' | includedByState) || ('home.appraisal' | includedByState)" class="shortcut-nav-calendar-wrapper" ng-class="{'active-hamburger': hamburgerActive}">
-            <!--
-                <div class="shortcut-list" ng-controller="DropdownCtrl">
-                <div class="btn-group" uib-dropdown is-open="status.isopen">
-                <button id="single-button" type="button" class="btn-primary btn-lg" uib-dropdown-toggle ng-disabled="disabled">
-                Shortcut list<span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="choice in items">
-                <a ng-click="gotoLink(choice)" href>{{choice}}</a>
-                </li>
-                </ul>
-                </div>
-                </div>
-            -->
             <div ng-controller="AngularTreeCtrl" class="navigation" context-menu="navMenuOptions(item)">
                 </br>
                 <p>
@@ -86,31 +59,6 @@
                 </treecontrol>
                 </p>
             </div>
-            <!--<div class="calendar">
-                <style>
-                    .full button span {
-                        background-color: limegreen;
-                        border-radius: 16px;
-                        color: black;
-                    }
-                    .partially button span {
-                        background-color: orange;
-                        border-radius: 16px;
-                        color: black;
-                    }
-                </style>
-                <div ng-controller="DatepickerCtrl">
-
-                    <div class="datepicker" style="display:inline-block;">
-                        <div uib-datepicker ng-model="dt" class="well well-sm" datepicker-options="options"></div>
-                    </div>
-                    <div class="calendar-buttons" style="display: none;">
-                        <button type="button" class="btn btn-sm btn-info" ng-click="today()">Today</button>
-                        <button type="button" class="btn btn-sm btn-danger" ng-click="clear()">Clear</button>
-                        <button type="button" class="btn btn-sm btn-default" ng-click="toggleMin()" uib-tooltip="After today restriction">Min date</button>
-                    </div>
-                </div>
-            </div>-->
         </div>
         <div ui-view class="dynamic-part">
         </div>

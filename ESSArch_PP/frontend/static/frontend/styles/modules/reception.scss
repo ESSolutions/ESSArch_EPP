@@ -1,4 +1,5 @@
 @import 'mixins';
+
 .content-wrapper {
     display: flex;
     display: -webkit-flex;
@@ -34,6 +35,11 @@
     margin-bottom: 10px;
     margin-left: 5px;
 }
+@media screen and (max-width: 1200px) {
+    .content-wrapper > div {
+        margin-left: 0;
+    }
+}
 .search-prepare-wrapper {
     display: flex;
     display: -webkit-flex;
@@ -56,8 +62,9 @@
     -webkit-flex-direction: column;
     margin-top: 10px;
     .list-view-table {
-    position: relative;
-    overflow-x: auto;
+        margin: 5px;
+        position: relative;
+        overflow-x: auto;
     }
 }
 .text-center {
@@ -137,9 +144,14 @@
 .event-view {
     margin: 5px;
     padding: 5px;
+    .table {
+        position: relative;
+        overflow-x: auto;
+    }
 }
 .items-per-page {
     width: 15%;
+    min-width: 50px;
 }
 .select-view {
     margin: 5px;
@@ -180,18 +192,13 @@ font-size: 20px;
     padding: 10px;
 }
 .sub-select-view {
-    border-top-style: solid;
-    border-color: #666;
-    /*text-align: center;
-    position: relative;*/
+    @include container(5px);
     height: 60px;
-    font-size: 20px;
     display: flex;
     display: -webkit-flex;
     flex-direction: row;
     -webkit-flex-direction: row;
     margin: 5px;
-    padding: 5px;
 }
 .sub-select-view > select {
     margin-left: 20px;
