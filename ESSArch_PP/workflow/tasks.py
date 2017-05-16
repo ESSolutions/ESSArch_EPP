@@ -197,11 +197,10 @@ class CacheAIP(DBTask):
 
     def run(self, aip):
         srcdir, dstdir, objid = InformationPackage.objects.values_list(
-            'policy__ingest_path__value', 'policy__cache_storage__value',
+            'ObjectPath', 'policy__cache_storage__value',
             'ObjectIdentifierValue',
         ).get(pk=aip)
 
-        srcdir = os.path.join(srcdir, objid)
         dstdir = os.path.join(dstdir, objid)
         dsttar = dstdir + '.tar'
 

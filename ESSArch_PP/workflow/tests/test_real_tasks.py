@@ -444,7 +444,11 @@ class CacheAIPTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        aip = InformationPackage.objects.create(ObjectIdentifierValue='custom_obj_id', policy=policy)
+        objid = 'custom_obj_id'
+        aip = InformationPackage.objects.create(
+            ObjectIdentifierValue=objid, policy=policy,
+            ObjectPath=os.path.join(self.ingest.value, objid)
+        )
 
         aip_dir = os.path.join(policy.ingest_path.value, aip.ObjectIdentifierValue)
         os.mkdir(aip_dir)
