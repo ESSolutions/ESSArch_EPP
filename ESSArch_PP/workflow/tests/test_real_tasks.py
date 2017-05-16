@@ -1659,13 +1659,13 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
         mock_write.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1709,13 +1709,13 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
         mock_write.side_effect = lambda *args, **kwargs: None
         mock_set_file_number.side_effect = lambda *args, **kwargs: None
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1903,13 +1903,13 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         mocked_tar = mock.Mock()
         mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1964,14 +1964,14 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         mocked_tar = mock.Mock()
         mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
-        ip2 = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip2 = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -2067,13 +2067,13 @@ class PollIOQueueWriteDiskTestCase(TransactionTestCase):
     def test_write(self, mock_copy):
         mock_copy.side_effect = lambda *args, **kwargs: None
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=DISK
         )
@@ -2140,13 +2140,13 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
         mocked_tar = mock.Mock()
         mock_tar.open.return_value.__enter__.return_value = mocked_tar
 
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir)
         user = User.objects.create()
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
+        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=DISK
         )

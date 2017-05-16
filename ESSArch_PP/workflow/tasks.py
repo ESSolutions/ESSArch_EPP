@@ -599,7 +599,7 @@ class PollIOQueue(DBTask):
                 )
             return
 
-        cache = Path.objects.get(entity='cache').value
+        cache = entry.ip.policy.cache_storage.value
         cache_obj = os.path.join(cache, entry.ip.ObjectIdentifierValue) + '.tar'
 
         with allow_join_result():
