@@ -7,35 +7,33 @@
                     <label>
                         <input type="checkbox" ng-model="visibleRequests.access"></input>
                         Access
-                    </label><br>
+                    </label><br />
                     <label>
                         <input type="checkbox" ng-model="visibleRequests.workarea"></input>
                         To/from workarea
-                    </label><br>
+                    </label><br />
                     <label>
                         <input type="checkbox" ng-model="visibleRequests.receive"></input>
                         Receive
                     </label>
                 </div>
             </div>
+            <div>
+            Currently showing: <b ng-if="visibleRequests.access">Access requests</b> <b ng-if="visibleRequests.workarea">Workarea requests</b> <b ng-if="visibleRequests.receive">receive requests</b>
+            </div>
         </div>
-        <div>
-        Currently showing: <b ng-if="visibleRequests.access">Access requests</b> <b ng-if="visibleRequests.workarea">Workarea requests</b> <b ng-if="visibleRequests.receive">receive requests</b>
-        </div>
-        <div class="list-view">
+        <div class="list-view" st-table="vm.displayedIps" st-pipe="vm.callServer">
+            <div class="search-prepare-wrapper">
+                <label for items-per-page></label>
+                <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
+                <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            </div>
             <div id="list-view" class="list-view-table">
-                <table st-table="vm.displayedIps" st-pipe="vm.callServer" class="table table-striped" style="margin-bottom: 0px;">
+                <table class="table table-striped" style="margin-bottom: 0px;">
                     <thead>
                         <tr>
-                            <th colspan="{{colspan}}">
-                                <div class="search-prepare-wrapper">
-                                    <label for items-per-page></label>
-                                    <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                                    <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
-                                    <button ng-if="'home.createSip.prepareIp' | isState" type="button" ng-click="newIpModal()" class="btn btn-info" uib-popover="{{'PREPAREIPDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREIP' | translate}}</button>
-                                    <span style="position:absolute; right:12px; top:12px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                                </div>
-                            </th>
                         </tr>
                         <tr>
                             <th class="clickable" st-sort="Label" class="column-label">{{'LABEL' | translate}}</th>
