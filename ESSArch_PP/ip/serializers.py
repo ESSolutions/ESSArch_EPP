@@ -73,7 +73,7 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
             'url', 'id', 'Label', 'ObjectIdentifierValue',
             'package_type', 'Responsible', 'CreateDate',
             'entry_date', 'State', 'status', 'step_state',
-            'aic', 'generation', 'ArchivalInstitution',
+            'archived', 'cached', 'aic', 'generation', 'ArchivalInstitution',
             'ArchivistOrganization', 'ArchivalType', 'ArchivalLocation',
         )
 
@@ -126,9 +126,9 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'url', 'id', 'Label', 'ObjectIdentifierValue', 'package_type',
             'Responsible', 'CreateDate', 'entry_date', 'State', 'status',
-            'step_state', 'aic', 'information_packages', 'generation',
-            'ArchivalInstitution', 'ArchivistOrganization', 'ArchivalType',
-            'ArchivalLocation',
+            'step_state', 'archived', 'cached', 'aic', 'information_packages',
+            'generation', 'ArchivalInstitution', 'ArchivistOrganization',
+            'ArchivalType', 'ArchivalLocation',
         )
 
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):

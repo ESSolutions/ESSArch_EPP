@@ -51,6 +51,8 @@ class InformationPackageFilter(django_filters.FilterSet):
     object_size = ListFilter(name='object_size', method='filter_fields')
     start_date = ListFilter(name='Startdate', method='filter_fields')
     end_date = ListFilter(name='Enddate', method='filter_fields')
+    archived = django_filters.BooleanFilter()
+    cached = django_filters.BooleanFilter()
 
     def filter_fields(self, queryset, name, value):
         view_type = self.data.get('view_type', 'aic')
