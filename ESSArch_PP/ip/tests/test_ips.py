@@ -36,8 +36,9 @@ import mock
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ESSArch_Core.configuration.models import Path
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
+from ESSArch_Core.WorkflowEngine.models import ProcessStep
 
 
 class AccessTestCase(TestCase):
@@ -589,6 +590,32 @@ class InformationPackageViewSetTestCase(TestCase):
         res = self.client.post(self.url, {'label': 'foo', 'orders': orders}, format='json')
 
         mock_prepare.assert_not_called()
+
+    @mock.patch('workflow.tasks.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_preserve_aip(self, mock_step):
+        self.ip = InformationPackage.objects.create(package_type=InformationPackage.AIP)
+        self.url = reverse('informationpackage-detail', args=(self.ip.pk,))
+        self.url = self.url + 'preserve/'
+
+        self.client.post(self.url)
+        mock_step.assert_called_once()
+
+        self.assertTrue(ProcessStep.objects.filter(information_package=self.ip).exists())
+
+    @mock.patch('workflow.tasks.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_preserve_dip(self, mock_step):
+        cache = Path.objects.create(entity='cache', value='cache')
+        ingest = Path.objects.create(entity='ingest', value='ingest')
+        policy = ArchivePolicy.objects.create(cache_storage=cache, ingest_path=ingest)
+
+        self.ip = InformationPackage.objects.create(package_type=InformationPackage.DIP)
+        self.url = reverse('informationpackage-detail', args=(self.ip.pk,))
+        self.url = self.url + 'preserve/'
+
+        self.client.post(self.url, {'policy': str(policy.pk)})
+        mock_step.assert_called_once()
+
+        self.assertTrue(ProcessStep.objects.filter(information_package=self.ip).exists())
 
 
 class InformationPackageViewSetFilesTestCase(TestCase):
