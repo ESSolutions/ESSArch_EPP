@@ -565,6 +565,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         if not in_directory(fullpath, ip.ObjectPath):
             raise exceptions.ParseError('Illegal path %s' % path)
 
+        if not os.path.exists(fullpath):
+            raise exceptions.NotFound
+
         for entry in get_files_and_dirs(fullpath):
             entry_type = "dir" if entry.is_dir() else "file"
 
