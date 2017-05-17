@@ -13,13 +13,14 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //context menu data
     $scope.menuOptions = function() {
-            return [
-                [$translate.instant('PRESERVE'), function($itemScope, $event, modelValue, text, $li) {
-                    $scope.selectIp($itemScope.row);
-                }],
-            ];
-        }
-        //Cancel update intervals on state change
+        return [
+            [$translate.instant('PRESERVE'), function($itemScope, $event, modelValue, text, $li) {
+                $scope.selectIp($itemScope.row);
+            }],
+        ];
+    }
+
+    //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
@@ -27,22 +28,22 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-            $scope.selectIp(row);
-            if ($scope.ip == row) {
-                row.class = "";
-                $scope.selectedIp = { id: "", class: "" };
-            }
-            if ($scope.eventShow) {
-                $scope.eventsClick(row);
-            }
-            if ($scope.statusShow) {
-                $scope.stateClicked(row);
-            }
-            if ($scope.select) {
-                $scope.ipTableClick(row);
-            }
+        $scope.selectIp(row);
+        if ($scope.ip == row) {
+            row.class = "";
+            $scope.selectedIp = { id: "", class: "" };
         }
-        //Click function for status view
+        if ($scope.eventShow) {
+            $scope.eventsClick(row);
+        }
+        if ($scope.statusShow) {
+            $scope.stateClicked(row);
+        }
+        if ($scope.select) {
+            $scope.ipTableClick(row);
+        }
+    }
+    //Click function for status view
     var stateInterval;
     $scope.stateClicked = function(row) {
         if ($scope.statusShow && $scope.ip == row) {
@@ -59,6 +60,21 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         $scope.ip = row;
         $rootScope.ip = row;
     };
+    //Click funciton for event view
+	$scope.eventsClick = function (row) {
+		if($scope.eventShow && $scope.ip == row){
+			$scope.eventShow = false;
+			$rootScope.stCtrl = null;
+		} else {
+			if($rootScope.stCtrl) {
+				$rootScope.stCtrl.pipe();
+			}
+			$scope.eventShow = true;
+			$scope.statusShow = false;
+		}
+		$scope.ip = row;
+		$rootScope.ip = row;
+	};
     //Initialize file browser update interval
     var fileBrowserInterval;
     $scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {
