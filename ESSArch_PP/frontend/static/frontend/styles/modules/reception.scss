@@ -362,3 +362,8 @@ input[type="checkbox"] {
         flex-direction: column;
     }
 }
+
+.version-info-page {
+    @include container(10px);
+    margin-top: 10px;
+}
