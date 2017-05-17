@@ -698,3 +698,28 @@ padding: 0 12px;
         margin-right: 3px;
     }
 }
+.list-view {
+    @include container(10px);
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    .list-view-table {
+        position: relative;
+        overflow-x: auto;
+        thead, tbody {
+            border: 1px solid $border-color;
+        }
+    }
+}
+.list-view-buttons {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: row;
+    -webkit-flex-direction: row;
+    justify-content: left;
+    -webkit-justify-content: left;
+    margin-bottom: 5px;
+}
+.list-view-buttons .btn {
+    margin-left: 10px;
+}

@@ -62,19 +62,6 @@
         right: 0px;
     }
 }
-.list-view {
-    @include container(10px);
-    display: flex;
-    flex-direction: column;
-    margin-top: 10px;
-    .list-view-table {
-        position: relative;
-        overflow-x: auto;
-        thead, tbody {
-            border: 1px solid $border-color;
-        }
-    }
-}
 .text-center {
     text-align: center;
     margin: auto;
@@ -129,18 +116,6 @@
 }
 .edit-view .submit-button {
     margin-bottom: 5px;
-}
-.list-view-buttons {
-    display: flex;
-    display: -webkit-flex;
-    flex-direction: row;
-    -webkit-flex-direction: row;
-    justify-content: left;
-    -webkit-justify-content: left;
-    margin-bottom: 5px;
-}
-.list-view-buttons .btn {
-    margin-left: 10px;
 }
 .select-sub-edit-eventlog-wrapper {
     @include container;
