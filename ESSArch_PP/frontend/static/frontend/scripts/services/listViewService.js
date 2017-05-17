@@ -29,8 +29,8 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
     }
     //Gets data for list view i.e information packages
     function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived) {
-        if(archived != 2) {
-            archived = 1;
+        if(archived != true) {
+            archived = false;
         }
         var ipUrl = appConfig.djangoUrl + 'information-packages/';
         if ($rootScope.ipUrl) {

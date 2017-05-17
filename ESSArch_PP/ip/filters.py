@@ -24,7 +24,7 @@
 
 from django.db.models import Q
 
-import django_filters
+from django_filters import rest_framework as filters
 
 from ESSArch_Core.filters import ListFilter
 
@@ -37,7 +37,7 @@ from ESSArch_Core.ip.models import (
 )
 
 
-class InformationPackageFilter(django_filters.FilterSet):
+class InformationPackageFilter(filters.FilterSet):
     archival_institution = ListFilter(name="ArchivalInstitution__name", method='filter_fields')
     archivist_organization = ListFilter(name='ArchivistOrganization__name', method='filter_fields')
     archival_type = ListFilter(name='ArchivalType__name', method='filter_fields')
@@ -51,8 +51,8 @@ class InformationPackageFilter(django_filters.FilterSet):
     object_size = ListFilter(name='object_size', method='filter_fields')
     start_date = ListFilter(name='Startdate', method='filter_fields')
     end_date = ListFilter(name='Enddate', method='filter_fields')
-    archived = django_filters.BooleanFilter()
-    cached = django_filters.BooleanFilter()
+    archived = filters.BooleanFilter()
+    cached = filters.BooleanFilter()
 
     def filter_fields(self, queryset, name, value):
         view_type = self.data.get('view_type', 'aic')
@@ -100,7 +100,7 @@ class InformationPackageFilter(django_filters.FilterSet):
         'archival_institution', 'archivist_organization']
 
 
-class ArchivalInstitutionFilter(django_filters.FilterSet):
+class ArchivalInstitutionFilter(filters.FilterSet):
     ip_state = ListFilter(name='information_packages__State', distinct=True)
 
     class Meta:
@@ -108,7 +108,7 @@ class ArchivalInstitutionFilter(django_filters.FilterSet):
         fields = ('ip_state',)
 
 
-class ArchivistOrganizationFilter(django_filters.FilterSet):
+class ArchivistOrganizationFilter(filters.FilterSet):
     ip_state = ListFilter(name='information_packages__State', distinct=True)
 
     class Meta:
@@ -116,7 +116,7 @@ class ArchivistOrganizationFilter(django_filters.FilterSet):
         fields = ('ip_state',)
 
 
-class ArchivalTypeFilter(django_filters.FilterSet):
+class ArchivalTypeFilter(filters.FilterSet):
     ip_state = ListFilter(name='information_packages__State', distinct=True)
 
     class Meta:
@@ -124,7 +124,7 @@ class ArchivalTypeFilter(django_filters.FilterSet):
         fields = ('ip_state',)
 
 
-class ArchivalLocationFilter(django_filters.FilterSet):
+class ArchivalLocationFilter(filters.FilterSet):
     ip_state = ListFilter(name='information_packages__State', distinct=True)
 
     class Meta:

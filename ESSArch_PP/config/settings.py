@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.sites',
+    'django_filters',
     'rest_auth',
     'rest_auth.registration',
     'rest_framework',
