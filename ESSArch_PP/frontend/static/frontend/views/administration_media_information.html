@@ -10,8 +10,6 @@
             <table class="table table-striped" style="margin-bottom: 0px;">
                 <thead>
                     <tr>
-                    </tr>
-                    <tr>
                         <th class="clickable" st-sort="medium_id" class="column-label">ID</th>
                         <th class="clickable" st-sort="storage_target" class="column-label">{{'STORAGETARGET' | translate}}</th>
                         <th class="clickable" st-sort="create_date" st-sort-default="reverse" class="column-label">{{'CREATED' | translate}}</th>
@@ -30,10 +28,6 @@
                         <td class="clickable" ng-click="storageRowClick(row)">{{row.used_capacity | filesize}}</td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr>
-                    </tr>
-                </tfoot>
             </table>
         </div>
         <td ng-show="!initLoad">
