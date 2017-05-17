@@ -559,9 +559,13 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             return Response(path, status=status.HTTP_201_CREATED)
 
         entries = []
-        path = os.path.join(ip.ObjectPath, request.query_params.get('path', ''))
+        path = request.query_params.get('path', '')
+        fullpath = os.path.join(ip.ObjectPath, path)
 
-        for entry in get_files_and_dirs(path):
+        if not in_directory(fullpath, ip.ObjectPath):
+            raise exceptions.ParseError('Illegal path %s' % path)
+
+        for entry in get_files_and_dirs(fullpath):
             entry_type = "dir" if entry.is_dir() else "file"
 
             if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
