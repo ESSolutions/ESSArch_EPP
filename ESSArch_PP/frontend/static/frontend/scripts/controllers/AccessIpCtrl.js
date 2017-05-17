@@ -1,7 +1,7 @@
 angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
-    var ipSortString = "Archived,Accessing";
+    var ipSortString = "";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Request form data
     $scope.initRequestData = function () {
@@ -146,7 +146,8 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics, $scope.columnFilters).then(function (result) {
+            var archived = 2;
+            Resource.getIpPage(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, ipSortString, $scope.expandedAics, $scope.columnFilters, archived).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -160,8 +161,9 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $scope.edit = false;
             $scope.select = false;
             $scope.initRequestData();
-            $scope.getListViewData();
-            $state.go("home.access.workarea");
+            $timeOut(function() {
+                $scope.getListViewData();
+            });
         });
     }
     //Make ip selected and add class to visualize

@@ -28,7 +28,10 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         $state.go(state);
     }
     //Gets data for list view i.e information packages
-    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters) {
+    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived) {
+        if(archived != 2) {
+            archived = 1;
+        }
         var ipUrl = appConfig.djangoUrl + 'information-packages/';
         if ($rootScope.ipUrl) {
             ipUrl = $rootScope.ipUrl;
@@ -42,7 +45,8 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
                 ordering: sortString,
                 state: state,
                 search: searchString,
-                view_type: viewType
+                view_type: viewType,
+                archived: archived
             }, columnFilters)
         }).then(function successCallback(response) {
             count = response.headers('Count');
