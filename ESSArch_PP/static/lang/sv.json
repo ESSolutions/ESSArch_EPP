@@ -246,7 +246,7 @@
     "DIR_EXISTS_IN_DIP": "Det existerar redan en mapp med samma namn!",
     "DIR_EXISTS_IN_DIP_DESC": "Det existerar redan en mapp med detta namn i utlämnandet. Vill du skriva över den nuvarande mappen?",
     "REFRESH": "Uppdatera",
-    "ARCHIVE_POLICY": "Archivpolicy",
+    "ARCHIVE_POLICY": "Arkivpolicy",
     "INFORMATION_CLASS": "Informationsklass",
     "TAGS": "Taggar",
     "ALLOW_UNKNOWN_FILES": "Tillåt okända filer",
@@ -255,5 +255,6 @@
     "SELECT_ORDERS": "Välj beställningar ..",
     "MARKFORRECEIVE": "Markera för mottagande",
     "CACHED": "Cachad",
-    "ARCHIVED": "Arkiverad"
+    "ARCHIVED": "Arkiverad",
+    "ENTERORDERLABEL": "Ange etikett för beställning"
 }

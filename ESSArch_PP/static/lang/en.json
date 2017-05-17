@@ -255,5 +255,7 @@
     "SELECT_ORDERS": "Select orders ..",
     "MARKFORRECEIVE": "Mark for receive",
     "CACHED": "Cached",
-    "ARCHIVED": "Archived"
+    "ARCHIVED": "Archived",
+    "ENTERORDERLABEL": "Enter label for order"
+
 }
