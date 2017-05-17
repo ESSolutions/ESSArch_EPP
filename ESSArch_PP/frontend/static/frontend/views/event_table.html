@@ -35,8 +35,7 @@
         </td>
     </div>
     <div class="events-footer">
-        <form ng-if="ip.State != 'Created' && ip.State != 'Creating' && ip.State != 'Submitting' && ip.State != 'Submitted'" class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
-
+        <form class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
             <div class="form-group" style="margin-right: 5px;">
                 <label>{{'EVENTTYPE' | translate}}</label>
                 <select style="width: 125px;" class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in eventTypeCollection" ng-required="true">

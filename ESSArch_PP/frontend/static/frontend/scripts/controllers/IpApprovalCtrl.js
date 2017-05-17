@@ -68,6 +68,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		listViewService.preserveIp(ip, {purpose: request.purpose}).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
+			$scope.requestEventlog = false;
 			$scope.eventShow = false;
 			$scope.initRequestData();
 			$scope.getListViewData();
@@ -244,7 +245,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.edit = false;
 			$scope.eventShow = false;
 			$scope.requestForm = false;
-			
 			return;
 		}
 		if($scope.select && $scope.ip.id== row.id){

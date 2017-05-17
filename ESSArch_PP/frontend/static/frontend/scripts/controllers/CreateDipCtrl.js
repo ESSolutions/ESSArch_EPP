@@ -11,15 +11,100 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         $scope.selectIp($scope.ip);
     }
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
+    $scope.initRequestData = function () {
+		vm.request = {
+			type: "preserve",
+			purpose: "",
+            archivePolicy: {
+                value: null,
+                options: []
+            },
+		};
+	}
+    $scope.initRequestData();
+
+    $scope.getArchivePolicies = function() {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'archive_policies/'
+        }).then(function(response) {
+            return response.data;
+        });
+    }
+    $scope.archivePolicyChange = function() {
+        vm.request.informationClass = vm.request.archivePolicy.value.information_class;
+    }
     //context menu data
     $scope.menuOptions = function() {
         return [
             [$translate.instant('PRESERVE'), function($itemScope, $event, modelValue, text, $li) {
-                $scope.selectIp($itemScope.row);
+                $scope.openRequestForm($itemScope.row);
             }],
         ];
     }
+    $scope.requestForm = false;
+    $scope.openRequestForm = function(row) {
+        if(row.package_type == 1) {
+			$scope.select = false;
+			$scope.eventlog = false;
+			$scope.edit = false;
+			$scope.eventShow = false;
+			$scope.requestForm = false;
+            $scope.requestEventlog = false;
+			return;
+		}
+		if($scope.select && $scope.ip.id== row.id){
+			$scope.select = false;
+			$scope.eventlog = false;
+			$scope.edit = false;
+			$scope.eventShow = false;
+			$scope.requestForm = false;
+            $scope.requestEventlog = false;
+		} else {
+			$scope.ip = row;
+			$rootScope.ip = $scope.ip;
+            $scope.getArchivePolicies().then(function(result) {
+                vm.request.archivePolicy.options = result;
+                $scope.requestEventlog = true;
+                $scope.requestForm = true;
+                $scope.eventsClick(row);
+                $timeout(function() {
+                    $anchorScroll("request-form");
+                });
+            });
+		}
+		$scope.statusShow = false;
+    }
 
+	$scope.submitRequest = function(ip, request) {
+		switch(request.type) {
+			case "preserve":
+				$scope.preserveIp(ip, request);
+				break; 
+			case "view":
+				console.log("request not implemented");
+				break;
+			case "edit_as_new":
+				console.log("request not implemented");
+				break;
+			case "diff_check":
+				console.log("request not implemented");
+				break;
+			default:
+				console.log("request not matched");
+				break;
+		}
+	}
+	$scope.preserveIp = function(ip, request) {
+		listViewService.preserveIp(ip, {purpose: request.purpose, policy: request.archivePolicy.value.id}).then(function(result) {
+			$scope.requestForm = false;
+			$scope.eventlog = false;
+			$scope.eventShow = false;
+            $scope.requestEventlog = false;
+			$scope.initRequestData();
+			$scope.getListViewData();
+		});
+	}
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
