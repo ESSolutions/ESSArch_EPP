@@ -279,7 +279,6 @@ body.modal-open[style] {
     display: flex;
     flex-direction: row;
     width: 100%;
-    min-height: 300px;
     .request-type {
         @include container(10px);
         width: 50%;
@@ -582,7 +581,7 @@ padding: 0 12px;
     background-color: white;
     padding: 10px;
     z-index: 1000;
-    margin-top: 31px;
+    margin-top: 36px;
     .formly-buttons-wrapper {
         display: flex;
         align-items: flex-end;
