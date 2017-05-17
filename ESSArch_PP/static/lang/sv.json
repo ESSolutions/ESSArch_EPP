@@ -252,5 +252,7 @@
     "ALLOW_UNKNOWN_FILES": "Tillåt okända filer",
     "SELECT_TAGS": "Välj taggar ...",
     "RECEIVE": "Ta emot",
-    "SELECT_ORDERS": "Välj beställningar .."
+    "SELECT_ORDERS": "Välj beställningar ..",
+    "MARKFORRECEIVE": "Markera för mottagande"
+
 }

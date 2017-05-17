@@ -252,5 +252,6 @@
     "ALLOW_UNKNOWN_FILES": "Allow unknown files",
     "SELECT_TAGS": "Select tags ...",
     "RECEIVE": "Receive",
-    "SELECT_ORDERS": "Select orders .."
+    "SELECT_ORDERS": "Select orders ..",
+    "MARKFORRECEIVE": "Mark for receive"
 }
