@@ -23,15 +23,11 @@
                         <td class="clickable" ng-click="robotRowClick(row)">{{row.online? translate.instant("ONLINE"):translate.instant("OFFLINE")}}</td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <td ng-show="!initLoad" colspan="{{colspan}}" class="text-center">
-                            <div st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
-                        </td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
+        <td ng-show="!initLoad" colspan="{{colspan}}">
+            <div class="text-center" st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+        </td>
     </div>
     <div ng-if="select" style="margin-top: 5px;" class="select-sub-edit-eventlog-wrapper">
         <div ng-if="select" id="select-view" class="select-view">
