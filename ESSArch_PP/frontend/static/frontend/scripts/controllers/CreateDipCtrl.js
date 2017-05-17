@@ -36,8 +36,12 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     }
     //context menu data
     $scope.menuOptions = function() {
+        var label = $translate.instant('PRESERVE');
+        if($scope.requestForm) {
+            label = $translate.instant("CANCELPRESERVATION");
+        }
         return [
-            [$translate.instant('PRESERVE'), function($itemScope, $event, modelValue, text, $li) {
+            [label, function($itemScope, $event, modelValue, text, $li) {
                 $scope.openRequestForm($itemScope.row);
             }],
         ];
@@ -53,20 +57,27 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.requestEventlog = false;
 			return;
 		}
-		if($scope.select && $scope.ip.id== row.id){
+		if($scope.requestForm && $scope.ip.id== row.id){
 			$scope.select = false;
 			$scope.eventlog = false;
 			$scope.edit = false;
 			$scope.eventShow = false;
 			$scope.requestForm = false;
             $scope.requestEventlog = false;
+            $scope.selectIp(row);
 		} else {
+			$scope.select = false;
+			$scope.eventlog = false;
+			$scope.edit = false;
+			$scope.eventShow = false;
 			$scope.ip = row;
 			$rootScope.ip = $scope.ip;
             $scope.getArchivePolicies().then(function(result) {
                 vm.request.archivePolicy.options = result;
-                $scope.requestEventlog = true;
                 $scope.requestForm = true;
+                $scope.requestEventlog = true;
+                row.class = "selected";
+                $scope.selectedIp = row;
                 $scope.eventsClick(row);
                 $timeout(function() {
                     $anchorScroll("request-form");
@@ -276,11 +287,10 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
-        if ($scope.select && $scope.ip.id == row.id) {
+        if (($scope.select || $scope.requestForm) && $scope.ip.id == row.id) {
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
-            $scope.requestForm = false;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
@@ -292,6 +302,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                 $anchorScroll("select-view");
             }, 0);
         }
+        $scope.requestForm = false;
+        $scope.requestEventlog = false;
         $scope.eventShow = false;
         $scope.statusShow = false;
     };

@@ -256,5 +256,7 @@
     "MARKFORRECEIVE": "Markera för mottagande",
     "CACHED": "Cachad",
     "ARCHIVED": "Arkiverad",
-    "ENTERORDERLABEL": "Ange etikett för beställning"
+    "ENTERORDERLABEL": "Ange etikett för beställning",
+    "CANCELPRESERVATION": "Stäng arkivering"
+
 }

@@ -256,6 +256,7 @@
     "MARKFORRECEIVE": "Mark for receive",
     "CACHED": "Cached",
     "ARCHIVED": "Archived",
-    "ENTERORDERLABEL": "Enter label for order"
+    "ENTERORDERLABEL": "Enter label for order",
+    "CANCELPRESERVATION": "Close preservation"
 
 }
