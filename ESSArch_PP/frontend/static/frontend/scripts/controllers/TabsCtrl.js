@@ -31,6 +31,7 @@ angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope,
             $scope.activeTab = null;
         }
     });
+    $scope.$state = $state;
     $scope.activeTab = null;
     $scope.myPage = $translate.instant('MYPAGE');
     $scope.tabs = [

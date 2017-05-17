@@ -1,20 +1,18 @@
 <body>
-    <div class="management">
-        <div class="content-wrapper">
-            <div style="margin: 5px">
-                <p>Tag: {{tag.name}}</p>
-                <p>IPs:</p>
-                <table class="table">
-                    <tr ng-repeat="row in ips">
-                        <td>
-                            {{row}}
-                        </td>
-                    </tr>
-                </table>
-                <p>Archive policy: {{archivePolicy.id}}</p>
-                <select class="form-control" ng-model="archivePolicy" ng-options="x as x.id for x in vm.archivePolicies" style="width: 25%;"></select>
+    <div class="content-wrapper">
+        <div class="appraisal-page">
+            <p>Tag: {{tag.name}}</p>
+            <p>IPs:</p>
+            <table class="table">
+                <tr ng-repeat="row in ips">
+                    <td>
+                        {{row}}
+                    </td>
+                </tr>
+            </table>
+            <p>Archive policy: {{archivePolicy.id}}</p>
+            <select class="form-control" ng-model="archivePolicy" ng-options="x as x.id for x in vm.archivePolicies" style="width: 25%;"></select>
 
-            </div>
         </div>
     </div>
 </body>

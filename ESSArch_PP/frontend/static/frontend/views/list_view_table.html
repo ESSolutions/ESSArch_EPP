@@ -34,15 +34,13 @@
     </div>
     <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}"
         popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREDIP' | translate}}</button>
-    <span style="position:absolute; right:15px; top:5px;" ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg"
+    <span ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg"
         ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left"
         popover-popup-delay="500" popover-append-to-body="true"></span>
 </div>
 <div id="list-view" class="list-view-table">
     <table class="table table-striped" style="margin-bottom: 0px;">
         <thead>
-            <tr>
-            </tr>
             <tr>
                 <th class="clickable" class="column-label"></th>
                 <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'CreateDate'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state'" style="white-space: nowrap;">{{col.label.toUpperCase() | translate}}</span></th>
@@ -70,10 +68,6 @@
                 </td>
             </tr>
         </tbody>
-        <tfoot>
-            <tr>
-            </tr>
-        </tfoot>
     </table>
 </div>
     <td ng-show="!initLoad">

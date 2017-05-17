@@ -1,62 +1,56 @@
-<html>
-
-<body>
-    <div class="access-ip">
-        <div class="content-wrapper">
-            <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-            <div ng-if="requestForm" class="request-layout">
-                <form id="request-form" class="request-form" ng-submit="accessIp(ip, vm.request)">
-                    <div class="request-type">
-                        <div ng-if="checkPermission('ip.view')">
-                            <input type="radio" ng-model="vm.request.type" value="view">
-                            <label>
-                                {{'GET' | translate}}
-                            </label>
-                        </div>
-                        <div ng-if="checkPermission('ip.view_tar')">
-                            <input type="radio" ng-model="vm.request.type" value="view_tar">
-                            <label>
-                                {{'GET_AS_CONTAINER' | translate}}
-                            </label>
-                        </div>
-                        <div ng-if="checkPermission('ip.edit_as_new')">
-                            <input type="radio" ng-model="vm.request.type" value="edit_as_new">
-                            <label>
-                                {{'GET_AS_NEW_GENERATION' | translate}}
-                            </label>
-                        </div>
+<div class="access-ip">
+    <div class="content-wrapper">
+        <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+        <div ng-if="requestForm" class="request-layout">
+            <form id="request-form" class="request-form" ng-submit="accessIp(ip, vm.request)">
+                <div class="request-type">
+                    <div ng-if="checkPermission('ip.view')">
+                        <input type="radio" ng-model="vm.request.type" value="view">
+                        <label>
+                            {{'GET' | translate}}
+                        </label>
                     </div>
-                    <div class="request-params">
-                        <div ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
-                            <label>
-                                {{'PURPOSE' | translate}}
-                            </label>
-                            <input required class="form-control" ng-model="vm.request.purpose">
-                        </div>
+                    <div ng-if="checkPermission('ip.view_tar')">
+                        <input type="radio" ng-model="vm.request.type" value="view_tar">
+                        <label>
+                            {{'GET_AS_CONTAINER' | translate}}
+                        </label>
                     </div>
+                    <div ng-if="checkPermission('ip.edit_as_new')">
+                        <input type="radio" ng-model="vm.request.type" value="edit_as_new">
+                        <label>
+                            {{'GET_AS_NEW_GENERATION' | translate}}
+                        </label>
+                    </div>
+                </div>
+                <div class="request-params">
+                    <div ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
+                        <label>
+                            {{'PURPOSE' | translate}}
+                        </label>
+                        <input required class="form-control" ng-model="vm.request.purpose">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+            <div ng-include src="'static/frontend/views/event_table.html'"></div>
+            <div ng-if="statusShow" class="status-view">
+                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+            </div>
+        </div>
+        <div ng-if="eventlog && (vm.request.type == 'view_tar' || vm.request.type == 'view' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query')"
+            class="select-sub-edit-eventlog-wrapper">
+            <div ng-if="eventlog" class="eventlog-view">
+                <form ng-submit="receiveSip(ip)" class="eventlog-form">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
+                        </label>
+                    </div>
+                    <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                 </form>
-            </div>
-            <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
-                <div ng-include src="'static/frontend/views/event_table.html'"></div>
-                <div ng-if="statusShow" class="status-view">
-                    <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
-                </div>
-            </div>
-            <div ng-if="eventlog && (vm.request.type == 'view_tar' || vm.request.type == 'view' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query')"
-                class="select-sub-edit-eventlog-wrapper">
-                <div ng-if="eventlog" class="eventlog-view">
-                    <form ng-submit="receiveSip(ip)" class="eventlog-form">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
-                            </label>
-                        </div>
-                        <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
-</body>
-
-</html>
+</div>
