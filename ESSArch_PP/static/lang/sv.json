@@ -253,6 +253,7 @@
     "SELECT_TAGS": "Välj taggar ...",
     "RECEIVE": "Ta emot",
     "SELECT_ORDERS": "Välj beställningar ..",
-    "MARKFORRECEIVE": "Markera för mottagande"
-
+    "MARKFORRECEIVE": "Markera för mottagande",
+    "CACHED": "Cachad",
+    "ARCHIVED": "Arkiverad"
 }

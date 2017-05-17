@@ -691,3 +691,11 @@ padding: 0 12px;
     margin-top: 10px;
     @include container(10px);
 }
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    * {
+        margin-right: 3px;
+    }
+}

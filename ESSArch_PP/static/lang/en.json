@@ -253,5 +253,7 @@
     "SELECT_TAGS": "Select tags ...",
     "RECEIVE": "Receive",
     "SELECT_ORDERS": "Select orders ..",
-    "MARKFORRECEIVE": "Mark for receive"
+    "MARKFORRECEIVE": "Mark for receive",
+    "CACHED": "Cached",
+    "ARCHIVED": "Archived"
 }
