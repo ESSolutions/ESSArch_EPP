@@ -3,9 +3,7 @@
 
 .content-wrapper {
     display: flex;
-    display: -webkit-flex;
     flex-direction: column;
-    -webkit-flex-direction: column;
     width: 100%;
     position: relative;
 }
@@ -43,10 +41,8 @@
 }
 .search-prepare-wrapper {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
     font-weight: bold;
-    -webkit-flex-direction: row;
     flex-wrap: nowrap;
     align-items: stretch;
     position: relative;
@@ -73,22 +69,18 @@
     height: 60px;
     margin: 5px;
     padding: 5px;
-}
-
-.events-footer .signature {
-    width: 250px;
-    height: 35px;
-    margin-left: 5px;
-    margin-right: 5px;
-    resize: none;
+    .signature {
+        width: 250px;
+        height: 35px;
+        margin-left: 5px;
+        margin-right: 5px;
+        resize: none;
+    }
 }
 .events-form {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     justify-content: flex-end;
-    -webkit-justify-content: flex-end;
     width: 100%;
     margin-left: 10px;
 }
@@ -102,17 +94,15 @@
     margin: 0;
     background-color: #aaa;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.48);
-    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.48);
 }
-.progress b { position: relative; }
+.progress b {
+    position: relative;
+}
 .column-label {
     cursor: pointer;
 }
 .clickable {
     cursor: pointer;
-}
-.edit-view .submit-button {
-    margin-bottom: 5px;
 }
 .select-sub-edit-eventlog-wrapper {
     @include container;
@@ -127,6 +117,9 @@
     .table {
         position: relative;
         overflow-x: auto;
+    }
+    .submit-button {
+        margin-bottom: 5px;
     }
 }
 .items-per-page {
@@ -163,22 +156,8 @@
     padding-bottom: 8px;
     line-height: 1;
 }
-.status-view {
-}
-/*.status-view treecontrol {
-font-size: 20px;
-}*/
 .tasks-list {
     padding: 10px;
-}
-.sub-select-view {
-    @include container(5px);
-    height: 60px;
-    display: flex;
-    display: -webkit-flex;
-    flex-direction: row;
-    -webkit-flex-direction: row;
-    margin: 5px;
 }
 .sub-select-view > select {
     margin-left: 20px;
@@ -195,38 +174,38 @@ font-size: 20px;
 }
 
 .edit-view {
-    border-color: #666;
+    border-color: $border-color;
     margin: 5px;
     padding: 5px;
     position: relative;
-}
-.edit-view .btn-danger {
-    float: right;
+    .formly {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 5px;
+        width: 100%;
+    }
+    .btn-danger {
+        float: right;
+    }
 }
 .eventlog-view {
-    border-color: #666;
+    border-color: $border-color;
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     height: 70px;
     margin: 5px;
     padding: 5px;
     justify-content: space-between;
-    -webkit-justify-content: space-between;
 }
 .eventlog-view .form-group {
     display: flex;
-    display: -webkit-flex;
     flex-direction: column;
-    -webkit-flex-direction: column;
     width: 33%;
 }
 .eventlog-view .btn-info {
     float: right;
     margin-top: 10px;
-}
-.eventlog-view .status-note{
 }
 .eventlog-view .checkbox {
     margin-top: 20px;
@@ -237,26 +216,11 @@ input[type="checkbox"] {
 .eventlog-view .submit-button {
     height: 40px;
 }
-.eventlog-view .signature {
-}
-.edit-view .formly {
-    display: flex;
-    display: -webkit-flex;
-    flex-direction: row;
-    -webkit-flex-direction: row;
-    flex-wrap: wrap;
-    -webkit-flex-wrap: wrap;
-    padding: 5px;
-    width: 100%;
-}
 .eventlog-form {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     width: 100%;
     justify-content: flex-end;
-    -webkit-justify-content: flex-end;
     margin-left: 10px;
 }
 .validator-choices {
@@ -294,16 +258,12 @@ input[type="checkbox"] {
 }
 .edit-view-tree {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     width: 100%;
 }
 .edit-view-tree .formly {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     width: 100%;
 }
 .edit-view-tree .formly-field {
@@ -319,22 +279,8 @@ input[type="checkbox"] {
 }
 .map-structure-editor {
     border-top-style: solid;
-    border-color: #666;
+    border-color: $border-color;
 }
-.sa-table {
-    padding-bottom: 10px;
-    border-bottom-style: solid;
-    border-color: #666;
-}
-.column-picker {
-    display: flex;
-    flex-direction: row;
-    .buttons {
-        display: flex;
-        flex-direction: column;
-    }
-}
-
 .version-info-page {
     @include container(10px);
     margin-top: 10px;
