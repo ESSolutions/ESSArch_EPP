@@ -1,10 +1,6 @@
-<div ng-if="!subrow" class="flex-row">
+<div ng-if="!subrow">
     <div class="clickable" style="white-space: nowrap;" ng-click="selectIp(row);stateClicked(row)" uib-popover="{{'IPSTATEDESC' | translate}}: {{row.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')"><a href="">{{row.State}}</a></div>
-    <span ng-if="row.archived" class="fa fa-lg fa-archive" uib-popover="{{'ARCHIVED' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-    <span ng-if="row.cached" class="fa fa-lg fa-database" uib-popover="{{'CACHED' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
 </div>
-<div ng-if="subrow" class="flex-row">
+<div ng-if="subrow">
     <div class="clickable" style="white-space: nowrap;" ng-click="selectIp(subrow);stateClicked(subrow)" uib-popover="{{'IPSTATEDESC' | translate}}: {{subrow.Label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a href="">{{subrow.State}}</a></div>
-    <span ng-if="row.archived" class="fa fa-lg fa-archive" uib-popover="{{'ARCHIVED' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-    <span ng-if="row.cached" class="fa fa-lg fa-database" uib-popover="{{'CACHED' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
 </div>

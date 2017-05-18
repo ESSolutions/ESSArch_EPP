@@ -257,6 +257,6 @@
     "CACHED": "Cached",
     "ARCHIVED": "Archived",
     "ENTERORDERLABEL": "Enter label for order",
-    "CANCELPRESERVATION": "Close preservation"
-
+    "CANCELPRESERVATION": "Close preservation",
+    "STORAGE_STATUS": "Storage status"
 }
