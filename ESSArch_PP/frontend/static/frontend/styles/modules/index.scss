@@ -115,15 +115,12 @@ body.modal-open[style] {
     width: 85%;
     height: 100%;
     margin: 0 auto;
-    cursor: pointer;
-}
-.logo h2 {
-    font-size: 28pt;
-    line-height: 0;
 }
 .logo h3 {
+    display: inline-block;
     margin-top: 12px;
     margin-bottom: 12px;
+    cursor: pointer;
 }
 .search {
     display: flex;
@@ -713,11 +710,8 @@ padding: 0 12px;
 }
 .list-view-buttons {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     justify-content: left;
-    -webkit-justify-content: left;
     margin-bottom: 5px;
 }
 .list-view-buttons .btn {
