@@ -287,7 +287,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
-        if (($scope.select || $scope.requestForm) && $scope.ip.id == row.id) {
+        if ( row.State === "Creating" || row.State === "Created" || (($scope.select || $scope.requestForm) && $scope.ip.id == row.id)) {
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
