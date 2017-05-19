@@ -166,8 +166,7 @@ class ReceiveSIP(DBTask):
         os.mkdir(metadata)
 
         if policy.receive_extract_sip:
-            dst = os.path.join(content, objid)
-            os.mkdir(dst)
+            dst = content
 
             if container_type.lower() == '.tar':
                 with tarfile.open(container) as tar:

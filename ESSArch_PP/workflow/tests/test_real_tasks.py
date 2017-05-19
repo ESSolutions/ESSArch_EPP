@@ -301,9 +301,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
             files.append(fpath)
 
         with tarfile.open(container, 'w') as tar:
-            for f in files:
-                arc = os.path.basename(os.path.normpath(f))
-                tar.add(f, arc)
+            tar.add(self.gate.value, sip)
 
         policy = ArchivePolicy.objects.create(
             cache_storage=self.cache,
@@ -363,7 +361,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
 
         with zipfile.ZipFile(container, 'w') as zipf:
             for f in files:
-                arc = os.path.basename(os.path.normpath(f))
+                arc = os.path.join(sip, os.path.relpath(f, self.gate.value))
                 zipf.write(f, arc)
 
         policy = ArchivePolicy.objects.create(
