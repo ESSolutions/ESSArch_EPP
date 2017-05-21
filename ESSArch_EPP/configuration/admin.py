@@ -215,8 +215,14 @@ class StorageTargetInline(NestedStackedInline):
         'status',
         'target',
         )
-    #verbose_name = 'bla'
+    verbose_name = 'target relation'
     verbose_name_plural = ''
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super(StorageTargetInline, self).get_formset(request, obj, **kwargs)
+        form = formset.form
+        form.base_fields['target'].widget.can_add_related = False
+        form.base_fields['target'].widget.can_change_related = False
+        return formset
 
 #class StorageMethodInline(nested_admin.NestedStackedInline):
 class StorageMethodInline(NestedStackedInline):

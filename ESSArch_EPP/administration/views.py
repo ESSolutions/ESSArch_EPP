@@ -51,7 +51,6 @@ from django.contrib.auth.decorators import permission_required
 
 from eztables.views import RE_FORMATTED
 
-
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -66,27 +65,6 @@ try:
     ExtDBupdate = int(ESSConfig.objects.get(Name='ExtDBupdate').Value)
 except (ESSConfig.DoesNotExist, utils.ProgrammingError, utils.OperationalError) as e:
     ExtDBupdate = 0
-
-'''
-class storageMediumList3_old(ListView):
-    """
-    List storageMedium
-    """
-    model = storageMedium
-    template_name='administration/liststoragemedium.html'
-
-    @method_decorator(permission_required('essarch.list_storageMedium'))
-    def dispatch(self, *args, **kwargs):
-        return super(storageMediumList, self).dispatch( *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(storageMediumList, self).get_context_data(**kwargs)
-        context['label'] = 'ADMINISTRATION - List media information'
-        context['MediumType_CHOICES'] = dict(MediumType_CHOICES)
-        context['MediumStatus_CHOICES'] = dict(MediumStatus_CHOICES)
-        context['MediumLocationStatus_CHOICES'] = dict(MediumLocationStatus_CHOICES)
-        return context
-'''
 
 class storageMediumDetail(DetailView):
     """
@@ -135,19 +113,6 @@ class storageDatatablesView(DatatablesViewEss):
         queryset = queryset.extra(select={'contentLocationValue_int': 'CAST(`contentLocationValue` AS UNSIGNED)'})
         orders = ('%scontentLocationValue_int' % direction)
         return orders, queryset
-
-#def storageMediumList2(request):
-#    """
-#    List storageMedium
-#    """
-#    model = storageMedium
-#    table = storageMediumTable(model.objects.all())
-#    RequestConfig(request).configure(table)
-#    template_name='administration/liststoragemedium2.html'
-#    context = {}
-#    context['table'] = table
-#    context['label'] = 'List of storagemedium'
-#    return render(request, template_name, context)
 
 class storageMediumList(TemplateView):
     template_name = 'administration/storagemedium_list.html'
@@ -245,11 +210,6 @@ class robotReqCreate(CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        
-        #self.object.pk = None 
-        #self.object.user = self.request.user.username
-        #self.object.ObjectIdentifierValue = self.obj_list
-        #self.object.ReqUUID = uuid.uuid1()
         ais_flag = form.cleaned_data.get('ais_flag',False)
         self.object.save()
         if not self.object.ReqType in [50,51,52]:
@@ -298,57 +258,6 @@ class robotReqDelete(DeleteView):
     def dispatch(self, *args, **kwargs):
         return super(robotReqDelete, self).dispatch( *args, **kwargs)
 
-"""
-class robotInventory(DetailView):
-    #model = ArchiveObject
-    template_name='administration/robotinventory_detail.html'
-
-    @method_decorator(permission_required('essarch.list_robot'))
-    def dispatch(self, *args, **kwargs):
-        return super(robotInventory, self).dispatch( *args, **kwargs)
-    
-    def get_object(self):
-        return None
-
-    def get_context_data(self, **kwargs):
-        #context = super(robotInventory, self).get_context_data(**kwargs)
-        context = {}
-        ###############################################
-        # robot inventory
-        ###############################################
-        # command=1 (robot inventory and do not fetch metadata form central database)
-        # command=2 (robot inventory and fetch metadata form central database)
-        # command=3 (robot inventory and fetch metadata form central database and Force set MediumLocaltion to IT_Mariberg)
-        if 'command' in self.kwargs:
-            command = self.kwargs['command']
-        else:
-            command = None
-
-        if command == '1': 
-            CentralDB = 0
-            set_storageMediumLocation = ''
-        elif command == '2':
-            CentralDB = 1
-            set_storageMediumLocation = ''
-        elif command == '3':
-            CentralDB = 1
-            set_storageMediumLocation = 'IT_MARIEBERG'
-        else:
-            CentralDB = 0
-            set_storageMediumLocation = ''
-
-        status_code = ESSPGM.Robot().Inventory()
-        if not status_code:
-            status_code = ESSPGM.Robot().GetVolserDB(CentralDB=CentralDB, set_storageMediumLocation=set_storageMediumLocation)
-        status_detail = [[],[]]
-        if status_code == 0:
-            status_code = 'OK'
-        context['status_code'] = status_code
-        context['status_detail'] = status_detail
-        context['ReqStatus_CHOICES'] = dict(ReqStatus_CHOICES)
-        return context
-"""
-
 class StorageMigration(TemplateView):
     template_name = 'administration/storagemigration.html'
 
@@ -357,11 +266,9 @@ class StorageMigration(TemplateView):
         return super(StorageMigration, self).dispatch( *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-
         context = super(StorageMigration, self).get_context_data(**kwargs)
         context['label'] = 'ADMINISTRATION - Storage Migration'
         context['DefaultValue'] = dict(DefaultValue.objects.filter(entity__startswith='administration_storagemigration').values_list('entity','value'))
-        #context['DefaultValueObject'] = DefaultValue.objects.filter(entity__startswith='administration_storagemaintenance').get_value_object()
         return context
 
 class StorageMigrationDatatablesView(DatatablesViewEss):
@@ -477,24 +384,7 @@ class TargetPrePopulation(View):
                             sm_migrate_target=target_obj.target            
                 sm_targetdict[sm_write_target] = sm_migrate_target
                 targetlist.append(sm_targetdict)
-                '''
-                #st_objs = sm_obj.storagetarget_set.filter(status__in=[1, 2])
-                st_objs = sm_obj.storagetarget_set.filter(status=1)
-                if st_objs.count() == 1:
-                    st_obj = st_objs[0]
-                elif st_objs.count() == 0:
-                    #logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
-                    continue
-                elif st_objs.count() > 1:
-                    #logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
-                    continue
-                if st_obj.target.status == 1:
-                    target_obj = st_obj.target
-                    targetlist.append(target_obj.target)
-                else:
-                    #logger.error('The target %s is disabled' % target_obj.name)
-                    continue
-                '''
+
             Policy ={}
             Policy['PolicyID'] = ArchivePolicy_obj.PolicyID
             Policy['PolicyName'] =  ArchivePolicy_obj.PolicyName
@@ -552,20 +442,24 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
             
         #print '############ obj_dict len: %s' % len(obj_dict)
 
+        # Check whether the criteria for replacement of media target prefix is met
+        if len(current_mediumid_search) == 8 and current_mediumid_search.startswith('-') and current_mediumid_search.__contains__('+'):
+            media_target_replace_flag = 1
+        else:
+            media_target_replace_flag = 0
+            
         for obj in self.object_list_with_writetapes:
             try:
                 obj_dict[obj['ObjectUUID']]
             except KeyError:
                 obj_dict[obj['ObjectUUID']] = obj        
-            #if not obj['ObjectUUID'] in obj_dict.keys():
-                #obj_dict[obj['ObjectUUID']] = obj
 
-            #Prepare storage method list
+            ###############################
+            # Prepare storage method list
             sm_objs = []
 
-            # Check whether the criteria for replacement of media target prefix is met
-            if len(current_mediumid_search) == 8 and current_mediumid_search.startswith('-') and current_mediumid_search.__contains__('+'):
-                media_target_replace_flag = 1
+            # if replacement of media target prefix is met force sm_objs
+            if media_target_replace_flag == 1:
                 # add corresponding new target medium prefix
                 sm_obj = sm()
                 sm_obj.id = 1
@@ -581,7 +475,6 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
                 sm_obj.target = current_mediumid_search[1:4]
                 sm_objs.append(sm_obj)
             else:
-                media_target_replace_flag = 0
                 if not obj['PolicyId__PolicyID'] in policy_sm_objs_dict.keys():
                     ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = obj['PolicyId__PolicyID'])
                     StorageMethod_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1)
@@ -610,15 +503,12 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
                 else:
                     sm_objs = policy_sm_objs_dict[obj['PolicyId__PolicyID']]
 
+            ###############################
+            # Add storage_list to sm_objs
             if not 'sm_list' in obj_dict[obj['ObjectUUID']].keys():
                 obj_dict[obj['ObjectUUID']]['sm_list'] = {}
-            
-            #sm_list = []
-            #if media_target_replace_flag:
-            #    storage_list = []
                 
             for sm_obj in sm_objs:
-                #storage_list = []
                 if not sm_obj.id in obj_dict[obj['ObjectUUID']]['sm_list'].keys():
                     obj_dict[obj['ObjectUUID']]['sm_list'][sm_obj.id] = {'id': sm_obj.id,
                                     'status': sm_obj.status,
@@ -654,124 +544,13 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
             for x in obj_dict[obj['ObjectUUID']]['sm_list'].values():
                 logger.debug('sm_list_y: %s' % repr(x))
 
-            #obj_list[num]['sm_list'] = sm_list
-
-        #end = time.time()
-        #print(end - start)                
-        #print '################# step 22 ###############################: %s' % (end - start)
-        '''
-        # Create unique obj_list
-        obj_list = []
-        for obj in self.object_list_with_writetapes:
-            if not any(d['ObjectUUID'] == obj['ObjectUUID'] for d in obj_list):
-                obj_list.append(obj)
-        print '################# step 2 ###############################'
-        
-        
-        # Add sm_list(sm+storage) to obj_list 
-        for num, obj in enumerate(obj_list):
-            
-            #Prepare storage method list
-            sm_objs = []
-
-            # Check whether the criteria for replacement of media target prefix is met
-            if len(current_mediumid_search) == 8 and current_mediumid_search.startswith('-') and current_mediumid_search.__contains__('+'):
-                media_target_replace_flag = 1
-                # add corresponding new target medium prefix
-                sm_obj = sm()
-                sm_obj.id = 1
-                sm_obj.status = 1
-                sm_obj.type = 300
-                sm_obj.target = current_mediumid_search[5:8]
-                sm_objs.append(sm_obj)
-                # add old target medium prefix
-                sm_obj = sm()
-                sm_obj.id = 2
-                sm_obj.status = 0 # Set status to 0 for SM when items on this target medium is replaced
-                sm_obj.type = 300
-                sm_obj.target = current_mediumid_search[1:4]
-                sm_objs.append(sm_obj)
-            else:
-                media_target_replace_flag = 0
-                if not obj['PolicyId__PolicyID'] in policy_sm_objs_dict.keys():
-                    ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = obj['PolicyId__PolicyID'])
-                    StorageMethod_objs = ArchivePolicy_obj.storagemethod_set.filter(status=1)
-                    for StorageMethod_obj in StorageMethod_objs:
-                        st_objs = StorageMethod_obj.storagetarget_set.filter(status=1)
-                        if st_objs.count() == 1:
-                            st_obj = st_objs[0]
-                        elif st_objs.count() == 0:
-                            logger.error('The storage method %s has no enabled target configured' % sm_obj.name)
-                            continue
-                        elif st_objs.count() > 1:
-                            logger.error('The storage method %s has too many targets configured with the status enabled' % sm_obj.name)
-                            continue
-                        if st_obj.target.status == 1:
-                            target_obj = st_obj.target
-                        else:
-                            logger.error('The target %s is disabled' % st_obj.target.name)
-                            continue
-                        sm_obj = sm()
-                        sm_obj.id = StorageMethod_obj.id
-                        sm_obj.status = st_obj.status
-                        sm_obj.type = target_obj.type
-                        sm_obj.target = target_obj.target
-                        sm_objs.append(sm_obj)
-                    policy_sm_objs_dict[obj['PolicyId__PolicyID']] = sm_objs
-                else:
-                    sm_objs = policy_sm_objs_dict[obj['PolicyId__PolicyID']]
-
-            sm_list = []
-            if media_target_replace_flag:
-                storage_list = []
-                
-            for sm_obj in sm_objs:
-                storage_list = []
-                if sm_obj.status == 1: # StorageTarget_Status_CHOICES = (0, 'Disabled'), (1, 'Enabled'), (2, 'ReadOnly'), (3, 'Migrate')
-                    for d in self.object_list_with_writetapes:
-                        if d['Storage_set__storagemedium__storageMediumID'] is not None:
-                            if (sm_obj.type in range(300,330) and
-                                d['Storage_set__storagemedium__storageMediumID'].startswith(sm_obj.target) and
-                                d['ObjectUUID'] == obj['ObjectUUID']
-                                ) or\
-                                (media_target_replace_flag and sm_obj.type == 300 and
-                                d['Storage_set__storagemedium__storageMediumID'].startswith(current_mediumid_search[1:4]) and
-                                d['ObjectUUID'] == obj['ObjectUUID']
-                                ) or\
-                               (sm_obj.type == 200 and
-                                d['Storage_set__storagemedium__storageMediumID'] == 'disk' and
-                                d['ObjectUUID'] == obj['ObjectUUID']
-                                ):
-                                    storage_list.append({'storagemedium__storageMediumID': d['Storage_set__storagemedium__storageMediumID'],
-                                                         'storagemedium__CreateDate': d['Storage_set__storagemedium__CreateDate'],
-                                                         'contentLocationValue': d['Storage_set__contentLocationValue'],
-                                                         'archiveobject__ObjectIdentifierValue': obj['ObjectIdentifierValue'],
-                                                         'archiveobject__ObjectUUID': obj['ObjectUUID'],
-                                                         })
-                                    #print 'd - storage__storageMediumUUID__storageMediumID: %s' % d['storage__storageMediumUUID__storageMediumID']
-                                    #print 'o - storage__storageMediumUUID__storageMediumID: %s' % obj['storage__storageMediumUUID__storageMediumID']
-                    #print 'ObjectUUID: %s, target:%s , s_count:%s' % (obj['ObjectUUID'],sm_obj.target,len(storage_list))
-                    sm_list.append({'id': sm_obj.id,
-                                    'status': sm_obj.status,
-                                    #'type': sm_obj.type,
-                                    'target': sm_obj.target,
-                                    'storage_list': storage_list})
-                
-            for x in sm_list:
-                logger.debug('sm_list_x: %s' % repr(x))
-
-            obj_list[num]['sm_list'] = sm_list
-        
-        logger.debug('obj_list: %s' % str(obj_list))
-        '''
         #end = time.time()                
         #print '################# step 3 ###############################: %s' % (end - start)
-        
+
+        ###############################        
         # Create redundant storage list
         redundant_storage_list = {}
-        #for obj in obj_list:
-        #print repr(obj_dict)
-        #obj_dict2 = {}
+        newly_added_IP_storage_list = {} # We maybe want to use this list to exclude newly added IPs to storage....
         for obj in obj_dict.values():
             #print 'obj: %s' % repr(obj)
             #for sm_obj in obj['sm_list']:
@@ -787,15 +566,25 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
                         elif storage_obj['storagemedium__CreateDate'] > active_storage_obj['storagemedium__CreateDate']:
                             active_storage_obj = storage_obj
                     for storage_obj in sm_obj['storage_list']:
+                        # Add the storage_obj with oldest storagemedium__CreateDate to redundant_storage_list
                         if storage_obj['storagemedium__CreateDate'] < active_storage_obj['storagemedium__CreateDate']:
                             if not storage_obj['storagemedium__storageMediumID'] in redundant_storage_list.keys():
                                 redundant_storage_list[storage_obj['storagemedium__storageMediumID']] = []
                             redundant_storage_list[storage_obj['storagemedium__storageMediumID']].append(storage_obj)
+                # if replacement of media target prefix is met and target prefix is current active media prefix, add this sm_obj as newly added IP that was not migrated
+                elif media_target_replace_flag == 1 and len(sm_obj['storage_list']) == 1:
+                    storage_obj = sm_obj['storage_list'][0]
+                    if storage_obj['storagemedium__storageMediumID'].startswith(current_mediumid_search[5:8]):
+                        if not storage_obj['storagemedium__storageMediumID'] in newly_added_IP_storage_list.keys():
+                            newly_added_IP_storage_list[storage_obj['storagemedium__storageMediumID']] = []
+                        newly_added_IP_storage_list[storage_obj['storagemedium__storageMediumID']].append(storage_obj)
         
         logger.debug('redundant_storage_list: %s' % repr(redundant_storage_list))
+        logger.debug('newly_added_IP_storage_list: %s' % repr(newly_added_IP_storage_list))
 
         #print '################# step 4 ###############################'
 
+        ###############################
         # Create deactivate_media_list and need_to_migrate_dict
         deactivate_media_list = []
         need_to_migrate_list = []
@@ -830,6 +619,10 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
                             #print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!not found!, skip remove %s' % storage_values
                         #print 'storage_list2_len after: %s' % len(storage_list2)
                         #pass
+                #for newly_added_IP_storage_values in newly_added_IP_storage_list[storageMediumID]:
+                #    if storage_values == newly_added_IP_storage_values:
+                #        if storage_values in storage_list2:
+                #            storage_list2.remove(storage_values)                        
             if len(storage_list2) == 0:
                 deactivate_media_list.append(['','','','',storageMediumID,'','','','','','','','','','','',''])
             else:
@@ -847,7 +640,6 @@ class StorageMaintenanceDatatablesView(StorageMigrationDatatablesView):
         
         #print '################# step 5 ###############################'                            
         
-        #print '#####################################obj_list: %s count: %s' % (obj_list,len(obj_list))
         #print '*************************************redundant_list: %s count: %s' % (redundant_storage_list,len(redundant_storage_list))
         #print '*************************************redundant_list: %s count: %s, storage_count: %s' % (redundant_storage_list,len(redundant_storage_list),len(redundant_storage_list['ESA001']))
         #deactivate_media_list.append(['ESA001'])
