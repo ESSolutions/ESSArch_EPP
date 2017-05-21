@@ -27,6 +27,7 @@ import glob
 import os
 import re
 import shutil
+import uuid
 
 from operator import itemgetter
 
@@ -56,7 +57,7 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
-from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory
+from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory, parse_content_range_header
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.pagination import LinkHeaderPagination
 
@@ -268,6 +269,50 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         step.run()
 
         return Response('Receiving %s...' % container)
+
+    @list_route(methods=['post'])
+    def upload(self, request):
+        path = Path.objects.get(entity="reception").value
+
+        f = request.FILES['the_file']
+        content_range = request.META.get('HTTP_CONTENT_RANGE', 'bytes 0-0/0')
+        filename = os.path.join(path, f.name)
+
+        (start, end, total) = parse_content_range_header(content_range)
+
+        if f.size != end - start + 1:
+            raise exceptions.ParseError("File size doesn't match headers")
+
+        if start == 0:
+            with open(filename, 'wb') as dstf:
+                dstf.write(f.read())
+        else:
+            with open(filename, 'ab') as dstf:
+                dstf.seek(start)
+                dstf.write(f.read())
+
+        upload_id = request.data.get('upload_id', uuid.uuid4().hex)
+        return Response({'upload_id': upload_id})
+
+    @list_route(methods=['post'])
+    def upload_complete(self, request):
+        path = Path.objects.get(entity="reception").value
+
+        md5 = request.data['md5']
+        filepath = request.data['path']
+        filepath = os.path.join(path, filepath)
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ValidateIntegrity",
+            params={
+                "filename": filepath,
+                "checksum": md5,
+                "algorithm": 'MD5'
+            },
+            responsible=self.request.user,
+        ).run().get()
+
+        return Response('Upload of %s complete' % filepath)
 
 
 class InformationPackageViewSet(viewsets.ModelViewSet):
