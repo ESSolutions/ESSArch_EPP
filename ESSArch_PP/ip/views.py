@@ -579,7 +579,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             try:
-                path = os.path.join(ip.ObjectPath, request.data['path'])
+                path = request.data['path']
             except KeyError:
                 return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
 
