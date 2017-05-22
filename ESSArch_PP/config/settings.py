@@ -236,6 +236,7 @@ STATICFILES_DIRS = (
 BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
 CELERY_IMPORTS = ("workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = 'amqp://'
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 from datetime import timedelta
 
