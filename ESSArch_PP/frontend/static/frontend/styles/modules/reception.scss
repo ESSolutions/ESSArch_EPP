@@ -230,7 +230,12 @@ input[type="checkbox"] {
     .formly {
         display: flex;
         flex-direction: row;
+        justify-content: flex-start;
         min-height: 70px;
+        .formly-field {
+            min-width: 105px;
+            width: 10%;
+        }
         select {
             width: 170px;
         }
