@@ -595,7 +595,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                 raise exceptions.ParseError('Illegal path %s' % fullpath)
 
             if pathtype == 'dir':
-                os.mkdir(fullpath)
+                os.makedirs(fullpath)
             elif pathtype == 'file':
                 open(fullpath, 'a').close()
             else:
