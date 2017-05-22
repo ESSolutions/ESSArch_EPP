@@ -91,7 +91,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 		switch(request.type) {
 			case "preserve":
 				$scope.preserveIp(ip, request);
-				break; 
+				break;
 			case "view":
 				console.log("request not implemented");
 				break;
@@ -353,7 +353,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.chosenFiles.forEach(function(chosen, index) {
                 if (chosen.name === file.name) {
                     fileExists = true;
-                    fileExistsModal(index, file);                    
+                    fileExistsModal(index, file, chosen);
                 }
             });
             if (!fileExists) {
@@ -365,7 +365,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         });
         $scope.selectedCards1 = [];
     }
-    function fileExistsModal(index, file) {
+    function fileExistsModal(index, file, fileToBeOverwritten) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
@@ -375,7 +375,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             resolve: {
                 data: function() {
                     return {
-                        file: file
+                        file: file,
+                        type: fileToBeOverwritten.type
                     };
                 }
             },
@@ -390,7 +391,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         });
     }
 
-    function folderNameExistsModal(index, folder) {
+    function folderNameExistsModal(index, folder, fileToBeOverwritten) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
@@ -402,20 +403,24 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             resolve: {
                 data: function() {
                     return {
-                        file: folder
+                        file: folder,
+                        type: fileToBeOverwritten.type
                     };
                 }
             },
         })
         modalInstance.result.then(function(data) {
-            listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(2), file)
-                .then(function() {
-                    $scope.updateGridArray();
+            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(2), fileToBeOverwritten)
+                .then(function(){
+                    listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(2), folder)
+                        .then(function() {
+                            $scope.updateGridArray();
+                        });
                 });
         });
     }
 
-    $scope.removeFiles = function(files) {
+    $scope.removeFiles = function() {
         $scope.selectedCards2.forEach(function(file) {
             listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(2), file)
             .then(function () {
@@ -434,7 +439,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         $scope.chosenFiles.forEach(function(chosen, index) {
             if (chosen.name === folder.name) {
                 fileExists = true;
-                folderNameExistsModal(index, folder);                    
+                folderNameExistsModal(index, folder, chosen);
             }
         });
         if (!fileExists) {
@@ -600,7 +605,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             });
         });
     }
-        
+
     $scope.newDirModal = function() {
         var modalInstance = $uibModal.open({
             animation: true,

@@ -123,6 +123,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 .controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
     var $ctrl = this;
     $ctrl.file = data.file;
+    $ctrl.type = data.type;
     $ctrl.overwrite = function () {
         $ctrl.data = {
             status: "overwritten"
