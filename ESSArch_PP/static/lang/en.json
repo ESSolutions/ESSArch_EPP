@@ -258,5 +258,6 @@
     "ARCHIVED": "Archived",
     "ENTERORDERLABEL": "Enter label for order",
     "CANCELPRESERVATION": "Close preservation",
-    "STORAGE_STATUS": "Storage status"
+    "STORAGE_STATUS": "Storage status",
+    "ARGS": "Args"
 }

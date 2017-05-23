@@ -14,6 +14,16 @@
             <thead>
                 <tr>
                     <td>
+                        <div style="max-height: 300px; overflow-y:auto;">
+                            <b>{{('ARGS' | translate)+':'}}</b>
+                            <table class="table">
+                                <thead>
+                                    <tr ng-repeat="x in currentStepTask.args">
+                                        <td class="param-value">{{x}}</td>
+                                </thead>
+                                </tr>
+                            </table>
+                        </div>
                         <div style="max-height:300px; overflow-y:auto;">
                             <b>{{('PARAMS' | translate)+':'}}</b>
                             <table class="table">

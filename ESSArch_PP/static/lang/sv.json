@@ -258,5 +258,6 @@
     "ARCHIVED": "Arkiverad",
     "ENTERORDERLABEL": "Ange etikett för beställning",
     "CANCELPRESERVATION": "Stäng arkivering",
-    "STORAGE_STATUS": "Lagringsstatus"
+    "STORAGE_STATUS": "Lagringsstatus",
+    "ARGS": "Args"
 }
