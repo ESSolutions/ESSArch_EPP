@@ -36,7 +36,7 @@
             <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
 
             <div ng-controller="LanguageCtrl" class="language-select" style="width: 100px; margin-left: 10px;">
-                <select class="form-control" ng-model="currentLanguage" ng-change="changeLanguage(currentLanguage)" ng-options="x | translate for x in availableLanguages" style="width: 100%;" uib-popover="{{'CHOOSELANGUAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                <select class="form-control" ng-model="currentLanguage" ng-change="changeLanguage(currentLanguage)" ng-options="x | translate for x in availableLanguages" style="width: 100%;" uib-popover="{{'CHOOSELANGUAGE' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></select>
             </div>
         </div>
     </div>

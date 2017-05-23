@@ -1,7 +1,7 @@
 <div ng-if="eventShow"  ng-controller="EventCtrl as vm" class="event-view">
     <div st-table="vm.displayed" st-pipe="eventPipe" class="table-container">
         <div class="search-prepare-wrapper">
-            <span style="float: right; margin-bottom: 5px;" ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }"></span>
+            <span style="float: right; margin-bottom: 5px;" ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <select class="form-control items-per-page" ng-change="updateEventsPerPage(vm.itemsPerPage)" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]"></select>
         </div>
         <div class="list-view-table">
