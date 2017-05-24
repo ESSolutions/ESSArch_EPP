@@ -162,7 +162,7 @@
     "ITEMSPERPAGE": "IP's per page",
     "GLOBALSEARCHDESC":"List all IP's associated to the search term",
     "PREPAREIPDESC": "Create a new IP",
-    "REFRESHTABLEDESC": "Refrash table",
+    "REFRESHTABLEDESC": "Refresh table",
     "LABELDESC": "Work with IP",
     "IPSTATEDESC": "Open status view for IP",
     "EVENTSDESC": "List Events for IP",
