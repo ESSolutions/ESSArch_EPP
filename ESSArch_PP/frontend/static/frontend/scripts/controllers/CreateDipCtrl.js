@@ -79,9 +79,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                 row.class = "selected";
                 $scope.selectedIp = row;
                 $scope.eventsClick(row);
-                $timeout(function() {
-                    $anchorScroll("request-form");
-                });
             });
 		}
 		$scope.statusShow = false;
@@ -298,9 +295,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.deckGridInit(row);
-            $timeout(function() {
-                $anchorScroll("select-view");
-            }, 0);
         }
         $scope.requestForm = false;
         $scope.requestEventlog = false;

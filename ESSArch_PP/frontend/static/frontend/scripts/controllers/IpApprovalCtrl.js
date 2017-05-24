@@ -261,9 +261,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.edit = true;
 			$scope.requestForm = true;
 			$scope.eventsClick(row);
-			$timeout(function() {
-				$anchorScroll("request-form");
-			}, 0);
 		}
 		$scope.statusShow = false;
 	};

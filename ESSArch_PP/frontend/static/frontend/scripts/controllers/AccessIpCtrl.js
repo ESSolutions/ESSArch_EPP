@@ -252,9 +252,6 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.requestForm = true;
-            $timeout(function() {
-                $anchorScroll("request-form");
-            }, 0);
         }
         $scope.eventShow = false;
         $scope.statusShow = false;

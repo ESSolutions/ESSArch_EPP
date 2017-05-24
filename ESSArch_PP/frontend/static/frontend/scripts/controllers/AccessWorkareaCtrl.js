@@ -229,9 +229,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.requestForm = true;
-            $timeout(function() {
-                $anchorScroll("request-form");
-            }, 0);
         }
         $scope.eventShow = false;
         $scope.statusShow = false;

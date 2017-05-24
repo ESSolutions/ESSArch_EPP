@@ -58,9 +58,6 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
-            $timeout(function() {
-                $anchorScroll("select-view");
-            }, 0);
         }
         $scope.statusShow = false;
     };

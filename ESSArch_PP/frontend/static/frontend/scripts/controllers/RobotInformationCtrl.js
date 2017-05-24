@@ -89,9 +89,6 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.select = true;
             $scope.getSlots(vm.selectedRobot);
             $scope.getDrives(vm.selectedRobot);
-            $timeout(function() {
-                $anchorScroll("select-view");
-            }, 0);
         }
     }
     

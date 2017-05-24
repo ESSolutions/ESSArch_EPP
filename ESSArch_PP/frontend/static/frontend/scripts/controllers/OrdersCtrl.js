@@ -155,9 +155,6 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
-            $timeout(function() {
-                $anchorScroll("request-form");
-            }, 0);
         }
         $scope.eventShow = false;
         $scope.statusShow = false;
