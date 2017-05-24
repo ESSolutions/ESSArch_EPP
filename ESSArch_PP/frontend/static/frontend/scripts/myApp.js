@@ -258,7 +258,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 })
 .config(function($animateProvider) {
     // Only animate elements with the 'angular-animate' class
-    $animateProvider.classNameFilter(/angular-animate/);
+    $animateProvider.classNameFilter(/angular-animate|ui-select-/);
 })
 .config(['markedProvider', function (markedProvider) {
     function isURL(str) {
