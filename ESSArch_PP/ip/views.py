@@ -59,6 +59,7 @@ from ESSArch_Core.ip.models import (
 from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
 from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory, parse_content_range_header
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
+from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
 from ESSArch_Core.pagination import LinkHeaderPagination
 
 from ip.filters import (
@@ -79,7 +80,6 @@ from ip.serializers import (
     EventIPSerializer,
     WorkareaSerializer,
 )
-from workflow.serializers import ProcessStepSerializer
 
 
 class ArchivalInstitutionViewSet(viewsets.ModelViewSet):

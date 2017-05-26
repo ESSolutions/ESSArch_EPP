@@ -43,6 +43,8 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
+from ESSArch_Core.WorkflowEngine.views import ProcessStepViewSet, ProcessTaskViewSet
+
 from ip.views import (
     ArchivalInstitutionViewSet,
     ArchivistOrganizationViewSet,
@@ -70,8 +72,6 @@ from storage.views import (
 )
 
 from tags.views import TagViewSet, TagInformationPackagesViewSet
-
-from workflow.views import ProcessStepViewSet, ProcessTaskViewSet
 
 
 router = ExtendedDefaultRouter()
