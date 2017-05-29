@@ -272,6 +272,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
     @list_route(methods=['post'])
     def upload(self, request):
+        if not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
         path = Path.objects.get(entity="reception").value
 
         f = request.FILES['the_file']
@@ -296,6 +299,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
     @list_route(methods=['post'])
     def upload_complete(self, request):
+        if not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
         path = Path.objects.get(entity="reception").value
 
         md5 = request.data['md5']
