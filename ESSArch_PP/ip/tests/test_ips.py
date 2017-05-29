@@ -684,6 +684,43 @@ class InformationPackageViewSetFilesTestCase(TestCase):
 
         self.assertTrue(os.path.isfile(os.path.join(self.ip.ObjectPath, path)))
 
+class InformationPackageReceptionViewSetTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="admin", password='admin')
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.url = reverse('ip-reception-list')
+
+        self.datadir = tempfile.mkdtemp()
+        Path.objects.create(entity='reception', value=self.datadir)
+
+        tar_filepath = os.path.join(self.datadir, '1.tar')
+        xml_filepath = os.path.join(self.datadir, '1.xml')
+
+        open(tar_filepath, 'a').close()
+        with open(xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1">
+                <metsHdr/>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''')
+
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive(self, mock_receive):
+        res = self.client.post(self.url + '1/receive/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        mock_receive.assert_called_once()
+
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_existing(self, mock_receive):
+        InformationPackage.objects.create(ObjectIdentifierValue='1')
+        res = self.client.post(self.url + '1/receive/')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_receive.assert_not_called()
+
 
 class OrderViewSetTestCase(TestCase):
     def setUp(self):
