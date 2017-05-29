@@ -39,15 +39,14 @@ logger = logging.getLogger('essarch.storagelogistics')
 #       Try to avoid editing it if you might need to regenerate it.
 ################################################################################
 
-from soapbox import soap, xsd
-from soapbox.xsd import UNBOUNDED
+from soapfish import soap, xsd
+from soapfish.xsd import UNBOUNDED
+
+BaseHeader = xsd.ComplexType
 
 ################################################################################
 # Schemas
-
-
 # http://ESSArch_Instance.ra.se/StorageLogisticsService.xs
-
 
 class StoragelogisticsResponse(xsd.ComplexType):
     '''
@@ -92,10 +91,8 @@ class StoragelogisticsRequest(xsd.ComplexType):
 Schema_55b49 = xsd.Schema(
     imports=[],
     targetNamespace='http://ESSArch_Instance.ra.se/StorageLogisticsService',
-    elementFormDefault='unqualified',
-    #elementFormDefault='qualified',
-    #elementFormDefault=xsd.ElementFormDefault.UNQUALIFIED,
-    #elementFormDefault=xsd.ElementFormDefault.QUALIFIED,
+    #elementFormDefault='unqualified',
+    elementFormDefault='qualified',
     simpleTypes=[],
     attributeGroups=[],
     groups=[],
@@ -459,9 +456,10 @@ storagelogistics_method = xsd.Method(function=storagelogistics,
 StorageLogisticsService_Port_SERVICE = soap.Service(
     name='StorageLogisticsService_Port',
     targetNamespace='http://ESSArch_Instance.ra.se/StorageLogisticsService',
-    location='%(scheme)s://%(host)s/webservice/StorageLogisticsService',
-    #location='http://ESSArch_Instance.ra.se/webservice/StorageLogisticsService',
-    schema=Schema_55b49,
+    #location='%(scheme)s://%(host)s/webservice/StorageLogisticsService',
+    #location='https://192.168.0.70:1443/webservice/StorageLogisticsService',
+    location='http://ESSArch_Instance.ra.se/webservice/StorageLogisticsService',
+    schemas=[Schema_55b49],
     version=soap.SOAPVersion.SOAP11,
     methods=[storagelogistics_method],
 )
@@ -472,8 +470,8 @@ StorageLogisticsService_Port_SERVICE = soap.Service(
 
 
 # Uncomment these lines to turn on dispatching:
-from django.views.decorators.csrf import csrf_exempt
-dispatch = csrf_exempt(soap.get_django_dispatch(StorageLogisticsService_Port_SERVICE))
+from django_dispatcher import django_dispatcher
+dispatch = django_dispatcher(StorageLogisticsService_Port_SERVICE)
 
 # Put these lines in the urls.py file of your Django project/application:
 #urlpatterns += patterns('',
