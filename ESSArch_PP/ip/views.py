@@ -331,7 +331,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     ordering_fields = (
         'label', 'responsible', 'create_date', 'state', 'eventDateTime',
         'eventType', 'eventOutcomeDetailNote', 'eventOutcome',
-        'linkingAgentIdentifierValue', 'id'
+        'linkingAgentIdentifierValue', 'id', 'object_identifier_value',
     )
     search_fields = (
         'object_identifier_value','aic__information_packages__object_identifier_value','information_packages__object_identifier_value',
