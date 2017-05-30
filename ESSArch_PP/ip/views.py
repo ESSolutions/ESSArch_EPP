@@ -574,6 +574,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             try:
                 shutil.rmtree(path)
             except OSError as e:
+                if e.errno == errno.ENOENT:
+                    raise exceptions.NotFound('Path does not exist')
+
                 if e.errno != errno.ENOTDIR:
                     raise
 
