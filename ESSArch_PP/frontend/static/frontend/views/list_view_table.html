@@ -43,7 +43,7 @@
         <thead>
             <tr>
                 <th class="clickable" class="column-label"></th>
-                <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'CreateDate'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state' || col.label == 'storage_status'" style="white-space: nowrap;">{{col.label.toUpperCase() | translate}}</span></th>
+                <th class="clickable" class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'create_date'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"><span ng-hide="col.label=='step_state' || col.label == 'storage_status'" style="white-space: nowrap;">{{col.label.toUpperCase() | translate}}</span></th>
             </tr>
         </thead>
         <tbody>
@@ -51,7 +51,7 @@
                 <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row')">
                     <div class="checkbox table-col">
                         <label>
-                            <input ng-disabled="row.State == 'Receiving'" type="checkbox" ng-model="row.checked" ng-change="includeIp(row)" uib-popover="{{'MARKFORRECEIVE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+                            <input ng-disabled="row.state == 'Receiving'" type="checkbox" ng-model="row.checked" ng-change="includeIp(row)" uib-popover="{{'MARKFORRECEIVE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
                             </input>
                         </label>
                     </div>

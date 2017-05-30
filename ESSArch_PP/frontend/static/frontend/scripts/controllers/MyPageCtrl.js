@@ -8,9 +8,9 @@ angular.module('myApp').controller('MyPageCtrl', function($scope, $controller, $
     $scope.tableControlCollapsed = true;
     $controller('BaseCtrl', { $scope: $scope });
     vm.displayedIps = [{
-        Label: "request",
-        Responsible: {username: "admin"},
-        CreateDate: new Date(),
+        label: "request",
+        responsible: {username: "admin"},
+        create_date: new Date(),
         RequestType: "Request type"
     }];
 });

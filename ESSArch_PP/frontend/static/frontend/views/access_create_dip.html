@@ -71,7 +71,7 @@
                 <div class="file-explorer">
                     <div class="file-explorer-nav">
                         <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
-                        <b class="dir-path">{{ip.ObjectIdentifierValue + '/' + previousGridArraysString(2)}}</b>
+                        <b class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString(2)}}</b>
                     </div>
                     <span style="float: right; margin-bottom: 5px;" ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
                     uib-popover="{{'REFRESH' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>

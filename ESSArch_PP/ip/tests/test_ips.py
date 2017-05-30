@@ -51,7 +51,7 @@ class AccessTestCase(TestCase):
         self.root = os.path.dirname(os.path.realpath(__file__))
         self.datadir = os.path.join(self.root, 'datadir')
 
-        self.ip = InformationPackage.objects.create(ObjectPath=self.datadir)
+        self.ip = InformationPackage.objects.create(object_path=self.datadir)
         self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
         self.url = self.url + 'access/'
 
@@ -158,9 +158,9 @@ class WorkareaViewSetTestCase(TestCase):
 
     def test_ip_in_workarea_by_current_user_ip_view_type_global_search(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        ip2 = InformationPackage.objects.create(Label='bar', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        ip2 = InformationPackage.objects.create(label='bar', package_type=InformationPackage.AIP, aic=aic, generation=1)
         self.ip.aic = aic
-        self.ip.Label = 'foo'
+        self.ip.label = 'foo'
         self.ip.save()
 
         Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
@@ -173,9 +173,9 @@ class WorkareaViewSetTestCase(TestCase):
 
     def test_ip_in_workarea_by_current_user_aic_view_type_global_search(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        ip2 = InformationPackage.objects.create(Label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        ip2 = InformationPackage.objects.create(label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
         self.ip.aic = aic
-        self.ip.Label = 'first'
+        self.ip.label = 'first'
         self.ip.save()
 
         Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
@@ -264,7 +264,7 @@ class WorkareaFilesViewTestCase(TestCase):
         dstdir = tempfile.mkdtemp(dir=self.path)
         dst = 'foo.txt'
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
@@ -279,7 +279,7 @@ class WorkareaFilesViewTestCase(TestCase):
         dstdir = tempfile.mkdtemp(dir=self.path)
         dst = 'foo.txt'
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
 
@@ -296,7 +296,7 @@ class WorkareaFilesViewTestCase(TestCase):
 
         open(os.path.join(dstdir, dst), 'a').close()
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
 
@@ -311,7 +311,7 @@ class WorkareaFilesViewTestCase(TestCase):
         dstdir = tempfile.mkdtemp(dir=self.path)
         dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
 
@@ -326,7 +326,7 @@ class WorkareaFilesViewTestCase(TestCase):
         dstdir = tempfile.mkdtemp(dir=self.path)
         dst = 'foo'
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
 
@@ -341,7 +341,7 @@ class WorkareaFilesViewTestCase(TestCase):
         dstdir = tempfile.mkdtemp(dir=self.path)
         dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
 
-        ip = InformationPackage.objects.create(ObjectPath=dstdir, Responsible=self.user, package_type=InformationPackage.DIP)
+        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
 
@@ -381,8 +381,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_aic_view_type_aic_multiple_aips_same_state_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(State='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(state='foo', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'aic', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -392,8 +392,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_aic_view_type_aic_multiple_aips_different_states_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(State='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(state='bar', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'aic', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -419,9 +419,9 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_same_state_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip3 = InformationPackage.objects.create(generation=2, State='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip3 = InformationPackage.objects.create(generation=2, state='foo', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -432,9 +432,9 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_states_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, State='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip3 = InformationPackage.objects.create(generation=2, State='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip3 = InformationPackage.objects.create(generation=2, state='bar', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -443,8 +443,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_states_first_ip_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, State='bar', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, State='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='foo', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -454,16 +454,16 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_states_all_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, State='bar', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, State='baz', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='baz', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 0)
 
     def test_aic_view_type_aic_multiple_aips_different_labels_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, Label='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, Label='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, label='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, label='bar', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'aic', 'label': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -473,8 +473,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_labels_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, Label='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, Label='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, label='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, label='bar', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'foo'})
         self.assertEqual(len(res.data), 1)
@@ -483,20 +483,20 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_labels_all_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, Label='bar', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, Label='baz', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, label='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, label='baz', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'foo'})
         self.assertEqual(len(res.data), 0)
 
     def test_aic_view_type_aic_multiple_aips_different_labels_global_search(self):
         aic1 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip11 = InformationPackage.objects.create(generation=0, Label='first1', aic=aic1, package_type=InformationPackage.AIP)
-        aip12 = InformationPackage.objects.create(generation=1, Label='first2', aic=aic1, package_type=InformationPackage.AIP)
+        aip11 = InformationPackage.objects.create(generation=0, label='first1', aic=aic1, package_type=InformationPackage.AIP)
+        aip12 = InformationPackage.objects.create(generation=1, label='first2', aic=aic1, package_type=InformationPackage.AIP)
 
         aic2 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip21 = InformationPackage.objects.create(generation=0, Label='second1', aic=aic2, package_type=InformationPackage.AIP)
-        aip22 = InformationPackage.objects.create(generation=1, Label='second2', aic=aic2, package_type=InformationPackage.AIP)
+        aip21 = InformationPackage.objects.create(generation=0, label='second1', aic=aic2, package_type=InformationPackage.AIP)
+        aip22 = InformationPackage.objects.create(generation=1, label='second2', aic=aic2, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'aic', 'search': 'first'})
         self.assertEqual(len(res.data), 1)
@@ -507,12 +507,12 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_labels_global_search(self):
         aic1 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip11 = InformationPackage.objects.create(generation=0, Label='first1', aic=aic1, package_type=InformationPackage.AIP)
-        aip12 = InformationPackage.objects.create(generation=1, Label='first2', aic=aic1, package_type=InformationPackage.AIP)
+        aip11 = InformationPackage.objects.create(generation=0, label='first1', aic=aic1, package_type=InformationPackage.AIP)
+        aip12 = InformationPackage.objects.create(generation=1, label='first2', aic=aic1, package_type=InformationPackage.AIP)
 
         aic2 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip21 = InformationPackage.objects.create(generation=0, Label='second1', aic=aic2, package_type=InformationPackage.AIP)
-        aip22 = InformationPackage.objects.create(generation=1, Label='second2', aic=aic2, package_type=InformationPackage.AIP)
+        aip21 = InformationPackage.objects.create(generation=0, label='second1', aic=aic2, package_type=InformationPackage.AIP)
+        aip22 = InformationPackage.objects.create(generation=1, label='second2', aic=aic2, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'search': 'first'})
         self.assertEqual(len(res.data), 1)
@@ -522,8 +522,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_ip_view_type_aic_multiple_aips_different_labels_global_search_and_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, Label='foo', State='first', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, Label='bar', State='second', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, label='foo', state='first', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, label='bar', state='second', aic=aic, package_type=InformationPackage.AIP)
 
         res = self.client.get(self.url, data={'view_type': 'ip', 'search': 'bar', 'state': 'second'})
         self.assertEqual(len(res.data), 1)
@@ -533,8 +533,8 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_aic_view_type_aic_aips_different_labels_same_aic_global_search(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(Label='first', package_type=InformationPackage.AIP, aic=aic, generation=1)
-        aip2 = InformationPackage.objects.create(Label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        aip = InformationPackage.objects.create(label='first', package_type=InformationPackage.AIP, aic=aic, generation=1)
+        aip2 = InformationPackage.objects.create(label='second', package_type=InformationPackage.AIP, aic=aic, generation=1)
 
         res = self.client.get(self.url, {'type': 'access', 'view_type': 'aic', 'search': 'first'})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -568,7 +568,7 @@ class InformationPackageViewSetTestCase(TestCase):
     def test_prepare_dip_with_existing_object_identifier_value(self, mock_prepare):
         self.url = self.url + 'prepare-dip/'
 
-        InformationPackage.objects.create(ObjectIdentifierValue='bar')
+        InformationPackage.objects.create(object_identifier_value='bar')
         res = self.client.post(self.url, {'label': 'foo', 'object_identifier_value': 'bar'})
 
         mock_prepare.assert_not_called()
@@ -627,7 +627,7 @@ class InformationPackageViewSetFilesTestCase(TestCase):
 
         self.datadir = tempfile.mkdtemp()
 
-        self.ip = InformationPackage.objects.create(ObjectPath=self.datadir, package_type=InformationPackage.DIP)
+        self.ip = InformationPackage.objects.create(object_path=self.datadir, package_type=InformationPackage.DIP)
         self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
         self.url = self.url + 'files/'
 
@@ -676,13 +676,13 @@ class InformationPackageViewSetFilesTestCase(TestCase):
         path = 'foo'
         res = self.client.post(self.url, {'path': path, 'type': 'dir'})
 
-        self.assertTrue(os.path.isdir(os.path.join(self.ip.ObjectPath, path)))
+        self.assertTrue(os.path.isdir(os.path.join(self.ip.object_path, path)))
 
     def test_create_file(self):
         path = 'foo.txt'
         res = self.client.post(self.url, {'path': path, 'type': 'file'})
 
-        self.assertTrue(os.path.isfile(os.path.join(self.ip.ObjectPath, path)))
+        self.assertTrue(os.path.isfile(os.path.join(self.ip.object_path, path)))
 
 class InformationPackageReceptionViewSetTestCase(TestCase):
     def setUp(self):
@@ -716,7 +716,7 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
 
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
     def test_receive_existing(self, mock_receive):
-        InformationPackage.objects.create(ObjectIdentifierValue='1')
+        InformationPackage.objects.create(object_identifier_value='1')
         res = self.client.post(self.url + '1/receive/')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         mock_receive.assert_not_called()

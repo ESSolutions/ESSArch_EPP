@@ -98,16 +98,16 @@ class ReceiveSIP(DBTask):
         )
 
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue=objid,
+            object_identifier_value=objid,
             policy=policy,
             package_type=InformationPackage.AIP,
-            Label=parsed.get('label'),
-            State='Receiving',
+            label=parsed.get('label'),
+            state='Receiving',
             entry_date=parsed.get('create_date'),
             aic=aic,
-            Responsible_id=self.responsible,
-            Startdate=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
-            Enddate=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
+            responsible_id=self.responsible,
+            start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
+            end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
             information_class=information_class,
             generation=0,
         )
@@ -121,29 +121,29 @@ class ReceiveSIP(DBTask):
             arch, _ = ArchivalInstitution.objects.get_or_create(
                 name=archival_institution
             )
-            aip.ArchivalInstitution = arch
+            aip.archival_institution = arch
 
         if archivist_organization:
             arch, _ = ArchivistOrganization.objects.get_or_create(
                 name=archivist_organization
             )
-            aip.ArchivistOrganization = arch
+            aip.archivist_organization = arch
 
         if archival_type:
             arch, _ = ArchivalType.objects.get_or_create(
                 name=archival_type
             )
-            aip.ArchivalType = arch
+            aip.archival_type = arch
 
         if archival_location:
             arch, _ = ArchivalLocation.objects.get_or_create(
                 name=archival_location
             )
-            aip.ArchivalLocation = arch
+            aip.archival_location = arch
 
         aip.save(update_fields=[
-            'ArchivalInstitution', 'ArchivistOrganization', 'ArchivalType',
-            'ArchivalLocation',
+            'archival_institution', 'archivist_organization', 'archival_type',
+            'archival_location',
         ])
 
         aip.tags = tags
@@ -156,7 +156,7 @@ class ReceiveSIP(DBTask):
             information_package=aip
         )
 
-        aip_dir = os.path.join(ingest.value, aip.ObjectIdentifierValue)
+        aip_dir = os.path.join(ingest.value, aip.object_identifier_value)
         os.makedirs(aip_dir)
 
         content = os.path.join(aip_dir, 'content')
@@ -178,8 +178,8 @@ class ReceiveSIP(DBTask):
             dst = os.path.join(aip_dir, 'content', objid + container_type)
             shutil.copy(container, dst)
 
-        aip.ObjectPath = aip_dir
-        aip.save(update_fields=['ObjectPath'])
+        aip.object_path = aip_dir
+        aip.save(update_fields=['object_path'])
 
         return aip.pk
 
@@ -196,8 +196,8 @@ class CacheAIP(DBTask):
 
     def run(self, aip):
         srcdir, dstdir, objid = InformationPackage.objects.values_list(
-            'ObjectPath', 'policy__cache_storage__value',
-            'ObjectIdentifierValue',
+            'object_path', 'policy__cache_storage__value',
+            'object_identifier_value',
         ).get(pk=aip)
 
         dstdir = os.path.join(dstdir, objid)
@@ -290,15 +290,15 @@ class AccessAIP(DBTask):
             old_aip = aip.pk
             new_aip = aip
             new_aip.pk = None
-            new_aip.ObjectIdentifierValue = None
-            new_aip.State = 'Access Workarea'
+            new_aip.object_identifier_value = None
+            new_aip.state = 'Access Workarea'
 
             max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
             new_aip.generation = max_generation + 1
             new_aip.save()
 
-            new_aip.ObjectIdentifierValue = object_identifier_value if object_identifier_value else str(new_aip.pk)
-            new_aip.save(update_fields=['ObjectIdentifierValue'])
+            new_aip.object_identifier_value = object_identifier_value if object_identifier_value else str(new_aip.pk)
+            new_aip.save(update_fields=['object_identifier_value'])
 
             aip = InformationPackage.objects.get(pk=old_aip)
         else:
@@ -319,7 +319,7 @@ class AccessAIP(DBTask):
                 raise
 
         cache = Path.objects.get(entity='cache').value
-        cache_obj = os.path.join(cache, aip.ObjectIdentifierValue)
+        cache_obj = os.path.join(cache, aip.object_identifier_value)
         cache_tar_obj = cache_obj + '.tar'
         in_cache = os.path.exists(cache_obj)
 
@@ -334,7 +334,7 @@ class AccessAIP(DBTask):
                         name="ESSArch_Core.tasks.CopyFile",
                         params={
                             'src': cache_tar_obj,
-                            'dst': os.path.join(dst, new_aip.ObjectIdentifierValue + '.tar'),
+                            'dst': os.path.join(dst, new_aip.object_identifier_value + '.tar'),
                         },
                         processstep=step,
                     ).run().get()
@@ -348,7 +348,7 @@ class AccessAIP(DBTask):
                                 name="ESSArch_Core.tasks.CopyFile",
                                 params={
                                     'src': filepath,
-                                    'dst': os.path.join(dst, new_aip.ObjectIdentifierValue, relpath),
+                                    'dst': os.path.join(dst, new_aip.object_identifier_value, relpath),
                                 },
                                 processstep=step,
                             ).run().get()
@@ -385,7 +385,7 @@ class AccessAIP(DBTask):
         if method_target is None:
             raise StorageMethodTargetRelation.DoesNotExist()
 
-        dst = os.path.join(dst, new_aip.ObjectIdentifierValue + '.tar')
+        dst = os.path.join(dst, new_aip.object_identifier_value + '.tar')
         entry, created = IOQueue.objects.get_or_create(
             storage_object=storage_object, req_type=req_type, object_path=dst,
             ip=aip, status__in=[0, 2, 5], defaults={
@@ -400,7 +400,7 @@ class AccessAIP(DBTask):
                 entry.refresh_from_db()
                 time.sleep(1)
 
-        tarpath = os.path.join(dst, new_aip.ObjectIdentifierValue) + '.tar'
+        tarpath = os.path.join(dst, new_aip.object_identifier_value) + '.tar'
 
         if extracted:
             with tarfile.open(dst) as tarf:
@@ -424,10 +424,10 @@ class PrepareDIP(DBTask):
         disseminations = Path.objects.get(entity='disseminations').value
 
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue=object_identifier_value,
-            Label=label,
-            Responsible_id=self.responsible,
-            State="Prepared",
+            object_identifier_value=object_identifier_value,
+            label=label,
+            responsible_id=self.responsible,
+            state="Prepared",
             package_type=InformationPackage.DIP,
         )
 
@@ -442,11 +442,11 @@ class PrepareDIP(DBTask):
             information_package=ip,
         )
 
-        ip_dir = os.path.join(disseminations, ip.ObjectIdentifierValue)
+        ip_dir = os.path.join(disseminations, ip.object_identifier_value)
         os.mkdir(ip_dir)
 
-        ip.ObjectPath = ip_dir
-        ip.save(update_fields=['ObjectPath'])
+        ip.object_path = ip_dir
+        ip.save(update_fields=['object_path'])
 
         return ip.pk
 
@@ -464,22 +464,22 @@ class CreateDIP(DBTask):
         if ip.package_type != InformationPackage.DIP:
             raise ValueError('"%s" is not a DIP, it is a "%s"' % (ip, ip.package_type))
 
-        ip.State = 'Creating'
-        ip.save(update_fields=['State'])
+        ip.state = 'Creating'
+        ip.save(update_fields=['state'])
 
-        src = ip.ObjectPath
+        src = ip.object_path
         order_path = Path.objects.get(entity='orders').value
 
         order_count = ip.orders.count()
 
         for idx, order in enumerate(ip.orders.all()):
-            dst = os.path.join(order_path, str(order.pk), ip.ObjectIdentifierValue)
+            dst = os.path.join(order_path, str(order.pk), ip.object_identifier_value)
             shutil.copytree(src, dst)
 
             self.set_progress(idx+1, order_count)
 
-        ip.State = 'Created'
-        ip.save(update_fields=['State'])
+        ip.state = 'Created'
+        ip.save(update_fields=['state'])
 
     def undo(self, ip):
         pass
@@ -599,7 +599,7 @@ class PollIOQueue(DBTask):
             return
 
         cache = entry.ip.policy.cache_storage.value
-        cache_obj = os.path.join(cache, entry.ip.ObjectIdentifierValue) + '.tar'
+        cache_obj = os.path.join(cache, entry.ip.object_identifier_value) + '.tar'
 
         with allow_join_result():
             try:
@@ -628,7 +628,7 @@ class PollIOQueue(DBTask):
                     if entry.ip.cached:
                         src = cache_obj
                     else:
-                        src = entry.ip.ObjectPath
+                        src = entry.ip.object_path
 
                     ProcessTask.objects.create(
                         name="ESSArch_Core.tasks.WriteToTape",
@@ -682,7 +682,7 @@ class PollIOQueue(DBTask):
                         tar.extractall(cache)
 
                 elif entry.req_type == 15:  # Write to disk
-                    content_location_value = os.path.join(storage_target.target, os.path.basename(entry.ip.ObjectPath))
+                    content_location_value = os.path.join(storage_target.target, os.path.basename(entry.ip.object_path))
                     storage_object = StorageObject.objects.create(
                         content_location_type=storage_method.type,
                         content_location_value=content_location_value,
@@ -692,7 +692,7 @@ class PollIOQueue(DBTask):
                     if entry.ip.cached:
                         src = cache_obj
                     else:
-                        src = entry.ip.ObjectPath
+                        src = entry.ip.object_path
 
                     ProcessTask.objects.create(
                         name="ESSArch_Core.tasks.CopyFile",

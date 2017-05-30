@@ -132,17 +132,17 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     //Make ip selected and add class to visualize
 	$scope.selectIp = function(row) {
 		vm.displayedIps.forEach(function(ip) {
-			if(ip.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
+			if(ip.object_identifier_value == $scope.selectedIp.object_identifier_value){
 				ip.class = "";
 			}
 			ip.information_packages.forEach(function(subIp) {
-				if(subIp.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue) {
+				if(subIp.object_identifier_value == $scope.selectedIp.object_identifier_value) {
 					subIp.class = "";
 				}
 			});
 		});
-		if(row.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
-			$scope.selectedIp = {ObjectIdentifierValue: "", class: ""};
+		if(row.object_identifier_value == $scope.selectedIp.object_identifier_value){
+			$scope.selectedIp = {object_identifier_value: "", class: ""};
 		} else {
 			row.class = "selected";
 			$scope.selectedIp = row;

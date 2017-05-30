@@ -97,13 +97,13 @@
                     <table class="table table-striped" style="margin-bottom: 0px;">
                         <thead>
                             <tr>
-                                <th st-sort="ip__ObjectIdentifierValue" class="clickable" class="column-label">IP</th>
+                                <th st-sort="ip__object_identifier_value" class="clickable" class="column-label">IP</th>
                                 <th st-sort="content_location_value" class="clickable" class="column-label">{{'CONTENTLOCATION' | translate}}</th>
                             </tr>
                         </thead>
                         <tbody>                                
                             <tr ng-class="row.class" ng-repeat="row in vm.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
-                                <td>{{row.ip.ObjectIdentifierValue}}</td>
+                                <td>{{row.ip.object_identifier_value}}</td>
                                 <td>{{row.content_location_value}}</td>
                             </tr>
                     </table>

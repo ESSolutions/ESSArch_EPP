@@ -169,7 +169,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         aip_id = task.run().get()
         aip = InformationPackage.objects.filter(
             pk=aip_id,
-            ObjectIdentifierValue=sip,
+            object_identifier_value=sip,
             package_type=InformationPackage.AIP,
             generation=0,
         )
@@ -178,15 +178,15 @@ class ReceiveSIPTestCase(TransactionTestCase):
         expected_aip = os.path.join(self.ingest.value, sip)
 
         aic = aip.first().aic
-        self.assertEqual(str(aic.pk), aic.ObjectIdentifierValue)
+        self.assertEqual(str(aic.pk), aic.object_identifier_value)
         self.assertEqual(aic.package_type, InformationPackage.AIC)
 
         aip = aip.first()
-        self.assertEqual(aip.Label, 'test-ip')
-        self.assertEqual(aip.ObjectPath, expected_aip)
+        self.assertEqual(aip.label, 'test-ip')
+        self.assertEqual(aip.object_path, expected_aip)
         self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
-        self.assertEqual(sip, aip.ObjectIdentifierValue)
+        self.assertEqual(sip, aip.object_identifier_value)
         self.assertTrue(os.path.isdir(expected_aip))
 
         expected_content = os.path.join(expected_aip, 'content')
@@ -202,7 +202,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         self.assertTrue(os.path.isdir(expected_metadata))
 
         self.assertEqual(ArchivistOrganization.objects.get().name, 'my_archivist_organization')
-        self.assertIsNotNone(aip.ArchivistOrganization)
+        self.assertIsNotNone(aip.archivist_organization)
 
     def test_receive_sip_with_information_class_same_as_policy(self):
         self.xmldata = '''
@@ -240,7 +240,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         aip_id = task.run().get()
         aip = InformationPackage.objects.filter(
             pk=aip_id,
-            ObjectIdentifierValue=sip,
+            object_identifier_value=sip,
             package_type=InformationPackage.AIP,
             information_class=1,
         )
@@ -328,7 +328,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
             package_type=InformationPackage.AIP
         ).first()
 
-        self.assertEqual(aip.ObjectPath, expected_aip)
+        self.assertEqual(aip.object_path, expected_aip)
 
         expected_tar = os.path.join(expected_content, sip + '.tar')
         self.assertFalse(os.path.isfile(expected_tar))
@@ -389,7 +389,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
             package_type=InformationPackage.AIP
         ).first()
 
-        self.assertEqual(aip.ObjectPath, expected_aip)
+        self.assertEqual(aip.object_path, expected_aip)
 
         expected_tar = os.path.join(expected_content, sip + '.tar')
         self.assertFalse(os.path.isfile(expected_tar))
@@ -444,11 +444,11 @@ class CacheAIPTestCase(TransactionTestCase):
         )
         objid = 'custom_obj_id'
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue=objid, policy=policy,
-            ObjectPath=os.path.join(self.ingest.value, objid)
+            object_identifier_value=objid, policy=policy,
+            object_path=os.path.join(self.ingest.value, objid)
         )
 
-        aip_dir = os.path.join(policy.ingest_path.value, aip.ObjectIdentifierValue)
+        aip_dir = os.path.join(policy.ingest_path.value, aip.object_identifier_value)
         os.mkdir(aip_dir)
         os.mkdir(os.path.join(aip_dir, 'content'))
         os.mkdir(os.path.join(aip_dir, 'metadata'))
@@ -469,7 +469,7 @@ class CacheAIPTestCase(TransactionTestCase):
 
         task.run()
 
-        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.object_identifier_value)
         self.assertTrue(os.path.isdir(cached_dir))
 
         equal_content = filecmp.cmp(
@@ -482,7 +482,7 @@ class CacheAIPTestCase(TransactionTestCase):
         extracted = os.path.join(aip.policy.cache_storage.value, 'extracted')
         os.mkdir(extracted)
 
-        cached_container = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue + '.tar')
+        cached_container = os.path.join(aip.policy.cache_storage.value, aip.object_identifier_value + '.tar')
         self.assertTrue(os.path.isfile(cached_container))
 
         with tarfile.open(cached_container) as tar:
@@ -490,7 +490,7 @@ class CacheAIPTestCase(TransactionTestCase):
 
         equal_content = filecmp.cmp(
             os.path.join(aip_dir, 'content', 'myfile.txt'),
-            os.path.join(extracted, aip.ObjectIdentifierValue, 'content', 'myfile.txt'),
+            os.path.join(extracted, aip.object_identifier_value, 'content', 'myfile.txt'),
             False
         )
         self.assertTrue(equal_content)
@@ -502,11 +502,11 @@ class CacheAIPTestCase(TransactionTestCase):
         )
         objid = 'custom_obj_id'
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue=objid, policy=policy,
-            ObjectPath=os.path.join(self.ingest.value, objid)
+            object_identifier_value=objid, policy=policy,
+            object_path=os.path.join(self.ingest.value, objid)
         )
 
-        os.makedirs(os.path.join(aip.ObjectPath, 'root', 'nested'))
+        os.makedirs(os.path.join(aip.object_path, 'root', 'nested'))
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.CacheAIP',
@@ -517,7 +517,7 @@ class CacheAIPTestCase(TransactionTestCase):
 
         task.run()
 
-        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.object_identifier_value)
         self.assertTrue(os.path.isdir(os.path.join(cached_dir, 'root', 'nested')))
 
         with tarfile.open(cached_dir + '.tar') as tar:
@@ -534,12 +534,12 @@ class CacheAIPTestCase(TransactionTestCase):
         )
         objid = 'custom_obj_id'
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue=objid, policy=policy,
-            ObjectPath=os.path.join(self.ingest.value, objid)
+            object_identifier_value=objid, policy=policy,
+            object_path=os.path.join(self.ingest.value, objid)
         )
 
-        os.makedirs(os.path.join(aip.ObjectPath, 'root'))
-        open(os.path.join(aip.ObjectPath, 'root', 'nested.txt'), 'a').close()
+        os.makedirs(os.path.join(aip.object_path, 'root'))
+        open(os.path.join(aip.object_path, 'root', 'nested.txt'), 'a').close()
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.CacheAIP',
@@ -550,7 +550,7 @@ class CacheAIPTestCase(TransactionTestCase):
 
         task.run()
 
-        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.ObjectIdentifierValue)
+        cached_dir = os.path.join(aip.policy.cache_storage.value, aip.object_identifier_value)
         self.assertTrue(os.path.isfile(os.path.join(cached_dir, 'root', 'nested.txt')))
 
         with tarfile.open(cached_dir + '.tar') as tar:
@@ -616,8 +616,8 @@ class StoreAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.datadir,
+            object_identifier_value='custom_obj_id', policy=policy,
+            object_path=self.datadir,
         )
         user = User.objects.create()
 
@@ -650,8 +650,8 @@ class StoreAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.datadir,
+            object_identifier_value='custom_obj_id', policy=policy,
+            object_path=self.datadir,
         )
         user = User.objects.create()
 
@@ -692,8 +692,8 @@ class StoreAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.datadir,
+            object_identifier_value='custom_obj_id', policy=policy,
+            object_path=self.datadir,
         )
         user = User.objects.create()
 
@@ -727,12 +727,12 @@ class StoreAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         aip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
-            ObjectPath=self.datadir,
+            object_identifier_value='custom_obj_id', policy=policy,
+            object_path=self.datadir,
         )
         aip2 = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id_2', policy=policy,
-            ObjectPath=self.datadir
+            object_identifier_value='custom_obj_id_2', policy=policy,
+            object_path=self.datadir
         )
         user = User.objects.create()
 
@@ -807,7 +807,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
         )
         user = User.objects.create()
 
@@ -841,8 +841,8 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertFalse(IOQueue.objects.exists())
         mock_copy.assert_called_once_with(
-            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue + '.tar'),
-            dst=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar')
+            src=os.path.join(self.cache.value, ip.object_identifier_value + '.tar'),
+            dst=os.path.join(self.access.value, str(user.pk), ip.object_identifier_value + '.tar')
         )
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
@@ -854,7 +854,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
         )
         user = User.objects.create()
 
@@ -888,7 +888,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=25,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar'),
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.object_identifier_value + '.tar'),
         ).exists())
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
@@ -900,7 +900,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
         )
         user = User.objects.create()
 
@@ -934,7 +934,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=20,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.ObjectIdentifierValue + '.tar'),
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), ip.object_identifier_value + '.tar'),
         ).exists())
 
         self.assertTrue(Workarea.objects.filter(ip=ip, user=user, type=Workarea.ACCESS, read_only=True).exists())
@@ -946,7 +946,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
             generation=0,
         )
         user = User.objects.create()
@@ -984,7 +984,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertTrue(IOQueue.objects.filter(
             ip=ip, storage_object=obj, req_type=25,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk), new_ip.ObjectIdentifierValue + '.tar'),
+            status=0, object_path=os.path.join(self.access.value, str(user.pk), new_ip.object_identifier_value + '.tar'),
         ).exists())
 
         self.assertFalse(Workarea.objects.filter(ip=ip).exists())
@@ -999,7 +999,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
             generation=0,
         )
         user = User.objects.create()
@@ -1037,8 +1037,8 @@ class AccessAIPTestCase(TransactionTestCase):
 
         self.assertFalse(IOQueue.objects.exists())
         mock_copy.assert_called_once_with(
-            src=os.path.join(self.cache.value, ip.ObjectIdentifierValue + '.tar'),
-            dst=os.path.join(self.access.value, str(user.pk), new_ip.ObjectIdentifierValue + '.tar')
+            src=os.path.join(self.cache.value, ip.object_identifier_value + '.tar'),
+            dst=os.path.join(self.access.value, str(user.pk), new_ip.object_identifier_value + '.tar')
         )
 
         self.assertTrue(Workarea.objects.filter(ip=new_ip, user=user, type=Workarea.ACCESS, read_only=False).exists())
@@ -1052,7 +1052,7 @@ class AccessAIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
         ip = InformationPackage.objects.create(
-            ObjectIdentifierValue='custom_obj_id', policy=policy,
+            object_identifier_value='custom_obj_id', policy=policy,
             generation=0,
         )
         user = User.objects.create()
@@ -1119,7 +1119,7 @@ class PrepareDIPTestCase(TransactionTestCase):
         ).run().get()
 
         mock_mkdir.assert_called_once()
-        self.assertTrue(InformationPackage.objects.filter(package_type=InformationPackage.DIP, ObjectIdentifierValue='myobjid').exists())
+        self.assertTrue(InformationPackage.objects.filter(package_type=InformationPackage.DIP, object_identifier_value='myobjid').exists())
 
     @mock.patch('workflow.tasks.os.mkdir')
     def test_with_orders(self, mock_mkdir):
@@ -1148,7 +1148,7 @@ class CreateDIPTestCase(TransactionTestCase):
     def setUp(self):
         self.orders = Path.objects.create(entity='orders', value='orders').value
         self.task = "workflow.tasks.CreateDIP"
-        self.ip = InformationPackage.objects.create(State='initial', ObjectPath='workarea', package_type=InformationPackage.DIP)
+        self.ip = InformationPackage.objects.create(state='initial', object_path='workarea', package_type=InformationPackage.DIP)
         self.user = User.objects.create(username="admin")
 
     @mock.patch('workflow.tasks.shutil.copytree')
@@ -1160,7 +1160,7 @@ class CreateDIPTestCase(TransactionTestCase):
 
         mock_copy.assert_not_called()
         self.ip.refresh_from_db()
-        self.assertEqual(self.ip.State, 'Created')
+        self.assertEqual(self.ip.state, 'Created')
 
     @mock.patch('workflow.tasks.shutil.copytree')
     def test_with_order(self, mock_copy):
@@ -1172,9 +1172,9 @@ class CreateDIPTestCase(TransactionTestCase):
             args=[str(self.ip.pk)],
         ).run().get()
 
-        mock_copy.assert_called_once_with(self.ip.ObjectPath, os.path.join(self.orders, str(order.pk), self.ip.ObjectIdentifierValue))
+        mock_copy.assert_called_once_with(self.ip.object_path, os.path.join(self.orders, str(order.pk), self.ip.object_identifier_value))
         self.ip.refresh_from_db()
-        self.assertEqual(self.ip.State, 'Created')
+        self.assertEqual(self.ip.state, 'Created')
 
     @mock.patch('workflow.tasks.shutil.copytree')
     def test_with_multiple_orders(self, mock_copy):
@@ -1188,12 +1188,12 @@ class CreateDIPTestCase(TransactionTestCase):
         ).run().get()
 
         calls = [
-            mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order1.pk), self.ip.ObjectIdentifierValue)),
-            mock.call(self.ip.ObjectPath, os.path.join(self.orders, str(order2.pk), self.ip.ObjectIdentifierValue))
+            mock.call(self.ip.object_path, os.path.join(self.orders, str(order1.pk), self.ip.object_identifier_value)),
+            mock.call(self.ip.object_path, os.path.join(self.orders, str(order2.pk), self.ip.object_identifier_value))
         ]
         mock_copy.assert_has_calls(calls, any_order=True)
         self.ip.refresh_from_db()
-        self.assertEqual(self.ip.State, 'Created')
+        self.assertEqual(self.ip.state, 'Created')
 
     @mock.patch('workflow.tasks.shutil.copytree')
     def test_not_dip(self, mock_copy):
@@ -1211,7 +1211,7 @@ class CreateDIPTestCase(TransactionTestCase):
 
         mock_copy.assert_not_called()
         self.ip.refresh_from_db()
-        self.assertEqual(self.ip.State, 'initial')
+        self.assertEqual(self.ip.state, 'initial')
 
 
 @tag('tape')
@@ -1663,7 +1663,7 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1684,7 +1684,7 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
 
         io_queue = IOQueue.objects.create(
             user=user, storage_method_target=method_target, req_type=10,
-            object_path=ip.ObjectPath, ip=ip,
+            object_path=ip.object_path, ip=ip,
         )
 
         ProcessTask.objects.create(
@@ -1713,7 +1713,7 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1734,12 +1734,12 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
 
         io_queue = IOQueue.objects.create(
             user=user, storage_method_target=method_target, req_type=10,
-            object_path=ip.ObjectPath, ip=ip,
+            object_path=ip.object_path, ip=ip,
         )
 
         io_queue2 = IOQueue.objects.create(
             user=user, storage_method_target=method_target, req_type=10,
-            object_path=ip.ObjectPath, ip=ip,
+            object_path=ip.object_path, ip=ip,
         )
 
         ProcessTask.objects.create(name=self.taskname,).run().get()
@@ -1820,7 +1820,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         io_queue = IOQueue.objects.create(
             user=user, storage_method_target=method_target, req_type=20,
-            object_path=ip.ObjectPath, ip=ip,
+            object_path=ip.object_path, ip=ip,
         )
 
         with self.assertRaises(ValueError):
@@ -1874,7 +1874,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         io_queue = IOQueue.objects.create(
             user=user, storage_method_target=method_target,
-            storage_object=obj, req_type=20, object_path=ip.ObjectPath,
+            storage_object=obj, req_type=20, object_path=ip.object_path,
             ip=ip,
         )
 
@@ -1907,7 +1907,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -1932,7 +1932,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         io_queue = IOQueue.objects.create(
             user=user, storage_method_target=method_target,
-            storage_object=obj, req_type=20, object_path=ip.ObjectPath,
+            storage_object=obj, req_type=20, object_path=ip.object_path,
             ip=ip,
         )
 
@@ -1943,7 +1943,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=self.datadir)
 
         io_queue.refresh_from_db()
 
@@ -1968,8 +1968,8 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
-        ip2 = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
+        ip2 = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=TAPE
         )
@@ -2001,13 +2001,13 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         io_queue = IOQueue.objects.create(
             user=user, storage_medium=medium, req_type=20, ip=ip,
             storage_method_target=method_target, storage_object=obj,
-            object_path=ip.ObjectPath,
+            object_path=ip.object_path,
         )
 
         io_queue2 = IOQueue.objects.create(
             user=user, storage_medium=medium, req_type=20, ip=ip2,
             storage_method_target=method_target, storage_object=obj2,
-            object_path=ip2.ObjectPath,
+            object_path=ip2.object_path,
         )
 
         ProcessTask.objects.create(
@@ -2015,7 +2015,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         ).run().get()
 
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.reset_mock()
         mock_copy.reset_mock()
@@ -2026,7 +2026,7 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
         ).run().get()
 
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.ObjectIdentifierValue) + '.tar', dst=self.datadir)
+        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.object_identifier_value) + '.tar', dst=self.datadir)
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
 
         io_queue.refresh_from_db()
@@ -2071,7 +2071,7 @@ class PollIOQueueWriteDiskTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=DISK
         )
@@ -2103,7 +2103,7 @@ class PollIOQueueWriteDiskTestCase(TransactionTestCase):
         self.assertFalse(RobotQueue.objects.exists())
         self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
 
-        mock_copy.assert_called_once_with(src=ip.ObjectPath, dst=target.target)
+        mock_copy.assert_called_once_with(src=ip.object_path, dst=target.target)
 
 
 @override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
@@ -2144,7 +2144,7 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
             cache_storage=self.cache,
             ingest_path=self.ingest,
         )
-        ip = InformationPackage.objects.create(ObjectPath=self.datadir, policy=policy)
+        ip = InformationPackage.objects.create(object_path=self.datadir, policy=policy)
         method = StorageMethod.objects.create(
             archive_policy=policy, type=DISK
         )
@@ -2184,4 +2184,4 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
         self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
 
         mock_copy.assert_any_call(src=obj.content_location_value, dst=self.cache.value)
-        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.ObjectIdentifierValue) + '.tar', dst=ip.ObjectPath)
+        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=ip.object_path)

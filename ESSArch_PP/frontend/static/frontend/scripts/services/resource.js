@@ -67,15 +67,15 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             ipCollection.forEach(function(ip) {
                 ip.collapsed = true;
                 expandedAics.forEach(function(aic, index, array) {
-                    if(ip.ObjectIdentifierValue == aic) {
+                    if(ip.object_identifier_value == aic) {
                         ip.collapsed = false;
                     }
                 });
-                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                if (ip.object_identifier_value === selected.object_identifier_value) {
                     ip.class = "selected"
                 }
                 ip.information_packages.forEach(function (subIp) {
-                    if (subIp.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    if (subIp.object_identifier_value === selected.object_identifier_value) {
                         subIp.class = "selected"
                     }
                 });
@@ -99,15 +99,15 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             ipCollection.forEach(function(ip) {
                 ip.collapsed = true;
                 expandedAics.forEach(function(aic, index, array) {
-                    if(ip.ObjectIdentifierValue == aic) {
+                    if(ip.object_identifier_value == aic) {
                         ip.collapsed = false;
                     }
                 });
-                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                if (ip.object_identifier_value === selected.object_identifier_value) {
                     ip.class="selected"
                 }
                 ip.information_packages.forEach(function(subIp) {
-                    if (subIp.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                    if (subIp.object_identifier_value === selected.object_identifier_value) {
                         subIp.class="selected"
                     }
                 });
@@ -128,7 +128,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = false;
-                if (ip.ObjectIdentifierValue === selected.ObjectIdentifierValue) {
+                if (ip.object_identifier_value === selected.object_identifier_value) {
                     ip.class = "selected"
                 }
             });

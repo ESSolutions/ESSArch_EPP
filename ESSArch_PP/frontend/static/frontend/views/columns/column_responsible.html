@@ -1,6 +1,6 @@
 <div ng-if="!subrow">
-    <div class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.Responsible.username}}</div>
+    <div class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.responsible.username}}</div>
 </div>
 <div ng-if="subrow">
-    <div class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.Responsible.username}}</div>
+    <div class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.responsible.username}}</div>
 </div>

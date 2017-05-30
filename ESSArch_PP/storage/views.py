@@ -108,11 +108,11 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = (
-        'ip__ObjectIdentifierValue', 'content_location_value',
+        'ip__object_identifier_value', 'content_location_value',
     )
 
     search_fields = (
-        'ip__ObjectIdentifierValue', 'content_location_value',
+        'ip__object_identifier_value', 'content_location_value',
     )
 
     def get_serializer_class(self):

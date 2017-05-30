@@ -54,27 +54,27 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
 class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
 
-    ArchivalInstitution = ArchivalInstitutionSerializer(
+    archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivistOrganization = ArchivistOrganizationSerializer(
+    archivist_organization = ArchivistOrganizationSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalType = ArchivalTypeSerializer(
+    archival_type = ArchivalTypeSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalLocation = ArchivalLocationSerializer(
+    archival_location = ArchivalLocationSerializer(
         fields=['url', 'id', 'name']
     )
 
     class Meta:
         model = InformationPackage
         fields = (
-            'url', 'id', 'Label', 'ObjectIdentifierValue',
-            'package_type', 'Responsible', 'CreateDate',
-            'entry_date', 'State', 'status', 'step_state',
-            'archived', 'cached', 'aic', 'generation', 'ArchivalInstitution',
-            'ArchivistOrganization', 'ArchivalType', 'ArchivalLocation',
+            'url', 'id', 'label', 'object_identifier_value',
+            'package_type', 'responsible', 'create_date',
+            'entry_date', 'state', 'status', 'step_state',
+            'archived', 'cached', 'aic', 'generation', 'archival_institution',
+            'archivist_organization', 'archival_type', 'archival_location',
         )
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
@@ -108,27 +108,27 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
         )
         return ips.data
 
-    ArchivalInstitution = ArchivalInstitutionSerializer(
+    archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivistOrganization = ArchivistOrganizationSerializer(
+    archivist_organization = ArchivistOrganizationSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalType = ArchivalTypeSerializer(
+    archival_type = ArchivalTypeSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalLocation = ArchivalLocationSerializer(
+    archival_location = ArchivalLocationSerializer(
         fields=['url', 'id', 'name']
     )
 
     class Meta:
         model = InformationPackage
         fields = (
-            'url', 'id', 'Label', 'ObjectIdentifierValue', 'package_type',
-            'Responsible', 'CreateDate', 'entry_date', 'State', 'status',
+            'url', 'id', 'label', 'object_identifier_value', 'package_type',
+            'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
-            'generation', 'ArchivalInstitution', 'ArchivistOrganization',
-            'ArchivalType', 'ArchivalLocation',
+            'generation', 'archival_institution', 'archivist_organization',
+            'archival_type', 'archival_location',
         )
 
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
@@ -180,27 +180,27 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
         )
         return ips.data
 
-    ArchivalInstitution = ArchivalInstitutionSerializer(
+    archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivistOrganization = ArchivistOrganizationSerializer(
+    archivist_organization = ArchivistOrganizationSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalType = ArchivalTypeSerializer(
+    archival_type = ArchivalTypeSerializer(
         fields=['url', 'id', 'name']
     )
-    ArchivalLocation = ArchivalLocationSerializer(
+    archival_location = ArchivalLocationSerializer(
         fields=['url', 'id', 'name']
     )
 
     class Meta:
         model = InformationPackage
         fields = (
-            'url', 'id', 'Label', 'ObjectIdentifierValue', 'package_type',
-            'Responsible', 'CreateDate', 'entry_date', 'State', 'status',
+            'url', 'id', 'label', 'object_identifier_value', 'package_type',
+            'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
-            'generation', 'ArchivalInstitution', 'ArchivistOrganization',
-            'ArchivalType', 'ArchivalLocation',
+            'generation', 'archival_institution', 'archivist_organization',
+            'archival_type', 'archival_location',
         )
 
 

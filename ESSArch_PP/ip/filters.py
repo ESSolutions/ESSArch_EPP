@@ -38,16 +38,16 @@ from ESSArch_Core.ip.models import (
 
 
 class InformationPackageFilter(filters.FilterSet):
-    archival_institution = ListFilter(name="ArchivalInstitution__name", method='filter_fields')
-    archivist_organization = ListFilter(name='ArchivistOrganization__name', method='filter_fields')
-    archival_type = ListFilter(name='ArchivalType__name', method='filter_fields')
-    archival_location = ListFilter(name='ArchivalLocation__name', method='filter_fields')
+    archival_institution = ListFilter(name="archival_institution__name", method='filter_fields')
+    archivist_organization = ListFilter(name='archivist_organization__name', method='filter_fields')
+    archival_type = ListFilter(name='archival_type__name', method='filter_fields')
+    archival_location = ListFilter(name='archival_location__name', method='filter_fields')
     package_type = ListFilter(name='package_type')
-    state = ListFilter(name='State', method='filter_fields_in_list')
-    object_identifier_value = ListFilter(name='ObjectIdentifierValue', method='filter_fields')
-    label = ListFilter(name='Label', method='filter_fields')
-    responsible = ListFilter(name='Responsible__username', method='filter_fields')
-    create_date = ListFilter(name='CreateDate', method='filter_fields')
+    state = ListFilter(name='state', method='filter_fields_in_list')
+    object_identifier_value = ListFilter(name='object_identifier_value', method='filter_fields')
+    label = ListFilter(name='label', method='filter_fields')
+    responsible = ListFilter(name='responsible__username', method='filter_fields')
+    create_date = ListFilter(name='create_date', method='filter_fields')
     object_size = ListFilter(name='object_size', method='filter_fields')
     start_date = ListFilter(name='Startdate', method='filter_fields')
     end_date = ListFilter(name='Enddate', method='filter_fields')
@@ -120,7 +120,7 @@ class InformationPackageFilter(filters.FilterSet):
 
 
 class ArchivalInstitutionFilter(filters.FilterSet):
-    ip_state = ListFilter(name='information_packages__State', distinct=True)
+    ip_state = ListFilter(name='information_packages__state', distinct=True)
 
     class Meta:
         model = ArchivalInstitution
@@ -128,7 +128,7 @@ class ArchivalInstitutionFilter(filters.FilterSet):
 
 
 class ArchivistOrganizationFilter(filters.FilterSet):
-    ip_state = ListFilter(name='information_packages__State', distinct=True)
+    ip_state = ListFilter(name='information_packages__state', distinct=True)
 
     class Meta:
         model = ArchivistOrganization
@@ -136,7 +136,7 @@ class ArchivistOrganizationFilter(filters.FilterSet):
 
 
 class ArchivalTypeFilter(filters.FilterSet):
-    ip_state = ListFilter(name='information_packages__State', distinct=True)
+    ip_state = ListFilter(name='information_packages__state', distinct=True)
 
     class Meta:
         model = ArchivalType
@@ -144,7 +144,7 @@ class ArchivalTypeFilter(filters.FilterSet):
 
 
 class ArchivalLocationFilter(filters.FilterSet):
-    ip_state = ListFilter(name='information_packages__State', distinct=True)
+    ip_state = ListFilter(name='information_packages__state', distinct=True)
 
     class Meta:
         model = ArchivalLocation

@@ -157,7 +157,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             ip_id = os.path.splitext(os.path.basename(xmlfile))[0]
 
-            if InformationPackage.objects.filter(ObjectIdentifierValue=ip_id).exists():
+            if InformationPackage.objects.filter(object_identifier_value=ip_id).exists():
                 continue
 
             ip = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
@@ -176,7 +176,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             if not os.path.isdir(os.path.join(path, d)):
                 continue
 
-            if InformationPackage.objects.filter(ObjectIdentifierValue=d).exists():
+            if InformationPackage.objects.filter(object_identifier_value=d).exists():
                 continue
 
             ip = {
@@ -216,7 +216,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
-        if InformationPackage.objects.filter(ObjectIdentifierValue=pk).exists():
+        if InformationPackage.objects.filter(object_identifier_value=pk).exists():
             raise exceptions.ParseError('IP with id "%s" already exist')
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
@@ -334,20 +334,20 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = (
-        'Label', 'Responsible', 'CreateDate', 'State', 'eventDateTime',
+        'label', 'responsible', 'create_date', 'state', 'eventDateTime',
         'eventType', 'eventOutcomeDetailNote', 'eventOutcome',
         'linkingAgentIdentifierValue', 'id'
     )
     search_fields = (
-        'ObjectIdentifierValue','aic__information_packages__ObjectIdentifierValue','information_packages__ObjectIdentifierValue',
-        'Label','aic__information_packages__Label','information_packages__Label',
-        'Responsible__first_name','aic__information_packages__Responsible__first_name','information_packages__Responsible__first_name',
-        'Responsible__last_name','aic__information_packages__Responsible__last_name','information_packages__Responsible__last_name',
-        'Responsible__username','aic__information_packages__Responsible__username','information_packages__Responsible__username',
-        'State','aic__information_packages__State','information_packages__State',
-        'SubmissionAgreement__name','aic__information_packages__SubmissionAgreement__name','information_packages__SubmissionAgreement__name',
-        'Startdate','aic__information_packages__Startdate','information_packages__Startdate',
-        'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
+        'object_identifier_value','aic__information_packages__object_identifier_value','information_packages__object_identifier_value',
+        'label','aic__information_packages__label','information_packages__label',
+        'responsible__first_name','aic__information_packages__responsible__first_name','information_packages__responsible__first_name',
+        'responsible__last_name','aic__information_packages__responsible__last_name','information_packages__responsible__last_name',
+        'responsible__username','aic__information_packages__responsible__username','information_packages__responsible__username',
+        'state','aic__information_packages__state','information_packages__state',
+        'submission_agreement__name','aic__information_packages__submission_agreement__name','information_packages__submission_agreement__name',
+        'start_date','aic__information_packages__start_date','information_packages__start_date',
+        'end_date','aic__information_packages__end_date','information_packages__end_date',
     )
 
     def get_queryset(self):
@@ -470,7 +470,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if dip.State != 'Prepared':
+        if dip.state != 'Prepared':
             return Response(
                 {'status': '"%s" is not in the "Prepared" state'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -510,7 +510,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         object_identifier_value = request.data.get('object_identifier_value')
 
         if object_identifier_value:
-            ip_exists = InformationPackage.objects.filter(ObjectIdentifierValue=object_identifier_value).exists()
+            ip_exists = InformationPackage.objects.filter(object_identifier_value=object_identifier_value).exists()
             if ip_exists:
                 return Response(
                     {'status': 'IP with object identifer value "%s" already exists' % object_identifier_value},
@@ -597,7 +597,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             except KeyError:
                 return Response('Type parameter missing', status=status.HTTP_400_BAD_REQUEST)
 
-            root = ip.ObjectPath
+            root = ip.object_path
             fullpath = os.path.join(root, path)
 
             if not in_directory(fullpath, root):
@@ -620,9 +620,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         entries = []
         path = request.query_params.get('path', '')
-        fullpath = os.path.join(ip.ObjectPath, path)
+        fullpath = os.path.join(ip.object_path, path)
 
-        if not in_directory(fullpath, ip.ObjectPath):
+        if not in_directory(fullpath, ip.object_path):
             raise exceptions.ParseError('Illegal path %s' % path)
 
         if not os.path.exists(fullpath):
@@ -652,20 +652,20 @@ class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = (
-        'Label', 'Responsible', 'CreateDate', 'State', 'eventDateTime',
+        'label', 'responsible', 'create_date', 'state', 'eventDateTime',
         'eventType', 'eventOutcomeDetailNote', 'eventOutcome',
         'linkingAgentIdentifierValue', 'id'
     )
     search_fields = (
-        'ObjectIdentifierValue','aic__information_packages__ObjectIdentifierValue','information_packages__ObjectIdentifierValue',
-        'Label','aic__information_packages__Label','information_packages__Label',
-        'Responsible__first_name','aic__information_packages__Responsible__first_name','information_packages__Responsible__first_name',
-        'Responsible__last_name','aic__information_packages__Responsible__last_name','information_packages__Responsible__last_name',
-        'Responsible__username','aic__information_packages__Responsible__username','information_packages__Responsible__username',
-        'State','aic__information_packages__State','information_packages__State',
-        'SubmissionAgreement__name','aic__information_packages__SubmissionAgreement__name','information_packages__SubmissionAgreement__name',
-        'Startdate','aic__information_packages__Startdate','information_packages__Startdate',
-        'Enddate','aic__information_packages__Enddate','information_packages__Enddate',
+        'object_identifier_value','aic__information_packages__object_identifier_value','information_packages__object_identifier_value',
+        'label','aic__information_packages__label','information_packages__label',
+        'responsible__first_name','aic__information_packages__responsible__first_name','information_packages__responsible__first_name',
+        'responsible__last_name','aic__information_packages__responsible__last_name','information_packages__responsible__last_name',
+        'responsible__username','aic__information_packages__responsible__username','information_packages__responsible__username',
+        'state','aic__information_packages__state','information_packages__state',
+        'submission_agreement__name','aic__information_packages__submission_agreement__name','information_packages__submission_agreement__name',
+        'start_date','aic__information_packages__start_date','information_packages__start_date',
+        'end_date','aic__information_packages__end_date','information_packages__end_date',
     )
     serializer_class = WorkareaSerializer
 
@@ -798,7 +798,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         src = os.path.join(root, src)
         self.validate_path(src, root)
 
-        dst = os.path.join(ip.ObjectPath, dst)
+        dst = os.path.join(ip.object_path, dst)
 
         if os.path.isfile(src) and os.path.isdir(dst):
             dst = os.path.join(dst, os.path.basename(src))

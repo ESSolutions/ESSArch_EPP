@@ -144,17 +144,17 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     //Make ip selected and add class to visualize
 	$scope.selectIp = function(row) {
 		vm.displayedIps.forEach(function(ip) {
-			if(ip.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
+			if(ip.object_identifier_value == $scope.selectedIp.object_identifier_value){
 				ip.class = "";
 			}
 			ip.information_packages.forEach(function(subIp) {
-				if(subIp.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue) {
+				if(subIp.object_identifier_value == $scope.selectedIp.object_identifier_value) {
 					subIp.class = "";
 				}
 			});
 		});
-		if(row.ObjectIdentifierValue == $scope.selectedIp.ObjectIdentifierValue){
-			$scope.selectedIp = {ObjectIdentifierValue: "", class: ""};
+		if(row.object_identifier_value == $scope.selectedIp.object_identifier_value){
+			$scope.selectedIp = {object_identifier_value: "", class: ""};
 		} else {
 			row.class = "selected";
 			$scope.selectedIp = row;
@@ -257,16 +257,16 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 	$scope.expandAic = function(row) {
 		row.collapsed = !row.collapsed;
 		if(!row.collapsed) {
-			$scope.expandedAics.push(row.ObjectIdentifierValue);
+			$scope.expandedAics.push(row.object_identifier_value);
 		} else {
 			$scope.expandedAics.forEach(function(aic, index, array) {
-				if(aic == row.ObjectIdentifierValue) {
+				if(aic == row.object_identifier_value) {
 					$scope.expandedAics.splice(index,1);
 				}
 			});
 		}
 		row.information_packages.forEach(function(ip, index, array) {
-			if(!ip.ObjectIdentifierValue) {
+			if(!ip.object_identifier_value) {
 				$http({
 					method: 'GET',
 					url: ip
