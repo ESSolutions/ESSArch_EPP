@@ -769,9 +769,9 @@ def installdefaultparameters(): # default config parameters
            'zone': 'zone3' ,
            'templatefile_log': 'log.xml' ,
            'templatefile_specification':'sip.xml',
-           'package_descriptionfile':'sip.xml',
+           'package_descriptionfile':'{uuid}.xml',
            'content_descriptionfile':'mets.xml',
-           'ip_logfile':'log.xml',
+           'ip_logfile':'ipevents.xml',
            'preservation_descriptionfile':'metadata/premis.xml',
            }
 
@@ -781,9 +781,9 @@ def installdefaultparameters(): # default config parameters
            'zone': 'zone3' ,
            'templatefile_log': 'log.xml' ,
            'templatefile_specification':'info.xml',
-           'package_descriptionfile':'info.xml',
+           'package_descriptionfile':'{uuid}.xml',
            'content_descriptionfile':'mets.xml',
-           'ip_logfile':'log.xml',
+           'ip_logfile':'ipevents.xml',
            'preservation_descriptionfile':'administrative_metadata/premis.xml',
            }
 
