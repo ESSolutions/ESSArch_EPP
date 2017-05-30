@@ -567,9 +567,15 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         if request.method == 'DELETE':
             try:
-                path = os.path.join(ip.ObjectPath, request.data.__getitem__('path'))
+                path = request.data['path']
             except KeyError:
                 return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
+
+            root = ip.object_path
+            fullpath = os.path.join(root, path)
+
+            if not in_directory(fullpath, ip.object_path):
+                raise exceptions.ParseError('Illegal path %s' % path)
 
             try:
                 shutil.rmtree(path)
@@ -599,7 +605,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             fullpath = os.path.join(root, path)
 
             if not in_directory(fullpath, root):
-                raise exceptions.ParseError('Illegal path %s' % fullpath)
+                raise exceptions.ParseError('Illegal path %s' % path)
 
             if pathtype == 'dir':
                 try:
