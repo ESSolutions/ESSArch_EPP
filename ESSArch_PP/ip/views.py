@@ -45,7 +45,7 @@ from ESSArch_Core.configuration.models import (
     ArchivePolicy,
     Path,
 )
-from ESSArch_Core.essxml.util import parse_submit_description
+from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -139,15 +139,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             if os.path.isfile(xmlfile) and not xmlfile.endswith('_ipevents.xml'):
                 yield xmlfile
 
-    def get_objectpath(self, el):
-        e = el.xpath('.//*[local-name()="%s"]' % "FLocat")[0]
-        if e is not None:
-            return get_value_from_path(e, "@href").split('file:///')[1]
-
     def get_container_for_xml(self, xmlfile):
         doc = etree.parse(xmlfile)
         root = doc.getroot()
-        return self.get_objectpath(root)
+        return get_objectpath(root)
 
     def get_contained_packages(self, path):
         ips = []
