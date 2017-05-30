@@ -51,8 +51,8 @@ class InformationPackageFilter(filters.FilterSet):
     object_size = ListFilter(name='object_size', method='filter_fields')
     start_date = ListFilter(name='Startdate', method='filter_fields')
     end_date = ListFilter(name='Enddate', method='filter_fields')
-    archived = filters.BooleanFilter()
-    cached = filters.BooleanFilter()
+    archived = filters.BooleanFilter(method='filter_boolean_fields')
+    cached = filters.BooleanFilter(method='filter_boolean_fields')
 
     def filter_fields(self, queryset, name, value):
         view_type = self.data.get('view_type', 'aic')
@@ -71,6 +71,25 @@ class InformationPackageFilter(filters.FilterSet):
 
         return queryset.filter(
             **{'%s__icontains' % name: value}
+        ).distinct()
+
+    def filter_boolean_fields(self, queryset, name, value):
+        view_type = self.data.get('view_type', 'aic')
+
+        if view_type == 'aic':
+            return queryset.filter(
+                **{'information_packages__%s__exact' % name: value}
+            ).distinct()
+        elif view_type == 'ip':
+            return queryset.filter(
+                Q(
+                    Q(**{'%s__exact' % name: value}) |
+                    Q(**{'aic__information_packages__%s__exact' % name: value})
+                ), generation=0
+            ).distinct()
+
+        return queryset.filter(
+            **{'%s__exact' % name: value}
         ).distinct()
 
     def filter_fields_in_list(self, queryset, name, value):
