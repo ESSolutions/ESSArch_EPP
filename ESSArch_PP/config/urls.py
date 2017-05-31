@@ -43,7 +43,7 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
-from ESSArch_Core.WorkflowEngine.views import ProcessStepViewSet, ProcessTaskViewSet
+from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
 
 from ip.views import (
     ArchivalInstitutionViewSet,
@@ -98,6 +98,18 @@ router.register(r'permissions', PermissionViewSet)
 router.register(r'robots', RobotViewSet)
 router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
+router.register(r'steps', ProcessStepViewSet, base_name='steps').register(
+    r'tasks',
+    ProcessTaskViewSet,
+    base_name='steps-tasks',
+    parents_query_lookups=['processstep']
+)
+router.register(r'steps', ProcessStepViewSet, base_name='steps').register(
+    r'children',
+    ProcessViewSet,
+    base_name='steps-children',
+    parents_query_lookups=['processstep']
+)
 
 router.register(r'tags', TagViewSet)
 router.register(r'tags', TagViewSet, base_name='tags').register(
