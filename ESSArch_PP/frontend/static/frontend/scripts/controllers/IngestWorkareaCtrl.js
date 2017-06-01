@@ -68,9 +68,16 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     }
     //Click function for status view
     var stateInterval;
-    $scope.stateClicked = function(row){
-        if($scope.statusShow && $scope.ip == row){
-            $scope.statusShow = false;
+    $scope.stateClicked = function (row) {
+        if ($scope.statusShow) {
+                $scope.tree_data = [];
+            if ($scope.ip == row) {
+                $scope.statusShow = false;
+            } else {
+                $scope.statusShow = true;
+                $scope.edit = false;
+                $scope.statusViewUpdate(row);
+            }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;

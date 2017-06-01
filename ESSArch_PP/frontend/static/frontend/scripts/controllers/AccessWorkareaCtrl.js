@@ -4,7 +4,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     var ipSortString = "Accessed";
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
 
-    $scope.menuOptions = function() { 
+    $scope.menuOptions = function() {
         return [
             [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
                 console.log($itemScope.row);
@@ -29,7 +29,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 		switch(request.type) {
 			case "preserve":
 				$scope.preserveIp(ip, request);
-				break; 
+				break;
 			case "diff_check":
 				console.log("request not implemented");
 				break;
@@ -74,9 +74,16 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     }
     //Click function for status view
     var stateInterval;
-    $scope.stateClicked = function(row){
-        if($scope.statusShow && $scope.ip == row){
-            $scope.statusShow = false;
+    $scope.stateClicked = function (row) {
+        if ($scope.statusShow) {
+                $scope.tree_data = [];
+            if ($scope.ip == row) {
+                $scope.statusShow = false;
+            } else {
+                $scope.statusShow = true;
+                $scope.edit = false;
+                $scope.statusViewUpdate(row);
+            }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;

@@ -49,7 +49,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		switch(request.type) {
 			case "preserve":
 				$scope.preserveIp(ip, request);
-				break; 
+				break;
 			case "view":
 				console.log("request not implemented");
 				break;
@@ -98,22 +98,29 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	}
 	//Click function for status view
 	var stateInterval;
-	$scope.stateClicked = function(row){
-		if($scope.statusShow && $scope.ip == row){
-			$scope.statusShow = false;
-		} else {
-			$scope.statusShow = true;
-			$scope.edit = false;
-			$scope.statusViewUpdate(row);
-		}
-		$scope.subSelect = false;
-		$scope.eventlog = false;
-		$scope.select = false;
-		$scope.eventShow = false;
-		$scope.ip = row;
-		$rootScope.ip = row;
-	};
-	
+	    $scope.stateClicked = function (row) {
+        if ($scope.statusShow) {
+                $scope.tree_data = [];
+            if ($scope.ip == row) {
+                $scope.statusShow = false;
+            } else {
+                $scope.statusShow = true;
+                $scope.edit = false;
+                $scope.statusViewUpdate(row);
+            }
+        } else {
+            $scope.statusShow = true;
+            $scope.edit = false;
+            $scope.statusViewUpdate(row);
+        }
+        $scope.subSelect = false;
+        $scope.eventlog = false;
+        $scope.select = false;
+        $scope.eventShow = false;
+        $scope.ip = row;
+        $rootScope.ip = row;
+    };
+
 	//Click funciton for event view
 	$scope.eventsClick = function (row) {
 		if($scope.eventShow && $scope.ip == row){
@@ -144,7 +151,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	/*******************************************/
 	/*Piping and Pagination for List-view table*/
 	/*******************************************/
-	
+
 	var ctrl = this;
 	$scope.selectedIp = {id: "", class: ""};
 	$scope.selectedProfileRow = {profile_type: "", class: ""};
@@ -230,13 +237,13 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 					} else {
 						updateListViewConditional();
 					}
-					
+
 				}, appConfig.ipIdleInterval);
 			}
 		}, appConfig.ipInterval);
 	};
 	updateListViewConditional();
-	
+
 	//Click function for Ip table
 	$scope.ipTableClick = function(row) {
 		if(row.package_type == 1) {

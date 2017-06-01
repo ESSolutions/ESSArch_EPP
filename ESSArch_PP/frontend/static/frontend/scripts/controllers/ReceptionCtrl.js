@@ -30,7 +30,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.colspan = 10;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //Cancel update intervals on state change
-    
+
     //Request form data
     function initRequestData() {
         vm.request = {
@@ -56,7 +56,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.includeIp = function(row) {
         var temp = true;
         $scope.includedIps.forEach(function(included, index, array) {
-            
+
             if(included.id == row.id) {
                 $scope.includedIps.splice(index, 1);
                 temp = false;
@@ -66,7 +66,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         if(temp) {
             $scope.includedIps.push(row);
             $scope.checkMatch();
-            
+
         }
         if($scope.includedIps.length == 0) {
             initRequestData();
@@ -118,9 +118,16 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     }
     //Click function for status view
     var stateInterval;
-    $scope.stateClicked = function(row){
-        if($scope.statusShow && $scope.ip == row){
-            $scope.statusShow = false;
+    $scope.stateClicked = function (row) {
+        if ($scope.statusShow) {
+                $scope.tree_data = [];
+            if ($scope.ip == row) {
+                $scope.statusShow = false;
+            } else {
+                $scope.statusShow = true;
+                $scope.edit = false;
+                $scope.statusViewUpdate(row);
+            }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;
@@ -133,6 +140,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         $scope.ip = row;
         $rootScope.ip = row;
     };
+
     //If status view is visible, start update interval
     $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
         if(newValue) {
@@ -143,11 +151,11 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         }
     });
     //Get data for status view
-    
+
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
-    
+
     var ctrl = this;
     $scope.selectedIp = {id: "", class: ""};
     $scope.selectedProfileRow = {profile_type: "", class: ""};
@@ -191,7 +199,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.selectedIp = row;
         }
     };
-    
+
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id== row.id){
@@ -222,7 +230,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         $scope.ip = row;
         $rootScope.ip = row;
     };
-    
+
     //Adds a new event to the database
     $scope.addEvent = function(ip, eventType, eventDetail) {
         listViewService.addEvent(ip, eventType, eventDetail).then(function(value) {
@@ -260,7 +268,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.requestForm = false;
     //Html popover template for currently disabled
     $scope.htmlPopover = $sce.trustAsHtml('<font size="3" color="red">Currently disabled</font>');
-    
+
     //Toggle visibility of select view
     $scope.toggleSelectView = function () {
         if($scope.select == false){
@@ -343,13 +351,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                     } else {
                         updateListViewConditional();
                     }
-                    
+
                 }, appConfig.ipIdleInterval);
             }
         }, appConfig.ipInterval);
     };
     updateListViewConditional();
-    
+
     //Reload current view
     $scope.reloadPage = function (){
         $state.reload();
@@ -392,7 +400,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         "key": "validate_integrity",
     }
     ];
-    
+
     $scope.getArchivePolicies = function() {
         return $http({
             method: 'GET',
