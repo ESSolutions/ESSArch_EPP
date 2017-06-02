@@ -179,7 +179,13 @@ class ReceiveSIP(DBTask):
             shutil.copy(container, dst)
 
         aip.object_path = aip_dir
-        aip.save(update_fields=['object_path'])
+
+        try:
+            aip.object_size = parsed['object_size']
+        except KeyError:
+            aip.object_size = os.stat(aip.object_path).st_size
+
+        aip.save(update_fields=['object_path', 'object_size'])
 
         return aip.pk
 

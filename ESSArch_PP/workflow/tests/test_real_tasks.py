@@ -184,6 +184,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
         aip = aip.first()
         self.assertEqual(aip.label, 'test-ip')
         self.assertEqual(aip.object_path, expected_aip)
+        self.assertEqual(aip.object_size, os.stat(expected_aip).st_size)
         self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
         self.assertEqual(sip, aip.object_identifier_value)
