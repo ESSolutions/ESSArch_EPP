@@ -294,26 +294,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         $uibTooltipProvider.options({trigger: 'mouseenter'});
     }
 }])
-.config(['flowFactoryProvider', function (flowFactoryProvider, $cookies) {
-    flowFactoryProvider.defaults = {
-        target: 'upload.php',
-        permanentErrors: [404, 500, 501],
-        maxChunkRetries: 1,
-        chunkRetryInterval: 5000,
-        simultaneousUploads: 10,
-        testMethod: 'GET',
-        uploadMethod: 'POST',
-        headers: function (file, chunk, isTest) {
-            var $cookies;
-            angular.injector(['ngCookies']).invoke(['$cookies', function(_$cookies_) {
-                $cookies = _$cookies_;
-            }]);
-            return {
-                'X-CSRFToken': $cookies.get("csrftoken")// call func for getting a cookie
-            }
-        }
-    };
-}])
 .config(['$compileProvider', 'appConfig', '$logProvider', function ($compileProvider, appConfig, $logProvider) {
     $compileProvider.debugInfoEnabled(appConfig.debugInfo);
     $compileProvider.commentDirectivesEnabled(appConfig.commentDirectives);
