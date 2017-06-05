@@ -19,13 +19,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-class="row.class" ng-repeat="row in vm.displayedMediums"  ng-attr-context-menu="menuOptions" class="table-item">
-                        <td class="clickable" ng-click="storageMediumTableClick(row);selectStorageMedium(row)">{{row.medium_id}}</td>
-                        <td class="clickable" ng-click="storageRowClick(row)">{{row.storage_target.name}}</td>
-                        <td class="clickable" ng-click="storageRowClick(row)">{{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                        <td class="clickable" ng-click="storageRowClick(row)">{{row.location}}</td>
-                        <td class="clickable" ng-click="storageRowClick(row)">{{row.location_status}}</td>
-                        <td class="clickable" ng-click="storageRowClick(row)">{{row.used_capacity | filesize}}</td>
+                    <tr ng-class="{'selected': storageMedium.id == row.id}" ng-repeat="row in vm.displayedMediums"  ng-attr-context-menu="menuOptions" class="table-item">
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.medium_id}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.storage_target.name}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location_status}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.used_capacity | filesize}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -102,7 +102,7 @@
                             </tr>
                         </thead>
                         <tbody>                                
-                            <tr ng-class="row.class" ng-repeat="row in vm.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
+                            <tr ng-class="{'selected': ip.id == row.id}" ng-repeat="row in vm.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
                                 <td>{{row.ip.object_identifier_value}}</td>
                                 <td>{{row.content_location_value}}</td>
                             </tr>

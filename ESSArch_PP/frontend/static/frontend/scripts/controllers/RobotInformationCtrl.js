@@ -33,28 +33,11 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.selectedRobot = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
-    $scope.selectedRobotObj = {id: "", class: ""};
-    
-    
-    $scope.selectRobotObj = function(row) {
-        vm.robots.forEach(function(robot) {
-            if(robot.id == $scope.selectedRobotObj.id){
-                robot.class = "";
-            }
-        });
-        if(row.id == $scope.selectedRobotObj.id){
-            $scope.selectedRobotObj = {id: "", class: ""};
-        } else {
-            row.class = "selected";
-            $scope.selectedRobotObj = row;
-        }
-    };
-    
+
     $scope.robotRowClick = function(row) {
 		$scope.selectRobotObj(row);
-		if($scope.ip == row){
-			row.class = "";
-			$scope.selectedRobotObj = {id: "", class: ""};
+		if($vm.selectedRobot.ip == row){
+            vm.selectedRobot = null;
 		}
 		if($scope.eventShow) {
 			$scope.eventsClick(row);
@@ -66,24 +49,25 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
 			$scope.robotClick(row);
 		}
 	}
-    
+
     $scope.getDrives = function(robot) {
         $http.get(robot.url + "tape-drives/").then(function(response) {
             vm.tapeDrives = response.data;
         });
     }
-    
+
     $scope.getSlots = function(robot) {
         $http.get(robot.url + "tape-slots/").then(function(response) {
             vm.tapeSlots = response.data;
         });
     }
-    
+
     $scope.robotClick = function(robot) {
         if($scope.select && vm.selectedRobot.id == robot.id){
             $scope.select = false;
             $scope.edit = false;
             $scope.eventlog = false;
+            vm.selectedRobot = null;
         } else {
             vm.selectedRobot = robot;
             $scope.select = true;
@@ -91,10 +75,12 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.getDrives(vm.selectedRobot);
         }
     }
-    
+
     $scope.loadRobots = function() {
+        $scope.ipLoading = true;
         $http.get(appConfig.djangoUrl + 'robots/').then(function(response) {
             vm.robots = response.data;
+            $scope.ipLoading = false;
         });
     }
     $scope.loadRobots();

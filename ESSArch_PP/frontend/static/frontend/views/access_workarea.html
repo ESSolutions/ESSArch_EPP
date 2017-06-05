@@ -27,7 +27,14 @@
                 </div>
             </form>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')" class="select-sub-edit-eventlog-wrapper">
+        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+            <div ng-include src="'static/frontend/views/event_table.html'"></div>
+            <div ng-if="statusShow" class="status-view">
+                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+            </div>
+        </div>
+        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')"
+            class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">
@@ -38,12 +45,6 @@
                     <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                 </form>
             </div>
-        </div>
-    </div>
-    <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
-        <div ng-include src="'static/frontend/views/event_table.html'"></div>
-        <div ng-if="statusShow" class="status-view">
-            <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
         </div>
     </div>
 </div>

@@ -2,7 +2,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     $scope.select = true;
-    $scope.ip = $stateParams.ip;
+    $scope.ip = null;
+    $rootScope.ip = null;
     $scope.orderObjects = [];
     listViewService.getOrderPage().then(function(response) {
         $scope.orderObjects = response.data;
@@ -55,6 +56,13 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 			$scope.eventShow = false;
 			$scope.requestForm = false;
             $scope.requestEventlog = false;
+            if ($scope.ip != null && $scope.ip.object_identifier_value== row.object_identifier_value) {
+				$scope.ip = null;
+				$rootScope.ip = null;
+			} else {
+				$scope.ip = row;
+				$rootScope.ip = $scope.ip;
+			}
 			return;
 		}
 		if($scope.requestForm && $scope.ip.id== row.id){
@@ -64,22 +72,21 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 			$scope.eventShow = false;
 			$scope.requestForm = false;
             $scope.requestEventlog = false;
-            $scope.selectIp(row);
+            $scope.ip = null;
+			$rootScope.ip = null;
 		} else {
 			$scope.select = false;
 			$scope.eventlog = false;
 			$scope.edit = false;
-			$scope.eventShow = false;
+            $scope.eventShow = false;
+            $scope.requestForm = true;
+            $scope.requestEventlog = true;
+            if (!$scope.eventsShow || $scope.ip.object_identifier_value != row.object_identifier_value) {
+                $scope.eventShow = false;
+                $scope.eventsClick(row);
+            }
 			$scope.ip = row;
 			$rootScope.ip = $scope.ip;
-            $scope.getArchivePolicies().then(function(result) {
-                vm.request.archivePolicy.options = result;
-                $scope.requestForm = true;
-                $scope.requestEventlog = true;
-                row.class = "selected";
-                $scope.selectedIp = row;
-                $scope.eventsClick(row);
-            });
 		}
 		$scope.statusShow = false;
     }
@@ -123,8 +130,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
         if ($scope.ip == row) {
-            row.class = "";
-            $scope.selectedIp = { id: "", class: "" };
+            $scope.ip = null;
+            $rootScope.ip = null;
         }
         if ($scope.eventShow) {
             $scope.eventsClick(row);
@@ -143,37 +150,48 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                 $scope.tree_data = [];
             if ($scope.ip == row) {
                 $scope.statusShow = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
             } else {
                 $scope.statusShow = true;
                 $scope.edit = false;
                 $scope.statusViewUpdate(row);
-            }
+                $scope.ip = row;
+                $rootScope.ip = row;
+        }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;
             $scope.statusViewUpdate(row);
+            $scope.ip = row;
+            $rootScope.ip = row;
         }
         $scope.subSelect = false;
         $scope.eventlog = false;
+        $scope.requestEventlog = false;
         $scope.select = false;
+        $scope.requestForm = false;
         $scope.eventShow = false;
-        $scope.ip = row;
-        $rootScope.ip = row;
     };
     //Click funciton for event view
 	$scope.eventsClick = function (row) {
 		if($scope.eventShow && $scope.ip == row){
 			$scope.eventShow = false;
 			$rootScope.stCtrl = null;
+			if(!$scope.requestForm) {
+				$scope.ip = null;
+				$rootScope.ip = null;
+			}
 		} else {
 			if($rootScope.stCtrl) {
 				$rootScope.stCtrl.pipe();
 			}
 			$scope.eventShow = true;
+            $scope.eventlog = false;
 			$scope.statusShow = false;
+            $scope.ip = row;
+            $rootScope.ip = row;
 		}
-		$scope.ip = row;
-		$rootScope.ip = row;
 	};
     //Initialize file browser update interval
     var fileBrowserInterval;
@@ -202,7 +220,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     /*******************************************/
 
     var ctrl = this;
-    $scope.selectedIp = { id: "", class: "" };
     $scope.selectedProfileRow = { profile_type: "", class: "" };
     this.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -222,7 +239,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage; // Number of entries showed per page.
             var pageNumber = start / number + 1;
-            Resource.getDips(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, $scope.columnFilters).then(function (result) {
+            Resource.getDips(start, number, pageNumber, tableState, sorting, search, $scope.columnFilters).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -230,20 +247,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             });
         }
     };
-    //Make ip selected and add class to visualize
-    $scope.selectIp = function(row) {
-        vm.displayedIps.forEach(function(ip) {
-            if (ip.id == $scope.selectedIp.id) {
-                ip.class = "";
-            }
-        });
-        if (row.id == $scope.selectedIp.id) {
-            $scope.selectedIp = { id: "", class: "" };
-        } else {
-            row.class = "selected";
-            $scope.selectedIp = row;
-        }
-    };
+
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
@@ -295,6 +299,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;

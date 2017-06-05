@@ -26,6 +26,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "";
+    $scope.ip = null;
+    $rootScope.ip = null;
     $scope.includedIps = [];
     $scope.colspan = 10;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
@@ -103,8 +105,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
         if($scope.ip == row){
-            row.class = "";
-            $scope.selectedIp = {id: "", class: ""};
+            $scope.ip = null;
+            $rootScope.ip = null;
         }
         if($scope.eventShow) {
             $scope.eventsClick(row);
@@ -123,22 +125,26 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 $scope.tree_data = [];
             if ($scope.ip == row) {
                 $scope.statusShow = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
             } else {
                 $scope.statusShow = true;
                 $scope.edit = false;
                 $scope.statusViewUpdate(row);
+                $scope.ip = row;
+                $rootScope.ip = row;
             }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;
             $scope.statusViewUpdate(row);
+            $scope.ip = row;
+            $rootScope.ip = row;
         }
         $scope.subSelect = false;
         $scope.eventlog = false;
         $scope.select = false;
         $scope.eventShow = false;
-        $scope.ip = row;
-        $rootScope.ip = row;
     };
 
     //If status view is visible, start update interval
@@ -157,7 +163,6 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     /*******************************************/
 
     var ctrl = this;
-    $scope.selectedIp = {id: "", class: ""};
     $scope.selectedProfileRow = {profile_type: "", class: ""};
     this.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -177,7 +182,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-            Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.selectedIp, $scope.includedIps, sorting, search, ipSortString, $scope.columnFilters).then(function (result) {
+            Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.includedIps, sorting, search, ipSortString, $scope.columnFilters).then(function (result) {
                 ctrl.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -185,25 +190,15 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             });
         }
     };
-    //Make ip selected and add class to visualize
-    $scope.selectIp = function(row) {
-        vm.displayedIps.forEach(function(ip) {
-            if(ip.id == $scope.selectedIp.id){
-                ip.class = "";
-            }
-        });
-        if(row.id == $scope.selectedIp.id){
-            $scope.selectedIp = {id: "", class: ""};
-        } else {
-            row.class = "selected";
-            $scope.selectedIp = row;
-        }
-    };
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
-        if($scope.select && $scope.ip.id== row.id){
+        if($scope.select && $scope.ip.id == row.id){
+            $scope.select = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
         } else {
+            $scope.select = true;
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
         }
@@ -216,6 +211,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
         if($scope.eventShow && $scope.ip == row){
             $scope.eventShow = false;
             $rootScope.stCtrl = null;
+            $scope.ip = null;
+            $rootScope.ip = null;
         } else {
             if($rootScope.stCtrl) {
                 $rootScope.stCtrl.pipe();
@@ -223,12 +220,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             getEventlogData();
             $scope.eventShow = true;
             $scope.statusShow = false;
+            $scope.ip = row;
+            $rootScope.ip = row;
         }
         $scope.select = false;
         $scope.edit = false;
         $scope.eventlog = false;
-        $scope.ip = row;
-        $rootScope.ip = row;
+
     };
 
     //Adds a new event to the database

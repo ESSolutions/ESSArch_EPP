@@ -2,6 +2,8 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "Accessed";
+    $scope.ip = null;
+    $rootScope.ip = null;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
 
     $scope.menuOptions = function() {
@@ -59,8 +61,8 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     $scope.ipRowClick = function(row) {
         $scope.selectIp(row);
         if($scope.ip == row){
-            row.class = "";
-            $scope.selectedIp = {id: "", class: ""};
+            $scope.ip = null;
+            $rootScope.ip = null;
         }
         if($scope.eventShow) {
             $scope.eventsClick(row);
@@ -79,23 +81,48 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
                 $scope.tree_data = [];
             if ($scope.ip == row) {
                 $scope.statusShow = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
             } else {
                 $scope.statusShow = true;
                 $scope.edit = false;
                 $scope.statusViewUpdate(row);
+                $scope.ip = row;
+                $rootScope.ip = row;
             }
         } else {
             $scope.statusShow = true;
             $scope.edit = false;
             $scope.statusViewUpdate(row);
+            $scope.ip = row;
+            $rootScope.ip = row;
         }
         $scope.subSelect = false;
         $scope.eventlog = false;
         $scope.select = false;
+        $scope.requestForm = false;
         $scope.eventShow = false;
-        $scope.ip = row;
-        $rootScope.ip = row;
     };
+
+    //Click funciton for event view
+	$scope.eventsClick = function (row) {
+		if($scope.eventShow && $scope.ip == row){
+			$scope.eventShow = false;
+			$rootScope.stCtrl = null;
+            if (!$scope.requestForm) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+            }
+		} else {
+			if($rootScope.stCtrl) {
+				$rootScope.stCtrl.pipe();
+			}
+			$scope.eventShow = true;
+			$scope.statusShow = false;
+			$scope.ip = row;
+			$rootScope.ip = row;
+		}
+	};
     //If status view is visible, start update interval
     $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
         if(newValue) {
@@ -113,7 +140,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     /*******************************************/
 
     var ctrl = this;
-    $scope.selectedIp = {id: "", class: ""};
     $scope.selectedProfileRow = {profile_type: "", class: ""};
     this.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -133,7 +159,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-			Resource.getWorkareaIps("access", start, number, pageNumber, tableState, $scope.selectedIp, sorting, search, $scope.expandedAics, $scope.columnFilters).then(function (result) {
+			Resource.getWorkareaIps("access", start, number, pageNumber, tableState, sorting, search, $scope.expandedAics, $scope.columnFilters).then(function (result) {
 				ctrl.displayedIps = result.data;
 				tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
 				$scope.ipLoading = false;
@@ -148,25 +174,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             });*/
         }
     };
-    //Make ip selected and add class to visualize
-	$scope.selectIp = function(row) {
-		vm.displayedIps.forEach(function(ip) {
-			if(ip.object_identifier_value == $scope.selectedIp.object_identifier_value){
-				ip.class = "";
-			}
-			ip.information_packages.forEach(function(subIp) {
-				if(subIp.object_identifier_value == $scope.selectedIp.object_identifier_value) {
-					subIp.class = "";
-				}
-			});
-		});
-		if(row.object_identifier_value == $scope.selectedIp.object_identifier_value){
-			$scope.selectedIp = {object_identifier_value: "", class: ""};
-		} else {
-			row.class = "selected";
-			$scope.selectedIp = row;
-		}
-	};
+
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
@@ -220,24 +228,36 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 			$scope.eventShow = false;
 			$scope.requestForm = false;
 			$scope.initRequestData();
-
+			if ($scope.ip != null && $scope.ip.object_identifier_value== row.object_identifier_value) {
+				$scope.ip = null;
+				$rootScope.ip = null;
+			} else {
+				$scope.ip = row;
+				$rootScope.ip = $scope.ip;
+			}
 			return;
 		}
-        if($scope.select && $scope.ip.id== row.id){
+        if($scope.select && $scope.ip.object_identifier_value == row.object_identifier_value){
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
+            $scope.eventShow = false;
             $scope.requestForm = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
             $scope.initRequestData();
         } else {
-            $scope.ip = row;
-            $rootScope.ip = $scope.ip;
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.requestForm = true;
+            if (!$scope.eventsShow || $scope.ip.object_identifier_value != row.object_identifier_value) {
+                $scope.eventShow = false;
+                $scope.eventsClick(row);
+            };
+            $scope.ip = row;
+            $rootScope.ip = $scope.ip;
         }
-        $scope.eventShow = false;
         $scope.statusShow = false;
     };
     $scope.colspan = 9;

@@ -56,7 +56,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
 	}
     //Get data for IP table
-    function getIpPage(start, number, pageNumber, params, selected, sort, search, state, expandedAics, columnFilters, archived) {
+    function getIpPage(start, number, pageNumber, params, sort, search, state, expandedAics, columnFilters, archived) {
         var viewType = $window.sessionStorage["view-type"] || 'aic';
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -71,14 +71,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                         ip.collapsed = false;
                     }
                 });
-                if (ip.object_identifier_value === selected.object_identifier_value) {
-                    ip.class = "selected"
-                }
-                ip.information_packages.forEach(function (subIp) {
-                    if (subIp.object_identifier_value === selected.object_identifier_value) {
-                        subIp.class = "selected"
-                    }
-                });
             });
 
             return {
@@ -88,7 +80,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-    function getWorkareaIps(workarea, start, number, pageNumber, params, selected, sort, search, expandedAics, columnFilters) {
+    function getWorkareaIps(workarea, start, number, pageNumber, params, sort, search, expandedAics, columnFilters) {
         var viewType = $window.sessionStorage["view-type"] || 'aic';
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -103,14 +95,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                         ip.collapsed = false;
                     }
                 });
-                if (ip.object_identifier_value === selected.object_identifier_value) {
-                    ip.class="selected"
-                }
-                ip.information_packages.forEach(function(subIp) {
-                    if (subIp.object_identifier_value === selected.object_identifier_value) {
-                        subIp.class="selected"
-                    }
-                });
             });
             return {
                 data: ipCollection,
@@ -119,7 +103,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-    function getDips(start, number, pageNumber, params, selected, sort, search, columnFilters) {
+    function getDips(start, number, pageNumber, params, sort, search, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -128,9 +112,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = false;
-                if (ip.object_identifier_value === selected.object_identifier_value) {
-                    ip.class = "selected"
-                }
             });
             return {
                 data: ipCollection,
@@ -139,7 +120,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-    function getOrders(start, number, pageNumber, params, selected, sort, search) {
+    function getOrders(start, number, pageNumber, params, sort, search) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -148,9 +129,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = false;
-                if (ip.id === selected.id) {
-                    ip.class = "selected"
-                }
             });
             return {
                 data: ipCollection,
@@ -159,7 +137,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-    function getReceptionPage(start, number, pageNumber, params, selected, checked, sort, search, state, columnFilters) {
+    function getReceptionPage(start, number, pageNumber, params, checked, sort, search, state, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -173,9 +151,6 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
                         ip.checked = true;
                     }
                 });
-                if(selected.id == ip.id) {
-                    ip.class = "selected";
-                }
             });
 
             return {
@@ -184,18 +159,13 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
-    function getStorageMediums(start, number, pageNumber, params, selected, sort, search) {
+    function getStorageMediums(start, number, pageNumber, params, sort, search) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
         return listViewService.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
             var storageMediumCollection = value.data;
-            storageMediumCollection.forEach(function(medium){
-                if(selected.id == medium.id) {
-                    medium.class = "selected";
-                }
-            });
             return {
                 data: storageMediumCollection,
                 numberOfPages: Math.ceil(value.count / number)

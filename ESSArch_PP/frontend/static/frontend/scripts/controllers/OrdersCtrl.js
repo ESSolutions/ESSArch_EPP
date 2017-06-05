@@ -1,6 +1,8 @@
 angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
+    $scope.ip = null;
+    $rootScope.ip = null;
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
@@ -8,10 +10,9 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-        $scope.selectIp(row);
         if($scope.ip == row){
-            row.class = "";
-            $scope.selectedIp = {id: "", class: ""};
+            $scope.ip = null;
+            $rootScope.ip = null;
         }
         if($scope.eventShow) {
             $scope.eventsClick(row);
@@ -57,7 +58,6 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
     /*******************************************/
     
     var ctrl = this;
-    $scope.selectedIp = {id: "", class: ""};
     $scope.selectedProfileRow = {profile_type: "", class: ""};
     this.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -77,27 +77,14 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-            Resource.getOrders(start, number, pageNumber, tableState, $scope.selectedIp, sorting, search).then(function(result) {
+            Resource.getOrders(start, number, pageNumber, tableState, sorting, search).then(function(result) {
                 vm.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update                
                 $scope.ipLoading = false;
             });
         }
     };
-    //Make ip selected and add class to visualize
-    $scope.selectIp = function(row) {
-        vm.displayedIps.forEach(function(ip) {
-            if(ip.id == $scope.selectedIp.id){
-                ip.class = "";
-            }
-        });
-        if(row.id == $scope.selectedIp.id){
-            $scope.selectedIp = {id: "", class: ""};
-        } else {
-            row.class = "selected";
-            $scope.selectedIp = row;
-        }
-    };
+
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
@@ -144,11 +131,13 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
     
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
-        if($scope.select && $scope.ip.id== row.id){
+        if($scope.select && $scope.ip.id == row.id){
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
             $scope.requestForm = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
