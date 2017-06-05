@@ -1484,11 +1484,14 @@ class StorageMethodRead:
                 if ok_flag and os.access(filepath,os.W_OK):
                     pass
                 else:
-                    event_info = 'Missing permission, Object path: %s is not writeable!' % filepath
-                    logging.error(event_info)
-                    ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
-                    ok_flag = 0
-                    break
+                    try:
+                        os.chmod(filepath, 0755)
+                    except:
+                        event_info = 'Missing permission, Object path: %s is not writeable!' % filepath
+                        logging.error(event_info)
+                        ESSPGM.Events().create('1043','',__name__,__version__,'1',event_info,2,ObjectIdentifierValue)
+                        ok_flag = 0
+                        break
                 if ok_flag:
                     if int(os.stat(filepath)[6]) == int(obj[1]):
                         ObjectSize += int(obj[1])

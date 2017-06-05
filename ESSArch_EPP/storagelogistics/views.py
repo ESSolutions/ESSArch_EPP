@@ -27,7 +27,7 @@ __author__ = "$Author$"
 import re
 __version__ = '%s.%s' % (__majorversion__,re.sub('[\D]', '',__revision__))
 
-import logging, string,  ESSMSSQL, ESSPGM
+import logging, string,  ESSMSSQL, ESSPGM, pytz, datetime
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth import authenticate
 
@@ -91,8 +91,8 @@ class StoragelogisticsRequest(xsd.ComplexType):
 Schema_55b49 = xsd.Schema(
     imports=[],
     targetNamespace='http://ESSArch_Instance.ra.se/StorageLogisticsService',
-    #elementFormDefault='unqualified',
-    elementFormDefault='qualified',
+    elementFormDefault='unqualified',
+    #elementFormDefault='qualified',
     simpleTypes=[],
     attributeGroups=[],
     groups=[],
@@ -106,7 +106,7 @@ Schema_55b49 = xsd.Schema(
 
 #@permission_required('StorageLogistics_ws.StorageLogistics')
 def storagelogistics(request, storagelogisticsRequest):
-    logger.debug('Request parameters before replace: storagemediumlocation=%s storagemediumdestination=%s useridentifiervalue=%s storagemediumid=%s eventtype=%s userpassword=%s eventdatetime=%s',storagelogisticsRequest.storagemediumlocation, storagelogisticsRequest.storagemediumdestination, storagelogisticsRequest.useridentifiervalue, storagelogisticsRequest.storagemediumid, storagelogisticsRequest.eventtype, storagelogisticsRequest.userpassword, storagelogisticsRequest.eventdatetime)
+    logger.debug('Request parameters before replace: storagemediumlocation=%s storagemediumdestination=%s useridentifiervalue=%s storagemediumid=%s eventtype=%s userpassword=%s eventdatetime=%s',storagelogisticsRequest.storagemediumlocation, storagelogisticsRequest.storagemediumdestination, storagelogisticsRequest.useridentifiervalue, storagelogisticsRequest.storagemediumid, storagelogisticsRequest.eventtype, storagelogisticsRequest.userpassword, repr(storagelogisticsRequest.eventdatetime))
     ###################################
     # Replace "-" with "_"
     if storagelogisticsRequest.storagemediumlocation is not None:
@@ -142,9 +142,12 @@ def storagelogistics(request, storagelogisticsRequest):
     else:
         userpassword = ''
 
-    eventdatetime = storagelogisticsRequest.eventdatetime
+    try:
+        eventdatetime = datetime.datetime.strptime(storagelogisticsRequest.eventdatetime, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.utc)
+    except ValueError:
+        eventdatetime = datetime.datetime.strptime(storagelogisticsRequest.eventdatetime, '%Y-%m-%dT%H:%M:%S').replace(tzinfo=pytz.utc)
 
-    logger.debug('Request parameters: storagemediumlocation=%s storagemediumdestination=%s useridentifiervalue=%s MediumID=%s MediumVersion=%s eventtype=%s userpassword=%s eventdatetime=%s',storagemediumlocation, storagemediumdestination, useridentifiervalue, MediumID, MediumVersion, eventtype, userpassword, eventdatetime)
+    logger.debug('Request parameters: storagemediumlocation=%s storagemediumdestination=%s useridentifiervalue=%s MediumID=%s MediumVersion=%s eventtype=%s userpassword=%s eventdatetime=%s',storagemediumlocation, storagemediumdestination, useridentifiervalue, MediumID, MediumVersion, eventtype, userpassword, repr(eventdatetime))
     
     UserAuthMethod=0 # 0=local DB, 1=AIS
     UserAuth = 0
@@ -237,10 +240,6 @@ def storagelogistics(request, storagelogisticsRequest):
                 return StoragelogisticsResponse(returncode=13)
         if UserAuth and CurrentStorageMediumLocation == storagemediumlocation and not LocationStatus ==  10:
             errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table=storageMedium_table, ext_table=storageMedium_table, AgentIdentifierValue=useridentifiervalue, storageMediumID=MediumID, storageMediumLocation=storagemediumlocation, storageMediumLocationStatus=eventtype, storageMediumDate=eventdatetime)
-            #res,errno,why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',10,
-            #                                                            'storageMediumDate',eventdatetime,
-            #                                                            'linkingAgentIdentifierValue',useridentifiervalue),
-            #                                                           ('storageMediumID',MediumID))
             if errno:
                 logger.error('Failed to update AIS for MediumID: %s , error: %s',MediumID,str(why))
                 return StoragelogisticsResponse(returncode=11)
@@ -281,11 +280,6 @@ def storagelogistics(request, storagelogisticsRequest):
             return StoragelogisticsResponse(returncode=25)
         if UserAuth and LocationStatus ==  10:
             errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table=storageMedium_table, ext_table=storageMedium_table, AgentIdentifierValue=useridentifiervalue, storageMediumID=MediumID, storageMediumLocation=storagemediumlocation, storageMediumLocationStatus=eventtype, storageMediumDate=eventdatetime)
-            #res,errno,why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',20,
-            #                                                            'storageMediumLocation',storagemediumlocation,
-            #                                                            'storageMediumDate',eventdatetime,
-            #                                                            'linkingAgentIdentifierValue',useridentifiervalue),
-            #                                                           ('storageMediumID',MediumID))
             if errno:
                 logger.error('Failed to update AIS for MediumID: %s , error: %s',MediumID,str(why))
                 return StoragelogisticsResponse(returncode=21)
@@ -319,10 +313,6 @@ def storagelogistics(request, storagelogisticsRequest):
                 return StoragelogisticsResponse(returncode=33)
         if UserAuth and CurrentStorageMediumLocation == storagemediumlocation and not (LocationStatus == 30 or LocationStatus == 10):
             errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table=storageMedium_table, ext_table=storageMedium_table, AgentIdentifierValue=useridentifiervalue, storageMediumID=MediumID, storageMediumLocation=storagemediumlocation, storageMediumLocationStatus=eventtype, storageMediumDate=eventdatetime)
-            #res,errno,why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',30,
-            #                                                            'storageMediumDate',eventdatetime,
-            #                                                            'linkingAgentIdentifierValue',useridentifiervalue),
-            #                                                           ('storageMediumID',MediumID))
             if errno:
                 logger.error('Failed to update AIS for MediumID: %s , error: %s',MediumID,str(why))
                 return StoragelogisticsResponse(returncode=31)
@@ -356,10 +346,6 @@ def storagelogistics(request, storagelogisticsRequest):
                 return StoragelogisticsResponse(returncode=43)
         if UserAuth and CurrentStorageMediumLocation == storagemediumlocation and LocationStatus ==  30:
             errno,why = ESSPGM.DB().SetStorageMediumLocation(local_table=storageMedium_table, ext_table=storageMedium_table, AgentIdentifierValue=useridentifiervalue, storageMediumID=MediumID, storageMediumLocation=storagemediumlocation, storageMediumLocationStatus=eventtype, storageMediumDate=eventdatetime)
-            #res,errno,why = ESSMSSQL.DB().action('storageMedium','UPD',('storageMediumLocationStatus',40,
-            #                                                            'storageMediumDate',eventdatetime,
-            #                                                            'linkingAgentIdentifierValue',useridentifiervalue),
-            #                                                           ('storageMediumID',MediumID))
             if errno:
                 logger.error('Failed to update AIS for MediumID: %s , error: %s',MediumID,str(why))
                 return StoragelogisticsResponse(returncode=41)

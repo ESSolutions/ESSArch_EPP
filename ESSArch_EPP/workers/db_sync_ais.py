@@ -361,7 +361,10 @@ class work:
                     storageMedium_obj.storageMediumStatus = storageMedium_ais_obj[7]
                     storageMedium_obj.storageMediumFormat = storageMedium_ais_obj[8]
                     storageMedium_obj.storageMediumMounts = storageMedium_ais_obj[9]
-                    storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
+                    if storageMedium_ais_obj[10] is None:
+                        storageMedium_obj.linkingAgentIdentifierValue = ''
+                    else:
+                        storageMedium_obj.linkingAgentIdentifierValue = storageMedium_ais_obj[10]
                     storageMedium_obj.CreateDate = CreateDate_utc
                     storageMedium_obj.CreateAgentIdentifierValue = storageMedium_ais_obj[12]
                     storageMedium_obj.LocalDBdatetime = timestamp_utc
