@@ -127,21 +127,30 @@ angular.module('myApp').controller('BaseCtrl', function ($log, $uibModal, $timeo
     };
 
     //Click funciton for steps and tasks
-    $scope.stepTaskClick = function(branch) {
-        $http({
-            method: 'GET',
-            url: branch.url
-        }).then(function(response){
-            $scope.currentStepTask = response.data;
-            if(branch.flow_type == "task"){
+    $scope.stepTaskClick = function (branch) {
+        $scope.getStepTask(branch).then(function (response) {
+            if (branch.flow_type == "task") {
                 $scope.taskInfoModal();
             } else {
                 $scope.stepInfoModal();
             }
-        }, function(response) {
-            response.status;
         });
     };
+
+    $scope.getStepTask = function (branch) {
+        $scope.stepTaskLoading = true;
+        return $http({
+            method: 'GET',
+            url: branch.url
+        }).then(function (response) {
+            var data = response.data;
+            var started = moment(data.time_started);
+            var done = moment(data.time_done);
+            data.duration = done.diff(started);
+            $scope.currentStepTask = data;
+            $scope.stepTaskLoading = false;
+        });
+    }
 
     $scope.copyToClipboard = function() {
         $("#traceback_textarea").val($("#traceback_pre").html()).show();
