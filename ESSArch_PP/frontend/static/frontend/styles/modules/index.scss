@@ -546,6 +546,17 @@ padding: 0 12px;
     .dir {
         text-align: center;
     }
+    .file-extension {
+        text-align: center;
+        position: absolute;
+        display: block;
+        word-break: break-all;
+        width: 30px;
+        left: 27px;
+        top: 15px;
+        font-size: 12px;
+        line-height: 1;
+    }
 }
 .advanced-filters {
     position: absolute;
