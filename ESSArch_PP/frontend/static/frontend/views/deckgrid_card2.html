@@ -2,7 +2,7 @@
     <div class="clickable" ng-dblClick="expandFile(2, ip, card)" ng-class="isSelected(2, card)" ng-click="cardSelect(2, card)">
         <div ng-class="card.type" ng-if="card.type == 'file'">
             <li class="fa fa-file-o fa-3x"></li>
-            <span class="file-extension"><b>{{getFileExtension(card)}}</b></span>
+            <span class="file-extension"><b>{{getFileExtension(card).length <= 6 ? getFileExtension(card) : ''}}</b></span>
         </div>
         <div ng-class="card.type" ng-if="card.type == 'dir'">
             <li class="fa fa-folder-o fa-3x"></li>
