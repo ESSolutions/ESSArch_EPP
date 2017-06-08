@@ -298,6 +298,8 @@ class AccessAIP(DBTask):
             new_aip.pk = None
             new_aip.object_identifier_value = None
             new_aip.state = 'Access Workarea'
+            new_aip.cached = False
+            new_aip.archived = False
 
             max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
             new_aip.generation = max_generation + 1
