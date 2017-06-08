@@ -1,6 +1,5 @@
 <div ng-if="!subrow">
-    <div ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.archivist_organization.name}}</div>
-    <div ng-if="'home.ingest.reception' | isState" class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.archivist_organization}}</div>
+    <div class="clickable" ng-click="selectIp(row);ipTableClick(row)" context-menu="menuOptions('row')">{{row.archivist_organization.name}}</div>
 </div>
 <div ng-if="subrow">
     <div class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.archivist_organization.name}}</div>

@@ -209,6 +209,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         # Filter ips based on conditions
         new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k,v) in conditions.iteritems())), ips)
 
+        from_db = InformationPackage.objects.filter(state='Receiving', **conditions)
+        serializer = InformationPackageSerializer(
+            data=from_db, many=True, context={'request': request, 'view': self}
+        )
+        serializer.is_valid()
+        new_ips.extend(serializer.data)
+
         paginator = LinkHeaderPagination()
         page = paginator.paginate_queryset(new_ips, request)
         if page is not None:
