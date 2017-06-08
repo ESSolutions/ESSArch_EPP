@@ -725,7 +725,7 @@ class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
                 aic__information_packages__workareas__user=self.request.user,
                 aic__information_packages__workareas__type=workarea_type
             )
-        ).only('id')
+        ).only('id').distinct()
 
 class WorkareaFilesViewSet(viewsets.ViewSet):
     def validate_workarea(self, area_type):
