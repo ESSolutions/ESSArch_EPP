@@ -39,6 +39,7 @@ from rest_framework.test import APIClient
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
 from ESSArch_Core.WorkflowEngine.models import ProcessStep
+from ESSArch_Core.util import timestamp_to_datetime
 
 
 class AccessTestCase(TestCase):
@@ -222,7 +223,7 @@ class WorkareaFilesViewTestCase(TestCase):
         _, path = tempfile.mkstemp(dir=self.path)
         res = self.client.get(self.url, {'type': 'access'})
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path)}])
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path), 'size': os.stat(path).st_size, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
 
     def test_list_file_content(self):
         _, path = tempfile.mkstemp(dir=self.path)
@@ -234,14 +235,14 @@ class WorkareaFilesViewTestCase(TestCase):
         path = tempfile.mkdtemp(dir=self.path)
         res = self.client.get(self.url, {'type': 'access'})
 
-        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path)}])
+        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
 
     def test_list_folder_content(self):
         path = tempfile.mkdtemp(dir=self.path)
         _, filepath = tempfile.mkstemp(dir=path)
         res = self.client.get(self.url, {'type': 'access', 'path': path})
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath)}])
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath), 'size': os.stat(filepath).st_size, 'modified': timestamp_to_datetime(os.stat(filepath).st_mtime)}])
 
     def test_illegal_path(self):
         path = os.path.join(self.path, '..')
@@ -657,20 +658,20 @@ class InformationPackageViewSetFilesTestCase(TestCase):
         _, path = tempfile.mkstemp(dir=self.datadir)
         res = self.client.get(self.url)
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path)}])
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
 
     def test_list_folder(self):
         path = tempfile.mkdtemp(dir=self.datadir)
         res = self.client.get(self.url)
 
-        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path)}])
+        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
 
     def test_list_folder_content(self):
         path = tempfile.mkdtemp(dir=self.datadir)
         _, filepath = tempfile.mkstemp(dir=path)
         res = self.client.get(self.url, {'path': path})
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath)}])
+        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath), 'size': os.stat(filepath).st_size, 'modified': timestamp_to_datetime(os.stat(filepath).st_mtime)}])
 
     def test_create_folder(self):
         path = 'foo'
