@@ -63,6 +63,7 @@ from ESSArch_Core.util import (
     get_tree_size_and_count,
     in_directory,
     parse_content_range_header,
+    timestamp_to_datetime,
 )
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
@@ -651,6 +652,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                     "name": os.path.basename(entry.path),
                     "type": entry_type,
                     "size": size,
+                    "modified": timestamp_to_datetime(entry.stat().st_mtime),
                 }
             )
 
@@ -771,6 +773,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
                     "name": os.path.basename(entry.path),
                     "type": entry_type,
                     "size": size,
+                    "modified": timestamp_to_datetime(entry.stat().st_mtime),
                 }
             )
 
