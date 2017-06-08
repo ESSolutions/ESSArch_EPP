@@ -259,5 +259,6 @@
     "ENTERORDERLABEL": "Enter label for order",
     "CANCELPRESERVATION": "Close preservation",
     "STORAGE_STATUS": "Storage status",
-    "ARGS": "Args"
+    "ARGS": "Args",
+    "CHANGED": "Changed"
 }

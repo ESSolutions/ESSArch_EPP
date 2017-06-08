@@ -259,5 +259,6 @@
     "ENTERORDERLABEL": "Ange etikett för beställning",
     "CANCELPRESERVATION": "Stäng arkivering",
     "STORAGE_STATUS": "Lagringsstatus",
-    "ARGS": "Args"
+    "ARGS": "Args",
+    "CHANGED": "Ändrad"
 }
