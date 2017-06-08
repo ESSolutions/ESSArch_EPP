@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService) {
+angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService, Requests) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "Accessed";
@@ -38,7 +38,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
         }
     }
     $scope.preserveIp = function (ip, request) {
-        listViewService.preserveIp(ip, { purpose: request.purpose }).then(function (result) {
+        Requests.preserve(ip, { purpose: request.purpose }).then(function (result) {
             $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.eventShow = false;

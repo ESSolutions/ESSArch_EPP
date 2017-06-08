@@ -4,27 +4,27 @@
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" class="request-form" ng-submit="accessIp(ip, vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.view')">
-                        <input type="radio" ng-model="vm.request.type" value="view">
+                    <div ng-if="checkPermission('ip.get_from_storage')">
+                        <input type="radio" ng-model="vm.request.type" value="get">
                         <label>
                             {{'GET' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.view_tar')">
-                        <input type="radio" ng-model="vm.request.type" value="view_tar">
+                    <div ng-if="checkPermission('ip.get_tar_from_storage')">
+                        <input type="radio" ng-model="vm.request.type" value="get_tar">
                         <label>
                             {{'GET_AS_CONTAINER' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.edit_as_new')">
-                        <input type="radio" ng-model="vm.request.type" value="edit_as_new">
+                    <div ng-if="checkPermission('ip.get_from_storage_as_new')">
+                        <input type="radio" ng-model="vm.request.type" value="get_as_new">
                         <label>
                             {{'GET_AS_NEW_GENERATION' | translate}}
                         </label>
                     </div>
                 </div>
                 <div class="request-params">
-                    <div ng-if="vm.request.type == 'view_tar' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'query'">
+                    <div ng-if="vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new' || vm.request.type == 'query'">
                         <label>
                             {{'PURPOSE' | translate}}
                         </label>
@@ -39,10 +39,10 @@
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'view_tar' || vm.request.type == 'view' || vm.request.type == 'view_tar_ext' || vm.request.type == 'view_ip_tar_ext' || vm.request.type == 'edit_as_new' || vm.request.type == 'query')"
+        <div ng-if="eventlog && (vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new' || vm.request.type == 'query')"
             class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
-                <form ng-submit="receiveSip(ip)" class="eventlog-form">
+                <form class="eventlog-form">
                     <div class="checkbox">
                         <label>
                             <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>

@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller){
+angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "";
@@ -417,16 +417,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     }
     $scope.receive = function(ips) {
         ips.forEach(function(ip) {
-            $http({
-                method: 'POST',
-                url: appConfig.djangoUrl +'ip-reception/'+ ip.id + '/receive/',
-                data: {
-                    archive_policy: vm.request.archivePolicy.value.id,
-                    purpose: vm.request.purpose,
-                    tags: vm.request.tags.value.map(function(tag){return tag.id}),
-                    allow_unknown_files: vm.request.allowUnknownFiles
-                }
-            }).then(function(){
+            Requests.receive(ip, vm.request)
+            .then(function(){
                 $scope.getListViewData();
                 $scope.eventlog = false;
                 $scope.edit = false;

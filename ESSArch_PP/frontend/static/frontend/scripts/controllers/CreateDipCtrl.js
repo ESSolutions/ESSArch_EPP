@@ -1,4 +1,4 @@
-angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource) {
+angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests) {
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     $scope.select = true;
@@ -96,10 +96,10 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 			case "preserve":
 				$scope.preserveIp(ip, request);
 				break;
-			case "view":
+			case "get":
 				console.log("request not implemented");
 				break;
-			case "edit_as_new":
+			case "get_as_new":
 				console.log("request not implemented");
 				break;
 			case "diff_check":
@@ -111,7 +111,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 		}
 	}
 	$scope.preserveIp = function(ip, request) {
-		listViewService.preserveIp(ip, {purpose: request.purpose, policy: request.archivePolicy.value.id}).then(function(result) {
+		Requests.preserve(ip, {purpose: request.purpose, policy: request.archivePolicy.value.id}).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.eventShow = false;

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state) {
+angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state, Requests) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope });
     var ipSortString = "";
@@ -189,12 +189,12 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
         }
     };
     $scope.accessIp = function(ip, request) {
-        var data = { purpose: request.purpose, tar: request.type === "view_tar", extracted: request.type === "view"};
-        $http.post(ip.url + "access/", data).then(function(response) {
+        var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new"};
+        Requests.access(ip, data).then(function(response) {
             $scope.edit = false;
             $scope.select = false;
             $scope.initRequestData();
-            $timeOut(function() {
+            $timeout(function() {
                 $scope.getListViewData();
             });
         });

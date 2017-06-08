@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state, Requests) {
 	var vm = this;
 	$controller('BaseCtrl', { $scope: $scope });
 	var ipSortString = "Received,Preserving";
@@ -52,10 +52,10 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			case "preserve":
 				$scope.preserveIp(ip, request);
 				break;
-			case "view":
+			case "get":
 				console.log("request not implemented");
 				break;
-			case "edit_as_new":
+			case "get_as_new":
 				console.log("request not implemented");
 				break;
 			case "diff_check":
@@ -67,7 +67,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		}
 	}
 	$scope.preserveIp = function(ip, request) {
-		listViewService.preserveIp(ip, {purpose: request.purpose}).then(function(result) {
+		Requests.preserve(ip, {purpose: request.purpose}).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.requestEventlog = false;

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService) {
+angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests) {
     $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "Accessed";
@@ -10,9 +10,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
         return [
             [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
                 console.log($itemScope.row);
-            }],
-                [$translate.instant('Create DIP'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.gotoCreateDip($itemScope.row);
             }],
         ];
     }
@@ -41,7 +38,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 		}
 	}
 	$scope.preserveIp = function(ip, request) {
-		listViewService.preserveIp(ip, {purpose: request.purpose}).then(function(result) {
+		Requests.preserve(ip, {purpose: request.purpose}).then(function(result) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.eventShow = false;

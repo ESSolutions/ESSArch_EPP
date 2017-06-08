@@ -4,14 +4,14 @@
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" name="request-form" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.view')">
-                        <input type="radio" ng-model="vm.request.type" value="view">
+                    <div ng-if="checkPermission('ip.get_from_storage')">
+                        <input type="radio" ng-model="vm.request.type" value="get">
                             <label>
                             {{'GET' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.edit_as_new')">
-                        <input type="radio" ng-model="vm.request.type" value="edit_as_new">
+                    <div ng-if="checkPermission('ip.get_from_storage_as_new')">
+                        <input type="radio" ng-model="vm.request.type" value="get_as_new">
                         <label>
                             {{'GET_AS_NEW_GENERATION' | translate}}
                         </label>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div class="request-params">
-                    <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
+                    <div ng-if="vm.request.type == 'get' || vm.request.type == 'get_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
                         <label>
                             {{'PURPOSE' | translate}}
                         </label>
