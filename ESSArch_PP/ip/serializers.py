@@ -11,6 +11,7 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 
+from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from ip.filters import InformationPackageFilter
@@ -78,6 +79,7 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
         )
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+    responsible = UserSerializer()
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
 
