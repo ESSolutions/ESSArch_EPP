@@ -57,7 +57,13 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
-from ESSArch_Core.util import get_value_from_path, get_files_and_dirs, in_directory, parse_content_range_header
+from ESSArch_Core.util import (
+    get_value_from_path,
+    get_files_and_dirs,
+    get_tree_size_and_count,
+    in_directory,
+    parse_content_range_header,
+)
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
 from ESSArch_Core.pagination import LinkHeaderPagination
@@ -638,10 +644,13 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
                 continue
 
+            size, _ = get_tree_size_and_count(entry.path)
+
             entries.append(
                 {
                     "name": os.path.basename(entry.path),
-                    "type": entry_type
+                    "type": entry_type,
+                    "size": size,
                 }
             )
 
@@ -755,10 +764,13 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
                 continue
 
+            size, _ = get_tree_size_and_count(entry.path)
+
             entries.append(
                 {
                     "name": os.path.basename(entry.path),
-                    "type": entry_type
+                    "type": entry_type,
+                    "size": size,
                 }
             )
 
