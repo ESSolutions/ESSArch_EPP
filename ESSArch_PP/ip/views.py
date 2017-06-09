@@ -226,7 +226,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
         if InformationPackage.objects.filter(object_identifier_value=pk).exists():
-            raise exceptions.ParseError('IP with id "%s" already exist')
+            raise exceptions.ParseError('IP with id %s already exist' % pk)
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
