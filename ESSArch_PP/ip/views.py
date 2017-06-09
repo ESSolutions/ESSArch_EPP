@@ -141,6 +141,12 @@ class EventIPViewSet(viewsets.ModelViewSet):
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
+    search_fields = (
+        'object_identifier_value', 'label', 'responsible__first_name',
+        'responsible__last_name', 'responsible__username', 'state',
+        'submission_agreement__name', 'start_date', 'end_date',
+    )
+
     def find_xml_files(self, path):
         for xmlfile in glob.glob(os.path.join(path, "*.xml")):
             if os.path.isfile(xmlfile) and not xmlfile.endswith('_ipevents.xml'):
