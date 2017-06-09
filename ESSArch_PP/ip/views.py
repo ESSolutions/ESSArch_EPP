@@ -194,6 +194,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             ip = {
                 'id': d,
+                'object_identifier_value': d,
                 'type': 'extracted',
                 'state': 'At reception',
                 'status': 100,
