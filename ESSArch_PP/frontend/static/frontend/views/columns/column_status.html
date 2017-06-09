@@ -1,6 +1,6 @@
 <div ng-if="!subrow && row.package_type != 1">
     <div context-menu="menuOptions('row')" class="clickable" ng-click="selectIp(row);ipTableClick(row)">
-        <uib-progressbar class="progress" value="subrow.status" type="success"><b>{{row.status | number : 0}}%</b></uib-progressbar>
+        <uib-progressbar class="progress" value="row.status" type="success"><b>{{row.status | number : 0}}%</b></uib-progressbar>
     </div>
 </div>
 <div ng-if="subrow">
