@@ -437,10 +437,12 @@ body.modal-open[style] {
 }
 .step-state {
     padding-top: 0 !important;
-    text-align: center;
 }
 .step-state-success {
     color: white;
+    display: inline-block;
+    min-width: 55px;
+    text-align: center;
     background-color: $step-success;
     padding: 3px 10px;
     font-size: 9px;
@@ -449,6 +451,9 @@ body.modal-open[style] {
 }
 .step-state-failure {
     color: white;
+    display: inline-block;
+    min-width: 55px;
+    text-align: center;
     background-color: $step-fail;
     padding: 3px 10px;
     font-size: 9px;
@@ -457,6 +462,9 @@ body.modal-open[style] {
 }
 .step-state-in-progress {
     color: white;
+    display: inline-block;
+    min-width: 55px;
+    text-align: center;
     background-color: $step-in-progress;
     padding: 3px 10px;
     font-size: 9px;
