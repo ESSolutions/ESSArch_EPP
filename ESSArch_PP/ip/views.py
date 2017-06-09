@@ -31,6 +31,8 @@ import uuid
 
 from operator import itemgetter
 
+from celery import states as celery_states
+
 from django.db.models import Q
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -173,6 +175,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             ip['container'] = container
             ip['xml'] = xmlfile
             ip['type'] = 'contained'
+            ip['state'] = 'At reception'
+            ip['status'] = 100
+            ip['step_state'] = celery_states.SUCCESS
             ips.append(ip)
 
         return ips
@@ -190,6 +195,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             ip = {
                 'id': d,
                 'type': 'extracted',
+                'state': 'At reception',
+                'status': 100,
+                'step_state': celery_states.SUCCESS,
             }
 
             ips.append(ip)
