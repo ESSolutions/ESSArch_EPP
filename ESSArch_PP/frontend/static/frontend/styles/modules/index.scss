@@ -439,7 +439,6 @@ body.modal-open[style] {
     padding-top: 0 !important;
 }
 .step-state-success {
-    display: inline;
     color: white;
     background-color: $step-success;
     padding: 3px 10px;
@@ -447,7 +446,6 @@ body.modal-open[style] {
     border-radius: 5px;
 }
 .step-state-failure {
-    display: inline;
     color: white;
     background-color: $step-fail;
     padding: 3px 10px;
@@ -455,7 +453,6 @@ body.modal-open[style] {
     border-radius: 5px;
 }
 .step-state-in-progress {
-    display: inline;
     color: white;
     background-color: $step-in-progress;
     padding: 3px 10px;
