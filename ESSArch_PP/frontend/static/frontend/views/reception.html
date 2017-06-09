@@ -1,59 +1,71 @@
 <div class="reception">
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+            <div ng-include src="'static/frontend/views/event_table.html'"></div>
+            <div ng-if="statusShow" class="status-view">
+                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+            </div>
+        </div>
         <div ng-if="requestForm" class="request-layout">
-                    <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
-                    <div class="request-type">
-                        <label ng-if="checkPermission('ip.receive')">
+            <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
+                <div class="request-type">
+                    <label ng-if="checkPermission('ip.receive')">
                             <input type="radio" ng-model="vm.request.type" value="receive">
                             {{'RECEIVE' | translate}}
                         </label><br/>
-                    </div>
-                    <div class="request-params">
-                        <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                            <label>
+                </div>
+                <div class="request-params">
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <label>
                                 {{'PURPOSE' | translate}}
                             </label>
-                            <input class="form-control" required="true" ng-model="vm.request.purpose">
-                        </div>
-                        <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                            <label>
+                        <input class="form-control" required="true" ng-model="vm.request.purpose">
+                    </div>
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <label>
                                 {{'ARCHIVE_POLICY' | translate}}
                             </label>
-                            <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value" ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
-                        </div>
-                        <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                            <label>
+                        <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
+                            ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
+                    </div>
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <label>
                                 {{'INFORMATION_CLASS' | translate}}
                             </label>
-                            <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
-                        </div>
-                        <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
-                        <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                            <label>
+                        <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
+                    </div>
+                    <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <label>
                                 {{'TAGS' | translate}}
                             </label>
+                        <div class="tags-row">
                             <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
                                 <ui-select-match placeholder="{{'SELECT_TAGS' | translate}}">{{$item.name}}</ui-select-match>
                                 <ui-select-choices repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
-                        </div>
-                        <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                            <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
-                            <label>
-                                {{'ALLOW_UNKNOWN_FILES' | translate}}
-                            </label>
+                            <span ng-click="updateTags()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
+                                popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                         </div>
                     </div>
-                    </form>
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
+                        <label>
+                                {{'ALLOW_UNKNOWN_FILES' | translate}}
+                            </label>
+                    </div>
                 </div>
+            </form>
+        </div>
         <div ng-if="(edit || eventlog || requestForm) && vm.request.type == 'receive' && checkPermission('ip.receive')" class="select-sub-edit-eventlog-wrapper">
             <div class="edit-view">
 
                 <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
             </div>
+
             <div ng-if="eventlog || requestForm" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">
