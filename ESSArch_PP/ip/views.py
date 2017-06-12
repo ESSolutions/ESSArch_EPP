@@ -24,6 +24,7 @@
 
 import errno
 import glob
+import mimetypes
 import os
 import re
 import shutil
@@ -34,6 +35,7 @@ from operator import itemgetter
 from celery import states as celery_states
 
 from django.db.models import Q
+from django.http import HttpResponse
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -238,6 +240,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         return Response(new_ips)
 
+    def retrieve(self, request, pk=None):
+        path = Path.objects.values_list('value', flat=True).get(entity="reception")
+        fullpath = os.path.join(path, "%s.xml" % pk)
+
+        if not os.path.exists(fullpath):
+            raise exceptions.NotFound
+
+        return Response(parse_submit_description(fullpath, srcdir=path))
+
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
         if InformationPackage.objects.filter(object_identifier_value=pk).exists():
@@ -296,6 +307,42 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         step.run()
 
         return Response('Receiving %s...' % container)
+
+    @detail_route(methods=['get'])
+    def files(self, request, pk=None):
+        reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+        xml = os.path.join(reception, "%s.xml" % pk)
+
+        if not os.path.exists(xml):
+            raise exceptions.NotFound
+
+        ip = parse_submit_description(xml, srcdir=reception)
+        container = ip['object_path']
+
+        path = request.query_params.get('path')
+
+        if path in [os.path.basename(container), os.path.basename(xml)]:
+            fullpath = os.path.join(os.path.dirname(container), path)
+            content_type, _ = mimetypes.guess_type(fullpath)
+            return HttpResponse(open(fullpath).read(), content_type=content_type)
+        elif path is not None:
+            raise exceptions.NotFound
+
+        entry = {
+            "name": os.path.basename(container),
+            "type": 'file',
+            "size": os.path.getsize(container),
+            "modified": timestamp_to_datetime(os.path.getmtime(container)),
+        }
+
+        xmlentry = {
+            "name": os.path.basename(xml),
+            "type": 'file',
+            "size": os.path.getsize(xml),
+            "modified": timestamp_to_datetime(os.path.getmtime(xml)),
+        }
+        return Response([entry, xmlentry])
+
 
     @list_route(methods=['post'])
     def upload(self, request):
