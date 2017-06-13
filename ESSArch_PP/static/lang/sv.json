@@ -260,5 +260,6 @@
     "CANCELPRESERVATION": "Stäng arkivering",
     "STORAGE_STATUS": "Lagringsstatus",
     "ARGS": "Args",
-    "CHANGED": "Ändrad"
+    "CHANGED": "Ändrad",
+    "FILEBROWSER": "Filhanterare"
 }

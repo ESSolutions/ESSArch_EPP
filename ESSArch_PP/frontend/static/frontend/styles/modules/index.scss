@@ -487,6 +487,9 @@ padding: 0 12px;
         width: 50%;
     }
 }
+.file-browser {
+    @include container(10px);
+}
 .file-explorer {
     margin-top: 10px;
     width: 100%;
@@ -525,20 +528,15 @@ padding: 0 12px;
 }
 .flex-grid {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     flex-wrap: wrap;
-    -webkit-flex-wrap: wrap;
 }
 .card {
     background:#fff center 30px no-repeat;
     margin:0 2px 2px 0;
     position:relative;
     display: flex;
-    display: -webkit-flex;
     flex-direction: column;
-    -webkit-flex-direction: column;
     width: 84px;
     margin: 5px;
     p {

@@ -336,6 +336,19 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.statusShow = false;
         });
     }
+    $scope.filebrowser = false;
+    $scope.filebrowserClick = function (ip) {
+        if ($scope.filebrowser && $scope.ip == ip) {
+            $scope.filebrowser = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
+        } else {
+            $scope.filebrowser = true;
+            ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
+            $scope.ip = ip;
+            $rootScope.ip = ip;
+        }
+    }
     $scope.createDip = function(ip) {
         listViewService.createDip(ip).then(function(response) {
             $scope.select = false;
@@ -543,8 +556,14 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
                     $scope.previousGridArrays2.push(card);
                 });
             }
+        } else {
+            $scope.getFile(card);
         }
     };
+    $scope.getFile = function (file) {
+        file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString() + file.name);
+        $window.open(file.content, '_blank');
+    }
     $scope.selectedCards1 = [];
     $scope.selectedCards2 = [];
     $scope.cardSelect = function(whichArray, card) {

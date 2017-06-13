@@ -260,5 +260,6 @@
     "CANCELPRESERVATION": "Close preservation",
     "STORAGE_STATUS": "Storage status",
     "ARGS": "Args",
-    "CHANGED": "Changed"
+    "CHANGED": "Changed",
+    "FILEBROWSER": "File browser"
 }
