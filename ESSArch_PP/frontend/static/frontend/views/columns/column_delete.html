@@ -1,4 +1,4 @@
-<div ng-if="!subrow">
+<div ng-if="!subrow && !row.archived">
     <div ng-click="ipRowClick(row)" context-menu="menuOptions('row')">
         <button type="button"
                 ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
@@ -10,7 +10,7 @@
                 popover-append-to-body="true"></button>
     </div>
 </div>
-<div ng-if="subrow">
+<div ng-if="subrow && !subrow.archived">
     <div ng-click="ipRowClick(subrow)" context-menu="menuOptions('subrow')">
         <button type="button"
                 ng-if="subrow.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
