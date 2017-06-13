@@ -1,7 +1,7 @@
 <div ng-if="!subrow">
     <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="selectIp(row);ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')">
         <div class="object-identifier-value">{{row.object_identifier_value}}</div>
-        <div ng-if="row.package_type != 1" class="generation-indicator">
+        <div ng-if="row.package_type != 1 || 'home.ingest.reception' | isState" class="generation-indicator">
             <i class="fa fa-lg fa-code-fork"></i>  {{row.generation}}
         </div>
     </div>
