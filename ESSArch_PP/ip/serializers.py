@@ -53,6 +53,7 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+    responsible = UserSerializer()
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
 
     archival_institution = ArchivalInstitutionSerializer(
