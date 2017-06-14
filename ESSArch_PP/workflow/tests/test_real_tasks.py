@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
     ESSArch is an open source archiving and digital preservation system
 
@@ -157,35 +159,27 @@ class ReceiveSIPTestCase(TransactionTestCase):
             ingest_path=self.ingest,
         )
 
-        task = ProcessTask.objects.create(
-            name='workflow.tasks.ReceiveSIP',
-            params={
-                'xml': xml,
-                'container': container,
-                'archive_policy': policy.pk
-            },
-        )
-
-        aip_id = task.run().get()
-        aip = InformationPackage.objects.filter(
-            pk=aip_id,
+        aip = InformationPackage.objects.create(
             object_identifier_value=sip,
             package_type=InformationPackage.AIP,
             generation=0,
         )
-        self.assertTrue(aip.exists())
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            args=[aip.pk, xml, container, policy.pk]
+        )
+
+        task.run().get()
 
         expected_aip = os.path.join(self.ingest.value, sip)
 
-        aic = aip.first().aic
+        aip.refresh_from_db()
+        aic = aip.aic
         self.assertEqual(str(aic.pk), aic.object_identifier_value)
         self.assertEqual(aic.package_type, InformationPackage.AIC)
 
-        aip = aip.first()
-        self.assertEqual(aip.label, 'test-ip')
         self.assertEqual(aip.object_path, expected_aip)
-        self.assertEqual(aip.object_size, os.stat(expected_aip).st_size)
-        self.assertEqual(localtime(aip.entry_date).isoformat(), '2016-12-01T11:54:31+01:00')
 
         self.assertEqual(sip, aip.object_identifier_value)
         self.assertTrue(os.path.isdir(expected_aip))
@@ -204,86 +198,6 @@ class ReceiveSIPTestCase(TransactionTestCase):
 
         self.assertEqual(ArchivistOrganization.objects.get().name, 'my_archivist_organization')
         self.assertIsNotNone(aip.archivist_organization)
-
-    def test_receive_sip_with_information_class_same_as_policy(self):
-        self.xmldata = '''
-            <mets LABEL="test-ip">
-                <metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
-                </metsHdr>
-                <altRecordID TYPE="INFORMATIONCLASS">1</altRecordID>
-            </mets>
-            '''
-        sip = 'sip_objid'
-
-        xml = os.path.join(self.gate.value, sip + '.xml')
-        container = os.path.join(self.gate.value, sip + '.tar')
-
-        with open(xml, 'w') as xmlf:
-            xmlf.write(self.xmldata)
-
-        open(container, 'a').close()
-
-        policy = ArchivePolicy.objects.create(
-            cache_storage=self.cache,
-            ingest_path=self.ingest,
-            information_class=1
-        )
-
-        task = ProcessTask.objects.create(
-            name='workflow.tasks.ReceiveSIP',
-            params={
-                'xml': xml,
-                'container': container,
-                'archive_policy': policy.pk
-            },
-        )
-
-        aip_id = task.run().get()
-        aip = InformationPackage.objects.filter(
-            pk=aip_id,
-            object_identifier_value=sip,
-            package_type=InformationPackage.AIP,
-            information_class=1,
-        )
-        self.assertTrue(aip.exists())
-
-    def test_receive_sip_with_information_class_different_from_policy(self):
-        self.xmldata = '''
-            <mets LABEL="test-ip">
-                <metsHdr CREATEDATE="2016-12-01T11:54:31+01:00">
-                </metsHdr>
-                <altRecordID TYPE="INFORMATIONCLASS">2</altRecordID>
-            </mets>
-            '''
-        sip = 'sip_objid'
-
-        xml = os.path.join(self.gate.value, sip + '.xml')
-        container = os.path.join(self.gate.value, sip + '.tar')
-
-        with open(xml, 'w') as xmlf:
-            xmlf.write(self.xmldata)
-
-        open(container, 'a').close()
-
-        policy = ArchivePolicy.objects.create(
-            cache_storage=self.cache,
-            ingest_path=self.ingest,
-            information_class=1
-        )
-
-        task = ProcessTask.objects.create(
-            name='workflow.tasks.ReceiveSIP',
-            params={
-                'xml': xml,
-                'container': container,
-                'archive_policy': policy.pk
-            },
-        )
-
-        with self.assertRaises(ValueError):
-            task.run().get()
-
-        self.assertFalse(InformationPackage.objects.exists())
 
     def test_receive_sip_extract_tar(self):
         sip = 'sip_objid'
@@ -310,24 +224,83 @@ class ReceiveSIPTestCase(TransactionTestCase):
             receive_extract_sip=True
         )
 
+        aip = InformationPackage.objects.create(
+            object_identifier_value=sip,
+            package_type=InformationPackage.AIP,
+            generation=0,
+        )
+
         task = ProcessTask.objects.create(
             name='workflow.tasks.ReceiveSIP',
-            params={
-                'xml': xml,
-                'container': container,
-                'archive_policy': policy.pk
-            },
+            args=[aip.pk, xml, container, policy.pk]
         )
 
         task.run()
+
+        aip.refresh_from_db()
 
         expected_aip = os.path.join(self.ingest.value, sip)
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
 
-        aip = InformationPackage.objects.filter(
-            package_type=InformationPackage.AIP
-        ).first()
+        self.assertEqual(aip.object_path, expected_aip)
+
+        expected_tar = os.path.join(expected_content, sip + '.tar')
+        self.assertFalse(os.path.isfile(expected_tar))
+
+        expected_content_dir = os.path.join(expected_content, sip)
+        self.assertTrue(os.path.isdir(expected_content_dir))
+
+        for f in files:
+            expected_file = os.path.join(expected_content_dir, os.path.basename(f))
+            self.assertTrue(os.path.isfile(expected_file))
+
+        expected_metadata = os.path.join(expected_aip, 'metadata')
+        self.assertTrue(os.path.isdir(expected_metadata))
+
+    def test_receive_sip_extract_tar_containing_non_ascii_filenames(self):
+        sip = 'sip_objid'
+
+        xml = os.path.join(self.gate.value, sip + '.xml')
+        container = os.path.join(self.gate.value, sip + '.tar')
+
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
+
+        files = []
+
+        for name in ['bar.txt', 'åäö']:
+            fpath = os.path.join(self.gate.value, name)
+            open(fpath, 'a').close()
+            files.append(fpath)
+
+        with tarfile.open(container, 'w', encoding='UTF-8') as tar:
+            tar.add(self.gate.value, sip)
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+            receive_extract_sip=True
+        )
+
+        aip = InformationPackage.objects.create(
+            object_identifier_value=sip,
+            package_type=InformationPackage.AIP,
+            generation=0,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            args=[aip.pk, xml, container, policy.pk]
+        )
+
+        task.run()
+
+        aip.refresh_from_db()
+
+        expected_aip = os.path.join(self.ingest.value, sip)
+        expected_content = os.path.join(expected_aip, 'content')
+        self.assertTrue(os.path.isdir(expected_content))
 
         self.assertEqual(aip.object_path, expected_aip)
 
@@ -371,24 +344,88 @@ class ReceiveSIPTestCase(TransactionTestCase):
             receive_extract_sip=True
         )
 
+        aip = InformationPackage.objects.create(
+            object_identifier_value=sip,
+            package_type=InformationPackage.AIP,
+            generation=0,
+        )
+
         task = ProcessTask.objects.create(
             name='workflow.tasks.ReceiveSIP',
-            params={
-                'xml': xml,
-                'container': container,
-                'archive_policy': policy.pk
-            },
+            args=[aip.pk, xml, container, policy.pk]
         )
 
         task.run()
+
+        aip.refresh_from_db()
 
         expected_aip = os.path.join(self.ingest.value, sip)
         expected_content = os.path.join(expected_aip, 'content')
         self.assertTrue(os.path.isdir(expected_content))
 
-        aip = InformationPackage.objects.filter(
-            package_type=InformationPackage.AIP
-        ).first()
+        self.assertEqual(aip.object_path, expected_aip)
+
+        expected_tar = os.path.join(expected_content, sip + '.tar')
+        self.assertFalse(os.path.isfile(expected_tar))
+
+        expected_zip = os.path.join(expected_content, sip + '.zip')
+        self.assertFalse(os.path.isfile(expected_zip))
+
+        expected_content_dir = os.path.join(expected_content, sip)
+        self.assertTrue(os.path.isdir(expected_content_dir))
+
+        for f in files:
+            expected_file = os.path.join(expected_content_dir, os.path.basename(f))
+            self.assertTrue(os.path.isfile(expected_file))
+
+        expected_metadata = os.path.join(expected_aip, 'metadata')
+        self.assertTrue(os.path.isdir(expected_metadata))
+
+    def test_receive_sip_extract_zip_containing_non_ascii_files(self):
+        sip = 'sip_objid'
+
+        xml = os.path.join(self.gate.value, sip + '.xml')
+        container = os.path.join(self.gate.value, sip + '.zip')
+
+        with open(xml, 'w') as xmlf:
+            xmlf.write(self.xmldata)
+
+        files = []
+
+        for name in ["åäö"]:
+            fpath = os.path.join(self.gate.value, name)
+            open(fpath, 'a').close()
+            files.append(fpath)
+
+        with zipfile.ZipFile(container, 'w') as zipf:
+            for f in files:
+                arc = os.path.join(sip, os.path.relpath(f, self.gate.value))
+                zipf.write(f, arc)
+
+        policy = ArchivePolicy.objects.create(
+            cache_storage=self.cache,
+            ingest_path=self.ingest,
+            receive_extract_sip=True
+        )
+
+        aip = InformationPackage.objects.create(
+            object_identifier_value=sip,
+            package_type=InformationPackage.AIP,
+            generation=0,
+        )
+
+        task = ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveSIP',
+            args=[aip.pk, xml, container, policy.pk]
+        )
+
+        task.run()
+
+        aip.refresh_from_db()
+
+        expected_aip = os.path.join(self.ingest.value, sip)
+        expected_content = os.path.join(expected_aip, 'content')
+        self.assertTrue(os.path.isdir(expected_content))
 
         self.assertEqual(aip.object_path, expected_aip)
 
