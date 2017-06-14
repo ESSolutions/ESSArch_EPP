@@ -543,6 +543,40 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
 
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_ip_without_permission(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo')
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        mock_shutil.assert_not_called()
+        mock_os.assert_not_called()
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_ip_with_permission(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo', responsible=self.user)
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        mock_shutil.assert_called_once_with(ip.object_path)
+        mock_os.assert_not_called()
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_archived_ip(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo', responsible=self.user, archived=True)
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_shutil.assert_not_called()
+        mock_os.assert_not_called()
+
     @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
     def test_prepare_dip_no_label(self, mock_prepare):
         self.url = self.url + 'prepare-dip/'

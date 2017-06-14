@@ -60,7 +60,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
+from ESSArch_Core.ip.permissions import CanDeleteIP, IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
 from ESSArch_Core.util import (
     get_value_from_path,
     get_files_and_dirs,
@@ -550,11 +550,34 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         context['view'] = self
         return context
 
+    def get_permissions(self):
+        if self.action == 'destroy':
+            self.permission_classes = [CanDeleteIP]
+
+        return super(InformationPackageViewSet, self).get_permissions()
+
     def destroy(self, request, pk=None):
         ip = self.get_object()
 
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
+
+        self.check_object_permissions(request, ip)
+        path = ip.object_path
+
+        try:
+            shutil.rmtree(path)
+        except OSError as e:
+            if e.errno == errno.ENOTDIR:
+                no_ext = os.path.splitext(path)[0]
+
+                for fl in glob.glob(no_ext + "*"):
+                    try:
+                        os.remove(fl)
+                    except:
+                        raise
+            else:
+                raise
 
         return super(InformationPackageViewSet, self).destroy(request, pk=pk)
 
