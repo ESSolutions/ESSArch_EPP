@@ -55,7 +55,6 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-        $scope.selectIp(row);
         if($scope.ip == row){
             $scope.ip = null;
             $rootScope.ip = null;

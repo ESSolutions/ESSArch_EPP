@@ -8,9 +8,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     listViewService.getOrderPage().then(function(response) {
         $scope.orderObjects = response.data;
     });
-    if ($scope.ip != null) {
-        $scope.selectIp($scope.ip);
-    }
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     $scope.initRequestData = function () {
 		vm.request = {
@@ -128,7 +125,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-        $scope.selectIp(row);
         if ($scope.ip == row) {
             $scope.ip = null;
             $rootScope.ip = null;
@@ -345,7 +341,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.selectedCards2 = [];
             $scope.chosenFiles = [];
             $scope.deckGridData = [];
-            $scope.selectIp(ip);
             $timeout(function() {
                 $scope.getListViewData();
                 $anchorScroll();
