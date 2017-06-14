@@ -550,6 +550,14 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         context['view'] = self
         return context
 
+    def destroy(self, request, pk=None):
+        ip = self.get_object()
+
+        if ip.archived:
+            raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
+
+        return super(InformationPackageViewSet, self).destroy(request, pk=pk)
+
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
         ip = self.get_object()
