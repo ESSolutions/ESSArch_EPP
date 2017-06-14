@@ -170,10 +170,10 @@ class ReceiveSIP(DBTask):
 
             if container_type.lower() == '.tar':
                 with tarfile.open(container) as tar:
-                    tar.extractall(dst)
+                    tar.extractall(dst.encode('utf-8'))
             elif container_type.lower() == '.zip':
                 with zipfile.ZipFile(container) as zipf:
-                    zipf.extractall(dst)
+                    zipf.extractall(dst.encode('utf-8'))
         else:
             dst = os.path.join(aip_dir, 'content', objid + container_type)
             shutil.copy(container, dst)
