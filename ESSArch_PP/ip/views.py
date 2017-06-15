@@ -831,35 +831,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
             return Response(path, status=status.HTTP_201_CREATED)
 
-        entries = []
-        path = request.query_params.get('path', '')
-        fullpath = os.path.join(ip.object_path, path)
-
-        if not in_directory(fullpath, ip.object_path):
-            raise exceptions.ParseError('Illegal path %s' % path)
-
-        if not os.path.exists(fullpath):
-            raise exceptions.NotFound
-
-        for entry in get_files_and_dirs(fullpath):
-            entry_type = "dir" if entry.is_dir() else "file"
-
-            if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
-                continue
-
-            size, _ = get_tree_size_and_count(entry.path)
-
-            entries.append(
-                {
-                    "name": os.path.basename(entry.path),
-                    "type": entry_type,
-                    "size": size,
-                    "modified": timestamp_to_datetime(entry.stat().st_mtime),
-                }
-            )
-
-        sorted_entries = sorted(entries, key=itemgetter('name'))
-        return Response(sorted_entries)
+        return ip.files(request.query_params.get('path', '').rstrip('/'))
 
 
 class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):
