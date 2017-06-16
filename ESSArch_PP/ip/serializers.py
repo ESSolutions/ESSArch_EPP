@@ -139,6 +139,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
+    aic = serializers.CharField(source="aic.object_identifier_value")
 
     def get_information_packages(self, obj):
         related = obj.related_ips()

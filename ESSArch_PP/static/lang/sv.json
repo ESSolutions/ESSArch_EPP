@@ -261,6 +261,7 @@
     "STORAGE_STATUS": "Lagringsstatus",
     "ARGS": "Args",
     "CHANGED": "Ändrad",
+    "FILEBROWSER": "Filhanterare",
     "NO_TAGS": "Det finns inga taggar ...",
     "COPYID": "Kopiera ID"
 }

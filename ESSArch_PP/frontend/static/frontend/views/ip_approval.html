@@ -46,6 +46,7 @@
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
+        <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
         <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')" class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
