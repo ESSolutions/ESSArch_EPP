@@ -435,6 +435,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 $scope.eventlog = false;
                 $scope.edit = false;
                 $scope.requestForm = false;
+                $scope.filebrowser = false;
                 initRequestData();
             });
         });
@@ -450,6 +451,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.eventlog = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            $scope.filebrowser = false;
+
         });
     }
     $scope.informationClassAlert = null;

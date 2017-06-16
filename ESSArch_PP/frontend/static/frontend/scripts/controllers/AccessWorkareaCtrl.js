@@ -42,6 +42,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.eventShow = false;
+            $scope.filebrowser = false;
 			$scope.initRequestData();
 			$scope.getListViewData();
 		});
@@ -260,13 +261,16 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     $scope.filebrowserClick = function (ip) {
         if ($scope.filebrowser && $scope.ip == ip) {
             $scope.filebrowser = false;
-            $scope.ip = null;
-            $rootScope.ip = null;
+            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+            }
         } else {
-            $scope.filebrowser = true;
-            ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
-            $scope.ip = ip;
-            $rootScope.ip = ip;
+            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
+                $scope.filebrowser = true;
+                $scope.ip = ip;
+                $rootScope.ip = ip;
+            }
         }
     }
     $scope.colspan = 9;
