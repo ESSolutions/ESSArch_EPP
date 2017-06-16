@@ -754,3 +754,8 @@ padding: 0 12px;
 .popover {
     word-break: break-all;
 }
+
+.profile-editor {
+    @include container(10px);
+    margin-left: 5px;
+}

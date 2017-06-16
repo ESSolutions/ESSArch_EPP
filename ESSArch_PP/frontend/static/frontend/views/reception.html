@@ -61,6 +61,7 @@
                 </div>
             </form>
         </div>
+        <profile-editor ng-if="ip" ip="ip" sa="ip"></profile-editor>
         <div ng-if="(edit || eventlog || requestForm) && vm.request.type == 'receive' && checkPermission('ip.receive')" class="select-sub-edit-eventlog-wrapper">
             <div class="edit-view">
 
