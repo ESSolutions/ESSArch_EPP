@@ -135,6 +135,7 @@ def installDefaultUsers():
 
 def installDefaultPaths():
     dct = {
+        'path_mimetypes_definitionfile': '/ESSArch/config/mime.types',
         'reception': '/ESSArch/data/gate/reception',
         'ingest': '/ESSArch/data/epp/ingest',
         'cache': '/ESSArch/data/epp/cache',
