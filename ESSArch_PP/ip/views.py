@@ -771,8 +771,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     def files(self, request, pk=None):
         ip = self.get_object()
 
-        if ip.package_type != InformationPackage.DIP:
-            return Response('%s is not a DIP' % ip, status=status.HTTP_400_BAD_REQUEST)
+        if ip.archived:
+            return Response('%s is archived' % ip, status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == 'DELETE':
             try:
