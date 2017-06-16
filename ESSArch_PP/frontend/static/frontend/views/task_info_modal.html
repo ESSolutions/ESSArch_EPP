@@ -10,6 +10,8 @@
         <div ng-if="currentStepTask.status != 'SUCCESS' && currentStepTask.status !='FAILURE'" class="step-state-in-progress"><b>{{'INPROGRESS' | translate}}</b></div>
         <p style="margin: 5px;"><b>{{'STARTED' | translate}}:</b> {{currentStepTask.time_started | date:"yyyy-MM-dd HH:mm:ss"}} <b>{{'DONE' | translate}}:</b> {{currentStepTask.time_done | date:"yyyy-MM-dd HH:mm:ss"}}</p>
         <p style="margin: 5px;"><b>{{'ID' | translate}}:</b> {{currentStepTask.id}}</p>
+        <button class="btn btn-default" clipboard text="currentStepTask.id" on-copied="$ctrl.idCopyDone()">{{'COPYID' | translate}}</button>
+        <span ng-if="$ctrl.idCopied" class="fa fa-lg fa-check traceback-copied"></span>
         <br>
         <table class="table" style="margin: 5px;">
             <thead>

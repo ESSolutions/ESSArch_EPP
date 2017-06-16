@@ -76,9 +76,8 @@ angular.module('myApp').factory('myService', function($location, PermPermissionS
             { label: "archival_institution", sortString: "archival_institution", template: "static/frontend/views/columns/column_archival_institution.html" },
             { label: "archivist_organization", sortString: "archivist_organization", template: "static/frontend/views/columns/column_archivist_organization.html" },
             { label: "start_date", sortString: "start_date", template: "static/frontend/views/columns/column_start_date.html" },
-            { label: "end_date", sortString: "end_date", template: "static/frontend/views/columns/column_end_date.html"},
-            { label: "storage_status", sortString: "archived", template: "static/frontend/views/columns/column_storage_status.html"},
             { label: "filebrowser", sortString: "", template: "static/frontend/views/columns/column_filebrowser.html"},
+            { label: "aic", sortString: "aic", template: "static/frontend/views/columns/column_aic.html" },
         ];
         var activeColumns = [];
         var simpleColumns = allColumns.map(function(a){return a.label});

@@ -60,7 +60,7 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.ip.permissions import IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
+from ESSArch_Core.ip.permissions import CanDeleteIP, IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
 from ESSArch_Core.util import (
     get_value_from_path,
     get_files_and_dirs,
@@ -272,38 +272,140 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        step = ProcessStep.objects.create(
-            name="Receive SIP", eager=False,
+        objid, container_type = os.path.splitext(os.path.basename(container))
+        parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
+
+        policy_id = request.data.get('archive_policy')
+
+        try:
+            policy = ArchivePolicy.objects.get(pk=policy_id)
+        except (ArchivePolicy.DoesNotExist, TypeError):
+            msg = 'Archive policy with id %s does not exist' % policy_id
+            if policy_id is None:
+                msg = 'archive_policy parameter missing'
+
+            raise exceptions.ParseError(msg)
+
+        information_class = parsed.get('information_class', policy.information_class)
+        if information_class != policy.information_class:
+            raise ValueError('Information class of IP and policy does not match')
+
+        ip = InformationPackage.objects.create(
+            object_identifier_value=objid,
+            policy=policy,
+            package_type=InformationPackage.AIP,
+            label=parsed.get('label'),
+            state='Receiving',
+            entry_date=parsed.get('create_date'),
+            responsible=request.user,
+            start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
+            end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
+            information_class=information_class,
+            generation=0,
         )
 
-        t1 = ProcessTask(
+        step = ProcessStep.objects.create(
+            name="Receive SIP", eager=False,
+            information_package=ip,
+        )
+
+        validators = request.data.get('validators', {})
+        available_validators = [
+            'validate_xml_file', 'validate_file_format', 'validate_integrity',
+            'validate_logical_physical_representation',
+        ]
+
+        if any(v is True and k in available_validators for k,v in validators.iteritems()):
+            validation_step = ProcessStep.objects.create(
+                name="Validate",
+                parent_step=step
+            )
+
+            if validators.get('validate_xml_file', False):
+                ProcessTask.objects.create(
+                    name="workflow.tasks.ValidateXMLFile",
+                    params={
+                        "xml_filename": xmlfile
+                    },
+                    log=EventIP,
+                    information_package=ip,
+                    responsible=self.request.user,
+                    processstep=validation_step
+                )
+
+            val_format = validators.get("validate_file_format", False)
+            val_integrity = validators.get("validate_integrity", False)
+
+            if val_format or val_integrity:
+                ProcessTask.objects.create(
+                    name="workflow.tasks.ValidateFiles",
+                    params={
+                        "rootdir": reception,
+                        "xmlfile": xmlfile,
+                        "validate_fileformat": val_format,
+                        "validate_integrity": val_integrity
+                    },
+                    log=EventIP,
+                    information_package=ip,
+                    responsible=self.request.user,
+                    processstep=validation_step
+                )
+
+            files = [container]
+
+            if validators.get('validate_logical_physical_representation'):
+                ProcessTask.objects.create(
+                    name="workflow.tasks.ValidateLogicalPhysicalRepresentation",
+                    params={
+                        "files": files,
+                        "files_reldir": container,
+                        "xmlfile": xmlfile,
+                    },
+                    log=EventIP,
+                    information_package=ip,
+                    responsible=self.request.user,
+                    processstep=validation_step
+                )
+
+        ProcessTask.objects.create(
             name='workflow.tasks.ReceiveSIP',
+            args=[ip.pk, xmlfile, container, policy_id],
             params={
-                'xml': xmlfile,
-                'container': container,
                 'purpose': request.data.get('purpose'),
-                'archive_policy': request.data.get('archive_policy'),
                 'allow_unknown_files': request.data.get('allow_unknown_files', False),
                 'tags': request.data.get('tags', [])
             },
+            log=EventIP,
+            information_package=ip,
             responsible=self.request.user,
             processstep=step,
             processstep_pos=0
         )
 
-        t2 = ProcessTask(
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.UpdateIPSizeAndCount",
+            args=[ip.pk],
+            log=EventIP,
+            information_package=ip,
+            responsible=self.request.user,
+            processstep=step,
+            processstep_pos=5,
+        )
+
+        ProcessTask.objects.create(
             name='ESSArch_Core.tasks.UpdateIPStatus',
+            args=[ip.pk],
             params={
                 'status': 'Received',
                 'prev': 'Receiving'
             },
-            result_params={'ip': t1.pk},
+            log=EventIP,
+            information_package=ip,
             responsible=self.request.user,
             processstep=step,
-            processstep_pos=1
+            processstep_pos=10
         )
 
-        ProcessTask.objects.bulk_create([t1, t2])
         step.run()
 
         return Response('Receiving %s...' % container)
@@ -447,6 +549,37 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         context = super(InformationPackageViewSet, self).get_serializer_context()
         context['view'] = self
         return context
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            self.permission_classes = [CanDeleteIP]
+
+        return super(InformationPackageViewSet, self).get_permissions()
+
+    def destroy(self, request, pk=None):
+        ip = self.get_object()
+
+        if ip.archived:
+            raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
+
+        self.check_object_permissions(request, ip)
+        path = ip.object_path
+
+        try:
+            shutil.rmtree(path)
+        except OSError as e:
+            if e.errno == errno.ENOTDIR:
+                no_ext = os.path.splitext(path)[0]
+
+                for fl in glob.glob(no_ext + "*"):
+                    try:
+                        os.remove(fl)
+                    except:
+                        raise
+            else:
+                raise
+
+        return super(InformationPackageViewSet, self).destroy(request, pk=pk)
 
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
@@ -698,35 +831,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
             return Response(path, status=status.HTTP_201_CREATED)
 
-        entries = []
-        path = request.query_params.get('path', '')
-        fullpath = os.path.join(ip.object_path, path)
-
-        if not in_directory(fullpath, ip.object_path):
-            raise exceptions.ParseError('Illegal path %s' % path)
-
-        if not os.path.exists(fullpath):
-            raise exceptions.NotFound
-
-        for entry in get_files_and_dirs(fullpath):
-            entry_type = "dir" if entry.is_dir() else "file"
-
-            if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
-                continue
-
-            size, _ = get_tree_size_and_count(entry.path)
-
-            entries.append(
-                {
-                    "name": os.path.basename(entry.path),
-                    "type": entry_type,
-                    "size": size,
-                    "modified": timestamp_to_datetime(entry.stat().st_mtime),
-                }
-            )
-
-        sorted_entries = sorted(entries, key=itemgetter('name'))
-        return Response(sorted_entries)
+        return ip.files(request.query_params.get('path', '').rstrip('/'))
 
 
 class WorkareaViewSet(viewsets.ReadOnlyModelViewSet):

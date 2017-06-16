@@ -38,13 +38,13 @@
         <form class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
             <div class="form-group" style="margin-right: 5px;">
                 <label>{{'EVENTTYPE' | translate}}</label>
-                <select style="width: 125px;" class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in eventTypeCollection" ng-required="true">
+                <select style="max-width: 125px;" class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in eventTypeCollection" ng-required="true">
                     <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>{{'OUTCOME' | translate}}</label>
-                <select style="width: 125px;" class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
+                <select style="max-width: 125px;" class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
                     <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
                 </select>
             </div>

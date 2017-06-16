@@ -79,38 +79,18 @@ from storage.exceptions import (
 
 
 class ReceiveSIP(DBTask):
-    event_type = 20100
+    event_type = 30100
 
-    def run(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=[]):
-        policy = ArchivePolicy.objects.get(pk=archive_policy)
+    def run(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=[]):
+        aip = InformationPackage.objects.get(pk=ip)
+        policy = ArchivePolicy.objects.get(pk=policy)
         ingest = policy.ingest_path
         objid, container_type = os.path.splitext(os.path.basename(container))
 
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip.aic = aic
+
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
-
-        information_class = parsed.get('information_class', policy.information_class)
-
-        if information_class != policy.information_class:
-            raise ValueError('Information class of IP and policy does not match')
-
-        aic = InformationPackage.objects.create(
-            package_type=InformationPackage.AIC
-        )
-
-        aip = InformationPackage.objects.create(
-            object_identifier_value=objid,
-            policy=policy,
-            package_type=InformationPackage.AIP,
-            label=parsed.get('label'),
-            state='Receiving',
-            entry_date=parsed.get('create_date'),
-            aic=aic,
-            responsible_id=self.responsible,
-            start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
-            end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
-            information_class=information_class,
-            generation=0,
-        )
 
         archival_institution = parsed.get('archival_institution')
         archivist_organization = parsed.get('archivist_organization')
@@ -119,42 +99,29 @@ class ReceiveSIP(DBTask):
 
         if archival_institution:
             arch, _ = ArchivalInstitution.objects.get_or_create(
-                name=archival_institution
+                name=archival_institution['name']
             )
             aip.archival_institution = arch
 
         if archivist_organization:
             arch, _ = ArchivistOrganization.objects.get_or_create(
-                name=archivist_organization
+                name=archivist_organization['name']
             )
             aip.archivist_organization = arch
 
         if archival_type:
             arch, _ = ArchivalType.objects.get_or_create(
-                name=archival_type
+                name=archival_type['name']
             )
             aip.archival_type = arch
 
         if archival_location:
             arch, _ = ArchivalLocation.objects.get_or_create(
-                name=archival_location
+                name=archival_location['name']
             )
             aip.archival_location = arch
 
-        aip.save(update_fields=[
-            'archival_institution', 'archivist_organization', 'archival_type',
-            'archival_location',
-        ])
-
         aip.tags = tags
-
-        ProcessTask.objects.filter(pk=self.request.id).update(
-            information_package=aip
-        )
-
-        ProcessStep.objects.filter(pk=self.step).update(
-            information_package=aip
-        )
 
         aip_dir = os.path.join(ingest.value, aip.object_identifier_value)
         os.makedirs(aip_dir)
@@ -170,31 +137,28 @@ class ReceiveSIP(DBTask):
 
             if container_type.lower() == '.tar':
                 with tarfile.open(container) as tar:
-                    tar.extractall(dst)
+                    tar.extractall(dst.encode('utf-8'))
             elif container_type.lower() == '.zip':
                 with zipfile.ZipFile(container) as zipf:
-                    zipf.extractall(dst)
+                    zipf.extractall(dst.encode('utf-8'))
         else:
             dst = os.path.join(aip_dir, 'content', objid + container_type)
             shutil.copy(container, dst)
 
         aip.object_path = aip_dir
 
-        try:
-            aip.object_size = parsed['object_size']
-        except KeyError:
-            aip.object_size = os.stat(aip.object_path).st_size
+        aip.save(update_fields=[
+            'aic', 'archival_institution', 'archivist_organization',
+            'archival_type', 'archival_location', 'object_path',
+        ])
 
-        aip.save(update_fields=['object_path', 'object_size'])
+        return ip
 
-        return aip.pk
-
-    def undo(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=None):
+    def undo(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
         pass
 
-    def event_outcome_success(self, xml=None, container=None, purpose=None, archive_policy=None, allow_unknown_files=False, tags=None):
-        ip_id = os.path.splitext(os.path.basename(xml))[0]
-        return "Received IP '%s'" % ip_id
+    def event_outcome_success(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
+        return "Received IP '%s'" % str(ip)
 
 
 class CacheAIP(DBTask):
@@ -853,3 +817,23 @@ class PollRobotQueue(DBTask):
     def event_outcome_success(self):
         pass
 
+
+class ValidateFileFormat(tasks.ValidateFileFormat):
+    event_type = 30260
+
+
+class ValidateXMLFile(tasks.ValidateXMLFile):
+    event_type = 30261
+
+
+class ValidateLogicalPhysicalRepresentation(tasks.ValidateLogicalPhysicalRepresentation):
+    event_type = 30262
+
+
+class ValidateIntegrity(tasks.ValidateIntegrity):
+    event_type = 30263
+
+
+class ValidateFiles(tasks.ValidateFiles):
+    fileformat_task = "workflow.tasks.ValidateFileFormat"
+    checksum_task = "workflow.tasks.ValidateIntegrity"

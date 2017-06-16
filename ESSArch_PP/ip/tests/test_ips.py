@@ -38,7 +38,7 @@ from rest_framework.test import APIClient
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
-from ESSArch_Core.WorkflowEngine.models import ProcessStep
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.util import timestamp_to_datetime
 
 
@@ -543,6 +543,40 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
 
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_ip_without_permission(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo')
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        mock_shutil.assert_not_called()
+        mock_os.assert_not_called()
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_ip_with_permission(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo', responsible=self.user)
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        mock_shutil.assert_called_once_with(ip.object_path)
+        mock_os.assert_not_called()
+
+    @mock.patch('ip.views.shutil.rmtree')
+    @mock.patch('ip.views.os.remove')
+    def test_delete_archived_ip(self, mock_os, mock_shutil):
+        ip = InformationPackage.objects.create(object_path='foo', responsible=self.user, archived=True)
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_shutil.assert_not_called()
+        mock_os.assert_not_called()
+
     @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
     def test_prepare_dip_no_label(self, mock_prepare):
         self.url = self.url + 'prepare-dip/'
@@ -687,7 +721,11 @@ class InformationPackageViewSetFilesTestCase(TestCase):
 
 class InformationPackageReceptionViewSetTestCase(TestCase):
     def setUp(self):
+        self.cache = Path.objects.create(entity='cache', value='cache')
+        self.ingest = Path.objects.create(entity='ingest', value='ingest')
+
         self.user = User.objects.create(username="admin", password='admin')
+        self.policy = ArchivePolicy.objects.create(cache_storage=self.cache, ingest_path=self.ingest)
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -703,7 +741,7 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
         open(tar_filepath, 'a').close()
         with open(xml_filepath, 'w') as xml:
             xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1">
+            <root OBJID="1" LABEL="my label">
                 <metsHdr/>
                 <file><FLocat href="file:///1.tar"/></file>
             </root>
@@ -711,16 +749,37 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
 
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
     def test_receive(self, mock_receive):
-        res = self.client.post(self.url + '1/receive/')
+        data = {'archive_policy': str(self.policy.pk)}
+        res = self.client.post(self.url + '1/receive/', data=data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         mock_receive.assert_called_once()
 
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
     def test_receive_existing(self, mock_receive):
+        data = {'archive_policy': str(self.policy.pk)}
         InformationPackage.objects.create(object_identifier_value='1')
-        res = self.client.post(self.url + '1/receive/')
+        res = self.client.post(self.url + '1/receive/', data=data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         mock_receive.assert_not_called()
+
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_invalid_validator(self, mock_receive):
+        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_invalid': True}}
+        res = self.client.post(self.url + '1/receive/', data=data)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertFalse(ProcessStep.objects.filter(name='Validate').exists())
+        mock_receive.assert_called_once()
+
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_validator(self, mock_receive):
+        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_xml_file': True}}
+        res = self.client.post(self.url + '1/receive/', data=data)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(ProcessStep.objects.filter(name='Validate').exists())
+        self.assertTrue(ProcessTask.objects.filter(name='workflow.tasks.ValidateXMLFile').exists())
+        mock_receive.assert_called_once()
 
 
 class OrderViewSetTestCase(TestCase):

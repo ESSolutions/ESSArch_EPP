@@ -1,10 +1,10 @@
 <div ng-if="!subrow && row.package_type != 1">
-    <div context-menu="menuOptions('row')" class="clickable" ng-click="selectIp(row);ipTableClick(row)">
+    <div context-menu="menuOptions('row')" class="clickable" ng-click="ipTableClick(row)">
         <uib-progressbar class="progress" value="row.status" type="success"><b>{{row.status | number : 0}}%</b></uib-progressbar>
     </div>
 </div>
 <div ng-if="subrow">
-    <div context-menu="menuOptions('subrow')" class="clickable" ng-click="selectIp(subrow);ipTableClick(subrow)">
+    <div context-menu="menuOptions('subrow')" class="clickable" ng-click="ipTableClick(subrow)">
         <uib-progressbar class="progress" value="subrow.status" type="success"><b>{{subrow.status | number : 0}}%</b></uib-progressbar>
     </div>
 </div>

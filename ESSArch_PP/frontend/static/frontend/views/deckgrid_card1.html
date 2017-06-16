@@ -1,4 +1,4 @@
-<div class="clickable" uib-popover-html="'{{'NAME' | translate}}: {{card.name}}<br>{{'SIZE' | translate}}: {{card.size | filesize}}<br>{{'CHANGED' | translate}}: {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}'" popover-placement="top-left" popover-popup-delay="1000" popover-append-to-body="true">
+<div class="clickable" uib-popover-html="'{{'NAME' | translate}}: {{card.name}}<br>{{'SIZE' | translate}}: {{card.size | filesize}}<br>{{'CHANGED' | translate}}: {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
     <div class="clickable" ng-dblClick="expandFile(1, ip, card)" ng-class="isSelected(1, card)" ng-click="cardSelect(1, card)">
         <div ng-class="card.type" ng-if="card.type == 'file'">
             <li class="fa fa-file-o fa-3x"></li>

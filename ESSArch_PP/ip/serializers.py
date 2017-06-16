@@ -53,7 +53,9 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+    responsible = UserSerializer()
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
+    aic = serializers.CharField(source="aic.object_identifier_value")
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name']
@@ -82,6 +84,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     responsible = UserSerializer()
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
+    aic = serializers.CharField(source="aic.object_identifier_value")
 
     def get_information_packages(self, obj):
         request = self.context['request']

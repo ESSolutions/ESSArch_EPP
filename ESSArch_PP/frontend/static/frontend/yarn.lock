@@ -111,6 +111,10 @@ angular-bootstrap-grid-tree@~0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/angular-bootstrap-grid-tree/-/angular-bootstrap-grid-tree-0.4.0.tgz#e8a14c83d117233aad3d1921326562817566469b"
 
+angular-clipboard@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/angular-clipboard/-/angular-clipboard-1.5.0.tgz#5dcfacd8f91184d165852a71c485e675c4233802"
+
 "angular-cookies@>=1.2.26 <1.7", angular-cookies@~1.6:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular-cookies/-/angular-cookies-1.6.4.tgz#c28f3f6aac7a9826c1e45f1d6807240036e5b26d"

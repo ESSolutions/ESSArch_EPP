@@ -7,11 +7,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     //context menu data
     $scope.menuOptions = function() {
-        return [
-            [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.selectIp($itemScope.row);
-            }],
-        ];
+        return [];
     }
     $scope.initRequestData = function () {
         vm.request = {
@@ -53,7 +49,6 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     });
     // Click funtion columns that does not have a relevant click function
     $scope.ipRowClick = function(row) {
-        $scope.selectIp(row);
         if($scope.ip == row){
             $scope.ip = null;
             $rootScope.ip = null;

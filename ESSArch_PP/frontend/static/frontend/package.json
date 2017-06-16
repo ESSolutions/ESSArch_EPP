@@ -63,7 +63,9 @@
     "ui-select": "~0.19.6",
     "yargs": "^6.5.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "angular-clipboard": "^1.5.0"
+  },
   "scripts": {
     "update-deps": "npm update",
     "pretest": "npm install",

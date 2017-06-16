@@ -23,7 +23,7 @@ Email - essarch@essolutions.se
 */
 
 angular.module('myApp').factory('Requests', function($http, appConfig) {
-    function receive(ip, request) {
+    function receive(ip, request, validators) {
         return $http({
             method: 'POST',
             url: appConfig.djangoUrl + 'ip-reception/' + ip.id + '/receive/',
@@ -31,7 +31,8 @@ angular.module('myApp').factory('Requests', function($http, appConfig) {
                 archive_policy: request.archivePolicy.value.id,
                 purpose: request.purpose,
                 tags: request.tags.value.map(function(tag){return tag.id}),
-                allow_unknown_files: request.allowUnknownFiles
+                allow_unknown_files: request.allowUnknownFiles,
+                validators: validators,
             }
         }).then(function(response) {
             return response;

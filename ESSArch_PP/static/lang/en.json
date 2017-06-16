@@ -261,5 +261,7 @@
     "STORAGE_STATUS": "Storage status",
     "ARGS": "Args",
     "CHANGED": "Changed",
-    "FILEBROWSER": "File browser"
+    "FILEBROWSER": "File browser",
+    "NO_TAGS": "There are no tags ...",
+    "COPYID": "Copy ID"
 }
