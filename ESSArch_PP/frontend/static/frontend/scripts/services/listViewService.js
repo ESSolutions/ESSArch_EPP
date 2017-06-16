@@ -599,6 +599,31 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         });
     }
 
+    function getDir(ip, pathStr) {
+        if(pathStr == "") {
+            sendData = {};
+        } else {
+            sendData = {path: pathStr};
+        }
+        return $http({
+            method: 'GET',
+            url: ip.url + "files/",
+            params: sendData
+        }).then(function(response) {
+            return response.data;
+        });
+    }
+
+    function getFile(ip, path, file) {
+        return $http({
+            method: 'GET',
+            url: ip.url + "files/",
+            params: {path: path + file.name}
+        }).then(function(response) {
+            return response;
+        });
+    }
+
     /*******************/
     /*HELPER FUNCTIONS*/
     /*****************/
@@ -816,5 +841,7 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         getOrderPage: getOrderPage,
         prepareOrder: prepareOrder,
         createDip: createDip,
+        getDir: getDir,
+        getfile: getFile,
     };
 });

@@ -39,6 +39,7 @@
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
+        <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
         <div ng-if="eventlog && (vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new' || vm.request.type == 'query')"
             class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">

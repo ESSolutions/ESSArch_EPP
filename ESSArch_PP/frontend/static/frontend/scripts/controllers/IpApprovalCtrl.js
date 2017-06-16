@@ -72,6 +72,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.eventlog = false;
 			$scope.requestEventlog = false;
 			$scope.eventShow = false;
+			$scope.filebrowser = false;
 			$scope.initRequestData();
 			$scope.getListViewData();
 		});
@@ -123,8 +124,8 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
         $scope.subSelect = false;
         $scope.eventlog = false;
         $scope.select = false;
+        $scope.requestForm = false;
         $scope.eventShow = false;
-
     };
 
 	//Click funciton for event view
@@ -276,6 +277,22 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		}
 		$scope.statusShow = false;
 	};
+	$scope.filebrowser = false;
+    $scope.filebrowserClick = function (ip) {
+        if ($scope.filebrowser && $scope.ip == ip) {
+            $scope.filebrowser = false;
+            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+            }
+        } else {
+            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
+                $scope.filebrowser = true;
+                $scope.ip = ip;
+                $rootScope.ip = ip;
+            }
+        }
+    }
 	$scope.initRequestData = function () {
 		vm.request = {
 			type: "",
@@ -296,6 +313,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.eventlog = false;
 			$scope.eventShow = false;
 			$scope.statusShow = false;
+			$scope.filebrowser = false;
 			$scope.getListViewData();
 		});
 	}

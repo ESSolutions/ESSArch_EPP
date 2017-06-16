@@ -7,6 +7,7 @@
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
+        <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
                 <div class="request-type">

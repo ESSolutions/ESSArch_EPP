@@ -38,6 +38,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.eventShow = false;
+            $scope.filebrowser = false;
             $scope.initRequestData();
             $scope.getListViewData();
         });
@@ -243,6 +244,22 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
         }
         $scope.statusShow = false;
     };
+    $scope.filebrowser = false;
+    $scope.filebrowserClick = function (ip) {
+        if ($scope.filebrowser && $scope.ip == ip) {
+            $scope.filebrowser = false;
+            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+            }
+        } else {
+            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
+                $scope.filebrowser = true;
+                $scope.ip = ip;
+                $rootScope.ip = ip;
+            }
+        }
+    }
     $scope.colspan = 9;
     $scope.stepTaskInfoShow = false;
     $scope.statusShow = false;
@@ -254,7 +271,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     $scope.requestForm = false;
 
     $scope.expandedAics = [];
-	$scope.expandAic = function(row) {
+    $scope.expandAic = function (row) {
 		row.collapsed = !row.collapsed;
 		if(!row.collapsed) {
 			$scope.expandedAics.push(row.object_identifier_value);
@@ -288,6 +305,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             $scope.eventlog = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            $scope.filebrowser = false;
         });
     }
     $scope.searchDisabled = function () {
