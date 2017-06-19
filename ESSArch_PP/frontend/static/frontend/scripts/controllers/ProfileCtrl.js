@@ -89,7 +89,7 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             vm.profileOldModel = row.active.specification_data;
             vm.profileModel = angular.copy(row.active.specification_data);
             vm.profileFields = row.active.template;
-            $scope.treeElements = [{ name: $translate.instant('ROOT'), type: "folder", children: angular.copy(row.active.structure) }];
+            $scope.treeElements = [{ name: 'root', type: "folder", children: angular.copy(row.active.structure) }];
             $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
             $scope.profileToSave = row.active;
             if (row.locked) {
@@ -333,7 +333,7 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             $scope.selectProfile = row;
             vm.profileModel = angular.copy(row.active.specification_data);
             vm.profileFields = row.active.template;
-            $scope.treeElements =[{name: $translate.instant('ROOT'), type: "folder", children: angular.copy(row.active.structure)}];
+            $scope.treeElements =[{name: 'root', type: "folder", children: angular.copy(row.active.structure)}];
             $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
             $scope.profileToSave = row.active;
             $scope.subSelectProfile = "profile";
@@ -486,7 +486,7 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
     //Populate map structure tree view given tree width and amount of levels
     function getStructure(profileUrl) {
         listViewService.getStructure(profileUrl).then(function(value) {
-            $scope.treeElements =[{name: $translate.instant('ROOT'), type: "folder", children: value}];
+            $scope.treeElements =[{name: 'root', type: "folder", children: value}];
             $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
         });
     }
