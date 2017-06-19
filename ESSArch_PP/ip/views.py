@@ -307,7 +307,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         try:
             sa = SubmissionAgreement.objects.get(pk=sa)
-        except ValueError as e:
+        except (ValueError, SubmissionAgreement.DoesNotExist) as e:
             raise exceptions.ParseError(detail=e.message)
 
         policy_id = request.data.get('archive_policy')
