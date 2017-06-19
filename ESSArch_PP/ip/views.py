@@ -576,6 +576,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
                         os.remove(fl)
                     except:
                         raise
+            elif e.errno == errno.ENOENT:
+                pass
             else:
                 raise
 
