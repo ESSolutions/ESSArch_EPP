@@ -12,35 +12,35 @@
             <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
                 <div class="request-type">
                     <label ng-if="checkPermission('ip.receive')">
-                            <input type="radio" ng-model="vm.request.type" value="receive">
-                            {{'RECEIVE' | translate}}
-                        </label><br/>
+                        <input type="radio" ng-model="vm.request.type" value="receive">
+                        {{'RECEIVE' | translate}}
+                    </label><br/>
                 </div>
                 <div class="request-params">
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <label>
-                                {{'PURPOSE' | translate}}
-                            </label>
+                            {{'PURPOSE' | translate}}
+                        </label>
                         <input class="form-control" required="true" ng-model="vm.request.purpose">
                     </div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <label>
-                                {{'ARCHIVE_POLICY' | translate}}
-                            </label>
+                            {{'ARCHIVE_POLICY' | translate}}
+                        </label>
                         <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
                             ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
                     </div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <label>
-                                {{'INFORMATION_CLASS' | translate}}
-                            </label>
+                            {{'INFORMATION_CLASS' | translate}}
+                        </label>
                         <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
                     </div>
                     <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <label>
-                                {{'TAGS' | translate}}
-                            </label>
+                            {{'TAGS' | translate}}
+                        </label>
                         <div class="tags-row">
                             <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
                                 <ui-select-match placeholder="{{'SELECT_TAGS' | translate}}">{{$item.name}}</ui-select-match>
@@ -55,8 +55,8 @@
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
                         <label>
-                                {{'ALLOW_UNKNOWN_FILES' | translate}}
-                            </label>
+                            {{'ALLOW_UNKNOWN_FILES' | translate}}
+                        </label>
                     </div>
                 </div>
             </form>
