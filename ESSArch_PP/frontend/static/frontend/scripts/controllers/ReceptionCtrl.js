@@ -42,6 +42,11 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 value: null,
                 options: []
             },
+            submissionAgreement: {
+                value: null,
+                options: [],
+                disabled: false
+            },
             tags: {
                 value: [],
                 options: []
@@ -81,6 +86,19 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                         vm.request.tags.options = result;
                         $scope.requestForm = true;
                     });
+                });
+
+                listViewService.getSaProfiles(row).then(function(result) {
+                    vm.request.submissionAgreement.options = result.profiles;
+                    if (row.altrecordids.SUBMISSIONAGREEMENT[0]) {
+                        let chosen_sa_id = row.altrecordids.SUBMISSIONAGREEMENT[0];
+                        let found = $filter('filter')(result.profiles, {id: chosen_sa_id}, true);
+
+                        if (found.length) {
+                            vm.request.submissionAgreement.value = found[0];
+                            vm.request.submissionAgreement.disabled = true;
+                        }
+                    }
                 });
             }
         }

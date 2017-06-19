@@ -29,6 +29,7 @@ angular.module('myApp').factory('Requests', function($http, appConfig) {
             url: appConfig.djangoUrl + 'ip-reception/' + ip.id + '/receive/',
             data: {
                 archive_policy: request.archivePolicy.value.id,
+                submission_agreement: request.submissionAgreement.value.id,
                 purpose: request.purpose,
                 tags: request.tags.value.map(function(tag){return tag.id}),
                 allow_unknown_files: request.allowUnknownFiles,

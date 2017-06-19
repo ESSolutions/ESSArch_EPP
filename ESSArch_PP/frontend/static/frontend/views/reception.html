@@ -32,6 +32,13 @@
                     </div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <label>
+                            {{'SUBMISSIONAGREEMENT' | translate}}
+                        </label>
+                        <select type="select" ng-disabled="vm.request.submissionAgreement.disabled" required="true" class="form-control" ng-model="vm.request.submissionAgreement.value"
+                            ng-options="x as x.name for x in vm.request.submissionAgreement.options"></select>
+                    </div>
+                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <label>
                             {{'INFORMATION_CLASS' | translate}}
                         </label>
                         <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
