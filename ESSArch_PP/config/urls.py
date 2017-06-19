@@ -58,6 +58,13 @@ from ip.views import (
     WorkareaFilesViewSet,
 )
 
+from profiles.views import (
+    ProfileViewSet,
+    ProfileSAViewSet,
+    ProfileIPViewSet,
+    SubmissionAgreementViewSet,
+)
+
 from storage.views import (
     IOQueueViewSet,
     RobotViewSet,
@@ -95,6 +102,9 @@ router.register(r'orders', OrderViewSet)
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
+router.register(r'profile-ip', ProfileIPViewSet)
+router.register(r'profile-sa', ProfileSAViewSet)
+router.register(r'profiles', ProfileViewSet)
 router.register(r'robots', RobotViewSet)
 router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
@@ -111,6 +121,7 @@ router.register(r'steps', ProcessStepViewSet, base_name='steps').register(
     parents_query_lookups=['processstep']
 )
 
+router.register(r'submission-agreements', SubmissionAgreementViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'tags', TagViewSet, base_name='tags').register(
     r'information-packages',

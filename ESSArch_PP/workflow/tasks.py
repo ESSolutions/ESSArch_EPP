@@ -84,7 +84,6 @@ class ReceiveSIP(DBTask):
     def run(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=[]):
         aip = InformationPackage.objects.get(pk=ip)
         policy = ArchivePolicy.objects.get(pk=policy)
-        ingest = policy.ingest_path
         objid, container_type = os.path.splitext(os.path.basename(container))
 
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -123,7 +122,7 @@ class ReceiveSIP(DBTask):
 
         aip.tags = tags
 
-        aip_dir = os.path.join(ingest.value, aip.object_identifier_value)
+        aip_dir = aip.object_path
         os.makedirs(aip_dir)
 
         content = os.path.join(aip_dir, 'content')
@@ -144,8 +143,6 @@ class ReceiveSIP(DBTask):
         else:
             dst = os.path.join(aip_dir, 'content', objid + container_type)
             shutil.copy(container, dst)
-
-        aip.object_path = aip_dir
 
         aip.save(update_fields=[
             'aic', 'archival_institution', 'archivist_organization',

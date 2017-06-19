@@ -133,7 +133,8 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
             'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
             'generation', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location',
+            'archival_type', 'archival_location', 'submission_agreement',
+            'submission_agreement_locked',
         )
 
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
