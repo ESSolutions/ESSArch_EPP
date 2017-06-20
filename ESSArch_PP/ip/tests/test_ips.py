@@ -777,6 +777,24 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
 
     @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_non_existing_sa_in_xml(self, mock_receive, mock_find_dest):
+        with open(self.xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1" LABEL="my label">
+                <metsHdr>
+                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
+                </metsHdr>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''' % str(uuid.uuid4()))
+
+        data = {'archive_policy': str(self.policy.pk)}
+
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
     def test_receive_sa_in_xml_and_no_provided(self, mock_receive, mock_find_dest):
         with open(self.xml_filepath, 'w') as xml:
             xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
