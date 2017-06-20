@@ -424,8 +424,18 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
 
+
         filesToCreate = OrderedDict()
         filesToCreate[mets_path] = aip_profile.specification
+
+        try:
+            premis_profile = ProfileSA.objects.get(submission_agreement=sa, profile__profile_type='preservation_metadata').profile
+        except ProfileSA.DoesNotExist as e:
+            pass
+        else:
+            premis_dir, premis_name = find_destination("preservation_description_file", aip_profile.structure)
+            premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
+            filesToCreate[premis_path] = premis_profile.specification
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.GenerateXML',

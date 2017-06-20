@@ -45,6 +45,7 @@ def installProfiles():
 
     installProfileAIP(sa)
     installProfileDIP(sa)
+    installProfilePreservationMetadata(sa)
 
     return 0
 
@@ -551,6 +552,24 @@ def installProfileDIP(sa):
     ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
 
     print 'Installed profile DIP'
+
+    return 0
+
+def installProfilePreservationMetadata(sa):
+
+    dct = {
+        'name': 'Preservation profile xx',
+        'profile_type': 'preservation_metadata',
+        'type': 'Implementation',
+        'status': 'Draft',
+        'label': 'Preservation profile for AIP xxyy',
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_PRESERVATION_METADATA_Template.json')).read()),
+    }
+
+    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
+    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+
+    print 'Installed profile preservation metadata'
 
     return 0
 
