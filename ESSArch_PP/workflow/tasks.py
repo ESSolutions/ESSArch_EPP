@@ -576,6 +576,10 @@ class IOTape(DBTask):
 
     def run(self, io_queue_entry, storage_medium):
         entry = IOQueue.objects.get(pk=io_queue_entry)
+
+        storage_method = entry.storage_method_target.storage_method
+        storage_target = entry.storage_method_target.storage_target
+
         entry.status = 5
         entry.save(update_fields=['status'])
 
@@ -607,7 +611,7 @@ class IOTape(DBTask):
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.SetTapeFileNumber",
                     params={
-                        'medium': storage_medium.pk,
+                        'medium': storage_medium,
                         'num': int(content_location_value),
                     },
                     processstep=step,
@@ -622,7 +626,7 @@ class IOTape(DBTask):
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.WriteToTape",
                     params={
-                        'medium': storage_medium.pk,
+                        'medium': storage_medium,
                         'path': src,
                     },
                     processstep=step,
@@ -632,15 +636,15 @@ class IOTape(DBTask):
                 StorageObject.objects.create(
                     content_location_type=storage_method.type,
                     content_location_value=content_location_value,
-                    ip=entry.ip, storage_medium=storage_medium
+                    ip=entry.ip, storage_medium_id=storage_medium
                 )
             elif entry.req_type == 20:  # Read from tape
-                tape_pos = int(storage_object.content_location_value)
+                tape_pos = int(entry.storage_object.content_location_value)
 
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.SetTapeFileNumber",
                     params={
-                        'medium': storage_medium.pk,
+                        'medium': storage_medium,
                         'num': tape_pos,
                     },
                     processstep=step,
@@ -650,7 +654,7 @@ class IOTape(DBTask):
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.ReadTape",
                     params={
-                        'medium': storage_medium.pk,
+                        'medium': storage_medium,
                         'path': cache
                     },
                     processstep=step,
@@ -734,7 +738,7 @@ class IODisk(DBTask):
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
                     params={
-                        'src': storage_object.content_location_value,
+                        'src': entry.storage_object.content_location_value,
                         'dst': cache,
                     },
                     processstep=step,
