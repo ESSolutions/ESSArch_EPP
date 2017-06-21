@@ -28,6 +28,7 @@ import tempfile
 import uuid
 
 from django.contrib.auth.models import User
+from django.http.response import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
@@ -688,24 +689,27 @@ class InformationPackageViewSetFilesTestCase(TestCase):
         res = self.client.delete(self.url)
         res.status = status.HTTP_400_BAD_REQUEST
 
-    def test_list_file(self):
+    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
+    def test_list_file(self, mock_files):
         _, path = tempfile.mkstemp(dir=self.datadir)
-        res = self.client.get(self.url)
+        self.client.get(self.url)
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
+        mock_files.assert_called_once_with('')
 
-    def test_list_folder(self):
+    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
+    def test_list_folder(self, mock_files):
         path = tempfile.mkdtemp(dir=self.datadir)
-        res = self.client.get(self.url)
+        self.client.get(self.url)
 
-        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
+        mock_files.assert_called_once_with('')
 
-    def test_list_folder_content(self):
+    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
+    def test_list_folder_content(self, mock_files):
         path = tempfile.mkdtemp(dir=self.datadir)
         _, filepath = tempfile.mkstemp(dir=path)
-        res = self.client.get(self.url, {'path': path})
+        self.client.get(self.url, {'path': path})
 
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath), 'size': os.stat(filepath).st_size, 'modified': timestamp_to_datetime(os.stat(filepath).st_mtime)}])
+        mock_files.assert_called_once_with(path)
 
     def test_create_folder(self):
         path = 'foo'
