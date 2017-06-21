@@ -509,7 +509,7 @@ class PollIOQueue(DBTask):
                 return entry.storage_object.storage_medium
 
     def run(self):
-        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('storage_method_target')[:5]
+        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('storage_method_target', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
