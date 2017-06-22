@@ -38,7 +38,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         });
     };
     $scope.expandFile = function (ip, card) {
-        if (card.type == "dir") {
+        if (card.type == "dir" || card.name.endsWith('.tar') || card.name.endsWith('.zip')) {
             $scope.previousGridArrays.push(card);
             listViewService.getDir(ip, $scope.previousGridArraysString()).then(function (dir) {
                 $scope.deckGridData = dir;
