@@ -35,8 +35,8 @@ from celery import states as celery_states
 from celery.exceptions import Ignore
 from celery.result import allow_join_result
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import IntegerField, Max
+from django.contrib.auth.models import User
+from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
 
@@ -75,6 +75,7 @@ from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 from storage.exceptions import (
     TapeMountedError,
     TapeMountedAndLockedByOtherError,
+    TapeUnmountedError,
 )
 
 
@@ -783,18 +784,18 @@ class IODisk(DBTask):
 
 class PollRobotQueue(DBTask):
     def run(self):
-        try:
-            entry = RobotQueue.objects.filter(
-                status=0
-            ).select_related('storage_medium').earliest()
-        except RobotQueue.DoesNotExist:
+        entry = RobotQueue.objects.filter(
+            status__in=[0, 2]
+        ).select_related('storage_medium').order_by('-req_type').first()
+
+        if entry is None:
             raise Ignore()
 
         step = ProcessStep(
             name='Poll Robot Queue',
         )
 
-        if entry.io_queue_entry:
+        if hasattr(entry, 'io_queue_entry') and hasattr(entry.io_queue_entry, 'task'):
             if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
                 step.parent_step = entry.io_queue_entry.task.processstep
             else:
@@ -830,13 +831,8 @@ class PollRobotQueue(DBTask):
                 if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
                     if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
                         entry.robot = None
-                        entry.status = 0
-                        entry.save(update_fields=['robot', 'status'])
+                        entry.save(update_fields=['robot'])
                         raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
-
-                    if medium.tape_drive.io_queue_entry is None:
-                        medium.tape_drive.io_queue_entry = entry.io_queue_entry
-                        medium.tape_drive.save(update_fields=['io_queue_entry'])
 
                     entry.status = 20
                     entry.robot = None
@@ -849,10 +845,9 @@ class PollRobotQueue(DBTask):
             ).order_by('num_of_mounts').first()
 
             if free_drive is None:
+                entry.robot = None
+                entry.save(update_fields=['robot'])
                 raise ValueError('No tape drive available')
-
-            free_drive.io_queue_entry = entry.io_queue_entry
-            free_drive.save(update_fields=['io_queue_entry'])
 
             with allow_join_result():
                 try:
@@ -868,12 +863,66 @@ class PollRobotQueue(DBTask):
                     raise
                 else:
                     medium.tape_drive = free_drive
-                    medium.save()
-                    entry.robot = None
+                    medium.last_changed_local = timezone.now()
+                    medium.save(update_fields=['tape_drive', 'last_changed_local'])
                     entry.status = 20
                 finally:
+                    entry.robot = None
                     entry.save(update_fields=['robot', 'status'])
 
+        elif entry.req_type == 20:  # unmount
+            medium = entry.storage_medium
+
+            if medium.tape_drive is None:  # already unmounted
+                entry.status = 20
+                entry.robot = None
+                entry.save(update_fields=['status', 'robot'])
+
+                raise TapeUnmountedError("Tape already unmounted")
+
+            with allow_join_result():
+                try:
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.UnmountTape",
+                        params={
+                            'drive': medium.tape_drive.pk,
+                        }
+                    ).run().get()
+                except:
+                    entry.status = 100
+                    raise
+                else:
+                    medium.tape_drive = None
+                    medium.last_changed_local = timezone.now()
+                    medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                    entry.status = 20
+                finally:
+                    entry.robot = None
+                    entry.save(update_fields=['robot', 'status'])
+
+
+    def undo(self):
+        pass
+
+    def event_outcome_success(self):
+        pass
+
+
+class UnmountIdleDrives(DBTask):
+    def run(self):
+        idle_drives = TapeDrive.objects.filter(
+            storage_medium__last_changed_local__lte=timezone.now()-F('idle_time')
+        )
+
+        if not idle_drives.exists():
+            raise Ignore()
+
+        for drive in idle_drives.iterator():
+            RobotQueue.objects.get_or_create(
+                user=User.objects.get(username='system'),
+                storage_medium=drive.storage_medium,
+                req_type=20
+            )
 
     def undo(self):
         pass

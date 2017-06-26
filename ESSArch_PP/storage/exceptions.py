@@ -5,3 +5,8 @@ class TapeMountedAndLockedByOtherError(Exception):
 class TapeMountedError(Exception):
     """The tape is already mounted"""
     pass
+
+
+class TapeUnmountedError(Exception):
+    """The tape is already unmounted"""
+    pass

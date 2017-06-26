@@ -249,6 +249,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'workflow.tasks.PollRobotQueue',
         'schedule': timedelta(seconds=10),
     },
+    'UnmountIdleDrives-queue-every-10-seconds': {
+        'task': 'workflow.tasks.UnmountIdleDrives',
+        'schedule': timedelta(seconds=10),
+    },
 }
 
 # Rest auth settings
