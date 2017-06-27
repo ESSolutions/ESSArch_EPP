@@ -209,7 +209,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             });
         }
     };
-
+    $scope.tagsPlaceholder = function() {
+        if (vm.request.tags.options.length == 0) {
+            return "NO_TAGS";
+        } else {
+            return "SELECT_TAGS";
+        }
+    }
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id == row.id){
