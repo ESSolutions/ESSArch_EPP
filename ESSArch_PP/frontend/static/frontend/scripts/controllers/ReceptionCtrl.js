@@ -54,6 +54,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
+        $interval.cancel(tagsInterval);
     });
     $scope.includeIp = function(row) {
         var temp = true;
@@ -84,6 +85,15 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 });
             }
         }
+    }
+
+    $scope.updateTags = function() {
+        $scope.tagsLoading = true;
+        $scope.getTags().then(function(result) {
+            vm.request.tags.options = result;
+            $scope.requestForm = true;
+            $scope.tagsLoading = false;
+        });
     }
     $scope.archivePolicyChange = function() {
         vm.request.informationClass = vm.request.archivePolicy.value.information_class;
@@ -147,6 +157,16 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     };
 
     //If status view is visible, start update interval
+    var tagsInterval;
+    $scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
+        if(newValue) {
+            $interval.cancel(tagsInterval);
+            tagsInterval = $interval(function(){$scope.updateTags()}, appConfig.tagsInterval);
+        } else {
+            $interval.cancel(tagsInterval);
+        }
+    });
+    //If request form is visible, start update interval
     $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
         if(newValue) {
             $interval.cancel(stateInterval);
@@ -189,7 +209,13 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             });
         }
     };
-
+    $scope.tagsPlaceholder = function() {
+        if (vm.request.tags.options.length == 0) {
+            return "NO_TAGS";
+        } else {
+            return "SELECT_TAGS";
+        }
+    }
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id == row.id){

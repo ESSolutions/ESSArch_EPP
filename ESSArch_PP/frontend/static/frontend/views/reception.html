@@ -38,19 +38,19 @@
                     </div>
                     <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                        <div class="tags-row">
                         <label>
                                 {{'TAGS' | translate}}
                             </label>
-                        <div class="tags-row">
+                            <span ng-click="updateTags()" class="clickable fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
+                                popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                        </div>
                             <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
-                                <ui-select-match placeholder="{{'SELECT_TAGS' | translate}}">{{$item.name}}</ui-select-match>
+                                <ui-select-match placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
                                 <ui-select-choices repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
-                            <span ng-click="updateTags()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
-                                popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                        </div>
                     </div>
                     <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                         <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
