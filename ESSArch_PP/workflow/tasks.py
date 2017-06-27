@@ -546,7 +546,7 @@ class PollIOQueue(DBTask):
                         storage_medium=storage_medium,
                         req_type=10, io_queue_entry=entry
                     )
-                return
+                continue
 
             if entry.req_type in [10, 20]:  # tape
                 entry.status = 2
@@ -784,121 +784,128 @@ class IODisk(DBTask):
 
 class PollRobotQueue(DBTask):
     def run(self):
-        entry = RobotQueue.objects.filter(
-            status__in=[0, 2]
-        ).select_related('storage_medium').order_by('-req_type').first()
+        available_drives = TapeDrive.objects.filter(storage_medium__isnull=True, locked=False)
 
-        if entry is None:
+        order = '-req_type'
+        if available_drives.exists():
+            order = 'req_type' # mount before unmount
+
+        entries = RobotQueue.objects.filter(
+            status__in=[0, 2]
+        ).select_related('storage_medium').order_by(order)[:5]
+
+        if not len(entries):
             raise Ignore()
 
         step = ProcessStep(
             name='Poll Robot Queue',
         )
 
-        if hasattr(entry, 'io_queue_entry') and hasattr(entry.io_queue_entry, 'task'):
-            if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
-                step.parent_step = entry.io_queue_entry.task.processstep
-            else:
-                step.information_package = entry.io_queue_entry.ip
+        for entry in entries.iterator():
+            if hasattr(entry, 'io_queue_entry') and hasattr(entry.io_queue_entry, 'task'):
+                if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
+                    step.parent_step = entry.io_queue_entry.task.processstep
+                else:
+                    step.information_package = entry.io_queue_entry.ip
 
-        step.save()
+            step.save()
 
-        ProcessTask.objects.get_or_create(
-            pk=self.task_id,
-            defaults={
-                'name': 'workflow.tasks.PollRobotQueue',
-                'hidden': self.hidden,
-                'status': celery_states.STARTED,
-                'time_started': timezone.now(),
-                'processstep': step,
-                'processstep_pos': 0,
-            }
-        )
+            ProcessTask.objects.get_or_create(
+                pk=self.task_id,
+                defaults={
+                    'name': 'workflow.tasks.PollRobotQueue',
+                    'hidden': self.hidden,
+                    'status': celery_states.STARTED,
+                    'time_started': timezone.now(),
+                    'processstep': step,
+                    'processstep_pos': 0,
+                }
+            )
 
-        free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
+            free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
 
-        if free_robot is None:
-            raise ValueError('No robot available')
+            if free_robot is None:
+                raise ValueError('No robot available')
 
-        entry.robot = free_robot
-        entry.status = 2
-        entry.save(update_fields=['robot', 'status'])
+            entry.robot = free_robot
+            entry.status = 2
+            entry.save(update_fields=['robot', 'status'])
 
-        if entry.req_type == 10:  # mount
-            medium = entry.storage_medium
+            if entry.req_type == 10:  # mount
+                medium = entry.storage_medium
 
-            if medium.tape_drive is not None:  # already mounted
-                if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
-                    if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
+                if medium.tape_drive is not None:  # already mounted
+                    if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
+                        if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
+                            entry.robot = None
+                            entry.save(update_fields=['robot'])
+                            raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
+
+                        entry.status = 20
                         entry.robot = None
-                        entry.save(update_fields=['robot'])
-                        raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
+                        entry.save(update_fields=['status', 'robot'])
 
+                    raise TapeMountedError("Tape already mounted")
+
+                free_drive = TapeDrive.objects.filter(
+                    storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
+                ).order_by('num_of_mounts').first()
+
+                if free_drive is None:
+                    entry.robot = None
+                    entry.save(update_fields=['robot'])
+                    raise ValueError('No tape drive available')
+
+                with allow_join_result():
+                    try:
+                        ProcessTask.objects.create(
+                            name="ESSArch_Core.tasks.MountTape",
+                            params={
+                                'medium': medium.pk,
+                                'drive': free_drive.pk,
+                            }
+                        ).run().get()
+                    except:
+                        entry.status = 100
+                        raise
+                    else:
+                        medium.tape_drive = free_drive
+                        medium.last_changed_local = timezone.now()
+                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        entry.status = 20
+                    finally:
+                        entry.robot = None
+                        entry.save(update_fields=['robot', 'status'])
+
+            elif entry.req_type == 20:  # unmount
+                medium = entry.storage_medium
+
+                if medium.tape_drive is None:  # already unmounted
                     entry.status = 20
                     entry.robot = None
                     entry.save(update_fields=['status', 'robot'])
 
-                raise TapeMountedError("Tape already mounted")
+                    raise TapeUnmountedError("Tape already unmounted")
 
-            free_drive = TapeDrive.objects.filter(
-                storage_medium__isnull=True, io_queue_entry__isnull=True
-            ).order_by('num_of_mounts').first()
-
-            if free_drive is None:
-                entry.robot = None
-                entry.save(update_fields=['robot'])
-                raise ValueError('No tape drive available')
-
-            with allow_join_result():
-                try:
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.MountTape",
-                        params={
-                            'medium': medium.pk,
-                            'drive': free_drive.pk,
-                        }
-                    ).run().get()
-                except:
-                    entry.status = 100
-                    raise
-                else:
-                    medium.tape_drive = free_drive
-                    medium.last_changed_local = timezone.now()
-                    medium.save(update_fields=['tape_drive', 'last_changed_local'])
-                    entry.status = 20
-                finally:
-                    entry.robot = None
-                    entry.save(update_fields=['robot', 'status'])
-
-        elif entry.req_type == 20:  # unmount
-            medium = entry.storage_medium
-
-            if medium.tape_drive is None:  # already unmounted
-                entry.status = 20
-                entry.robot = None
-                entry.save(update_fields=['status', 'robot'])
-
-                raise TapeUnmountedError("Tape already unmounted")
-
-            with allow_join_result():
-                try:
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.UnmountTape",
-                        params={
-                            'drive': medium.tape_drive.pk,
-                        }
-                    ).run().get()
-                except:
-                    entry.status = 100
-                    raise
-                else:
-                    medium.tape_drive = None
-                    medium.last_changed_local = timezone.now()
-                    medium.save(update_fields=['tape_drive', 'last_changed_local'])
-                    entry.status = 20
-                finally:
-                    entry.robot = None
-                    entry.save(update_fields=['robot', 'status'])
+                with allow_join_result():
+                    try:
+                        ProcessTask.objects.create(
+                            name="ESSArch_Core.tasks.UnmountTape",
+                            params={
+                                'drive': medium.tape_drive.pk,
+                            }
+                        ).run().get()
+                    except:
+                        entry.status = 100
+                        raise
+                    else:
+                        medium.tape_drive = None
+                        medium.last_changed_local = timezone.now()
+                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        entry.status = 20
+                    finally:
+                        entry.robot = None
+                        entry.save(update_fields=['robot', 'status'])
 
 
     def undo(self):
@@ -911,7 +918,8 @@ class PollRobotQueue(DBTask):
 class UnmountIdleDrives(DBTask):
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__last_changed_local__lte=timezone.now()-F('idle_time')
+            storage_medium__last_changed_local__lte=timezone.now()-F('idle_time'),
+            locked=False,
         )
 
         if not idle_drives.exists():
