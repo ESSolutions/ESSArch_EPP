@@ -832,15 +832,6 @@ class PollRobotQueue(DBTask):
                 }
             )
 
-            free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
-
-            if free_robot is None:
-                raise ValueError('No robot available')
-
-            entry.robot = free_robot
-            entry.status = 2
-            entry.save(update_fields=['robot', 'status'])
-
             if entry.req_type == 10:  # mount
                 medium = entry.storage_medium
 
@@ -852,8 +843,7 @@ class PollRobotQueue(DBTask):
                             raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
 
                         entry.status = 20
-                        entry.robot = None
-                        entry.save(update_fields=['status', 'robot'])
+                        entry.save(update_fields=['status'])
 
                     raise TapeMountedError("Tape already mounted")
 
@@ -862,11 +852,19 @@ class PollRobotQueue(DBTask):
                 ).order_by('num_of_mounts').first()
 
                 if free_drive is None:
-                    entry.robot = None
-                    entry.save(update_fields=['robot'])
                     raise ValueError('No tape drive available')
 
+                free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
+
+                if free_robot is None:
+                    raise ValueError('No robot available')
+
+                entry.robot = free_robot
+                entry.status = 2
+                entry.save(update_fields=['robot', 'status'])
+
                 with allow_join_result():
+
                     try:
                         ProcessTask.objects.create(
                             name="ESSArch_Core.tasks.MountTape",
@@ -896,6 +894,15 @@ class PollRobotQueue(DBTask):
                     entry.save(update_fields=['status', 'robot'])
 
                     raise TapeUnmountedError("Tape already unmounted")
+
+                free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
+
+                if free_robot is None:
+                    raise ValueError('No robot available')
+
+                entry.robot = free_robot
+                entry.status = 2
+                entry.save(update_fields=['robot', 'status'])
 
                 with allow_join_result():
                     try:
