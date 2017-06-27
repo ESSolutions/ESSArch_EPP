@@ -287,3 +287,25 @@ input[type="checkbox"] {
     @include container(10px);
     margin-top: 10px;
 }
+.tags-row {
+    ui-select {
+        display: inline-block;
+    }
+    .ui-select-container {
+        float: left;
+    }
+    .fa-refresh {
+        display: inline-block;
+        transform: scale(.8, .8);
+    }
+    .fa-refresh-animate {
+        animation: small-spin 0.7s infinite linear;
+    }
+    .fa-refresh-animate-once {
+        animation: small-spin 0.7s;
+    }
+    @keyframes small-spin {
+        from { transform: scale(.8, .8) rotate(0deg);}
+        to { transform: scale(.8, .8) rotate(360deg);}
+    }
+}
