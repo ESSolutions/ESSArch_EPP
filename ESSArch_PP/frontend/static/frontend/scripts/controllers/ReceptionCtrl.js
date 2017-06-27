@@ -54,6 +54,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
+        $interval.cancel(tagsInterval);
     });
     $scope.includeIp = function(row) {
         var temp = true;
@@ -156,6 +157,16 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     };
 
     //If status view is visible, start update interval
+    var tagsInterval;
+    $scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
+        if(newValue) {
+            $interval.cancel(tagsInterval);
+            tagsInterval = $interval(function(){$scope.updateTags()}, appConfig.tagsInterval);
+        } else {
+            $interval.cancel(tagsInterval);
+        }
+    });
+    //If request form is visible, start update interval
     $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
         if(newValue) {
             $interval.cancel(stateInterval);
