@@ -547,7 +547,10 @@ class work:
                                     ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
                                     ip_obj.OAISPackageType = ip_obj_ext[26]
                                     ip_obj.preservationLevelValue = ip_obj_ext[27]
-                                    ip_obj.DELIVERYTYPE = ip_obj_ext[28]
+                                    if ip_obj_ext[28] is None:
+                                        ip_obj.DELIVERYTYPE = ''
+                                    else:                                    
+                                        ip_obj.DELIVERYTYPE = ip_obj_ext[28]
                                     ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                                     ip_obj.ObjectActive = ip_obj_ext[30]
                                     ip_obj.LocalDBdatetime = timestamp_utc
@@ -596,7 +599,10 @@ class work:
                                 ip_obj.EntryAgentIdentifierValue = ip_obj_ext[25]
                                 ip_obj.OAISPackageType = ip_obj_ext[26]
                                 ip_obj.preservationLevelValue = ip_obj_ext[27]
-                                ip_obj.DELIVERYTYPE = ip_obj_ext[28]
+                                if ip_obj_ext[28] is None:
+                                    ip_obj.DELIVERYTYPE = ''
+                                else:                                    
+                                    ip_obj.DELIVERYTYPE = ip_obj_ext[28]                                
                                 ip_obj.INFORMATIONCLASS = ip_obj_ext[29]
                                 ip_obj.ObjectActive = ip_obj_ext[30]
                                 ip_obj.LocalDBdatetime = timestamp_utc
