@@ -549,6 +549,13 @@ class PollIOQueue(DBTask):
                 continue
 
             if entry.req_type in [10, 20]:  # tape
+                drive_entry = storage_medium.tape_drive.io_queue_entry
+                if drive_entry is not None and drive_entry != entry:
+                    raise ValueError('Tape Drive locked')
+                else:
+                    storage_medium.tape_drive.io_queue_entry = entry
+                    storage_medium.tape_drive.save(update_fields=['io_queue_entry'])
+
                 entry.status = 2
                 entry.save(update_fields=['status'])
                 ProcessTask.objects.create(
@@ -680,6 +687,9 @@ class IOTape(DBTask):
         else:
             entry.status = 20
         finally:
+            drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
+            drive.io_queue_entry = None
+            drive.save(update_fields=['io_queue_entry'])
             entry.save(update_fields=['status'])
 
     def undo(self):
