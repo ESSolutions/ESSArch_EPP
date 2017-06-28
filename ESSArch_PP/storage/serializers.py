@@ -118,7 +118,7 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TapeDrive
         fields = (
-            'url', 'id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status'
+            'url', 'id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status', 'storage_medium',
         )
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
