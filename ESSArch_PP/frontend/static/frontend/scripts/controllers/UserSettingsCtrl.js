@@ -1,6 +1,6 @@
 angular.module("myApp").controller("UserSettingsCtrl", function($scope, $rootScope, $http, appConfig, $controller, $cookies, myService, $q, $window) {
     var vm = this;
-    $controller('BaseCtrl', {$scope: $scope });
+    $controller('BaseCtrl', {$scope: $scope, vm: vm, ipSortString: '' });
     vm.activeColumns = {chosen: []};
     vm.availableColumns = { options: [], chosen: []};
 

@@ -23,6 +23,7 @@
 */
 
 angular.module('myApp').controller('UtilCtrl', function($scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig) {
+    $scope.$state = $state;
     $scope.reloadPage = function (){
         $state.reload();
     }

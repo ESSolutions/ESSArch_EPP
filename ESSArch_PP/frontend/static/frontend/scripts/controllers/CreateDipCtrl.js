@@ -1,9 +1,7 @@
 angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window) {
-    $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
-    $scope.select = true;
-    $scope.ip = null;
-    $rootScope.ip = null;
+    var ipSortString = "";
+    $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     $scope.orderObjects = [];
     listViewService.getOrderPage().then(function(response) {
         $scope.orderObjects = response.data;
@@ -88,107 +86,12 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 		$scope.statusShow = false;
     }
 
-	$scope.submitRequest = function(ip, request) {
-		switch(request.type) {
-			case "preserve":
-				$scope.preserveIp(ip, request);
-				break;
-			case "get":
-				console.log("request not implemented");
-				break;
-			case "get_as_new":
-				console.log("request not implemented");
-				break;
-			case "diff_check":
-				console.log("request not implemented");
-				break;
-			default:
-				console.log("request not matched");
-				break;
-		}
-	}
-	$scope.preserveIp = function(ip, request) {
-		Requests.preserve(ip, {purpose: request.purpose, policy: request.archivePolicy.value.id}).then(function(result) {
-			$scope.requestForm = false;
-			$scope.eventlog = false;
-			$scope.eventShow = false;
-            $scope.requestEventlog = false;
-			$scope.initRequestData();
-			$scope.getListViewData();
-		});
-	}
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
-        $interval.cancel(stateInterval);
-        $interval.cancel(listViewInterval);
         $interval.cancel(fileBrowserInterval);
     });
-    // Click funtion columns that does not have a relevant click function
-    $scope.ipRowClick = function(row) {
-        if ($scope.ip == row) {
-            $scope.ip = null;
-            $rootScope.ip = null;
-        }
-        if ($scope.eventShow) {
-            $scope.eventsClick(row);
-        }
-        if ($scope.statusShow) {
-            $scope.stateClicked(row);
-        }
-        if ($scope.select) {
-            $scope.ipTableClick(row);
-        }
-    }
-    //Click function for status view
-    var stateInterval;
-    $scope.stateClicked = function (row) {
-        if ($scope.statusShow) {
-                $scope.tree_data = [];
-            if ($scope.ip == row) {
-                $scope.statusShow = false;
-                $scope.ip = null;
-                $rootScope.ip = null;
-            } else {
-                $scope.statusShow = true;
-                $scope.edit = false;
-                $scope.statusViewUpdate(row);
-                $scope.ip = row;
-                $rootScope.ip = row;
-        }
-        } else {
-            $scope.statusShow = true;
-            $scope.edit = false;
-            $scope.statusViewUpdate(row);
-            $scope.ip = row;
-            $rootScope.ip = row;
-        }
-        $scope.subSelect = false;
-        $scope.eventlog = false;
-        $scope.requestEventlog = false;
-        $scope.select = false;
-        $scope.requestForm = false;
-        $scope.eventShow = false;
-    };
-    //Click funciton for event view
-	$scope.eventsClick = function (row) {
-		if($scope.eventShow && $scope.ip == row){
-			$scope.eventShow = false;
-			$rootScope.stCtrl = null;
-			if(!$scope.requestForm) {
-				$scope.ip = null;
-				$rootScope.ip = null;
-			}
-		} else {
-			if($rootScope.stCtrl) {
-				$rootScope.stCtrl.pipe();
-			}
-			$scope.eventShow = true;
-            $scope.eventlog = false;
-			$scope.statusShow = false;
-            $scope.ip = row;
-            $rootScope.ip = row;
-		}
-	};
+
+
     //Initialize file browser update interval
     var fileBrowserInterval;
     $scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {
@@ -199,27 +102,13 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $interval.cancel(fileBrowserInterval);
         }
     });
-    //If status view is visible, start update interval
-    $scope.$watch(function() { return $scope.statusShow; }, function(newValue, oldValue) {
-        if (newValue) {
-            $interval.cancel(stateInterval);
-            stateInterval = $interval(function() { $scope.statusViewUpdate($scope.ip) }, appConfig.stateInterval);
-        } else {
-            $interval.cancel(stateInterval);
-        }
-    });
-    $scope.$watch(function() { return $rootScope.ipUrl; }, function(newValue, oldValue) {
-        $scope.getListViewData();
-    }, true);
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
 
-    var ctrl = this;
-    $scope.selectedProfileRow = { profile_type: "", class: "" };
-    this.displayedIps = [];
+    vm.displayedIps = [];
     //Get data according to ip table settings and populates ip table
-    this.callServer = function callServer(tableState) {
+    vm.callServer = function callServer(tableState) {
         $scope.ipLoading = true;
         if (vm.displayedIps.length == 0) {
             $scope.initLoad = true;
@@ -236,7 +125,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             var number = pagination.number || vm.itemsPerPage; // Number of entries showed per page.
             var pageNumber = start / number + 1;
             Resource.getDips(start, number, pageNumber, tableState, sorting, search, $scope.columnFilters).then(function (result) {
-                ctrl.displayedIps = result.data;
+                vm.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
@@ -244,50 +133,6 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         }
     };
 
-    //Get data for list view
-    $scope.getListViewData = function() {
-        vm.callServer($scope.tableState);
-        $rootScope.loadTags();
-    };
-    //Update ip list view with an interval
-    //Update only if status < 100 and no step has failed in any IP
-    var listViewInterval;
-
-    function updateListViewConditional() {
-        $interval.cancel(listViewInterval);
-        listViewInterval = $interval(function() {
-            var updateVar = false;
-            vm.displayedIps.forEach(function(ip, idx) {
-                if (ip.status < 100) {
-                    if (ip.step_state != "FAILURE") {
-                        updateVar = true;
-                    }
-                }
-            });
-            if (updateVar) {
-                $scope.getListViewData();
-            } else {
-                $interval.cancel(listViewInterval);
-                listViewInterval = $interval(function() {
-                    var updateVar = false;
-                    vm.displayedIps.forEach(function(ip, idx) {
-                        if (ip.status < 100) {
-                            if (ip.step_state != "FAILURE") {
-                                updateVar = true;
-                            }
-                        }
-                    });
-                    if (!updateVar) {
-                        $scope.getListViewData();
-                    } else {
-                        updateListViewConditional();
-                    }
-
-                }, appConfig.ipIdleInterval);
-            }
-        }, appConfig.ipInterval);
-    };
-    updateListViewConditional();
 
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
@@ -332,22 +177,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.statusShow = false;
         });
     }
-    $scope.filebrowser = false;
-    $scope.filebrowserClick = function (ip) {
-        if ($scope.filebrowser && $scope.ip == ip) {
-            $scope.filebrowser = false;
-            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-            }
-        } else {
-            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
-                $scope.filebrowser = true;
-                $scope.ip = ip;
-                $rootScope.ip = ip;
-            }
-        }
-    }
+
     $scope.createDip = function(ip) {
         listViewService.createDip(ip).then(function(response) {
             $scope.select = false;
@@ -646,20 +476,5 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
         modalInstance.result.then(function(data) {
             $scope.createDipFolder(data.dir_name);
         });
-    }
-    $scope.searchDisabled = function() {
-        if ($scope.filterModels.length > 0) {
-            if ($scope.filterModels[0].column != null) {
-                delete $scope.tableState.search.predicateObject;
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-    $scope.clearSearch = function() {
-        delete $scope.tableState.search.predicateObject;
-        $('#search-input')[0].value = "";
-        $scope.getListViewData();
     }
 });
