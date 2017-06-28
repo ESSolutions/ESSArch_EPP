@@ -81,6 +81,7 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
             'entry_date', 'state', 'status', 'step_state',
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
+            'policy',
         )
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
@@ -139,7 +140,7 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
             'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
             'generation', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location',
+            'archival_type', 'archival_location', 'policy',
         )
 
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
@@ -215,7 +216,7 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
             'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
             'generation', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location',
+            'archival_type', 'archival_location', 'policy',
         )
 
 
