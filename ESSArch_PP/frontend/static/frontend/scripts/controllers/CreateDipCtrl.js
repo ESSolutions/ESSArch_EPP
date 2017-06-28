@@ -86,41 +86,12 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
 		$scope.statusShow = false;
     }
 
-	$scope.submitRequest = function(ip, request) {
-		switch(request.type) {
-			case "preserve":
-				$scope.preserveIp(ip, request);
-				break;
-			case "get":
-				console.log("request not implemented");
-				break;
-			case "get_as_new":
-				console.log("request not implemented");
-				break;
-			case "diff_check":
-				console.log("request not implemented");
-				break;
-			default:
-				console.log("request not matched");
-				break;
-		}
-	}
-	$scope.preserveIp = function(ip, request) {
-		Requests.preserve(ip, {purpose: request.purpose, policy: request.archivePolicy.value.id}).then(function(result) {
-			$scope.requestForm = false;
-			$scope.eventlog = false;
-			$scope.eventShow = false;
-            $scope.requestEventlog = false;
-			$scope.initRequestData();
-			$scope.getListViewData();
-		});
-	}
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(fileBrowserInterval);
     });
-  
-   
+
+
     //Initialize file browser update interval
     var fileBrowserInterval;
     $scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {

@@ -2,7 +2,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	var vm = this;
 	var ipSortString = "Received,Preserving";
 	$controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
-	
+
 	$scope.menuOptions = function(rowType) {
 		return [
 		[$translate.instant("APPRAISAL"), function ($itemScope, $event, modelValue, text, $li) {
@@ -32,38 +32,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 		}]
 		];
 	};
-	$scope.submitRequest = function(ip, request) {
-		switch(request.type) {
-			case "preserve":
-				$scope.preserveIp(ip, request);
-				break;
-			case "get":
-				console.log("request not implemented");
-				break;
-			case "get_as_new":
-				console.log("request not implemented");
-				break;
-			case "diff_check":
-				console.log("request not implemented");
-				break;
-			default:
-				console.log("request not matched");
-				break;
-		}
-	}
-	$scope.preserveIp = function(ip, request) {
-		Requests.preserve(ip, {purpose: request.purpose}).then(function(result) {
-			$scope.requestForm = false;
-			$scope.eventlog = false;
-			$scope.requestEventlog = false;
-			$scope.eventShow = false;
-			$scope.filebrowser = false;
-			$scope.initRequestData();
-			$scope.getListViewData();
-		});
-	}
-
-	$scope.selectedProfileRow = {profile_type: "", class: ""};
 
 	//Click function for Ip table
 	$scope.ipTableClick = function(row) {

@@ -11,30 +11,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
         ];
     }
 
-    $scope.submitRequest = function(ip, request) {
-		switch(request.type) {
-			case "preserve":
-				$scope.preserveIp(ip, request);
-				break;
-			case "diff_check":
-				console.log("request not implemented");
-				break;
-			default:
-				console.log("request not matched");
-				break;
-		}
-	}
-	$scope.preserveIp = function(ip, request) {
-		Requests.preserve(ip, {purpose: request.purpose}).then(function(result) {
-			$scope.requestForm = false;
-			$scope.eventlog = false;
-			$scope.eventShow = false;
-            $scope.filebrowser = false;
-			$scope.initRequestData();
-			$scope.getListViewData();
-		});
-	}
-
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/

@@ -5,7 +5,7 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
-    
+
     $scope.selectedProfileRow = {profile_type: "", class: ""};
     vm.displayedIps = [];
     //Get data according to ip table settings and populates ip table
@@ -27,7 +27,7 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             var pageNumber = start/number+1;
             Resource.getOrders(start, number, pageNumber, tableState, sorting, search).then(function(result) {
                 vm.displayedIps = result.data;
-                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update                
+                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
             });
         }
