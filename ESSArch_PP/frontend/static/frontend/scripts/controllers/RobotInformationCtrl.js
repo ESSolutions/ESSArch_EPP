@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate){
+angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
     var vm = this;
     $scope.translate = $translate;
     vm.slotsPerPage = 20;
@@ -34,14 +34,14 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.tapeDrives = [];
 
     $scope.getDrives = function(robot) {
-        $http.get(robot.url + "tape-drives/").then(function(response) {
-            vm.tapeDrives = response.data;
+        Storage.getTapeDrives(robot).then(function(drives) {
+            vm.tapeDrives = drives;
         });
     }
 
     $scope.getSlots = function(robot) {
-        $http.get(robot.url + "tape-slots/").then(function(response) {
-            vm.tapeSlots = response.data;
+        Storage.getTapeSlots(robot).then(function(slots) {
+            vm.tapeSlots = slots;
         });
     }
 
@@ -61,8 +61,8 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
 
     $scope.loadRobots = function() {
         $scope.ipLoading = true;
-        $http.get(appConfig.djangoUrl + 'robots/').then(function(response) {
-            vm.robots = response.data;
+        Storage.getRobots().then(function(robots) {
+            vm.robots = robots;
             $scope.ipLoading = false;
         });
     }

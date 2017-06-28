@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies, $window) {
+angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, Storage, $rootScope, $http, $cookies, $window) {
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
@@ -164,7 +164,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
+        return Storage.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
             var storageMediumCollection = value.data;
             return {
                 data: storageMediumCollection,
@@ -177,7 +177,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getStorageObjects(pageNumber, number, medium, sortString, search).then(function(value) {
+        return Storage.getStorageObjects(pageNumber, number, medium, sortString, search).then(function(value) {
             var storageObjectCollection = value.data;
             return {
                 data: storageObjectCollection,

@@ -30,14 +30,6 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
     $rootScope.storageMedium = null;
     vm.storageObjects = [];
     vm.objectsPerPage = 10;
-    $scope.getStorageObjects = function(medium) {
-        $http({
-            method: "GET",
-            url: medium.url + 'storage-objects/',
-        }).then(function(response) {
-            vm.storageObjects = response.data;
-        });
-    }
     $scope.storageMediumTableClick = function(row) {
         if($scope.select && $scope.storageMedium.id == row.id){
             $scope.select = false;
@@ -49,7 +41,6 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
         } else {
             $scope.storageMedium = row;
             $rootScope.storageMedium = row;
-            //$scope.getStorageObjects(row);
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
