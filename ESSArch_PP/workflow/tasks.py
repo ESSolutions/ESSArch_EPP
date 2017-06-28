@@ -478,7 +478,7 @@ class PollIOQueue(DBTask):
                         raise ValueError("No tape available for allocation")
 
                     storage_medium = StorageMedium.objects.create(
-                        medium_id=storage_target.name,
+                        medium_id=slot.medium_id,
                         storage_target=storage_target, status=20,
                         location_status=20,
                         block_size=storage_target.default_block_size,
@@ -510,7 +510,7 @@ class PollIOQueue(DBTask):
                 return entry.storage_object.storage_medium
 
     def run(self):
-        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('storage_method_target', 'posted')[:5]
+        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
@@ -802,7 +802,7 @@ class PollRobotQueue(DBTask):
 
         entries = RobotQueue.objects.filter(
             status__in=[0, 2]
-        ).select_related('storage_medium').order_by(order)[:5]
+        ).select_related('storage_medium').order_by(order, 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
