@@ -53,21 +53,24 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
-    responsible = UserSerializer()
+    responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
-    aic = serializers.CharField(source="aic.object_identifier_value")
 
     archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
 
     class Meta:
@@ -81,10 +84,9 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
         )
 
 class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
-    responsible = UserSerializer()
+    responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
-    aic = serializers.CharField(source="aic.object_identifier_value")
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -114,16 +116,20 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
         return ips.data
 
     archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
 
     class Meta:
@@ -139,7 +145,6 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
-    aic = serializers.CharField(source="aic.object_identifier_value")
 
     def get_information_packages(self, obj):
         related = obj.related_ips()
@@ -187,16 +192,20 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
         return ips.data
 
     archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
     archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name']
+        fields=['url', 'id', 'name'],
+        read_only=True,
     )
 
     class Meta:
