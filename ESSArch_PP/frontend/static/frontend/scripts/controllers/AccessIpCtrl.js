@@ -34,18 +34,6 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
         ];
     };
 
-    $scope.accessIp = function(ip, request) {
-        var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new"};
-        Requests.access(ip, data).then(function(response) {
-            $scope.edit = false;
-            $scope.select = false;
-            $scope.initRequestData();
-            $timeout(function() {
-                $scope.getListViewData();
-            });
-        });
-    }
-
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if(row.package_type == 1) {

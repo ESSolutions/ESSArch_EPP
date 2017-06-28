@@ -272,10 +272,13 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
 				$scope.preserveIp(ip, request);
 				break;
 			case "get":
-				console.log("request not implemented");
+                $scope.accessIp(ip, request);
+				break;
+            case "get_tar":
+                $scope.accessIp(ip, request);
 				break;
 			case "get_as_new":
-				console.log("request not implemented");
+                $scope.accessIp(ip, request);
 				break;
 			case "diff_check":
 				console.log("request not implemented");
@@ -298,6 +301,25 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
 			$scope.getListViewData();
 		});
 	}
+
+    $scope.accessIp = function(ip, request) {
+        var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new"};
+        Requests.access(ip, data).then(function(response) {
+			$scope.requestForm = false;
+			$scope.eventlog = false;
+			$scope.requestEventlog = false;
+			$scope.eventShow = false;
+			$scope.filebrowser = false;
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.initRequestData();
+            $timeout(function() {
+                $scope.ip = null;
+                $rootScope.ip = null;
+                $scope.getListViewData();
+            });
+        });
+    }
 
     // Basic functions
 
