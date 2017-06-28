@@ -31,6 +31,7 @@
     </div>
     <div ng-if="select" style="margin-top: 5px;" class="select-sub-edit-eventlog-wrapper">
         <div ng-if="select" id="select-view" class="select-view">
+            <button class="btn btn-info" ng-click="vm.inventoryClick(robot)">{{'INVENTORYROBOTS' | translate}}</button>
             <h4>{{'TAPESLOTS' | translate}}</h4>
             <div class="table-container" st-table="vm.slots" st-safe-src="vm.tapeSlots">
                 <div class="search-prepare-wrapper">
@@ -94,4 +95,37 @@
             </div>
         </div>
     </div>
+    <div ng-if="requestForm" class="request-layout">
+        <span class="fa fa-cross close-request" style="position: absolute; right: 5px; top: 5px;"></span>
+            <form id="request-form" name="request-form" class="request-form" ng-submit="submitRequest(vm.selectedRobot, vm.request)">
+                <div class="request-type">
+                    <div>
+                        <input type="radio" ng-model="vm.request.type" value="inventory">
+                            <label>
+                            {{'INVENTORY' | translate}}
+                        </label>
+                    </div>
+                </div>
+                <div class="request-params">
+                    <div ng-if="vm.request.type == 'inventory'">
+                        <label>
+                            {{'PURPOSE' | translate}}
+                        </label>
+                        <input required class="form-control" ng-model="vm.request.purpose">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-if="eventlog && (vm.request.type == 'inventory')" class="select-sub-edit-eventlog-wrapper">
+            <div ng-if="eventlog" class="eventlog-view">
+                <form class="eventlog-form">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkBox" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
+                        </label>
+                    </div>
+                    <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
+                </form>
+            </div>
+        </div>
 </div>

@@ -32,6 +32,20 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.selectedRobot = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
+    $scope.requestForm = false;
+    $scope.eventlog = false;
+
+    $scope.menuOptions = function(rowType){
+        return [];
+    }
+
+    $scope.initRequestData = function () {
+        vm.request = {
+            type: "",
+            purpose: "",
+        };
+    }
+    $scope.initRequestData();
 
     $scope.getDrives = function(robot) {
         Storage.getTapeDrives(robot).then(function(drives) {
@@ -50,6 +64,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.select = false;
             $scope.edit = false;
             $scope.eventlog = false;
+            $scope.requestForm = false;
             vm.selectedRobot = null;
         } else {
             vm.selectedRobot = robot;
@@ -67,6 +82,27 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
     $scope.loadRobots();
+
+    vm.inventoryClick = function(robot) {
+        $scope.initRequestData();
+        $scope.requestForm = true;
+        $scope.eventlog = true;
+    }
+    vm.inventoryRobot = function(robot, request) {
+        Storage.inventoryRobot(robot, request).then(function(result) {
+            console.log(result);
+        });
+    }
+
+    // Requests
+	$scope.submitRequest = function(robot, request) {
+		switch(request.type) {
+			case "inventory":
+				vm.inventoryRobot(robot, request);
+				break;
+        }
+    }
+	
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {

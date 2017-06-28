@@ -66,11 +66,22 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response.data;
         });
     }
+
+    // Inventory robot
+    function inventoryRobot(robot, request) {
+        return $http.post(robot.url + "inventory/", request).then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response.statusText;
+        })
+    }
+    
     return {
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
         getTapeSlots: getTapeSlots,
         getTapeDrives: getTapeDrives,
-        getRobots: getRobots
+        getRobots: getRobots,
+        inventoryRobot: inventoryRobot,
     }
 });
