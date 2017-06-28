@@ -24,12 +24,11 @@ Email - essarch@essolutions.se
 
 angular.module('myApp').controller('MediaInformationCtrl', function($scope, $rootScope, $controller, $cookies, $http, appConfig, Resource, $interval, $anchorScroll, $timeout) {
     var vm = this;
-    $controller('BaseCtrl', { $scope: $scope });
+    $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
     $scope.colspan = 6;
     $scope.storageMedium = null;
     $rootScope.storageMedium = null;
     vm.storageObjects = [];
-    $scope.select = false;
     vm.objectsPerPage = 10;
     $scope.getStorageObjects = function(medium) {
         $http({
@@ -57,30 +56,6 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
         }
         $scope.statusShow = false;
     };
-    //Cancel update intervals on state change
-    $rootScope.$on('$stateChangeStart', function() {
-        $interval.cancel(listViewInterval);
-    });
-    // Click funtion columns that does not have a relevant click function
-    $scope.storageRowClick = function(row) {
-        $scope.selectStorageMedium(row);
-        if($scope.ip == row){
-            $scope.storageMedium = null;
-            $rootScope.storageMedium = null;
-        }
-        if($scope.eventShow) {
-            $scope.eventsClick(row);
-        }
-        if($scope.statusShow) {
-            $scope.stateClicked(row);
-        }
-        if ($scope.select) {
-            $scope.storageMediumTableClick(row);
-        }
-    }
-    $scope.$watch(function(){return $rootScope.ipUrl;}, function(newValue, oldValue) {
-        $scope.getListViewData();
-    }, true);
 
     $scope.updateStorageMediums = function() {
         vm.callServer($scope.mediumTableState);
@@ -89,9 +64,9 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
     /*Piping and Pagination for List-view table*/
     /*******************************************/
     var ctrl = this;
-    this.displayedMediums = [];
+    vm.displayedMediums = [];
     //Get data according to ip table settings and populates ip table
-    this.callServer = function callServer(tableState) {
+    vm.callServer = function callServer(tableState) {
         $scope.ipLoading = true;
         if(vm.displayedMediums.length == 0) {
             $scope.initLoad = true;
@@ -108,14 +83,14 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
             Resource.getStorageMediums(start, number, pageNumber, tableState, sorting, search).then(function (result) {
-                ctrl.displayedMediums = result.data;
+                vm.displayedMediums = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
             });
         }
     };
-    this.objectPipe = function objectPipe(tableState) {
+    vm.objectPipe = function objectPipe(tableState) {
         $scope.objectLoading = true;
         if(vm.storageObjects.length == 0) {
             $scope.initObjLoad = true;
@@ -139,13 +114,6 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             });
         }
     };
-
-    //Get data for list view
-    $scope.getListViewData = function() {
-        vm.callServer($scope.tableState);
-        $rootScope.loadTags();
-    };
-    var listViewInterval;
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {

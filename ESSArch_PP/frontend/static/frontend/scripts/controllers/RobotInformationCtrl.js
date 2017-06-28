@@ -25,7 +25,6 @@ Email - essarch@essolutions.se
 angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate){
     var vm = this;
     $scope.translate = $translate;
-    $controller('BaseCtrl', { $scope: $scope});
     vm.slotsPerPage = 20;
     $scope.colspan = 4;
     vm.robots = [];
@@ -33,22 +32,6 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.selectedRobot = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
-
-    $scope.robotRowClick = function(row) {
-		$scope.selectRobotObj(row);
-		if($vm.selectedRobot.ip == row){
-            vm.selectedRobot = null;
-		}
-		if($scope.eventShow) {
-			$scope.eventsClick(row);
-		}
-		if($scope.statusShow) {
-			$scope.stateClicked(row);
-		}
-		if ($scope.select) {
-			$scope.robotClick(row);
-		}
-	}
 
     $scope.getDrives = function(robot) {
         $http.get(robot.url + "tape-drives/").then(function(response) {
