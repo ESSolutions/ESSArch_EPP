@@ -243,6 +243,16 @@ class MigrationTask(JobtasticTask):
             logger.info(event_info)
             try:
                 if ReqType == '4':
+                    file_mode=0666
+                    dir_mode=0777
+                    if file_mode or dir_mode:
+                        for root, dirs, files in os.walk(os.path.splitext(ObjectPath)[0]):
+                            if  dir_mode:
+                                for momo in dirs:  
+                                    os.chmod(os.path.join(root, momo), dir_mode)
+                            if file_mode:
+                                for momo in files:
+                                    os.chmod(os.path.join(root, momo), file_mode)                    
                     if os.path.isdir(os.path.splitext(copy_ObjectPath)[0]):
                         shutil.rmtree(os.path.splitext(copy_ObjectPath)[0])
                     shutil.move(os.path.splitext(ObjectPath)[0], os.path.splitext(copy_ObjectPath)[0]) 
