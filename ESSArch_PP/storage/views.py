@@ -162,7 +162,7 @@ class RobotViewSet(viewsets.ModelViewSet):
         return Response()
 
 
-class RobotQueueViewSet(viewsets.ModelViewSet):
+class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint for robot
     """

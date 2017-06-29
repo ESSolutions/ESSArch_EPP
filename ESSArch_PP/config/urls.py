@@ -96,6 +96,12 @@ router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
 router.register(r'robots', RobotViewSet)
+router.register(r'robots', ProcessStepViewSet, base_name='robots').register(
+    r'queue',
+    RobotQueueViewSet,
+    base_name='robots-queue',
+    parents_query_lookups=['robot']
+)
 router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
 router.register(r'steps', ProcessStepViewSet, base_name='steps').register(
