@@ -8,6 +8,7 @@ django-mptt==0.8.7
 django-jsonfield==1.0.1
 django-redis==4.7.0
 django-rest-auth[with_social]==0.8.1
+drf-dynamic-fields==0.2.0
 drf-extensions==0.3.1
 httpretty==0.8.14
 jsonpickle==0.9.3
