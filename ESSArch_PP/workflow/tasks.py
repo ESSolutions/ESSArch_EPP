@@ -838,8 +838,6 @@ class PollRobotQueue(DBTask):
                 if medium.tape_drive is not None:  # already mounted
                     if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
                         if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
-                            entry.robot = None
-                            entry.save(update_fields=['robot'])
                             raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
 
                         entry.status = 20
@@ -882,16 +880,14 @@ class PollRobotQueue(DBTask):
                         medium.save(update_fields=['tape_drive', 'last_changed_local'])
                         entry.status = 20
                     finally:
-                        entry.robot = None
-                        entry.save(update_fields=['robot', 'status'])
+                        entry.save(update_fields=['status'])
 
             elif entry.req_type == 20:  # unmount
                 medium = entry.storage_medium
 
                 if medium.tape_drive is None:  # already unmounted
                     entry.status = 20
-                    entry.robot = None
-                    entry.save(update_fields=['status', 'robot'])
+                    entry.save(update_fields=['status'])
 
                     raise TapeUnmountedError("Tape already unmounted")
 

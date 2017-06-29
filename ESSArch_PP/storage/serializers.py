@@ -2,6 +2,10 @@ from rest_framework import serializers
 
 from ip.serializers import InformationPackageSerializer
 
+from ESSArch_Core.auth.serializers import UserSerializer
+
+from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
+
 from ESSArch_Core.storage.models import medium_status_CHOICES
 
 from ESSArch_Core.storage.models import (
@@ -122,6 +126,11 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
+    io_queue_entry = IOQueueSerializer(read_only=True)
+    robot = RobotSerializer(read_only=True)
+    storage_medium = StorageMediumReadSerializer(read_only=True)
+    user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
+
     class Meta:
         model = RobotQueue
         fields = (
