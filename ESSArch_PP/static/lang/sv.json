@@ -263,5 +263,7 @@
     "CHANGED": "Ändrad",
     "FILEBROWSER": "Filhanterare",
     "NO_TAGS": "Det finns inga taggar ...",
-    "COPYID": "Kopiera ID"
+    "COPYID": "Kopiera ID",
+    "INVENTORY": "Inventera",
+    "INVENTORYROBOTS": "Inventera robotar"
 }

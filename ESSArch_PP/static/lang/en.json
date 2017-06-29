@@ -263,5 +263,7 @@
     "CHANGED": "Changed",
     "FILEBROWSER": "File browser",
     "NO_TAGS": "There are no tags ...",
-    "COPYID": "Copy ID"
+    "COPYID": "Copy ID",
+    "INVENTORY": "Inventory",
+    "INVENTORYROBOTS": "Inventory robots"
 }
