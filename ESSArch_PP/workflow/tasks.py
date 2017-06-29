@@ -879,7 +879,8 @@ class PollRobotQueue(DBTask):
                         medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
-                        entry.save(update_fields=['status'])
+                        entry.robot = None
+                        entry.save(update_fields=['robot', 'status'])
 
             elif entry.req_type == 20:  # unmount
                 medium = entry.storage_medium
