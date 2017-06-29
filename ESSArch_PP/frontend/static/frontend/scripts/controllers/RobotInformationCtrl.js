@@ -42,7 +42,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
 
     $scope.initRequestData = function () {
         vm.request = {
-            type: "",
+            type: "inventory",
             purpose: "",
         };
     }
@@ -97,8 +97,9 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         $scope.eventlog = true;
     }
     vm.inventoryRobot = function(robot, request) {
-        Storage.inventoryRobot(robot, request).then(function(result) {
-            console.log(result);
+        Storage.inventoryRobot(robot).then(function(result) {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
         });
     }
 

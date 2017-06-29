@@ -68,8 +68,8 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
     }
 
     // Inventory robot
-    function inventoryRobot(robot, request) {
-        return $http.post(robot.url + "inventory/", request).then(function(response) {
+    function inventoryRobot(robot) {
+        return $http.post(robot.url + "inventory/").then(function(response) {
             return response;
         }).catch(function(response) {
             return response.statusText;
