@@ -25,6 +25,15 @@ from ESSArch_Core.storage.models import (
 class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
 
+    req_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_req_type(self, obj):
+        return obj.get_req_type_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     class Meta:
         model = IOQueue
         fields = (
@@ -61,6 +70,16 @@ class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
 
 class StorageMediumReadSerializer(serializers.HyperlinkedModelSerializer):
     storage_target = StorageTargetSerializer(read_only=True)
+
+    location_status = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_location_status(self, obj):
+        return obj.get_location_status_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     class Meta:
         model = StorageMedium
         fields = (
@@ -135,6 +154,14 @@ class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
     robot = RobotSerializer(read_only=True)
     storage_medium = StorageMediumReadSerializer(read_only=True)
     user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
+    req_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_req_type(self, obj):
+        return obj.get_req_type_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
 
     class Meta:
         model = RobotQueue
