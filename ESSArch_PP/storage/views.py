@@ -25,6 +25,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, filters
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
@@ -40,6 +42,8 @@ from ESSArch_Core.storage.models import (
     TapeDrive,
     TapeSlot,
 )
+
+from ESSArch_Core.WorkflowEngine.models import ProcessTask
 
 from storage.serializers import (
     IOQueueSerializer,
@@ -143,6 +147,20 @@ class RobotViewSet(viewsets.ModelViewSet):
     search_fields = (
         'id', 'label', 'device', 'online',
     )
+
+    @detail_route(methods=['post'])
+    def inventory(self, request, pk=None):
+        robot = self.get_object()
+
+        ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.RobotInventory',
+            args=[robot.device],
+            eager=False,
+            responsible=self.request.user,
+        ).run()
+
+        return Response()
+
 
 class RobotQueueViewSet(viewsets.ModelViewSet):
     """
