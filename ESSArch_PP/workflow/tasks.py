@@ -876,8 +876,7 @@ class PollRobotQueue(DBTask):
                         raise
                     else:
                         medium.tape_drive = free_drive
-                        medium.last_changed_local = timezone.now()
-                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
                         entry.save(update_fields=['status'])
@@ -913,8 +912,7 @@ class PollRobotQueue(DBTask):
                         raise
                     else:
                         medium.tape_drive = None
-                        medium.last_changed_local = timezone.now()
-                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
                         entry.robot = None
@@ -931,7 +929,8 @@ class PollRobotQueue(DBTask):
 class UnmountIdleDrives(DBTask):
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__last_changed_local__lte=timezone.now()-F('idle_time'),
+            storage_medium__isnull=False,
+            last_change__lte=timezone.now()-F('idle_time'),
             locked=False,
         )
 
