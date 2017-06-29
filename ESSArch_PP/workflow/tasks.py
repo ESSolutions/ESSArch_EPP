@@ -231,6 +231,13 @@ class StoreAIP(DBTask):
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
 
+        size, count = ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
+            params={'ip': aip},
+            information_package_id=aip,
+            responsible_id=self.responsible,
+        ).run().get()
+
         for method in storage_methods:
             for method_target in method.storagemethodtargetrelation_set.all():
                 req_type = 10 if method_target.storage_method.type == TAPE else 15
@@ -238,7 +245,7 @@ class StoreAIP(DBTask):
                 _, created = IOQueue.objects.get_or_create(
                     storage_method_target=method_target, req_type=req_type,
                     ip_id=aip, status__in=[0, 2, 5],
-                    defaults={'user_id': self.responsible, 'status': 0}
+                    defaults={'user_id': self.responsible, 'status': 0, 'write_size': size}
                 )
 
                 if created:
@@ -640,6 +647,8 @@ class IOTape(DBTask):
                     processstep=step,
                     processstep_pos=2,
                 ).run().get()
+
+                StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
                 StorageObject.objects.create(
                     content_location_type=storage_method.type,
