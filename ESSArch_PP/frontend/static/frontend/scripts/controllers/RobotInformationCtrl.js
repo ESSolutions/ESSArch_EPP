@@ -32,6 +32,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.selectedRobot = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
+    vm.robotQueue = [];
     $scope.requestForm = false;
     $scope.eventlog = false;
 
@@ -59,6 +60,12 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
 
+    $scope.getRobotQueue = function(robot) {
+        Storage.getRobotQueue(robot).then(function(queue) {
+            vm.robotQueue = queue;
+        });
+    }
+
     $scope.robotClick = function(robot) {
         if($scope.select && vm.selectedRobot.id == robot.id){
             $scope.select = false;
@@ -71,6 +78,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.select = true;
             $scope.getSlots(vm.selectedRobot);
             $scope.getDrives(vm.selectedRobot);
+            $scope.getRobotQueue(vm.selectedRobot);
         }
     }
 

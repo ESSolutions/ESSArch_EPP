@@ -73,7 +73,16 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response;
         }).catch(function(response) {
             return response.statusText;
-        })
+        });
+    }
+
+    function getRobotQueue(robot) {
+        return $http({
+            method: 'GET',
+            url: robot.url + "queue/",
+        }).then(function(response) {
+            return response.data;
+        });
     }
     
     return {
@@ -83,5 +92,6 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         getTapeDrives: getTapeDrives,
         getRobots: getRobots,
         inventoryRobot: inventoryRobot,
+        getRobotQueue: getRobotQueue,
     }
 });

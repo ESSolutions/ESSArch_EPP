@@ -265,5 +265,8 @@
     "NO_TAGS": "There are no tags ...",
     "COPYID": "Copy ID",
     "INVENTORY": "Inventory",
-    "INVENTORYROBOTS": "Inventory robots"
+    "INVENTORYROBOTS": "Inventory robots",
+    "POSTED": "Posted",
+    "REQUESTTYPE": "Request",
+    "ROBOTQUEUE": "Robot queue"
 }

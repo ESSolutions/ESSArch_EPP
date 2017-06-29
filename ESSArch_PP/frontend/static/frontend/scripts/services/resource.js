@@ -185,6 +185,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
+
     return {
         getEventPage: getEventPage,
         getIpPage: getIpPage,

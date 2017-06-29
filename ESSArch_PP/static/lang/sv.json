@@ -265,5 +265,8 @@
     "NO_TAGS": "Det finns inga taggar ...",
     "COPYID": "Kopiera ID",
     "INVENTORY": "Inventera",
-    "INVENTORYROBOTS": "Inventera robotar"
+    "INVENTORYROBOTS": "Inventera robotar",
+    "POSTED": "Inlagt",
+    "REQUESTTYPE": "Förfrågan",
+    "ROBOTQUEUE": "Robotkö"
 }
