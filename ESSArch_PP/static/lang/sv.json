@@ -268,5 +268,7 @@
     "INVENTORYROBOTS": "Inventera robotar",
     "POSTED": "Inlagt",
     "REQUESTTYPE": "Förfrågan",
-    "ROBOTQUEUE": "Robotkö"
+    "ROBOTQUEUE": "Robotkö",
+    "IOQUEUE": "IO-kö",
+    "QUEUES": "Köer"
 }

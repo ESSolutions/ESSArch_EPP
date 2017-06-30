@@ -268,5 +268,7 @@
     "INVENTORYROBOTS": "Inventory robots",
     "POSTED": "Posted",
     "REQUESTTYPE": "Request",
-    "ROBOTQUEUE": "Robot queue"
+    "ROBOTQUEUE": "Robot queue",
+    "IOQUEUE": "IO-queue",
+    "QUEUES": "Queues"
 }

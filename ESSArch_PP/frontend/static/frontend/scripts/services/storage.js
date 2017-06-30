@@ -77,14 +77,21 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
     }
 
     function getRobotQueue(robot) {
+        var url;
+        robot ? url = robot.url + "queue/" : url = appConfig.djangoUrl + "robot-queue/";
         return $http({
             method: 'GET',
-            url: robot.url + "queue/",
+            url: url,
         }).then(function(response) {
             return response.data;
         });
     }
     
+    function getIoQueue() {
+        return $http.get(appConfig.djangoUrl + "io-queue/").then(function(response) {
+            return response.data;
+        });
+    }
     return {
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
@@ -93,5 +100,6 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         getRobots: getRobots,
         inventoryRobot: inventoryRobot,
         getRobotQueue: getRobotQueue,
+        getIoQueue: getIoQueue,
     }
 });
