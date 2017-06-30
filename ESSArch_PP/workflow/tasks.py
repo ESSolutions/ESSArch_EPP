@@ -231,6 +231,13 @@ class StoreAIP(DBTask):
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
 
+        size, count = ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
+            params={'ip': aip},
+            information_package_id=aip,
+            responsible_id=self.responsible,
+        ).run().get()
+
         for method in storage_methods:
             for method_target in method.storagemethodtargetrelation_set.all():
                 req_type = 10 if method_target.storage_method.type == TAPE else 15
@@ -238,7 +245,7 @@ class StoreAIP(DBTask):
                 _, created = IOQueue.objects.get_or_create(
                     storage_method_target=method_target, req_type=req_type,
                     ip_id=aip, status__in=[0, 2, 5],
-                    defaults={'user_id': self.responsible, 'status': 0}
+                    defaults={'user_id': self.responsible, 'status': 0, 'write_size': size}
                 )
 
                 if created:
@@ -641,6 +648,8 @@ class IOTape(DBTask):
                     processstep_pos=2,
                 ).run().get()
 
+                StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
+
                 StorageObject.objects.create(
                     content_location_type=storage_method.type,
                     content_location_value=content_location_value,
@@ -876,11 +885,11 @@ class PollRobotQueue(DBTask):
                         raise
                     else:
                         medium.tape_drive = free_drive
-                        medium.last_changed_local = timezone.now()
-                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
-                        entry.save(update_fields=['status'])
+                        entry.robot = None
+                        entry.save(update_fields=['robot', 'status'])
 
             elif entry.req_type == 20:  # unmount
                 medium = entry.storage_medium
@@ -913,8 +922,7 @@ class PollRobotQueue(DBTask):
                         raise
                     else:
                         medium.tape_drive = None
-                        medium.last_changed_local = timezone.now()
-                        medium.save(update_fields=['tape_drive', 'last_changed_local'])
+                        medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
                         entry.robot = None
@@ -931,7 +939,8 @@ class PollRobotQueue(DBTask):
 class UnmountIdleDrives(DBTask):
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__last_changed_local__lte=timezone.now()-F('idle_time'),
+            storage_medium__isnull=False,
+            last_change__lte=timezone.now()-F('idle_time'),
             locked=False,
         )
 
@@ -942,7 +951,7 @@ class UnmountIdleDrives(DBTask):
             RobotQueue.objects.get_or_create(
                 user=User.objects.get(username='system'),
                 storage_medium=drive.storage_medium,
-                req_type=20
+                req_type=20, status__in=[0, 2], defaults={'status': 0}
             )
 
     def undo(self):
