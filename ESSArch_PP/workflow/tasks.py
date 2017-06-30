@@ -951,7 +951,7 @@ class UnmountIdleDrives(DBTask):
             RobotQueue.objects.get_or_create(
                 user=User.objects.get(username='system'),
                 storage_medium=drive.storage_medium,
-                req_type=20
+                req_type=20, status__in=[0, 2], defaults={'status': 0}
             )
 
     def undo(self):
