@@ -73,6 +73,7 @@ from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 
 from storage.exceptions import (
+    TapeDriveLockedError,
     TapeMountedError,
     TapeMountedAndLockedByOtherError,
     TapeUnmountedError,
@@ -803,15 +804,9 @@ class IODisk(DBTask):
 
 class PollRobotQueue(DBTask):
     def run(self):
-        available_drives = TapeDrive.objects.filter(storage_medium__isnull=True, locked=False)
-
-        order = '-req_type'
-        if available_drives.exists():
-            order = 'req_type' # mount before unmount
-
         entries = RobotQueue.objects.filter(
             status__in=[0, 2]
-        ).select_related('storage_medium').order_by(order, 'posted')[:5]
+        ).select_related('storage_medium').order_by('-req_type', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
@@ -854,12 +849,17 @@ class PollRobotQueue(DBTask):
 
                     raise TapeMountedError("Tape already mounted")
 
-                free_drive = TapeDrive.objects.filter(
-                    storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
-                ).order_by('num_of_mounts').first()
+                drive = entry.tape_drive
 
-                if free_drive is None:
-                    raise ValueError('No tape drive available')
+                if drive is None:
+                    free_drive = TapeDrive.objects.filter(
+                        storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
+                    ).order_by('num_of_mounts').first()
+
+                    if free_drive is None:
+                        raise ValueError('No tape drive available')
+
+                    drive = free_drive
 
                 free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
 
@@ -877,21 +877,21 @@ class PollRobotQueue(DBTask):
                             name="ESSArch_Core.tasks.MountTape",
                             params={
                                 'medium': medium.pk,
-                                'drive': free_drive.pk,
+                                'drive': drive.pk,
                             }
                         ).run().get()
                     except:
                         entry.status = 100
                         raise
                     else:
-                        medium.tape_drive = free_drive
+                        medium.tape_drive = drive
                         medium.save(update_fields=['tape_drive'])
                         entry.status = 20
                     finally:
                         entry.robot = None
                         entry.save(update_fields=['robot', 'status'])
 
-            elif entry.req_type == 20:  # unmount
+            elif entry.req_type in [20, 30]:  # unmount
                 medium = entry.storage_medium
 
                 if medium.tape_drive is None:  # already unmounted
@@ -899,6 +899,10 @@ class PollRobotQueue(DBTask):
                     entry.save(update_fields=['status'])
 
                     raise TapeUnmountedError("Tape already unmounted")
+
+                if medium.tape_drive.locked:
+                    if entry.req_type == 20:
+                        raise TapeDriveLockedError("Tape locked")
 
                 free_robot = Robot.objects.filter(robot_queue__isnull=True).first()
 
@@ -917,6 +921,9 @@ class PollRobotQueue(DBTask):
                                 'drive': medium.tape_drive.pk,
                             }
                         ).run().get()
+                    except TapeUnmountedError:
+                        entry.status = 20
+                        raise TapeUnmountedError("Tape already unmounted")
                     except:
                         entry.status = 100
                         raise
