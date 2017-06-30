@@ -270,5 +270,8 @@
     "REQUESTTYPE": "Förfrågan",
     "ROBOTQUEUE": "Robotkö",
     "IOQUEUE": "IO-kö",
-    "QUEUES": "Köer"
+    "QUEUES": "Köer",
+    "MOUNT": "Montera",
+    "UNMOUNT": "Avmontera",
+    "UNMOUNT_FORCE": "Avmontera(tvinga)"
 }

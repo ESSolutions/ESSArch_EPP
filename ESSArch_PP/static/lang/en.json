@@ -270,5 +270,8 @@
     "REQUESTTYPE": "Request",
     "ROBOTQUEUE": "Robot queue",
     "IOQUEUE": "IO-queue",
-    "QUEUES": "Queues"
+    "QUEUES": "Queues",
+    "MOUNT": "Mount",
+    "UNMOUNT": "Unmount",
+    "UNMOUNT_FORCE": "Unmount(force)"
 }

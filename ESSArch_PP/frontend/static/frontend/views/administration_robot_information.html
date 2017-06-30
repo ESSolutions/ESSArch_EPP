@@ -112,7 +112,7 @@
                             </tr>
                         </thead>
                         <tbody>                                
-                            <tr ng-class="row.class" ng-repeat="row in vm.drives"  ng-attr-context-menu="menuOptions" class="table-item">
+                            <tr ng-class="{'selected': vm.tapeDrive.id == row.id}" ng-click="vm.tapeDriveClick(row)" class="clickable" ng-repeat="row in vm.drives"  ng-attr-context-menu="menuOptions" class="table-item">
                                 <td>{{row.id}}</td>
                                 <td>{{row.device}}</td>
                                 <td>{{row.num_of_mounts}}</td>
@@ -128,18 +128,18 @@
         </div>
     </div>
     <div ng-if="requestForm" class="request-layout">
-        <span class="fa fa-cross close-request" style="position: absolute; right: 5px; top: 5px;"></span>
             <form id="request-form" name="request-form" class="request-form" ng-submit="submitRequest(vm.selectedRobot, vm.request)">
                 <div class="request-type">
-                    <div>
-                        <input type="radio" ng-model="vm.request.type" value="inventory">
+                    <div ng-repeat="type in vm.requestTypes">
+                        <input type="radio" ng-model="vm.request.type" value="{{type}}">
                             <label>
-                            {{'INVENTORY' | translate}}
+                            {{type.toUpperCase() | translate}}
                         </label>
                     </div>
                 </div>
                 <div class="request-params">
-                    <div ng-if="vm.request.type == 'inventory'">
+                <span class="fa fa-times close-request clickable" ng-click="closeRequestForm()"></span>
+                    <div ng-if="vm.request.type == 'inventory' || vm.request.type == 'mount' || vm.request.type == 'unmount' || vm.request.type == 'unmount_force'">
                         <label>
                             {{'PURPOSE' | translate}}
                         </label>
@@ -148,7 +148,7 @@
                 </div>
             </form>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'inventory')" class="select-sub-edit-eventlog-wrapper">
+        <div ng-if="eventlog && (vm.request.type)" class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">

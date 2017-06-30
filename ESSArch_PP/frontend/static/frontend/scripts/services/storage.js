@@ -92,6 +92,18 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response.data;
         });
     }
+
+    function mountTapeDrive(tapeDrive) {
+        return $http.post(tapeDrive.url + "mount/").then(function(response) {
+            return response;
+        });
+    }
+
+    function unmountTapeDrive(tapeDrive, force) {
+        return $http.post(tapeDrive.url + "unmount/", {force: force}).then(function(response) {
+            return response;
+        });
+    }
     return {
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
@@ -101,5 +113,7 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         inventoryRobot: inventoryRobot,
         getRobotQueue: getRobotQueue,
         getIoQueue: getIoQueue,
+        mountTapeDrive: mountTapeDrive,
+        unmountTapeDrive: unmountTapeDrive,
     }
 });

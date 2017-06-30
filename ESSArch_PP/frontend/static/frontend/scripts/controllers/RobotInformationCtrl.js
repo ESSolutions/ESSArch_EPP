@@ -30,6 +30,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.robots = [];
     $scope.select = false;
     vm.selectedRobot = null;
+    vm.tapeDrive = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
     vm.robotQueue = [];
@@ -40,14 +41,15 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         return [];
     }
 
-    $scope.initRequestData = function () {
+    $scope.initRequestData = function (types) {
+        vm.requestTypes = types;
         vm.request = {
-            type: "inventory",
+            type: types[0],
             purpose: "",
         };
     }
-    $scope.initRequestData();
 
+    // Getters
     $scope.getDrives = function(robot) {
         Storage.getTapeDrives(robot).then(function(drives) {
             vm.tapeDrives = drives;
@@ -66,6 +68,17 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
 
+    $scope.loadRobots = function() {
+        $scope.ipLoading = true;
+        Storage.getRobots().then(function(robots) {
+            vm.robots = robots;
+            $scope.ipLoading = false;
+        });
+    }
+    $scope.loadRobots();
+
+    // Click funcitons
+    
     $scope.robotClick = function(robot) {
         if($scope.select && vm.selectedRobot.id == robot.id){
             $scope.select = false;
@@ -82,20 +95,26 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         }
     }
 
-    $scope.loadRobots = function() {
-        $scope.ipLoading = true;
-        Storage.getRobots().then(function(robots) {
-            vm.robots = robots;
-            $scope.ipLoading = false;
-        });
-    }
-    $scope.loadRobots();
-
     vm.inventoryClick = function(robot) {
-        $scope.initRequestData();
+        $scope.initRequestData(["inventory"]);
         $scope.requestForm = true;
         $scope.eventlog = true;
     }
+    
+    vm.tapeDriveClick = function(tapeDrive) {
+        if(tapeDrive == vm.tapeDrive) {
+            vm.tapeDrive = null;
+            $scope.requestForm = false;
+        } else {
+            vm.tapeDrive = tapeDrive;
+            $scope.initRequestData(["mount", "unmount", "unmount_force"])
+            $scope.requestForm = true;
+            $scope.eventlog = true;
+            console.log("showing request form?", $scope.requestForm, "tapedrive: ", vm.tapeDrive);
+        }
+    }
+
+    // Actions
     vm.inventoryRobot = function(robot, request) {
         Storage.inventoryRobot(robot).then(function(result) {
             $scope.requestForm = false;
@@ -103,15 +122,43 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
 
+    vm.mountTapeDrive = function(tapeDrive, request) {
+        Storage.mountTapeDrive(tapeDrive).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
+
+    vm.unmountTapeDrive = function(tapeDrive, request, force) {
+        Storage.unmountTapeDrive(tapeDrive, force).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
     // Requests
-	$scope.submitRequest = function(robot, request) {
+	$scope.submitRequest = function(object, request) {
 		switch(request.type) {
 			case "inventory":
-				vm.inventoryRobot(robot, request);
+				vm.inventoryRobot(object, request);
 				break;
+            case "mount":
+                vm.mountTapeDrive(object, request);
+                break;
+            case "unmount":
+                vm.unmountTapeDrive(object, request, false);
+                break;
+            case "unmount_force":
+                vm.unmountTapeDrive(object, request, true);
+                break;
         }
     }
 	
+    $scope.closeRequestForm = function() {
+        $scope.requestForm = false;
+        $scope.eventlog = false;
+        vm.tapeDrive = null;
+    }
+
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {
