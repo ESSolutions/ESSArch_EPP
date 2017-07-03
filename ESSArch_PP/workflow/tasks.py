@@ -491,23 +491,37 @@ class PollIOQueue(DBTask):
                     status=20,
                 ).order_by('last_changed_local').first()
 
-                if storage_medium is None:
-                    slot = TapeSlot.objects.filter(
-                        storage_medium__isnull=True,
-                        medium_id__startswith=storage_target.target
-                    ).exclude(medium_id__exact='').first()
+                if storage_medium is not None:
+                    new_size = storage_medium.used_capacity + entry.write_size
 
-                    if slot is None:
-                        raise ValueError("No tape available for allocation")
+                    if storage_target.max_capacity > 0 and new_size > storage_target.max_capacity:
+                        try:
+                            storage_medium.mark_as_full()
+                        except AssertionError:
+                            pass
 
-                    storage_medium = StorageMedium.objects.create(
-                        medium_id=slot.medium_id,
-                        storage_target=storage_target, status=20,
-                        location_status=20,
-                        block_size=storage_target.default_block_size,
-                        format=storage_target.default_format, agent=entry.user,
-                        tape_slot=slot,
-                    )
+                        storage_medium = None
+                    else:
+                        return storage_medium
+
+                # Could not find any storage medium, create one
+
+                slot = TapeSlot.objects.filter(
+                    storage_medium__isnull=True,
+                    medium_id__startswith=storage_target.target
+                ).exclude(medium_id__exact='').first()
+
+                if slot is None:
+                    raise ValueError("No tape available for allocation")
+
+                storage_medium = StorageMedium.objects.create(
+                    medium_id=slot.medium_id,
+                    storage_target=storage_target, status=20,
+                    location_status=20,
+                    block_size=storage_target.default_block_size,
+                    format=storage_target.default_format, agent=entry.user,
+                    tape_slot=slot,
+                )
 
                 return storage_medium
             elif entry.req_type == 20:
