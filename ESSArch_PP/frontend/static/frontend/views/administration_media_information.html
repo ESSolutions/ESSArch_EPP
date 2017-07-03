@@ -17,6 +17,7 @@
                         <th class="clickable" st-sort="location"  class="column-label">{{'LOCATION' | translate}}</th>
                         <th class="clickable" st-sort="location_status"  class="column-label">{{'LOCATIONSTATUS' | translate}}</th>
                         <th class="clickable" st-sort="used_capacity" class="column-label">{{'USEDCAPACITY' | translate}}</th>
+                        <th class="clickable" st-sort="storage_target.max_capacity" class="column-label">{{'MAXCAPACITY' | translate}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,7 @@
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location_status}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.used_capacity | filesize}}</td>
+                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.storage_target.max_capacity | filesize}}</td>
                     </tr>
                 </tbody>
             </table>

@@ -300,5 +300,6 @@
     "POLICYSTATUS": "Policy-status",
     "FILTERS": "Filter",
     "STORAGEMIGRATION": "Lagringsmigrering",
-    "STORAGEMAINTENANCE": "Lagringsunderhåll"
+    "STORAGEMAINTENANCE": "Lagringsunderhåll",
+    "MAXCAPACITY": "Maxkapacitet"
 }

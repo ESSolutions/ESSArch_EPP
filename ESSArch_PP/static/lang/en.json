@@ -300,5 +300,6 @@
     "POLICYSTATUS": "Policy status",
     "FILTERS": "Filters",
     "STORAGEMIGRATION": "Storage migration",
-    "STORAGEMAINTENANCE": "Storage maintenance"
+    "STORAGEMAINTENANCE": "Storage maintenance",
+    "MAXCAPACITY": "Max capacity"
 }
