@@ -24,7 +24,7 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, filters
+from rest_framework import exceptions, viewsets, filters
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -196,6 +196,43 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
     search_fields = (
         'id', 'device', 'num_of_mounts', 'idle_time',
     )
+
+
+    @detail_route(methods=['post'])
+    def mount(self, request, pk=None):
+        drive = self.get_object()
+
+        try:
+            storage_medium = request.data['storage_medium']
+        except KeyError:
+            raise exceptions.ParseError('Missing parameter storage_medium')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium_id=storage_medium,
+            tape_drive=drive,
+            req_type=10, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response()
+
+    @detail_route(methods=['post'])
+    def unmount(self, request, pk=None):
+        drive = self.get_object()
+        force = request.data.get('force', False)
+
+        req_type = 30 if force else 20
+
+        if not hasattr(drive, 'storage_medium'):
+            raise exceptions.ParseError(detail='No tape mounted')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=drive.storage_medium,
+            req_type=req_type, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response()
 
 class TapeSlotViewSet(viewsets.ModelViewSet):
     """
