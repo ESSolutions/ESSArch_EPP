@@ -846,18 +846,6 @@ class PollRobotQueue(DBTask):
 
             step.save()
 
-            ProcessTask.objects.get_or_create(
-                pk=self.task_id,
-                defaults={
-                    'name': 'workflow.tasks.PollRobotQueue',
-                    'hidden': self.hidden,
-                    'status': celery_states.STARTED,
-                    'time_started': timezone.now(),
-                    'processstep': step,
-                    'processstep_pos': 0,
-                }
-            )
-
             if entry.req_type == 10:  # mount
                 medium = entry.storage_medium
 
