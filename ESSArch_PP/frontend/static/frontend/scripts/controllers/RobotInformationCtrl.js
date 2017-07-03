@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
+angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
     var vm = this;
     $scope.translate = $translate;
     vm.slotsPerPage = 20;
@@ -37,6 +37,16 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.storageMediums = [];
     $scope.requestForm = false;
     $scope.eventlog = false;
+    var robotInterval;
+    $interval.cancel(robotInterval);
+    robotInterval = $interval(function() {
+        $scope.loadRobots();
+        if(vm.selectedRobot != null) {
+            $scope.getRobotQueue(vm.selectedRobot)
+            $scope.getSlots(vm.selectedRobot);
+            $scope.getDrives(vm.selectedRobot);
+        }
+    }, appConfig.robotInterval);
 
     $scope.menuOptions = function(rowType){
         return [];
@@ -80,7 +90,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     $scope.loadRobots();
 
     // Click funcitons
-    
+
     $scope.robotClick = function(robot) {
         if($scope.select && vm.selectedRobot.id == robot.id){
             $scope.select = false;
@@ -102,7 +112,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         $scope.requestForm = true;
         $scope.eventlog = true;
     }
-    
+
     vm.tapeDriveClick = function(tapeDrive) {
         if(tapeDrive == vm.tapeDrive) {
             vm.tapeDrive = null;
@@ -123,14 +133,20 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
                 }
             }
             if(types.includes("mount")) {
-                $http.get(appConfig.djangoUrl + "storage-mediums/", {params: {status: 20}}).then(function(response) {
-                    vm.storageMediums = response.data;
+                vm.getStorageMediumsByState(20).then(function(result) {
+                    vm.storageMediums = result;
                 });
             }
             $scope.initRequestData(types)
             $scope.requestForm = true;
             $scope.eventlog = true;
         }
+    }
+
+    vm.getStorageMediumsByState = function (status) {
+        return $http.get(appConfig.djangoUrl + "storage-mediums/", { params: { status: status } }).then(function (response) {
+            return response.data;
+        });
     }
 
     // Actions
@@ -171,7 +187,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
                 break;
         }
     }
-	
+
     $scope.closeRequestForm = function() {
         $scope.requestForm = false;
         $scope.eventlog = false;

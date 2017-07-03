@@ -30,6 +30,27 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
     $rootScope.storageMedium = null;
     vm.storageObjects = [];
     vm.objectsPerPage = 10;
+    var mediumInterval;
+    var objectInterval;
+    $interval.cancel(mediumInterval);
+    mediumInterval = $interval(function() {
+        vm.getMediumData();
+    }, appConfig.storageMediumInterval)
+    $scope.$watch(function(){return $scope.select;}, function(newValue, oldValue) {
+		if(newValue) {
+			$interval.cancel(objectInterval);
+			objectInterval = $interval(function(){vm.getObjectData()}, appConfig.storageObjectInterval);
+		} else {
+			$interval.cancel(objectInterval);
+		}
+	});
+
+    //Cancel update intervals on state change
+	$rootScope.$on('$stateChangeStart', function() {
+		$interval.cancel(mediumInterval);
+		$interval.cancel(objectInterval);
+	});
+
     $scope.storageMediumTableClick = function(row) {
         if($scope.select && $scope.storageMedium.id == row.id){
             $scope.select = false;
@@ -41,6 +62,7 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
         } else {
             $scope.storageMedium = row;
             $rootScope.storageMedium = row;
+            vm.getObjectData();
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;
@@ -48,13 +70,13 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
         $scope.statusShow = false;
     };
 
+
     $scope.updateStorageMediums = function() {
         vm.callServer($scope.mediumTableState);
     }
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/
-    var ctrl = this;
     vm.displayedMediums = [];
     //Get data according to ip table settings and populates ip table
     vm.callServer = function callServer(tableState) {
@@ -63,7 +85,7 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             $scope.initLoad = true;
         }
         if(!angular.isUndefined(tableState)) {
-            $scope.mediumTableState = tableState;
+            vm.mediumTableState = tableState;
             var search = "";
             if(tableState.search.predicateObject) {
                 var search = tableState.search.predicateObject["$"];
@@ -87,7 +109,7 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             $scope.initObjLoad = true;
         }
         if(!angular.isUndefined(tableState)) {
-            $scope.objectTableState = tableState;
+            vm.objectTableState = tableState;
             var search = "";
             if(tableState.search.predicateObject) {
                 var search = tableState.search.predicateObject["$"];
@@ -98,13 +120,19 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
             var number = pagination.number || vm.objectsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
             Resource.getStorageObjects(start, number, pageNumber, tableState, $scope.storageMedium, sorting, search).then(function (result) {
-                ctrl.storageObjects = result.data;
+                vm.storageObjects = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.objectLoading = false;
                 $scope.initObjLoad = false;
             });
         }
     };
+    vm.getMediumData = function() {
+        vm.callServer(vm.mediumTableState);
+    }
+    vm.getObjectData = function() {
+        vm.objectPipe(vm.objectTableState);
+    }
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {
