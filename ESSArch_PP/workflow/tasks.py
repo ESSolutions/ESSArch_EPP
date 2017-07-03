@@ -671,6 +671,13 @@ class IOTape(DBTask):
                     content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
+
+                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
+                    entry.ip.archived = True
+                    entry.ip.cached = True
+                    entry.ip.state = 'Preserved'
+                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
+
             elif entry.req_type == 20:  # Read from tape
                 tape_pos = int(entry.storage_object.content_location_value)
 
@@ -770,6 +777,12 @@ class IODisk(DBTask):
                 )
                 step.run().get()
 
+                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
+                    entry.ip.archived = True
+                    entry.ip.cached = True
+                    entry.ip.state = 'Preserved'
+                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
+
             elif entry.req_type == 25:  # Read from disk
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
@@ -800,12 +813,6 @@ class IODisk(DBTask):
             raise
         else:
             entry.status = 20
-
-            if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
-                entry.ip.archived = True
-                entry.ip.cached = True
-                entry.ip.state = 'Preserved'
-                entry.ip.save(update_fields=['archived', 'cached', 'state'])
         finally:
 
             entry.save(update_fields=['status'])
