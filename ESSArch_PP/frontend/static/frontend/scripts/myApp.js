@@ -244,6 +244,26 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
+    .state('home.administration.storageMigration', {
+        url: '/storage-migration',
+        templateUrl: 'static/frontend/views/administration_storage_migration.html',
+        controller: 'StorageMigrationCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.administration.storageMaintenance', {
+        url: '/storage-maintenance',
+        templateUrl: 'static/frontend/views/administration_storage_maintenance.html',
+        controller: 'StorageMaintenanceCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('restricted', {
         url: '/restricted',
         templateUrl: '/static/frontend/views/restricted.html',
