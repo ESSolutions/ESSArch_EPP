@@ -36,6 +36,7 @@ from celery.exceptions import Ignore
 from celery.result import allow_join_result
 
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
@@ -252,18 +253,19 @@ class StoreAIP(DBTask):
             responsible_id=self.responsible,
         ).run().get()
 
-        for method in storage_methods:
-            for method_target in method.storagemethodtargetrelation_set.all():
-                req_type = 10 if method_target.storage_method.type == TAPE else 15
+        with transaction.atomic():
+            for method in storage_methods:
+                for method_target in method.storagemethodtargetrelation_set.filter(status=1):
+                    req_type = 10 if method_target.storage_method.type == TAPE else 15
 
-                _, created = IOQueue.objects.get_or_create(
-                    storage_method_target=method_target, req_type=req_type,
-                    ip_id=aip, status__in=[0, 2, 5],
-                    defaults={'user_id': self.responsible, 'status': 0, 'write_size': size}
-                )
+                    _, created = IOQueue.objects.get_or_create(
+                        storage_method_target=method_target, req_type=req_type,
+                        ip_id=aip, status__in=[0, 2, 5],
+                        defaults={'user_id': self.responsible, 'status': 0, 'write_size': size}
+                    )
 
-                if created:
-                    InformationPackage.objects.filter(pk=aip).update(state='Preserving')
+                    if created:
+                        InformationPackage.objects.filter(pk=aip).update(state='Preserving')
 
     def undo(self, aip):
         pass
