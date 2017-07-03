@@ -234,6 +234,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
+    .state('home.administration.queues', {
+        url: '/queues',
+        templateUrl: 'static/frontend/views/administration_queues.html',
+        controller: 'QueuesCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('restricted', {
         url: '/restricted',
         templateUrl: '/static/frontend/views/restricted.html',

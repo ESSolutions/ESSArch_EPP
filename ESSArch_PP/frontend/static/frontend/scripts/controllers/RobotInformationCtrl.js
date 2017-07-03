@@ -30,9 +30,28 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.robots = [];
     $scope.select = false;
     vm.selectedRobot = null;
+    vm.tapeDrive = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
+    vm.robotQueue = [];
+    vm.storageMediums = [];
+    $scope.requestForm = false;
+    $scope.eventlog = false;
 
+    $scope.menuOptions = function(rowType){
+        return [];
+    }
+
+    $scope.initRequestData = function (types) {
+        vm.requestTypes = types;
+        vm.request = {
+            type: types[0],
+            purpose: "",
+            storageMedium: null,
+        };
+    }
+
+    // Getters
     $scope.getDrives = function(robot) {
         Storage.getTapeDrives(robot).then(function(drives) {
             vm.tapeDrives = drives;
@@ -45,18 +64,10 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
 
-    $scope.robotClick = function(robot) {
-        if($scope.select && vm.selectedRobot.id == robot.id){
-            $scope.select = false;
-            $scope.edit = false;
-            $scope.eventlog = false;
-            vm.selectedRobot = null;
-        } else {
-            vm.selectedRobot = robot;
-            $scope.select = true;
-            $scope.getSlots(vm.selectedRobot);
-            $scope.getDrives(vm.selectedRobot);
-        }
+    $scope.getRobotQueue = function(robot) {
+        Storage.getRobotQueue(robot).then(function(queue) {
+            vm.robotQueue = queue;
+        });
     }
 
     $scope.loadRobots = function() {
@@ -67,6 +78,106 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         });
     }
     $scope.loadRobots();
+
+    // Click funcitons
+    
+    $scope.robotClick = function(robot) {
+        if($scope.select && vm.selectedRobot.id == robot.id){
+            $scope.select = false;
+            $scope.edit = false;
+            $scope.eventlog = false;
+            $scope.requestForm = false;
+            vm.selectedRobot = null;
+        } else {
+            vm.selectedRobot = robot;
+            $scope.select = true;
+            $scope.getSlots(vm.selectedRobot);
+            $scope.getDrives(vm.selectedRobot);
+            $scope.getRobotQueue(vm.selectedRobot);
+        }
+    }
+
+    vm.inventoryClick = function(robot) {
+        $scope.initRequestData(["inventory"]);
+        $scope.requestForm = true;
+        $scope.eventlog = true;
+    }
+    
+    vm.tapeDriveClick = function(tapeDrive) {
+        if(tapeDrive == vm.tapeDrive) {
+            vm.tapeDrive = null;
+            $scope.eventlog = false;
+            $scope.requestForm = false;
+        } else {
+            vm.tapeDrive = tapeDrive;
+            var types = [];
+            if(!tapeDrive.locked) {
+                if(tapeDrive.storage_medium != null) {
+                    types.push("unmount");
+                } else {
+                    types.push("mount");
+                }
+            } else {
+                if(tapeDrive.storage_medium != null) {
+                    types.push("unmount_force");
+                }
+            }
+            if(types.includes("mount")) {
+                $http.get(appConfig.djangoUrl + "storage-mediums/", {params: {status: 20}}).then(function(response) {
+                    vm.storageMediums = response.data;
+                });
+            }
+            $scope.initRequestData(types)
+            $scope.requestForm = true;
+            $scope.eventlog = true;
+        }
+    }
+
+    // Actions
+    vm.inventoryRobot = function(robot, request) {
+        Storage.inventoryRobot(robot).then(function(result) {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
+
+    vm.mountTapeDrive = function(tapeDrive, request) {
+        Storage.mountTapeDrive(tapeDrive, request.storageMedium).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
+
+    vm.unmountTapeDrive = function(tapeDrive, request, force) {
+        Storage.unmountTapeDrive(tapeDrive, force).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
+    // Requests
+	$scope.submitRequest = function(object, request) {
+		switch(request.type) {
+			case "inventory":
+				vm.inventoryRobot(object, request);
+				break;
+            case "mount":
+                vm.mountTapeDrive(vm.tapeDrive, request);
+                break;
+            case "unmount":
+                vm.unmountTapeDrive(vm.tapeDrive, request, false);
+                break;
+            case "unmount_force":
+                vm.unmountTapeDrive(vm.tapeDrive, request, true);
+                break;
+        }
+    }
+	
+    $scope.closeRequestForm = function() {
+        $scope.requestForm = false;
+        $scope.eventlog = false;
+        vm.tapeDrive = null;
+    }
+
     $scope.searchDisabled = function () {
         if ($scope.filterModels.length > 0) {
             if ($scope.filterModels[0].column != null) {

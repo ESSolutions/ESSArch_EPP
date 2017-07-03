@@ -9,7 +9,7 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
-                search: searchString
+                search: searchString,
             }
         }).then(function successCallback(response) {
             count = response.headers('Count');
@@ -66,11 +66,54 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response.data;
         });
     }
+
+    // Inventory robot
+    function inventoryRobot(robot) {
+        return $http.post(robot.url + "inventory/").then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response.statusText;
+        });
+    }
+
+    function getRobotQueue(robot) {
+        var url;
+        robot ? url = robot.url + "queue/" : url = appConfig.djangoUrl + "robot-queue/";
+        return $http({
+            method: 'GET',
+            url: url,
+        }).then(function(response) {
+            return response.data;
+        });
+    }
+    
+    function getIoQueue() {
+        return $http.get(appConfig.djangoUrl + "io-queue/").then(function(response) {
+            return response.data;
+        });
+    }
+
+    function mountTapeDrive(tapeDrive, medium) {
+        return $http.post(tapeDrive.url + "mount/", {storage_medium: medium.id}).then(function(response) {
+            return response;
+        });
+    }
+
+    function unmountTapeDrive(tapeDrive, force) {
+        return $http.post(tapeDrive.url + "unmount/", {force: force}).then(function(response) {
+            return response;
+        });
+    }
     return {
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
         getTapeSlots: getTapeSlots,
         getTapeDrives: getTapeDrives,
-        getRobots: getRobots
+        getRobots: getRobots,
+        inventoryRobot: inventoryRobot,
+        getRobotQueue: getRobotQueue,
+        getIoQueue: getIoQueue,
+        mountTapeDrive: mountTapeDrive,
+        unmountTapeDrive: unmountTapeDrive,
     }
 });

@@ -45,6 +45,8 @@ from ESSArch_Core.storage.models import (
 
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 
+from storage.filters import StorageMediumFilter
+
 from storage.serializers import (
     IOQueueSerializer,
     RobotSerializer,
@@ -76,6 +78,9 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
+
+    filter_class = StorageMediumFilter
+
     ordering_fields = (
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
     )
@@ -247,6 +252,6 @@ class TapeSlotViewSet(viewsets.ModelViewSet):
         'id', 'slot_id', 'medium_id',
     )
     search_fields = (
-        'id', 'slot_id', 'medium_id',
+        'id', 'slot_id', 'medium_id', 'status'
 
     )

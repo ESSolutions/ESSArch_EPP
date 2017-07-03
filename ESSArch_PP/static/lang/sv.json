@@ -263,5 +263,15 @@
     "CHANGED": "Ändrad",
     "FILEBROWSER": "Filhanterare",
     "NO_TAGS": "Det finns inga taggar ...",
-    "COPYID": "Kopiera ID"
+    "COPYID": "Kopiera ID",
+    "INVENTORY": "Inventera",
+    "INVENTORYROBOTS": "Inventera robotar",
+    "POSTED": "Inlagt",
+    "REQUESTTYPE": "Förfrågan",
+    "ROBOTQUEUE": "Robotkö",
+    "IOQUEUE": "IO-kö",
+    "QUEUES": "Köer",
+    "MOUNT": "Montera",
+    "UNMOUNT": "Avmontera",
+    "UNMOUNT_FORCE": "Avmontera(tvinga)"
 }
