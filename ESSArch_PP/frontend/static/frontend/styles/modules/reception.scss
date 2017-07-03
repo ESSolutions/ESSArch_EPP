@@ -313,3 +313,13 @@ input[type="checkbox"] {
 .queues {
     margin-top: 10px;
 }
+
+.migration {
+    margin-top: 10px;
+    .migration-form {
+        width: 50%;
+    }
+    .action-buttons {
+        float: right;
+    }
+}
