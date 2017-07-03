@@ -167,12 +167,12 @@ class CacheAIP(DBTask):
     event_type = 20200
 
     def run(self, aip):
-        srcdir, dstdir, objid = InformationPackage.objects.values_list(
-            'object_path', 'policy__cache_storage__value',
-            'object_identifier_value',
-        ).get(pk=aip)
+        aip_obj = InformationPackage.objects.prefetch_related('policy').get(pk=aip)
+        policy = aip_obj.policy
+        srcdir = aip_obj.object_path
+        objid = aip_obj.object_identifier_value
 
-        dstdir = os.path.join(dstdir, objid)
+        dstdir = os.path.join(policy.cache_storage.value, objid)
         dsttar = dstdir + '.tar'
 
         try:
@@ -204,7 +204,20 @@ class CacheAIP(DBTask):
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
 
-        InformationPackage.objects.filter(pk=aip).update(cached=True)
+        checksum = ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.CalculateChecksum',
+            params={
+                'filename': dsttar,
+                'algorithm': policy.get_checksum_algorithm_display(),
+            },
+            information_package_id=aip,
+            responsible_id=self.responsible,
+        ).run().get()
+
+        InformationPackage.objects.filter(pk=aip).update(
+            message_digest=checksum, message_digest_algorithm=policy.checksum_algorithm,
+            cached=True
+        )
         return aip
 
     def undo(self, aip):
