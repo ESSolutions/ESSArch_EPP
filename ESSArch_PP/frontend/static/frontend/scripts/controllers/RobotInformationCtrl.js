@@ -34,6 +34,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.tapeSlots = [];
     vm.tapeDrives = [];
     vm.robotQueue = [];
+    vm.storageMediums = [];
     $scope.requestForm = false;
     $scope.eventlog = false;
 
@@ -46,6 +47,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         vm.request = {
             type: types[0],
             purpose: "",
+            storageMedium: null,
         };
     }
 
@@ -104,13 +106,30 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.tapeDriveClick = function(tapeDrive) {
         if(tapeDrive == vm.tapeDrive) {
             vm.tapeDrive = null;
+            $scope.eventlog = false;
             $scope.requestForm = false;
         } else {
             vm.tapeDrive = tapeDrive;
-            $scope.initRequestData(["mount", "unmount", "unmount_force"])
+            var types = [];
+            if(!tapeDrive.locked) {
+                if(tapeDrive.storage_medium != null) {
+                    types.push("unmount");
+                } else {
+                    types.push("mount");
+                }
+            } else {
+                if(tapeDrive.storage_medium != null) {
+                    types.push("unmount_force");
+                }
+            }
+            if(types.includes("mount")) {
+                $http.get(appConfig.djangoUrl + "storage-mediums/", {params: {status: 20}}).then(function(response) {
+                    vm.storageMediums = response.data;
+                });
+            }
+            $scope.initRequestData(types)
             $scope.requestForm = true;
             $scope.eventlog = true;
-            console.log("showing request form?", $scope.requestForm, "tapedrive: ", vm.tapeDrive);
         }
     }
 
@@ -123,7 +142,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     }
 
     vm.mountTapeDrive = function(tapeDrive, request) {
-        Storage.mountTapeDrive(tapeDrive).then(function() {
+        Storage.mountTapeDrive(tapeDrive, request.storageMedium).then(function() {
             $scope.requestForm = false;
             $scope.eventlog = false;
         });
@@ -142,13 +161,13 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
 				vm.inventoryRobot(object, request);
 				break;
             case "mount":
-                vm.mountTapeDrive(object, request);
+                vm.mountTapeDrive(vm.tapeDrive, request);
                 break;
             case "unmount":
-                vm.unmountTapeDrive(object, request, false);
+                vm.unmountTapeDrive(vm.tapeDrive, request, false);
                 break;
             case "unmount_force":
-                vm.unmountTapeDrive(object, request, true);
+                vm.unmountTapeDrive(vm.tapeDrive, request, true);
                 break;
         }
     }

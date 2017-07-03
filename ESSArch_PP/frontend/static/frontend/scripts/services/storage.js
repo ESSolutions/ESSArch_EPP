@@ -9,7 +9,7 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
-                search: searchString
+                search: searchString,
             }
         }).then(function successCallback(response) {
             count = response.headers('Count');
@@ -93,8 +93,8 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         });
     }
 
-    function mountTapeDrive(tapeDrive) {
-        return $http.post(tapeDrive.url + "mount/").then(function(response) {
+    function mountTapeDrive(tapeDrive, medium) {
+        return $http.post(tapeDrive.url + "mount/", {storage_medium: medium.id}).then(function(response) {
             return response;
         });
     }

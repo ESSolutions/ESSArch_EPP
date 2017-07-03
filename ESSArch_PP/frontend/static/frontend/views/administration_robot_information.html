@@ -116,7 +116,7 @@
                                 <td>{{row.id}}</td>
                                 <td>{{row.device}}</td>
                                 <td>{{row.num_of_mounts}}</td>
-                                <td>{{row.status}}</td>
+                                <td>{{row.status}}</td>pe
                             </tr>
                         </tbody>
                     </table>
@@ -144,6 +144,12 @@
                             {{'PURPOSE' | translate}}
                         </label>
                         <input required class="form-control" ng-model="vm.request.purpose">
+                    </div>
+                    <div ng-if="vm.request.type == 'mount'">
+                        <label>
+                            {{'STORAGEMEDIUM' | translate}}
+                        </label>
+                        <select required class="form-control" ng-model="vm.request.storageMedium" ng-options="medium.medium_id for medium in vm.storageMediums"></select>
                     </div>
                 </div>
             </form>
