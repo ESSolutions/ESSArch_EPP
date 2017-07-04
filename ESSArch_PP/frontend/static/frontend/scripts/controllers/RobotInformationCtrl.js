@@ -38,6 +38,9 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     $scope.requestForm = false;
     $scope.eventlog = false;
     var robotInterval;
+    $rootScope.$on('$stateChangeStart', function() {
+		$interval.cancel(robotInterval);
+	});
     $interval.cancel(robotInterval);
     robotInterval = $interval(function() {
         $scope.loadRobots();
