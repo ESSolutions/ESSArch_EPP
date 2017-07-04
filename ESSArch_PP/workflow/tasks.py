@@ -676,6 +676,7 @@ class IOTape(DBTask):
                         params={
                             'medium': storage_medium,
                             'path': src,
+                            'block_size': medium.block_size * 512,
                         },
                         processstep=step,
                         processstep_pos=2,
@@ -717,11 +718,14 @@ class IOTape(DBTask):
                     processstep_pos=1,
                 ).run().get()
 
+                medium = StorageMedium.objects.get(pk=storage_medium)
+
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.ReadTape",
                     params={
                         'medium': storage_medium,
-                        'path': cache
+                        'path': cache,
+                        'block_size': medium.block_size * 512,
                     },
                     processstep=step,
                     processstep_pos=2,
