@@ -139,7 +139,7 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TapeSlot
         fields = (
-            'url','id', 'slot_id', 'medium_id', 'robot', 'status'
+            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'locked', 'mounted',
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
