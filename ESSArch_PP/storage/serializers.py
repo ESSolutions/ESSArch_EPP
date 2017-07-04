@@ -119,7 +119,18 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
+    locked = serializers.SerializerMethodField()
+    mounted = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+
+    def get_locked(self, obj):
+        if hasattr(obj, 'storage_medium'):
+            return obj.storage_medium.tape_drive.locked
+        return False
+
+    def get_mounted(self, obj):
+        return hasattr(obj, 'storage_medium') and hasattr(obj.storage_medium, 'tape_drive')
+
     def get_status(self, obj):
         if hasattr(obj, 'storage_medium'):
             return obj.storage_medium.get_status_display()
