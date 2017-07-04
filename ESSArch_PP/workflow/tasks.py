@@ -668,15 +668,27 @@ class IOTape(DBTask):
                 else:
                     src = entry.ip.object_path
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.WriteToTape",
-                    params={
-                        'medium': storage_medium,
-                        'path': src,
-                    },
-                    processstep=step,
-                    processstep_pos=2,
-                ).run().get()
+                medium = StorageMedium.objects.get(pk=storage_medium)
+
+                try:
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.WriteToTape",
+                        params={
+                            'medium': storage_medium,
+                            'path': src,
+                        },
+                        processstep=step,
+                        processstep_pos=2,
+                    ).run().get()
+                except OSError as e:
+                    if e.errno == errno.ENOSPC:
+                        medium.mark_as_full()
+                        entry.status = 0
+                        entry.storage_medium = None
+                        entry.save(update_fields=['status', 'storage_medium'])
+                        return
+                    else:
+                        raise
 
                 StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
