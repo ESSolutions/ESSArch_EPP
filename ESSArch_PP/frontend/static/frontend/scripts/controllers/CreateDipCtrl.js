@@ -142,6 +142,7 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
             $scope.edit = false;
             $scope.ip = null;
             $rootScope.ip = null;
+            $scope.filebrowser = false;
         } else {
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
