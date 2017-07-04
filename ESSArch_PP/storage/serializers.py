@@ -43,8 +43,9 @@ class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
             'remote_status', 'transfer_task_id'
         )
 
-class StorageObjectReadSerializer(serializers.HyperlinkedModelSerializer):
-    ip = InformationPackageSerializer()
+
+class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
+    ip = InformationPackageSerializer(read_only=True)
     class Meta:
         model = StorageObject
         fields = (
@@ -52,13 +53,6 @@ class StorageObjectReadSerializer(serializers.HyperlinkedModelSerializer):
             'last_changed_external', 'ip', 'storage_medium'
         )
 
-class StorageObjectWriteSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageObject
-        fields = (
-            'url', 'id', 'content_location_type', 'content_location_value', 'last_changed_local',
-            'last_changed_external', 'ip', 'storage_medium'
-        )
 
 class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
