@@ -143,11 +143,7 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
-    storage_medium = serializers.HyperlinkedRelatedField(
-        queryset=StorageMedium.objects.all(),
-        view_name='storagemedium-detail',
-        allow_null=True
-    )
+    storage_medium = StorageMediumReadSerializer()
     status = serializers.SerializerMethodField()
     def get_status(self, obj):
         if hasattr(obj, 'storage_medium'):        
