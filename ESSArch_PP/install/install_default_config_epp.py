@@ -149,6 +149,7 @@ def installDefaultPaths():
         'access': '/ESSArch/data/epp/access',
         'disseminations': '/ESSArch/data/epp/disseminations',
         'orders': '/ESSArch/data/epp/orders',
+        'verify': '/ESSArch/verify',
     }
 
     for key in dct:
