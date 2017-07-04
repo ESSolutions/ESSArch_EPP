@@ -81,7 +81,7 @@
                             </tr>
                         </thead>
                         <tbody>                                
-                            <tr ng-class="row.class" ng-repeat="row in vm.slots"  ng-attr-context-menu="menuOptions" class="table-item">
+                            <tr ng-class="{'selected': vm.tapeSlot.id == row.id}" ng-repeat="row in vm.slots" ng-click="vm.tapeSlotClick(row)" ng-attr-context-menu="menuOptions" class="table-item clickable">
                                 <td>{{row.slot_id}}</td>
                                 <td>{{row.medium_id}}</td>
                                 <td>{{row.status}}</td>
@@ -145,7 +145,7 @@
                         </label>
                         <input required class="form-control" ng-model="vm.request.purpose">
                     </div>
-                    <div ng-if="vm.request.type == 'mount'">
+                    <div ng-if="vm.request.type == 'mount' && vm.tapeSlot == null">
                         <label>
                             {{'STORAGEMEDIUM' | translate}}
                         </label>

@@ -31,6 +31,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     $scope.select = false;
     vm.selectedRobot = null;
     vm.tapeDrive = null;
+    vm.tapeSlot = null;
     vm.tapeSlots = [];
     vm.tapeDrives = [];
     vm.robotQueue = [];
@@ -122,6 +123,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.eventlog = false;
             $scope.requestForm = false;
         } else {
+            vm.tapeSlot = null;
             vm.tapeDrive = tapeDrive;
             var types = [];
             if(!tapeDrive.locked) {
@@ -139,6 +141,35 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
                 vm.getStorageMediumsByState(20).then(function(result) {
                     vm.storageMediums = result;
                 });
+            }
+            $scope.initRequestData(types)
+            $scope.requestForm = true;
+            $scope.eventlog = true;
+        }
+    }
+
+    vm.tapeSlotClick = function (tapeSlot) {
+        if (tapeSlot.medium_id === "") {
+            return;
+        }
+        if (tapeSlot == vm.tapeSlot) {
+            vm.tapeSlot = null;
+            $scope.eventlog = false;
+            $scope.requestForm = false;
+        } else {
+            vm.tapeDrive = null;
+            vm.tapeSlot = tapeSlot;
+            var types = [];
+            if (!tapeSlot.locked) {
+                if (tapeSlot.mounted) {
+                    types.push("unmount");
+                } else {
+                    types.push("mount");
+                }
+            } else {
+                if (tapeSlot.mounted) {
+                    types.push("unmount_force");
+                }
             }
             $scope.initRequestData(types)
             $scope.requestForm = true;
@@ -173,6 +204,20 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
             $scope.eventlog = false;
         });
     }
+
+    vm.mountTapeSlot = function(tapeSlot, request) {
+        Storage.mountTapeSlot(tapeSlot, request).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
+
+    vm.unmountTapeSlot = function(tapeSlot, request, force) {
+        Storage.unmountTapeSlot(tapeDrive, force).then(function() {
+            $scope.requestForm = false;
+            $scope.eventlog = false;
+        });
+    }
     // Requests
 	$scope.submitRequest = function(object, request) {
 		switch(request.type) {
@@ -180,13 +225,25 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
 				vm.inventoryRobot(object, request);
 				break;
             case "mount":
-                vm.mountTapeDrive(vm.tapeDrive, request);
+                if(vm.tapeDrive != null) {
+                    vm.mountTapeDrive(vm.tapeDrive, request);
+                } else if (vm.tapeSlot != null) {
+                    vm.mountTapeSlot(vm.tapeSlot, request);
+                }
                 break;
             case "unmount":
-                vm.unmountTapeDrive(vm.tapeDrive, request, false);
+                if(vm.tapeDrive != null) {
+                    vm.unmountTapeDrive(vm.tapeDrive, request, false);
+                } else if (vm.tapeSlot != null) {
+                    vm.unmountTapeSlot(vm.tapeSlot, request, false);
+                }
                 break;
             case "unmount_force":
-                vm.unmountTapeDrive(vm.tapeDrive, request, true);
+                if(vm.tapeDrive != null) {
+                    vm.unmountTapeDrive(vm.tapeDrive, request, true);
+                } else if (vm.tapeSlot != null) {
+                    vm.unmountTapeSlot(vm.tapeSlot, request, true);
+                }
                 break;
         }
     }
@@ -195,6 +252,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         $scope.requestForm = false;
         $scope.eventlog = false;
         vm.tapeDrive = null;
+        vm.tapeSlot = null;
     }
 
     $scope.searchDisabled = function () {

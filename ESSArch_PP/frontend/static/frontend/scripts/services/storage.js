@@ -104,6 +104,18 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response;
         });
     }
+
+    function mountTapeSlot(tapeSlot, medium) {
+        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.medium_id + "/mount/").then(function(response) {
+            return response;
+        });
+    }
+
+    function unmountTapeSlot(tapeSlot, force) {
+        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.medium_id + "/unmount/", {force: force}).then(function(response) {
+            return response;
+        });
+    }
     return {
         getStorageMediums: getStorageMediums,
         getStorageObjects: getStorageObjects,
@@ -115,5 +127,7 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         getIoQueue: getIoQueue,
         mountTapeDrive: mountTapeDrive,
         unmountTapeDrive: unmountTapeDrive,
+        mountTapeSlot: mountTapeSlot,
+        unmountTapeSlot: unmountTapeSlot,
     }
 });
