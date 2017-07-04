@@ -68,7 +68,7 @@ class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
             'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
         )
 
-class StorageMediumReadSerializer(serializers.HyperlinkedModelSerializer):
+class StorageMediumReadSerializer(DynamicHyperlinkedModelSerializer):
     storage_target = StorageTargetSerializer(read_only=True)
 
     location_status = serializers.SerializerMethodField()
@@ -119,6 +119,10 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
+    storage_medium = StorageMediumReadSerializer(fields=[
+        'url', 'id', 'tape_drive', 'status', 'used_capacity',
+        'num_of_mounts', 'create_date',
+    ])
     locked = serializers.SerializerMethodField()
     mounted = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -133,13 +137,16 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_status(self, obj):
         if hasattr(obj, 'storage_medium'):
+            if obj.storage_medium.tape_drive:
+                drive = obj.storage_medium.tape_drive
+                return 'Mounted in drive %s (%s)' % (drive.pk, drive.device)
             return obj.storage_medium.get_status_display()
         return 'empty'
 
     class Meta:
         model = TapeSlot
         fields = (
-            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'locked', 'mounted',
+            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'locked', 'mounted', 'storage_medium',
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
