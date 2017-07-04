@@ -167,6 +167,9 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.select = true;
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
+            if($scope.filebrowser && !$scope.ip.url) {
+                $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
+            }
         }
     };
     $scope.filebrowser = false;
@@ -177,7 +180,9 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $rootScope.ip = null;
         } else {
             $scope.filebrowser = true;
-            ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
+            if(!ip.url) {
+                ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
+            }
             $scope.ip = ip;
             $rootScope.ip = ip;
         }
