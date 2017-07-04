@@ -61,6 +61,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 			if ($scope.ip != null && $scope.ip.object_identifier_value== row.object_identifier_value) {
 				$scope.ip = null;
 				$rootScope.ip = null;
+                $scope.filebrowser = false;
 			} else {
 				$scope.ip = row;
 				$rootScope.ip = $scope.ip;
@@ -75,6 +76,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
             $scope.requestForm = false;
             $scope.ip = null;
             $rootScope.ip = null;
+            $scope.filebrowser = false;
             $scope.initRequestData();
         } else {
             $scope.select = true;

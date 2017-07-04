@@ -45,6 +45,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
 			if ($scope.ip != null && $scope.ip.object_identifier_value == row.object_identifier_value) {
 				$scope.ip = null;
 				$rootScope.ip = null;
+                $scope.filebrowser = false;
 			} else {
 				$scope.ip = row;
 				$rootScope.ip = $scope.ip;
@@ -59,6 +60,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $scope.requestForm = false;
 			$scope.ip = null;
 			$rootScope.ip = null;
+            $scope.filebrowser = false;
             $scope.initRequestData();
 
         } else {
