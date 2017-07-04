@@ -128,7 +128,7 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.SerializerMethodField()
 
     def get_locked(self, obj):
-        if hasattr(obj, 'storage_medium'):
+        if hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None:
             return obj.storage_medium.tape_drive.locked
         return False
 
