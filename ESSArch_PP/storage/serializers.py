@@ -133,7 +133,7 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
         return False
 
     def get_mounted(self, obj):
-        return hasattr(obj, 'storage_medium') and hasattr(obj.storage_medium, 'tape_drive')
+        return hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None
 
     def get_status(self, obj):
         if hasattr(obj, 'storage_medium'):
