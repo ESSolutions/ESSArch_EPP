@@ -213,7 +213,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     }
 
     vm.unmountTapeSlot = function(tapeSlot, request, force) {
-        Storage.unmountTapeSlot(tapeDrive, force).then(function() {
+        Storage.unmountTapeSlot(tapeSlot, force).then(function() {
             $scope.requestForm = false;
             $scope.eventlog = false;
         });
