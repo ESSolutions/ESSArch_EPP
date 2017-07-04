@@ -68,7 +68,7 @@ class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
             'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
         )
 
-class StorageMediumReadSerializer(DynamicHyperlinkedModelSerializer):
+class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
     storage_target = StorageTargetSerializer(read_only=True)
 
     location_status = serializers.SerializerMethodField()
@@ -85,14 +85,6 @@ class StorageMediumReadSerializer(DynamicHyperlinkedModelSerializer):
         fields = (
             'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size', 'format',
             'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
-        )
-
-class StorageMediumWriteSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageMedium
-        fields = (
-            'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size',
-            'format', 'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive'
         )
 
 
@@ -119,7 +111,7 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
-    storage_medium = StorageMediumReadSerializer(fields=[
+    storage_medium = StorageMediumSerializer(fields=[
         'url', 'id', 'tape_drive', 'status', 'used_capacity',
         'num_of_mounts', 'create_date',
     ])
@@ -150,7 +142,7 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
-    storage_medium = StorageMediumReadSerializer()
+    storage_medium = StorageMediumSerializer()
     status = serializers.SerializerMethodField()
     def get_status(self, obj):
         if hasattr(obj, 'storage_medium'):        
@@ -167,7 +159,7 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
     io_queue_entry = IOQueueSerializer(read_only=True)
     robot = RobotSerializer(read_only=True)
-    storage_medium = StorageMediumReadSerializer(read_only=True)
+    storage_medium = StorageMediumSerializer(read_only=True)
     user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
     req_type = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()

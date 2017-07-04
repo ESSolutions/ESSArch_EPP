@@ -57,8 +57,7 @@ from storage.serializers import (
     StorageMethodTargetRelationSerializer,
     StorageObjectReadSerializer,
     StorageObjectWriteSerializer,
-    StorageMediumReadSerializer,
-    StorageMediumWriteSerializer,
+    StorageMediumSerializer,
     StorageTargetSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
@@ -77,6 +76,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     API endpoint for storage medium
     """
     queryset = StorageMedium.objects.all()
+    serializer_class = StorageMediumSerializer
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
@@ -89,11 +89,6 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     search_fields = (
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
     )
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return StorageMediumReadSerializer
-        return StorageMediumWriteSerializer
 
     @detail_route(methods=['post'])
     def mount(self, request, pk=None):
