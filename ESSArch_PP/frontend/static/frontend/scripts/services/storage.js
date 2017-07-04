@@ -106,13 +106,13 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
     }
 
     function mountTapeSlot(tapeSlot, medium) {
-        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.medium_id + "/mount/").then(function(response) {
+        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.storage_medium.id + "/mount/").then(function(response) {
             return response;
         });
     }
 
     function unmountTapeSlot(tapeSlot, force) {
-        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.medium_id + "/unmount/", {force: force}).then(function(response) {
+        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.storage_medium.id + "/unmount/", {force: force}).then(function(response) {
             return response;
         });
     }

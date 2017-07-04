@@ -24,11 +24,13 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import exceptions, viewsets, filters
+from rest_framework import exceptions, viewsets, filters, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
+
+from ESSArch_Core.exceptions import Conflict
 
 from ESSArch_Core.storage.models import (
     IOQueue,
@@ -92,6 +94,39 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
         if self.request.method == 'GET':
             return StorageMediumReadSerializer
         return StorageMediumWriteSerializer
+
+    @detail_route(methods=['post'])
+    def mount(self, request, pk=None):
+        medium = self.get_object()
+
+        if medium.tape_drive is not None:
+            raise Conflict(detail='Tape already mounted')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=medium,
+            req_type=10, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @detail_route(methods=['post'])
+    def unmount(self, request, pk=None):
+        medium = self.get_object()
+
+        if medium.tape_drive is None:
+            raise exceptions.ParseError(detail='Tape not mounted')
+
+        force = request.data.get('force', False)
+        req_type = 30 if force else 20
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=medium,
+            req_type=req_type, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 class StorageMethodViewSet(viewsets.ModelViewSet):
     """
