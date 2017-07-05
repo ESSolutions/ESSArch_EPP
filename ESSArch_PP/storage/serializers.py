@@ -131,8 +131,9 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
-    storage_medium = StorageMediumSerializer()
+    storage_medium = StorageMediumSerializer(read_only=True)
     status = serializers.SerializerMethodField()
+
     def get_status(self, obj):
         return obj.get_status_display()
 
