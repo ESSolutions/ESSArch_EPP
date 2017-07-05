@@ -159,6 +159,9 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
+
+    // Storage
+
     function getStorageMediums(start, number, pageNumber, params, sort, search) {
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -186,6 +189,89 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
+    function getRobots(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobots(pageNumber, number, sortString, search).then(function (value) {
+            var robotCollection = value.data;
+            return {
+                data: robotCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getRobotQueue(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobotQueue(pageNumber, number, sortString, search).then(function (value) {
+            var robotQueueCollection = value.data;
+            return {
+                data: robotQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getRobotQueueForRobot(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobotQueueForRobot(pageNumber, number, sortString, search, robot).then(function (value) {
+            var robotQueueCollection = value.data;
+            return {
+                data: robotQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getIoQueue(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getIoQueue(pageNumber, number, sortString, search).then(function (value) {
+            var ioQueueCollection = value.data;
+            return {
+                data: ioQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getTapeDrives(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getTapeDrives(pageNumber, number, sortString, search, robot).then(function (value) {
+            var tapeDrivecollection = value.data;
+            return {
+                data: tapeDrivecollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getTapeSlots(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getTapeSlots(pageNumber, number, sortString, search, robot).then(function (value) {
+            var tapeSlotCollection = value.data;
+            return {
+                data: tapeSlotCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
     return {
         getEventPage: getEventPage,
         getIpPage: getIpPage,
@@ -195,5 +281,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getWorkareaIps: getWorkareaIps,
         getDips: getDips,
         getOrders: getOrders,
+        getRobots: getRobots,
+        getRobotQueue: getRobotQueue,
+        getRobotQueueForRobot: getRobotQueueForRobot,
+        getIoQueue: getIoQueue,
+        getTapeDrives: getTapeDrives,
+        getTapeSlots: getTapeSlots,
     };
 });

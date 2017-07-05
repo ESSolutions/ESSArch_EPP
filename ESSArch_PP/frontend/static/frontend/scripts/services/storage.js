@@ -1,5 +1,5 @@
 angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
-    
+
     // Get storage mediums
     function getStorageMediums(pageNumber, pageSize, filters, sortString, searchString) {
         return $http({
@@ -46,24 +46,142 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         });
     }
 
+
+    // Get robots
+    function getRobots(pageNumber, pageSize, sortString, searchString) {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'robots/',
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+    }
+
     // Get tape slots given robot
-    function getTapeSlots(robot) {
-        return $http.get(robot.url + "tape-slots/").then(function(response) {
-            return response.data;
+    function getTapeSlots(pageNumber, pageSize, sortString, searchString, robot) {
+        return $http({
+            method: 'GET',
+            url: robot.url + "tape-slots/",
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
         });
     }
 
     // Get tape drives
-    function getTapeDrives(robot) {
-        return $http.get(robot.url + "tape-drives/").then(function(response) {
-            return response.data;
+    function getTapeDrives(pageNumber, pageSize, sortString, searchString, robot) {
+        return $http({
+            method: 'GET',
+            url: robot.url + "tape-drives/",
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
         });
     }
 
-    // Get robots
-    function getRobots() {
-        return $http.get(appConfig.djangoUrl + 'robots/').then(function(response) {
-            return response.data;
+
+    function getRobotQueueForRobot(pageNumber, pageSize, sortString, searchString, robot) {
+        var url = robot.url + "queue/";
+        return $http({
+            method: 'GET',
+            url: url,
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+    }
+
+    function getRobotQueue(pageNumber, pageSize, sortString, searchString) {
+        var url = appConfig.djangoUrl + "robot-queue/";
+        return $http({
+            method: 'GET',
+            url: url,
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
+        });
+    }
+
+    function getIoQueue(pageNumber, pageSize, sortString, searchString) {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + "io-queue/",
+            params: {
+                page: pageNumber,
+                page_size: pageSize,
+                ordering: sortString,
+                search: searchString,
+            }
+        }).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
+            return {
+                count: count,
+                data: response.data
+            };
         });
     }
 
@@ -73,23 +191,6 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
             return response;
         }).catch(function(response) {
             return response.statusText;
-        });
-    }
-
-    function getRobotQueue(robot) {
-        var url;
-        robot ? url = robot.url + "queue/" : url = appConfig.djangoUrl + "robot-queue/";
-        return $http({
-            method: 'GET',
-            url: url,
-        }).then(function(response) {
-            return response.data;
-        });
-    }
-    
-    function getIoQueue() {
-        return $http.get(appConfig.djangoUrl + "io-queue/").then(function(response) {
-            return response.data;
         });
     }
 
@@ -123,6 +224,7 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
         getTapeDrives: getTapeDrives,
         getRobots: getRobots,
         inventoryRobot: inventoryRobot,
+        getRobotQueueForRobot: getRobotQueueForRobot,
         getRobotQueue: getRobotQueue,
         getIoQueue: getIoQueue,
         mountTapeDrive: mountTapeDrive,

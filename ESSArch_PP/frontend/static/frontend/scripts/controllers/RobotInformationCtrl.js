@@ -25,7 +25,7 @@ Email - essarch@essolutions.se
 angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
     var vm = this;
     $scope.translate = $translate;
-    vm.slotsPerPage = 20;
+    vm.slotsPerPage = 10;
     $scope.colspan = 4;
     vm.robots = [];
     $scope.select = false;
@@ -38,20 +38,26 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     vm.storageMediums = [];
     $scope.requestForm = false;
     $scope.eventlog = false;
+
+    // Table states
+
     var robotInterval;
     $rootScope.$on('$stateChangeStart', function() {
 		$interval.cancel(robotInterval);
 	});
     $interval.cancel(robotInterval);
     robotInterval = $interval(function() {
-        $scope.loadRobots();
-        if(vm.selectedRobot != null) {
-            $scope.getRobotQueue(vm.selectedRobot)
-            $scope.getSlots(vm.selectedRobot);
-            $scope.getDrives(vm.selectedRobot);
-        }
+        vm.updateTables();
     }, appConfig.robotInterval);
 
+    vm.updateTables = function() {
+        $scope.loadRobots(vm.robotTableState);
+        if(vm.selectedRobot != null) {
+            $scope.getRobotQueue(vm.robotQueueTableState)
+            $scope.getSlots(vm.slotTableState);
+            $scope.getDrives(vm.driveTableState);
+        }
+    }
     $scope.menuOptions = function(rowType){
         return [];
     }
@@ -66,32 +72,83 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     }
 
     // Getters
-    $scope.getDrives = function(robot) {
-        Storage.getTapeDrives(robot).then(function(drives) {
-            vm.tapeDrives = drives;
-        });
+    $scope.getDrives = function(tableState) {
+        if (!angular.isUndefined(tableState)) {
+            vm.driveTableState = tableState;
+            var search = "";
+			if(tableState.search.predicateObject) {
+				var search = tableState.search.predicateObject["$"];
+			}
+			var sorting = tableState.sort;
+			var pagination = tableState.pagination;
+			var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+			var number = pagination.number || vm.drivesPerPage;  // Number of entries showed per page.
+			var pageNumber = start/number+1;
+            Resource.getTapeDrives(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
+                vm.tapeDrives = result.data;
+                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            });
+        }
     }
 
-    $scope.getSlots = function(robot) {
-        Storage.getTapeSlots(robot).then(function(slots) {
-            vm.tapeSlots = slots;
-        });
+    $scope.getSlots = function (tableState) {
+        if (!angular.isUndefined(tableState)) {
+            vm.slotTableState = tableState;
+            var search = "";
+			if(tableState.search.predicateObject) {
+				var search = tableState.search.predicateObject["$"];
+			}
+			var sorting = tableState.sort;
+			var pagination = tableState.pagination;
+			var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+			var number = pagination.number || vm.slotsPerPage;  // Number of entries showed per page.
+			var pageNumber = start/number+1;
+            Resource.getTapeSlots(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
+                vm.tapeSlots = result.data;
+                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            });
+        }
     }
 
-    $scope.getRobotQueue = function(robot) {
-        Storage.getRobotQueue(robot).then(function(queue) {
-            vm.robotQueue = queue;
-        });
+    $scope.getRobotQueue = function (tableState) {
+        if (!angular.isUndefined(tableState)) {
+            vm.robotQueueTableState = tableState;
+            var search = "";
+			if(tableState.search.predicateObject) {
+				var search = tableState.search.predicateObject["$"];
+			}
+			var sorting = tableState.sort;
+			var pagination = tableState.pagination;
+			var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+			var number = pagination.number || vm.robotQueueItemsPerPage;  // Number of entries showed per page.
+			var pageNumber = start/number+1;
+            Resource.getRobotQueueForRobot(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
+                vm.robotQueue = result.data;
+                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            });
+        }
     }
 
-    $scope.loadRobots = function() {
+    $scope.loadRobots = function(tableState) {
         $scope.ipLoading = true;
-        Storage.getRobots().then(function(robots) {
-            vm.robots = robots;
-            $scope.ipLoading = false;
-        });
+        if (!angular.isUndefined(tableState)) {
+            vm.robotTableState = tableState;
+            var search = "";
+			if(tableState.search.predicateObject) {
+				var search = tableState.search.predicateObject["$"];
+			}
+			var sorting = tableState.sort;
+			var pagination = tableState.pagination;
+			var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+			var number = pagination.number || vm.robotsPerPage;  // Number of entries showed per page.
+			var pageNumber = start/number+1;
+            Resource.getRobots(start, number, pageNumber, tableState, sorting, search).then(function (result) {
+                vm.robots = result.data;
+                tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                $scope.ipLoading = false;
+            });
+        }
     }
-    $scope.loadRobots();
 
     // Click funcitons
 
@@ -105,9 +162,9 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
         } else {
             vm.selectedRobot = robot;
             $scope.select = true;
-            $scope.getSlots(vm.selectedRobot);
-            $scope.getDrives(vm.selectedRobot);
-            $scope.getRobotQueue(vm.selectedRobot);
+            $scope.getSlots(vm.slotTableState);
+            $scope.getDrives(vm.driveTableState);
+            $scope.getRobotQueue(vm.robotQueueTableState);
         }
     }
 
