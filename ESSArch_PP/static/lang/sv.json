@@ -301,5 +301,6 @@
     "FILTERS": "Filter",
     "STORAGEMIGRATION": "Lagringsmigrering",
     "STORAGEMAINTENANCE": "Lagringsunderhåll",
-    "MAXCAPACITY": "Maxkapacitet"
+    "MAXCAPACITY": "Maxkapacitet",
+    "MEDIUM": "Medium"
 }

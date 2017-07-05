@@ -301,5 +301,6 @@
     "FILTERS": "Filters",
     "STORAGEMIGRATION": "Storage migration",
     "STORAGEMAINTENANCE": "Storage maintenance",
-    "MAXCAPACITY": "Max capacity"
+    "MAXCAPACITY": "Max capacity",
+    "MEDIUM": "Medium"
 }
