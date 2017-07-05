@@ -2,6 +2,10 @@ from rest_framework import serializers
 
 from ip.serializers import InformationPackageSerializer
 
+from ESSArch_Core.auth.serializers import UserSerializer
+
+from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
+
 from ESSArch_Core.storage.models import medium_status_CHOICES
 
 from ESSArch_Core.storage.models import (
@@ -21,6 +25,15 @@ from ESSArch_Core.storage.models import (
 class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
 
+    req_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_req_type(self, obj):
+        return obj.get_req_type_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     class Meta:
         model = IOQueue
         fields = (
@@ -30,8 +43,9 @@ class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
             'remote_status', 'transfer_task_id'
         )
 
-class StorageObjectReadSerializer(serializers.HyperlinkedModelSerializer):
-    ip = InformationPackageSerializer()
+
+class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
+    ip = InformationPackageSerializer(read_only=True)
     class Meta:
         model = StorageObject
         fields = (
@@ -39,13 +53,6 @@ class StorageObjectReadSerializer(serializers.HyperlinkedModelSerializer):
             'last_changed_external', 'ip', 'storage_medium'
         )
 
-class StorageObjectWriteSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageObject
-        fields = (
-            'url', 'id', 'content_location_type', 'content_location_value', 'last_changed_local',
-            'last_changed_external', 'ip', 'storage_medium'
-        )
 
 class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -55,21 +62,23 @@ class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
             'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
         )
 
-class StorageMediumReadSerializer(serializers.HyperlinkedModelSerializer):
+class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
     storage_target = StorageTargetSerializer(read_only=True)
+
+    location_status = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_location_status(self, obj):
+        return obj.get_location_status_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     class Meta:
         model = StorageMedium
         fields = (
             'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size', 'format',
             'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
-        )
-
-class StorageMediumWriteSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageMedium
-        fields = (
-            'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size',
-            'format', 'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive'
         )
 
 
@@ -96,32 +105,59 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
+    storage_medium = StorageMediumSerializer(fields=[
+        'url', 'id', 'tape_drive', 'status', 'used_capacity',
+        'num_of_mounts', 'create_date',
+    ])
+    locked = serializers.SerializerMethodField()
+    mounted = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+
     def get_status(self, obj):
-        if hasattr(obj, 'storage_medium'):
-            return obj.storage_medium.get_status_display()
-        return 'empty'
+        return obj.get_status_display()
+
+    def get_locked(self, obj):
+        if hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None:
+            return obj.storage_medium.tape_drive.locked
+        return False
+
+    def get_mounted(self, obj):
+        return hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None
 
     class Meta:
         model = TapeSlot
         fields = (
-            'url','id', 'slot_id', 'medium_id', 'robot', 'status'
+            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'locked', 'mounted', 'storage_medium',
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
+    storage_medium = StorageMediumSerializer(read_only=True)
     status = serializers.SerializerMethodField()
+
     def get_status(self, obj):
-        if hasattr(obj, 'storage_medium'):        
-            return obj.storage_medium.get_status_display()
-        return 'empty'
+        return obj.get_status_display()
 
     class Meta:
         model = TapeDrive
         fields = (
-            'url', 'id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status'
+            'url', 'id', 'drive_id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status', 'storage_medium',
+            'locked', 'last_change',
         )
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
+    io_queue_entry = IOQueueSerializer(read_only=True)
+    robot = RobotSerializer(read_only=True)
+    storage_medium = StorageMediumSerializer(read_only=True)
+    user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
+    req_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    def get_req_type(self, obj):
+        return obj.get_req_type_display()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     class Meta:
         model = RobotQueue
         fields = (

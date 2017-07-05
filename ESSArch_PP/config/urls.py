@@ -106,6 +106,12 @@ router.register(r'profile-ip', ProfileIPViewSet)
 router.register(r'profile-sa', ProfileSAViewSet)
 router.register(r'profiles', ProfileViewSet)
 router.register(r'robots', RobotViewSet)
+router.register(r'robots', ProcessStepViewSet, base_name='robots').register(
+    r'queue',
+    RobotQueueViewSet,
+    base_name='robots-queue',
+    parents_query_lookups=['robot']
+)
 router.register(r'robot-queue', RobotQueueViewSet)
 router.register(r'steps', ProcessStepViewSet)
 router.register(r'steps', ProcessStepViewSet, base_name='steps').register(

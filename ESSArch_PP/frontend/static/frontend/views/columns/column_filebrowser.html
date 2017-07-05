@@ -1,6 +1,6 @@
-<div ng-if="!subrow && (row.responsible.id == auth.id || !row.responsible) && !row.archived">
+<div ng-if="!subrow && (row.responsible.id == auth.id || row.responsible == null) && !row.archived && row.package_type != 1 && row.state !== 'Receiving'">
     <a ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
 </div>
-<div ng-if="subrow && (subrow.responsible.id == auth.id || !subrow.responsible  && !subrow.archived)">
+<div ng-if="subrow && (subrow.responsible.id == auth.id || subrow.responsible == null)  && !subrow.archived  && row.state !== 'Receiving'">
     <a ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
 </div>

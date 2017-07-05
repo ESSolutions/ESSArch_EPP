@@ -1,6 +1,5 @@
 angular.module('myApp').controller('AdministrationCtrl', function($scope, $rootScope, $controller, $cookies, $http, appConfig) {
     var vm = this;
-    $controller('BaseCtrl', { $scope: $scope });
     vm.ipViewType = $cookies.get('ip-view-type') || 1;
     $scope.selectedObject = {id: "", class: ""};
     vm.storageObjects = []

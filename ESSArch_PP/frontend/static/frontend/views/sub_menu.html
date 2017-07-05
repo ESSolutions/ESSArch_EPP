@@ -14,6 +14,9 @@
         <div ng-if="'home.administration' | includedByState">
             <div ui-sref="home.administration.mediaInformation" ng-class="{chosen: $state.current.name == 'home.administration.mediaInformation'}" class="nav-item sliding-middle-out">{{'MEDIAINFORMATION' | translate}}</div>
             <div ui-sref="home.administration.robotInformation" ng-class="{chosen: $state.current.name == 'home.administration.robotInformation'}" class="nav-item sliding-middle-out">{{'ROBOTINFORMATION' | translate}}</div>
+            <div ui-sref="home.administration.queues" ng-class="{chosen: $state.current.name == 'home.administration.queues'}" class="nav-item sliding-middle-out">{{'QUEUES' | translate}}</div>
+            <div ui-sref="home.administration.storageMigration" ng-class="{chosen: $state.current.name == 'home.administration.storageMigration'}" class="nav-item sliding-middle-out">{{'STORAGEMIGRATION' | translate}}</div>
+            <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out">{{'STORAGEMAINTENANCE' | translate}}</div>
         </div>
         <div ng-if="$state.current.name == 'home.appraisal'" class="nav-item sliding-middle-out" style="margin-left: 5px;" translate="APPRAISAL"></div>
     </div>

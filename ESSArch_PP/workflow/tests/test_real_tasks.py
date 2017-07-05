@@ -1782,15 +1782,11 @@ class PollIOQueueWriteTapeTestCase(TransactionTestCase):
 
         ProcessTask.objects.create(name=self.taskname,).run().get()
 
-        mock_write.assert_called_once_with(medium=medium.pk, path=self.datadir)
-        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
-        mock_write.reset_mock()
-        mock_set_file_number.reset_mock()
+        write_calls = [mock.call(medium=medium.pk, path=self.datadir), mock.call(medium=medium.pk, path=self.datadir)]
+        file_num_calls = [mock.call(medium=medium.pk, num=1), mock.call(medium=medium.pk, num=2)]
 
-        ProcessTask.objects.create(name=self.taskname,).run().get()
-
-        mock_write.assert_called_once_with(medium=medium.pk, path=self.datadir)
-        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
+        mock_write.assert_has_calls(write_calls)
+        mock_set_file_number.assert_has_calls(file_num_calls)
 
         io_queue.refresh_from_db()
         io_queue2.refresh_from_db()
@@ -2052,20 +2048,22 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
             name=self.taskname,
         ).run().get()
 
-        mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=self.datadir)
-        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
-        mock_read.reset_mock()
-        mock_copy.reset_mock()
-        mock_set_file_number.reset_mock()
+        read_calls = [
+            mock.call(medium=medium.pk, path=self.cache.value),
+            mock.call(medium=medium.pk, path=self.cache.value)
+        ]
+        copy_calls = [
+            mock.call(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=self.datadir),
+            mock.call(src=os.path.join(self.cache.value, ip2.object_identifier_value) + '.tar', dst=self.datadir)
+        ]
+        file_num_calls = [
+            mock.call(medium=medium.pk, num=1),
+            mock.call(medium=medium.pk, num=2)
+        ]
 
-        ProcessTask.objects.create(
-            name=self.taskname,
-        ).run().get()
-
-        mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip2.object_identifier_value) + '.tar', dst=self.datadir)
-        mock_set_file_number.assert_called_once_with(medium=medium.pk, num=2)
+        mock_read.assert_has_calls(read_calls)
+        mock_copy.assert_has_calls(copy_calls)
+        mock_set_file_number.assert_has_calls(file_num_calls)
 
         io_queue.refresh_from_db()
         io_queue2.refresh_from_db()

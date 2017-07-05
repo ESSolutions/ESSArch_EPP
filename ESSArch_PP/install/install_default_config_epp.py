@@ -82,6 +82,13 @@ def installDefaultParameters():
 
 
 def installDefaultUsers():
+    user_system, _ = User.objects.get_or_create(
+        username='system', email='system@essolutions.se',
+        is_staff=True, is_superuser=True
+    )
+    user_system.set_password('system')
+    user_system.save()
+
     user_user, _ = User.objects.get_or_create(
         username='user', email='usr1@essolutions.se'
     )
@@ -142,6 +149,7 @@ def installDefaultPaths():
         'access': '/ESSArch/data/epp/access',
         'disseminations': '/ESSArch/data/epp/disseminations',
         'orders': '/ESSArch/data/epp/orders',
+        'verify': '/ESSArch/verify',
     }
 
     for key in dct:

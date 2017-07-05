@@ -1,4 +1,4 @@
-/*
+"""
     ESSArch is an open source archiving and digital preservation system
 
     ESSArch Preservation Platform (EPP)
@@ -20,17 +20,23 @@
     Contact information:
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
-*/
+"""
 
-angular.module('myApp').controller('UtilCtrl', function($scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig) {
-    $scope.$state = $state;
-    $scope.reloadPage = function (){
-        $state.reload();
-    }
-    $scope.redirectAdmin = function () {
-        $window.location.href="/admin/";
-    }
-    $scope.infoPage = function() {
-        $state.go('home.myPage');
-    }
-});
+from django.db.models import Q
+
+from django_filters import rest_framework as filters
+
+from ESSArch_Core.filters import ListFilter
+
+from ESSArch_Core.storage.models import (
+    StorageMedium,
+    TapeDrive,
+    TapeSlot
+)
+
+class StorageMediumFilter(filters.FilterSet):
+    status = ListFilter(name='status', distinct='true')
+
+    class Meta:
+        model = StorageMedium
+        fields = ('status',)

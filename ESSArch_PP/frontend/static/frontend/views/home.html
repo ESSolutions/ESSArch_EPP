@@ -41,7 +41,7 @@
         </div>
     </div>
     </div>
-	<div ng-controller="BaseCtrl" ng-include src="'static/frontend/views/sub_menu.html'"></div>
+	<div ng-controller="UtilCtrl" ng-include src="'static/frontend/views/sub_menu.html'"></div>
     <div class="nav-dynamic-wrapper">
         <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.management' | includedByState) || ('home.administration' | includedByState) || ('home.appraisal' | includedByState)" class="shortcut-nav-calendar-wrapper" ng-class="{'active-hamburger': hamburgerActive}">
             <div ng-controller="AngularTreeCtrl" class="navigation" context-menu="navMenuOptions(item)">

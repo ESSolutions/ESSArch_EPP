@@ -23,18 +23,13 @@ Email - essarch@essolutions.se
 */
 
 angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
-    $controller('BaseCtrl', { $scope: $scope });
     var vm = this;
     var ipSortString = "";
-    $scope.ip = null;
-    $rootScope.ip = null;
+    $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     $scope.includedIps = [];
-    $scope.colspan = 10;
-    vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
-    //Cancel update intervals on state change
 
     //Request form data
-    function initRequestData() {
+    $scope.initRequestData = function() {
         vm.request = {
             type: "receive",
             purpose: "",
@@ -55,10 +50,9 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             allowUnknownFiles: false
         };
     }
-    initRequestData();
+    $scope.initRequestData();
     $rootScope.$on('$stateChangeStart', function() {
-        $interval.cancel(stateInterval);
-        $interval.cancel(listViewInterval);
+        $interval.cancel(tagsInterval);
     });
     $scope.includeIp = function(row) {
         var temp = true;
@@ -76,7 +70,7 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
 
         }
         if($scope.includedIps.length == 0) {
-            initRequestData();
+            $scope.initRequestData();
             $scope.requestForm = false;
         } else {
             if(!$scope.requestForm) {
@@ -103,10 +97,21 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             }
         }
     }
+
+    $scope.updateTags = function() {
+        $scope.tagsLoading = true;
+        $scope.getTags().then(function(result) {
+            vm.request.tags.options = result;
+            $scope.requestForm = true;
+            $scope.tagsLoading = false;
+        });
+    }
+
     $scope.archivePolicyChange = function() {
         vm.request.informationClass = vm.request.archivePolicy.value.information_class;
         $scope.checkMatch();
     }
+
     $scope.checkMatch = function() {
         if(vm.request.archivePolicy.value != null) {
             for(i=0;i<$scope.includedIps.length; i++) {
@@ -119,58 +124,15 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 };
         }
     };
-    // Click funtion columns that does not have a relevant click function
-    $scope.ipRowClick = function(row) {
-        if($scope.ip == row){
-            $scope.ip = null;
-            $rootScope.ip = null;
-        }
-        if($scope.eventShow) {
-            $scope.eventsClick(row);
-        }
-        if($scope.statusShow) {
-            $scope.stateClicked(row);
-        }
-        if ($scope.select) {
-            $scope.ipTableClick(row);
-        }
-    }
-    //Click function for status view
-    var stateInterval;
-    $scope.stateClicked = function (row) {
-        if ($scope.statusShow) {
-                $scope.tree_data = [];
-            if ($scope.ip == row) {
-                $scope.statusShow = false;
-                $scope.ip = null;
-                $rootScope.ip = null;
-            } else {
-                $scope.statusShow = true;
-                $scope.edit = false;
-                $scope.statusViewUpdate(row);
-                $scope.ip = row;
-                $rootScope.ip = row;
-            }
-        } else {
-            $scope.statusShow = true;
-            $scope.edit = false;
-            $scope.statusViewUpdate(row);
-            $scope.ip = row;
-            $rootScope.ip = row;
-        }
-        $scope.subSelect = false;
-        $scope.eventlog = false;
-        $scope.select = false;
-        $scope.eventShow = false;
-    };
 
     //If status view is visible, start update interval
-    $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
+    var tagsInterval;
+    $scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
         if(newValue) {
-            $interval.cancel(stateInterval);
-            stateInterval = $interval(function(){$scope.statusViewUpdate($scope.ip)}, appConfig.stateInterval);
+            $interval.cancel(tagsInterval);
+            tagsInterval = $interval(function(){$scope.updateTags()}, appConfig.tagsInterval);
         } else {
-            $interval.cancel(stateInterval);
+            $interval.cancel(tagsInterval);
         }
     });
     //Get data for status view
@@ -179,11 +141,10 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     /*Piping and Pagination for List-view table*/
     /*******************************************/
 
-    var ctrl = this;
     $scope.selectedProfileRow = {profile_type: "", class: ""};
-    this.displayedIps = [];
+    vm.displayedIps = [];
     //Get data according to ip table settings and populates ip table
-    this.callServer = function callServer(tableState) {
+    vm.callServer = function callServer(tableState) {
         $scope.ipLoading = true;
         if(vm.displayedIps.length == 0) {
             $scope.initLoad = true;
@@ -200,14 +161,20 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
             Resource.getReceptionPage(start, number, pageNumber, tableState, $scope.includedIps, sorting, search, ipSortString, $scope.columnFilters).then(function (result) {
-                ctrl.displayedIps = result.data;
+                vm.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
             });
         }
     };
-
+    $scope.tagsPlaceholder = function() {
+        if (vm.request.tags.options.length == 0) {
+            return "NO_TAGS";
+        } else {
+            return "SELECT_TAGS";
+        }
+    }
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
         if($scope.select && $scope.ip.id == row.id){
@@ -218,6 +185,9 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.select = true;
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
+            if($scope.filebrowser && !$scope.ip.url) {
+                $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
+            }
         }
     };
     $scope.filebrowser = false;
@@ -226,165 +196,16 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
             $scope.filebrowser = false;
             $scope.ip = null;
             $rootScope.ip = null;
+            $scope.filebrowser = false;
         } else {
             $scope.filebrowser = true;
-            ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
+            if(!ip.url) {
+                ip.url = appConfig.djangoUrl + "ip-reception/" + ip.id + "/";
+            }
             $scope.ip = ip;
             $rootScope.ip = ip;
         }
     }
-    $scope.$watch(function(){return $rootScope.navigationFilter;}, function(newValue, oldValue) {
-        $scope.getListViewData();
-    }, true);
-    //Click funciton for event view
-    $scope.eventsClick = function (row) {
-        if($scope.eventShow && $scope.ip == row){
-            $scope.eventShow = false;
-            $rootScope.stCtrl = null;
-            $scope.ip = null;
-            $rootScope.ip = null;
-        } else {
-            if($rootScope.stCtrl) {
-                $rootScope.stCtrl.pipe();
-            }
-            getEventlogData();
-            $scope.eventShow = true;
-            $scope.statusShow = false;
-            $scope.ip = row;
-            $rootScope.ip = row;
-        }
-        $scope.select = false;
-        $scope.edit = false;
-        $scope.eventlog = false;
-
-    };
-
-    //Adds a new event to the database
-    $scope.addEvent = function(ip, eventType, eventDetail) {
-        listViewService.addEvent(ip, eventType, eventDetail).then(function(value) {
-        });
-    }
-    //Get data for list view
-    $scope.getListViewData = function() {
-        vm.callServer($scope.tableState);
-        $rootScope.loadTags();
-    };
-    // Progress bar max value
-    $scope.max = 100;
-    vm.options = {};
-    //Click funciton for profile view
-    //Get data for eventlog view
-    function getEventlogData() {
-        listViewService.getEventlogData().then(function(value){
-            $scope.eventTypeCollection = value;
-        });
-    };
-    //Decides visibility of stepTask info page
-    $scope.stepTaskInfoShow = false;
-    //Decides visibility of status view
-    $scope.statusShow = false;
-    //Decides visibility of events view
-    $scope.eventShow = false;
-    //Decides visibility of select view
-    $scope.select = false;
-    //Decides visibility of sub-select view
-    $scope.subSelect = false;
-    //Decides visibility of edit view
-    $scope.edit = false;
-    //Decides visibility of eventlog view
-    $scope.eventlog = false;
-    $scope.requestForm = false;
-    //Html popover template for currently disabled
-    $scope.htmlPopover = $sce.trustAsHtml('<font size="3" color="red">Currently disabled</font>');
-
-    //Toggle visibility of select view
-    $scope.toggleSelectView = function () {
-        if($scope.select == false){
-            $scope.select = true;
-        } else {
-            $scope.select = false;
-        }
-    };
-    //Toggle visibility of sub-select view
-    $scope.toggleSubSelectView = function () {
-        if($scope.subSelect == false){
-            $scope.subSelect = true;
-        } else {
-            $scope.subSelect = false;
-        }
-    };
-    //Toggle visibility of edit view
-    $scope.toggleEditView = function () {
-        if($scope.edit == false){
-            $('.edit-view').show();
-            $scope.edit = true;
-            $scope.eventlog = true;
-        } else {
-            $('.edit-view').hide();
-            $scope.edit = false;
-            $scope.eventlog = false;
-        }
-    };
-    //Toggle visibility of eventlog view
-    $scope.toggleEventlogView = function() {
-        if($scope.eventlog == false){
-            $scope.eventlog = true;
-        }else {
-            $scope.eventlog = false;
-        }
-    }
-    //Remove ip
-    $scope.removeIp = function (ipObject) {
-        $http({
-            method: 'DELETE',
-            url: ipObject.url
-        }).then(function() {
-            vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
-            $scope.edit = false;
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.eventShow = false;
-            $scope.statusShow = false;
-        });
-    }
-    //Update ip list view with an interval
-    //Update only if status < 100 and no step has failed in any IP
-    var listViewInterval;
-    function updateListViewConditional() {
-        $interval.cancel(listViewInterval);
-        listViewInterval = $interval(function() {
-            var updateVar = false;
-            vm.displayedIps.forEach(function(ip, idx) {
-                if(ip.status < 100) {
-                    if(ip.step_state != "FAILURE") {
-                        updateVar = true;
-                    }
-                }
-            });
-            if(updateVar) {
-                $scope.getListViewData();
-            } else {
-                $interval.cancel(listViewInterval);
-                listViewInterval = $interval(function() {
-                    var updateVar = false;
-                    vm.displayedIps.forEach(function(ip, idx) {
-                        if(ip.status < 100) {
-                            if(ip.step_state != "FAILURE") {
-                                updateVar = true;
-                            }
-                        }
-                    });
-                    if(!updateVar) {
-                        $scope.getListViewData();
-                    } else {
-                        updateListViewConditional();
-                    }
-
-                }, appConfig.ipIdleInterval);
-            }
-        }, appConfig.ipInterval);
-    };
-    updateListViewConditional();
 
     //Reload current view
     $scope.reloadPage = function (){
@@ -392,42 +213,6 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     }
     $scope.yes = $translate.instant('YES');
     $scope.no = $translate.instant('NO');
-    vm.validatorModel = {
-    };
-    vm.validatorFields = [
-    {
-        "templateOptions": {
-            "label": $translate.instant('VALIDATEFILEFORMAT'),
-        },
-        "defaultValue": true,
-        "type": "checkbox",
-        "key": "validate_file_format",
-    },
-    {
-        "templateOptions": {
-            "label": $translate.instant('VALIDATEXMLFILE'),
-        },
-        "defaultValue": true,
-        "type": "checkbox",
-        "key": "validate_xml_file",
-    },
-    {
-        "templateOptions": {
-            "label": $translate.instant('VALIDATELOGICALPHYSICALREPRESENTATION'),
-        },
-        "defaultValue": true,
-        "type": "checkbox",
-        "key": "validate_logical_physical_representation",
-    },
-    {
-        "templateOptions": {
-            "label": $translate.instant('VALIDATEINTEGRITY'),
-        },
-        "defaultValue": true,
-        "type": "checkbox",
-        "key": "validate_integrity",
-    }
-    ];
 
     $scope.getArchivePolicies = function() {
         return $http({
@@ -454,23 +239,8 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
                 $scope.edit = false;
                 $scope.requestForm = false;
                 $scope.filebrowser = false;
-                initRequestData();
+                $scope.initRequestData();
             });
-        });
-    }
-    $scope.removeIp = function (ipObject) {
-        $http({
-            method: 'DELETE',
-            url: ipObject.url
-        }).then(function() {
-            vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
-            $scope.edit = false;
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.eventShow = false;
-            $scope.statusShow = false;
-            $scope.filebrowser = false;
-
         });
     }
     $scope.informationClassAlert = null;
@@ -479,20 +249,5 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     };
     $scope.closeAlert = function() {
         $scope.informationClassAlert = null;
-    }
-    $scope.searchDisabled = function () {
-        if ($scope.filterModels.length > 0) {
-            if ($scope.filterModels[0].column != null) {
-                delete $scope.tableState.search.predicateObject;
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-    $scope.clearSearch = function () {
-        delete $scope.tableState.search.predicateObject;
-        $('#search-input')[0].value = "";
-        $scope.getListViewData();
     }
 });

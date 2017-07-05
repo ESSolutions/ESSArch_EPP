@@ -24,9 +24,13 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, filters
+from rest_framework import exceptions, viewsets, filters, status
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
+
+from ESSArch_Core.exceptions import Conflict
 
 from ESSArch_Core.storage.models import (
     IOQueue,
@@ -41,16 +45,18 @@ from ESSArch_Core.storage.models import (
     TapeSlot,
 )
 
+from ESSArch_Core.WorkflowEngine.models import ProcessTask
+
+from storage.filters import StorageMediumFilter
+
 from storage.serializers import (
     IOQueueSerializer,
     RobotSerializer,
     RobotQueueSerializer,
     StorageMethodSerializer,
     StorageMethodTargetRelationSerializer,
-    StorageObjectReadSerializer,
-    StorageObjectWriteSerializer,
-    StorageMediumReadSerializer,
-    StorageMediumWriteSerializer,
+    StorageObjectSerializer,
+    StorageMediumSerializer,
     StorageTargetSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
@@ -69,9 +75,13 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     API endpoint for storage medium
     """
     queryset = StorageMedium.objects.all()
+    serializer_class = StorageMediumSerializer
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
+
+    filter_class = StorageMediumFilter
+
     ordering_fields = (
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
     )
@@ -79,10 +89,38 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
     )
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return StorageMediumReadSerializer
-        return StorageMediumWriteSerializer
+    @detail_route(methods=['post'])
+    def mount(self, request, pk=None):
+        medium = self.get_object()
+
+        if medium.tape_drive is not None:
+            raise Conflict(detail='Tape already mounted')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=medium,
+            req_type=10, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @detail_route(methods=['post'])
+    def unmount(self, request, pk=None):
+        medium = self.get_object()
+
+        if medium.tape_drive is None:
+            raise exceptions.ParseError(detail='Tape not mounted')
+
+        force = request.data.get('force', False)
+        req_type = 30 if force else 20
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=medium,
+            req_type=req_type, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 class StorageMethodViewSet(viewsets.ModelViewSet):
     """
@@ -103,6 +141,7 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     API endpoint for storage object
     """
     queryset = StorageObject.objects.all()
+    serializer_class = StorageObjectSerializer
 
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -115,10 +154,6 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         'ip__object_identifier_value', 'content_location_value',
     )
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return StorageObjectReadSerializer
-        return StorageObjectWriteSerializer
 
 class StorageTargetViewSet(viewsets.ModelViewSet):
     """
@@ -144,7 +179,21 @@ class RobotViewSet(viewsets.ModelViewSet):
         'id', 'label', 'device', 'online',
     )
 
-class RobotQueueViewSet(viewsets.ModelViewSet):
+    @detail_route(methods=['post'])
+    def inventory(self, request, pk=None):
+        robot = self.get_object()
+
+        ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.RobotInventory',
+            args=[robot.device],
+            eager=False,
+            responsible=self.request.user,
+        ).run()
+
+        return Response()
+
+
+class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint for robot
     """
@@ -179,6 +228,43 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
         'id', 'device', 'num_of_mounts', 'idle_time',
     )
 
+
+    @detail_route(methods=['post'])
+    def mount(self, request, pk=None):
+        drive = self.get_object()
+
+        try:
+            storage_medium = request.data['storage_medium']
+        except KeyError:
+            raise exceptions.ParseError('Missing parameter storage_medium')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium_id=storage_medium,
+            tape_drive=drive,
+            req_type=10, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response()
+
+    @detail_route(methods=['post'])
+    def unmount(self, request, pk=None):
+        drive = self.get_object()
+        force = request.data.get('force', False)
+
+        req_type = 30 if force else 20
+
+        if not hasattr(drive, 'storage_medium'):
+            raise exceptions.ParseError(detail='No tape mounted')
+
+        RobotQueue.objects.get_or_create(
+            user=self.request.user,
+            storage_medium=drive.storage_medium,
+            req_type=req_type, status__in=[0, 2], defaults={'status': 0}
+        )
+
+        return Response()
+
 class TapeSlotViewSet(viewsets.ModelViewSet):
     """
     API endpoint for TapeSlot
@@ -192,6 +278,6 @@ class TapeSlotViewSet(viewsets.ModelViewSet):
         'id', 'slot_id', 'medium_id',
     )
     search_fields = (
-        'id', 'slot_id', 'medium_id',
+        'id', 'slot_id', 'medium_id', 'status'
 
     )

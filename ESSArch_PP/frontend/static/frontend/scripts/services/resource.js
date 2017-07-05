@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, $rootScope, $http, $cookies, $window) {
+angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, listViewService, Storage, $rootScope, $http, $cookies, $window) {
     //Get data for Events table
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
@@ -159,12 +159,15 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
+
+    // Storage
+
     function getStorageMediums(start, number, pageNumber, params, sort, search) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
+        return Storage.getStorageMediums(pageNumber, number, $rootScope.navigationFilter, sortString, search).then(function(value) {
             var storageMediumCollection = value.data;
             return {
                 data: storageMediumCollection,
@@ -177,10 +180,94 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getStorageObjects(pageNumber, number, medium, sortString, search).then(function(value) {
+        return Storage.getStorageObjects(pageNumber, number, medium, sortString, search).then(function(value) {
             var storageObjectCollection = value.data;
             return {
                 data: storageObjectCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getRobots(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobots(pageNumber, number, sortString, search).then(function (value) {
+            var robotCollection = value.data;
+            return {
+                data: robotCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getRobotQueue(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobotQueue(pageNumber, number, sortString, search).then(function (value) {
+            var robotQueueCollection = value.data;
+            return {
+                data: robotQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getRobotQueueForRobot(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getRobotQueueForRobot(pageNumber, number, sortString, search, robot).then(function (value) {
+            var robotQueueCollection = value.data;
+            return {
+                data: robotQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getIoQueue(start, number, pageNumber, params, sort, search) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getIoQueue(pageNumber, number, sortString, search).then(function (value) {
+            var ioQueueCollection = value.data;
+            return {
+                data: ioQueueCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getTapeDrives(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getTapeDrives(pageNumber, number, sortString, search, robot).then(function (value) {
+            var tapeDrivecollection = value.data;
+            return {
+                data: tapeDrivecollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
+
+    function getTapeSlots(start, number, pageNumber, params, sort, search, robot) {
+        var sortString = sort.predicate;
+        if (sort.reverse) {
+            sortString = "-" + sortString;
+        }
+        return Storage.getTapeSlots(pageNumber, number, sortString, search, robot).then(function (value) {
+            var tapeSlotCollection = value.data;
+            return {
+                data: tapeSlotCollection,
                 numberOfPages: Math.ceil(value.count / number)
             };
         });
@@ -194,5 +281,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getWorkareaIps: getWorkareaIps,
         getDips: getDips,
         getOrders: getOrders,
+        getRobots: getRobots,
+        getRobotQueue: getRobotQueue,
+        getRobotQueueForRobot: getRobotQueueForRobot,
+        getIoQueue: getIoQueue,
+        getTapeDrives: getTapeDrives,
+        getTapeSlots: getTapeSlots,
     };
 });
