@@ -113,6 +113,9 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     mounted = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
+    def get_status(self, obj):
+        return obj.get_status_display()
+
     def get_locked(self, obj):
         if hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None:
             return obj.storage_medium.tape_drive.locked
@@ -120,14 +123,6 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_mounted(self, obj):
         return hasattr(obj, 'storage_medium') and obj.storage_medium.tape_drive is not None
-
-    def get_status(self, obj):
-        if hasattr(obj, 'storage_medium'):
-            if obj.storage_medium.tape_drive:
-                drive = obj.storage_medium.tape_drive
-                return 'Mounted in drive %s (%s)' % (drive.pk, drive.device)
-            return obj.storage_medium.get_status_display()
-        return 'empty'
 
     class Meta:
         model = TapeSlot
@@ -139,9 +134,7 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     storage_medium = StorageMediumSerializer()
     status = serializers.SerializerMethodField()
     def get_status(self, obj):
-        if hasattr(obj, 'storage_medium'):        
-            return obj.storage_medium.get_status_display()
-        return 'empty'
+        return obj.get_status_display()
 
     class Meta:
         model = TapeDrive
