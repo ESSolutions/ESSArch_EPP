@@ -93,6 +93,10 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     def get_information_packages(self, obj):
         request = self.context['request']
         view = self.context.get('view')
+
+        if view is None:
+            return obj.related_ips()
+
         view_type = request.query_params.get('view_type', 'aic')
 
         related = obj.related_ips()
