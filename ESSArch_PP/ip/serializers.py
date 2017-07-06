@@ -52,7 +52,7 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
                 'linkingObjectIdentifierValue',
         )
 
-class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
 
@@ -84,7 +84,7 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
             'policy', 'message_digest', 'message_digest_algorithm',
         )
 
-class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
