@@ -25,8 +25,8 @@
                                 <tr ng-class="srow.class" ng-repeat="row in vm.ioQueue" ng-attr-context-menu="menuOptions" class="table-item">
                                     <td>{{row.id}}</td>
                                     <td>{{row.posted | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                                    <td>{{row.req_type}}</td>
-                                    <td>{{row.status}}</td>
+                                    <td>{{row.req_type_display}}</td>
+                                    <td>{{row.status_display}}</td>
                                 </tr>
                             </tbody>
                         </table>
