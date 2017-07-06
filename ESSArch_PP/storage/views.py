@@ -22,15 +22,21 @@
     Email - essarch@essolutions.se
 """
 
+from django.contrib.auth.models import User
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import exceptions, viewsets, filters, status
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.exceptions import Conflict
+
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
+
+from ESSArch_Core.ip.models import InformationPackage
 
 from ESSArch_Core.storage.models import (
     IOQueue,
@@ -68,6 +74,117 @@ class IOQueueViewSet(viewsets.ModelViewSet):
     """
     queryset = IOQueue.objects.all()
     serializer_class = IOQueueSerializer
+
+    @list_route(methods=['post'], url_path='from-master')
+    def from_master(self, request, pk=None):
+        try:
+            entry_data = request.data.pop('entry')
+        except KeyError:
+            raise exceptions.ParseError(detail='entry parameter missing')
+
+        try:
+            ip_data = request.data.pop('information_package')
+        except KeyError:
+            raise exceptions.ParseError(detail='information_package parameter missing')
+
+        try:
+            policy_data = ip_data.pop('policy')
+
+            try:
+                cache_storage_data = policy_data.pop('cache_storage')
+                cache_storage_data.pop('url')
+                cache_storage, _ = Path.objects.get_or_create(
+                    entity=cache_storage_data.pop('entity'), defaults=cache_storage_data
+                )
+                policy_data['cache_storage'] = cache_storage
+            except KeyError:
+                raise exceptions.ParseError(detail='information_package.policy.cache_storage parameter missing')
+
+            try:
+                ingest_path_data = policy_data.pop('ingest_path')
+                ingest_path_data.pop('url')
+                ingest_path, _ = Path.objects.get_or_create(
+                    entity=ingest_path_data.pop('entity'), defaults=ingest_path_data
+                )
+                policy_data['ingest_path'] = ingest_path
+            except KeyError:
+                raise exceptions.ParseError(detail='information_package.policy.ingest_path parameter missing')
+
+            policy_data.pop('url', None)
+
+            policy, _ = ArchivePolicy.objects.update_or_create(
+                id=policy_data.pop('id'), defaults=policy_data
+            )
+
+            ip_data['policy'] = policy
+
+        except KeyError:
+            raise exceptions.ParseError(detail='information_package.policy parameter missing')
+
+        try:
+            aic_data = ip_data['aic']
+            aic_data.pop('url', None)
+            aic, _ = InformationPackage.objects.get_or_create(
+                id=aic_data.pop('id'), defaults=aic_data
+            )
+            ip_data['aic'] = aic
+
+        except KeyError:
+            aic = None
+
+        ip, _ = InformationPackage.objects.get_or_create(
+            id=ip_data['id'], defaults=ip_data
+        )
+
+        entry_data['ip'] = ip
+
+        try:
+            user_data = entry_data.pop('user')
+            user_data.pop('url', None)
+            user_data.pop('id', None)
+            user, _ = User.objects.get_or_create(
+                username=user_data['username'], defaults=user_data
+            )
+            entry_data['user'] = user
+        except KeyError:
+            raise exceptions.ParseError(detail='entry.user parameter missing')
+
+        try:
+            storage_method_target_data = entry_data.pop('storage_method_target')
+
+            try:
+                storage_method_data = storage_method_target_data.pop('storage_method')
+                storage_method_data['archive_policy'] = policy
+                storage_method_data.pop('url', None)
+                storage_method, _ = StorageMethod.objects.get_or_create(
+                    id=storage_method_data['id'], defaults=storage_method_data
+                )
+                storage_method_target_data['storage_method'] = storage_method
+            except KeyError:
+                raise exceptions.ParseError(detail='entry.storage_method_target.storage_method parameter missing')
+
+            try:
+                storage_target_data = storage_method_target_data.pop('storage_target')
+                storage_target_data.pop('url', None)
+                storage_target, _ = StorageTarget.objects.get_or_create(
+                    id=storage_target_data['id'], defaults=storage_target_data
+                )
+                storage_method_target_data['storage_target'] = storage_target
+            except KeyError:
+                raise exceptions.ParseError(detail='entry.storage_method_target.storage_target parameter missing')
+
+
+            storage_method_target_data.pop('url', None)
+            storage_method_target, _ = StorageMethodTargetRelation.objects.get_or_create(
+                id=storage_method_target_data['id'], defaults=storage_method_target_data
+            )
+            entry_data['storage_method_target'] = storage_method_target
+        except KeyError:
+            raise exceptions.ParseError(detail='entry.storage_method_target parameter missing')
+
+        io_obj, _ = IOQueue.objects.get_or_create(id=entry_data.pop('id'), defaults=entry_data)
+
+        return Response(io_obj.id, status=status.HTTP_201_CREATED)
 
 
 class StorageMediumViewSet(viewsets.ModelViewSet):

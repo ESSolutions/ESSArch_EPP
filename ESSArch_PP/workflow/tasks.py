@@ -31,6 +31,8 @@ import tarfile
 import time
 import zipfile
 
+from urlparse import urljoin
+
 from celery import states as celery_states
 from celery.exceptions import Ignore
 from celery.result import allow_join_result
@@ -40,6 +42,11 @@ from django.db import transaction
 from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
+
+from rest_framework.request import Request
+from rest_framework.test import APIRequestFactory
+
+import requests
 
 from scandir import walk
 
@@ -73,12 +80,16 @@ from ESSArch_Core.storage.models import (
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
 
+from ip.serializers import InformationPackageDetailSerializer
+
 from storage.exceptions import (
     TapeDriveLockedError,
     TapeMountedError,
     TapeMountedAndLockedByOtherError,
     TapeUnmountedError,
 )
+
+from storage.serializers import IOQueueSerializer
 
 
 class ReceiveSIP(DBTask):
@@ -564,6 +575,48 @@ class PollIOQueue(DBTask):
             storage_method = entry.storage_method_target.storage_method
             storage_target = entry.storage_method_target.storage_target
 
+            if storage_target.remote_server:
+                entry.status = 2
+                entry.save(update_fields=['status'])
+
+                host, user, passw = storage_target.remote_server.split(',')
+                dst = urljoin(host, 'api/io-queue/from-master/')
+                session = requests.Session()
+                session.verify = False
+                session.auth = (user, passw)
+
+                factory = APIRequestFactory()
+                request = Request(factory.get('/'))
+
+                data = {
+                    'information_package': InformationPackageDetailSerializer(
+                        entry.ip, context={'request': request}, omit=[
+                            'url', 'information_packages', 'responsible',
+                            'archivist_organization', 'archival_location',
+                            'archival_institution', 'archival_type',
+                            'status', 'step_state',
+                        ]
+                    ).data,
+                    'entry': IOQueueSerializer(
+                        entry, context={'request': request}, omit=[
+                            'url', 'ip', 'req_type_display', 'status_display',
+                        ]
+                    ).data
+                }
+
+                try:
+                    response = session.post(dst, json=data)
+                    response.raise_for_status()
+                except requests.exceptions.HTTPError:
+                    entry.status = 100
+                    raise
+                else:
+                    entry.status = 5
+                finally:
+                    entry.save(update_fields=['status'])
+
+                return
+
             try:
                 storage_medium = self.get_storage_medium(entry, storage_target, storage_method.type)
             except ValueError:
@@ -995,11 +1048,12 @@ class UnmountIdleDrives(DBTask):
             raise Ignore()
 
         for drive in idle_drives.iterator():
-            RobotQueue.objects.get_or_create(
-                user=User.objects.get(username='system'),
-                storage_medium=drive.storage_medium,
-                req_type=20, status__in=[0, 2], defaults={'status': 0}
-            )
+            if not RobotQueue.objects.filter(storage_medium=drive.storage_medium, req_type=20, status__in=[0, 2]).exists():
+                RobotQueue.objects.create(
+                    user=User.objects.get(username='system'),
+                    storage_medium=drive.storage_medium,
+                    req_type=20, status=0,
+                )
 
     def undo(self):
         pass
