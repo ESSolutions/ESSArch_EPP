@@ -12,6 +12,7 @@ from ESSArch_Core.ip.models import (
 )
 
 from ESSArch_Core.auth.serializers import UserSerializer
+from ESSArch_Core.configuration.serializers import ArchivePolicySerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from ip.filters import InformationPackageFilter
@@ -223,6 +224,9 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
+    aic = NestedInformationPackageSerializer(read_only=True, omit=['status', 'step_state'])
+    policy = ArchivePolicySerializer(read_only=True)
+
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
