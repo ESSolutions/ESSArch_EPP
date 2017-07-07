@@ -750,3 +750,20 @@ padding: 0 12px;
 .profile-editor {
     @include container(10px);
 }
+
+.sa-editor {
+    @include container(10px);
+    box-shadow: none;
+    margin-top: 10px;
+    .edit-view {
+        .form-control {
+            width: 100%;
+        }
+    }
+    .sa-select {
+        width: 33%;
+    }
+    .fa-plus {
+        color: $step-success;
+    }
+}

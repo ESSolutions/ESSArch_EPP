@@ -264,6 +264,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
+    .state('home.administration.profileManager', {
+        url: '/profile-manager',
+        templateUrl: 'static/frontend/views/profile_manager.html',
+        controller: 'ProfileManagerCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('restricted', {
         url: '/restricted',
         templateUrl: '/static/frontend/views/restricted.html',

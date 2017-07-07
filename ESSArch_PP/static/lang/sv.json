@@ -305,5 +305,6 @@
     "MAXCAPACITY": "Maxkapacitet",
     "MEDIUM": "Medium",
     "SKIP": "Hoppa över",
-    "CANNOT_RECEIVE_ERROR": "Ogiltig leveransöverenskommelse i XML-fil"
+    "CANNOT_RECEIVE_ERROR": "Ogiltig leveransöverenskommelse i XML-fil",
+    "PROFILEMANAGER": "Profilhanterare"
 }

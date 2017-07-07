@@ -305,5 +305,6 @@
     "MAXCAPACITY": "Max capacity",
     "MEDIUM": "Medium",
     "SKIP": "Skip",
-    "CANNOT_RECEIVE_ERROR": "Invalid submission agreement in XML-file"
+    "CANNOT_RECEIVE_ERROR": "Invalid submission agreement in XML-file",
+    "PROFILEMANAGER": "Profile manager"
 }
