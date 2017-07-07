@@ -1,4 +1,68 @@
-angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootScope, listViewService, $log, $uibModal, $translate) {
+angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
+    var vm = this;
+    $scope.select = true;
+    $scope.saAlert = null;
+    $scope.alerts = {
+        receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
+    };
+    // On init
+    vm.$onInit = function() {
+        $scope.saProfile = {
+            profile: null,
+            profiles: [],
+            disabled: false
+        };
+        $scope.ip = vm.ip;
+        listViewService.getSaProfiles($scope.ip).then(function (result) {
+            $scope.saProfile.profiles = result.profiles;
+            if ($scope.ip.altrecordids.SUBMISSIONAGREEMENT[0]) {
+                let chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
+                let found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
+
+                if (found.length) {
+                    $scope.saProfile.profile = found[0];
+                    $scope.saProfile.disabled = true;
+                    getAndShowProfile($scope.saProfile.profile.profile_aip.profile, {})
+                } else {
+                    $scope.saAlert = $scope.alerts.receiveError;
+                    $scope.saProfile.disabled = true;
+                    $scope.$emit('disable_receive', {});
+                }
+                $scope.getSelectCollection($scope.saProfile.profile, $scope.ip);
+                $scope.selectRowCollection = $scope.selectRowCollapse;
+            }
+        });
+    };
+
+    vm.$onChanges = function($event) {
+        $scope.saProfile = {
+            profile: null,
+            profiles: [],
+            disabled: false
+        };
+        $scope.ip = vm.ip;
+        listViewService.getSaProfiles($scope.ip).then(function (result) {
+            $scope.saProfile.profiles = result.profiles;
+            if ($scope.ip.altrecordids.SUBMISSIONAGREEMENT[0]) {
+                let chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
+                let found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
+
+                if (found.length) {
+                    $scope.saProfile.profile = found[0];
+                    $scope.saProfile.disabled = true;
+                }
+                $scope.getSelectCollection($scope.ip);
+                $scope.selectRowCollection = $scope.selectRowCollapse;
+            }
+        });
+    };
+    $scope.pushData = function() {
+        vm.shareData({$event: {profileId: $scope.saProfile.profile.profile_aip.id, model: vm.profileModel, submissionAgreement: $scope.saProfile.profile.id}});
+    }
+    $scope.$on('get_profile_data', function() {
+        $scope.pushData();
+    });
+
     $scope.setSelectedProfile = function(row) {
         $scope.selectRowCollection.forEach(function(profileRow) {
             if(profileRow.profile_type == $scope.selectedProfileRow.profile_type){
@@ -88,25 +152,14 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             $scope.selectProfile = row;
             vm.profileOldModel = row.active.specification_data;
             vm.profileModel = angular.copy(row.active.specification_data);
-            vm.profileFields = row.active.template;
-            $scope.treeElements = [{ name: 'root', type: "folder", children: angular.copy(row.active.structure) }];
-            $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
+            var temp = [];
+            row.active.template.forEach(function(x) {
+                if(!x.templateOptions.disabled) {
+                    temp.push(x);
+                }
+            });
+            vm.profileFields = temp;
             $scope.profileToSave = row.active;
-            if (row.locked) {
-                vm.profileFields.forEach(function (field) {
-                    if (field.fieldGroup != null) {
-                        field.fieldGroup.forEach(function (subGroup) {
-                            subGroup.fieldGroup.forEach(function (item) {
-                                item.type = 'input';
-                                item.templateOptions.disabled = true;
-                            });
-                        });
-                    } else {
-                        field.type = 'input';
-                        field.templateOptions.disabled = true;
-                    }
-                });
-            }
             $scope.edit = true;
             $scope.eventlog = true;
         });
@@ -194,22 +247,14 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
     };
     //Changes SA profile for selected ip
     $scope.changeSaProfile = function (sa, ip, oldSa_idx) {
-        $http({
-            method: 'PATCH',
-            url: ip.url,
-            data: {
-                'submission_agreement': sa.url
-            }
-        }).then(function(response){
-            $scope.getSelectCollection(sa, ip);
-            $scope.selectRowCollection = $scope.selectRowCollapse;
-            if($scope.editSA) {
-                $scope.saClick({profile: sa});
-            }
-            $scope.saProfile.profile = sa;
-        }, function(response) {
-            $scope.saProfile.profile = $scope.saProfile.profiles[oldSa_idx];
-        });
+        getAndShowProfile(sa.profile.profile_aip.profile, {})
+        $scope.getSelectCollection(sa, ip);
+        $scope.selectRowCollection = $scope.selectRowCollapse;
+        if ($scope.editSA) {
+            $scope.saClick({ profile: sa });
+        }
+        $scope.saProfile.profile = sa;
+
     }
     //Toggle visibility of profiles in select view
     $scope.showHideAllProfiles = function() {
@@ -749,10 +794,4 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
-    function initProfileEditor() {
-        $scope.ip = this.ip;
-        $scope.getSaProfiles($scope.ip);
-        $scope.select = true;
-    }
-    initProfileEditor();
 });

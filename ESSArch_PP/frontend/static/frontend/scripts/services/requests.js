@@ -24,14 +24,16 @@ Email - essarch@essolutions.se
 
 angular.module('myApp').factory('Requests', function($http, appConfig) {
     function receive(ip, request, validators) {
+        console.log(request);
         return $http({
             method: 'POST',
             url: appConfig.djangoUrl + 'ip-reception/' + ip.id + '/receive/',
             data: {
                 archive_policy: request.archivePolicy.value.id,
-                submission_agreement: request.submissionAgreement.value ? request.submissionAgreement.value.id : null,
+                submission_agreement: request.submissionAgreement.value,
                 purpose: request.purpose,
                 tags: request.tags.value.map(function(tag){return tag.id}),
+                profile_data: request.profileData,
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
             }

@@ -303,5 +303,7 @@
     "STORAGEMIGRATION": "Storage migration",
     "STORAGEMAINTENANCE": "Storage maintenance",
     "MAXCAPACITY": "Max capacity",
-    "MEDIUM": "Medium"
+    "MEDIUM": "Medium",
+    "SKIP": "Skip",
+    "CANNOT_RECEIVE_ERROR": "Invalid submission agreement in XML-file"
 }

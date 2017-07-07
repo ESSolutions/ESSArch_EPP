@@ -141,4 +141,50 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
+})
+.controller('ReceiveModalInstanceCtrl', function ($uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
+    var vm = data.vm;
+    $scope.saAlert = null;
+    $scope.alerts = {
+        receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
+    };
+    $scope.ip = data.ip;
+    $scope.requestForm = true;
+    $scope.approvedToReceive = false;
+    $scope.profileEditor = true;
+    $scope.receiveDisabled = false;
+
+    $scope.$on('disable_receive', function() {
+        $scope.receiveDisabled = true;
+    });
+
+    vm.getProfileData = function($event) {
+        vm.request.submissionAgreement.value = $event.submissionAgreement;
+        vm.request.profileData[$event.profileId] = $event.model;
+        $scope.approvedToReceive = true;
+    }
+    vm.receive = function (ip) {
+        vm.data = {
+            status: "received"
+        }
+        Requests.receive(ip, vm.request, vm.validatorModel)
+            .then(function(){
+                $uibModalInstance.close(vm.data);
+            });
+    };
+    vm.fetchProfileData = function() {
+        if($scope.approvedToReceive) {
+            $scope.approvedToReceive = false;
+            $scope.$broadcast('get_profile_data', {})
+        }
+    }
+    vm.skip = function() {
+        vm.data = {
+            status: "skip"
+        }
+        $uibModalInstance.close(vm.data);     
+    }
+    vm.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
 });

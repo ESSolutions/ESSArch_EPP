@@ -4,6 +4,7 @@ angular.module('myApp').component('profileEditor', {
   controllerAs: 'vm',
   bindings: {
     ip: '<',
-    sa: '<'
+    sa: '<',
+    shareData: '&'
   }
 });
