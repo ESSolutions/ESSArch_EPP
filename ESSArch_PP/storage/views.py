@@ -22,6 +22,9 @@
     Email - essarch@essolutions.se
 """
 
+import os
+import uuid
+
 from django.contrib.auth.models import User
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -50,6 +53,8 @@ from ESSArch_Core.storage.models import (
     TapeDrive,
     TapeSlot,
 )
+
+from ESSArch_Core.util import parse_content_range_header
 
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 
@@ -166,6 +171,7 @@ class IOQueueViewSet(viewsets.ModelViewSet):
             try:
                 storage_target_data = storage_method_target_data.pop('storage_target')
                 storage_target_data.pop('url', None)
+                storage_target_data.pop('remote_server', None)
                 storage_target, _ = StorageTarget.objects.get_or_create(
                     id=storage_target_data['id'], defaults=storage_target_data
                 )
@@ -182,9 +188,69 @@ class IOQueueViewSet(viewsets.ModelViewSet):
         except KeyError:
             raise exceptions.ParseError(detail='entry.storage_method_target parameter missing')
 
+        entry_data['status'] = -1
         io_obj, _ = IOQueue.objects.get_or_create(id=entry_data.pop('id'), defaults=entry_data)
 
         return Response(io_obj.id, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'], url_path='add-file')
+    def add_file(self, request, pk=None):
+        if not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
+        entry = self.get_object()
+        path = entry.ip.policy.cache_storage.value
+
+        f = request.FILES['the_file']
+        content_range = request.META.get('HTTP_CONTENT_RANGE', 'bytes 0-0/0')
+        filename = os.path.join(path, f.name)
+
+        (start, end, total) = parse_content_range_header(content_range)
+
+        if f.size != end - start + 1:
+            raise exceptions.ParseError("File size doesn't match headers")
+
+        if start == 0:
+            with open(filename, 'wb') as dstf:
+                dstf.write(f.read())
+        else:
+            with open(filename, 'ab') as dstf:
+                dstf.seek(start)
+                dstf.write(f.read())
+
+        upload_id = request.data.get('upload_id', uuid.uuid4().hex)
+        return Response({'upload_id': upload_id})
+
+    @detail_route(methods=['post'], url_path='add-file_complete')
+    def add_file_complete(self, request, pk=None):
+        if not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
+        entry = self.get_object()
+        path = entry.ip.policy.cache_storage.value
+
+        md5 = request.data['md5']
+        filepath = request.data['path']
+        filepath = os.path.join(path, filepath)
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ValidateIntegrity",
+            params={
+                "filename": filepath,
+                "checksum": md5,
+                "algorithm": 'MD5'
+            },
+            responsible=self.request.user,
+        ).run().get()
+
+        return Response('Upload of %s complete' % filepath)
+
+    @detail_route(methods=['post'], url_path='all-files-done')
+    def all_files_done(self, request, pk=None):
+        entry = self.get_object()
+        entry.status = 0
+        entry.save(update_fields=['status'])
+        return Response()
 
 
 class StorageMediumViewSet(viewsets.ModelViewSet):

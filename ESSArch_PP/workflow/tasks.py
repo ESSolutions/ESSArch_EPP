@@ -615,6 +615,23 @@ class PollIOQueue(DBTask):
                 finally:
                     entry.save(update_fields=['status'])
 
+                dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+
+                try:
+                    response = session.post(dst, json=data)
+                    ProcessTask.objects.create(
+                        name='ESSArch_Core.tasks.CopyFile',
+                        args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
+                        params={'requests_session': session}
+                    ).run().get()
+
+                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                    response = session.post(dst)
+                except requests.exceptions.HTTPError:
+                    entry.status = 100
+                    entry.save(update_fields=['status'])
+                    raise
+
                 return
 
             try:
