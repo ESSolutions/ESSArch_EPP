@@ -507,7 +507,7 @@ class PollIOQueue(DBTask):
                 # Could not find any storage medium, create one
 
                 slot = TapeSlot.objects.filter(
-                    storage_medium__isnull=True,
+                    status=20, storage_medium__isnull=True,
                     medium_id__startswith=storage_target.target
                 ).exclude(medium_id__exact='').first()
 
