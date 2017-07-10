@@ -518,7 +518,7 @@ class PollIOQueue(DBTask):
                 # Could not find any storage medium, create one
 
                 slot = TapeSlot.objects.filter(
-                    storage_medium__isnull=True,
+                    status=20, storage_medium__isnull=True,
                     medium_id__startswith=storage_target.target
                 ).exclude(medium_id__exact='').first()
 
@@ -963,7 +963,7 @@ class PollRobotQueue(DBTask):
 
                 if drive is None:
                     free_drive = TapeDrive.objects.filter(
-                        storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
+                        status=20, storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
                     ).order_by('num_of_mounts').first()
 
                     if free_drive is None:
@@ -1056,7 +1056,7 @@ class PollRobotQueue(DBTask):
 class UnmountIdleDrives(DBTask):
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__isnull=False,
+            status=20, storage_medium__isnull=False,
             last_change__lte=timezone.now()-F('idle_time'),
             locked=False,
         )
