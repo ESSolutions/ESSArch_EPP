@@ -986,7 +986,7 @@ class PollRobotQueue(DBTask):
 class UnmountIdleDrives(DBTask):
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__isnull=False,
+            status=20, storage_medium__isnull=False,
             last_change__lte=timezone.now()-F('idle_time'),
             locked=False,
         )
