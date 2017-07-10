@@ -54,6 +54,12 @@ from ESSArch_Core.ip.models import (
     InformationPackage,
     Workarea,
 )
+from ESSArch_Core.storage.exceptions import (
+    TapeDriveLockedError,
+    TapeMountedError,
+    TapeMountedAndLockedByOtherError,
+    TapeUnmountedError,
+)
 from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
@@ -72,13 +78,6 @@ from ESSArch_Core.storage.models import (
 )
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
-
-from storage.exceptions import (
-    TapeDriveLockedError,
-    TapeMountedError,
-    TapeMountedAndLockedByOtherError,
-    TapeUnmountedError,
-)
 
 
 class ReceiveSIP(DBTask):
