@@ -862,19 +862,7 @@ class PollRobotQueue(DBTask):
         if not len(entries):
             raise Ignore()
 
-        step = ProcessStep(
-            name='Poll Robot Queue',
-        )
-
         for entry in entries.iterator():
-            if hasattr(entry, 'io_queue_entry') and hasattr(entry.io_queue_entry, 'task'):
-                if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
-                    step.parent_step = entry.io_queue_entry.task.processstep
-                else:
-                    step.information_package = entry.io_queue_entry.ip
-
-            step.save()
-
             if entry.req_type == 10:  # mount
                 medium = entry.storage_medium
 
