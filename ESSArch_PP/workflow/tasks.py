@@ -482,7 +482,7 @@ class CreateDIP(DBTask):
 
 
 class PollIOQueue(DBTask):
-    hidden = True
+    track = False
     def get_storage_medium(self, entry, storage_target, storage_type):
         if storage_type == TAPE:
             if entry.req_type == 10:
@@ -850,6 +850,7 @@ class IODisk(DBTask):
 
 
 class PollRobotQueue(DBTask):
+    track = False
     def run(self):
         entries = RobotQueue.objects.filter(
             status__in=[0, 2]
@@ -971,6 +972,7 @@ class PollRobotQueue(DBTask):
 
 
 class UnmountIdleDrives(DBTask):
+    track = False
     def run(self):
         idle_drives = TapeDrive.objects.filter(
             status=20, storage_medium__isnull=False,
