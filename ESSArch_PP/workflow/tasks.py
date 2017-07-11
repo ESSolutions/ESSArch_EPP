@@ -852,7 +852,7 @@ class IODisk(DBTask):
 class PollRobotQueue(DBTask):
     def run(self):
         entries = RobotQueue.objects.filter(
-            status=[0,2]
+            status__in=[0, 2]
         ).select_related('storage_medium').order_by('-status', '-req_type', 'posted')[:5]
 
         if not len(entries):
