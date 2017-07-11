@@ -546,12 +546,17 @@ class PollIOQueue(DBTask):
                 return entry.storage_object.storage_medium
 
     def run(self):
-        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
+        entries = IOQueue.objects.filter(
+            status__in=[0, 2]
+        ).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
 
         for entry in entries:
+            entry.status = 2
+            entry.save(update_fields=['status'])
+
             if entry.req_type in [20, 25]:  # read
                 if entry.storage_object is None:
                     entry.status = 100
@@ -588,7 +593,7 @@ class PollIOQueue(DBTask):
                     storage_medium.tape_drive.io_queue_entry = entry
                     storage_medium.tape_drive.save(update_fields=['io_queue_entry'])
 
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['status'])
                 ProcessTask.objects.create(
                     name="workflow.tasks.IOTape",
@@ -597,7 +602,7 @@ class PollIOQueue(DBTask):
                 ).run()
 
             elif entry.req_type in [15, 25]:  # Write to disk
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['status'])
                 ProcessTask.objects.create(
                     name="workflow.tasks.IODisk",
