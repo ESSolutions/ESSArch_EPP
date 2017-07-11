@@ -856,16 +856,19 @@ class IODisk(DBTask):
 class PollRobotQueue(DBTask):
     def run(self):
         entries = RobotQueue.objects.filter(
-            status=0
-        ).select_related('storage_medium').order_by('-req_type', 'posted')[:5]
+            status=[0,2]
+        ).select_related('storage_medium').order_by('-status', '-req_type', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
 
         for entry in entries.iterator():
-            if entry.req_type == 10:  # mount
-                medium = entry.storage_medium
+            entry.status = 2
+            entry.save(update_fields=['status'])
 
+            medium = entry.storage_medium
+
+            if entry.req_type == 10:  # mount
                 if medium.tape_drive is not None:  # already mounted
                     if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
                         if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
@@ -894,7 +897,7 @@ class PollRobotQueue(DBTask):
                     raise ValueError('No robot available')
 
                 entry.robot = free_robot
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['robot', 'status'])
 
                 with allow_join_result():
@@ -907,6 +910,9 @@ class PollRobotQueue(DBTask):
                                 'drive': drive.pk,
                             }
                         ).run().get()
+                    except TapeMountedError:
+                        entry.status = 20
+                        raise
                     except:
                         entry.status = 100
                         raise
@@ -919,8 +925,6 @@ class PollRobotQueue(DBTask):
                         entry.save(update_fields=['robot', 'status'])
 
             elif entry.req_type in [20, 30]:  # unmount
-                medium = entry.storage_medium
-
                 if medium.tape_drive is None:  # already unmounted
                     entry.status = 20
                     entry.save(update_fields=['status'])
@@ -937,7 +941,7 @@ class PollRobotQueue(DBTask):
                     raise ValueError('No robot available')
 
                 entry.robot = free_robot
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['robot', 'status'])
 
                 with allow_join_result():
@@ -950,7 +954,7 @@ class PollRobotQueue(DBTask):
                         ).run().get()
                     except TapeUnmountedError:
                         entry.status = 20
-                        raise TapeUnmountedError("Tape already unmounted")
+                        raise
                     except:
                         entry.status = 100
                         raise
