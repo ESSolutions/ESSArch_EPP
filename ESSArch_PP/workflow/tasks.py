@@ -571,17 +571,13 @@ class PollIOQueue(DBTask):
                 raise
 
             if storage_method.type == TAPE and storage_medium.tape_drive is None:  # Tape not mounted, queue to mount it
-                started = RobotQueue.objects.filter(
+                RobotQueue.objects.get_or_create(
                     storage_medium=storage_medium, req_type=10,
-                    status__in=[0, 2, 5],
+                    status__in=[0, 2, 5], defaults={
+                        'user': entry.user, 'status': 0,
+                        'io_queue_entry': entry
+                    }
                 )
-
-                if not started.exists():  # add to queue if not already in queue
-                    RobotQueue.objects.create(
-                        user=entry.user,
-                        storage_medium=storage_medium,
-                        req_type=10, io_queue_entry=entry
-                    )
                 continue
 
             if entry.req_type in [10, 20]:  # tape
