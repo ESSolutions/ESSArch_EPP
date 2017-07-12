@@ -563,6 +563,10 @@ class PollIOQueue(DBTask):
                 entry.save(update_fields=['status'])
                 continue
 
+            if result.status == 'PENDING':
+                if task is not None and task.status == celery_states.PENDING:
+                    task.run()
+
     def run(self):
         self.cleanup()
 
