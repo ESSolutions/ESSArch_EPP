@@ -33,7 +33,7 @@ import zipfile
 
 from celery import states as celery_states
 from celery.exceptions import Ignore
-from celery.result import allow_join_result
+from celery.result import allow_join_result, AsyncResult
 
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -545,7 +545,27 @@ class PollIOQueue(DBTask):
             elif entry.req_type == 25:
                 return entry.storage_object.storage_medium
 
+    def cleanup(self):
+        entries = IOQueue.objects.filter(status=5).exclude(task_id='')
+
+        for entry in entries.iterator():
+            result = AsyncResult(entry.task_id)
+
+            if result.ready() and (result.failed() or result.successful()):
+                entry.status = 20 if result.successful() else 100
+                entry.save(update_fields=['status'])
+                continue
+
+            task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+            if task is not None and task.status in [celery_states.SUCCESS, celery_states.FAILURE]:
+                entry.status = 20 if task.status == celery_states.SUCCESS else 100
+                entry.save(update_fields=['status'])
+                continue
+
     def run(self):
+        self.cleanup()
+
         entries = IOQueue.objects.filter(
             status__in=[0, 2]
         ).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
