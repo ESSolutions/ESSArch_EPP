@@ -620,27 +620,28 @@ class PollIOQueue(DBTask):
 
                 dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
-                try:
-                    entry.remote_status = 5
-                    entry.save(update_fields=['remote_status'])
+                if entry.remote_status != 20:
+                    try:
+                        entry.remote_status = 5
+                        entry.save(update_fields=['remote_status'])
 
-                    response = session.post(dst, json=data)
-                    ProcessTask.objects.create(
-                        name='ESSArch_Core.tasks.CopyFile',
-                        args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
-                        params={'requests_session': session}
-                    ).run().get()
+                        response = session.post(dst, json=data)
+                        ProcessTask.objects.create(
+                            name='ESSArch_Core.tasks.CopyFile',
+                            args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
+                            params={'requests_session': session}
+                        ).run().get()
 
-                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
-                    response = session.post(dst)
-                except requests.exceptions.HTTPError:
-                    entry.status = 100
-                    entry.remote_status = 100
-                    entry.save(update_fields=['status', 'remote_status'])
-                    raise
-                else:
-                    entry.remote_status = 20
-                    entry.save(update_fields=['remote_status'])
+                        dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                        response = session.post(dst)
+                    except requests.exceptions.HTTPError:
+                        entry.status = 100
+                        entry.remote_status = 100
+                        entry.save(update_fields=['status', 'remote_status'])
+                        raise
+                    else:
+                        entry.remote_status = 20
+                        entry.save(update_fields=['remote_status'])
 
                 return
 
