@@ -626,12 +626,17 @@ class PollIOQueue(DBTask):
                         entry.save(update_fields=['remote_status'])
 
                         response = session.post(dst, json=data)
-                        ProcessTask.objects.create(
+                        t = ProcessTask.objects.create(
                             name='ESSArch_Core.tasks.CopyFile',
                             args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
                             params={'requests_session': session},
                             eager=False,
-                        ).run().get()
+                        )
+
+                        entry.transfer_task_id = str(t.pk)
+                        entry.save(update_fields=['transfer_task_id'])
+
+                        t.run().get()
 
                         dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                         response = session.post(dst)
