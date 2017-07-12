@@ -176,7 +176,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Rest auth
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'ESSArch_Core.auth.serializers.UserSerializer'
+    'USER_DETAILS_SERIALIZER': 'ESSArch_Core.auth.serializers.UserLoggedInSerializer'
 }
 
 
