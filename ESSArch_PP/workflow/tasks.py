@@ -629,7 +629,8 @@ class PollIOQueue(DBTask):
                         ProcessTask.objects.create(
                             name='ESSArch_Core.tasks.CopyFile',
                             args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
-                            params={'requests_session': session}
+                            params={'requests_session': session},
+                            eager=False,
                         ).run().get()
 
                         dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
