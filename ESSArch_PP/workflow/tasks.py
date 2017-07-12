@@ -595,20 +595,30 @@ class PollIOQueue(DBTask):
 
                 entry.status = 5
                 entry.save(update_fields=['status'])
-                ProcessTask.objects.create(
+                t = ProcessTask.objects.create(
                     name="workflow.tasks.IOTape",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
-                ).run()
+                )
+
+                entry.task_id = str(t.pk)
+                entry.save(update_fields=['task_id'])
+
+                t.run()
 
             elif entry.req_type in [15, 25]:  # Write to disk
                 entry.status = 5
                 entry.save(update_fields=['status'])
-                ProcessTask.objects.create(
+                t = ProcessTask.objects.create(
                     name="workflow.tasks.IODisk",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
-                ).run()
+                )
+
+                entry.task_id = str(t.pk)
+                entry.save(update_fields=['task_id'])
+
+                t.run()
 
     def undo(self):
         pass
