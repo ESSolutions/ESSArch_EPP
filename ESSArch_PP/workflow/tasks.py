@@ -621,6 +621,9 @@ class PollIOQueue(DBTask):
                 dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
                 try:
+                    entry.remote_status = 5
+                    entry.save(update_fields=['remote_status'])
+
                     response = session.post(dst, json=data)
                     ProcessTask.objects.create(
                         name='ESSArch_Core.tasks.CopyFile',
@@ -632,8 +635,12 @@ class PollIOQueue(DBTask):
                     response = session.post(dst)
                 except requests.exceptions.HTTPError:
                     entry.status = 100
-                    entry.save(update_fields=['status'])
+                    entry.remote_status = 100
+                    entry.save(update_fields=['status', 'remote_status'])
                     raise
+                else:
+                    entry.remote_status = 20
+                    entry.save(update_fields=['remote_status'])
 
                 return
 
