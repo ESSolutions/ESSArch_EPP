@@ -667,8 +667,10 @@ class IOTape(DBTask):
 
         step = ProcessStep(name='IO Tape',)
 
-        if hasattr(entry.task, 'processstep') and entry.task.processstep is not None:
-            step.parent_step = entry.task.processstep
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
         else:
             step.information_package = entry.ip
 
@@ -810,8 +812,10 @@ class IODisk(DBTask):
 
         step = ProcessStep(name='IO Disk',)
 
-        if hasattr(entry.task, 'processstep') and entry.task.processstep is not None:
-            step.parent_step = entry.task.processstep
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
         else:
             step.information_package = entry.ip
 
