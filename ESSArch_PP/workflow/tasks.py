@@ -891,14 +891,20 @@ class IODisk(DBTask):
 class PollRobotQueue(DBTask):
     track = False
     def run(self):
-        entries = RobotQueue.objects.filter(
+        force_entries = RobotQueue.objects.filter(
+            req_type=30, status__in=[0, 2]
+        ).select_related('storage_medium').order_by('-status', 'posted')
+
+        non_force_entries = RobotQueue.objects.filter(
             status__in=[0, 2]
-        ).select_related('storage_medium').order_by('-status', '-req_type', 'posted')[:5]
+        ).exclude(req_type=30).select_related('storage_medium').order_by('-status', '-req_type', 'posted')[:5]
+
+        entries = list(force_entries) + list(non_force_entries)
 
         if not len(entries):
             raise Ignore()
 
-        for entry in entries.iterator():
+        for entry in entries:
             entry.status = 2
             entry.save(update_fields=['status'])
 
