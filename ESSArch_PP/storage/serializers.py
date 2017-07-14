@@ -128,7 +128,7 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
 
 class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
-    user = UserSerializer(read_only=True, omit=['groups', 'permissions', 'user_permissions', 'ip_list_columns'])
+    user = UserSerializer(read_only=True)
     storage_method_target = StorageMethodTargetRelationSerializer(read_only=True)
 
     req_type_display = serializers.SerializerMethodField()
@@ -154,7 +154,7 @@ class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
     io_queue_entry = IOQueueSerializer(read_only=True)
     robot = RobotSerializer(read_only=True)
     storage_medium = StorageMediumSerializer(read_only=True)
-    user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
+    user = UserSerializer(read_only=True)
     req_type = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
