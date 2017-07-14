@@ -1,8 +1,12 @@
-from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-from ip.serializers import InformationPackageSerializer
+from rest_framework import serializers, validators
 
 from ESSArch_Core.auth.serializers import UserSerializer
+
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
+
+from ESSArch_Core.ip.models import InformationPackage
 
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
@@ -21,9 +25,9 @@ from ESSArch_Core.storage.models import (
     TapeSlot,
 )
 
+from ip.serializers import InformationPackageDetailSerializer
 
 class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
-    ip = InformationPackageSerializer(read_only=True)
     class Meta:
         model = StorageObject
         fields = (
@@ -32,17 +36,7 @@ class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = StorageTarget
-        fields = (
-            'url', 'id', 'name', 'status', 'type', 'default_block_size', 'default_format', 'min_chunk_size',
-            'min_capacity_warning', 'max_capacity', 'remote_server', 'master_server', 'target'
-        )
-
 class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
-    storage_target = StorageTargetSerializer(read_only=True)
-
     location_status = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
@@ -59,24 +53,6 @@ class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
             'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
         )
 
-
-class StorageMethodSerializer(DynamicHyperlinkedModelSerializer):
-    class Meta:
-        model = StorageMethod
-        fields = (
-            'url', 'id', 'name', 'status', 'type', 'archive_policy', 'targets',
-        )
-
-
-class StorageMethodTargetRelationSerializer(serializers.HyperlinkedModelSerializer):
-    storage_target = StorageTargetSerializer()
-    storage_method = StorageMethodSerializer(omit=['targets'])
-
-    class Meta:
-        model = StorageMethodTargetRelation
-        fields = (
-            'url', 'id', 'name', 'status', 'storage_target', 'storage_method',
-        )
 
 class RobotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -127,9 +103,10 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
+    ip = InformationPackageDetailSerializer()
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
-    user = UserSerializer(read_only=True)
-    storage_method_target = StorageMethodTargetRelationSerializer(read_only=True)
+    user = UserSerializer()
+    storage_method_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMethodTargetRelation.objects.all())
 
     req_type_display = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
@@ -148,6 +125,82 @@ class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
             'ip', 'storage_method_target', 'storage_medium', 'storage_object', 'access_queue',
             'remote_status', 'transfer_task_id'
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [validators.UniqueValidator(queryset=IOQueue.objects.all())],
+            },
+        }
+
+
+class IOQueueWriteSerializer(IOQueueSerializer):
+    storage_method_target = serializers.UUIDField(required=True)
+    storage_medium = serializers.UUIDField(allow_null=True, required=False)
+
+    def create(self, validated_data):
+        ip_data = validated_data.pop('ip')
+        aic_data = ip_data.pop('aic')
+        policy_data = ip_data.pop('policy')
+        storage_method_set_data = policy_data.pop('storage_methods')
+
+        cache_storage_data = policy_data.pop('cache_storage')
+        ingest_path_data = policy_data.pop('ingest_path')
+
+        cache_storage = Path.objects.get_or_create(entity=cache_storage_data['entity'], defaults=cache_storage_data)
+        ingest_path = Path.objects.get_or_create(entity=ingest_path_data['entity'], defaults=ingest_path_data)
+
+        policy_data['cache_storage'], _ = cache_storage
+        policy_data['ingest_path'], _ = ingest_path
+
+        policy, _ = ArchivePolicy.objects.update_or_create(policy_id=policy_data['policy_id'],
+                                                           defaults=policy_data)
+
+        for storage_method_data in storage_method_set_data:
+            storage_method_target_set_data = storage_method_data.pop('storage_method_target_relations')
+            storage_method_data['archive_policy'] = policy
+            storage_method, _ = StorageMethod.objects.update_or_create(id=storage_method_data['id'],
+                                                                       defaults=storage_method_data)
+
+            for storage_method_target_data in storage_method_target_set_data:
+                storage_target_data = storage_method_target_data.pop('storage_target')
+                storage_target, _ = StorageTarget.objects.update_or_create(id=storage_target_data['id'],
+                                                                           defaults=storage_target_data)
+                storage_method_target_data['storage_method'] = storage_method
+                storage_method_target_data['storage_target'] = storage_target
+                storage_method_target, _ = StorageMethodTargetRelation.objects.update_or_create(
+                                                                            id=storage_method_target_data['id'],
+                                                                            defaults=storage_method_target_data)
+
+        aic, _ = InformationPackage.objects.get_or_create(id=aic_data['id'], defaults=aic_data)
+
+        ip_data['aic'] = aic
+        ip_data['policy'] = policy
+        ip, _ = InformationPackage.objects.get_or_create(id=ip_data['id'], defaults=ip_data)
+
+        storage_method_target = StorageMethodTargetRelation.objects.get(id=validated_data.pop('storage_method_target'))
+
+        try:
+            storage_medium_data = validated_data.pop('storage_medium')
+
+            if storage_medium_data is not None:
+                storage_medium = StorageMedium.objects.get(id=storage_medium_data['id'])
+            else:
+                storage_medium = None
+        except KeyError, StorageMedium.DoesNotExist:
+            storage_medium = None
+
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        else:
+            user = get_user_model.objects.get(username="system")
+
+        validated_data['user'] = user
+        validated_data['status'] = -1
+
+        return IOQueue.objects.create(ip=ip, storage_method_target=storage_method_target,
+                                      storage_medium=storage_medium, **validated_data)
 
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):

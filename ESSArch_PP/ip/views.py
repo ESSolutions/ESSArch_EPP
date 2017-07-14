@@ -90,6 +90,7 @@ from ip.serializers import (
     ArchivalLocationSerializer,
     InformationPackageSerializer,
     InformationPackageDetailSerializer,
+    NestedInformationPackageSerializer,
     OrderSerializer,
     EventIPSerializer,
     WorkareaSerializer,
@@ -623,7 +624,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return InformationPackageSerializer
+            return NestedInformationPackageSerializer
 
         return InformationPackageDetailSerializer
 

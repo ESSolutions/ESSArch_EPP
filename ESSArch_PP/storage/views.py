@@ -29,7 +29,7 @@ from django.contrib.auth.models import User
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import exceptions, viewsets, filters, status
+from rest_framework import exceptions, viewsets, filters, permissions, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
@@ -58,17 +58,21 @@ from ESSArch_Core.util import parse_content_range_header
 
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 
+from configuration.serializers import (
+    StorageMethodSerializer,
+    StorageMethodTargetRelationSerializer,
+    StorageTargetSerializer,
+)
+
 from storage.filters import StorageMediumFilter
 
 from storage.serializers import (
     IOQueueSerializer,
+    IOQueueWriteSerializer,
     RobotSerializer,
     RobotQueueSerializer,
-    StorageMethodSerializer,
-    StorageMethodTargetRelationSerializer,
     StorageObjectSerializer,
     StorageMediumSerializer,
-    StorageTargetSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
 )
@@ -78,7 +82,12 @@ class IOQueueViewSet(viewsets.ModelViewSet):
     API endpoint for IO queues
     """
     queryset = IOQueue.objects.all()
-    serializer_class = IOQueueSerializer
+
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return IOQueueSerializer
+
+        return IOQueueWriteSerializer
 
     @list_route(methods=['post'], url_path='from-master')
     def from_master(self, request, pk=None):
