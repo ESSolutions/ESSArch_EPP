@@ -245,12 +245,12 @@ class StoreAIP(DBTask):
     event_type = 20300
 
     def run(self, aip):
-        policy = InformationPackage.objects.prefetch_related('policy__storagemethod_set__targets').get(pk=aip).policy
+        policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=aip).policy
 
         if not policy:
             raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % aip)
 
-        storage_methods = policy.storagemethod_set.all()
+        storage_methods = policy.storage_methods.all()
 
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
@@ -264,7 +264,7 @@ class StoreAIP(DBTask):
 
         with transaction.atomic():
             for method in storage_methods:
-                for method_target in method.storagemethodtargetrelation_set.filter(status=1):
+                for method_target in method.storage_method_target_relations.filter(status=1):
                     req_type = 10 if method_target.storage_method.type == TAPE else 15
 
                     _, created = IOQueue.objects.get_or_create(
