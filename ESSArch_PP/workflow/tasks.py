@@ -813,11 +813,15 @@ class IOTape(DBTask):
 
                 StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
-                StorageObject.objects.create(
+                storage_object = StorageObject.objects.create(
                     content_location_type=storage_method.type,
                     content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
+
+                entry.storage_medium_id = storage_medium
+                entry.storage_object = storage_object
+                entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
                 if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
                     entry.ip.archived = True
@@ -913,6 +917,10 @@ class IODisk(DBTask):
                     content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
+
+                entry.storage_medium_id = storage_medium
+                entry.storage_object = storage_object
+                entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
                 if entry.ip.cached:
                     src = cache_obj
