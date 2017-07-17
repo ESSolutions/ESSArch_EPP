@@ -27,31 +27,57 @@ from ESSArch_Core.storage.models import (
 
 from ip.serializers import InformationPackageDetailSerializer
 
+
+class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
+    agent = UserSerializer()
+    storage_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=StorageTarget.objects.all())
+    tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=TapeDrive.objects.all())
+    tape_slot = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=TapeSlot.objects.all())
+    location_status_display = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
+
+    def get_location_status_display(self, obj):
+        return obj.get_location_status_display()
+
+    def get_status_display(self, obj):
+        return obj.get_status_display()
+
+    class Meta:
+        model = StorageMedium
+        fields = (
+            'url', 'id', 'medium_id', 'status', 'status_display', 'location', 'location_status', 'location_status_display', 'block_size', 'format',
+            'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'medium_id': {
+                'validators': [],
+            },
+        }
+
+
 class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
+    ip = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=InformationPackage.objects.all())
+
     class Meta:
         model = StorageObject
         fields = (
             'url', 'id', 'content_location_type', 'content_location_value', 'last_changed_local',
             'last_changed_external', 'ip', 'storage_medium'
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
 
 
-class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
-    location_status = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-
-    def get_location_status(self, obj):
-        return obj.get_location_status_display()
-
-    def get_status(self, obj):
-        return obj.get_status_display()
-
-    class Meta:
-        model = StorageMedium
-        fields = (
-            'url', 'id', 'medium_id', 'status', 'location', 'location_status', 'block_size', 'format',
-            'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
-        )
+class StorageObjectNestedSerializer(StorageObjectSerializer):
+    storage_medium = StorageMediumSerializer()
 
 
 class RobotSerializer(serializers.HyperlinkedModelSerializer):
@@ -107,6 +133,8 @@ class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
     user = UserSerializer()
     storage_method_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMethodTargetRelation.objects.all())
+    storage_medium = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMedium.objects.all())
+    storage_object = StorageObjectNestedSerializer()
 
     req_type_display = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
@@ -142,6 +170,8 @@ class IOQueueWriteSerializer(IOQueueSerializer):
         aic_data = ip_data.pop('aic')
         policy_data = ip_data.pop('policy')
         storage_method_set_data = policy_data.pop('storage_methods')
+
+        validated_data.pop('storage_object', None)
 
         cache_storage_data = policy_data.pop('cache_storage')
         ingest_path_data = policy_data.pop('ingest_path')
@@ -197,10 +227,49 @@ class IOQueueWriteSerializer(IOQueueSerializer):
             user = get_user_model.objects.get(username="system")
 
         validated_data['user'] = user
-        validated_data['status'] = -1
 
         return IOQueue.objects.create(ip=ip, storage_method_target=storage_method_target,
                                       storage_medium=storage_medium, **validated_data)
+
+    def update(self, instance, validated_data):
+        storage_object_data = validated_data.pop('storage_object', None)
+
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        else:
+            user = get_user_model.objects.get(username="system")
+
+        if storage_object_data is not None:
+            storage_medium_data = storage_object_data.pop('storage_medium')
+            storage_medium_data['agent'] = user
+            storage_medium, _ = StorageMedium.objects.update_or_create(
+                                    id=storage_medium_data['id'],
+                                    defaults=storage_medium_data)
+
+            storage_object_data['storage_medium'] = storage_medium
+            storage_object, _ = StorageObject.objects.update_or_create(
+                                id=storage_object_data['id'],
+                                defaults=storage_object_data)
+
+            instance.storage_object = storage_object
+
+
+        storage_medium_data = validated_data.pop('storage_medium', None)
+
+        try:
+            instance.storage_medium = StorageMedium.objects.get(id=storage_medium_data)
+        except StorageMedium.DoesNotExist:
+            if storage_medium_data is not None:
+                raise
+
+        instance.result = validated_data.get('result', instance.result)
+        instance.status = validated_data.get('status', instance.status)
+
+        instance.save()
+
+        return instance
 
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):

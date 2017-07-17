@@ -682,6 +682,10 @@ class PollIOQueue(DBTask):
             except ValueError:
                 entry.status = 100
                 entry.save(update_fields=['status'])
+
+                if entry.remote_io:
+                    data = IOQueueSerializer(entry, context={'request': None}).data
+                    entry.sync_with_master(data)
                 raise
 
             if storage_method.type == TAPE and storage_medium.tape_drive is None:  # Tape not mounted, queue to mount it
@@ -879,6 +883,10 @@ class IOTape(DBTask):
             drive.save(update_fields=['io_queue_entry'])
             entry.save(update_fields=['status'])
 
+            if entry.remote_io:
+                data = IOQueueSerializer(entry, context={'request': None}).data
+                entry.sync_with_master(data)
+
     def undo(self):
         pass
 
@@ -975,8 +983,11 @@ class IODisk(DBTask):
         else:
             entry.status = 20
         finally:
-
             entry.save(update_fields=['status'])
+
+            if entry.remote_io:
+                data = IOQueueSerializer(entry, context={'request': None}).data
+                entry.sync_with_master(data)
 
     def undo(self):
         pass
