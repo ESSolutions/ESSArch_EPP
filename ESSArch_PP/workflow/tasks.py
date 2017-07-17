@@ -516,6 +516,7 @@ class PollIOQueue(DBTask):
                 storage_medium = StorageMedium.objects.create(
                     medium_id=slot.medium_id,
                     storage_target=storage_target, status=20,
+                    location=Parameter.objects.get(entity='medium_location').value,
                     location_status=20,
                     block_size=storage_target.default_block_size,
                     format=storage_target.default_format, agent=entry.user,
