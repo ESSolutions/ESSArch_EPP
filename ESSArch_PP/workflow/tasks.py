@@ -607,29 +607,30 @@ class PollIOQueue(DBTask):
                 entry.save(update_fields=['status'])
 
                 host, user, passw = storage_target.remote_server.split(',')
-                dst = urljoin(host, 'api/io-queue/from-master/')
+                dst = urljoin(host, 'api/io-queue/')
                 session = requests.Session()
                 session.verify = False
                 session.auth = (user, passw)
 
-                factory = APIRequestFactory()
-                request = Request(factory.get('/'))
+                data = IOQueueSerializer(entry, context={'request': None}).data
 
-                data = {
-                    'information_package': InformationPackageDetailSerializer(
-                        entry.ip, context={'request': request}, omit=[
-                            'url', 'information_packages', 'responsible',
-                            'archivist_organization', 'archival_location',
-                            'archival_institution', 'archival_type',
-                            'status', 'step_state',
-                        ]
-                    ).data,
-                    'entry': IOQueueSerializer(
-                        entry, context={'request': request}, omit=[
-                            'url', 'ip', 'req_type_display', 'status_display',
-                        ]
-                    ).data
-                }
+                methods_to_keep = []
+
+                target_id = str(storage_target.pk)
+
+                for method in data['ip']['policy']['storage_methods']:
+                    if target_id in method['targets']:
+                        method['targets'] = [target_id]
+
+                        for relation in method['storage_method_target_relations']:
+                            if relation['storage_target']['id'] == target_id:
+                                relation['storage_target'].pop('remote_server')
+                                break
+
+                        method['storage_method_target_relations'] = [relation]
+                        methods_to_keep.append(method)
+
+                data['ip']['policy']['storage_methods'] = methods_to_keep
 
                 try:
                     response = session.post(dst, json=data)
