@@ -568,7 +568,25 @@ class PollIOQueue(DBTask):
                 if task is not None and task.status == celery_states.PENDING:
                     task.run()
 
+    def mark_as_complete(self):
+        ips = InformationPackage.objects.filter(state='Preserving').prefetch_related('policy__storage_methods')
+
+        for ip in ips.iterator():
+            entries = ip.ioqueue_set.filter(req_type__in=[10, 15])
+
+            if entries.exclude(status=20).exists():
+                continue  # unfinished IO entry exists for IP, skip
+
+            for storage_method in ip.policy.storage_methods.iterator():
+                if not entries.filter(storage_method_target__storage_method=storage_method).exists():
+                    raise Exception("No entry for storage method '%s' for IP '%s'" % (storage_method.pk, ip.pk))
+
+            ip.archived = True
+            ip.state = 'Preserved'
+            ip.save(update_fields=['archived', 'state'])
+
     def run(self):
+        self.mark_as_complete()
         self.cleanup()
 
         entries = IOQueue.objects.filter(
@@ -740,12 +758,6 @@ class IOTape(DBTask):
                 entry.storage_object = storage_object
                 entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
-                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
-                    entry.ip.archived = True
-                    entry.ip.cached = True
-                    entry.ip.state = 'Preserved'
-                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
-
             elif entry.req_type == 20:  # Read from tape
                 tape_pos = int(entry.storage_object.content_location_value)
 
@@ -853,12 +865,6 @@ class IODisk(DBTask):
                     processstep=step,
                 )
                 step.run().get()
-
-                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
-                    entry.ip.archived = True
-                    entry.ip.cached = True
-                    entry.ip.state = 'Preserved'
-                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
 
             elif entry.req_type == 25:  # Read from disk
                 ProcessTask.objects.create(
