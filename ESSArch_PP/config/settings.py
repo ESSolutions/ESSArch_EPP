@@ -156,6 +156,25 @@ CACHES = {
     }
 }
 
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'core': {
+            'level': 'DEBUG',
+            'class': 'ESSArch_Core.log.dbhandler.DBHandler',
+            'application': 'ESSArch Preservation Platform',
+        }
+    },
+    'loggers': {
+        'essarch': {
+            'handlers': ['core'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
