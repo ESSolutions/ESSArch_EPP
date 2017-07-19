@@ -16,11 +16,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-class="row.class" ng-click="eventClick(row)" ng-repeat="row in vm.displayed">
+                    <tr ng-class="[row.class, row.eventOutcome > 30 ? 'row-error' : '', row.eventOutcome == 30 ? 'row-warning' : '']" ng-click="eventClick(row)" ng-repeat="row in vm.displayed">
                         <td>{{row.eventDetail}}</td>
                         <td>{{row.eventOutcomeDetailNote}}</td>
                         <td>{{getEventOutcome(row.eventOutcome)}}</td>
-                        <td>{{row.linkingAgentIdentifierValue.username}}</td>
+                        <td>{{row.user.username}}</td>
                         <td>{{row.eventDateTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                     </tr>
                 </tbody>

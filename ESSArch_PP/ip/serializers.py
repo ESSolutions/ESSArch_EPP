@@ -1,3 +1,5 @@
+from _version import get_versions
+
 from rest_framework import exceptions, filters, serializers
 
 from ESSArch_Core.ip.models import (
@@ -16,6 +18,8 @@ from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from configuration.serializers import ArchivePolicySerializer
 from ip.filters import InformationPackageFilter
+
+VERSION = get_versions()['version']
 
 class ArchivalInstitutionSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
@@ -42,6 +46,8 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
 
 
 class EventIPSerializer(serializers.HyperlinkedModelSerializer):
+    user = UserSerializer(read_only=True, source='linkingAgentIdentifierValue', default=serializers.CurrentUserDefault())
+    information_package = serializers.HyperlinkedRelatedField(required=False, allow_null=True, source='linkingObjectIdentifierValue', queryset=InformationPackage.objects.all(), view_name='informationpackage-detail')
     eventDetail = serializers.SlugRelatedField(slug_field='eventDetail', source='eventType', read_only=True)
 
     class Meta:
@@ -49,9 +55,14 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
                 'url', 'id', 'eventType', 'eventDateTime', 'eventDetail',
                 'eventVersion', 'eventOutcome',
-                'eventOutcomeDetailNote', 'linkingAgentIdentifierValue',
-                'linkingObjectIdentifierValue',
+                'eventOutcomeDetailNote', 'user',
+                'information_package',
         )
+        extra_kwargs = {
+            'eventVersion': {
+                'default': VERSION
+            }
+        }
 
 
 class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
