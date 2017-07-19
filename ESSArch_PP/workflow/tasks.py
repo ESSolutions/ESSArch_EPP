@@ -664,7 +664,8 @@ class PollIOQueue(DBTask):
 
                 dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
-                if entry.remote_status != 20:
+                # copy files if write request and not already copied
+                if entry.req_type in [10, 15] and entry.remote_status != 20:
                     try:
                         entry.remote_status = 5
                         entry.save(update_fields=['remote_status'])
