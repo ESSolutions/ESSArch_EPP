@@ -188,10 +188,10 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
             method: 'POST',
             url: appConfig.djangoUrl + "events/",
             data: {
-                "eventType": eventType.id,
+                "eventType": eventType.url,
                 "eventOutcomeDetailNote": eventDetail,
                 "eventOutcome": outcome.value,
-                "information_package": ip.id
+                "information_package": ip.url
             }
 
         }).then(function(response) {
