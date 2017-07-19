@@ -1,0 +1,10 @@
+@import 'colors';
+
+.row-error {
+    background-color: $step-fail !important;
+    color: white;
+}
+
+.row-warning {
+    background-color: $gold-leaf !important;
+}
