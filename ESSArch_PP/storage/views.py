@@ -204,10 +204,11 @@ class IOQueueViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'], url_path='add-file')
     def add_file(self, request, pk=None):
-        if not request.user.has_perm('ip.can_receive_remote_files'):
+        entry = self.get_object()
+
+        if entry.ip.responsible != self.request.user and not request.user.has_perm('ip.can_receive_remote_files'):
             raise exceptions.PermissionDenied
 
-        entry = self.get_object()
         path = entry.ip.policy.cache_storage.value
 
         f = request.FILES['the_file']
@@ -232,10 +233,11 @@ class IOQueueViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'], url_path='add-file_complete')
     def add_file_complete(self, request, pk=None):
-        if not request.user.has_perm('ip.can_receive_remote_files'):
+        entry = self.get_object()
+
+        if entry.ip.responsible != self.request.user and not request.user.has_perm('ip.can_receive_remote_files'):
             raise exceptions.PermissionDenied
 
-        entry = self.get_object()
         path = entry.ip.policy.cache_storage.value
 
         md5 = request.data['md5']
