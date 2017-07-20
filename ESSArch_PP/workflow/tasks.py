@@ -798,7 +798,7 @@ class IOTape(DBTask):
                 ).run().get()
 
                 with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache)
+                    tar.extractall(cache.encode('utf-8'))
         except:
             entry.status = 100
             raise
@@ -893,7 +893,7 @@ class IODisk(DBTask):
                 step.run().get()
 
                 with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache)
+                    tar.extractall(cache.encode('utf-8'))
         except:
             entry.status = 100
             raise
