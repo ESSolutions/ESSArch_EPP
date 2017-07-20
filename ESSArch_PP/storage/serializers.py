@@ -94,9 +94,9 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     ])
     locked = serializers.SerializerMethodField()
     mounted = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
 
-    def get_status(self, obj):
+    def get_status_display(self, obj):
         return obj.get_status_display()
 
     def get_locked(self, obj):
@@ -110,20 +110,20 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TapeSlot
         fields = (
-            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'locked', 'mounted', 'storage_medium',
+            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'status_display', 'locked', 'mounted', 'storage_medium',
         )
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     storage_medium = StorageMediumSerializer(read_only=True)
-    status = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
 
-    def get_status(self, obj):
+    def get_status_display(self, obj):
         return obj.get_status_display()
 
     class Meta:
         model = TapeDrive
         fields = (
-            'url', 'id', 'drive_id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status', 'storage_medium',
+            'url', 'id', 'drive_id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status', 'status_display', 'storage_medium',
             'locked', 'last_change',
         )
 
