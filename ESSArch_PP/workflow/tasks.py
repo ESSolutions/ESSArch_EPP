@@ -529,12 +529,10 @@ class PollIOQueue(DBTask):
 
         elif storage_type == DISK:
             if entry.req_type == 15:
-                storage_medium = storage_target.storagemedium_set.filter(
-                    status=20,
-                ).order_by('last_changed_local').first()
+                storage_medium = storage_target.storagemedium_set.first()
 
                 if storage_medium is None:
-                    storage_medium = StorageMedium.objects.create(
+                    return StorageMedium.objects.create(
                         medium_id=storage_target.name,
                         storage_target=storage_target, status=20,
                         location=Parameter.objects.get(entity='medium_location').value,
@@ -542,7 +540,12 @@ class PollIOQueue(DBTask):
                         block_size=storage_target.default_block_size,
                         format=storage_target.default_format, agent=entry.user,
                     )
-                return storage_target.storagemedium_set.first()
+
+                if storage_medium.status == 20 and storage_medium.location_status == 50:
+                    return storage_medium
+
+                raise ValueError("No disk available for storage target %s (%s)" % (storage_target.name, storage_target.pk))
+
             elif entry.req_type == 25:
                 return entry.storage_object.storage_medium
 
