@@ -134,7 +134,7 @@ class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
     user = UserSerializer()
     storage_method_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMethodTargetRelation.objects.all())
     storage_medium = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMedium.objects.all())
-    storage_object = StorageObjectNestedSerializer()
+    storage_object = StorageObjectNestedSerializer(allow_null=True, required=False)
 
     req_type_display = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
@@ -171,7 +171,14 @@ class IOQueueWriteSerializer(IOQueueSerializer):
         policy_data = ip_data.pop('policy')
         storage_method_set_data = policy_data.pop('storage_methods')
 
-        validated_data.pop('storage_object', None)
+        storage_object_data = validated_data.pop('storage_object', None)
+
+        if storage_object_data is not None:
+            storage_object = StorageObject.objects.get(pk=storage_object_data.get('id'))
+        else:
+            storage_object = None
+
+        validated_data['storage_object'] = storage_object
 
         cache_storage_data = policy_data.pop('cache_storage')
         ingest_path_data = policy_data.pop('ingest_path')
