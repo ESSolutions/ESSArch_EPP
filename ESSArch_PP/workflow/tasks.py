@@ -367,13 +367,13 @@ class AccessAIP(DBTask):
         if not storage_objects.exists():
             raise StorageObject.DoesNotExist("IP %s not archived on active medium" % aip)
 
-        on_disk = storage_objects.filter(storage_medium__storage_target__type=DISK).first()
+        on_disk = storage_objects.filter(content_location_type=DISK).first()
 
         if on_disk is not None:
             storage_object = on_disk
             req_type = 25
         else:
-            on_tape = storage_objects.filter(storage_medium__storage_target__type=TAPE).first()
+            on_tape = storage_objects.filter(content_location_type=TAPE).first()
             if on_tape is not None:
                 storage_object = on_tape
                 req_type = 20
