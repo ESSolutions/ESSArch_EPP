@@ -31,8 +31,8 @@ from ip.serializers import InformationPackageDetailSerializer
 class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
     agent = UserSerializer()
     storage_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=StorageTarget.objects.all())
-    tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=TapeDrive.objects.all())
-    tape_slot = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=TapeSlot.objects.all())
+    tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, required=False, queryset=TapeDrive.objects.all())
+    tape_slot = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, required=False, queryset=TapeSlot.objects.all())
     location_status_display = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
 
