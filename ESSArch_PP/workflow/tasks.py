@@ -487,7 +487,7 @@ class PollIOQueue(DBTask):
         if storage_type == TAPE:
             if entry.req_type == 10:
                 storage_medium = storage_target.storagemedium_set.filter(
-                    status=20,
+                    status=20, location_status=50
                 ).order_by('last_changed_local').first()
 
                 if storage_medium is not None:
