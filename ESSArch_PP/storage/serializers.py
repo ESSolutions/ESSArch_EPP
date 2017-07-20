@@ -213,7 +213,7 @@ class IOQueueWriteSerializer(IOQueueSerializer):
             storage_medium_data = validated_data.pop('storage_medium')
 
             if storage_medium_data is not None:
-                storage_medium = StorageMedium.objects.get(id=storage_medium_data['id'])
+                storage_medium = StorageMedium.objects.get(id=storage_medium_data)
             else:
                 storage_medium = None
         except KeyError, StorageMedium.DoesNotExist:
