@@ -787,6 +787,12 @@ class IOTape(DBTask):
                     processstep_pos=2,
                 ).run().get()
 
+                with tarfile.open(cache_obj) as tar:
+                    tar.extractall(cache.encode('utf-8'))
+
+                entry.ip.cached = True
+                entry.ip.cached.save(update_fields=['cached'])
+
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
                     params={
@@ -796,9 +802,6 @@ class IOTape(DBTask):
                     processstep=step,
                     processstep_pos=3,
                 ).run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache.encode('utf-8'))
         except:
             entry.status = 100
             raise
@@ -878,7 +881,13 @@ class IODisk(DBTask):
                     },
                     processstep=step,
                     processstep_pos=0,
-                )
+                ).run().get()
+
+                with tarfile.open(cache_obj) as tar:
+                    tar.extractall(cache.encode('utf-8'))
+
+                entry.ip.cached = True
+                entry.ip.cached.save(update_fields=['cached'])
 
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
@@ -888,12 +897,7 @@ class IODisk(DBTask):
                     },
                     processstep=step,
                     processstep_pos=5,
-                )
-
-                step.run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache.encode('utf-8'))
+                ).run().get()
         except:
             entry.status = 100
             raise
