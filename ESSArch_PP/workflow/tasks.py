@@ -791,7 +791,7 @@ class IOTape(DBTask):
                     tar.extractall(cache.encode('utf-8'))
 
                 entry.ip.cached = True
-                entry.ip.cached.save(update_fields=['cached'])
+                entry.ip.save(update_fields=['cached'])
 
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
@@ -887,7 +887,7 @@ class IODisk(DBTask):
                     tar.extractall(cache.encode('utf-8'))
 
                 entry.ip.cached = True
-                entry.ip.cached.save(update_fields=['cached'])
+                entry.ip.save(update_fields=['cached'])
 
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
