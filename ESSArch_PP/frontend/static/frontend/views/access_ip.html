@@ -4,19 +4,19 @@
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.get_from_storage')">
+                    <div ng-if="checkPermission('ip.get_from_storage') || auth.id == ip.responsible.id">
                         <input type="radio" ng-model="vm.request.type" value="get">
                         <label>
                             {{'GET' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.get_tar_from_storage')">
+                    <div ng-if="checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id">
                         <input type="radio" ng-model="vm.request.type" value="get_tar">
                         <label>
                             {{'GET_AS_CONTAINER' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.get_from_storage_as_new')">
+                    <div ng-if="checkPermission('ip.get_from_storage_as_new') || auth.id == ip.responsible.id">
                         <input type="radio" ng-model="vm.request.type" value="get_as_new">
                         <label>
                             {{'GET_AS_NEW_GENERATION' | translate}}
