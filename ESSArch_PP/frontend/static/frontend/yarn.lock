@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@flowjs/ng-flow@~2.7.7":
+  version "2.7.7"
+  resolved "https://registry.yarnpkg.com/@flowjs/ng-flow/-/ng-flow-2.7.7.tgz#b612bbccd78b902e7dc90cb06905b6b03298d963"
+
 "@gulp-sourcemaps/map-sources@1.X":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gulp-sourcemaps/map-sources/-/map-sources-1.0.0.tgz#890ae7c5d8c877f6d384860215ace9d7ec945bda"
@@ -2443,10 +2447,6 @@ ng-annotate@^1.2.1:
     stringmap "~0.2.2"
     stringset "~0.2.1"
     tryor "~0.1.2"
-
-"ng-flow@https://github.com/OskarPersson/ng-flow.git":
-  version "2.7.6"
-  resolved "https://github.com/OskarPersson/ng-flow.git#7b1d7589aa8e237295e55224d2712712dcf72e3a"
 
 node-gyp@^3.3.1:
   version "3.6.0"
