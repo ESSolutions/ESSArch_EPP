@@ -64,7 +64,8 @@
     "yargs": "^6.5.0"
   },
   "dependencies": {
-    "angular-clipboard": "^1.5.0"
+    "angular-clipboard": "^1.5.0",
+    "angular-resource": "^1.6.5"
   },
   "scripts": {
     "update-deps": "npm update",

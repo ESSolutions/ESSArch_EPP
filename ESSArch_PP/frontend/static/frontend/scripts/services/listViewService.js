@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function($q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(IP, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -32,24 +32,20 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
         if(archived != true) {
             archived = false;
         }
-        var ipUrl = appConfig.djangoUrl + 'information-packages/';
-        if ($rootScope.ipUrl) {
-            ipUrl = $rootScope.ipUrl;
-        }
-        var promise = $http({
-            method: 'GET',
-            url: ipUrl,
-            params: angular.extend({
+        return IP.getList(
+            angular.extend({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 state: state,
                 search: searchString,
                 view_type: viewType,
-                archived: archived
+                archived: archived,
+                tag: $rootScope.selectedTag,
             }, columnFilters)
-        }).then(function successCallback(response) {
-            count = response.headers('Count');
+        ).$promise.then(function(response) {
+            console.log(response)
+            var count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
             }
@@ -57,8 +53,7 @@ angular.module('myApp').factory('listViewService', function($q, $http, $state, $
                 count: count,
                 data: response.data
             };
-        });
-        return promise;
+        })
     }
 
     //Fetches IP's for given workarea (ingest or access)

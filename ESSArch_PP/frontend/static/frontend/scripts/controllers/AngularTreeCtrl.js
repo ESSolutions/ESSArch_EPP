@@ -66,12 +66,12 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
             });
         });
     }
-    $rootScope.ipUrl = null;
+    $rootScope.selectedTag = null;
     $scope.showSelectedNode = function(node) {
-        if($rootScope.ipUrl == node.url + 'information-packages/') {
-            $rootScope.ipUrl = null;
+        if($rootScope.selectedTag == node.id) {
+            $rootScope.selectedTag = null;
         } else {
-            $rootScope.ipUrl = node.url + 'information-packages/';
+            $rootScope.selectedTag = node.id;
         }
     };
     // Remove given node
