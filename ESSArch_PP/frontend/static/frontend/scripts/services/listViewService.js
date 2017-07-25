@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders, IPReception, Events, Steps, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(IP, Workarea, WorkareaFiles, Orders, IPReception, Events, EventTypes, SA, Steps, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -43,14 +43,14 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
                 archived: archived,
                 tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
             }, columnFilters)
-        ).$promise.then(function (response) {
-            var count = response.headers('Count');
+        ).$promise.then(function (resource) {
+            var count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         })
     }
@@ -67,14 +67,14 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
                 view_type: viewType,
                 tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
             }, columnFilters)
-        ).$promise.then(function (response) {
-            count = response.headers('Count');
+        ).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
@@ -90,14 +90,14 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
                 search: searchString,
                 tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                              
             }, columnFilters)
-        ).$promise.then(function (response) {
-            count = response.headers('Count');
+        ).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
         return promise;
@@ -109,14 +109,14 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
             ordering: sortString,
             search: searchString,
             tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,            
-        }).$promise.then(function (response) {
-            count = response.headers('Count');
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
@@ -131,16 +131,16 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
                     search: searchString,
                     tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
                 }, columnFilters)
-            ).$promise.then(function (response) {
-                count = response.headers('Count');
+            ).$promise.then(function (resource) {
+                count = resource.$httpHeaders('Count');
                 if (count == null) {
-                    count = response.data.length;
+                    count = resource.length;
                 }
                 return {
                     count: count,
-                    data: response.data
+                    data: resource
                 };
-            }, function errorCallback(response) {});
+            });
     }
 
     //Get data for status view. child steps and tasks
@@ -178,28 +178,22 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
             page: pageNumber,
             page_size: pageSize,
             ordering: sortString
-        }).$promise.then(function (response) {
-                count = response.headers('Count');
+        }).$promise.then(function (resource) {
+                count = resource.$httpHeaders('Count');
                 if (count == null) {
-                    count = response.data.length;
+                    count = resource.length;
                 }
                 return {
                     count: count,
-                    data: response.data
+                    data: resource
                 };
             });
     }
     //Gets event type for dropdown selection
     function getEventlogData() {
-        var promise = $http({
-                method: 'GET',
-                url: appConfig.djangoUrl + 'event-types/'
-            })
-            .then(function successCallback(response) {
-                return response.data;
-            }, function errorCallback(response) {});
-        return promise;
-
+        return EventTypes.query().$promise.then(function (data) {
+            return data;
+        });
     }
     //Returns map structure for a profile
     function getStructure(profileUrl) {
@@ -220,24 +214,19 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
 
             ],
         };
-        var promise = $http({
-                method: 'GET',
-                url: appConfig.djangoUrl + 'submission-agreements/'
-            })
-            .then(function successCallback(response) {
-                sas = response.data;
-                saProfile.profiles = [];
-                saProfile.profileObjects = sas;
-                sas.forEach(function(sa) {
-                    saProfile.profiles.push(sa);
-                    if (ip.submission_agreement == sa.url) {
-                        saProfile.profile = sa;
-                        saProfile.locked = ip.submission_agreement_locked;
-                    }
-                });
-                return saProfile;
-            }, function errorCallback(response) {});
-        return promise;
+        return SA.get().$promise.then(function (response) {
+            sas = response.data;
+            saProfile.profiles = [];
+            saProfile.profileObjects = sas;
+            sas.forEach(function (sa) {
+                saProfile.profiles.push(sa);
+                if (ip.submission_agreement == sa.url) {
+                    saProfile.profile = sa;
+                    saProfile.locked = ip.submission_agreement_locked;
+                }
+            });
+            return saProfile;
+        });
     }
 
     function getProfileByTypeFromSA(sa, type) {
@@ -388,36 +377,32 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
 
     //Execute prepare ip, which creates a new IP
     function prepareIp(label) {
-        return $http({
-            method: 'POST',
-            url: appConfig.djangoUrl + "information-packages/",
-            data: { label: label }
-        }).then(function(response) {
+        ip.post({ 
+            label: label
+        }).$promise.then(function(response) {
             return "created";
         });
 
     }
     //Returns IP
-    function getIp(url) {
-        return $http({
-            method: 'GET',
-            url: url
-        }).then(function(response) {
-            return response.data;
-        }, function(response) {});
+    function getIp(id) {
+        return IP.get({
+            id: id
+        }).$promise.then(function(data) {
+            return data;
+        });
     }
     //Returns SA
-    function getSa(url) {
-        return $http({
-            method: 'GET',
-            url: url
-        }).then(function(response) {
-            return response.data;
-        }, function(response) {});
+    function getSa(id) {
+        SA.get({
+            id: id
+        }).$promise.then(function (data) {
+            return data;
+        });
     }
     //Get list of files in Ip
     function getFileList(ip) {
-        return getIp(ip.url).then(function(result) {
+        return getIp(ip.id).then(function(result) {
             var array = [];
             var tempElement = {
                 filename: result.object_path,
@@ -430,29 +415,26 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
     }
 
     function prepareDip(label, objectIdentifierValue, orders) {
-        return $http.post(appConfig.djangoUrl + "information-packages/prepare-dip/",
-            {
+        return IP.prepareDip({
                 label: label,
                 object_identifier_value: objectIdentifierValue,
                 orders: orders
-            }).then(function (response) {
-                return response.data;
+            }).$promise.then(function (response) {
+                return response;
             });
     };
 
     function createDip(ip) {
-        return $http.post(ip.url + 'create-dip/').then(function(response) {
-            return response.data;
+        return IP.createDip({ id: ip.id }).$promise.then(function(response) {
+            return response;
         });
     }
 
     function prepareOrder(label) {
-        return $http( {
-            method: 'POST',
-            url: appConfig.djangoUrl + 'orders/',
-            data: {label: label}
-        }).then(function(response){
-            return response.data;
+        return Orders.save( {
+            label: label
+        }).$promise.then(function(response){
+            return response;
         })
     }
     function getWorkareaDir(workareaType, pathStr) {
@@ -467,75 +449,63 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders
                 type: workareaType
             };
         }
-        var url = appConfig.djangoUrl + "workarea-files/";
-        return $http.get(url, {params: sendData})
-            .then(function(response) {
-                return response.data;
-            });
+        return WorkareaFiles.query(sendData).$promise.then(function (data) {
+            return data;
+        });
     }
 
     function getDipDir(ip, pathStr) {
-        if (pathStr == "") {
-            sendData = {};
-        } else {
-            sendData = {
-                path: pathStr,
-            };
+        var sendData = {
+            id: ip.id
+        };
+        if (pathStr != "") {
+            sendData.path = pathStr;
         }
-        var url = ip.url + "files/";
-        return $http.get(url, {params: sendData})
-            .then(function(response) {
-                return response.data;
+        return IP.files(sendData)
+            .$promise.then(function(data) {
+                return data;
             });
     }
 
     function addFileToDip(ip, path, file, destination, type) {
         var src = path + file.name;
         var dst = destination + file.name;
-        return $http.post(appConfig.djangoUrl + "workarea-files/add-to-dip/", {
+        return WorkareaFiles.addToDip({
             dip: ip.id,
             src: src,
             dst: dst,
             type: type
-        }).then(function(response){
+        }).$promise.then(function(response){
             return response;
         });
     }
+
     function addNewFolder(ip, path, file) {
-        return $http.post(ip.url + "files/",
-        {
+        return IP.addFile({
+            id: ip.id,
             path: path + file.name,
             type: file.type
-        }).then(function(response) {
+        }).$promise.then(function(response) {
             return response;
         });
     }
+
     function deleteFile(ip, path, file) {
-        return $http({
-            method: "DELETE",
-            url: ip.url + "files/",
-            data: { path: path + file.name },
-            headers: {
-                'Content-type': 'application/json;charset=utf-8'
-            }
-        })
-        .then(function(response) {
+        return IP.removeFile({ 
+            id: ip.id,
+            path: path + file.name,
+        }).$promise.then(function(response) {
             return response;
         });
     }
 
     function getDir(ip, pathStr) {
-        if(pathStr == "") {
-            sendData = {};
-        } else {
+        var sendData = {};
+        if(pathStr != "") {
             sendData = {path: pathStr};
         }
-        return $http({
-            method: 'GET',
-            url: ip.url + "files/",
-            params: sendData
-        }).then(function(response) {
-            return response.data;
+        return IP.files(sendData).$promise.then(function(data) {
+            return data;
         });
     }
 

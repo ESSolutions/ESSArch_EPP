@@ -2,9 +2,13 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'ip-reception/:id/:action/', {}, {
         query: {
             method: 'GET',
-            transformResponse: function (data, headers) {
-                return { data: JSON.parse(data), headers: headers };
-            }
+            isArray: true,
+            interceptor: {
+                response: function (response) {
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            },
         },
         // TODO
         receive: {
