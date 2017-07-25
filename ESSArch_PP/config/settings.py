@@ -260,6 +260,10 @@ CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
+   'PollAccessQueue-every-10-seconds': {
+        'task': 'workflow.tasks.PollAccessQueue',
+        'schedule': timedelta(seconds=10),
+    },
     'PollIOQueue-every-10-seconds': {
         'task': 'workflow.tasks.PollIOQueue',
         'schedule': timedelta(seconds=10),

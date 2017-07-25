@@ -13,6 +13,7 @@ from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 from ESSArch_Core.storage.models import medium_status_CHOICES
 
 from ESSArch_Core.storage.models import (
+    AccessQueue,
     IOQueue,
     Robot,
     RobotQueue,
@@ -277,6 +278,15 @@ class IOQueueWriteSerializer(IOQueueSerializer):
         instance.save()
 
         return instance
+
+
+class AccessQueueSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = AccessQueue
+        fields = (
+            'url', 'id', 'user', 'posted', 'ip', 'package', 'extracted',
+            'new', 'object_identifier_value', 'new_ip', 'status',
+        )
 
 
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):

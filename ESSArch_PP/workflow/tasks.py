@@ -71,6 +71,7 @@ from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
 
+    AccessQueue,
     IOQueue,
 
     Robot,
@@ -284,136 +285,19 @@ class StoreAIP(DBTask):
 
 
 class AccessAIP(DBTask):
-    def run(self, aip, tar=True, extracted=False, new=False, object_identifier_value=None):
+    def run(self, aip, tar=True, extracted=False, new=False, object_identifier_value=""):
         aip = InformationPackage.objects.get(pk=aip)
 
-        if new:
-            old_aip = aip.pk
-            new_aip = aip
-            new_aip.pk = None
-            new_aip.object_identifier_value = None
-            new_aip.state = 'Access Workarea'
-            new_aip.cached = False
-            new_aip.archived = False
+        if object_identifier_value is None:
+            object_identifier_value = ''
 
-            max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
-            new_aip.generation = max_generation + 1
-            new_aip.save()
-
-            new_aip.object_identifier_value = object_identifier_value if object_identifier_value else str(new_aip.pk)
-            new_aip.save(update_fields=['object_identifier_value'])
-
-            aip = InformationPackage.objects.get(pk=old_aip)
-        else:
-            new_aip = aip
-
-        storage_objects = aip.storage
-
-        if not storage_objects.exists():
-            raise StorageObject.DoesNotExist("IP %s not archived" % aip)
-
-        dst = Path.objects.get(entity='access').value
-        dst = os.path.join(dst, str(self.responsible))
-
-        try:
-            os.mkdir(dst)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-        cache = Path.objects.get(entity='cache').value
-        cache_obj = os.path.join(cache, aip.object_identifier_value)
-        cache_tar_obj = cache_obj + '.tar'
-        in_cache = os.path.exists(cache_obj)
-
-        if in_cache:
-            step = ProcessStep.objects.create(
-                name='Copy from cache',
-                parent_step_id=self.step,
-            )
-            with allow_join_result():
-                if tar:
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.CopyFile",
-                        params={
-                            'src': cache_tar_obj,
-                            'dst': os.path.join(dst, new_aip.object_identifier_value + '.tar'),
-                        },
-                        processstep=step,
-                    ).run().get()
-                if extracted:
-                    for root, dirs, filenames in walk(cache_obj):
-                        for fname in filenames:
-                            filepath = os.path.join(root, fname)
-                            relpath = os.path.relpath(filepath, cache_obj)
-
-                            ProcessTask.objects.create(
-                                name="ESSArch_Core.tasks.CopyFile",
-                                params={
-                                    'src': filepath,
-                                    'dst': os.path.join(dst, new_aip.object_identifier_value, relpath),
-                                },
-                                processstep=step,
-                            ).run().get()
-
-            Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=not new)
-            return
-
-        storage_objects = storage_objects.filter(
-            storage_medium__status__in=[20, 30],
-            storage_medium__location_status=50,
+        AccessQueue.objects.get_or_create(
+            ip=aip, status__in=[0, 2, 5], package=tar,
+            extracted=extracted, new=new,
+            defaults={'user_id': self.responsible, 'object_identifier_value': object_identifier_value}
         )
-
-        if not storage_objects.exists():
-            raise StorageObject.DoesNotExist("IP %s not archived on active medium" % aip)
-
-        on_disk = storage_objects.filter(content_location_type=DISK).first()
-
-        if on_disk is not None:
-            storage_object = on_disk
-            req_type = 25
-        else:
-            on_tape = storage_objects.filter(content_location_type=TAPE).first()
-            if on_tape is not None:
-                storage_object = on_tape
-                req_type = 20
-            else:
-                raise StorageObject.DoesNotExist()
-
-        target = storage_object.storage_medium.storage_target
-        method_target = StorageMethodTargetRelation.objects.filter(
-            storage_target=target, status__in=[1, 2],
-        ).first()
-
-        if method_target is None:
-            raise StorageMethodTargetRelation.DoesNotExist()
-
-        dst = os.path.join(dst, new_aip.object_identifier_value + '.tar')
-        entry, created = IOQueue.objects.get_or_create(
-            storage_object=storage_object, req_type=req_type, object_path=dst,
-            ip=aip, status__in=[0, 2, 5], defaults={
-                'status': 0, 'user_id': self.responsible,
-                'storage_method_target': method_target,
-                'task_id': self.task_id,
-            }
-        )
-
-        if not self.eager:
-            while entry.status in (0, 2, 5):
-                entry.refresh_from_db()
-                time.sleep(1)
-
-        tarpath = os.path.join(dst, new_aip.object_identifier_value) + '.tar'
-
-        if extracted:
-            with tarfile.open(dst) as tarf:
-                tarf.extractall(dst[:-4])
-
-        if not tar:
-            os.remove(tarpath)
-
-        Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.ACCESS, read_only=not new)
         return
+
 
     def undo(self, aip):
         pass
@@ -489,6 +373,207 @@ class CreateDIP(DBTask):
 
     def event_outcome_success(self, ip):
         return 'Created DIP "%s"' % ip
+
+
+class PollAccessQueue(DBTask):
+    def copy_from_cache(self, entry):
+        step = ProcessStep.objects.create(
+            name='Copy from cache',
+            parent_step_id=self.step,
+        )
+        cache_dir = entry.ip.policy.cache_storage.value
+        cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
+        cache_tar_obj = cache_obj + '.tar'
+        in_cache = os.path.exists(cache_tar_obj)
+
+        if not in_cache:
+            # not in cache
+            entry.status=100
+            entry.save(update_fields=['status'])
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), cache_tar_obj)
+        else:
+            entry.ip.cached = True
+            entry.ip.save(update_fields=['cached'])
+
+        if not os.path.exists(cache_obj):
+            with tarfile.open(cache_tar_obj) as tarf:
+                tarf.extractall(cache_obj.encode('utf-8'))
+
+        access = Path.objects.get(entity='access').value
+        access_user = os.path.join(access, str(entry.user.pk))
+        dst_dir = os.path.join(access_user, entry.new_ip.object_identifier_value)
+        dst_tar = dst_dir + '.tar'
+
+        try:
+            os.mkdir(access_user)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.CopyFile",
+            params={
+                'src': cache_tar_obj,
+                'dst': dst_tar
+            },
+            processstep=step,
+        ).run().get()
+
+        if entry.extracted:
+            with tarfile.open(dst_tar) as tarf:
+                tarf.extractall(dst_dir.encode('utf-8'))
+
+        if not entry.package:
+            os.remove(dst_tar)
+
+        Workarea.objects.create(ip=entry.new_ip, user=entry.user, type=Workarea.ACCESS, read_only=not entry.new)
+
+        entry.status = 20
+        entry.save(update_fields=['status'])
+        return
+
+    def get_available_storage_objects(self, entry):
+        storage_objects = entry.ip.storage.filter(
+            storage_medium__status__in=[20, 30],
+            storage_medium__location_status=50,
+        )
+
+        if not storage_objects.exists():
+            entry.status = 100
+            entry.save(update_fields=['status'])
+            raise StorageObject.DoesNotExist("IP %s not archived on active medium" % aip)
+
+        return storage_objects
+
+
+    def run(self):
+        entries = AccessQueue.objects.filter(
+            status=5, ioqueue__status=20
+        ).order_by('posted')
+
+        for entry in entries:
+            self.copy_from_cache(entry)
+
+        entries = AccessQueue.objects.filter(
+            status=5, ioqueue__status=100
+        ).order_by('posted')
+
+        for entry in entries:
+            # io entry failed, are there any other available storage_objects we can use?
+            self.get_available_storage_objects(entry)
+
+            # at least one available storage object, try again
+            entry.status = 2
+            entry.save(update_fields=['status'])
+            IOQueue.objects.filter(access_queue=entry).update(access_queue=None)
+
+
+        entries = AccessQueue.objects.filter(
+            status__in=[0, 2]
+        ).order_by('posted')[:5]
+
+        if not len(entries):
+            raise Ignore()
+
+        for entry in entries:
+            entry.status = 2
+            entry.save(update_fields=['status'])
+
+            if entry.new:
+                old_aip = entry.ip.pk
+                new_aip = entry.ip
+                new_aip.pk = None
+                new_aip.object_identifier_value = None
+                new_aip.state = 'Access Workarea'
+                new_aip.cached = False
+                new_aip.archived = False
+
+                max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
+                new_aip.generation = max_generation + 1
+                new_aip.save()
+
+                new_aip.object_identifier_value = entry.object_identifier_value if entry.object_identifier_value is not None else str(new_aip.pk)
+                new_aip.save(update_fields=['object_identifier_value'])
+
+                aip = InformationPackage.objects.get(pk=old_aip)
+            else:
+                new_aip = entry.ip
+
+            entry.new_ip = new_aip
+            entry.save(update_fields=['new_ip'])
+
+            if entry.ip.cached:
+                try:
+                    entry.status = 5
+                    entry.save(update_fields=['status'])
+
+                    self.copy_from_cache(entry)
+
+                    entry.status = 20
+                    entry.save(update_fields=['status'])
+                    return
+                except OSError as e:
+                    if e.errno != errno.ENOENT:
+                        entry.status = 100
+                        entry.save(update_fields=['status'])
+                        raise
+
+                    # IP not in cache, continue
+
+            storage_objects = self.get_available_storage_objects(entry)
+
+            on_disk = storage_objects.filter(content_location_type=DISK).first()
+
+            if on_disk is not None:
+                storage_object = on_disk
+                req_type = 25
+            else:
+                on_tape = storage_objects.filter(content_location_type=TAPE).first()
+                if on_tape is not None:
+                    storage_object = on_tape
+                    req_type = 20
+                else:
+                    raise StorageObject.DoesNotExist()
+
+            target = storage_object.storage_medium.storage_target
+            method_target = StorageMethodTargetRelation.objects.filter(
+                storage_target=target, status__in=[1, 2],
+            ).first()
+
+            if method_target is None:
+                raise StorageMethodTargetRelation.DoesNotExist()
+
+            try:
+                io_entry, _ = IOQueue.objects.get_or_create(
+                    storage_object=storage_object, req_type__in=[20, 25],
+                    ip=entry.ip, status__in=[0, 2, 5], defaults={
+                        'status': 0, 'user': entry.user,
+                        'storage_method_target': method_target,
+                        'req_type': req_type, 'access_queue': entry,
+                    }
+                )
+            except Exception:
+                entries = IOQueue.objects.filter(
+                    storage_object=storage_object, req_type__in=[20, 25],
+                    ip=entry.ip, status__in=[0, 2, 5]
+                )
+
+                if entries.count > 1:
+                    io_entry = entries.first()
+                else:
+                    raise
+
+            entry.status = 5
+            entry.save(update_fields=['status'])
+
+            return str(io_entry.pk)
+
+    def undo(self):
+        pass
+
+    def event_outcome_success(self):
+        pass
+
 
 
 class PollIOQueue(DBTask):
@@ -598,6 +683,45 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
+    def get_from_cache(self, entry):
+        cache_dir = entry.ip.policy.cache_storage.value
+        cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
+        cache_tar_obj = cache_obj + '.tar'
+        in_cache = os.path.exists(cache_tar_obj)
+
+        if not in_cache:
+            # not in cache
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), cache_tar_obj)
+        else:
+            entry.ip.cached = True
+            entry.ip.save(update_fields=['cached'])
+
+    def transfer_to_master(self, entry):
+        master_server = entry.storage_method_target.storage_target.master_server
+        host, user, passw = master_server.split(',')
+        dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+
+        session = requests.Session()
+        session.verify = False
+        session.auth = (user, passw)
+
+        cache_dir = entry.ip.policy.cache_storage.value
+        cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
+        cache_tar_obj = cache_obj + '.tar'
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.CopyFile",
+            params={
+                'src': cache_tar_obj,
+                'dst': dst,
+                'requests_session': session,
+            },
+        ).run().get()
+
+        dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+        response = session.post(dst)
+        response.raise_for_status()
+
     def run(self):
         self.mark_as_complete()
         self.cleanup()
@@ -620,6 +744,28 @@ class PollIOQueue(DBTask):
                     raise ValueError("Storage Object needed to read from storage")
 
                 storage_object = entry.storage_object
+
+                try:
+                    self.get_from_cache(entry)
+
+                    if entry.remote_io:
+                        self.transfer_to_master(entry)
+
+                    entry.status = 20
+                    entry.save(update_fields=['status'])
+
+                    if entry.remote_io:
+                        data = IOQueueSerializer(entry, context={'request': None}).data
+                        entry.sync_with_master(data)
+
+                    return
+                except OSError as e:
+                    if e.errno != errno.ENOENT:
+                        entry.status = 100
+                        entry.save(update_fields=['status'])
+                        raise
+
+                    # IP not in cache, continue
 
             storage_method = entry.storage_method_target.storage_method
             storage_target = entry.storage_method_target.storage_target
@@ -652,6 +798,8 @@ class PollIOQueue(DBTask):
                         method['storage_method_target_relations'] = [relation]
                         methods_to_keep.append(method)
 
+                data.pop('access_queue', None)
+                data['ip'].pop('cached', None)
                 data['ip']['policy']['storage_methods'] = methods_to_keep
 
                 try:
@@ -882,15 +1030,27 @@ class IOTape(DBTask):
                 entry.ip.cached = True
                 entry.ip.save(update_fields=['cached'])
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.CopyFile",
-                    params={
-                        'src': cache_obj,
-                        'dst': entry.object_path,
-                    },
-                    processstep=step,
-                    processstep_pos=3,
-                ).run().get()
+                if entry.remote_io:
+                    master_server = entry.storage_method_target.storage_target.master_server
+                    host, user, passw = master_server.split(',')
+                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+
+                    session = requests.Session()
+                    session.verify = False
+                    session.auth = (user, passw)
+
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_obj,
+                            'dst': dst,
+                            'requests_session': session,
+                        },
+                    ).run().get()
+
+                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                    response = session.post(dst)
+                    response.raise_for_status()
         except:
             entry.status = 100
             raise
@@ -982,15 +1142,27 @@ class IODisk(DBTask):
                 entry.ip.cached = True
                 entry.ip.save(update_fields=['cached'])
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.CopyFile",
-                    params={
-                        'src': cache_obj,
-                        'dst': entry.object_path,
-                    },
-                    processstep=step,
-                    processstep_pos=5,
-                ).run().get()
+                if entry.remote_io:
+                    master_server = entry.storage_method_target.storage_target.master_server
+                    host, user, passw = master_server.split(',')
+                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+
+                    session = requests.Session()
+                    session.verify = False
+                    session.auth = (user, passw)
+
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_obj,
+                            'dst': dst,
+                            'requests_session': session,
+                        },
+                    ).run().get()
+
+                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                    response = session.post(dst)
+                    response.raise_for_status()
         except:
             entry.status = 100
             raise

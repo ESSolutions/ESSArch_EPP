@@ -42,6 +42,7 @@ from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage
 
 from ESSArch_Core.storage.models import (
+    AccessQueue,
     IOQueue,
     Robot,
     RobotQueue,
@@ -67,6 +68,7 @@ from configuration.serializers import (
 from storage.filters import StorageMediumFilter
 
 from storage.serializers import (
+    AccessQueueSerializer,
     IOQueueSerializer,
     IOQueueWriteSerializer,
     RobotSerializer,
@@ -386,6 +388,16 @@ class RobotViewSet(viewsets.ModelViewSet):
 
         return Response()
 
+class AccessQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    """
+    API endpoint for access queue
+    """
+    queryset = AccessQueue.objects.all()
+    serializer_class = AccessQueueSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = ('posted',)
 
 class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
