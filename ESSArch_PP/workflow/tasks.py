@@ -672,7 +672,7 @@ class PollIOQueue(DBTask):
         for ip in ips.iterator():
             entries = ip.ioqueue_set.filter(req_type__in=[10, 15])
 
-            if entries.exclude(status=20).exists():
+            if not entries.exists() or entries.exclude(status=20).exists():
                 continue  # unfinished IO entry exists for IP, skip
 
             for storage_method in ip.policy.storage_methods.iterator():
