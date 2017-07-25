@@ -68,10 +68,10 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
     }
     $rootScope.selectedTag = null;
     $scope.showSelectedNode = function(node) {
-        if($rootScope.selectedTag == node.id) {
+        if($rootScope.selectedTag == node) {
             $rootScope.selectedTag = null;
         } else {
-            $rootScope.selectedTag = node.id;
+            $rootScope.selectedTag = node;
         }
     };
     // Remove given node

@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(IP, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(IP, Workarea, Orders, IPReception, Events, Steps, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -32,7 +32,7 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
         if(archived != true) {
             archived = false;
         }
-        return IP.getList(
+        return IP.query(
             angular.extend({
                 page: pageNumber,
                 page_size: pageSize,
@@ -41,10 +41,9 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
                 search: searchString,
                 view_type: viewType,
                 archived: archived,
-                tag: $rootScope.selectedTag,
+                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
             }, columnFilters)
-        ).$promise.then(function(response) {
-            console.log(response)
+        ).$promise.then(function (response) {
             var count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
@@ -58,19 +57,17 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
 
     //Fetches IP's for given workarea (ingest or access)
     function getWorkareaData(workarea, pageNumber, pageSize, filters, sortString, searchString, viewType, columnFilters) {
-        var ipUrl = appConfig.djangoUrl + 'workarea/';
-        var promise = $http({
-            method: 'GET',
-            url: ipUrl,
-            params: angular.extend({
+        return Workarea.query(
+            angular.extend({
                 type: workarea,
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
-                view_type: viewType
+                view_type: viewType,
+                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
             }, columnFilters)
-        }).then(function successCallback(response) {
+        ).$promise.then(function (response) {
             count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
@@ -80,23 +77,20 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
                 data: response.data
             };
         });
-        return promise;
     }
 
-        //Fetches IP's for given workarea (ingest or access)
+    //Fetches IP's for given workarea (ingest or access)
     function getDipPage(pageNumber, pageSize, filters, sortString, searchString, columnFilters) {
-        var ipUrl = appConfig.djangoUrl + 'information-packages/';
-        var promise = $http({
-            method: 'GET',
-            url: ipUrl,
-            params: angular.extend({
+        return IP.query(
+             angular.extend({
                 package_type: 4,
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
+                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                              
             }, columnFilters)
-        }).then(function successCallback(response) {
+        ).$promise.then(function (response) {
             count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
@@ -109,17 +103,13 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
         return promise;
     }
     function getOrderPage(pageNumber, pageSize, filters, sortString, searchString) {
-        var orderUrl = appConfig.djangoUrl + 'orders/';
-        var promise = $http({
-            method: 'GET',
-            url: orderUrl,
-            params: {
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                search: searchString,
-            }
-        }).then(function successCallback(response) {
+        return Orders.query({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString,
+            tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,            
+        }).$promise.then(function (response) {
             count = response.headers('Count');
             if (count == null) {
                 count = response.data.length;
@@ -129,22 +119,19 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
                 data: response.data
             };
         });
-        return promise;
     }
 
     function getReceptionIps(pageNumber, pageSize, filters, sortString, searchString, state, columnFilters) {
-        var promise = $http({
-                method: 'GET',
-                url: appConfig.djangoUrl + 'ip-reception/',
-                params: angular.extend({
+        return IPReception.query(
+                angular.extend({
                     page: pageNumber,
                     page_size: pageSize,
                     ordering: sortString,
                     state: state,
-                    search: searchString
+                    search: searchString,
+                    tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
                 }, columnFilters)
-            })
-            .then(function successCallback(response) {
+            ).$promise.then(function (response) {
                 count = response.headers('Count');
                 if (count == null) {
                     count = response.data.length;
@@ -154,16 +141,12 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
                     data: response.data
                 };
             }, function errorCallback(response) {});
-        return promise;
     }
 
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes) {
-        return $http({
-            method: 'GET',
-            url: ip.url + 'steps/'
-        }).then(function (response) {
-            var steps = response.data;
+        return Steps.query().$promise.then(function (data) {
+            var steps = data;
             steps.forEach(function (step) {
                 step.time_started = $filter('date')(step.time_created, "yyyy-MM-dd HH:mm:ss");
                 step.children = [{ val: -1 }];
@@ -179,31 +162,23 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
 
     //Add a new event
     function addEvent(ip, eventType, eventDetail, outcome) {
-        var promise = $http({
-            method: 'POST',
-            url: appConfig.djangoUrl + "events/",
-            data: {
-                "eventType": eventType.url,
-                "eventOutcomeDetailNote": eventDetail,
-                "eventOutcome": outcome.value,
-                "information_package": ip.url
-            }
-
-        }).then(function(response) {
+        return Events.save({
+            "eventType": eventType.eventType,
+            "eventOutcomeDetailNote": eventDetail,
+            "eventOutcome": outcome.value,
+            "information_package": ip.id
+        }).$promise.then(function (response) {
             return response.data;
-        }, function() {
-
         });
-        return promise;
     }
     //Returns all events for one ip
     function getEvents(ip, pageNumber, pageSize, sortString) {
-        var promise = $http({
-                method: 'GET',
-                url: ip.url + 'events/',
-                params: { page: pageNumber, page_size: pageSize, ordering: sortString }
-            })
-            .then(function successCallback(response) {
+        return IP.events({
+            id: ip.id,
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString
+        }).$promise.then(function (response) {
                 count = response.headers('Count');
                 if (count == null) {
                     count = response.data.length;
@@ -212,8 +187,7 @@ angular.module('myApp').factory('listViewService', function(IP, $q, $http, $stat
                     count: count,
                     data: response.data
                 };
-            }, function errorCallback(response) {});
-        return promise;
+            });
     }
     //Gets event type for dropdown selection
     function getEventlogData() {

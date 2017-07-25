@@ -2,6 +2,8 @@ from _version import get_versions
 
 from rest_framework import exceptions, filters, serializers
 
+from ESSArch_Core.configuration.models import EventType
+
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -47,7 +49,8 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
 
 class EventIPSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(read_only=True, source='linkingAgentIdentifierValue', default=serializers.CurrentUserDefault())
-    information_package = serializers.HyperlinkedRelatedField(required=False, allow_null=True, source='linkingObjectIdentifierValue', queryset=InformationPackage.objects.all(), view_name='informationpackage-detail')
+    information_package = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=InformationPackage.objects.all(), source='linkingObjectIdentifierValue',)
+    eventType = serializers.PrimaryKeyRelatedField(queryset=EventType.objects.all())
     eventDetail = serializers.SlugRelatedField(slug_field='eventDetail', source='eventType', read_only=True)
 
     class Meta:
