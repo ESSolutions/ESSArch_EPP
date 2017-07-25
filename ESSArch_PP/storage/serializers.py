@@ -211,8 +211,18 @@ class IOQueueWriteSerializer(IOQueueSerializer):
 
         aic, _ = InformationPackage.objects.get_or_create(id=aic_data['id'], defaults=aic_data)
 
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        else:
+            user = get_user_model.objects.get(username="system")
+
+        validated_data['user'] = user
+
         ip_data['aic'] = aic
         ip_data['policy'] = policy
+        ip_data['responsible'] = user
         ip, _ = InformationPackage.objects.get_or_create(id=ip_data['id'], defaults=ip_data)
 
         storage_method_target = StorageMethodTargetRelation.objects.get(id=validated_data.pop('storage_method_target'))
@@ -226,15 +236,6 @@ class IOQueueWriteSerializer(IOQueueSerializer):
                 storage_medium = None
         except KeyError, StorageMedium.DoesNotExist:
             storage_medium = None
-
-        user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-        else:
-            user = get_user_model.objects.get(username="system")
-
-        validated_data['user'] = user
 
         return IOQueue.objects.create(ip=ip, storage_method_target=storage_method_target,
                                       storage_medium=storage_medium, **validated_data)
