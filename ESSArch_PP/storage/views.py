@@ -263,6 +263,9 @@ class IOQueueViewSet(viewsets.ModelViewSet):
         entry = self.get_object()
         entry.status = 0
         entry.save(update_fields=['status'])
+
+        entry.ip.cached = True
+        entry.ip.save(update_fields=['cached'])
         return Response()
 
 
