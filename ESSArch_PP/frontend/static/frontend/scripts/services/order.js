@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Orders', function ($resource, appConfig) {
+angular.module('myApp').factory('Order', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'orders/:id/:action/', {}, {
         query: {
             method: 'GET',

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
+angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(Tag, $scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
     $scope.treeOptions = {
         nodeChildren: "children",
         dirSelectable: true,
@@ -40,29 +40,24 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
     //TAGS
     $scope.tags = [];
     $rootScope.loadTags = function() {
-        $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + 'tags/',
-            params: {only_roots: true}
-        }).then(function(response) {
-            response.data.forEach(function(tag, index, array) {
+        Tag.query({
+            only_roots: true
+        }).$promise.then(function(data) {
+            data.forEach(function(tag, index, array) {
                 $scope.expandedNodes.forEach(function(node) {
                     if(tag.id == node.id) {
                         $scope.onNodeToggle(tag);
                     }
                 });
             });
-            $scope.tags = response.data;
+            $scope.tags = data;
         });
     }
     $rootScope.loadTags();
     $scope.onNodeToggle = function(node) {
         node.children.forEach(function(child, index, array) {
-            $http({
-                method: 'GET',
-                url: child.url
-            }).then(function(response) {
-                array[index] = response.data;
+            child.$get().then(function(data) {
+                array[index] = data;
             });
         });
     }
@@ -79,10 +74,7 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         if(node.parentNode == null){
             $scope.tags.forEach(function(element) {
                 if(element.name == node.node.name) {
-                    $http({
-                        method: 'DELETE',
-                        url: element.url
-                    }).then (function(response){
+                    element.$delete().then (function(response){
                         $rootScope.loadTags();
                     });
                 }
@@ -90,10 +82,7 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         } else {
             node.parentNode.children.forEach(function(element) {
                 if(element.name == node.node.name) {
-                    $http({
-                        method: 'DELETE',
-                        url: element.url
-                    }).then (function(response){
+                    element.$delete().then (function(response){
                         $rootScope.loadTags();
                     });
                 }
@@ -165,20 +154,11 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         isRoot ? data.parent = null : data.parent = tag.url;;
         data.information_packages = [];
         if(isRoot){
-            $http({
-                method: 'POST',
-                url: appConfig.djangoUrl + 'tags/',
-                data: data
-            }).then(function(response) {
+            Tag.save(data).$promise.then(function(response) {
                 $rootScope.loadTags();
             });
-
         } else {
-            $http({
-                method: 'POST',
-                url: appConfig.djangoUrl + 'tags/',
-                data: data
-            }).then(function(response) {
+            Tag.save(data).$promise.then(function(response) {
                 $rootScope.loadTags();
             });
         }
@@ -201,11 +181,9 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl($
         });
     }
     $scope.updateTag = function(tag, data) {
-        $http({
-            method: 'PATCH',
-            url: tag.url,
-            data: data
-        }).then(function(response) {
+        Tag.update(angular.extend({
+            id: tag.id
+        }, data)).$promise.then(function(response) {
             $rootScope.loadTags();
         });
     };

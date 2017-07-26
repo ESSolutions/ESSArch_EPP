@@ -1,4 +1,4 @@
-angular.module('myApp').factory('IP', function ($resource, appConfig) {
+angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
     return $resource(appConfig.djangoUrl + 'information-packages/:id/:action/', {}, {
         query: {
             method: 'GET',
@@ -16,6 +16,9 @@ angular.module('myApp').factory('IP', function ($resource, appConfig) {
             isArray: true,
             interceptor: {
                 response: function (response) {
+                    response.resource.forEach(function(res, idx, array) {
+                        array[idx] = new Event(res);
+                    });
                     response.resource.$httpHeaders = response.headers;
                     return response.resource;
                 }

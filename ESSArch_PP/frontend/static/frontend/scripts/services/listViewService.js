@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(IP, Workarea, WorkareaFiles, Orders, IPReception, Events, EventTypes, SA, Steps, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -103,7 +103,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
         return promise;
     }
     function getOrderPage(pageNumber, pageSize, filters, sortString, searchString) {
-        return Orders.query({
+        return Order.query({
             page: pageNumber,
             page_size: pageSize,
             ordering: sortString,
@@ -145,7 +145,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
 
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes) {
-        return Steps.query().$promise.then(function (data) {
+        return Step.query().$promise.then(function (data) {
             var steps = data;
             steps.forEach(function (step) {
                 step.time_started = $filter('date')(step.time_created, "yyyy-MM-dd HH:mm:ss");
@@ -162,7 +162,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
 
     //Add a new event
     function addEvent(ip, eventType, eventDetail, outcome) {
-        return Events.save({
+        return Event.save({
             "eventType": eventType.eventType,
             "eventOutcomeDetailNote": eventDetail,
             "eventOutcome": outcome.value,
@@ -191,7 +191,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
     }
     //Gets event type for dropdown selection
     function getEventlogData() {
-        return EventTypes.query().$promise.then(function (data) {
+        return EventType.query().$promise.then(function (data) {
             return data;
         });
     }
@@ -431,7 +431,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
     }
 
     function prepareOrder(label) {
-        return Orders.save( {
+        return Order.save( {
             label: label
         }).$promise.then(function(response){
             return response;
@@ -510,10 +510,9 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
     }
 
     function getFile(ip, path, file) {
-        return $http({
-            method: 'GET',
-            url: ip.url + "files/",
-            params: {path: path + file.name}
+        return IP.files({
+            id: ip.id,
+            path: path + file.name,
         }).then(function(response) {
             return response;
         });
@@ -563,32 +562,29 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
         } else {
             step.page_number = page_number;
         }
-        return $http({
-            method: 'GET',
-            url: step.url + "children/",
-            params: {
-                page: step.page_number,
-                page_size: page_size,
-                hidden: false
-            }
-        }).then(function (response) {
-            var link = linkHeaderParser.parse(response.headers('Link'));
-            var count = response.headers('Count');
+        return Step.children({
+            id: step.id,
+            page: step.page_number,
+            page_size: page_size,
+            hidden: false
+        }).$promise.then(function (resource) {
+            var link = linkHeaderParser.parse(resource.$httpHeaders('Link'));
+            var count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             step.pages = Math.ceil(count / page_size);
             link.next ? step.next = link.next : step.next = null;
             link.prev ? step.prev = link.prev : step.prev = null;
             step.page_number = page_number || 1;
             var placeholder_removed = false;
-            if (response.data.length > 0) {
+            if (resource.length > 0) {
                 // Delete placeholder
                 step.children.pop();
                 placeholder_removed = true;
             }
             var tempChildArray = [];
-            response.data.forEach(function (child) {
+            resource.forEach(function (child) {
                 child.label = child.name;
                 child.user = child.responsible;
                 if (child.flow_type == "step") {
