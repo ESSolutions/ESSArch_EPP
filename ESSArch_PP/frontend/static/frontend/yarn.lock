@@ -164,6 +164,10 @@ angular-permission@~5.2.1:
   dependencies:
     angular ">=1.4.8"
 
+angular-resource@^1.6.5:
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.6.5.tgz#d1e712ab01afa5d2ec649f5e471673a704f2be40"
+
 angular-route@~1.6:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.4.tgz#7bb216fcda746a1b8c452054b05900a7074ecc62"

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests){
+angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests){
     // Initialize variables
 
     $scope.$window = $window;
@@ -363,10 +363,9 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
 	}
     // Remove ip
 	$scope.removeIp = function (ipObject) {
-		$http({
-			method: 'DELETE',
-			url: ipObject.url
-		}).then(function() {
+		IP.delete({
+			id: ipObject.id
+		}).$promise.then(function() {
 			$scope.edit = false;
 			$scope.select = false;
 			$scope.eventlog = false;
@@ -439,27 +438,21 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
     $scope.myTreeControl.scope = this;
     //Undo step/task
     $scope.myTreeControl.scope.taskStepUndo = function(branch) {
-        $http({
-            method: 'POST',
-            url: branch.url+"undo/"
-        }).then(function(response) {
+        branch.$undo().then(function(response) {
             $timeout(function(){
                 $scope.statusViewUpdate($scope.ip);
             }, 1000);
-        }, function() {
+        }).catch(function() {
             console.log("error");
         });
     };
     //Redo step/task
     $scope.myTreeControl.scope.taskStepRedo = function(branch){
-        $http({
-            method: 'POST',
-            url: branch.url+"retry/"
-        }).then(function(response) {
+        branch.$retry().then(function(response) {
             $timeout(function(){
                 $scope.statusViewUpdate($scope.ip);
             }, 1000);
-        }, function() {
+        }).catch(function() {
             console.log("error");
         });
     };
@@ -485,8 +478,9 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
 
     //Click funciton for steps and tasks
     $scope.stepTaskClick = function (branch) {
-        $scope.getStepTask(branch).then(function (response) {
-            if (branch.flow_type == "task") {
+        var flow_type = branch.flow_type;
+        $scope.getStepTask(branch).then(function (data) {
+            if (flow_type == "task") {
                 $scope.taskInfoModal();
             } else {
                 $scope.stepInfoModal();
@@ -496,16 +490,13 @@ angular.module('myApp').controller('BaseCtrl',  function(vm, ipSortString, $log,
 
     $scope.getStepTask = function (branch) {
         $scope.stepTaskLoading = true;
-        return $http({
-            method: 'GET',
-            url: branch.url
-        }).then(function (response) {
-            var data = response.data;
+        return branch.$get().then(function (data) {
             var started = moment(data.time_started);
             var done = moment(data.time_done);
             data.duration = done.diff(started);
             $scope.currentStepTask = data;
             $scope.stepTaskLoading = false;
+            return data;
         });
     }
     //Redirect to admin page

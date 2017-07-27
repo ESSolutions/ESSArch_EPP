@@ -1,4 +1,4 @@
-angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window) {
+angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window) {
     var vm = this;
     var ipSortString = "";
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
@@ -20,11 +20,8 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.initRequestData();
 
     $scope.getArchivePolicies = function() {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + 'archive_policies/'
-        }).then(function(response) {
-            return response.data;
+        return ArchivePolicy.query().$promise.then(function(data) {
+            return data;
         });
     }
     $scope.archivePolicyChange = function() {
@@ -166,10 +163,9 @@ angular.module('myApp').controller('CreateDipCtrl', function($scope, $rootScope,
     $scope.eventlog = false;
     $scope.requestForm = false;
     $scope.removeIp = function(ipObject) {
-        $http({
-            method: 'DELETE',
-            url: ipObject.url
-        }).then(function() {
+        IP.delete({
+            id: ipObject.id
+        }).$promise.then(function() {
             vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
             $scope.edit = false;
             $scope.select = false;

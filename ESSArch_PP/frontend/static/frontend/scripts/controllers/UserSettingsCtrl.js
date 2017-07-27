@@ -1,17 +1,15 @@
-angular.module("myApp").controller("UserSettingsCtrl", function($scope, $rootScope, $http, appConfig, $controller, $cookies, myService, $q, $window) {
+angular.module("myApp").controller("UserSettingsCtrl", function(Me, $scope, $rootScope, $http, appConfig, $controller, $cookies, myService, $q, $window) {
     var vm = this;
     $controller('BaseCtrl', {$scope: $scope, vm: vm, ipSortString: '' });
     vm.activeColumns = {chosen: []};
     vm.availableColumns = { options: [], chosen: []};
 
     $scope.changeIpViewType = function(type) {
-        $http({
-            method: 'PATCH',
-            url: $rootScope.auth.url,
-            data: {ip_list_view_type: type}
-        }).then(function(response) {
-            $window.sessionStorage.setItem("view-type", response.data.ip_list_view_type);
-            $rootScope.auth = response.data;
+        Me.update({
+            ip_list_view_type: type
+        }).$promise.then(function(data) {
+            $window.sessionStorage.setItem("view-type", data.ip_list_view_type);
+            $rootScope.auth = data;
         });
 
     }
@@ -75,13 +73,11 @@ angular.module("myApp").controller("UserSettingsCtrl", function($scope, $rootSco
         $rootScope.listViewColumns = vm.activeColumns.options;
         vm.activeColumns.chosen = [];
         $scope.saveAlert = null;
-        var updateArray = vm.activeColumns.options.map(function(a){return a.label});
-        $http({
-            method: 'PATCH',
-            url: $rootScope.auth.url,
-            data: {ip_list_columns: updateArray}
-        }).then(function(response) {
-            $rootScope.auth = response.data;
+        var updateArray = vm.activeColumns.options.map(function (a) { return a.label });
+        Me.update({
+            ip_list_columns: updateArray
+        }).$promise.then(function (data) {
+            $rootScope.auth = data;
             $scope.saveAlert = $scope.alerts.saveSuccess;
         }, function error() {
             $scope.saveAlert = $scope.alerts.saveError;

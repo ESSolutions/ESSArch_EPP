@@ -22,33 +22,28 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Requests', function($http, appConfig) {
+angular.module('myApp').factory('Requests', function(IPReception, IP, $http, appConfig) {
     function receive(ip, request, validators) {
-        return $http({
-            method: 'POST',
-            url: appConfig.djangoUrl + 'ip-reception/' + ip.id + '/receive/',
-            data: {
+        return IPReception.receive({
+                id: ip.id,
                 archive_policy: request.archivePolicy.value.id,
                 purpose: request.purpose,
                 tags: request.tags.value.map(function(tag){return tag.id}),
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
-            }
-        }).then(function(response) {
+        }).$promise.then(function(response) {
             return response;
         });
     };
     function preserve(ip, request) {
-        return $http({
-            method: 'POST',
-            url: ip.url + 'preserve/',
-            data: request
-        }).then(function (response) {
+        return IP.preserve(
+            angular.extend(request, { id: ip.id }) 
+        ).$promise.then(function (response) {
             return response;
         });
     }
     function access(ip, data) {
-        return $http.post(ip.url + "access/", data).then(function(response) {
+        return IP.access(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
             return response;
         });
     }

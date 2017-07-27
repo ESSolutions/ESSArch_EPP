@@ -24,6 +24,8 @@ from ESSArch_Core.storage.models import (
 
 class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
     ip = InformationPackageSerializer(read_only=True)
+    storage_medium = serializers.PrimaryKeyRelatedField(queryset=StorageMedium.objects.all())
+
     class Meta:
         model = StorageObject
         fields = (

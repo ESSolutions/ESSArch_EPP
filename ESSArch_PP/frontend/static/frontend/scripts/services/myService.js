@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('myService', function($location, PermPermissionStore, $anchorScroll, $http, appConfig, djangoAuth) {
+angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPermissionStore, $anchorScroll, $http, appConfig, djangoAuth) {
     function changePath(state) {
         $state.go(state);
     };
@@ -47,14 +47,9 @@ angular.module('myApp').factory('myService', function($location, PermPermissionS
         return temp1;
     }
     function getVersionInfo() {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl+"sysinfo/"
-        }).then(function(response){
-            return response.data;
-        }, function() {
-            console.log('error');
-        })
+        return Sysinfo.get().$promise.then(function(data){
+            return data;
+        });
     }
     function getActiveColumns() {
         return djangoAuth.profile().then(function(response) {

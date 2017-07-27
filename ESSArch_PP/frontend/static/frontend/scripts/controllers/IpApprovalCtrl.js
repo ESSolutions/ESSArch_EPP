@@ -39,7 +39,6 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.select = false;
 			$scope.eventlog = false;
 			$scope.edit = false;
-			console.log("eventview blir false")
 			$scope.eventShow = false;
 			$scope.requestForm = false;
 			if ($scope.ip != null && $scope.ip.object_identifier_value == row.object_identifier_value) {

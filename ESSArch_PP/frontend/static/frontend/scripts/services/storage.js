@@ -1,47 +1,39 @@
-angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
+angular.module('myApp').factory('Storage', function(StorageMedium, StorageObject, Robot, RobotQueue, IOQueue, TapeSlot, TapeDrive, $http, $q, appConfig) {
 
     // Get storage mediums
     function getStorageMediums(pageNumber, pageSize, filters, sortString, searchString) {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + "storage-mediums/",
-            params: {
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                search: searchString,
-            }
-        }).then(function successCallback(response) {
-            count = response.headers('Count');
+        return StorageMedium.query({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString,
+        }).$promise.then(function successCallback(resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     // Get storage objects given storage medium
     function getStorageObjects(pageNumber, pageSize, medium, sortString, searchString) {
-        return $http({
-            method: 'GET',
-            url: medium.url + "storage-objects/",
-            params: {
+        return StorageObject.query({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString
-            }
-        }).then(function successCallback(response) {
-            count = response.headers('Count');
+        }).$promise.then(function successCallback(resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
@@ -49,145 +41,120 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
 
     // Get robots
     function getRobots(pageNumber, pageSize, sortString, searchString) {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + 'robots/',
-            params: {
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        return Robot.query({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString,
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     // Get tape slots given robot
     function getTapeSlots(pageNumber, pageSize, sortString, searchString, robot) {
-        return $http({
-            method: 'GET',
-            url: robot.url + "tape-slots/",
-            params: {
+        return TapeSlot.query({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     // Get tape drives
     function getTapeDrives(pageNumber, pageSize, sortString, searchString, robot) {
-        return $http({
-            method: 'GET',
-            url: robot.url + "tape-drives/",
-            params: {
+        return TapeDrive.query({
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
 
     function getRobotQueueForRobot(pageNumber, pageSize, sortString, searchString, robot) {
-        var url = robot.url + "queue/";
-        return $http({
-            method: 'GET',
-            url: url,
-            params: {
+        return Robot.queue({
+                id: robot.id, 
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     function getRobotQueue(pageNumber, pageSize, sortString, searchString) {
-        var url = appConfig.djangoUrl + "robot-queue/";
-        return $http({
-            method: 'GET',
-            url: url,
-            params: {
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        return RobotQueue.query({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString,
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     function getIoQueue(pageNumber, pageSize, sortString, searchString) {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + "io-queue/",
-            params: {
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                search: searchString,
-            }
-        }).then(function (response) {
-            count = response.headers('Count');
+        return IOQueue.query({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString,
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
             if (count == null) {
-                count = response.data.length;
+                count = resource.length;
             }
             return {
                 count: count,
-                data: response.data
+                data: resource
             };
         });
     }
 
     // Inventory robot
     function inventoryRobot(robot) {
-        return $http.post(robot.url + "inventory/").then(function(response) {
+        return robot.$inventory().then(function(response) {
             return response;
         }).catch(function(response) {
             return response.statusText;
@@ -195,25 +162,25 @@ angular.module('myApp').factory('Storage', function($http, $q, appConfig) {
     }
 
     function mountTapeDrive(tapeDrive, medium) {
-        return $http.post(tapeDrive.url + "mount/", {storage_medium: medium.id}).then(function(response) {
+        return TapeDrive.mount({id: tapeDrive.id, storage_medium: medium.id}).$promise.then(function(response) {
             return response;
         });
     }
 
     function unmountTapeDrive(tapeDrive, force) {
-        return $http.post(tapeDrive.url + "unmount/", {force: force}).then(function(response) {
+        return TapeDrive.unmount({id: tapeDrive.id, force: force}).$promise.then(function(response) {
             return response;
         });
     }
 
     function mountTapeSlot(tapeSlot, medium) {
-        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.storage_medium.id + "/mount/").then(function(response) {
+        return StorageMedium.mount({ id: tapeSlot.storage_medium.id }).$promise.then(function(response) {
             return response;
         });
     }
 
     function unmountTapeSlot(tapeSlot, force) {
-        return $http.post(appConfig.djangoUrl + "storage-mediums/" + tapeSlot.storage_medium.id + "/unmount/", {force: force}).then(function(response) {
+        return StorageMedium.unmount({ id: tapeSlot.storage_medium.id, force: force }).$promise.then(function(response) {
             return response;
         });
     }
