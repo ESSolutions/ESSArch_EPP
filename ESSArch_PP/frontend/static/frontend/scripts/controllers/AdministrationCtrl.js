@@ -1,11 +1,11 @@
-angular.module('myApp').controller('AdministrationCtrl', function($scope, $rootScope, $controller, $cookies, $http, appConfig) {
+angular.module('myApp').controller('AdministrationCtrl', function(StorageObject, StorageMedium, IP, $scope, $rootScope, $controller, $cookies, $http, appConfig) {
     var vm = this;
     vm.ipViewType = $cookies.get('ip-view-type') || 1;
     $scope.selectedObject = {id: "", class: ""};
     vm.storageObjects = []
     $scope.getStorageObjects = function() {
-        $http.get(appConfig.djangoUrl + 'storage-objects').then(function(response) {
-            vm.storageObjects = response.data;
+        StorageObject.query().$promise.then(function(data) {
+            vm.storageObjects = data;
         });
     }
     $scope.getStorageObjects();
@@ -19,11 +19,13 @@ angular.module('myApp').controller('AdministrationCtrl', function($scope, $rootS
     }
 
     $scope.objectTableClick = function(row) {
-        vm.storage_medium = $http.get(row.storage_medium).then(function(response) {
-            return response.data;
+        vm.storage_medium = StorageMedium.get({ id: row.storage_medium }).$promise.then(function(data) {
+            console.log(data);
+            return data;
         });
-        vm.ip = $http.get(row.ip).then(function(response) {
-            return response.data;
+        vm.ip = IP.get({id: row.ip }).$promise.then(function(data) {
+            console.log(data);
+            return data;
         });
     }
 });
