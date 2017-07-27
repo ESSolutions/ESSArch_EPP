@@ -20,11 +20,9 @@ angular.module('myApp').controller('AdministrationCtrl', function(StorageObject,
 
     $scope.objectTableClick = function(row) {
         vm.storage_medium = StorageMedium.get({ id: row.storage_medium }).$promise.then(function(data) {
-            console.log(data);
             return data;
         });
         vm.ip = IP.get({id: row.ip }).$promise.then(function(data) {
-            console.log(data);
             return data;
         });
     }

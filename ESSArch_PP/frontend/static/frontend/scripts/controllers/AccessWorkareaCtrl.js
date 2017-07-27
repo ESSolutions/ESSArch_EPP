@@ -6,7 +6,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
     $scope.menuOptions = function() {
         return [
             [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {
-                console.log($itemScope.row);
             }],
         ];
     }
