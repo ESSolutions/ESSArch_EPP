@@ -49,6 +49,7 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
         },
         preserve: {
             method: 'POST',
+            isArray: true,
             params: { action: "preserve", id: "@id" }
         },
         access: {
