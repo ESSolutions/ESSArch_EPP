@@ -51,6 +51,10 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
             method: 'POST',
             params: { action: "preserve", id: "@id" }
         },
+        access: {
+            method: "POST",
+            params: { action: "access", id: "@id" }
+        },
         changeSa: {
             method: "PATCH",
             params: { id: "@id" },

@@ -10,7 +10,6 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
                 }
             },
         },
-        // TODO
         receive: {
             method: 'POST',
             params: { action: "receive", id: "@id" }
