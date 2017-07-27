@@ -4,16 +4,18 @@ angular.module('myApp').factory('User', function ($resource, appConfig) {
             method: "GET",
             params: {id: "@id"}
         },
-        query: {
+        changeIpViewType: {
+            method: "PATCH",
+            params: { id: "@id" }
+        }
+    });
+}).factory('Me', function ($resource, appConfig) {
+    return $resource(appConfig.djangoUrl + 'me/:action/', {}, {
+        get: {
             method: "GET",
-            params: { id: "@id" },
-            isArray: true,
-            interceptor: {
-                response: function (response) {
-                    response.resource.$httpHeaders = response.headers;
-                    return response.resource;
-                }
-            },
         },
+        update: {
+            method: "PATCH",
+        }
     });
 });
