@@ -37,6 +37,11 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
             params: { action: "files", id: "@id" },
             isArray: true
         },
+        steps: {
+            method: "GET",
+            isArray: true,
+            params: { action: "steps", id: "@id" }
+        },
         addFile: {
             method: "POST",
             params: { action: "files" , id: "@id" }

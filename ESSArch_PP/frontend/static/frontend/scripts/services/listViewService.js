@@ -145,7 +145,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
 
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes) {
-        return Step.query().$promise.then(function (data) {
+        return IP.steps({ id: ip.id }).$promise.then(function (data) {
             var steps = data;
             steps.forEach(function (step) {
                 step.time_started = $filter('date')(step.time_created, "yyyy-MM-dd HH:mm:ss");
