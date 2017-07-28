@@ -1,4 +1,4 @@
-angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
+angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Step) {
     return $resource(appConfig.djangoUrl + 'information-packages/:id/:action/', {}, {
         query: {
             method: 'GET',
@@ -39,8 +39,17 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event) {
         },
         steps: {
             method: "GET",
+            params: { action: "steps", id: "@id" },
             isArray: true,
-            params: { action: "steps", id: "@id" }
+            interceptor: {
+                response: function (response) {
+                    response.resource.forEach(function(res, idx, array) {
+                        array[idx] = new Step(res);
+                    });
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            },
         },
         addFile: {
             method: "POST",
