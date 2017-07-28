@@ -168,7 +168,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
             "eventOutcome": outcome.value,
             "information_package": ip.id
         }).$promise.then(function (response) {
-            return response.data;
+            return response;
         });
     }
     //Returns all events for one ip
