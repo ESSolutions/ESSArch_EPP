@@ -8,7 +8,7 @@
                     <form role="form" ng-submit="login(loginForm)" name="loginForm" novalidate>
                         <div class="form-group">
                             <label for="id_username">{{'USERNAME' | translate}}</label>
-                            <input name="username" id="id_username" type="text" ng-model="model.username" placeholder="Username" class="form-control" required />
+                            <input name="username" id="id_username" type="text" ng-model="model.username" placeholder="Username" class="form-control" required focused="true" />
                         </div>
                         <div class="alert alert-danger" ng-repeat="error in errors.username">{{error}}</div>
                         <div class="form-group">

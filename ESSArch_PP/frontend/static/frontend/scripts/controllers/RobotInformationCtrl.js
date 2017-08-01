@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('RobotInformationCtrl', function($scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
+angular.module('myApp').controller('RobotInformationCtrl', function(StorageMedium, $scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
     var vm = this;
     $scope.translate = $translate;
     vm.slotsPerPage = 10;
@@ -235,8 +235,8 @@ angular.module('myApp').controller('RobotInformationCtrl', function($scope, $con
     }
 
     vm.getStorageMediumsByState = function (status) {
-        return $http.get(appConfig.djangoUrl + "storage-mediums/", { params: { status: status } }).then(function (response) {
-            return response.data;
+        return StorageMedium.query({status : status }).$promise.then(function (data) {
+            return data;
         });
     }
 

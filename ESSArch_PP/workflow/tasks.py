@@ -33,7 +33,7 @@ import zipfile
 
 from celery import states as celery_states
 from celery.exceptions import Ignore
-from celery.result import allow_join_result
+from celery.result import allow_join_result, AsyncResult
 
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -54,6 +54,12 @@ from ESSArch_Core.ip.models import (
     InformationPackage,
     Workarea,
 )
+from ESSArch_Core.storage.exceptions import (
+    TapeDriveLockedError,
+    TapeMountedError,
+    TapeMountedAndLockedByOtherError,
+    TapeUnmountedError,
+)
 from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
@@ -72,13 +78,6 @@ from ESSArch_Core.storage.models import (
 )
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
-
-from storage.exceptions import (
-    TapeDriveLockedError,
-    TapeMountedError,
-    TapeMountedAndLockedByOtherError,
-    TapeUnmountedError,
-)
 
 
 class ReceiveSIP(DBTask):
@@ -233,12 +232,12 @@ class StoreAIP(DBTask):
     event_type = 20300
 
     def run(self, aip):
-        policy = InformationPackage.objects.prefetch_related('policy__storagemethod_set__targets').get(pk=aip).policy
+        policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=aip).policy
 
         if not policy:
             raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % aip)
 
-        storage_methods = policy.storagemethod_set.all()
+        storage_methods = policy.storage_methods.all()
 
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
@@ -252,7 +251,7 @@ class StoreAIP(DBTask):
 
         with transaction.atomic():
             for method in storage_methods:
-                for method_target in method.storagemethodtargetrelation_set.filter(status=1):
+                for method_target in method.storage_method_target_relations.filter(status=1):
                     req_type = 10 if method_target.storage_method.type == TAPE else 15
 
                     _, created = IOQueue.objects.get_or_create(
@@ -480,12 +479,12 @@ class CreateDIP(DBTask):
 
 
 class PollIOQueue(DBTask):
-    hidden = True
+    track = False
     def get_storage_medium(self, entry, storage_target, storage_type):
         if storage_type == TAPE:
             if entry.req_type == 10:
                 storage_medium = storage_target.storagemedium_set.filter(
-                    status=20,
+                    status=20, location_status=50
                 ).order_by('last_changed_local').first()
 
                 if storage_medium is not None:
@@ -504,7 +503,7 @@ class PollIOQueue(DBTask):
                 # Could not find any storage medium, create one
 
                 slot = TapeSlot.objects.filter(
-                    storage_medium__isnull=True,
+                    status=20, storage_medium__isnull=True,
                     medium_id__startswith=storage_target.target
                 ).exclude(medium_id__exact='').first()
 
@@ -514,7 +513,8 @@ class PollIOQueue(DBTask):
                 storage_medium = StorageMedium.objects.create(
                     medium_id=slot.medium_id,
                     storage_target=storage_target, status=20,
-                    location_status=20,
+                    location=Parameter.objects.get(entity='medium_location').value,
+                    location_status=50,
                     block_size=storage_target.default_block_size,
                     format=storage_target.default_format, agent=entry.user,
                     tape_slot=slot,
@@ -526,12 +526,10 @@ class PollIOQueue(DBTask):
 
         elif storage_type == DISK:
             if entry.req_type == 15:
-                storage_medium = storage_target.storagemedium_set.filter(
-                    status=20,
-                ).order_by('last_changed_local').first()
+                storage_medium = storage_target.storagemedium_set.first()
 
                 if storage_medium is None:
-                    storage_medium = StorageMedium.objects.create(
+                    return StorageMedium.objects.create(
                         medium_id=storage_target.name,
                         storage_target=storage_target, status=20,
                         location=Parameter.objects.get(entity='medium_location').value,
@@ -539,17 +537,69 @@ class PollIOQueue(DBTask):
                         block_size=storage_target.default_block_size,
                         format=storage_target.default_format, agent=entry.user,
                     )
-                return storage_target.storagemedium_set.first()
+
+                if storage_medium.status == 20 and storage_medium.location_status == 50:
+                    return storage_medium
+
+                raise ValueError("No disk available for storage target %s (%s)" % (storage_target.name, storage_target.pk))
+
             elif entry.req_type == 25:
                 return entry.storage_object.storage_medium
 
+    def cleanup(self):
+        entries = IOQueue.objects.filter(status=5).exclude(task_id='')
+
+        for entry in entries.iterator():
+            result = AsyncResult(entry.task_id)
+
+            if result.ready() and (result.failed() or result.successful()):
+                entry.status = 20 if result.successful() else 100
+                entry.save(update_fields=['status'])
+                continue
+
+            task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+            if task is not None and task.status in [celery_states.SUCCESS, celery_states.FAILURE]:
+                entry.status = 20 if task.status == celery_states.SUCCESS else 100
+                entry.save(update_fields=['status'])
+                continue
+
+            if result.status == 'PENDING':
+                if task is not None and task.status == celery_states.PENDING:
+                    task.run()
+
+    def mark_as_complete(self):
+        ips = InformationPackage.objects.filter(state='Preserving').prefetch_related('policy__storage_methods')
+
+        for ip in ips.iterator():
+            entries = ip.ioqueue_set.filter(req_type__in=[10, 15])
+
+            if entries.exclude(status=20).exists():
+                continue  # unfinished IO entry exists for IP, skip
+
+            for storage_method in ip.policy.storage_methods.iterator():
+                if not entries.filter(storage_method_target__storage_method=storage_method).exists():
+                    raise Exception("No entry for storage method '%s' for IP '%s'" % (storage_method.pk, ip.pk))
+
+            ip.archived = True
+            ip.state = 'Preserved'
+            ip.save(update_fields=['archived', 'state'])
+
     def run(self):
-        entries = IOQueue.objects.filter(status=0).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
+        self.mark_as_complete()
+        self.cleanup()
+
+        entries = IOQueue.objects.filter(
+            status__in=[0, 2]
+        ).select_related('storage_method_target').order_by('ip__policy', 'ip', 'posted')[:5]
 
         if not len(entries):
             raise Ignore()
 
         for entry in entries:
+            entry.status = 2
+            entry.save(update_fields=['status'])
+
             if entry.req_type in [20, 25]:  # read
                 if entry.storage_object is None:
                     entry.status = 100
@@ -569,17 +619,13 @@ class PollIOQueue(DBTask):
                 raise
 
             if storage_method.type == TAPE and storage_medium.tape_drive is None:  # Tape not mounted, queue to mount it
-                started = RobotQueue.objects.filter(
+                RobotQueue.objects.get_or_create(
                     storage_medium=storage_medium, req_type=10,
-                    status__in=[0, 2, 5],
+                    status__in=[0, 2, 5], defaults={
+                        'user': entry.user, 'status': 0,
+                        'io_queue_entry': entry
+                    }
                 )
-
-                if not started.exists():  # add to queue if not already in queue
-                    RobotQueue.objects.create(
-                        user=entry.user,
-                        storage_medium=storage_medium,
-                        req_type=10, io_queue_entry=entry
-                    )
                 continue
 
             if entry.req_type in [10, 20]:  # tape
@@ -590,22 +636,32 @@ class PollIOQueue(DBTask):
                     storage_medium.tape_drive.io_queue_entry = entry
                     storage_medium.tape_drive.save(update_fields=['io_queue_entry'])
 
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['status'])
-                ProcessTask.objects.create(
+                t = ProcessTask.objects.create(
                     name="workflow.tasks.IOTape",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
-                ).run()
+                )
+
+                entry.task_id = str(t.pk)
+                entry.save(update_fields=['task_id'])
+
+                t.run()
 
             elif entry.req_type in [15, 25]:  # Write to disk
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['status'])
-                ProcessTask.objects.create(
+                t = ProcessTask.objects.create(
                     name="workflow.tasks.IODisk",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
-                ).run()
+                )
+
+                entry.task_id = str(t.pk)
+                entry.save(update_fields=['task_id'])
+
+                t.run()
 
     def undo(self):
         pass
@@ -630,8 +686,10 @@ class IOTape(DBTask):
 
         step = ProcessStep(name='IO Tape',)
 
-        if hasattr(entry.task, 'processstep') and entry.task.processstep is not None:
-            step.parent_step = entry.task.processstep
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
         else:
             step.information_package = entry.ip
 
@@ -690,17 +748,15 @@ class IOTape(DBTask):
 
                 StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
-                StorageObject.objects.create(
+                storage_object = StorageObject.objects.create(
                     content_location_type=storage_method.type,
                     content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
 
-                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
-                    entry.ip.archived = True
-                    entry.ip.cached = True
-                    entry.ip.state = 'Preserved'
-                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
+                entry.storage_medium_id = storage_medium
+                entry.storage_object = storage_object
+                entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
             elif entry.req_type == 20:  # Read from tape
                 tape_pos = int(entry.storage_object.content_location_value)
@@ -728,6 +784,12 @@ class IOTape(DBTask):
                     processstep_pos=2,
                 ).run().get()
 
+                with tarfile.open(cache_obj) as tar:
+                    tar.extractall(cache.encode('utf-8'))
+
+                entry.ip.cached = True
+                entry.ip.save(update_fields=['cached'])
+
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
                     params={
@@ -737,9 +799,6 @@ class IOTape(DBTask):
                     processstep=step,
                     processstep_pos=3,
                 ).run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache)
         except:
             entry.status = 100
             raise
@@ -773,8 +832,10 @@ class IODisk(DBTask):
 
         step = ProcessStep(name='IO Disk',)
 
-        if hasattr(entry.task, 'processstep') and entry.task.processstep is not None:
-            step.parent_step = entry.task.processstep
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
         else:
             step.information_package = entry.ip
 
@@ -788,6 +849,10 @@ class IODisk(DBTask):
                     content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
+
+                entry.storage_medium_id = storage_medium
+                entry.storage_object = storage_object
+                entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
                 if entry.ip.cached:
                     src = cache_obj
@@ -804,12 +869,6 @@ class IODisk(DBTask):
                 )
                 step.run().get()
 
-                if IOQueue.objects.exclude(ip=entry.ip, status__in=[0, 2, 5]).exists():
-                    entry.ip.archived = True
-                    entry.ip.cached = True
-                    entry.ip.state = 'Preserved'
-                    entry.ip.save(update_fields=['archived', 'cached', 'state'])
-
             elif entry.req_type == 25:  # Read from disk
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
@@ -819,7 +878,13 @@ class IODisk(DBTask):
                     },
                     processstep=step,
                     processstep_pos=0,
-                )
+                ).run().get()
+
+                with tarfile.open(cache_obj) as tar:
+                    tar.extractall(cache.encode('utf-8'))
+
+                entry.ip.cached = True
+                entry.ip.save(update_fields=['cached'])
 
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
@@ -829,12 +894,7 @@ class IODisk(DBTask):
                     },
                     processstep=step,
                     processstep_pos=5,
-                )
-
-                step.run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache)
+                ).run().get()
         except:
             entry.status = 100
             raise
@@ -852,30 +912,28 @@ class IODisk(DBTask):
 
 
 class PollRobotQueue(DBTask):
+    track = False
     def run(self):
-        entries = RobotQueue.objects.filter(
-            status=0
-        ).select_related('storage_medium').order_by('-req_type', 'posted')[:5]
+        force_entries = RobotQueue.objects.filter(
+            req_type=30, status__in=[0, 2]
+        ).select_related('storage_medium').order_by('-status', 'posted')
+
+        non_force_entries = RobotQueue.objects.filter(
+            status__in=[0, 2]
+        ).exclude(req_type=30).select_related('storage_medium').order_by('-status', '-req_type', 'posted')[:5]
+
+        entries = list(force_entries) + list(non_force_entries)
 
         if not len(entries):
             raise Ignore()
 
-        step = ProcessStep(
-            name='Poll Robot Queue',
-        )
+        for entry in entries:
+            entry.status = 2
+            entry.save(update_fields=['status'])
 
-        for entry in entries.iterator():
-            if hasattr(entry, 'io_queue_entry') and hasattr(entry.io_queue_entry, 'task'):
-                if hasattr(entry.io_queue_entry.task, 'processstep') and entry.io_queue_entry.task.processstep is not None:
-                    step.parent_step = entry.io_queue_entry.task.processstep
-                else:
-                    step.information_package = entry.io_queue_entry.ip
-
-            step.save()
+            medium = entry.storage_medium
 
             if entry.req_type == 10:  # mount
-                medium = entry.storage_medium
-
                 if medium.tape_drive is not None:  # already mounted
                     if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
                         if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
@@ -890,7 +948,7 @@ class PollRobotQueue(DBTask):
 
                 if drive is None:
                     free_drive = TapeDrive.objects.filter(
-                        storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
+                        status=20, storage_medium__isnull=True, io_queue_entry__isnull=True, locked=False,
                     ).order_by('num_of_mounts').first()
 
                     if free_drive is None:
@@ -904,7 +962,7 @@ class PollRobotQueue(DBTask):
                     raise ValueError('No robot available')
 
                 entry.robot = free_robot
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['robot', 'status'])
 
                 with allow_join_result():
@@ -917,6 +975,9 @@ class PollRobotQueue(DBTask):
                                 'drive': drive.pk,
                             }
                         ).run().get()
+                    except TapeMountedError:
+                        entry.status = 20
+                        raise
                     except:
                         entry.status = 100
                         raise
@@ -929,8 +990,6 @@ class PollRobotQueue(DBTask):
                         entry.save(update_fields=['robot', 'status'])
 
             elif entry.req_type in [20, 30]:  # unmount
-                medium = entry.storage_medium
-
                 if medium.tape_drive is None:  # already unmounted
                     entry.status = 20
                     entry.save(update_fields=['status'])
@@ -947,7 +1006,7 @@ class PollRobotQueue(DBTask):
                     raise ValueError('No robot available')
 
                 entry.robot = free_robot
-                entry.status = 2
+                entry.status = 5
                 entry.save(update_fields=['robot', 'status'])
 
                 with allow_join_result():
@@ -960,7 +1019,7 @@ class PollRobotQueue(DBTask):
                         ).run().get()
                     except TapeUnmountedError:
                         entry.status = 20
-                        raise TapeUnmountedError("Tape already unmounted")
+                        raise
                     except:
                         entry.status = 100
                         raise
@@ -981,9 +1040,10 @@ class PollRobotQueue(DBTask):
 
 
 class UnmountIdleDrives(DBTask):
+    track = False
     def run(self):
         idle_drives = TapeDrive.objects.filter(
-            storage_medium__isnull=False,
+            status=20, storage_medium__isnull=False,
             last_change__lte=timezone.now()-F('idle_time'),
             locked=False,
         )

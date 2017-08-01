@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
+angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
     var vm = this;
     var ipSortString = "";
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
@@ -217,20 +217,15 @@ angular.module('myApp').controller('ReceptionCtrl', function ($log, $uibModal, $
     $scope.yes = $translate.instant('YES');
     $scope.no = $translate.instant('NO');
 
-    $scope.getArchivePolicies = function() {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + 'archive_policies/'
-        }).then(function(response) {
-            return response.data;
-        });
+    $scope.getArchivePolicies = function () {
+        return ArchivePolicy.query()
+            .$promise.then(function (data) {
+                return data;
+            });
     }
     $scope.getTags = function() {
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl + 'tags/'
-        }).then(function(response) {
-            return response.data;
+        return Tag.query().$promise.then(function(data) {
+            return data;
         });
     }
     $scope.receive = function(ips) {

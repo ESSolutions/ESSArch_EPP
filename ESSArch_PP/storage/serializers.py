@@ -22,30 +22,10 @@ from ESSArch_Core.storage.models import (
 )
 
 
-class IOQueueSerializer(serializers.HyperlinkedModelSerializer):
-    result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
-
-    req_type = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-
-    def get_req_type(self, obj):
-        return obj.get_req_type_display()
-
-    def get_status(self, obj):
-        return obj.get_status_display()
-
-    class Meta:
-        model = IOQueue
-        fields = (
-            'url', 'id', 'req_type', 'req_purpose', 'user', 'object_path',
-            'write_size', 'result', 'status', 'task_id', 'posted',
-            'ip', 'storage_method_target', 'storage_medium', 'storage_object', 'access_queue',
-            'remote_status', 'transfer_task_id'
-        )
-
-
 class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
     ip = InformationPackageSerializer(read_only=True)
+    storage_medium = serializers.PrimaryKeyRelatedField(queryset=StorageMedium.objects.all())
+
     class Meta:
         model = StorageObject
         fields = (
@@ -82,7 +62,7 @@ class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
         )
 
 
-class StorageMethodSerializer(serializers.HyperlinkedModelSerializer):
+class StorageMethodSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
         model = StorageMethod
         fields = (
@@ -91,6 +71,9 @@ class StorageMethodSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class StorageMethodTargetRelationSerializer(serializers.HyperlinkedModelSerializer):
+    storage_target = StorageTargetSerializer()
+    storage_method = StorageMethodSerializer(omit=['targets'])
+
     class Meta:
         model = StorageMethodTargetRelation
         fields = (
@@ -144,11 +127,36 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
             'locked', 'last_change',
         )
 
+
+class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
+    result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
+    user = UserSerializer(read_only=True)
+    storage_method_target = StorageMethodTargetRelationSerializer(read_only=True)
+
+    req_type_display = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
+
+    def get_req_type_display(self, obj):
+        return obj.get_req_type_display()
+
+    def get_status_display(self, obj):
+        return obj.get_status_display()
+
+    class Meta:
+        model = IOQueue
+        fields = (
+            'url', 'id', 'req_type', 'req_type_display', 'req_purpose', 'user', 'object_path',
+            'write_size', 'result', 'status', 'status_display', 'task_id', 'posted',
+            'ip', 'storage_method_target', 'storage_medium', 'storage_object', 'access_queue',
+            'remote_status', 'transfer_task_id'
+        )
+
+
 class RobotQueueSerializer(serializers.HyperlinkedModelSerializer):
     io_queue_entry = IOQueueSerializer(read_only=True)
     robot = RobotSerializer(read_only=True)
     storage_medium = StorageMediumSerializer(read_only=True)
-    user = UserSerializer(read_only=True, fields=['url', 'id', 'username', 'first_name', 'last_name'])
+    user = UserSerializer(read_only=True)
     req_type = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 

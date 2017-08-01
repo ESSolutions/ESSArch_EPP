@@ -1,4 +1,8 @@
+from _version import get_versions
+
 from rest_framework import exceptions, filters, serializers
+
+from ESSArch_Core.configuration.models import EventType
 
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
@@ -12,9 +16,12 @@ from ESSArch_Core.ip.models import (
 )
 
 from ESSArch_Core.auth.serializers import UserSerializer
+from ESSArch_Core.configuration.serializers import ArchivePolicySerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from ip.filters import InformationPackageFilter
+
+VERSION = get_versions()['version']
 
 class ArchivalInstitutionSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
@@ -41,6 +48,9 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
 
 
 class EventIPSerializer(serializers.HyperlinkedModelSerializer):
+    user = UserSerializer(read_only=True, source='linkingAgentIdentifierValue', default=serializers.CurrentUserDefault())
+    information_package = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=InformationPackage.objects.all(), source='linkingObjectIdentifierValue',)
+    eventType = serializers.PrimaryKeyRelatedField(queryset=EventType.objects.all())
     eventDetail = serializers.SlugRelatedField(slug_field='eventDetail', source='eventType', read_only=True)
 
     class Meta:
@@ -48,11 +58,16 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
                 'url', 'id', 'eventType', 'eventDateTime', 'eventDetail',
                 'eventVersion', 'eventOutcome',
-                'eventOutcomeDetailNote', 'linkingAgentIdentifierValue',
-                'linkingObjectIdentifierValue',
+                'eventOutcomeDetailNote', 'user',
+                'information_package',
         )
+        extra_kwargs = {
+            'eventVersion': {
+                'default': VERSION
+            }
+        }
 
-class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
 
@@ -84,7 +99,7 @@ class NestedInformationPackageSerializer(serializers.HyperlinkedModelSerializer)
             'policy', 'message_digest', 'message_digest_algorithm',
         )
 
-class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
+class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
@@ -92,6 +107,10 @@ class InformationPackageSerializer(serializers.HyperlinkedModelSerializer):
     def get_information_packages(self, obj):
         request = self.context['request']
         view = self.context.get('view')
+
+        if view is None:
+            return obj.related_ips()
+
         view_type = request.query_params.get('view_type', 'aic')
 
         related = obj.related_ips()
@@ -224,6 +243,9 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
+    aic = NestedInformationPackageSerializer(read_only=True, omit=['status', 'step_state'])
+    policy = ArchivePolicySerializer(read_only=True)
+
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (

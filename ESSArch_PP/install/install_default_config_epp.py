@@ -82,32 +82,36 @@ def installDefaultParameters():
 
 
 def installDefaultUsers():
-    user_system, _ = User.objects.get_or_create(
+    user_system, created = User.objects.get_or_create(
         username='system', email='system@essolutions.se',
         is_staff=True, is_superuser=True
     )
-    user_system.set_password('system')
-    user_system.save()
+    if created:
+        user_system.set_password('system')
+        user_system.save()
 
-    user_user, _ = User.objects.get_or_create(
+    user_user, created = User.objects.get_or_create(
         username='user', email='usr1@essolutions.se'
     )
-    user_user.set_password('user')
-    user_user.save()
+    if created:
+        user_user.set_password('user')
+        user_user.save()
 
-    user_admin, _ = User.objects.get_or_create(
+    user_admin, created = User.objects.get_or_create(
         username='admin', email='admin@essolutions.se',
         is_staff=True
     )
-    user_admin.set_password('admin')
-    user_admin.save()
+    if created:
+        user_admin.set_password('admin')
+        user_admin.save()
 
-    user_sysadmin, _ = User.objects.get_or_create(
+    user_sysadmin, created = User.objects.get_or_create(
         username='sysadmin', email='sysadmin@essolutions.se',
         is_staff=True, is_superuser=True
     )
-    user_sysadmin.set_password('sysadmin')
-    user_sysadmin.save()
+    if created:
+        user_sysadmin.set_password('sysadmin')
+        user_sysadmin.save()
 
     group_user, _ = Group.objects.get_or_create(name='user')
     group_admin, _ = Group.objects.get_or_create(name='admin')

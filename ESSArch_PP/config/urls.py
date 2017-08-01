@@ -31,6 +31,7 @@ from rest_framework_extensions.routers import ExtendedDefaultRouter
 from ESSArch_Core.auth.views import (
     GroupViewSet,
     PermissionViewSet,
+    MeView,
     UserViewSet,
 )
 
@@ -178,6 +179,7 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/', include(router.urls)),
     url(r'^api/sysinfo/', SysInfoView.as_view()),
+    url(r'^api/me/$', MeView.as_view(), name='me'),
     url(r'^rest-auth/', include('rest_auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
 ]

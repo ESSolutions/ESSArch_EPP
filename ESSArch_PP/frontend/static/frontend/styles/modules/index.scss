@@ -370,22 +370,22 @@ body.modal-open[style] {
     }
 }
 .fa.fa-refresh {
-    font-size: 20px;
+    font-size: 21px;
 }
 .fa.fa-pencil {
-    font-size: 20px;
+    font-size: 21px;
 }
 .fa.fa-print {
-    font-size: 20px;
+    font-size: 21px;
 }
 .fa.fa-cog {
-    font-size: 20px;
+    font-size: 21px;
 }
 .fa.fa-envelope {
-    font-size: 20px;
+    font-size: 21px;
 }
 .fa.fa-question-circle {
-    font-size: 20px;
+    font-size: 21px;
 }
 .status-tree-grid {
     padding: 5px;
@@ -414,8 +414,8 @@ body.modal-open[style] {
     animation: spin 0.7s;
 }
 @keyframes spin {
-    from { transform: scale(1) rotate(0deg);}
-    to { transform: scale(1) rotate(360deg);}
+    from { transform: rotate(0deg);}
+    to { transform: rotate(360deg);}
 }
 
 .ui-select-placeholder {

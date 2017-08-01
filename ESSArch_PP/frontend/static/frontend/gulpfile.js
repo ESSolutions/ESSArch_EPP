@@ -67,7 +67,7 @@ var jsVendorFiles = [
         'node_modules/angular-bootstrap-contextmenu/contextMenu.js',
         'node_modules/ui-select/dist/select.js',
         'node_modules/bootstrap/dist/js/bootstrap.js',
-        'node_modules/ng-flow/dist/ng-flow-standalone.js',
+        'node_modules/@flowjs/ng-flow/dist/ng-flow-standalone.js',
         'bower_components/angular-link-header-parser/release/angular-link-header-parser.js',
         'bower_components/lodash/lodash.js', // required by angular-link-header-parser
         'bower_components/uri-util/dist/uri-util.js', // required by angular-link-header-parser
@@ -79,6 +79,7 @@ var jsVendorFiles = [
         'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
         'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js',
         'node_modules/angular-clipboard/angular-clipboard.js',
+        'node_modules/angular-resource/angular-resource.js',
     ],
     jsFiles = [
         'scripts/myApp.js', 'scripts/controllers/*.js', 'scripts/components/*.js', 'scripts/services/*.js',

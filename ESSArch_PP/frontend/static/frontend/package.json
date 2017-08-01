@@ -1,6 +1,7 @@
 {
   "private": true,
   "devDependencies": {
+    "@flowjs/ng-flow": "~2.7.7",
     "angular": "~1.6",
     "angular-animate": "~1.6",
     "angular-bootstrap-contextmenu": "0.9.7",
@@ -55,7 +56,6 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-safari-launcher": "^1.0.0",
     "moment": "^2.17.1",
-    "ng-flow": "https://github.com/OskarPersson/ng-flow.git",
     "normalize-scss": "^6.0.0",
     "protractor": "^4.0.14",
     "select2": "~4.0.3",
@@ -64,7 +64,8 @@
     "yargs": "^6.5.0"
   },
   "dependencies": {
-    "angular-clipboard": "^1.5.0"
+    "angular-clipboard": "^1.5.0",
+    "angular-resource": "^1.6.5"
   },
   "scripts": {
     "update-deps": "npm update",

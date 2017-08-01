@@ -55,6 +55,8 @@ from ESSArch_Core.ip.models import (
 
 from ESSArch_Core.storage.exceptions import (
     RobotMountException,
+    TapeMountedError,
+    TapeMountedAndLockedByOtherError,
 )
 
 from ESSArch_Core.storage.models import (
@@ -83,11 +85,6 @@ from ESSArch_Core.storage.tape import (
 
 from ESSArch_Core.WorkflowEngine.models import (
     ProcessTask,
-)
-
-from storage.exceptions import (
-    TapeMountedError,
-    TapeMountedAndLockedByOtherError,
 )
 
 
