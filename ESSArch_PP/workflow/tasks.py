@@ -520,20 +520,29 @@ class PollAccessQueue(DBTask):
 
                     # IP not in cache, continue
 
-            storage_objects = self.get_available_storage_objects(entry)
+            def get_optimal(objects):
+                on_disk = objects.filter(content_location_type=DISK).first()
 
-            on_disk = storage_objects.filter(content_location_type=DISK).first()
-
-            if on_disk is not None:
-                storage_object = on_disk
-                req_type = 25
-            else:
-                on_tape = storage_objects.filter(content_location_type=TAPE).first()
-                if on_tape is not None:
-                    storage_object = on_tape
-                    req_type = 20
+                if on_disk is not None:
+                    storage_object = on_disk
+                    req_type = 25
                 else:
-                    raise StorageObject.DoesNotExist()
+                    on_tape = objects.filter(content_location_type=TAPE).first()
+                    if on_tape is not None:
+                        storage_object = on_tape
+                        req_type = 20
+                    else:
+                        raise StorageObject.DoesNotExist
+
+                return storage_object, req_type
+
+            storage_objects = self.get_available_storage_objects(entry)
+            local_storage_objects = storage_objects.filter(storage_medium__storage_target__remote_server__exact='')
+
+            try:
+                storage_object, req_type = get_optimal(local_storage_objects)
+            except StorageObject.DoesNotExist:
+                storage_object, req_type = get_optimal(storage_objects)
 
             target = storage_object.storage_medium.storage_target
             method_target = StorageMethodTargetRelation.objects.filter(
