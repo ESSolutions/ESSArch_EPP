@@ -820,7 +820,7 @@ class PollIOQueue(DBTask):
                 try:
                     response = session.post(dst, json=data)
                     response.raise_for_status()
-                except requests.exceptions.HTTPError:
+                except:
                     entry.status = 100
                     if entry.access_queue:
                         entry.access_queue.status = 100
@@ -853,7 +853,8 @@ class PollIOQueue(DBTask):
 
                         dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                         response = session.post(dst)
-                    except requests.exceptions.HTTPError:
+                        response.raise_for_status()
+                    except:
                         entry.status = 100
                         entry.remote_status = 100
                         entry.save(update_fields=['status', 'remote_status'])
