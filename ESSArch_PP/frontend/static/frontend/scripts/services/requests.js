@@ -24,16 +24,8 @@ Email - essarch@essolutions.se
 
 angular.module('myApp').factory('Requests', function(IPReception, IP, $http, appConfig) {
     function receive(ip, request, validators) {
-<<<<<<< HEAD
-        console.log(request);
-        return $http({
-            method: 'POST',
-            url: appConfig.djangoUrl + 'ip-reception/' + ip.id + '/receive/',
-            data: {
-=======
         return IPReception.receive({
                 id: ip.id,
->>>>>>> 9bb70b00835e0082875362a3f1a02f13406a6880
                 archive_policy: request.archivePolicy.value.id,
                 submission_agreement: request.submissionAgreement.value,
                 purpose: request.purpose,
