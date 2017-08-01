@@ -1118,10 +1118,8 @@ class IODisk(DBTask):
 
         try:
             if entry.req_type == 15:  # Write to disk
-                content_location_value = os.path.join(storage_target.target, os.path.basename(entry.ip.object_path))
                 storage_object = StorageObject.objects.create(
                     content_location_type=storage_method.type,
-                    content_location_value=content_location_value,
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
 
@@ -1148,7 +1146,7 @@ class IODisk(DBTask):
                 ProcessTask.objects.create(
                     name="ESSArch_Core.tasks.CopyFile",
                     params={
-                        'src': entry.storage_object.content_location_value,
+                        'src': os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar'),
                         'dst': cache,
                     },
                     processstep=step,
