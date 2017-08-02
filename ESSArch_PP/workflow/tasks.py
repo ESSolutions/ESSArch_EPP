@@ -1143,6 +1143,8 @@ class IODisk(DBTask):
                 )
                 step.run().get()
 
+                StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
+
                 storage_object = StorageObject.objects.create(
                     content_location_type=storage_method.type,
                     ip=entry.ip, storage_medium_id=storage_medium
