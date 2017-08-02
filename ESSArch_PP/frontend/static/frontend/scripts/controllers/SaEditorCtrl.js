@@ -1,11 +1,11 @@
-angular.module('myApp').controller('SaEditorCtrl', function($scope, $rootScope, $http, appConfig) {
+angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope, $rootScope, $http, appConfig) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;
     vm.saProfiles = [];
     vm.$onInit = function() {
-        $http.get(appConfig.djangoUrl + "submission-agreements/").then(function(response) {
-            vm.saProfiles = response.data;
+        SA.query().$promise.then(function(resource) {
+            vm.saProfiles = resource;
         });
     }
     vm.newSa = function() {
@@ -29,8 +29,8 @@ angular.module('myApp').controller('SaEditorCtrl', function($scope, $rootScope, 
         console.log(vm.profileModel)
     }
     vm.getProfiles = function() {
-        $http.get(appConfig.djangoUrl + "profiles/").then(function(response) {
-            response.data.forEach(function(profile) {
+        Profile.query().$promise.then(function(resource) {
+            resource.forEach(function(profile) {
                 vm.profiles[profile.profile_type].push(profile);
             });
         });
