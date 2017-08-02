@@ -80,6 +80,11 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
     )
     serializer_class = SubmissionAgreementSerializer
 
+    @detail_route(methods=['post'])
+    def publish(self, request, pk=None):
+        SubmissionAgreement.objects.filter(pk=pk).update(published=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @detail_route(methods=['post'], url_path='include-type')
     def include_type(self, request, pk=None):
         sa = SubmissionAgreement.objects.get(pk=pk)
