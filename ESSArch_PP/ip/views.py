@@ -696,6 +696,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             name='workflow.tasks.CacheAIP',
             params={'aip': pk},
             processstep=main_step,
+            processstep_pos=10,
             responsible=self.request.user,
         ))
 
@@ -703,6 +704,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             name='workflow.tasks.StoreAIP',
             params={'aip': pk},
             processstep=main_step,
+            processstep_pos=20,
             responsible=self.request.user,
         ))
 
