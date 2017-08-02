@@ -1128,15 +1128,6 @@ class IODisk(DBTask):
 
         try:
             if entry.req_type == 15:  # Write to disk
-                storage_object = StorageObject.objects.create(
-                    content_location_type=storage_method.type,
-                    ip=entry.ip, storage_medium_id=storage_medium
-                )
-
-                entry.storage_medium_id = storage_medium
-                entry.storage_object = storage_object
-                entry.save(update_fields=['storage_medium_id', 'storage_object'])
-
                 if entry.ip.cached:
                     src = cache_obj
                 else:
@@ -1151,6 +1142,15 @@ class IODisk(DBTask):
                     processstep=step,
                 )
                 step.run().get()
+
+                storage_object = StorageObject.objects.create(
+                    content_location_type=storage_method.type,
+                    ip=entry.ip, storage_medium_id=storage_medium
+                )
+
+                entry.storage_medium_id = storage_medium
+                entry.storage_object = storage_object
+                entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
             elif entry.req_type == 25:  # Read from disk
                 ProcessTask.objects.create(
