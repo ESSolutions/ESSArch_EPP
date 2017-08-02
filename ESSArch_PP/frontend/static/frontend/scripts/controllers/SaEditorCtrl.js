@@ -15,7 +15,6 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     }
     vm.chooseSa = function(sa) {
         vm.getProfiles();
-        vm.createProfileModel(sa);
         vm.saProfile = sa;
         vm.saModel = sa;
         $scope.edit = true;
@@ -26,7 +25,6 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 vm.profileModel[key] = sa[key];
             }
         }
-        console.log(vm.profileModel)
     }
     vm.getProfiles = function() {
         Profile.query().$promise.then(function(resource) {
@@ -35,6 +33,22 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             });
         });
     }
+
+    vm.saveSa = function () {
+        console.log("samodel", vm.saModel, "profilemodel", vm.profileModel);
+        SA.update(vm.saModel)
+            .$promise.then(function (resource) {
+                return resource;
+            });
+    }
+
+    vm.publishSa = function () {
+        SA.publish({id: vm.saProfile.id})
+            .$promise.then(function (resource) {
+                return resource;
+            });
+    }
+
     vm.profiles = {
         transfer_project: [],
         content_type: [],
@@ -309,13 +323,11 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
         },
         "type": "input",
         "key": "designated_community_individual_additional",
-    }
-    ];
-    vm.profileModel = {};
-    vm.profileFields = [
+    },
     {
         "templateOptions": {
             "label": "profile_transfer_project",
+            "valueProp": "id",
             "options": vm.profiles["transfer_project"],
         },
         "type": "select",
@@ -324,6 +336,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_content_type",
+            "valueProp": "id",
             "options": vm.profiles["content_type"],
         },
         "type": "select",
@@ -332,6 +345,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_data_selection",
+            "valueProp": "id",
             "options": vm.profiles["data_selection"],
         },
         "type": "select",
@@ -340,6 +354,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_authority_information",
+            "valueProp": "id",
             "options": vm.profiles["authority_information"],
         },
         "type": "select",
@@ -348,6 +363,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_archival_description",
+            "valueProp": "id",
             "options": vm.profiles["archival_description"],
         },
         "type": "select",
@@ -356,6 +372,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_import",
+            "valueProp": "id",
             "options": vm.profiles["import"],
         },
         "type": "select",
@@ -364,6 +381,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_submit_description",
+            "valueProp": "id",
             "options": vm.profiles["submit_description"],
         },
         "type": "select",
@@ -372,6 +390,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_sip",
+            "valueProp": "id",
             "options": vm.profiles["sip"],
         },
         "type": "select",
@@ -380,6 +399,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_aip",
+            "valueProp": "id",
             "options": vm.profiles["aip"],
         },
         "type": "select",
@@ -388,6 +408,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_dip",
+            "valueProp": "id",
             "options": vm.profiles["dip"],
         },
         "type": "select",
@@ -396,6 +417,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_workflow",
+            "valueProp": "id",
             "options": vm.profiles["workflow"],
         },
         "type": "select",
@@ -404,6 +426,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "profile_preservation_metadata",
+            "valueProp": "id",
             "options": vm.profiles["preservation_metadata"],
         },
         "type": "select",

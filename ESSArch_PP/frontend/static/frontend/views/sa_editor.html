@@ -9,8 +9,10 @@
             <formly-form model="vm.saModel" fields="vm.saFields" options="vm.validatorOptions"></formly-form>
         </form>
         <h4>SA profiles</h4>
-        <form name="profiles-form">
+        <!--<form name="profiles-form">
             <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.validatorOptions"></formly-form>
-        </form>
+        </form>-->
+        <button class="btn btn-default" translate="SAVE" ng-click="vm.saveSa()"></button>
+        <button class="btn btn-default" translate="PUBLISH" ng-click="vm.publishSa()"></button>
     </div>
 </div>

@@ -14,7 +14,14 @@ angular.module('myApp').factory('SA', function ($resource, appConfig) {
         },
         save: {
             method: "POST",
-            params: { action: "save", id: "@id" }
+        },
+        update: {
+            method: "PUT",
+            params: { id: "@id" }
+        },
+        publish: {
+            method: "POST",
+            params: { action: "publish", id: "@id" }
         },
         lock: {
             method: "POST",
