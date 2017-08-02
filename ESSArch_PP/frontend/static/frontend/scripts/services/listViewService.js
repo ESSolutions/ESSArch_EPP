@@ -215,13 +215,10 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
 
             ],
         };
-        return $http({
-            method: 'GET',
-            url: appConfig.djangoUrl+'submission-agreements/',
-            params: {pager: 'none'}
-        })
-        .then(function successCallback(response) {
-            sas = response.data;
+        return SA.query({
+            pager: 'none'
+        }).$promise.then(function (resource) {
+            sas = resource;
             saProfile.profiles = [];
             sas.forEach(function (sa) {
                 saProfile.profiles.push(sa);

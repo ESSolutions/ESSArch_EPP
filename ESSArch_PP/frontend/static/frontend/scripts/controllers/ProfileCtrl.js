@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
+angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
     var vm = this;
     $scope.select = true;
     $scope.saAlert = null;
@@ -130,25 +130,22 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             $scope.editSA = false;
             $scope.closeAlert();
             if (row.active.name){
-                var profileUrl = row.active.url;
+                var profileId = row.active.url;
             } else {
-                var profileUrl = row.active.profile;
+                var profileId = row.active.profile;
             }
-            getAndShowProfile(profileUrl, row);
+            getAndShowProfile(profileId, row);
         }
     };
-    function getAndShowProfile(profileUrl, row) {
-        $http({
-            method: 'GET',
-            url: profileUrl,
-            params: {
+    function getAndShowProfile(profileId, row) {
+        Profile.get({
+            id: profileId,
                 'sa': $scope.saProfile.profile.id,
                 'ip': $scope.ip.id
-            }
-        }).then(function (response) {
-            response.data.profile_name = response.data.name;
-            row.active = response.data;
-            row.profiles = [response.data];
+        }).$promise.then(function (resource) {
+            resource.profile_name = resource.name;
+            row.active = resource;
+            row.profiles = [resource];
             $scope.selectProfile = row;
             vm.profileOldModel = row.active.specification_data;
             vm.profileModel = angular.copy(row.active.specification_data);
@@ -181,61 +178,48 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
     };
 
     //Include the given profile type in the SA
-    $scope.includeProfileType = function(type){
+    $scope.includeProfileType = function (type) {
         var sendData = {
             "type": type
         };
-        var uri = $scope.saProfile.profile.url+"include-type/";
-        $http({
-            method: 'POST',
-            url: uri,
-            data: sendData
-        }).then(function success(response){
-        }, function error(response){
+        SA.includeType(
+            angular.extend({ id: $scope.saProfile.profile.id }, sendData)
+        ).$promise.then(function success(response) {
+        }, function error(response) {
             alert(response.status);
         });
     };
 
     //Exclude the given profile type in the SA
-    $scope.excludeProfileType = function(type){
+    $scope.excludeProfileType = function (type) {
         var sendData = {
             "type": type
         };
-
-        var uri = $scope.saProfile.profile.url+"exclude-type/";
-        $http({
-            method: 'POST',
-            url: uri,
-            data: sendData
-        }).then(function success(response){
-        }, function error(response){
+        SA.excludeType(
+            angular.extend({ id: $scope.saProfile.profile.id }, sendData)
+        ).$promise.then(function success(response) {
+        }, function error(response) {
             alert(response.status);
         });
     };
     //Make a profile "Checked"
     $scope.setCheckedProfile = function(type, checked){
-        var uri = $scope.ip.url+"check-profile/";
-        $http({
-            method: 'PUT',
-            url: uri,
-            data: {
-                type: type,
-                checked: checked
-            }
-        }).then(function success(response){
+        IP.checkProfile({
+            id: $scope.ip.id,
+            type: type,
+            checked: checked
+        }).$promise.then(function success(response){
         }, function error(response){
         });
     };
 
     //Change the standard profile of the same type as given profile for an sa
-    $scope.changeProfile = function(profile, row){
+     $scope.changeProfile = function(profile, row){
         var sendData = {"new_profile": profile.id};
         var uri = $scope.ip.url+"change-profile/";
-        $http({
-            method: 'PUT',
-            url: uri,
-            data: sendData
-        }).then(function success(response){
+        IP.changeProfile(
+            angular.extend({id: $scope.ip.id}, sendData)
+        ).$promise.then(function success(response){
             row.active = profile;
             if($scope.edit && row == $scope.selectedProfileRow) {
                 $scope.edit = false;
@@ -245,6 +229,7 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             alert(response.status);
         });
     };
+
     //Changes SA profile for selected ip
     $scope.changeSaProfile = function (sa, ip, oldSa_idx) {
         getAndShowProfile(sa.profile.profile_aip.profile, {})
@@ -269,48 +254,37 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
 
     //Saves edited SA and creates a new SA instance with given name
     vm.onSASubmit = function(new_name) {
-        var url = $scope.profileToSave.url;
-        var sendData = {
-            "data": vm.profileModel,
-            "information_package": $scope.ip.id,
-            "new_name": new_name,
-        };
-        $http({
-            method: 'POST',
-            url: url+"save/",
-            data: sendData
-        }).then(function(response) {
+        SA.save({
+            id: $scope.profileToSave.id,
+            data: vm.profileModel,
+            information_package: $scope.ip.id,
+            new_name: new_name,
+        }).$promise.then(function(resource) {
             $scope.editSA = false;
             var old = $scope.saProfile.profiles.indexOf($scope.saProfile.profile);
-            $scope.saProfile.profiles.push(response.data);
-            $scope.changeSaProfile(response.data, $scope.ip, old);
-        }, function(response) {
-            console.log(response.status);
+            $scope.saProfile.profiles.push(resource);
+            $scope.changeSaProfile(resource, $scope.ip, old);
+        }, function(resource) {
+            console.log(resource.status);
         });
     };
     //Saves edited profile and creates a new profile instance with given name
-    vm.onSubmit = function(new_name) {
-        profileUrl = $scope.profileToSave.profile || $scope.profileToSave.url
-        var sendData = {
-            "specification_data": vm.profileModel,
-            "new_name": new_name,
-            "structure": $scope.treeElements[0].children
-        };
-        $http({
-            method: 'POST',
-            url: profileUrl+"save/",
-            data: sendData
-        })
-            .then(function(response) {
+ vm.onSubmit = function(new_name) {
+        Profile.save({
+            id: $scope.profileToSave.profile || $scope.profileToSave.id,
+            specification_data: vm.profileModel,
+            new_name: new_name,
+            structure: $scope.treeElements[0].children
+        }).$promise.then(function(resource) {
                 var profileType = 'profile_' + $scope.profileToSave.profile_type;
-                var newProfile = response.data;
+                var newProfile = resource;
                 $scope.selectedProfileRow.profiles.push(newProfile);
                 newProfile.profile_name = newProfile.name;
                 $scope.changeProfile(newProfile, $scope.selectedProfileRow);
                 $scope.edit = false;
                 $scope.eventlog = false;
-            }, function(response) {
-                alert(response.status);
+            }, function(resource) {
+                alert(resource.status);
             });
     };
       //Create and show modal when saving an SA
@@ -351,7 +325,7 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             });
         }
     }
-     function showRequiredProfileFields(row) {
+    function showRequiredProfileFields(row) {
         if($scope.edit) {
             $scope.lockAlert = $scope.alerts.lockError;
             $scope.lockAlert.name = row.active.profile_name;
@@ -360,21 +334,18 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
             return;
         }
         if (row.active.name){
-            var profileUrl = row.active.url;
+            var profileId = row.active.id;
         } else {
-            var profileUrl = row.active.profile;
+            var profileId = row.active.profile;
         }
-        $http({
-            method: 'GET',
-            url: profileUrl,
-            params: {
-                'sa': $scope.saProfile.profile.id,
-                'ip': $scope.ip.id
-            }
-        }).then(function(response) {
-            response.data.profile_name = response.data.name;
-            row.active = response.data;
-            row.profiles = [response.data];
+        Profile.get({
+            id: profileId,
+            sa: $scope.saProfile.profile.id,
+            ip: $scope.ip.id
+        }).$promise.then(function(resource) {
+            resource.profile_name = resource.name;
+            row.active = resource;
+            row.profiles = [resource];
             $scope.selectProfile = row;
             vm.profileModel = angular.copy(row.active.specification_data);
             vm.profileFields = row.active.template;
@@ -422,22 +393,18 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
     }
     //Lock a SA
     $scope.lockSa = function(sa) {
-        ip = $scope.ip;
-
-        $http({
-            method: 'POST',
-            url: sa.profile.url+"lock/",
-            data: {
-                ip: ip.id
-            }
-        }).then(function (response) {
+        SA.lock({
+            id: sa.profile.id,
+            ip: $scope.ip.id
+        }).$promise.then(function (response) {
             sa.locked = true;
             $scope.edit = false;
             $scope.eventlog = false;
             $scope.getListViewData();
         });
     }
-      vm.treeEditModel = {
+
+    vm.treeEditModel = {
     };
     vm.treeEditFields = [
         {
@@ -714,17 +681,14 @@ angular.module('myApp').controller('ProfileCtrl', function($scope, $http, $rootS
         }
     }
     //Unlock profile from current IP
-    $scope.unlock = function(profile) {
-        $http({
-            method: 'POST',
-            url: $scope.ip.url + "unlock-profile/",
-            data: {
-                type: profile.active.profile_type
-            }
-        }).then(function(response){
+$scope.unlock = function(profile) {
+        IP.unlockProfile({
+            id: $scope.ip.id,
+            type: profile.active.profile_type
+        }).$promise.then(function(response){
             profile.locked = false;
             if($scope.edit && profile.active.id === $scope.selectedProfileRow.active.id) {
-                getAndShowProfile(profile.active.url, profile);
+                getAndShowProfile(profile.active.id, profile);
             }
         });
     }
