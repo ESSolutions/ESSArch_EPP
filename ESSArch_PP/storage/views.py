@@ -347,7 +347,7 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = (
-        'ip__object_identifier_value', 'content_location_value',
+        'ip__object_identifier_value', 'content_location_value', 'last_changed_local',
     )
 
     search_fields = (
