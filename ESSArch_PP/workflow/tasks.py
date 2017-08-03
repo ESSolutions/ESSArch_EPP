@@ -662,6 +662,11 @@ class PollIOQueue(DBTask):
             if result.ready() and (result.failed() or result.successful()):
                 entry.status = 20 if result.successful() else 100
                 entry.save(update_fields=['status'])
+
+                if entry.remote_io:
+                    data = IOQueueSerializer(entry, context={'request': None}).data
+                    entry.sync_with_master(data)
+
                 continue
 
             task = ProcessTask.objects.filter(pk=entry.task_id).first()
@@ -669,6 +674,11 @@ class PollIOQueue(DBTask):
             if task is not None and task.status in [celery_states.SUCCESS, celery_states.FAILURE]:
                 entry.status = 20 if task.status == celery_states.SUCCESS else 100
                 entry.save(update_fields=['status'])
+
+                if entry.remote_io:
+                    data = IOQueueSerializer(entry, context={'request': None}).data
+                    entry.sync_with_master(data)
+
                 continue
 
             if result.status == 'PENDING':
