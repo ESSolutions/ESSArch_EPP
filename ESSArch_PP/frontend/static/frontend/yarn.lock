@@ -136,9 +136,9 @@ angular-filesize-filter@^0.1.1:
   dependencies:
     angular "^1.4.0"
 
-angular-formly-templates-bootstrap@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/angular-formly-templates-bootstrap/-/angular-formly-templates-bootstrap-6.4.0.tgz#d3aa4ad41bc531ff5a4a57aee7fd403112494682"
+angular-formly-templates-bootstrap@^6.5.1:
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/angular-formly-templates-bootstrap/-/angular-formly-templates-bootstrap-6.5.1.tgz#d9399d33a80245c6ec94b213b3e13d0e6a415e43"
 
 angular-formly@~8.4.1:
   version "8.4.1"
