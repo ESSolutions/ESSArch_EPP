@@ -70,6 +70,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 vm.saProfile = null;
                 vm.saModel = {};
                 $scope.edit = false;
+                $anchorScroll();
                 return resource;
             });
     }
