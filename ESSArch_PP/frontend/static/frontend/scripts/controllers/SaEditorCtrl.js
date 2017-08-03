@@ -50,6 +50,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             vm.updateSa();
         }
     }
+
     vm.saveNewSa = function () {
         var newSa = new SA(vm.saModel);
         newSa.$save().then(function (resource) {
@@ -64,6 +65,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 return resource;
             });
     }
+
     vm.updateSa = function () {
         SA.update(vm.saModel)
             .$promise.then(function (resource) {
@@ -81,6 +83,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 return resource;
             });
     }
+
     vm.profiles = {
         transfer_project: [],
         content_type: [],

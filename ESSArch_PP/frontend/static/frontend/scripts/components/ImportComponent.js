@@ -1,6 +1,6 @@
-angular.module('myApp').component('saSync', {
+angular.module('myApp').component('import', {
   template: '<div><p>{{title}}</p></div>',
-  controller: 'SaSyncCtrl',
+  controller: 'ImportCtrl',
   controllerAs: 'vm',
   bindings: {
   }
