@@ -760,9 +760,6 @@ class PollIOQueue(DBTask):
                 if entry.storage_object is None:
                     entry.status = 100
                     entry.save(update_fields=['status'])
-                    if entry.access_queue:
-                        entry.access_queue.status = 100
-                        entry.access_queue.save(update_fields=['status'])
                     raise ValueError("Storage Object needed to read from storage")
 
                 storage_object = entry.storage_object
@@ -783,9 +780,6 @@ class PollIOQueue(DBTask):
                     return
                 except OSError as e:
                     if e.errno != errno.ENOENT:
-                        if entry.access_queue:
-                            entry.access_queue.status = 100
-                            entry.access_queue.save(update_fields=['status'])
                         entry.status = 100
                         entry.save(update_fields=['status'])
                         raise
@@ -832,9 +826,6 @@ class PollIOQueue(DBTask):
                     response.raise_for_status()
                 except:
                     entry.status = 100
-                    if entry.access_queue:
-                        entry.access_queue.status = 100
-                        entry.access_queue.save(update_fields=['status'])
                     raise
                 else:
                     entry.status = 5
@@ -868,10 +859,6 @@ class PollIOQueue(DBTask):
                         entry.status = 100
                         entry.remote_status = 100
                         entry.save(update_fields=['status', 'remote_status'])
-
-                        if entry.access_queue:
-                            entry.access_queue.status = 100
-                            entry.access_queue.save(update_fields=['status'])
                         raise
                     else:
                         entry.remote_status = 20
@@ -886,10 +873,6 @@ class PollIOQueue(DBTask):
             except ValueError:
                 entry.status = 100
                 entry.save(update_fields=['status'])
-
-                if entry.access_queue:
-                    entry.access_queue.status = 100
-                    entry.access_queue.save(update_fields=['status'])
 
                 if entry.remote_io:
                     data = IOQueueSerializer(entry, context={'request': None}).data
@@ -1090,9 +1073,6 @@ class IOTape(DBTask):
                     response.raise_for_status()
         except:
             entry.status = 100
-            if entry.access_queue:
-                entry.access_queue.status = 100
-                entry.access_queue.save(update_fields=['status'])
             raise
         else:
             entry.status = 20
@@ -1205,9 +1185,6 @@ class IODisk(DBTask):
                     response.raise_for_status()
         except:
             entry.status = 100
-            if entry.access_queue:
-                entry.access_queue.status = 100
-                entry.access_queue.save(update_fields=['status'])
             raise
         else:
             entry.status = 20
