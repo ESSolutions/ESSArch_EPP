@@ -654,7 +654,7 @@ class PollIOQueue(DBTask):
                 return entry.storage_object.storage_medium
 
     def cleanup(self):
-        entries = IOQueue.objects.filter(status=5).exclude(task_id='')
+        entries = IOQueue.objects.filter(status=5, storage_method_target__storage_target__remote_server='').exclude(task_id='')
 
         for entry in entries.iterator():
             result = AsyncResult(entry.task_id)
