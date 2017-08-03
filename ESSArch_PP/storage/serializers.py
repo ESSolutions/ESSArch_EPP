@@ -26,7 +26,7 @@ from ESSArch_Core.storage.models import (
     TapeSlot,
 )
 
-from ip.serializers import InformationPackageDetailSerializer
+from ip.serializers import InformationPackageSerializer, InformationPackageDetailSerializer
 
 class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
     agent = UserSerializer()
@@ -79,6 +79,47 @@ class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
 class StorageObjectNestedSerializer(StorageObjectSerializer):
     storage_medium = StorageMediumSerializer()
 
+
+class StorageObjectWithIPSerializer(StorageObjectSerializer):
+    ip = InformationPackageSerializer(read_only=True)
+
+
+class StorageMediumWithStorageObjectsSerializer(serializers.ModelSerializer):
+    agent = UserSerializer()
+    storage_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'),
+                                                        allow_null=False, required=True,
+                                                        queryset=StorageTarget.objects.all())
+    tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'),
+                                                    allow_null=True, required=False, queryset=TapeDrive.objects.all())
+    tape_slot = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'),
+                                                   allow_null=True, required=False, queryset=TapeSlot.objects.all())
+    location_status_display = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
+    storage_objects = StorageObjectWithIPSerializer(many=True, read_only=True, source="storage")
+
+    def get_location_status_display(self, obj):
+        return obj.get_location_status_display()
+
+    def get_status_display(self, obj):
+        return obj.get_status_display()
+
+    class Meta:
+        model = StorageMedium
+        fields = (
+            'id', 'medium_id', 'status', 'status_display', 'location', 'location_status',
+            'location_status_display', 'block_size', 'format',
+            'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
+            'storage_objects',
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'medium_id': {
+                'validators': [],
+            },
+        }
 
 class RobotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

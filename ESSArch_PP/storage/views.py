@@ -74,7 +74,9 @@ from storage.serializers import (
     RobotSerializer,
     RobotQueueSerializer,
     StorageObjectSerializer,
+    StorageObjectWithIPSerializer,
     StorageMediumSerializer,
+    StorageMediumWithStorageObjectsSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
 )
@@ -274,7 +276,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     API endpoint for storage medium
     """
     queryset = StorageMedium.objects.all()
-    serializer_class = StorageMediumSerializer
+    serializer_class = StorageMediumWithStorageObjectsSerializer
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
@@ -340,7 +342,7 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     API endpoint for storage object
     """
     queryset = StorageObject.objects.all()
-    serializer_class = StorageObjectSerializer
+    serializer_class = StorageObjectWithIPSerializer
 
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
