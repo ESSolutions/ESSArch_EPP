@@ -28,6 +28,8 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Prefetch
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
@@ -79,6 +81,9 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
         Prefetch('profilesa_set', to_attr='profiles')
     )
     serializer_class = SubmissionAgreementSerializer
+
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('published',)
 
     @detail_route(methods=['post'])
     def publish(self, request, pk=None):
