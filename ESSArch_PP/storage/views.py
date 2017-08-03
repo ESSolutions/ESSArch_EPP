@@ -76,7 +76,6 @@ from storage.serializers import (
     StorageObjectSerializer,
     StorageObjectWithIPSerializer,
     StorageMediumSerializer,
-    StorageMediumWithStorageObjectsSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
 )
@@ -276,7 +275,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     API endpoint for storage medium
     """
     queryset = StorageMedium.objects.all()
-    serializer_class = StorageMediumWithStorageObjectsSerializer
+    serializer_class = StorageMediumSerializer
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
