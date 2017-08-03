@@ -6,7 +6,7 @@
     </div>
     <div class="edit-view" ng-if="edit">
         <h4>SA fields</h4>
-        <form ide="sa-form" name="sa-form" ng-submit="vm.saveSa()">
+        <form name="sa-form" ng-submit="vm.saveSa()">
             <formly-form model="vm.saModel" fields="vm.saFields" options="vm.validatorOptions"></formly-form>
             <button class="btn btn-info" type="submit" translate="SAVE"></button>
         </form>
