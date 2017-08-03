@@ -2,17 +2,13 @@
     <div class="flex-row">
         <select class="form-control sa-select" ng-change="vm.chooseSa(vm.saProfile)" ng-model="vm.saProfile" ng-options="x as x.name for x in vm.saProfiles">x</select>
         <button class="btn btn-default fa fa-plus" ng-click="vm.newSa()"></button>
+        <button class="btn btn-success" ng-if="vm.saProfile" translate="PUBLISH" ng-click="vm.publishSa()"></button>
     </div>
     <div class="edit-view" ng-if="edit">
         <h4>SA fields</h4>
         <form name="sa-form">
             <formly-form model="vm.saModel" fields="vm.saFields" options="vm.validatorOptions"></formly-form>
         </form>
-        <h4>SA profiles</h4>
-        <!--<form name="profiles-form">
-            <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.validatorOptions"></formly-form>
-        </form>-->
-        <button class="btn btn-default" translate="SAVE" ng-click="vm.saveSa()"></button>
-        <button class="btn btn-default" translate="PUBLISH" ng-click="vm.publishSa()"></button>
+        <button class="btn btn-info" translate="SAVE" ng-click="vm.saveSa()"></button>
     </div>
 </div>

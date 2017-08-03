@@ -3,6 +3,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     $scope.edit = false;
     vm.saProfile = null;
     vm.saProfiles = [];
+    vm.createNewSa = false;
     vm.$onInit = function() {
         SA.query().$promise.then(function(resource) {
             vm.saProfiles = resource;
@@ -10,13 +11,16 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     }
     vm.newSa = function() {
         vm.getProfiles();
-        vm.saProfile = {};
+        vm.saProfile = null;
+        vm.saModel = {};
+        vm.createNewSa = true;
         $scope.edit = true;
     }
     vm.chooseSa = function(sa) {
         vm.getProfiles();
         vm.saProfile = sa;
         vm.saModel = sa;
+        vm.createNewSa = false;
         $scope.edit = true;
     }
     vm.createProfileModel = function(sa) {
@@ -26,18 +30,42 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             }
         }
     }
-    vm.getProfiles = function() {
-        Profile.query().$promise.then(function(resource) {
-            resource.forEach(function(profile) {
+    vm.getProfiles = function () {
+        Profile.query().$promise.then(function (resource) {
+            resource.forEach(function (profile) {
+                vm.profiles[profile.profile_type].forEach(function (item, idx, array) {
+                    if (item.id == profile.id) {
+                        array.splice(idx, 1)
+                    }
+                })
                 vm.profiles[profile.profile_type].push(profile);
             });
         });
     }
 
-    vm.saveSa = function () {
-        console.log("samodel", vm.saModel, "profilemodel", vm.profileModel);
+    vm.saveSa = function() {
+        if(vm.createNewSa) {
+            vm.saveNewSa();
+        } else {
+            vm.updateSa();
+        }
+    }
+    vm.saveNewSa = function () {
+        var newSa = new SA(vm.saModel);
+        newSa.$save().then(function (resource) {
+                vm.createNewSa = false;
+                vm.saProfile = null;
+                vm.saModel = {};
+                $scope.edit = False;
+                return resource;
+            });
+    }
+    vm.updateSa = function () {
         SA.update(vm.saModel)
             .$promise.then(function (resource) {
+                vm.saProfile = null;
+                vm.saModel = {};
+                $scope.edit = False;
                 return resource;
             });
     }
@@ -48,7 +76,6 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 return resource;
             });
     }
-
     vm.profiles = {
         transfer_project: [],
         content_type: [],

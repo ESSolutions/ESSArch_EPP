@@ -306,5 +306,7 @@
     "MEDIUM": "Medium",
     "SKIP": "Hoppa över",
     "CANNOT_RECEIVE_ERROR": "Ogiltig leveransöverenskommelse i XML-fil",
-    "PROFILEMANAGER": "Profilhanterare"
+    "PROFILEMANAGER": "Profilhanterare",
+    "PUBLISH": "Publicera",
+    "SAVE": "Spara"
 }
