@@ -881,6 +881,8 @@ class PollIOQueue(DBTask):
 
             try:
                 storage_medium = self.get_storage_medium(entry, storage_target, storage_method.type)
+                entry.storage_medium = storage_medium
+                entry.save(update_fields=['storage_medium'])
             except ValueError:
                 entry.status = 100
                 entry.save(update_fields=['status'])
@@ -1030,9 +1032,8 @@ class IOTape(DBTask):
                     ip=entry.ip, storage_medium_id=storage_medium
                 )
 
-                entry.storage_medium_id = storage_medium
                 entry.storage_object = storage_object
-                entry.save(update_fields=['storage_medium_id', 'storage_object'])
+                entry.save(update_fields=['storage_object'])
 
             elif entry.req_type == 20:  # Read from tape
                 tape_pos = int(entry.storage_object.content_location_value)
