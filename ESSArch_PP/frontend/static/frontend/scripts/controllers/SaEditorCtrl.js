@@ -69,7 +69,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             .$promise.then(function (resource) {
                 vm.saProfile = null;
                 vm.saModel = {};
-                $scope.edit = False;
+                $scope.edit = false;
                 return resource;
             });
     }
