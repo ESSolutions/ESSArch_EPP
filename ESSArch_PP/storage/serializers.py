@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import get_user_model
 
 from rest_framework import serializers, validators
@@ -14,6 +16,7 @@ from ESSArch_Core.storage.models import medium_status_CHOICES
 
 from ESSArch_Core.storage.models import (
     AccessQueue,
+    DISK,
     IOQueue,
     Robot,
     RobotQueue,
@@ -61,6 +64,13 @@ class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
 
 class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
     ip = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=InformationPackage.objects.all())
+    content_location_value = serializers.SerializerMethodField()
+
+    def get_content_location_value(self, obj):
+        if obj.content_location_type == DISK:
+            return os.path.join(obj.storage_medium.storage_target.target, '%s.tar' % obj.ip.object_identifier_value)
+
+        return obj.content_location_value
 
     class Meta:
         model = StorageObject
