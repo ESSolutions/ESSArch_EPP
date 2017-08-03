@@ -306,5 +306,7 @@
     "MEDIUM": "Medium",
     "SKIP": "Skip",
     "CANNOT_RECEIVE_ERROR": "Invalid submission agreement in XML-file",
-    "PROFILEMANAGER": "Profile manager"
+    "PROFILEMANAGER": "Profile manager",
+    "PUBLISH": "Publish",
+    "SAVE": "Save"
 }
