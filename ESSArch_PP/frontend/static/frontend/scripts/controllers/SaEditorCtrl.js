@@ -99,6 +99,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "name",
+            "required": true,
         },
         "type": "input",
         "key": "name",
@@ -106,6 +107,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "type",
+            "required": true,
         },
         "type": "input",
         "key": "type",
@@ -113,6 +115,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "status",
+            "required": true,
         },
         "type": "input",
         "key": "status",
@@ -120,6 +123,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "label",
+            "required": true,
         },
         "type": "input",
         "key": "label",
