@@ -183,6 +183,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "producer_main_phone",
+            "type": 'tel',
         },
         "type": "input",
         "key": "producer_main_phone",
@@ -190,6 +191,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "producer_main_email",
+            "type": 'email',
         },
         "type": "input",
         "key": "producer_main_email",
@@ -218,6 +220,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "producer_individual_phone",
+            "type": 'tel',
         },
         "type": "input",
         "key": "producer_individual_phone",
@@ -225,6 +228,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "producer_individual_email",
+            "type": 'email',
         },
         "type": "input",
         "key": "producer_individual_email",
@@ -260,6 +264,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "archivist_main_phone",
+            "type": 'tel',
         },
         "type": "input",
         "key": "archivist_main_phone",
@@ -267,6 +272,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "archivist_main_email",
+            "type": 'email',
         },
         "type": "input",
         "key": "archivist_main_email",
@@ -295,6 +301,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "archivist_individual_phone",
+            "type": 'tel',
         },
         "type": "input",
         "key": "archivist_individual_phone",
@@ -302,6 +309,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "archivist_individual_email",
+            "type": 'email',
         },
         "type": "input",
         "key": "archivist_individual_email",
@@ -337,6 +345,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "designated_community_individual_phone",
+            "type": 'tel',
         },
         "type": "input",
         "key": "designated_community_individual_phone",
@@ -344,6 +353,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     {
         "templateOptions": {
             "label": "designated_community_individual_email",
+            "type": 'email',
         },
         "type": "input",
         "key": "designated_community_individual_email",
