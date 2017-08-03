@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope, $rootScope, $http, appConfig) {
+angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;
@@ -56,7 +56,11 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
                 vm.createNewSa = false;
                 vm.saProfile = null;
                 vm.saModel = {};
-                $scope.edit = False;
+                $scope.edit = false;
+                SA.query().$promise.then(function (resource) {
+                    vm.saProfiles = resource;
+                    $anchorScroll();
+                });
                 return resource;
             });
     }
