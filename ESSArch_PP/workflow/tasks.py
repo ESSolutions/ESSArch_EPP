@@ -455,7 +455,13 @@ class PollAccessQueue(DBTask):
         ).order_by('posted')
 
         for entry in entries:
-            self.copy_from_cache(entry)
+            try:
+                self.copy_from_cache(entry)
+            except:
+                entry.status = 100
+                entry.save(update_fields=['status'])
+                raise
+
         # Look for failed IOQueue entries
 
         entries = AccessQueue.objects.filter(
@@ -561,6 +567,8 @@ class PollAccessQueue(DBTask):
             ).first()
 
             if method_target is None:
+                entry.status = 100
+                entry.save(update_fields=['status'])
                 raise StorageMethodTargetRelation.DoesNotExist()
 
             try:
@@ -581,6 +589,8 @@ class PollAccessQueue(DBTask):
                 if entries.count > 1:
                     io_entry = entries.first()
                 else:
+                    entry.status = 100
+                    entry.save(update_fields=['status'])
                     raise
 
             entry.status = 5
