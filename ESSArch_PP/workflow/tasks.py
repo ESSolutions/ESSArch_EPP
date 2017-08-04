@@ -605,70 +605,60 @@ class PollAccessQueue(DBTask):
 class PollIOQueue(DBTask):
     track = False
     def get_storage_medium(self, entry, storage_target, storage_type):
+        if entry.req_type in [20, 25]:
+            return entry.storage_object.storage_medium
+
+        storage_medium = storage_target.storagemedium_set.filter(
+            status=20, location_status=50
+        ).order_by('last_changed_local').first()
+
         if storage_type == TAPE:
-            if entry.req_type == 10:
-                storage_medium = storage_target.storagemedium_set.filter(
-                    status=20, location_status=50
-                ).order_by('last_changed_local').first()
+            if storage_medium is not None:
+                new_size = storage_medium.used_capacity + entry.write_size
 
-                if storage_medium is not None:
-                    new_size = storage_medium.used_capacity + entry.write_size
+                if storage_target.max_capacity > 0 and new_size > storage_target.max_capacity:
+                    try:
+                        storage_medium.mark_as_full()
+                    except AssertionError:
+                        pass
 
-                    if storage_target.max_capacity > 0 and new_size > storage_target.max_capacity:
-                        try:
-                            storage_medium.mark_as_full()
-                        except AssertionError:
-                            pass
+                    storage_medium = None
+                else:
+                    return storage_medium
 
-                        storage_medium = None
-                    else:
-                        return storage_medium
+            # Could not find any storage medium, create one
 
-                # Could not find any storage medium, create one
+            slot = TapeSlot.objects.filter(
+                status=20, storage_medium__isnull=True,
+                medium_id__startswith=storage_target.target
+            ).exclude(medium_id__exact='').first()
 
-                slot = TapeSlot.objects.filter(
-                    status=20, storage_medium__isnull=True,
-                    medium_id__startswith=storage_target.target
-                ).exclude(medium_id__exact='').first()
+            if slot is None:
+                raise ValueError("No tape available for allocation")
 
-                if slot is None:
-                    raise ValueError("No tape available for allocation")
+            storage_medium = StorageMedium.objects.create(
+                medium_id=slot.medium_id,
+                storage_target=storage_target, status=20,
+                location=Parameter.objects.get(entity='medium_location').value,
+                location_status=50,
+                block_size=storage_target.default_block_size,
+                format=storage_target.default_format, agent=entry.user,
+                tape_slot=slot,
+            )
 
-                storage_medium = StorageMedium.objects.create(
-                    medium_id=slot.medium_id,
+            return storage_medium
+
+        elif storage_type == DISK:
+            if storage_medium is None:
+                return StorageMedium.objects.create(
+                    medium_id=storage_target.name,
                     storage_target=storage_target, status=20,
                     location=Parameter.objects.get(entity='medium_location').value,
                     location_status=50,
                     block_size=storage_target.default_block_size,
                     format=storage_target.default_format, agent=entry.user,
-                    tape_slot=slot,
                 )
 
-                return storage_medium
-            elif entry.req_type == 20:
-                return entry.storage_object.storage_medium
-
-        elif storage_type == DISK:
-            if entry.req_type == 15:
-                storage_medium = storage_target.storagemedium_set.first()
-
-                if storage_medium is None:
-                    return StorageMedium.objects.create(
-                        medium_id=storage_target.name,
-                        storage_target=storage_target, status=20,
-                        location=Parameter.objects.get(entity='medium_location').value,
-                        location_status=50,
-                        block_size=storage_target.default_block_size,
-                        format=storage_target.default_format, agent=entry.user,
-                    )
-
-                if storage_medium.status == 20 and storage_medium.location_status == 50:
-                    return storage_medium
-
-                raise ValueError("No disk available for storage target %s (%s)" % (storage_target.name, storage_target.pk))
-
-            elif entry.req_type == 25:
-                return entry.storage_object.storage_medium
 
     def cleanup(self):
         entries = IOQueue.objects.filter(status=5, storage_method_target__storage_target__remote_server='').exclude(task_id='')
