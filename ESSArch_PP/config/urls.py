@@ -63,6 +63,8 @@ from profiles.views import (
     ProfileViewSet,
     ProfileSAViewSet,
     ProfileIPViewSet,
+    ProfileMakerExtensionViewSet,
+    ProfileMakerTemplateViewSet,
     SubmissionAgreementViewSet,
 )
 
@@ -106,6 +108,8 @@ router.register(r'permissions', PermissionViewSet)
 router.register(r'profile-ip', ProfileIPViewSet)
 router.register(r'profile-sa', ProfileSAViewSet)
 router.register(r'profiles', ProfileViewSet)
+router.register(r'profilemaker-extensions', ProfileMakerExtensionViewSet)
+router.register(r'profilemaker-templates', ProfileMakerTemplateViewSet)
 router.register(r'robots', RobotViewSet)
 router.register(r'robots', ProcessStepViewSet, base_name='robots').register(
     r'queue',

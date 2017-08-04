@@ -38,6 +38,8 @@ from ESSArch_Core.configuration.models import (
     Path,
 )
 
+from ESSArch_Core.essxml.ProfileMaker.models import extensionPackage, templatePackage
+
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -69,6 +71,8 @@ from ESSArch_Core.profiles.models import (
     ProfileSA,
     ProfileIP,
 )
+
+from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
 from rest_framework import viewsets
 
@@ -375,3 +379,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
             ip.save(update_fields=['state'])
 
         return Response({'status': 'locking profile'})
+
+
+class ProfileMakerExtensionViewSet(viewsets.ModelViewSet):
+    queryset = extensionPackage.objects.all()
+    serializer_class = ProfileMakerExtensionSerializer
+
+
+class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
+    queryset = templatePackage.objects.all()
+    serializer_class = ProfileMakerTemplateSerializer
