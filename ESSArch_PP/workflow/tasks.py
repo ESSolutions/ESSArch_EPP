@@ -447,12 +447,16 @@ class PollAccessQueue(DBTask):
 
 
     def run(self):
+        # Completed IOQueue entries are in the cache,
+        # continue entry by copying from there
+
         entries = AccessQueue.objects.filter(
             status=5, ioqueue__status=20
         ).order_by('posted')
 
         for entry in entries:
             self.copy_from_cache(entry)
+        # Look for failed IOQueue entries
 
         entries = AccessQueue.objects.filter(
             status=5, ioqueue__status=100
@@ -480,6 +484,8 @@ class PollAccessQueue(DBTask):
             entry.save(update_fields=['status'])
 
             if entry.new:
+                # Create new generation of the IP
+
                 old_aip = entry.ip.pk
                 new_aip = entry.ip
                 new_aip.pk = None
@@ -503,6 +509,8 @@ class PollAccessQueue(DBTask):
             entry.save(update_fields=['new_ip'])
 
             if entry.ip.cached:
+                # The IP is flagged as cached, try copying from there
+
                 try:
                     entry.status = 5
                     entry.save(update_fields=['status'])
@@ -521,6 +529,7 @@ class PollAccessQueue(DBTask):
                     # IP not in cache, continue
 
             def get_optimal(objects):
+                # Prefer disks over tapes
                 on_disk = objects.filter(content_location_type=DISK).first()
 
                 if on_disk is not None:
@@ -540,8 +549,10 @@ class PollAccessQueue(DBTask):
             local_storage_objects = storage_objects.filter(storage_medium__storage_target__remote_server__exact='')
 
             try:
+                # Local storage is (probably) faster, prefer it over remote storage
                 storage_object, req_type = get_optimal(local_storage_objects)
             except StorageObject.DoesNotExist:
+                # No local storage, try remote instead
                 storage_object, req_type = get_optimal(storage_objects)
 
             target = storage_object.storage_medium.storage_target
