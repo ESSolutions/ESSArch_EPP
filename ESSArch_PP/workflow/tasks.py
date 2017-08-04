@@ -526,13 +526,9 @@ class PollAccessQueue(DBTask):
                     entry.status = 20
                     entry.save(update_fields=['status'])
                     return
-                except OSError as e:
-                    if e.errno != errno.ENOENT:
-                        entry.status = 100
-                        entry.save(update_fields=['status'])
-                        raise
-
-                    # IP not in cache, continue
+                except:
+                    # failed to copy from cache, get from storage instead
+                    pass
 
             def get_optimal(objects):
                 # Prefer disks over tapes
@@ -723,18 +719,14 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
-    def get_from_cache(self, entry):
+    def is_cached(self, entry):
         cache_dir = entry.ip.policy.cache_storage.value
         cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
         cache_tar_obj = cache_obj + '.tar'
         in_cache = os.path.exists(cache_tar_obj)
 
-        if not in_cache:
-            # not in cache
-            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), cache_tar_obj)
-        else:
-            entry.ip.cached = True
-            entry.ip.save(update_fields=['cached'])
+        InformationPackage.objects.filter(pk=entry.ip_id).update(cached=in_cache)
+        return in_cache
 
     def transfer_to_master(self, entry):
         master_server = entry.storage_method_target.storage_target.master_server
@@ -785,27 +777,23 @@ class PollIOQueue(DBTask):
 
                 storage_object = entry.storage_object
 
-                try:
-                    self.get_from_cache(entry)
 
-                    if entry.remote_io:
-                        self.transfer_to_master(entry)
+                if self.is_cached(entry):
+                    try:
+                        if entry.remote_io:
+                            self.transfer_to_master(entry)
 
-                    entry.status = 20
-                    entry.save(update_fields=['status'])
-
-                    if entry.remote_io:
-                        data = IOQueueSerializer(entry, context={'request': None}).data
-                        entry.sync_with_master(data)
-
-                    return
-                except OSError as e:
-                    if e.errno != errno.ENOENT:
-                        entry.status = 100
+                        entry.status = 20
                         entry.save(update_fields=['status'])
-                        raise
 
-                    # IP not in cache, continue
+                        if entry.remote_io:
+                            data = IOQueueSerializer(entry, context={'request': None}).data
+                            entry.sync_with_master(data)
+
+                        return
+                    except:
+                        # failed to copy from cache, get from storage instead
+                        pass
 
             storage_method = entry.storage_method_target.storage_method
             storage_target = entry.storage_method_target.storage_target
