@@ -22,7 +22,9 @@
     Email - essarch@essolutions.se
 """
 
+import copy
 import os
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -30,7 +32,7 @@ from django.db.models import Prefetch
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import exceptions, status
+from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -71,6 +73,8 @@ from ESSArch_Core.profiles.models import (
     ProfileSA,
     ProfileIP,
 )
+
+from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore
 
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
@@ -389,3 +393,72 @@ class ProfileMakerExtensionViewSet(viewsets.ModelViewSet):
 class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
     queryset = templatePackage.objects.all()
     serializer_class = ProfileMakerTemplateSerializer
+
+    @detail_route(methods=['post'], url_path='add-child')
+    def add_child(self, request, pk=None):
+        required = ['name', 'parent']
+
+        # validate input
+        missing_items = {
+            field_name: 'This field is required'
+            for field_name in required
+            if field_name not in request.data
+        }
+        if missing_items:
+            raise exceptions.ValidationError(missing_items, code='required')
+
+        obj = self.get_object()
+
+        existingElements = obj.existingElements
+        templates = obj.allElements
+
+        new_name = request.data['name']
+        parent = request.data['parent']
+        new_uuid = str(uuid.uuid4())
+
+        if parent not in existingElements:
+            raise exceptions.ValidationError({'parent': '"%s" not in the tree' % parent})
+
+        newElement = None
+
+        # ensure that the element exists in any of the schemas
+        if new_name in templates:
+            newElement = copy.deepcopy(templates[new_name])
+        else:
+            for extension in obj.extensions.all():
+                if new_name in extension.allElements:
+                    newElement = copy.deepcopy(extension.allElements[new_name])
+
+        if newElement is None:
+            raise exceptions.ValidationError({'name': '"%s" not in any of the schemas' % new_name})
+
+        newElement['parent'] = parent
+        existingElements[new_uuid] = newElement
+
+        # If there are multiple of the same element under the same parent
+        # then we need to know the position of the last element with
+        # the same name
+
+        try:
+            l = [c['name'] for c in existingElements[parent]['children']]
+            index = len(l) - list(reversed(l)).index(new_name)
+        except ValueError:
+            index = 0
+
+        # calculate which elements should be before the new element
+        cb = calculateChildrenBefore(existingElements[parent]['availableChildren'], new_name)
+
+        if index == 0:
+            for child in existingElements[parent]['children']:
+                if child['name'] not in cb:
+                    break
+                else:
+                    index += 1
+
+        e = {
+            'name': new_name,
+            'uuid': new_uuid
+        }
+        existingElements[parent]['children'].insert(index, e)
+        obj.save()
+        return Response(new_uuid, status=status.HTTP_201_CREATED)
