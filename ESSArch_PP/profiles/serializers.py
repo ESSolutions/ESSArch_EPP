@@ -43,6 +43,9 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         )
 
         extra_kwargs = {
+            'root_element': {
+                'required': True
+            },
             'targetNamespace': {
                 'required': False
             }
