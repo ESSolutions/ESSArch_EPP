@@ -74,7 +74,7 @@ from ESSArch_Core.profiles.models import (
     ProfileIP,
 )
 
-from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore
+from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement
 
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
@@ -462,3 +462,86 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         existingElements[parent]['children'].insert(index, e)
         obj.save()
         return Response(new_uuid, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'])
+    def generate(self, request, pk=None):
+        class SimpleProfileSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Profile
+                fields = (
+                    'id', 'profile_type', 'name', 'type', 'status', 'label',
+                )
+
+        def addExtraAttribute(field, data, attr):
+            """
+            Adds extra attribute to field if it exists in data
+            Args:
+                field: The field to add to
+                data: The data dictionary to look in
+                attr: The name of the attribute to add
+            Returns:
+                The new field with the attribute added to it if the attribute
+                exists in data. Otherwise the original field.
+            """
+
+            field_attr = field['key'] + '_' + attr
+
+            if field_attr in data:
+                field[attr] = data[field_attr]
+
+            return field
+
+        serializer = SimpleProfileSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+
+        obj = self.get_object()
+        existingElements = obj.existingElements
+
+        form = existingElements['root']['form']
+        formData = existingElements['root']['formData']
+
+        for idx, field in enumerate(form):
+            field = addExtraAttribute(field, formData, 'desc')
+            field = addExtraAttribute(field, formData, 'hideExpression')
+            field = addExtraAttribute(field, formData, 'readonly')
+
+            form[idx] = field
+
+        existingElements['root']['form'] = form
+
+        jsonString, forms, data = generateElement(existingElements, 'root')
+        schemaLocation = ['%s %s' % (obj.targetNamespace, obj.schemaURL)]
+
+        XSI = 'http://www.w3.org/2001/XMLSchema-instance'
+
+        if not jsonString["-nsmap"].get("xsi"):
+            jsonString["-nsmap"]["xsi"] = XSI
+
+        if not jsonString["-nsmap"].get(obj.prefix):
+            jsonString["-nsmap"][obj.prefix] = obj.targetNamespace
+
+        for ext in obj.extensions.all():
+            jsonString["-nsmap"][ext.prefix] = ext.targetNamespace
+
+            schemaLocation.append('%s %s' % (ext.targetNamespace, ext.schemaURL))
+
+        schemaLocation = ({
+            '-name': 'schemaLocation',
+            '-namespace': 'xsi',
+            '#content': [{
+                'text': ' '.join(schemaLocation)
+            }]
+        })
+
+        jsonString['-attr'].append(schemaLocation)
+
+        profile = Profile.objects.create(profile_type=validated_data['profile_type'],
+                    name=validated_data['name'], type=validated_data['type'],
+                    status=validated_data['status'], label=validated_data['label'],
+                    template=forms, specification=jsonString, specification_data=data)
+
+        profile_data = ProfileSerializer(profile, context={'request': request}).data
+
+        return Response(profile_data, status=status.HTTP_201_CREATED)
