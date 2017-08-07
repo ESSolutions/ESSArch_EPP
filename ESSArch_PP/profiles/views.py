@@ -74,7 +74,7 @@ from ESSArch_Core.profiles.models import (
     ProfileIP,
 )
 
-from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement
+from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
 
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
@@ -462,6 +462,41 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         existingElements[parent]['children'].insert(index, e)
         obj.save()
         return Response(new_uuid, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['delete'], url_path='delete-element')
+    def delete_element(self, request, pk=None):
+        required = ['uuid']
+
+        # validate input
+        missing_items = {
+            field_name: 'This field is required'
+            for field_name in required
+            if field_name not in request.data
+        }
+        if missing_items:
+            raise exceptions.ValidationError(missing_items, code='required')
+
+        obj = self.get_object()
+        el_uuid = request.data['uuid']
+
+        try:
+            el = obj.existingElements[el_uuid]
+        except KeyError:
+            raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
+
+        parent = obj.existingElements[el['parent']]
+
+        # delete element in list of children of parent
+        parent['children'][:] = [c for c in parent['children'] if c.get('uuid') != el_uuid]
+
+        # delete the children of the element
+        removeChildren(obj.existingElements, el)
+
+        # delete the element
+        del obj.existingElements[el_uuid]
+
+        obj.save(update_fields=['existingElements'])
+        return Response(obj.existingElements, status=status.HTTP_200_OK)
 
     @detail_route(methods=['post'])
     def generate(self, request, pk=None):
