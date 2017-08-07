@@ -1,5 +1,6 @@
 from lxml import etree
 
+from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 import requests
@@ -23,7 +24,11 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         targetNamespace = schemadoc.get('targetNamespace')
         nsmap = {k: v for k, v in schemadoc.nsmap.iteritems() if k and v != "http://www.w3.org/2001/XMLSchema"}
 
-        existingElements, allElements = generateJsonRes(schemadoc, validated_data['root_element'], validated_data['prefix']);
+        try:
+            existingElements, allElements = generateJsonRes(schemadoc, validated_data['root_element'], validated_data['prefix']);
+        except ValueError as e:
+            raise ValidationError(e.message)
+
         existingElements["root"]["nsmap"] = nsmap
 
         return templatePackage.objects.create(
