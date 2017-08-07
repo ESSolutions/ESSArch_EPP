@@ -461,7 +461,7 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         }
         existingElements[parent]['children'].insert(index, e)
         obj.save()
-        return Response(new_uuid, status=status.HTTP_201_CREATED)
+        return Response(existingElements, status=status.HTTP_201_CREATED)
 
     @detail_route(methods=['delete'], url_path='delete-element')
     def delete_element(self, request, pk=None):
