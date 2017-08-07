@@ -498,6 +498,33 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         obj.save(update_fields=['existingElements'])
         return Response(obj.existingElements, status=status.HTTP_200_OK)
 
+    @detail_route(methods=['put'], url_path='update-element')
+    def update_element(self, request, pk=None):
+        required = ['uuid', 'data']
+
+        # validate input
+        missing_items = {
+            field_name: 'This field is required'
+            for field_name in required
+            if field_name not in request.data
+        }
+        if missing_items:
+            raise exceptions.ValidationError(missing_items, code='required')
+
+        obj = self.get_object()
+        el_uuid = request.data['uuid']
+        data = request.data['data']
+
+        try:
+            el = obj.existingElements[el_uuid]
+        except KeyError:
+            raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
+
+        obj.existingElements[el_uuid]['formData'] = data
+
+        obj.save(update_fields=['existingElements'])
+        return Response(obj.existingElements, status=status.HTTP_200_OK)
+
     @detail_route(methods=['post'])
     def generate(self, request, pk=None):
         class SimpleProfileSerializer(serializers.ModelSerializer):
