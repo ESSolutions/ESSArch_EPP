@@ -72,10 +72,13 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = (
-            'existingElements', 'allElements', 'extensions',
+            'existingElements', 'allElements',
         )
 
         extra_kwargs = {
+            'extensions': {
+                'required': False
+            },
             'root_element': {
                 'required': True
             },
