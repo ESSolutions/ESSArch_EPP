@@ -77,7 +77,8 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
             'extensions': {
-                'required': False
+                'required': False,
+                'allow_empty': True,
             },
             'root_element': {
                 'required': True
