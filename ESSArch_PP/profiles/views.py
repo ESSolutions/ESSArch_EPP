@@ -525,6 +525,35 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         obj.save(update_fields=['existingElements'])
         return Response(obj.existingElements, status=status.HTTP_200_OK)
 
+    @detail_route(methods=['put'], url_path='update-contains-files')
+    def update_contains_files(self, request, pk=None):
+        required = ['uuid', 'contains_files']
+
+        # validate input
+        missing_items = {
+            field_name: 'This field is required'
+            for field_name in required
+            if field_name not in request.data
+        }
+        if missing_items:
+            raise exceptions.ValidationError(missing_items, code='required')
+
+        obj = self.get_object()
+        el_uuid = request.data['uuid']
+        val = request.data['contains_files']
+
+        try:
+            el = obj.existingElements[el_uuid]
+        except KeyError:
+            raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
+
+        if type(val) is not bool:
+            raise exceptions.ValidationError({'contains_files': 'Must be a boolean'})
+
+        obj.existingElements[el_uuid]['containsFiles'] = val
+        obj.save(update_fields=['existingElements'])
+        return Response(obj.existingElements, status=status.HTTP_200_OK)
+
     @detail_route(methods=['post'], url_path='add-attribute')
     def add_attribute(self, request, pk=None):
         required = ['uuid', 'data']
