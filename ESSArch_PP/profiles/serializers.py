@@ -59,11 +59,9 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         except ValueError as e:
             raise ValidationError(e.message)
 
-        existingElements["root"]["nsmap"] = nsmap
-
         return templatePackage.objects.create(
             existingElements=existingElements, allElements=allElements,
-            targetNamespace=targetNamespace, **validated_data
+            targetNamespace=targetNamespace, nsmap=nsmap, **validated_data
         )
 
     class Meta:
