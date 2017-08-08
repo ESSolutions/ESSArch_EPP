@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTemplate, $scope, $state, $rootScope, $http) {
+angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTemplate, $scope, $state, $rootScope, $http, $uibModal, $log) {
   var vm = this;
   vm.templates = [];
   vm.template = null;
@@ -26,10 +26,10 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
     vm.generate = !vm.generate;
   }
 
-  vm.delete = function (templateName) {
+  vm.delete = function (template) {
     if (window.confirm('Are you sure you want to delete this template?')) {
       ProfileMakerTemplate.remove({
-        templateName: templateName,
+        templateName: template.name,
       }).$promise.then(function () {
         $state.reload();
       });
@@ -47,6 +47,7 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
         vm.edit = true;
       });
   }
+
   vm.countAll = {};
   vm.anyAttribute = false;
   vm.anyElement = false;
@@ -420,6 +421,119 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
       });
   };
 
+  //Creates and shows modal with task information
+  vm.generateModal = function () {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: 'modal-title',
+      ariaDescribedBy: 'modal-body',
+      templateUrl: 'static/frontend/views/profile_maker/generate.html',
+      controller: 'TemplateModalInstanceCtrl',
+      controllerAs: '$ctrl',
+      resolve: {
+        data: function () {
+          return {
+            generate: vm.generateTemplate,
+            template: vm.template,
+            model: angular.copy(vm.generateModel),
+            fields: vm.generateFields
+          };
+        }
+      },
+    });
+    modalInstance.result.then(function (data, $ctrl) {
+    }, function () {
+      $log.info('modal-component dismissed at: ' + new Date());
+    });
+  }
+
+  //Creates and shows modal with task information
+  vm.addTemplateModal = function () {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: 'modal-title',
+      ariaDescribedBy: 'modal-body',
+      templateUrl: 'static/frontend/views/profile_maker/add.html',
+      controller: 'TemplateModalInstanceCtrl',
+      controllerAs: '$ctrl',
+      resolve: {
+        data: function () {
+          return {
+            add: vm.addTemplate,
+            model: angular.copy(vm.addModel),
+            fields: vm.addFields
+          };
+        }
+      },
+    });
+    modalInstance.result.then(function (data, $ctrl) {
+      vm.template = null;
+      vm.edit = false;
+      vm.getTemplates();
+      ProfileMakerTemplate.query().$promise.then(function(resource) {
+        vm.templates = resource;
+        vm.templates.forEach(function(tp) {
+          if(tp.name === data.name) {
+            vm.template = tp;
+          }
+        });
+        vm.editTemplate(vm.template);
+      });
+    }, function () {
+      $log.info('modal-component dismissed at: ' + new Date());
+    });
+  }
+
+  vm.addTemplate = function(model) {
+    if (model) {
+      return ProfileMakerTemplate.add(model).$promise.then(function (response) {
+        return response;
+      });
+    }
+  }
+
+  vm.addModel = {};
+  vm.addFields = [
+    {
+      key: 'name',
+      type: 'input',
+      templateOptions: {
+        type: 'text',
+        label: 'Name',
+        placeholder: '',
+        required: true
+      }
+    },
+    {
+      key: 'prefix',
+      type: 'input',
+      templateOptions: {
+        type: 'text',
+        label: 'prefix',
+        placeholder: '',
+        required: true
+      }
+    },
+    {
+      key: 'root_element',
+      type: 'input',
+      templateOptions: {
+        type: 'text',
+        label: 'Root Element',
+        placeholder: '',
+        required: true
+      }
+    },
+    {
+      key: 'schemaURL',
+      type: 'input',
+      templateOptions: {
+        type: "url",
+        label: 'Schema URL'
+      }
+    },
+  ];
+
   vm.model = {
   };
 
@@ -492,12 +606,11 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
   vm.floatingElementVisable = false;
 
   // Generate
-  vm.generateTemplate = function () {
-    var data = vm.generateModel;
-    ProfileMakerTemplate.generate(
+  vm.generateTemplate = function (data) {
+    return ProfileMakerTemplate.generate(
       angular.extend({ templateName: vm.template.name }, data)
     ).$promise.then(function (resource) {
-      console.log(resource);
+      return resource;
     });
   };
 

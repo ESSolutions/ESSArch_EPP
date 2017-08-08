@@ -1,5 +1,9 @@
 .profile-maker {
 
+  .template-select {
+    // width: 30%;
+    margin-right: 5px;
+  }
   .floatingForm {
       position: absolute;
       width: 300px;
@@ -32,7 +36,7 @@
   .TemplateRow {
     margin-left: 20px;
     height: 40px;
-    a {
+    select {
       width: 200px;
       display: inline-block;
     }

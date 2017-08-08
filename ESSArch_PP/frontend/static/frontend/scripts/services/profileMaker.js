@@ -5,7 +5,6 @@ angular.module('myApp').factory('ProfileMakerTemplate', function ($resource, app
         },
         remove: {
             method: "DELETE",
-            params: { action: "delete-element" }
         },
         get: {
             method: "GET",

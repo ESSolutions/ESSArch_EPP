@@ -1,19 +1,13 @@
-<!--<!doctype html>
-<html>
-    <head>
-      <title>TemplateMaker</title>
-    </head>
-    <body>
-      <form enctype="multipart/form-data" method="post">
-        {{ form }}
-        <input type="submit" value="Submit">
-      </form>
-    </body>
-</html> -->
-<div id="add" ng-controller="AddCtrl as vm">
-  <form ng-submit="vm.onSubmit()" name="vm.form">
-    <formly-form model="vm.model" fields="vm.fields" form="vm.form" options="vm.options">
-      <input class="btn btn-info" type="submit" value="Submit">
+<div class="enter-profile-name">
+  <h3 style="margin: 15px;" class="modal-title" id="modal-title">{{'GENERATE_TEMPLATE' | translate}}</h3>
+</div>
+<div id="add">
+  <form ng-submit="$ctrl.addTemplate()" name="$ctrl.form">
+    <formly-form model="$ctrl.model" fields="$ctrl.fields" form="$ctrl.form" options="$ctrl.options">
     </formly-form>
+    <div class="modal-footer">
+      <button class="btn btn-info" type="submit" ng-disabled="$ctrl.form.$invalid">{{'GENERATE' | translate}}</button>
+      <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>
   </form>
 </div>

@@ -1,9 +1,11 @@
-<div class="profile-maker">
-    <div class="container col-md-4">
-        <form ng-submit="vm.generateTemplate()">
-            <formly-form model="vm.generateModel" fields="vm.generateFields" form="vm.generateForm">
-                <button type="submit" class="btn btn-success" ng-disabled="vm.generateForm.$invalid">Generate</button>
-            </formly-form>
-        </form>
-    </div>
+<div class="enter-profile-name">
+    <h3 style="margin: 15px;" class="modal-title" id="modal-title">{{'GENERATE_TEMPLATE' | translate}}</h3>
 </div>
+<form ng-submit="$ctrl.generateTemplate()">
+    <formly-form model="$ctrl.model" fields="$ctrl.fields" form="$ctrl.form">
+    </formly-form>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success" ng-disabled="$ctrl.form.$invalid">Generate</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>
+</form>

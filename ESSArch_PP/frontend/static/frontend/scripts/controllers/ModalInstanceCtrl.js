@@ -187,4 +187,24 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     vm.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
-});
+}).controller('TemplateModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
+    var $ctrl = this;
+    $ctrl.template = data.template;
+    $ctrl.model = data.model;
+    $ctrl.fields = data.fields;
+    $ctrl.generateTemplate = function () {
+        $ctrl.data = $ctrl.model;
+        data.generate($ctrl.data).then(function(response) {
+            $uibModalInstance.close(response);
+        })
+    };
+    $ctrl.addTemplate = function () {
+        $ctrl.data = $ctrl.model;
+        data.add($ctrl.data).then(function(response) {
+            $uibModalInstance.close(response);
+        })
+    };
+    $ctrl.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+})

@@ -1,20 +1,18 @@
 angular.module('myApp').controller('AddCtrl', function (ProfileMakerTemplate, $http, $scope, appConfig) {
   console.log("add controller")
   var vm = this;
-  vm.model = {};
   vm.options = {};
 
-  vm.onSubmit = function() {
-    if (vm.model) {
-      // send the image data
-      ProfileMakerTemplate.add(vm.model).$promise.then(function (response) {
-        vm.model = {};
+  vm.addTemplate = function(model) {
+    if (model) {
+      return ProfileMakerTemplate.add(model).$promise.then(function (response) {
+        return response;
       });
     }
-    //   vm.options.updateInitialValue();
   }
 
-  vm.fields = [
+  vm.addModel = {};
+  vm.addFields = [
     {
       key: 'name',
       type: 'input',
