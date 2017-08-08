@@ -628,21 +628,26 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
 
         existingElements['root']['form'] = form
 
-        jsonString, forms, data = generateElement(existingElements, 'root')
+        nsmap = obj.nsmap
+
+        for ext in obj.extensions.iterator():
+            nsmap.update(ext.nsmap)
+
         schemaLocation = ['%s %s' % (obj.targetNamespace, obj.schemaURL)]
 
         XSI = 'http://www.w3.org/2001/XMLSchema-instance'
 
-        if not jsonString["-nsmap"].get("xsi"):
-            jsonString["-nsmap"]["xsi"] = XSI
+        if not nsmap.get("xsi"):
+            nsmap["xsi"] = XSI
 
-        if not jsonString["-nsmap"].get(obj.prefix):
-            jsonString["-nsmap"][obj.prefix] = obj.targetNamespace
+        if not nsmap.get(obj.prefix):
+            nsmap[obj.prefix] = obj.targetNamespace
 
         for ext in obj.extensions.all():
-            jsonString["-nsmap"][ext.prefix] = ext.targetNamespace
-
+            nsmap[ext.prefix] = ext.targetNamespace
             schemaLocation.append('%s %s' % (ext.targetNamespace, ext.schemaURL))
+
+        jsonString, forms, data = generateElement(existingElements, 'root', nsmap=nsmap)
 
         schemaLocation = ({
             '-name': 'schemaLocation',
