@@ -1,0 +1,19 @@
+<!--<!doctype html>
+<html>
+    <head>
+      <title>TemplateMaker</title>
+    </head>
+    <body>
+      <form enctype="multipart/form-data" method="post">
+        {{ form }}
+        <input type="submit" value="Submit">
+      </form>
+    </body>
+</html> -->
+<div id="add" ng-controller="AddCtrl as vm">
+  <form ng-submit="vm.onSubmit()" name="vm.form">
+    <formly-form model="vm.model" fields="vm.fields" form="vm.form" options="vm.options">
+      <input class="btn btn-info" type="submit" value="Submit">
+    </formly-form>
+  </form>
+</div>

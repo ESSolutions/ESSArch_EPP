@@ -1,0 +1,9 @@
+<div class="profile-maker">
+    <div class="container col-md-4">
+        <form ng-submit="vm.generateTemplate()">
+            <formly-form model="vm.generateModel" fields="vm.generateFields" form="vm.generateForm">
+                <button type="submit" class="btn btn-success" ng-disabled="vm.generateForm.$invalid">Generate</button>
+            </formly-form>
+        </form>
+    </div>
+</div>

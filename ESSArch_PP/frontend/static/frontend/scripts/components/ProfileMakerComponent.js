@@ -1,5 +1,5 @@
 angular.module('myApp').component('profileMaker', {
-  template: '<div><p>{{title}}</p></div>',
+  templateUrl: 'static/frontend/views/profile_maker/index.html',
   controller: 'ProfileMakerCtrl',
   controllerAs: 'vm',
   bindings: {

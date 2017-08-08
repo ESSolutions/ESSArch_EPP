@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+    
+    <div class="profile-maker">
+      <div>
+        <h1>Templates</h1>
+        <div ng-repeat="tp in vm.templates">
+          <div class="TemplateRow">
+            <a ng-click="vm.editTemplate(tp)">{{tp.name}}</a>
+            <input class="btn btn-primary" type="button" ng-click="vm.showGenerateTemplate(tp)"value="Generate">
+            <input class="btn btn-primary" type="button" ng-click="vm.addExtension(tp)" value="Add Extension">
+            <input class="btn btn-danger" type="button" ng-click="vm.delete('{{tp.name}}')" value="Delete" />
+          </div>
+          </div>
+        <a class="btn btn-success" ng-click="vm.showAddTemplate()">Create new template</a>
+      </div>
+      <hr>
+      <div ng-if="vm.edit" ng-include src="'static/frontend/views/profile_maker/edit.html'"></div>
+      <div ng-if="vm.add" ng-include src="'static/frontend/views/profile_maker/add.html'"></div>
+      <div ng-if="vm.generate" ng-include src="'static/frontend/views/profile_maker/generate.html'"></div>
+    </div>
+</html>
