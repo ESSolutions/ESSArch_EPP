@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTemplate, $scope, $state, $rootScope, $http, $uibModal, $log) {
+angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTemplate, ProfileMakerExtension, $scope, $state, $rootScope, $http, $uibModal, $log) {
   var vm = this;
   vm.templates = [];
   vm.template = null;
@@ -6,7 +6,7 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
   vm.edit = false;
   vm.generate = false;
   vm.getTemplates = function () {
-    ProfileMakerTemplate.query().$promise.then(function (resource) {
+    ProfileMakerTemplate.query({pager: "none"}).$promise.then(function (resource) {
       vm.templates = resource;
     });
   }
@@ -294,11 +294,27 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
   };
 
   vm.addAttribute = function () {
-    vm.floatingVisable = !vm.floatingVisable;
+    //vm.floatingVisable = !vm.floatingVisable;
     vm.floatingmodel = [];
-    ProfileMakerTemplate.getAttributes({ templateName: vm.template.name }).$promise.then(function (resource) {
-      $scope.allAttributes = resource;
+    var allAttributes = [];
+    vm.template.extensions.forEach(function (extension) {
+      ProfileMakerExtension.get({ id: extension }).$promise.then(function(resource) {
+      var r = {
+        name: resource.prefix,
+      };
+      var children = [];
+      for (var key in resource.allAttributes) {
+        var c = {};
+        c['name'] = key;
+        c['data'] = resource.allAttributes[key];
+        children.push(c);
+      }
+      r['children'] = children;
+      allAttributes.push(r);
+      });
     });
+    vm.allAttributes = allAttributes;
+    vm.addAttributeModal(vm.template);
   };
 
   $scope.addAttribute = function (data, parent) {
@@ -309,7 +325,7 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
       data.templateOptions.label = parent.name + ':' + data.templateOptions.label
     }
     vm.fields.push(data);
-    ProfileMakerTemplate.addAttribute({
+    return ProfileMakerTemplate.addAttribute({
       templateName: vm.template.name
     },
       {
@@ -317,6 +333,7 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
         data: data
       }).$promise.then(function (resource) {
         vm.floatingVisable = false;
+        return resource;
       });
   }
 
@@ -332,12 +349,14 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
     attribute['defaultValue'] = vm.floatingmodel['attribvalue'];
     vm.fields.push(attribute);
     vm.floatingVisable = false;
-    ProfileMakerTemplate.addAttribute({
+    return ProfileMakerTemplate.addAttribute({
       templateName: vm.template.name
     },
       {
         uuid: vm.uuid,
         data: attribute
+      }).$promise.then(function(response) {
+        return response;
       });
   };
 
@@ -398,6 +417,34 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
       $scope.showSelected(vm.uuid, false);
     });
   };
+
+  vm.addExtension = function(data) {
+    return ProfileMakerExtension.save({}, data).$promise.then(function(resource) {
+      return resource;
+    });
+  }
+
+  vm.extensionModel = {};
+  vm.extensionFields = [
+    {
+      key: 'schemaURL',
+      type: 'input',
+      templateOptions: {
+        type: "url",
+        label: 'Schema URL'
+      }
+    },
+    {
+      key: 'prefix',
+      type: 'input',
+      templateOptions: {
+        type: 'text',
+        label: 'prefix',
+        placeholder: '',
+        required: true
+      }
+    },
+  ];
 
   vm.closeFloatingElementForm = function () {
     vm.floatingVisable = false;
@@ -467,10 +514,8 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
       },
     });
     modalInstance.result.then(function (data, $ctrl) {
-      vm.template = null;
       vm.edit = false;
-      vm.getTemplates();
-      ProfileMakerTemplate.query().$promise.then(function(resource) {
+      ProfileMakerTemplate.query({pager: "none"}).$promise.then(function(resource) {
         vm.templates = resource;
         vm.templates.forEach(function(tp) {
           if(tp.name === data.name) {
@@ -483,6 +528,61 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
       $log.info('modal-component dismissed at: ' + new Date());
     });
   }
+    vm.addExtensionModal = function (template) {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: 'modal-title',
+      ariaDescribedBy: 'modal-body',
+      templateUrl: 'static/frontend/views/profile_maker/add_extension.html',
+      controller: 'TemplateModalInstanceCtrl',
+      controllerAs: '$ctrl',
+      resolve: {
+        data: function () {
+          return {
+            template: template,
+            add: vm.addExtension,
+            model: angular.copy(vm.extensionModel),
+            fields: vm.extensionFields
+          };
+        }
+      },
+    });
+    modalInstance.result.then(function (data, $ctrl) {
+      vm.editTemplate(vm.template);
+    }, function () {
+      $log.info('modal-component dismissed at: ' + new Date());
+    });
+  }
+
+    vm.addAttributeModal = function (template) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/profile_maker/add_attribute.html',
+        controller: 'TemplateModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: function () {
+            return {
+              template: template,
+              allAttributes: vm.allAttributes,
+              add: $scope.addAttribute,
+              save: vm.saveAttribute,
+              model: vm.floatingmodel,
+              fields: vm.floatingfields
+            };
+          }
+        },
+      });
+      modalInstance.result.then(function (data, $ctrl) {
+        vm.editTemplate(vm.template);
+      }, function () {
+        $log.info('modal-component dismissed at: ' + new Date());
+      });
+    }
+
+
 
   vm.addTemplate = function(model) {
     if (model) {

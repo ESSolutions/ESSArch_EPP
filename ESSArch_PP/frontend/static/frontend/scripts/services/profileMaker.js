@@ -44,12 +44,15 @@ angular.module('myApp').factory('ProfileMakerTemplate', function ($resource, app
         updateContainFiles: {
             method: "PUT",
             params: { action: "update-contains-files" }
+        },
+        update: {
+            method: "PATCH"
         }
     });
 }).factory('ProfileMakerExtension', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'profilemaker-extensions/:id/:action/', { id: "@id" }, {
         add: {
             method: "POST"
-        }
+        },
     });
 });

@@ -111,3 +111,18 @@
   }*/
 
 }
+.attribute-form {
+  .flex-wrap {
+    display: flex;
+    flex-direction: row;
+    .attribute-formly {
+      width: 50%;
+      .formly-field {
+        width: 75%;
+      }
+    }
+    .attribute-tree {
+
+    }
+  }
+}
