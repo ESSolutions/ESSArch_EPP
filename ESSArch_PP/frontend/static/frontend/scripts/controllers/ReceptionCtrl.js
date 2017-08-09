@@ -264,7 +264,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy
         })
         modalInstance.result.then(function (data) {
             $scope.getListViewData();
-            if(data.status == "received") {
+            if (data.status == "received") {
                 $scope.eventlog = false;
                 $scope.edit = false;
                 $scope.requestForm = false;

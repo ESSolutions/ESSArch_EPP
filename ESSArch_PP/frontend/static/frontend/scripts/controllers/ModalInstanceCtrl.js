@@ -153,8 +153,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $scope.approvedToReceive = false;
     $scope.profileEditor = true;
     $scope.receiveDisabled = false;
-
-    $scope.$on('disable_receive', function() {
+    $scope.$on('disable_receive', function () {
         $scope.receiveDisabled = true;
     });
 

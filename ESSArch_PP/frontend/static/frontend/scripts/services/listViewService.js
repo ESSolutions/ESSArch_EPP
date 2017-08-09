@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -222,9 +222,21 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
             saProfile.profiles = [];
             sas.forEach(function (sa) {
                 saProfile.profiles.push(sa);
-                if (ip.submission_agreement == sa.url){
+                if (ip.submission_agreement == sa.url || ip.altrecordids["SUBMISSIONAGREEMENT"] == sa.id ){
                     saProfile.profile = sa;
                     saProfile.locked = ip.submission_agreement_locked;
+                    if (saProfile.profile.profile_aip) {
+                        Profile.get({ id: saProfile.profile.profile_aip })
+                            .$promise.then(function (resource) {
+                                saProfile.profile.profile_aip = resource;
+                            });
+                    }
+                    if (saProfile.profile.profile_dip) {
+                        Profile.get({ id: saProfile.profile.profile_dip })
+                            .$promise.then(function (resource) {
+                                saProfile.profile.profile_dip = resource;
+                            });
+                    }
                 }
             });
             return saProfile;
@@ -312,6 +324,7 @@ angular.module('myApp').factory('listViewService', function(IP, Workarea, Workar
             if(ip.profile_aip) {
                 selectCollapse.push(createProfileObjMinified("aip", [ip.profile_aip], ip, sa));
             } else {
+                console.log("getProfilesFromIp: ", sa, ip)
                 selectCollapse.push(createProfileObjMinified("aip", [], ip, sa));
             }
             if(ip.profile_dip) {
