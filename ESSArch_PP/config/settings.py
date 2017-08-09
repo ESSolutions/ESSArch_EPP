@@ -54,13 +54,18 @@ ALLOWED_HOSTS = ['*']
 
 # Rest framework
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'ESSArch_Core.pagination.LinkHeaderPagination',
+    'DEFAULT_PAGINATION_CLASS': 'proxy_pagination.ProxyPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_PERMISSION_CLASSES': (
       'rest_framework.permissions.IsAuthenticated',
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
+
+PROXY_PAGINATION_PARAM = 'pager'
+PROXY_PAGINATION_DEFAULT = 'ESSArch_Core.pagination.LinkHeaderPagination'
+PROXY_PAGINATION_MAPPING = {'none': 'ESSArch_Core.pagination.NoPagination'}
+
 # Application definition
 
 INSTALLED_APPS = [
