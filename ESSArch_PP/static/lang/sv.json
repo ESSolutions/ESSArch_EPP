@@ -308,5 +308,7 @@
     "CANNOT_RECEIVE_ERROR": "Ogiltig leveransöverenskommelse i XML-fil",
     "PROFILEMANAGER": "Profilhanterare",
     "PUBLISH": "Publicera",
-    "SAVE": "Spara"
+    "SAVE": "Spara",
+    "DO_YOU_WANT_TO_REMOVE_TEMPLATE": "Vill du ta bort template?"
+
 }

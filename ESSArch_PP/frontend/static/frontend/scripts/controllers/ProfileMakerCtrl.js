@@ -27,14 +27,24 @@ angular.module('myApp').controller('ProfileMakerCtrl', function (ProfileMakerTem
   }
 
   vm.delete = function (template) {
-    if (window.confirm('Are you sure you want to delete this template?')) {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      ariaLabelledBy: 'modal-title',
+      ariaDescribedBy: 'modal-body',
+      templateUrl: 'static/frontend/views/profile_maker/remove_template.html',
+      controller: 'ModalInstanceCtrl',
+      controllerAs: '$ctrl'
+    })
+    modalInstance.result.then(function (data) {
       ProfileMakerTemplate.remove({
         templateName: template.name,
       }).$promise.then(function () {
         $state.reload();
       });
-    }
-  };
+    }, function () {
+      $log.info('modal-component dismissed at: ' + new Date());
+    });
+  }
 
   vm.initEdit = function () {
     ProfileMakerTemplate.get({ templateName: vm.template.name })
