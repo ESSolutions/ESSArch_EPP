@@ -59,13 +59,12 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
     $scope.initRequestData();
 
     // Watchers
-
-    $scope.$watch(function(){return $rootScope.ipUrl;}, function(newValue, oldValue) {
-		$scope.getListViewData();
-	}, true);
+    $rootScope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
+        $scope.getListViewData();
+    }, true);
 
     // Initialize intervals
-    
+
     //Cancel update intervals on state change
 	$rootScope.$on('$stateChangeStart', function() {
 		$interval.cancel(stateInterval);
@@ -224,7 +223,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 	//Get data for list view
 	$scope.getListViewData = function() {
 		vm.callServer($scope.tableState);
-		$rootScope.loadTags();
+        $rootScope.$broadcast('load_tags', {})
+
 	};
 
     // Validators
