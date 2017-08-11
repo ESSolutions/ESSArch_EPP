@@ -4,20 +4,20 @@
 <div class="modal-body" id="modal-body">
     <profile-editor ng-if="profileEditor" ip="ip" share-data="vm.getProfileData($event)"></profile-editor>
     <div ng-if="requestForm" class="request-layout">
-        <form id="request-form" name="request-form" class="request-form" ng-submit="vm.receive(includedIps[0])">
+        <form id="request-form" name="vm.form" class="request-form" ng-submit="vm.receive(includedIps[0])">
             <div class="request-type">
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <label>
                 {{'PURPOSE' | translate}}
             </label>
-                    <input class="form-control" required="true" ng-model="vm.request.purpose">
+                    <input class="form-control" required="true" ng-model="vm.request.purpose" required>
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <label>
                 {{'ARCHIVE_POLICY' | translate}}
             </label>
                     <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
-                        ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
+                        ng-options="x as x.policy_name for x in vm.request.archivePolicy.options" required></select>
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <label>
@@ -59,7 +59,7 @@
     <div class="receive-footer">
         <div class="checkbox">
             <label>
-                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
+                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
             </label>
         </div>
         <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(includedIps[0])">{{'RECEIVE' | translate}}</button>

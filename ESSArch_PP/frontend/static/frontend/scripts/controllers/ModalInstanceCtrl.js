@@ -159,7 +159,12 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     vm.getProfileData = function($event) {
         vm.request.submissionAgreement.value = $event.submissionAgreement;
-        vm.request.profileData[$event.profileId] = $event.model;
+        if($event.aipProfileId) {
+            vm.request.profileData[$event.aipProfileId] = $event.aipModel;
+        }
+        if($event.dipProfileId) {
+            vm.request.profileData[$event.dipProfileId] = $event.dipModel;
+        }
         $scope.approvedToReceive = true;
     }
     vm.receive = function (ip) {

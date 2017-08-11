@@ -220,26 +220,29 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
         }).$promise.then(function (resource) {
             sas = resource;
             saProfile.profiles = [];
+            var promises = [];
             sas.forEach(function (sa) {
                 saProfile.profiles.push(sa);
                 if (ip.submission_agreement == sa.url || ip.altrecordids["SUBMISSIONAGREEMENT"] == sa.id ){
                     saProfile.profile = sa;
                     saProfile.locked = ip.submission_agreement_locked;
                     if (saProfile.profile.profile_aip) {
-                        Profile.get({ id: saProfile.profile.profile_aip })
+                        promises.push(Profile.get({ id: saProfile.profile.profile_aip })
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_aip = resource;
-                            });
+                            }));
                     }
                     if (saProfile.profile.profile_dip) {
-                        Profile.get({ id: saProfile.profile.profile_dip })
+                        promises.push(Profile.get({ id: saProfile.profile.profile_dip })
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_dip = resource;
-                            });
+                            }));
                     }
                 }
             });
-            return saProfile;
+            return $q.all(promises).then(function() {
+                return saProfile;
+            })
         });
     }
 
@@ -270,13 +273,6 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
         var checked = false;
         var profile = null;
 
-        p = getProfileByTypeFromIP(ip, type);
-        if (p) {
-            profile_from_ip = p;
-            profile = profile_from_ip;
-            locked = p.LockedBy ? true : false;
-            checked = p.included
-        }
         p = getProfileByTypeFromSA(sa, type);
         if (p){
             checked = true;
@@ -321,14 +317,13 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
             } else {
                 selectCollapse.push(createProfileObjMinified("sip", [], ip, sa));
             }*/
-            if(ip.profile_aip) {
-                selectCollapse.push(createProfileObjMinified("aip", [ip.profile_aip], ip, sa));
+            if(sa.profile_aip) {
+                selectCollapse.push(createProfileObjMinified("aip", [sa.profile_aip], ip, sa));
             } else {
-                console.log("getProfilesFromIp: ", sa, ip)
                 selectCollapse.push(createProfileObjMinified("aip", [], ip, sa));
             }
-            if(ip.profile_dip) {
-                selectCollapse.push(createProfileObjMinified("dip", [ip.profile_dip], ip, sa));
+            if(sa.profile_dip) {
+                selectCollapse.push(createProfileObjMinified("dip", [sa.profile_dip], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("dip", [], ip, sa));
             }

@@ -22,7 +22,6 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
                 if (found.length) {
                     $scope.saProfile.profile = found[0];
                     $scope.saProfile.disabled = true;
-                    getAndShowProfile($scope.saProfile.profile.profile_aip.profile, {})
                 } else {
                     $scope.saAlert = $scope.alerts.receiveError;
                     $scope.saProfile.disabled = true;
@@ -57,7 +56,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
         });
     };
     $scope.pushData = function() {
-        vm.shareData({$event: {profileId: $scope.saProfile.profile.profile_aip.id, model: vm.profileModel, submissionAgreement: $scope.saProfile.profile.id}});
+        vm.shareData({$event: {aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id}});
     }
     $scope.$on('get_profile_data', function() {
         $scope.pushData();
@@ -76,6 +75,24 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
             $scope.selectedProfileRow = row;
         }
     };
+
+    vm.saveProfileModel = function(type, model) {
+        if(type === "aip") {
+            vm.savedAip = model;
+            vm.profileModel = {};
+            vm.profileFields = [];
+        }
+        if(type === "dip") {
+            vm.savedDip = model;
+            vm.profileModel = {};
+            vm.profileFields = [];
+        }
+    }
+
+    vm.cancel = function() {
+        vm.profileModel = {};
+        vm.profileFields = [];
+    }
 
     vm.profileModel = {};
     vm.profileFields=[];
@@ -134,10 +151,13 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
             } else {
                 var profileId = row.active.profile;
             }
-            getAndShowProfile(profileId, row);
+            vm.getAndShowProfile(profile, row);
         }
     };
-    function getAndShowProfile(profileId, row) {
+    vm.selectedProfile = null;
+    vm.getAndShowProfile = function(profile, row) {
+        vm.selectedProfile = profile;
+        var profileId = profile.id;
         Profile.get({
             id: profileId,
                 'sa': $scope.saProfile.profile.id,
@@ -232,7 +252,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
 
     //Changes SA profile for selected ip
     $scope.changeSaProfile = function (sa, ip, oldSa_idx) {
-        getAndShowProfile(sa.profile.profile_aip.profile, {})
+        vm.getAndShowProfile(sa.profile.profile_aip.profile, {})
         $scope.getSelectCollection(sa, ip);
         $scope.selectRowCollection = $scope.selectRowCollapse;
         if ($scope.editSA) {
@@ -688,7 +708,7 @@ $scope.unlock = function(profile) {
         }).$promise.then(function(response){
             profile.locked = false;
             if($scope.edit && profile.active.id === $scope.selectedProfileRow.active.id) {
-                getAndShowProfile(profile.active.id, profile);
+                vm.getAndShowProfile(profile.active.id, profile);
             }
         });
     }
