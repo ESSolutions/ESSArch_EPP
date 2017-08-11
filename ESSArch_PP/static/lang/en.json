@@ -309,5 +309,10 @@
     "PROFILEMANAGER": "Profile manager",
     "PUBLISH": "Publish",
     "SAVE": "Save",
-    "DO_YOU_WANT_TO_REMOVE_TEMPLATE": "Do you want to remove template?"
+    "DO_YOU_WANT_TO_REMOVE_TEMPLATE": "Do you want to remove template?",
+    "SAEDITOR": "SA editor",
+    "PROFILEMAKER": "Profile maker",
+    "IMPORT": "Import",
+    "COLLAPSE_ALL": "Collapse all",
+    "EXPAND_ALL": "Expand all"
 }

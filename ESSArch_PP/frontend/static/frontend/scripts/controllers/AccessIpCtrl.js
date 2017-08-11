@@ -64,6 +64,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $scope.initRequestData();
 
         } else {
+
             $scope.select = true;
             $scope.eventlog = true;
             $scope.edit = true;

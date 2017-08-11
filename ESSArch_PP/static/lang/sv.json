@@ -309,6 +309,10 @@
     "PROFILEMANAGER": "Profilhanterare",
     "PUBLISH": "Publicera",
     "SAVE": "Spara",
-    "DO_YOU_WANT_TO_REMOVE_TEMPLATE": "Vill du ta bort template?"
-
+    "DO_YOU_WANT_TO_REMOVE_TEMPLATE": "Vill du ta bort template?",
+    "SAEDITOR": "SA editor",
+    "PROFILEMAKER": "Profile maker",
+    "IMPORT": "Import",
+    "COLLAPSE_ALL": "Kollapsa alla",
+    "EXPAND_ALL": "Expandera alla"
 }

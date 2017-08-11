@@ -360,7 +360,40 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 				}
 			});
 		};
-	}
+    }
+
+    // Expand all IP's
+    vm.expandAll = function() {
+        vm.displayedIps.forEach(function(ip) {
+            ip.collapsed = false;
+			$scope.expandedAics.push(ip.object_identifier_value);
+        })
+    }
+
+    vm.collapseAll = function() {
+        vm.displayedIps.forEach(function(ip) {
+            ip.collapsed = true;
+            $scope.expandedAics.forEach(function(aic, index, array) {
+				if(aic == ip.object_identifier_value) {
+					$scope.expandedAics.splice(index,1);
+				}
+			});
+        })
+    }
+    vm.expandAllVisible = function() {
+        var visible = false;
+        var expand = true;
+        vm.displayedIps.forEach(function(ip) {
+            if(ip.information_packages && ip.information_packages.length) {
+                visible = true;
+                if(ip.collapsed == false) {
+                    expand = false;
+                }
+            }
+        })
+        vm.showExpand = expand;
+        return visible;
+    }
     // Remove ip
 	$scope.removeIp = function (ipObject) {
 		IP.delete({
