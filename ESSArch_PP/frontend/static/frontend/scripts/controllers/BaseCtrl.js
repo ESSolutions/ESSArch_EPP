@@ -404,7 +404,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 			$scope.eventlog = false;
 			$scope.eventShow = false;
 			$scope.statusShow = false;
-			$scope.filebrowser = false;
+            $scope.filebrowser = false;
+            $scope.requestForm = false;
 			$scope.getListViewData();
 		});
 	}
