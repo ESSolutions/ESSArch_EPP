@@ -22,17 +22,27 @@
     Email - essarch@essolutions.se
 """
 
+import os
+import uuid
+
+from django.contrib.auth.models import User
+
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import exceptions, viewsets, filters, status
-from rest_framework.decorators import detail_route
+from rest_framework import exceptions, viewsets, filters, permissions, status
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.exceptions import Conflict
 
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
+
+from ESSArch_Core.ip.models import InformationPackage
+
 from ESSArch_Core.storage.models import (
+    AccessQueue,
     IOQueue,
     Robot,
     RobotQueue,
@@ -45,19 +55,27 @@ from ESSArch_Core.storage.models import (
     TapeSlot,
 )
 
+from ESSArch_Core.util import parse_content_range_header
+
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
+
+from configuration.serializers import (
+    StorageMethodSerializer,
+    StorageMethodTargetRelationSerializer,
+    StorageTargetSerializer,
+)
 
 from storage.filters import StorageMediumFilter
 
 from storage.serializers import (
+    AccessQueueSerializer,
     IOQueueSerializer,
+    IOQueueWriteSerializer,
     RobotSerializer,
     RobotQueueSerializer,
-    StorageMethodSerializer,
-    StorageMethodTargetRelationSerializer,
     StorageObjectSerializer,
+    StorageObjectWithIPSerializer,
     StorageMediumSerializer,
-    StorageTargetSerializer,
     TapeDriveSerializer,
     TapeSlotSerializer,
 )
@@ -67,7 +85,189 @@ class IOQueueViewSet(viewsets.ModelViewSet):
     API endpoint for IO queues
     """
     queryset = IOQueue.objects.all()
-    serializer_class = IOQueueSerializer
+
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return IOQueueSerializer
+
+        return IOQueueWriteSerializer
+
+    @list_route(methods=['post'], url_path='from-master')
+    def from_master(self, request, pk=None):
+        try:
+            entry_data = request.data.pop('entry')
+        except KeyError:
+            raise exceptions.ParseError(detail='entry parameter missing')
+
+        try:
+            ip_data = request.data.pop('information_package')
+        except KeyError:
+            raise exceptions.ParseError(detail='information_package parameter missing')
+
+        try:
+            policy_data = ip_data.pop('policy')
+
+            try:
+                cache_storage_data = policy_data.pop('cache_storage')
+                cache_storage_data.pop('url')
+                cache_storage, _ = Path.objects.get_or_create(
+                    entity=cache_storage_data.pop('entity'), defaults=cache_storage_data
+                )
+                policy_data['cache_storage'] = cache_storage
+            except KeyError:
+                raise exceptions.ParseError(detail='information_package.policy.cache_storage parameter missing')
+
+            try:
+                ingest_path_data = policy_data.pop('ingest_path')
+                ingest_path_data.pop('url')
+                ingest_path, _ = Path.objects.get_or_create(
+                    entity=ingest_path_data.pop('entity'), defaults=ingest_path_data
+                )
+                policy_data['ingest_path'] = ingest_path
+            except KeyError:
+                raise exceptions.ParseError(detail='information_package.policy.ingest_path parameter missing')
+
+            policy_data.pop('url', None)
+
+            policy, _ = ArchivePolicy.objects.update_or_create(
+                id=policy_data.pop('id'), defaults=policy_data
+            )
+
+            ip_data['policy'] = policy
+
+        except KeyError:
+            raise exceptions.ParseError(detail='information_package.policy parameter missing')
+
+        try:
+            aic_data = ip_data['aic']
+            aic_data.pop('url', None)
+            aic, _ = InformationPackage.objects.get_or_create(
+                id=aic_data.pop('id'), defaults=aic_data
+            )
+            ip_data['aic'] = aic
+
+        except KeyError:
+            aic = None
+
+        ip, _ = InformationPackage.objects.get_or_create(
+            id=ip_data['id'], defaults=ip_data
+        )
+
+        entry_data['ip'] = ip
+
+        try:
+            user_data = entry_data.pop('user')
+            user_data.pop('url', None)
+            user_data.pop('id', None)
+            user, _ = User.objects.get_or_create(
+                username=user_data['username'], defaults=user_data
+            )
+            entry_data['user'] = user
+        except KeyError:
+            raise exceptions.ParseError(detail='entry.user parameter missing')
+
+        try:
+            storage_method_target_data = entry_data.pop('storage_method_target')
+
+            try:
+                storage_method_data = storage_method_target_data.pop('storage_method')
+                storage_method_data['archive_policy'] = policy
+                storage_method_data.pop('url', None)
+                storage_method, _ = StorageMethod.objects.get_or_create(
+                    id=storage_method_data['id'], defaults=storage_method_data
+                )
+                storage_method_target_data['storage_method'] = storage_method
+            except KeyError:
+                raise exceptions.ParseError(detail='entry.storage_method_target.storage_method parameter missing')
+
+            try:
+                storage_target_data = storage_method_target_data.pop('storage_target')
+                storage_target_data.pop('url', None)
+                storage_target_data.pop('remote_server', None)
+                storage_target, _ = StorageTarget.objects.get_or_create(
+                    id=storage_target_data['id'], defaults=storage_target_data
+                )
+                storage_method_target_data['storage_target'] = storage_target
+            except KeyError:
+                raise exceptions.ParseError(detail='entry.storage_method_target.storage_target parameter missing')
+
+
+            storage_method_target_data.pop('url', None)
+            storage_method_target, _ = StorageMethodTargetRelation.objects.get_or_create(
+                id=storage_method_target_data['id'], defaults=storage_method_target_data
+            )
+            entry_data['storage_method_target'] = storage_method_target
+        except KeyError:
+            raise exceptions.ParseError(detail='entry.storage_method_target parameter missing')
+
+        entry_data['status'] = -1
+        io_obj, _ = IOQueue.objects.get_or_create(id=entry_data.pop('id'), defaults=entry_data)
+
+        return Response(io_obj.id, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'], url_path='add-file')
+    def add_file(self, request, pk=None):
+        entry = self.get_object()
+
+        if entry.ip.responsible != self.request.user and not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
+        path = entry.ip.policy.cache_storage.value
+
+        f = request.FILES['the_file']
+        content_range = request.META.get('HTTP_CONTENT_RANGE', 'bytes 0-0/0')
+        filename = os.path.join(path, f.name)
+
+        (start, end, total) = parse_content_range_header(content_range)
+
+        if f.size != end - start + 1:
+            raise exceptions.ParseError("File size doesn't match headers")
+
+        if start == 0:
+            with open(filename, 'wb') as dstf:
+                dstf.write(f.read())
+        else:
+            with open(filename, 'ab') as dstf:
+                dstf.seek(start)
+                dstf.write(f.read())
+
+        upload_id = request.data.get('upload_id', uuid.uuid4().hex)
+        return Response({'upload_id': upload_id})
+
+    @detail_route(methods=['post'], url_path='add-file_complete')
+    def add_file_complete(self, request, pk=None):
+        entry = self.get_object()
+
+        if entry.ip.responsible != self.request.user and not request.user.has_perm('ip.can_receive_remote_files'):
+            raise exceptions.PermissionDenied
+
+        path = entry.ip.policy.cache_storage.value
+
+        md5 = request.data['md5']
+        filepath = request.data['path']
+        filepath = os.path.join(path, filepath)
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ValidateIntegrity",
+            params={
+                "filename": filepath,
+                "checksum": md5,
+                "algorithm": 'MD5'
+            },
+            responsible=self.request.user,
+        ).run().get()
+
+        return Response('Upload of %s complete' % filepath)
+
+    @detail_route(methods=['post'], url_path='all-files-done')
+    def all_files_done(self, request, pk=None):
+        entry = self.get_object()
+        entry.status = 0
+        entry.save(update_fields=['status'])
+
+        entry.ip.cached = True
+        entry.ip.save(update_fields=['cached'])
+        return Response()
 
 
 class StorageMediumViewSet(viewsets.ModelViewSet):
@@ -141,13 +341,13 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     API endpoint for storage object
     """
     queryset = StorageObject.objects.all()
-    serializer_class = StorageObjectSerializer
+    serializer_class = StorageObjectWithIPSerializer
 
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = (
-        'ip__object_identifier_value', 'content_location_value',
+        'ip__object_identifier_value', 'content_location_value', 'last_changed_local',
     )
 
     search_fields = (
@@ -192,6 +392,16 @@ class RobotViewSet(viewsets.ModelViewSet):
 
         return Response()
 
+class AccessQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    """
+    API endpoint for access queue
+    """
+    queryset = AccessQueue.objects.all()
+    serializer_class = AccessQueueSerializer
+    filter_backends = (
+        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
+    )
+    ordering_fields = ('posted',)
 
 class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """

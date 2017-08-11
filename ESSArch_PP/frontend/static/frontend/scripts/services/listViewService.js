@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -32,27 +32,41 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
         if(archived != true) {
             archived = false;
         }
-        return IP.query(
-            angular.extend({
-                page: pageNumber,
-                page_size: pageSize,
-                ordering: sortString,
-                state: state,
-                search: searchString,
-                view_type: viewType,
-                archived: archived,
-                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
-            }, columnFilters)
-        ).$promise.then(function (resource) {
-            var count = resource.$httpHeaders('Count');
-            if (count == null) {
-                count = resource.length;
-            }
-            return {
-                count: count,
-                data: resource
-            };
-        })
+        var data = angular.extend({
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            state: state,
+            search: searchString,
+            view_type: viewType,
+            archived: archived,
+        }, columnFilters);
+        if ($rootScope.selectedTag != null) {
+
+            return Tag.information_packages(angular.extend({id: $rootScope.selectedTag.id }, data)).$promise.then(function (resource) {
+                var count = resource.$httpHeaders('Count');
+                if (count == null) {
+                    count = resource.length;
+                }
+                return {
+                    count: count,
+                    data: resource
+                };
+            })
+        } else {
+
+            return IP.query(data).$promise.then(function (resource) {
+                var count = resource.$httpHeaders('Count');
+
+                if (count == null) {
+                    count = resource.length;
+                }
+                return {
+                    count: count,
+                    data: resource
+                };
+            })
+        }
     }
 
     //Fetches IP's for given workarea (ingest or access)
@@ -65,7 +79,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
                 ordering: sortString,
                 search: searchString,
                 view_type: viewType,
-                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
+                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
             }, columnFilters)
         ).$promise.then(function (resource) {
             count = resource.$httpHeaders('Count');
@@ -88,7 +102,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
-                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                              
+                tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
             }, columnFilters)
         ).$promise.then(function (resource) {
             count = resource.$httpHeaders('Count');
@@ -108,7 +122,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
             page_size: pageSize,
             ordering: sortString,
             search: searchString,
-            tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,            
+            tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
         }).$promise.then(function (resource) {
             count = resource.$httpHeaders('Count');
             if (count == null) {
@@ -129,7 +143,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
                     ordering: sortString,
                     state: state,
                     search: searchString,
-                    tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,                
+                    tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
                 }, columnFilters)
             ).$promise.then(function (resource) {
                 count = resource.$httpHeaders('Count');

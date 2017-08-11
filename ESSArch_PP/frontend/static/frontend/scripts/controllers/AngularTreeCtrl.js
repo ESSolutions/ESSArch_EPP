@@ -54,6 +54,9 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(T
         });
     }
     $rootScope.loadTags();
+    $rootScope.$on('load_tags', function() {
+        $rootScope.loadTags();
+    });
     $scope.onNodeToggle = function(node) {
         node.children.forEach(function(child, index, array) {
             child.$get().then(function(data) {
@@ -63,7 +66,7 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(T
     }
     $rootScope.selectedTag = null;
     $scope.showSelectedNode = function(node) {
-        if($rootScope.selectedTag == node) {
+        if($rootScope.selectedTag && $rootScope.selectedTag.id === node.id) {
             $rootScope.selectedTag = null;
         } else {
             $rootScope.selectedTag = node;

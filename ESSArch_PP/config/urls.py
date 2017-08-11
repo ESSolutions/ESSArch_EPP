@@ -69,6 +69,7 @@ from profiles.views import (
 )
 
 from storage.views import (
+    AccessQueueViewSet,
     IOQueueViewSet,
     RobotViewSet,
     RobotQueueViewSet,
@@ -89,6 +90,7 @@ router = ExtendedDefaultRouter()
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
+router.register(r'access-queue', AccessQueueViewSet)
 router.register(r'agents', AgentViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)

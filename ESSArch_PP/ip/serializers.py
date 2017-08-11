@@ -16,9 +16,9 @@ from ESSArch_Core.ip.models import (
 )
 
 from ESSArch_Core.auth.serializers import UserSerializer
-from ESSArch_Core.configuration.serializers import ArchivePolicySerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
+from configuration.serializers import ArchivePolicySerializer
 from ip.filters import InformationPackageFilter
 
 VERSION = get_versions()['version']
@@ -67,7 +67,8 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
             }
         }
 
-class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
+
+class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
 
@@ -98,8 +99,19 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archivist_organization', 'archival_type', 'archival_location',
             'policy', 'message_digest', 'message_digest_algorithm',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'object_identifier_value': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
 
-class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
+
+class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
@@ -108,7 +120,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         request = self.context['request']
         view = self.context.get('view')
 
-        if view is None:
+        if view is None or not hasattr(view, 'search_fields'):
             return obj.related_ips()
 
         view_type = request.query_params.get('view_type', 'aic')
@@ -130,7 +142,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         ]
         related = search_filter.filter_queryset(request, related, view)
 
-        ips = NestedInformationPackageSerializer(
+        ips = InformationPackageSerializer(
             related, many=True, context={'request': request}
         )
         return ips.data
@@ -162,7 +174,18 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archival_type', 'archival_location', 'policy', 'message_digest',
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked'
-            )
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'object_identifier_value': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
+
 
 class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
@@ -208,7 +231,7 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
         ]
         related = search_filter.filter_queryset(request, related, view)
 
-        ips = NestedInformationPackageSerializer(
+        ips = InformationPackageSerializer(
             related, many=True, context={'request': request}
         )
         return ips.data
@@ -240,17 +263,60 @@ class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
             'archival_type', 'archival_location', 'policy', 'message_digest',
             'message_digest_algorithm',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'object_identifier_value': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
+
+
+class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
+    information_packages = InformationPackageSerializer(read_only=True, many=True)
+    package_type = serializers.ChoiceField(choices=((1, 'AIC'),))
+
+    class Meta:
+        model = InformationPackageSerializer.Meta.model
+        fields = (
+            'id', 'label', 'object_identifier_value',
+            'package_type', 'responsible', 'create_date',
+            'entry_date', 'information_packages',
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'object_identifier_value': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
 
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
-    aic = NestedInformationPackageSerializer(read_only=True, omit=['status', 'step_state'])
-    policy = ArchivePolicySerializer(read_only=True)
+    aic = InformationPackageAICSerializer(omit=['information_packages'])
+    policy = ArchivePolicySerializer()
 
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
             'tags',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'validators': [],
+            },
+            'object_identifier_value': {
+                'read_only': False,
+                'validators': [],
+            },
+        }
 
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):

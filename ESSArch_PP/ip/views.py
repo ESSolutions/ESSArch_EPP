@@ -105,6 +105,7 @@ from ip.serializers import (
     ArchivalLocationSerializer,
     InformationPackageSerializer,
     InformationPackageDetailSerializer,
+    NestedInformationPackageSerializer,
     OrderSerializer,
     EventIPSerializer,
     WorkareaSerializer,
@@ -709,7 +710,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return InformationPackageSerializer
+            return NestedInformationPackageSerializer
 
         return InformationPackageDetailSerializer
 
@@ -781,6 +782,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             name='workflow.tasks.CacheAIP',
             params={'aip': pk},
             processstep=main_step,
+            processstep_pos=10,
             responsible=self.request.user,
         ))
 
@@ -788,6 +790,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
             name='workflow.tasks.StoreAIP',
             params={'aip': pk},
             processstep=main_step,
+            processstep_pos=20,
             responsible=self.request.user,
         ))
 

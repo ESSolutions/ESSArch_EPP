@@ -93,9 +93,9 @@ INSTALLED_APPS = [
     'ESSArch_Core.profiles',
     'ESSArch_Core.essxml.Generator',
     'ESSArch_Core.essxml.ProfileMaker',
-    'ESSArch_Core.storage',
     'ESSArch_Core.tags',
     'ESSArch_Core.WorkflowEngine',
+    'storage',
 ]
 
 SITE_ID = 1
@@ -265,6 +265,10 @@ CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
+   'PollAccessQueue-every-10-seconds': {
+        'task': 'workflow.tasks.PollAccessQueue',
+        'schedule': timedelta(seconds=10),
+    },
     'PollIOQueue-every-10-seconds': {
         'task': 'workflow.tasks.PollIOQueue',
         'schedule': timedelta(seconds=10),
