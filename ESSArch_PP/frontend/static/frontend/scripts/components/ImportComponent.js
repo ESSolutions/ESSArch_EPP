@@ -1,5 +1,5 @@
 angular.module('myApp').component('import', {
-  template: '<div><p>{{title}}</p></div>',
+  templateUrl: 'static/frontend/views/import.html',
   controller: 'ImportCtrl',
   controllerAs: 'vm',
   bindings: {
