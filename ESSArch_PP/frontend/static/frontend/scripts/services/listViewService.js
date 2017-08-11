@@ -392,7 +392,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
 
     //Execute prepare ip, which creates a new IP
     function prepareIp(label) {
-        ip.post({ 
+        ip.post({
             label: label
         }).$promise.then(function(response) {
             return "created";
@@ -506,7 +506,7 @@ angular.module('myApp').factory('listViewService', function(Profile, IP, Workare
     }
 
     function deleteFile(ip, path, file) {
-        return IP.removeFile({ 
+        return IP.removeFile({
             id: ip.id,
             path: path + file.name,
         }).$promise.then(function(response) {

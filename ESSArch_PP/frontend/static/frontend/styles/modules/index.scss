@@ -369,6 +369,47 @@ body.modal-open[style] {
         background: white;
     }
 }
+.profile-manager-sub-menu {
+    border-style: solid;
+    border-color: $border-color;
+    border-width: 1px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    background-color: white;
+    color: black;
+    padding: 5px 10px 5px 10px;
+    width: 100%;
+    p {
+        font-size: 12pt;
+    }
+    .sliding-middle-out {
+        display: inline-block;
+        position: relative;
+        padding-bottom: 3px;
+    }
+    .sliding-middle-out:after {
+        content: '';
+        display: block;
+        margin: auto;
+        height: 1px;
+        width: 0px;
+        background: transparent;
+    }
+    .chosen:hover:after {
+        width: 100%;
+        height: 1px;
+        background: black;
+    }
+    .chosen:after {
+        width: 100%;
+        height: 1px;
+        background: black;
+    }
+}
+.profile-manager-route {
+    margin-top: 5px;
+}
 .fa.fa-refresh {
     font-size: 21px;
 }
@@ -766,4 +807,11 @@ padding: 0 12px;
     .fa-plus {
         color: $step-success;
     }
+}
+.import {
+    @include container(10px);
+    display: inline-block;
+    width: 100%;
+    box-shadow: none;
+    margin-top: 5px;
 }

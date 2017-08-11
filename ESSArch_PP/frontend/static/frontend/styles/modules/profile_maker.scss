@@ -1,8 +1,12 @@
 .profile-maker {
+    @include container(10px);
+    display: inline-block;
+    width: 100%;
+    box-shadow: none;
+    margin-top: 5px;
 
   .template-select {
-    // width: 30%;
-    margin-right: 5px;
+      width: 33%;
   }
   .floatingForm {
       position: absolute;
@@ -34,11 +38,10 @@
   }
 
   .TemplateRow {
-    margin-left: 20px;
-    height: 40px;
-    select {
-      width: 200px;
-      display: inline-block;
+    display: flex;
+    flex-direction: row;
+    * {
+        margin-right: 3px;
     }
   }
 
@@ -46,6 +49,9 @@
       width: 200px;
   }
 
+  .fa-plus {
+    color: $step-success;
+  }
   .display-flex {
     display: flex;
   }

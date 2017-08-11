@@ -2,13 +2,7 @@
     <div class="content-wrapper">
         <div class="select-sub-edit-eventlog-wrapper">
             <div ng-if="select" class="select-view">
-                <uib-tabset active="$state.current.name" vertical="false">
-                    <uib-tab ui-sref="home.administration.profileManager.saEditor" index="0" heading="Submission agreement"></uib-tab>
-                    <uib-tab ui-sref="home.administration.profileManager.profileMaker" index="1" heading="Profiles"></uib-tab>
-                    <uib-tab ui-sref="home.administration.profileManager.import" index="2" heading="Import"></uib-tab>
-                </uib-tabset>
-                    <!--
-                <div class="sub-menu" ng-controller="UtilCtrl as vm">
+                <div class="profile-manager-sub-menu" ng-controller="UtilCtrl as vm">
                     <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.saEditor'}"
                         class="nav-item sliding-middle-out">{{'SAEDITOR' | translate}}</div>
                     <div ui-sref="home.administration.profileManager.profileMaker" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.profileMaker'}"
@@ -16,8 +10,7 @@
                     <div ui-sref="home.administration.profileManager.import" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.import'}"
                         class="nav-item sliding-middle-out">{{'IMPORT' | translate}}</div>
                 </div>
-                    -->
-                <div ui-view>
+                <div class="profile-manager-route" ui-view>
                 </div>
             </div>
         </div>

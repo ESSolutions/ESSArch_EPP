@@ -1,9 +1,10 @@
 <div class="sa-editor">
     <div class="flex-row">
-        <select class="form-control sa-select" ng-change="vm.chooseSa(vm.saProfile)" ng-model="vm.saProfile" ng-options="x as x.name for x in vm.saProfiles">x</select>
-        <button class="btn btn-default fa fa-plus" ng-click="vm.newSa()"></button>
+        <select id="submission-agreement" class="form-control sa-select" ng-change="vm.chooseSa(vm.saProfile)" ng-model="vm.saProfile" ng-options="x as x.name for x in vm.saProfiles">x</select>
+        <button class="btn btn-default" ng-click="vm.newSa()"><i class="fa fa-plus"></i></button>
         <button class="btn btn-success" ng-if="vm.saProfile" translate="PUBLISH" ng-click="vm.publishSa()"></button>
     </div>
+    <hr>
     <div class="edit-view" ng-if="edit">
         <h4>SA fields</h4>
         <form name="sa-form" ng-submit="vm.saveSa()">
