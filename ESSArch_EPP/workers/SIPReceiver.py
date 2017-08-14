@@ -224,10 +224,11 @@ class WorkingThread:
 
                         if self.extOBJdbget and ext_errno == 0:
                             altRecordID_dict['POLICYID'] = self.extOBJdbget[0][0]
-                            try:
-                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('utf-8')
-                            except UnicodeDecodeError:
-                                altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('unicode-escape')
+                            altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8]
+                            #try:
+                            #    altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('utf-8')
+                            #except UnicodeDecodeError:
+                            #    altRecordID_dict['PROJECTNAME'] = self.extOBJdbget[0][8].decode('unicode-escape')
                         else:
                             logging.error('Problem to get ProjectGroupCode from AIS, ObjectIdentifierValue: %s, why: %s' % (self.ObjectIdentifierValue, ext_why))
                             self.ok = 0
