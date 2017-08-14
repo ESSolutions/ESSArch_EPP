@@ -316,8 +316,10 @@ class AccessAIP(DBTask):
             else:
                 new_aip = aip
 
+            responsible = User.objects.get(pk=self.responsible)
+
             workarea = Path.objects.get(entity='ingest_workarea').value
-            workarea_user = os.path.join(workarea, str(self.responsible))
+            workarea_user = os.path.join(workarea, responsible.username)
             dst_dir = os.path.join(workarea_user, new_aip.object_identifier_value, )
 
             ProcessTask.objects.create(
@@ -440,7 +442,7 @@ class PollAccessQueue(DBTask):
                 tarf.extractall(cache_obj.encode('utf-8'))
 
         access = Path.objects.get(entity='access_workarea').value
-        access_user = os.path.join(access, str(entry.user.pk))
+        access_user = os.path.join(access, entry.user.username)
         dst_dir = os.path.join(access_user, entry.new_ip.object_identifier_value)
         dst_tar = dst_dir + '.tar'
 
