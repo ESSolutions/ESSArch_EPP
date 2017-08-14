@@ -156,10 +156,16 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $scope.$on('disable_receive', function () {
         $scope.receiveDisabled = true;
     });
-
-    vm.getProfileData = function($event) {
+    $scope.getArchivePolicies().then(function (result) {
+        vm.request.archivePolicy.options = result;
+        $scope.getTags().then(function (result) {
+            vm.request.tags.options = result;
+            $scope.requestForm = true;
+        });
+    });
+    vm.getProfileData = function ($event) {
         vm.request.submissionAgreement.value = $event.submissionAgreement;
-        if($event.aipProfileId) {
+        if ($event.aipProfileId) {
             vm.request.profileData[$event.aipProfileId] = $event.aipModel;
         }
         if($event.dipProfileId) {
@@ -186,7 +192,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         vm.data = {
             status: "skip"
         }
-        $uibModalInstance.close(vm.data);     
+        $uibModalInstance.close(vm.data);
     }
     vm.cancel = function () {
         $uibModalInstance.dismiss('cancel');

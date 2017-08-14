@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
+angular.module('myApp').controller('ReceptionCtrl', function (IPReception, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
     var vm = this;
     var ipSortString = "";
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
@@ -59,14 +59,14 @@ angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy
         var temp = true;
         $scope.includedIps.forEach(function(included, index, array) {
 
-            if(included.id == row.id) {
+            if(included == row.id) {
                 $scope.includedIps.splice(index, 1);
                 temp = false;
                 $scope.checkMatch();
             }
         });
         if(temp) {
-            $scope.includedIps.push(row);
+            $scope.includedIps.push(row.id);
             $scope.checkMatch();
 
         }
@@ -75,26 +75,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy
             $scope.requestForm = false;
         } else {
             if(!$scope.requestForm) {
-                $scope.getArchivePolicies().then(function(result) {
-                    vm.request.archivePolicy.options = result;
-                    $scope.getTags().then(function(result) {
-                        vm.request.tags.options = result;
-                        $scope.requestForm = true;
-                    });
-                });
-
-                listViewService.getSaProfiles(row).then(function(result) {
-                    vm.request.submissionAgreement.options = result.profiles;
-                    if (row.altrecordids.SUBMISSIONAGREEMENT[0]) {
-                        let chosen_sa_id = row.altrecordids.SUBMISSIONAGREEMENT[0];
-                        let found = $filter('filter')(result.profiles, {id: chosen_sa_id}, true);
-
-                        if (found.length) {
-                            vm.request.submissionAgreement.value = found[0];
-                            vm.request.submissionAgreement.disabled = true;
-                        }
-                    }
-                });
+                $scope.requestForm = true;
             }
         }
     }
@@ -243,48 +224,51 @@ angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy
     }
 
     //Create and show modal for remove ip
-    $scope.receiveModal = function (ip) {
-        var modalInstance = $uibModal.open({
-            animation: true,
-            ariaLabelledBy: 'modal-title',
-            ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/receive_modal.html',
-            controller: 'ReceiveModalInstanceCtrl',
-            size: "lg",
-            scope: $scope,
-            controllerAs: '$ctrl',
-            resolve: {
-                data: function () {
-                    return {
-                        ip: ip,
-                        vm: vm
-                    };
+    $scope.receiveModal = function (ipId) {
+        IPReception.get({ id: ipId }).$promise.then(function (resource) {
+            var modalInstance = $uibModal.open({
+                animation: true,
+                ariaLabelledBy: 'modal-title',
+                ariaDescribedBy: 'modal-body',
+                templateUrl: 'static/frontend/views/receive_modal.html',
+                controller: 'ReceiveModalInstanceCtrl',
+                size: "lg",
+                scope: $scope,
+                controllerAs: '$ctrl',
+                resolve: {
+                    data: function () {
+                        return {
+                            ip: resource,
+                            vm: vm
+                        };
+                    }
+                },
+            })
+            modalInstance.result.then(function (data) {
+                $scope.getListViewData();
+                if (data.status == "received") {
+                    $scope.eventlog = false;
+                    $scope.edit = false;
+                    $scope.requestForm = false;
                 }
-            },
-        })
-        modalInstance.result.then(function (data) {
-            $scope.getListViewData();
-            if (data.status == "received") {
-                $scope.eventlog = false;
-                $scope.edit = false;
-                $scope.requestForm = false;
-            }
-            $scope.filebrowser = false;
-            $scope.initRequestData();
-            $scope.includedIps.shift();
-            if ($scope.includedIps.length > 0) {
-                $scope.getArchivePolicies().then(function (result) {
-                    vm.request.archivePolicy.options = result;
-                    $scope.getTags().then(function (result) {
-                        vm.request.tags.options = result;
-                        $scope.requestForm = true;
-                        $scope.receiveModal($scope.includedIps[0]);
+                $scope.filebrowser = false;
+                $scope.initRequestData();
+                $scope.includedIps.shift();
+                $scope.getListViewData();
+                if ($scope.includedIps.length > 0) {
+                    $scope.getArchivePolicies().then(function (result) {
+                        vm.request.archivePolicy.options = result;
+                        $scope.getTags().then(function (result) {
+                            vm.request.tags.options = result;
+                            $scope.requestForm = true;
+                            $scope.receiveModal($scope.includedIps[0]);
+                        });
                     });
-                });
-            }
-        }, function () {
-            $log.info('modal-component dismissed at: ' + new Date());
-        });
+                }
+            }, function () {
+                $log.info('modal-component dismissed at: ' + new Date());
+            });
+        })
     }
 
     $scope.informationClassAlert = null;
