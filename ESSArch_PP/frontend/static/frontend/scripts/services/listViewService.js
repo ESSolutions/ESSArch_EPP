@@ -28,7 +28,7 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         $state.go(state);
     }
     //Gets data for list view i.e information packages
-    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived) {
+    function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived, workarea) {
         if(archived != true) {
             archived = false;
         }
@@ -41,6 +41,11 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
             view_type: viewType,
             archived: archived,
         }, columnFilters);
+
+        if (workarea) {
+            data = angular.extend(data, {workarea, workarea});
+        }
+
         if ($rootScope.selectedTag != null) {
 
             return Tag.information_packages(angular.extend({id: $rootScope.selectedTag.id }, data)).$promise.then(function (resource) {

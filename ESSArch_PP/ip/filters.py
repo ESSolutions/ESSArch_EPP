@@ -26,6 +26,8 @@ from django.db.models import Q
 
 from django_filters import rest_framework as filters
 
+from rest_framework import exceptions
+
 from ESSArch_Core.filters import ListFilter
 
 from ESSArch_Core.ip.models import (
@@ -34,6 +36,7 @@ from ESSArch_Core.ip.models import (
     ArchivalType,
     ArchivalLocation,
     InformationPackage,
+    Workarea,
 )
 
 
@@ -53,6 +56,17 @@ class InformationPackageFilter(filters.FilterSet):
     end_date = ListFilter(name='Enddate', method='filter_fields')
     archived = filters.BooleanFilter(method='filter_boolean_fields')
     cached = filters.BooleanFilter(method='filter_boolean_fields')
+    workarea = ListFilter(name='workareas__type', method='filter_workarea')
+
+    def filter_workarea(self, queryset, name, value):
+        workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
+
+        try:
+            workarea_type = workarea_type_reverse[value]
+        except KeyError:
+            raise exceptions.ParseError('Workarea of type "%s" does not exist' % value)
+
+        return self.filter_fields(queryset, name, workarea_type)
 
     def filter_fields(self, queryset, name, value):
         view_type = self.data.get('view_type', 'aic')
