@@ -314,5 +314,7 @@
     "PROFILEMAKER": "Profile maker",
     "IMPORT": "Import",
     "COLLAPSE_ALL": "Kollapsa alla",
-    "EXPAND_ALL": "Expandera alla"
+    "EXPAND_ALL": "Expandera alla",
+    "MISSING_AIP": "AIP-profil saknas i leveransöverenskommelse",
+    "MISSING_DIP": "DIP-profil saknas i leveransöverenskommelse"
 }

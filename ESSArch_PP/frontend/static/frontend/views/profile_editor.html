@@ -25,7 +25,9 @@
         <div ng-if="saProfile.profile" id="edit-view" class="edit-view">
             <form id="edit-form" ng-submit="vm.saveProfileModel(vm.selectedProfile.profile_type, vm.profileModel)" name="vm.editForm" novalidate>
                 <div ng-if="saProfile.profile.profile_aip"><b>AIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_aip, {})">{{saProfile.profile.profile_aip.name}}</a></div>
+                <div uib-alert ng-if="!saProfile.profile.profile_aip" style="width: 100%;" ng-class="'alert-' + (aipAlert.type || 'warning')">{{aipAlert.msg}}</div>
                 <div ng-if="saProfile.profile.profile_dip"><b>DIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_dip, {})">{{saProfile.profile.profile_dip.name}}</a></div>
+                <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
                 <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>

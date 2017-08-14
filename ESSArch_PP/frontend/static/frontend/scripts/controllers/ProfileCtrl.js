@@ -1,10 +1,15 @@
 angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
     var vm = this;
     $scope.select = true;
-    $scope.saAlert = null;
     $scope.alerts = {
         receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
+        aipError: { type: 'danger', msg: $translate.instant('MISSING_AIP') },
+        dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') }
+
     };
+    $scope.saAlert = null;
+    $scope.aipAlert = $scope.alerts.aipError;
+    $scope.dipAlert = $scope.alerts.dipError;
     // On init
     vm.$onInit = function() {
         $scope.saProfile = {
