@@ -716,6 +716,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def access(self, request, pk=None):
+        aip = self.get_object()
+
         data = request.data
 
         options = ['tar', 'extracted', 'new']
