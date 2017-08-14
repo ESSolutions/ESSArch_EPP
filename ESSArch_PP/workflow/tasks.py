@@ -399,7 +399,7 @@ class PollAccessQueue(DBTask):
             with tarfile.open(cache_tar_obj) as tarf:
                 tarf.extractall(cache_obj.encode('utf-8'))
 
-        access = Path.objects.get(entity='access').value
+        access = Path.objects.get(entity='access_workarea').value
         access_user = os.path.join(access, str(entry.user.pk))
         dst_dir = os.path.join(access_user, entry.new_ip.object_identifier_value)
         dst_tar = dst_dir + '.tar'
