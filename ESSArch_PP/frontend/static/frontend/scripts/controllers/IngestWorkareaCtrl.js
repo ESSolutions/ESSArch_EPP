@@ -1,7 +1,6 @@
 angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService, Requests) {
     var vm = this;
     var ipSortString = "";
-    vm.archived = true;
     vm.workarea = 'ingest';
 
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
