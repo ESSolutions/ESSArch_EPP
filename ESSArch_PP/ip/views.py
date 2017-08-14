@@ -952,7 +952,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Missing type parameter')
 
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea).value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
 
         entries = []
         path = os.path.join(root, request.query_params.get('path', ''))
