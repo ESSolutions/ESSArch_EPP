@@ -519,9 +519,9 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
     }
 
     function getDir(ip, pathStr) {
-        var sendData = {};
+        var sendData = {'id': ip.id};
         if(pathStr != "") {
-            sendData = {path: pathStr};
+            sendData = angular.extend(sendData, {path: pathStr});
         }
         return IP.files(sendData).$promise.then(function(data) {
             return data;
