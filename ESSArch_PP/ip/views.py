@@ -728,8 +728,14 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         if not any(v for k, v in data.iteritems() if k in options):
             return Response('Need atleast one option set to true', status=status.HTTP_400_BAD_REQUEST)
 
-        if Workarea.objects.filter(user=request.user, ip_id=pk, type=Workarea.ACCESS).exists():
-            return Response('IP already in workarea', status=status.HTTP_400_BAD_REQUEST)
+        workarea_type = Workarea.INGEST if aip.state == 'Received' else Workarea.ACCESS
+
+        ip_workarea = aip.workareas.filter(user=request.user)
+        ingest_path = Path.objects.get(entity='ingest_workarea')
+        access_path = Path.objects.get(entity='access_workarea')
+
+        if ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
+            return Response('IP already in workarea', status=status.HTTP_409_CONFLICT)
 
         step = ProcessStep.objects.create(
             name='Access AIP', eager=False,

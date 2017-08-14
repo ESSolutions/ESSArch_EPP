@@ -288,6 +288,46 @@ class AccessAIP(DBTask):
     def run(self, aip, tar=True, extracted=False, new=False, object_identifier_value=""):
         aip = InformationPackage.objects.get(pk=aip)
 
+        # if it is a received IP, i.e. from ingest and not from storage,
+        # then we read it directly from disk and move it to the ingest workarea
+        if aip.state == 'Received':
+            if not extracted and not new:
+                raise ValueError('An IP must be extracted when transferred to ingest workarea')
+
+            if new:
+                # Create new generation of the IP
+
+                old_aip = aip.pk
+                new_aip = aip
+                new_aip.pk = None
+                new_aip.object_identifier_value = None
+                new_aip.state = 'Ingest Workarea'
+                new_aip.cached = False
+                new_aip.archived = False
+
+                max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
+                new_aip.generation = max_generation + 1
+                new_aip.save()
+
+                new_aip.object_identifier_value = object_identifier_value if object_identifier_value is not None else str(new_aip.pk)
+                new_aip.save(update_fields=['object_identifier_value'])
+
+                aip = InformationPackage.objects.get(pk=old_aip)
+            else:
+                new_aip = aip
+
+            workarea = Path.objects.get(entity='ingest_workarea').value
+            workarea_user = os.path.join(workarea, str(self.responsible))
+            dst_dir = os.path.join(workarea_user, new_aip.object_identifier_value, )
+
+            ProcessTask.objects.create(
+                name='ESSArch_Core.tasks.CopyDir',
+                args=[aip.object_path, dst_dir],
+            ).run().get()
+
+            workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
+            return str(workarea_obj.pk)
+
         if object_identifier_value is None:
             object_identifier_value = ''
 
