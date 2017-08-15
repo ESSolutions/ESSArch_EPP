@@ -464,7 +464,9 @@ class PollAccessQueue(DBTask):
 
         if entry.extracted:
             with tarfile.open(dst_tar) as tarf:
-                tarf.extractall(dst_dir.encode('utf-8'))
+                tarf.extractall(access_user.encode('utf-8'))
+
+        os.rename(os.path.join(access_user, str(entry.ip.object_identifier_value)), dst_dir)
 
         if not entry.package:
             os.remove(dst_tar)
