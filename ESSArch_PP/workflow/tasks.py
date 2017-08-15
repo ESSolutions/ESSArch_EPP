@@ -471,6 +471,10 @@ class PollAccessQueue(DBTask):
 
         Workarea.objects.create(ip=entry.new_ip, user=entry.user, type=Workarea.ACCESS, read_only=not entry.new)
 
+        if entry.new:
+            entry.new_ip.object_path = dst_dir
+            entry.new_ip.save(update_fields=['object_path'])
+
         entry.status = 20
         entry.save(update_fields=['status'])
         return
