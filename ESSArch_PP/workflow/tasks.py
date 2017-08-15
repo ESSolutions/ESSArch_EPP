@@ -251,7 +251,7 @@ class StoreAIP(DBTask):
         if not policy:
             raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % aip)
 
-        storage_methods = policy.storage_methods.all()
+        storage_methods = policy.storage_methods.filter(status=True)
 
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
@@ -743,7 +743,7 @@ class PollIOQueue(DBTask):
             if not entries.exists() or entries.exclude(status=20).exists():
                 continue  # unfinished IO entry exists for IP, skip
 
-            for storage_method in ip.policy.storage_methods.iterator():
+            for storage_method in ip.policy.storage_methods.filter(status=True).iterator():
                 if not entries.filter(storage_method_target__storage_method=storage_method).exists():
                     raise Exception("No entry for storage method '%s' for IP '%s'" % (storage_method.pk, ip.pk))
 
