@@ -1,8 +1,8 @@
 angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state, Requests) {
     var vm = this;
     var ipSortString = "";
-    vm.archived = true;
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
+    vm.archived = true;
 
     $scope.menuOptions = function(rowType) {
         return [
