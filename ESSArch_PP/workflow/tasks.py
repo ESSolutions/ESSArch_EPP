@@ -701,6 +701,8 @@ class PollIOQueue(DBTask):
                     format=storage_target.default_format, agent=entry.user,
                 )
 
+            return storage_medium
+
 
     def cleanup(self):
         entries = IOQueue.objects.filter(status=5, storage_method_target__storage_target__remote_server='').exclude(task_id='')
