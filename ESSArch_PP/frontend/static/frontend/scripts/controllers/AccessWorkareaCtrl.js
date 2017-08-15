@@ -5,6 +5,8 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $contr
 
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
 
+    vm.archived = null;
+
     $scope.menuOptions = function() {
         return [
             [$translate.instant('APPLYCHANGES'), function ($itemScope, $event, modelValue, text, $li) {

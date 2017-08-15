@@ -29,9 +29,6 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
     }
     //Gets data for list view i.e information packages
     function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived, workarea) {
-        if(archived != true) {
-            archived = false;
-        }
         var data = angular.extend({
             page: pageNumber,
             page_size: pageSize,
