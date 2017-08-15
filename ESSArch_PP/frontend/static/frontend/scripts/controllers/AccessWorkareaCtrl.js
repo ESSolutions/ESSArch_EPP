@@ -1,7 +1,6 @@
 angular.module('myApp').controller('AccessWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests) {
     var vm = this;
     var ipSortString = "";
-    vm.archived = true;
     vm.workarea = 'access';
 
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
