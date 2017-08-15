@@ -299,7 +299,7 @@ class AccessAIP(DBTask):
                 # Create new generation of the IP
 
                 old_aip = aip.pk
-                new_aip = aip
+                new_aip = deepcopy(aip)
                 new_aip.pk = None
                 new_aip.object_identifier_value = None
                 new_aip.state = 'Ingest Workarea'
