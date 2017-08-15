@@ -483,7 +483,7 @@ class PollAccessQueue(DBTask):
         if not storage_objects.exists():
             entry.status = 100
             entry.save(update_fields=['status'])
-            raise StorageObject.DoesNotExist("IP %s not archived on active medium" % aip)
+            raise StorageObject.DoesNotExist("IP %s not archived on active medium" % entry.ip)
 
         return storage_objects
 
@@ -542,7 +542,7 @@ class PollAccessQueue(DBTask):
                 new_aip.cached = False
                 new_aip.archived = False
 
-                max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
+                max_generation = InformationPackage.objects.filter(aic=new_aip.aic).aggregate(Max('generation'))['generation__max']
                 new_aip.generation = max_generation + 1
                 new_aip.save()
 
