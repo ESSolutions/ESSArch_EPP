@@ -31,6 +31,7 @@ import tarfile
 import time
 import zipfile
 
+from copy import deepcopy
 from urlparse import urljoin
 
 from celery import states as celery_states
@@ -535,7 +536,7 @@ class PollAccessQueue(DBTask):
                 # Create new generation of the IP
 
                 old_aip = entry.ip.pk
-                new_aip = entry.ip
+                new_aip = deepcopy(entry.ip)
                 new_aip.pk = None
                 new_aip.object_identifier_value = None
                 new_aip.state = 'Access Workarea'
