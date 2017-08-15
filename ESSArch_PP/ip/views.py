@@ -737,6 +737,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         if ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
             return Response('IP already in workarea', status=status.HTTP_409_CONFLICT)
 
+        if data.get('new'):
+            data['extracted'] = True
+
         step = ProcessStep.objects.create(
             name='Access AIP', eager=False,
             information_package_id=pk,
