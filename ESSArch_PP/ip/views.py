@@ -1020,7 +1020,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Missing type parameter')
 
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea).value, str(request.user.pk))
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, str(request.user.username))
 
         try:
             dip = self.request.data['dip']
