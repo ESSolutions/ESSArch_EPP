@@ -175,6 +175,35 @@ class ReceiveSIP(DBTask):
         return "Received IP '%s'" % str(ip)
 
 
+class ReceiveAIP(DBTask):
+    def run(self, workarea):
+        workarea = Workarea.objects.prefetch_related('ip').get(pk=workarea)
+        ip = workarea.ip
+
+        ip.state = 'Receiving'
+        ip.save(update_fields=['state'])
+
+        ingest = ip.policy.ingest_path
+        dst = os.path.join(ingest.value, ip.object_identifier_value)
+
+        ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.CopyDir',
+            args=[ip.object_path, dst]
+        ).run().get()
+
+        ip.object_path = dst
+        ip.state = 'Received'
+        ip.save()
+
+        workarea.delete()
+
+    def undo(self, workarea):
+        pass
+
+    def event_outcome_success(self, workarea):
+        pass
+
+
 class CacheAIP(DBTask):
     event_type = 20200
 

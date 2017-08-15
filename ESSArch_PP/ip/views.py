@@ -666,6 +666,33 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         return super(InformationPackageViewSet, self).destroy(request, pk=pk)
 
+    @detail_route(methods=['post'])
+    def receive(self, request, pk=None):
+        ip = self.get_object()
+        workarea = ip.workareas.filter(read_only=False).first()
+
+        if workarea is None:
+            raise exceptions.ParseError(detail='IP not in writeable workarea')
+
+        step = ProcessStep.objects.create(
+            name='Receive from workarea',
+            eager=False,
+            information_package=ip,
+        )
+
+        ProcessTask.objects.create(
+            name='workflow.tasks.ReceiveAIP',
+            args=[str(workarea.pk)],
+            processstep=step,
+            processstep_pos=10,
+            information_package=ip,
+            responsible=request.user,
+        )
+
+        step.run()
+
+        return Response('Receiving %s' % str(ip.pk), status=status.HTTP_202_ACCEPTED)
+
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
         ip = self.get_object()
