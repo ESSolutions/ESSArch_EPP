@@ -437,6 +437,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         container = ip['object_path']
 
         path = request.query_params.get('path')
+        download = request.query_params.get('download', False)
 
         if path is not None:
             path = path.rstrip('/ ')
@@ -446,6 +447,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             if tarfile.is_tarfile(container):
                 with tarfile.open(container) as tar:
                     if fullpath == container:
+                        if download:
+                            content_type = mtypes.get(os.path.splitext(fullpath)[1])
+                            return generate_file_response(open(fullpath), content_type, download)
+
                         entries = []
                         for member in tar.getmembers():
                             if not member.isfile():
@@ -468,17 +473,17 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
                             f = tar.extractfile(member)
                             content_type = mtypes.get(os.path.splitext(subpath)[1])
-                            response = HttpResponse(f.read(), content_type=content_type)
-                            response['Content-Disposition'] = 'inline; filename="%s"' % os.path.basename(f.name)
-                            if content_type is None:
-                                response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(f.name)
-                            return response
+                            return generate_file_response(f, content_type, download)
                         except KeyError:
                             raise exceptions.NotFound
 
             elif zipfile.is_zipfile(container):
                 with zipfile.ZipFile(container) as zipf:
                     if fullpath == container:
+                        if download:
+                            content_type = mtypes.get(os.path.splitext(fullpath)[1])
+                            return generate_file_response(open(fullpath), content_type, download)
+
                         entries = []
                         for member in zipf.filelist:
                             if member.filename.endswith('/'):
@@ -496,21 +501,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                         try:
                             f = zipf.open(subpath)
                             content_type = mtypes.get(os.path.splitext(subpath)[1])
-                            response = HttpResponse(f.read(), content_type=content_type)
-                            response['Content-Disposition'] = 'inline; filename="%s"' % os.path.basename(f.name)
-                            if content_type is None:
-                                response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(f.name)
-                            return response
+                            return generate_file_response(f, content_type, download)
                         except KeyError:
                             raise exceptions.NotFound
         elif path in [os.path.basename(container), os.path.basename(xml)]:
             fullpath = os.path.join(os.path.dirname(container), path)
             content_type = mtypes.get(os.path.splitext(fullpath)[1])
-            response = HttpResponse(open(fullpath).read(), content_type=content_type)
-            response['Content-Disposition'] = 'inline; filename="%s"' % os.path.basename(fullpath)
-            if content_type is None:
-                response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(fullpath)
-            return response
+            return generate_file_response(open(fullpath), content_type, download)
         elif path is not None:
             raise exceptions.NotFound
 
