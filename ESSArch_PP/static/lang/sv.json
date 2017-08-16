@@ -316,5 +316,8 @@
     "COLLAPSE_ALL": "Kollapsa alla",
     "EXPAND_ALL": "Expandera alla",
     "MISSING_AIP": "AIP-profil saknas i leveransöverenskommelse",
-    "MISSING_DIP": "DIP-profil saknas i leveransöverenskommelse"
+    "MISSING_DIP": "DIP-profil saknas i leveransöverenskommelse",
+    "GENERATE_TEMPLATE": "Generera template",
+    "ADD_ATTRIBUTE": "Lägg till Attribut",
+    "ADD_EXTENSION": "Lägg till tillägg"
 }
