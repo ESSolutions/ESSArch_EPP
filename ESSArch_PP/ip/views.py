@@ -957,7 +957,8 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
             return Response(path, status=status.HTTP_201_CREATED)
 
-        return ip.files(request.query_params.get('path', '').rstrip('/'))
+        download = request.query_params.get('download', False)
+        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
 
 
 class WorkareaFilesViewSet(viewsets.ViewSet):
@@ -1002,7 +1003,8 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
 
         if os.path.isfile(path):
             content_type = mtypes.get(os.path.splitext(path)[1])
-            return generate_file_response(open(path), content_type)
+            download = request.query_params.get('download', False)
+            return generate_file_response(open(path), content_type, force_download=download)
 
         for entry in get_files_and_dirs(path):
             entry_type = "dir" if entry.is_dir() else "file"
