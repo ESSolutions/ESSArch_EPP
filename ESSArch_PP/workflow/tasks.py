@@ -334,6 +334,7 @@ class AccessAIP(DBTask):
                 new_aip.state = 'Ingest Workarea'
                 new_aip.cached = False
                 new_aip.archived = False
+                new_aip.object_path = ''
 
                 max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
                 new_aip.generation = max_generation + 1
@@ -358,6 +359,10 @@ class AccessAIP(DBTask):
             ).run().get()
 
             workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
+
+            new_aip.object_path = dst_dir
+            new_aip.save(update_fields=['object_path'])
+
             return str(workarea_obj.pk)
 
         if object_identifier_value is None:
@@ -577,6 +582,7 @@ class PollAccessQueue(DBTask):
                 new_aip.state = 'Access Workarea'
                 new_aip.cached = False
                 new_aip.archived = False
+                new_aip.object_path = ''
 
                 max_generation = InformationPackage.objects.filter(aic=new_aip.aic).aggregate(Max('generation'))['generation__max']
                 new_aip.generation = max_generation + 1
