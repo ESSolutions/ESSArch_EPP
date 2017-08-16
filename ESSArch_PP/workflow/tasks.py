@@ -188,7 +188,10 @@ class ReceiveAIP(DBTask):
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.CopyDir',
-            args=[ip.object_path, dst]
+            args=[ip.object_path, dst],
+            processstep_id=self.step,
+            information_package=ip,
+            responsible_id=self.responsible,
         ).run().get()
 
         ip.object_path = dst
