@@ -911,11 +911,13 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Workarea of type "%s" does not exist' % area_type)
 
     def validate_path(self, path, root):
+        relpath = os.path.relpath(path, root)
+
         if not in_directory(path, root):
-            raise exceptions.ParseError('Illegal path %s' % os.path.relpath(path, root))
+            raise exceptions.ParseError('Illegal path %s' % relpath)
 
         if not os.path.exists(path):
-            raise exceptions.ParseError('Path "%s" does not exist' % path)
+            raise exceptions.ParseError('Path "%s" does not exist' % relpath)
 
     def list(self, request):
         try:
