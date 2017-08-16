@@ -65,6 +65,7 @@ from ESSArch_Core.ip.models import (
 )
 from ESSArch_Core.ip.permissions import CanDeleteIP, IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
 from ESSArch_Core.util import (
+    generate_file_response,
     get_value_from_path,
     get_files_and_dirs,
     get_tree_size_and_count,
@@ -989,8 +990,19 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
 
         self.validate_path(path, root)
 
+        mimetypes.suffix_map = {}
+        mimetypes.encodings_map = {}
+        mimetypes.types_map = {}
+        mimetypes.common_types = {}
+        mimetypes_file = Path.objects.get(
+            entity="path_mimetypes_definitionfile"
+        ).value
+        mimetypes.init(files=[mimetypes_file])
+        mtypes = mimetypes.types_map
+
         if os.path.isfile(path):
-            raise exceptions.ParseError('Path "%s" is a file' % path)
+            content_type = mtypes.get(os.path.splitext(path)[1])
+            return generate_file_response(open(path), content_type)
 
         for entry in get_files_and_dirs(path):
             entry_type = "dir" if entry.is_dir() else "file"
