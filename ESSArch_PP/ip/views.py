@@ -912,7 +912,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
 
     def validate_path(self, path, root):
         if not in_directory(path, root):
-            raise exceptions.ParseError('Illegal path %s' % path)
+            raise exceptions.ParseError('Illegal path %s' % os.path.relpath(path, root))
 
         if not os.path.exists(path):
             raise exceptions.ParseError('Path "%s" does not exist' % path)
