@@ -890,69 +890,12 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         serializer.is_valid()
         return Response(serializer.data)
 
-    @detail_route(methods=['delete', 'get', 'post'])
+    @detail_route(methods=['get'])
     def files(self, request, pk=None):
         ip = self.get_object()
 
         if ip.archived:
             return Response('%s is archived' % ip, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.method == 'DELETE':
-            try:
-                path = request.data['path']
-            except KeyError:
-                return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
-
-            root = ip.object_path
-            fullpath = os.path.join(root, path)
-
-            if not in_directory(fullpath, ip.object_path):
-                raise exceptions.ParseError('Illegal path %s' % path)
-
-            try:
-                shutil.rmtree(fullpath)
-            except OSError as e:
-                if e.errno == errno.ENOENT:
-                    raise exceptions.NotFound('Path does not exist')
-
-                if e.errno != errno.ENOTDIR:
-                    raise
-
-                os.remove(fullpath)
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        if request.method == 'POST':
-            try:
-                path = request.data['path']
-            except KeyError:
-                return Response('Path parameter missing', status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                pathtype = request.data['type']
-            except KeyError:
-                return Response('Type parameter missing', status=status.HTTP_400_BAD_REQUEST)
-
-            root = ip.object_path
-            fullpath = os.path.join(root, path)
-
-            if not in_directory(fullpath, root):
-                raise exceptions.ParseError('Illegal path %s' % path)
-
-            if pathtype == 'dir':
-                try:
-                    os.makedirs(fullpath)
-                except OSError as e:
-                    if e.errno == errno.EEXIST:
-                        raise exceptions.ParseError('Directory %s already exists' % path)
-
-                    raise
-            elif pathtype == 'file':
-                open(fullpath, 'a').close()
-            else:
-                return Response('Type must be either "file" or "dir"', status=status.HTTP_400_BAD_REQUEST)
-
-            return Response(path, status=status.HTTP_201_CREATED)
 
         download = request.query_params.get('download', False)
         return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
