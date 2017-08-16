@@ -1,5 +1,6 @@
 angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
     var vm = this;
+    $scope.angular = angular;
     $scope.select = true;
     $scope.alerts = {
         receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
@@ -86,17 +87,20 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
             vm.savedAip = model;
             vm.profileModel = {};
             vm.profileFields = [];
+            $scope.profileToSave = null;
         }
         if(type === "dip") {
             vm.savedDip = model;
             vm.profileModel = {};
             vm.profileFields = [];
+            $scope.profileToSave = null;
         }
     }
 
     vm.cancel = function() {
         vm.profileModel = {};
         vm.profileFields = [];
+        $scope.profileToSave = null;
     }
 
     vm.profileModel = {};
@@ -174,14 +178,15 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
             $scope.selectProfile = row;
             vm.profileOldModel = row.active.specification_data;
             vm.profileModel = angular.copy(row.active.specification_data);
+            getStructure(row.active);
             var temp = [];
             row.active.template.forEach(function(x) {
                 if(!x.templateOptions.disabled) {
                     temp.push(x);
                 }
             });
-            vm.profileFields = temp;
             $scope.profileToSave = row.active;
+            vm.profileFields = temp;
             $scope.edit = true;
             $scope.eventlog = true;
         });
@@ -521,11 +526,9 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
         else return [];
     }
     //Populate map structure tree view given tree width and amount of levels
-    function getStructure(profileUrl) {
-        listViewService.getStructure(profileUrl).then(function(value) {
-            $scope.treeElements =[{name: 'root', type: "folder", children: value}];
-            $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
-        });
+    function getStructure(profile) {
+        $scope.treeElements =[{name: 'root', type: "folder", children: profile.structure}];
+        $scope.expandedNodes = [$scope.treeElements[0]].concat($scope.treeElements[0].children);
     }
     $scope.treeElements = [];//[{name: "Root", type: "Folder", children: createSubTree(3, 4, "")}];
     $scope.currentNode = null;
@@ -650,8 +653,6 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
             $scope.addNode(node);
         } else if($scope.updateMode.active) {
             $scope.updateNode(node);
-        } else {
-            return;
         }
     }
     //context menu data

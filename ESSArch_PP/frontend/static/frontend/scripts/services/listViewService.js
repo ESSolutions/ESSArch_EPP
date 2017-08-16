@@ -210,13 +210,13 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
     //Returns map structure for a profile
-    function getStructure(profileUrl) {
-        return $http({
-            method: 'GET',
-            url: profileUrl
-        }).then(function(response) {
-            return response.data.structure;
-        }, function(response) {});
+    function getStructure(profileId) {
+        console.log(profileId)
+        return Profile.get({
+            id: profileId
+        }).$promise.then(function(data) {
+            return data.structure;
+        });
     }
      //returns all SA-profiles and current as an object
     function getSaProfiles(ip) {
