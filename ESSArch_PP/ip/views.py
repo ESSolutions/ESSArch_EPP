@@ -917,7 +917,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Illegal path %s' % relpath)
 
         if not os.path.exists(path):
-            raise exceptions.ParseError('Path "%s" does not exist' % relpath)
+            raise exceptions.NotFound('Path "%s" does not exist' % relpath)
 
     def list(self, request):
         try:
