@@ -910,13 +910,13 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         except KeyError:
             raise exceptions.ParseError('Workarea of type "%s" does not exist' % area_type)
 
-    def validate_path(self, path, root):
+    def validate_path(self, path, root, existence=True):
         relpath = os.path.relpath(path, root)
 
         if not in_directory(path, root):
             raise exceptions.ParseError('Illegal path %s' % relpath)
 
-        if not os.path.exists(path):
+        if existence and not os.path.exists(path):
             raise exceptions.NotFound('Path "%s" does not exist' % relpath)
 
     def list(self, request):
@@ -967,6 +967,39 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
 
         sorted_entries = sorted(entries, key=itemgetter('name'))
         return Response(sorted_entries)
+
+
+    @list_route(methods=['post'], url_path='add-directory')
+    def add_directory(self, request):
+        try:
+            workarea = self.request.query_params['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        self.validate_workarea(workarea)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+
+        path = os.path.join(root, request.query_params.get('path', ''))
+        self.validate_path(path, root, existence=False)
+
+        real_given_path = os.path.realpath(path)[len(root)+1:]
+        relative_root = real_given_path.split('/')[0]
+
+        try:
+            workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
+        except Workarea.DoesNotExist:
+            raise exceptions.NotFound
+
+        if workarea_obj.read_only:
+            raise exceptions.MethodNotAllowed(request.method)
+
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise exceptions.ParseError('Directory already exists')
+
+        return Response(status=status.HTTP_201_CREATED)
 
 
     @list_route(methods=['delete'], url_path='')
