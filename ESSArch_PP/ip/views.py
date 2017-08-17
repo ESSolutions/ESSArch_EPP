@@ -972,14 +972,14 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
     @list_route(methods=['post'], url_path='add-directory')
     def add_directory(self, request):
         try:
-            workarea = self.request.query_params['type'].lower()
+            workarea = self.request.data['type'].lower()
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
         self.validate_workarea(workarea)
         root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
 
-        path = os.path.join(root, request.query_params.get('path', ''))
+        path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root, existence=False)
 
         real_given_path = os.path.realpath(path)[len(root)+1:]
