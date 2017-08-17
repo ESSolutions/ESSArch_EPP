@@ -74,12 +74,19 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
             $scope.deckGridData = dir;
         });
     };
-    if ($scope.ip) {
-        $scope.deckGridInit($scope.ip);
-    }
     $scope.$watch(function () { return $scope.ip; }, function (newValue, oldValue) {
-        if($scope.ip) {
+        if($scope.ip && $scope.filebrowser) {
             $scope.deckGridInit($scope.ip);
+            if(!$rootScope.flowObjects[$scope.ip.object_identifier_value]) {
+                $scope.createNewFlow($scope.ip);
+            }
+            $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.object_identifier_value];
+            if($scope.filebrowser) {
+                $scope.showFileUpload = false;
+                $timeout(function() {
+                    $scope.showFileUpload = true;
+                });
+            }
         }
         $scope.previousGridArrays = [];
     }, true);
@@ -214,5 +221,125 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
     };
     $scope.getFileExtension = function (file) {
         return file.name.split(".").pop().toUpperCase();
+    }
+
+    // **********************************
+    //            Upload
+    // **********************************
+
+    $scope.uploadDisabled = false;
+    $scope.setUploaded = function(ip) {
+        $scope.uploadDisabled = true;
+        IP.setUploaded({
+            id: ip.id
+        }).$promise.then(function(response){
+            $scope.eventlog = false;
+            $scope.select = false;
+            $scope.filebrowser = false;
+            $timeout(function() {
+                $scope.getListViewData();
+                vm.updateListViewConditional();
+            }, 1000);
+            $scope.uploadDisabled = false;
+            $anchorScroll();
+        }, function(response) {
+            $scope.uploadDisabled = false;
+        });
+    }
+    $scope.updateListViewTimeout = function(timeout) {
+        $timeout(function(){
+            $scope.getListViewData();
+        }, timeout);
+    };
+
+    vm.flowDestination = null;
+    $scope.showFileUpload = true;
+    $scope.currentFlowObject = null;
+    $scope.getFlowTarget = function() {
+        console.log("set target");
+        return appConfig.djangoUrl + 'workarea-files/upload/?type=access/';
+    };
+    $scope.getQuery = function(FlowFile, FlowChunk, isTest) {
+        return {destination: $scope.previousGridArraysString()};
+    };
+    $scope.fileUploadSuccess = function(ip, file, message, flow) {
+        $scope.uploadedFiles ++;
+        var path = flow.opts.query.destination + file.relativePath;
+
+        IP.mergeChunks({
+            id: ip.id,
+            path: path
+        });
+    };
+    $scope.fileTransferFilter = function(file)
+    {
+        return file.isUploading();
+    };
+    $scope.removeFiles = function() {
+        $scope.selectedCards.forEach(function(file) {
+            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
+            .then(function () {
+                $scope.updateGridArray();
+            });
+        });
+        $scope.selectedCards = [];
+    }
+    $scope.isSelected = function (card) {
+        var cardClass = "";
+        $scope.selectedCards.forEach(function (file) {
+            if (card.name == file.name) {
+                cardClass = "card-selected";
+            }
+        });
+        return cardClass;
+    };
+    $scope.resetUploadedFiles = function() {
+        $scope.uploadedFiles = 0;
+    }
+    $scope.uploadedFiles = 0;
+    $scope.flowCompleted = false;
+    $scope.flowComplete = function(flow, transfers) {
+        if(flow.progress() === 1) {
+            flow.flowCompleted = true;
+            flow.flowSize = flow.getSize();
+            flow.flowFiles = transfers.length;
+            flow.cancel();
+            if(flow == $scope.currentFlowObject){
+                $scope.resetUploadedFiles();
+            }
+        }
+
+        $scope.updateGridArray();
+    }
+    $scope.hideFlowCompleted = function(flow) {
+        flow.flowCompleted = false;
+    }
+    $scope.getUploadedPercentage = function(totalSize, uploadedSize, totalFiles) {
+        if(totalSize == 0 || uploadedSize/totalSize == 1) {
+            return ($scope.uploadedFiles / totalFiles) * 100;
+        } else {
+            return (uploadedSize / totalSize) * 100;
+        }
+    }
+
+    $scope.createNewFlow = function(ip) {
+        var flowObj = new Flow({
+            target: appConfig.djangoUrl+'workarea-files/upload/?type=access/',
+            simultaneousUploads: 15,
+            maxChunkRetries: 5,
+            chunkRetryInterval: 1000,
+            headers: {'X-CSRFToken' : $cookies.get("csrftoken")},
+            complete: $scope.flowComplete
+        });
+        flowObj.on('complete', function(){
+            $scope.flowComplete(flowObj, flowObj.files);
+        });
+        flowObj.on('fileSuccess', function(file,message){
+            $scope.fileUploadSuccess(ip, file, message, flowObj);
+        });
+        flowObj.on('uploadStart', function(){
+            flowObj.opts.query = {destination: $scope.previousGridArraysString()};
+        });
+        $rootScope.flowObjects[ip.object_identifier_value] = flowObj;
     }
 });
