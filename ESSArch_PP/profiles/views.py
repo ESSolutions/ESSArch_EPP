@@ -64,6 +64,7 @@ from ESSArch_Core.profiles.serializers import (
     ProfileSerializer,
     ProfileSASerializer,
     ProfileIPSerializer,
+    ProfileIPDataSerializer,
     SubmissionAgreementSerializer
 )
 
@@ -72,6 +73,7 @@ from ESSArch_Core.profiles.models import (
     Profile,
     ProfileSA,
     ProfileIP,
+    ProfileIPData,
 )
 
 from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
@@ -221,6 +223,11 @@ class ProfileSAViewSet(viewsets.ModelViewSet):
 class ProfileIPViewSet(viewsets.ModelViewSet):
     queryset = ProfileIP.objects.all()
     serializer_class = ProfileIPSerializer
+
+
+class ProfileIPDataViewSet(viewsets.ModelViewSet):
+    queryset = ProfileIPData.objects.all()
+    serializer_class = ProfileIPDataSerializer
 
 
 class ProfileViewSet(viewsets.ModelViewSet):

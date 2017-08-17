@@ -63,6 +63,7 @@ from profiles.views import (
     ProfileViewSet,
     ProfileSAViewSet,
     ProfileIPViewSet,
+    ProfileIPDataViewSet,
     ProfileMakerExtensionViewSet,
     ProfileMakerTemplateViewSet,
     SubmissionAgreementViewSet,
@@ -108,6 +109,7 @@ router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)
 router.register(r'permissions', PermissionViewSet)
 router.register(r'profile-ip', ProfileIPViewSet)
+router.register(r'profile-ip-data', ProfileIPDataViewSet)
 router.register(r'profile-sa', ProfileSAViewSet)
 router.register(r'profiles', ProfileViewSet)
 router.register(r'profilemaker-extensions', ProfileMakerExtensionViewSet)
