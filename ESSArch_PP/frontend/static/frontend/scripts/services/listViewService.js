@@ -506,9 +506,27 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         });
     }
 
+    function addNewWorkareaFolder(workareaType, path, file) {
+        return WorkareaFiles.addDirectory({
+            type: workareaType,
+            path: path + file.name,
+        }).$promise.then(function(response) {
+            return response;
+        });
+    }
+
     function deleteFile(ip, path, file) {
         return IP.removeFile({ 
             id: ip.id,
+            path: path + file.name,
+        }).$promise.then(function(response) {
+            return response;
+        });
+    }
+
+    function deleteWorkareaFile(workareaType, path, file) {
+        return WorkareaFiles.removeFile({ 
+            type: workareaType,
             path: path + file.name,
         }).$promise.then(function(response) {
             return response;
@@ -520,14 +538,29 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         if(pathStr != "") {
             sendData = angular.extend(sendData, {path: pathStr});
         }
-        return IP.files(sendData).$promise.then(function(data) {
-            return data;
-        });
+        if(ip.state == "At reception") {
+            return IPReception.files(sendData).$promise.then(function(data) {
+                return data;
+            });
+        } else {
+            return IP.files(sendData).$promise.then(function(data) {
+                return data;
+            });
+        }
     }
 
     function getFile(ip, path, file) {
         return IP.files({
             id: ip.id,
+            path: path + file.name,
+        }).then(function(response) {
+            return response;
+        });
+    }
+
+    function getWorkareaFile(workareaType, path, file) {
+        return WorkareaFiles.files({
+            type: workareaType,
             path: path + file.name,
         }).then(function(response) {
             return response;
@@ -740,7 +773,9 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         getWorkareaData: getWorkareaData,
         addFileToDip: addFileToDip,
         addNewFolder: addNewFolder,
+        addNewWorkareaFolder: addNewWorkareaFolder,
         deleteFile: deleteFile,
+        deleteWorkareaFile: deleteWorkareaFile,
         prepareDip: prepareDip,
         getDipPage: getDipPage,
         getOrderPage: getOrderPage,
@@ -748,5 +783,6 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         createDip: createDip,
         getDir: getDir,
         getfile: getFile,
+        getWorkareaFile: getWorkareaFile,
     };
 });
