@@ -324,7 +324,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
 
     $scope.createNewFlow = function(ip) {
         var flowObj = new Flow({
-            target: appConfig.djangoUrl+'workarea-files/upload/?type=access/',
+            target: appConfig.djangoUrl+'workarea-files/upload/?type=access',
             simultaneousUploads: 15,
             maxChunkRetries: 5,
             chunkRetryInterval: 1000,
