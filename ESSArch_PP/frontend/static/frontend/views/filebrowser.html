@@ -10,6 +10,4 @@
             <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
         </div>
     </div>
-    <button ng-if="selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
-    <button ng-if="ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
 </div>
