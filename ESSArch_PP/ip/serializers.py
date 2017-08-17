@@ -71,6 +71,7 @@ class EventIPSerializer(serializers.HyperlinkedModelSerializer):
 class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
+    workarea = serializers.SerializerMethodField()
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],
@@ -89,6 +90,13 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         read_only=True,
     )
 
+    def get_workarea(self, obj):
+        workarea = obj.workareas.first()
+
+        if workarea is not None:
+            return WorkareaSerializer(workarea, context=self.context).data
+
+
     class Meta:
         model = InformationPackage
         fields = (
@@ -97,7 +105,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'entry_date', 'state', 'status', 'step_state',
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
-            'policy', 'message_digest', 'message_digest_algorithm',
+            'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
         )
         extra_kwargs = {
             'id': {
@@ -185,93 +193,12 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             },
         }
 
-
-class WorkareaSerializer(serializers.HyperlinkedModelSerializer):
-    package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
-    information_packages = serializers.SerializerMethodField()
-
-    def get_information_packages(self, obj):
-        related = obj.related_ips()
-        request = self.context['request']
-        view = self.context.get('view')
-        view_type = request.query_params.get('view_type', 'aic')
-
-        try:
-            query_wtype = request.query_params['type'].lower()
-        except KeyError:
-            related = related.filter(
-                workareas__user=request.user,
-            )
-        else:
-            workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
-
-            try:
-                workarea_type = workarea_type_reverse[query_wtype]
-            except KeyError:
-                raise exceptions.ParseError('Workarea of type "%s" does not exist' % query_wtype)
-
-            related = related.filter(
-                workareas__user=request.user,
-                workareas__type=workarea_type
-            )
-
-        qp = request.query_params.copy()
-        qp.__setitem__('view_type', 'self')
-
-        related = InformationPackageFilter(qp, queryset=related).qs
-
-        search_filter = filters.SearchFilter()
-
-        # do not need to check on IPs related to the related IPs
-        view.search_fields = [
-            s for s in view.search_fields
-            if not s.startswith('aic__information_packages__') and
-            not s.startswith('information_packages__')
-        ]
-        related = search_filter.filter_queryset(request, related, view)
-
-        ips = InformationPackageSerializer(
-            related, many=True, context={'request': request}
-        )
-        return ips.data
-
-    archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-
+class WorkareaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InformationPackage
+        model = Workarea
         fields = (
-            'url', 'id', 'label', 'object_identifier_value', 'package_type',
-            'responsible', 'create_date', 'entry_date', 'state', 'status',
-            'step_state', 'archived', 'cached', 'aic', 'information_packages',
-            'generation', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location', 'policy', 'message_digest',
-            'message_digest_algorithm',
+            'id', 'user', 'ip', 'read_only', 'type',
         )
-        extra_kwargs = {
-            'id': {
-                'read_only': False,
-                'validators': [],
-            },
-            'object_identifier_value': {
-                'read_only': False,
-                'validators': [],
-            },
-        }
 
 
 class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
