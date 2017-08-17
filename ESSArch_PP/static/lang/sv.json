@@ -302,5 +302,8 @@
     "STORAGEMIGRATION": "Lagringsmigrering",
     "STORAGEMAINTENANCE": "Lagringsunderhåll",
     "MAXCAPACITY": "Maxkapacitet",
-    "MEDIUM": "Medium"
+    "MEDIUM": "Medium",
+    "APPROVAL": "Godkännande",
+    "MOVE_TO_APPROVAL": "Flytta till Godkännande",
+    "MOVE_TO_INGEST_APPROVAL": "Flytta till Mottagande/Godkännande"
 }

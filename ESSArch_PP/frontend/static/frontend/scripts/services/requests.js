@@ -47,9 +47,15 @@ angular.module('myApp').factory('Requests', function(IPReception, IP, $http, app
             return response;
         });
     }
+    function moveToApproval(ip, data) {
+        return IP.moveToApproval(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
+            return response;
+        });
+    }
     return {
         receive: receive,
         preserve: preserve,
         access: access,
+        moveToApproval: moveToApproval,
     };
 });

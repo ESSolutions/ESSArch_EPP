@@ -68,7 +68,8 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         },
         access: {
             method: "POST",
-            params: { action: "access", id: "@id" }
+            params: { action: "access", id: "@id" },
+            isArray: true
         },
         changeSa: {
             method: "PATCH",
@@ -78,5 +79,9 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
             method: 'POST',
             params: { action: "submit", id: "@id" }
         },
+        moveToApproval: {
+            method: 'POST',
+            params: { action: "receive", id: "@id" }
+        }
     });
 });

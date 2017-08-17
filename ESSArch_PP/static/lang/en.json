@@ -302,5 +302,8 @@
     "STORAGEMIGRATION": "Storage migration",
     "STORAGEMAINTENANCE": "Storage maintenance",
     "MAXCAPACITY": "Max capacity",
-    "MEDIUM": "Medium"
+    "MEDIUM": "Medium",
+    "APPROVAL": "Approval",
+    "MOVE_TO_APPROVAL": "Move to Approval",
+    "MOVE_TO_INGEST_APPROVAL": "Move to Ingest/Approval"
 }

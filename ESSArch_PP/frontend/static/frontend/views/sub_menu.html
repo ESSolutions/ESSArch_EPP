@@ -2,7 +2,7 @@
     <div class="sub-menu">
         <div ng-if="'home.ingest' | includedByState">
             <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out">{{'RECEPTION' | translate}}</div>
-            <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;">{{'PRESERVE' | translate}}</div>
+            <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;">{{'APPROVAL' | translate}}</div>
             <div ui-sref="home.ingest.workarea"  ng-class="{chosen: $state.current.name == 'home.ingest.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;">{{'WORKAREA' | translate}}</div>
             <div ng-if="$state.current.name == 'home.ingest.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">{{'CREATEDIP' | translate}}</div>
         </div>

@@ -47,7 +47,7 @@
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
-        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')" class="select-sub-edit-eventlog-wrapper">
+        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'get' || vm.request.type == 'get_as_new')" class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">

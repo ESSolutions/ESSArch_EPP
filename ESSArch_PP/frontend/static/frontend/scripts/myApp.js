@@ -111,7 +111,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     })
     .state('home.ingest.ipApproval', {
-        url: '/preserve',
+        url: '/approval',
         templateUrl: '/static/frontend/views/ip_approval.html',
         controller: 'IpApprovalCtrl as vm',
         resolve: {

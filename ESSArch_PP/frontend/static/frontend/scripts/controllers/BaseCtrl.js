@@ -281,7 +281,10 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 				break;
 			case "get_as_new":
                 $scope.accessIp(ip, request);
-				break;
+                break;
+            case "move_to_approval":
+                $scope.moveToApproval(ip, request);
+                break;
 			case "diff_check":
 				console.log("request not implemented");
 				break;
@@ -307,6 +310,25 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
     $scope.accessIp = function(ip, request) {
         var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new"};
         Requests.access(ip, data).then(function(response) {
+			$scope.requestForm = false;
+			$scope.eventlog = false;
+			$scope.requestEventlog = false;
+			$scope.eventShow = false;
+			$scope.filebrowser = false;
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.initRequestData();
+            $timeout(function() {
+                $scope.ip = null;
+                $rootScope.ip = null;
+                $scope.getListViewData();
+            });
+        });
+    }
+
+    $scope.moveToApproval = function(ip, request) {
+        var data = { purpose: request.purpose };
+        Requests.moveToApproval(ip, data).then(function(response) {
 			$scope.requestForm = false;
 			$scope.eventlog = false;
 			$scope.requestEventlog = false;

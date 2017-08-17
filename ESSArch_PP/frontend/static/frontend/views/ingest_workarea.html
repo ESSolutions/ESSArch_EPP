@@ -16,9 +16,15 @@
                             {{'PRESERVE' | translate}}
                         </label>
                     </div>
+                    <div ng-if="checkPermission('ip.move_from_ingest_workarea')">
+                        <input type="radio" ng-model="vm.request.type" value="move_to_approval">
+                        <label>
+                            {{'MOVE_TO_APPROVAL' | translate}}
+                        </label>
+                    </div>
                 </div>
                 <div class="request-params">
-                    <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
+                    <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'move_to_approval'">
                         <label>
                             {{'PURPOSE' | translate}}
                         </label>
@@ -27,7 +33,7 @@
                 </div>
             </form>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')" class="select-sub-edit-eventlog-wrapper">
+        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'move_to_approval')" class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">
