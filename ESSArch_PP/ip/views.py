@@ -901,6 +901,20 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
 
 
+class WorkareaViewSet(viewsets.ModelViewSet):
+    queryset = Workarea.objects.all()
+    serializer_class = WorkareaSerializer
+    http_method_names = ['delete', 'get', 'head']
+
+    def destroy(self, request, pk=None, **kwargs):
+        workarea = self.get_object()
+
+        if not workarea.read_only:
+            workarea.ip.delete()
+
+        return super(WorkareaViewSet, self).destroy(request, pk, **kwargs)
+
+
 class WorkareaFilesViewSet(viewsets.ViewSet):
     def validate_workarea(self, area_type):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
