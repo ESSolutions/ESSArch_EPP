@@ -102,6 +102,9 @@ angular.module('myApp')
                 'method': "POST",
                 'url': "/logout/"
             }).then(function(data){
+                if (data.data.redirect) {
+                    window.location.replace(data.data.redirect);
+                }
                 delete $http.defaults.headers.common.Authorization;
                 delete $cookies.token;
                 djangoAuth.authenticated = false;

@@ -22,6 +22,7 @@
     Email - essarch@essolutions.se
 """
 
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
@@ -171,6 +172,9 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^api/sysinfo/', SysInfoView.as_view()),
     url(r'^api/me/$', MeView.as_view(), name='me'),
-    url(r'^rest-auth/', include('rest_auth.urls')),
+    url(r'^rest-auth/', include('ESSArch_Core.auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
 ]
+
+if getattr(settings, 'ENABLE_ADFS_LOGIN', False):
+    urlpatterns.append(url(r'^saml2/', include('djangosaml2.urls', namespace='saml2')))
