@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService, Requests, $uibModal, $sce, $window) {
+angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles, Workarea, $scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, listViewService, Requests, $uibModal, $sce, $window) {
     var vm = this;
     var ipSortString = "";
     vm.workarea = 'ingest';
@@ -7,6 +7,23 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     //context menu data
     $scope.menuOptions = function() {
         return [];
+    }
+
+    // Remove ip
+    $scope.removeIp = function (ipObject) {
+        console.log(ipObject)
+        Workarea.delete({
+            id: ipObject.workarea.id
+        }).$promise.then(function() {
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
+            $scope.filebrowser = false;
+            $scope.requestForm = false;
+            $scope.getListViewData();
+        });
     }
 
     //Click function for Ip table
@@ -54,7 +71,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
         }
         $scope.statusShow = false;
     };
-    
+
     // ***********************
     //       FILEBROWSER
     // ***********************
@@ -74,12 +91,20 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
             $scope.deckGridData = dir;
         });
     };
-    if ($scope.ip) {
-        $scope.deckGridInit($scope.ip);
-    }
+
     $scope.$watch(function () { return $scope.ip; }, function (newValue, oldValue) {
-        if($scope.ip) {
+        if($scope.ip && $scope.filebrowser) {
             $scope.deckGridInit($scope.ip);
+            if(!$rootScope.flowObjects[$scope.ip.object_identifier_value]) {
+                $scope.createNewFlow($scope.ip);
+            }
+            $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.object_identifier_value];
+            if($scope.filebrowser) {
+                $scope.showFileUpload = false;
+                $timeout(function() {
+                    $scope.showFileUpload = true;
+                });
+            }
         }
         $scope.previousGridArrays = [];
     }, true);
@@ -215,4 +240,105 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function($scope, $contr
     $scope.getFileExtension = function (file) {
         return file.name.split(".").pop().toUpperCase();
     }
+
+    // **********************************
+    //            Upload
+    // **********************************
+
+    $scope.uploadDisabled = false;
+    $scope.updateListViewTimeout = function (timeout) {
+        $timeout(function () {
+            $scope.getListViewData();
+        }, timeout);
+    };
+
+    vm.flowDestination = null;
+    $scope.showFileUpload = true;
+    $scope.currentFlowObject = null;
+    $scope.getFlowTarget = function () {
+        console.log("set target");
+        return appConfig.djangoUrl + 'workarea-files/upload/?type=ingest/';
+    };
+    $scope.getQuery = function (FlowFile, FlowChunk, isTest) {
+        return { destination: $scope.previousGridArraysString() };
+    };
+    $scope.fileUploadSuccess = function(ip, file, message, flow) {
+        $scope.uploadedFiles ++;
+        var path = flow.opts.query.destination + file.relativePath;
+
+        WorkareaFiles.mergeChunks({
+            type: "ingest",
+        }, { path: path });
+    };
+    $scope.fileTransferFilter = function (file) {
+        return file.isUploading();
+    };
+    $scope.removeFiles = function () {
+        $scope.selectedCards.forEach(function (file) {
+            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
+                .then(function () {
+                    $scope.updateGridArray();
+                });
+        });
+        $scope.selectedCards = [];
+    }
+    $scope.isSelected = function (card) {
+        var cardClass = "";
+        $scope.selectedCards.forEach(function (file) {
+            if (card.name == file.name) {
+                cardClass = "card-selected";
+            }
+        });
+        return cardClass;
+    };
+    $scope.resetUploadedFiles = function () {
+        $scope.uploadedFiles = 0;
+    }
+    $scope.uploadedFiles = 0;
+    $scope.flowCompleted = false;
+    $scope.flowComplete = function (flow, transfers) {
+        if (flow.progress() === 1) {
+            flow.flowCompleted = true;
+            flow.flowSize = flow.getSize();
+            flow.flowFiles = transfers.length;
+            flow.cancel();
+            if (flow == $scope.currentFlowObject) {
+                $scope.resetUploadedFiles();
+            }
+        }
+
+        $scope.updateGridArray();
+    }
+    $scope.hideFlowCompleted = function (flow) {
+        flow.flowCompleted = false;
+    }
+    $scope.getUploadedPercentage = function (totalSize, uploadedSize, totalFiles) {
+        if (totalSize == 0 || uploadedSize / totalSize == 1) {
+            return ($scope.uploadedFiles / totalFiles) * 100;
+        } else {
+            return (uploadedSize / totalSize) * 100;
+        }
+    }
+
+    $scope.createNewFlow = function (ip) {
+        var flowObj = new Flow({
+            target: appConfig.djangoUrl + 'workarea-files/upload/?type=ingest',
+            simultaneousUploads: 15,
+            maxChunkRetries: 5,
+            chunkRetryInterval: 1000,
+            headers: { 'X-CSRFToken': $cookies.get("csrftoken") },
+            complete: $scope.flowComplete
+        });
+        flowObj.on('complete', function () {
+            $scope.flowComplete(flowObj, flowObj.files);
+        });
+        flowObj.on('fileSuccess', function (file, message) {
+            $scope.fileUploadSuccess(ip, file, message, flowObj);
+        });
+        flowObj.on('uploadStart', function () {
+            flowObj.opts.query = { destination: $scope.previousGridArraysString() };
+        });
+        $rootScope.flowObjects[ip.object_identifier_value] = flowObj;
+    }
+
 });

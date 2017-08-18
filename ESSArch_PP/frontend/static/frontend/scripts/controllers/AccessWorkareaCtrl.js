@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests, $uibModal, $sce, $window) {
+angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles, Workarea, $scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests, $uibModal, $sce, $window) {
     var vm = this;
     var ipSortString = "";
     vm.workarea = 'access';
@@ -10,6 +10,22 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
     $scope.menuOptions = function () {
         return [
         ];
+    }
+
+    // Remove ip
+    $scope.removeIp = function (ipObject) {
+        Workarea.delete({
+            id: ipObject.workarea.id
+        }).$promise.then(function() {
+            $scope.edit = false;
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
+            $scope.filebrowser = false;
+            $scope.requestForm = false;
+            $scope.getListViewData();
+        });
     }
 
     //Click function for Ip table
@@ -228,24 +244,6 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
     // **********************************
 
     $scope.uploadDisabled = false;
-    $scope.setUploaded = function(ip) {
-        $scope.uploadDisabled = true;
-        IP.setUploaded({
-            id: ip.id
-        }).$promise.then(function(response){
-            $scope.eventlog = false;
-            $scope.select = false;
-            $scope.filebrowser = false;
-            $timeout(function() {
-                $scope.getListViewData();
-                vm.updateListViewConditional();
-            }, 1000);
-            $scope.uploadDisabled = false;
-            $anchorScroll();
-        }, function(response) {
-            $scope.uploadDisabled = false;
-        });
-    }
     $scope.updateListViewTimeout = function(timeout) {
         $timeout(function(){
             $scope.getListViewData();
@@ -266,10 +264,9 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
         $scope.uploadedFiles ++;
         var path = flow.opts.query.destination + file.relativePath;
 
-        IP.mergeChunks({
-            id: ip.id,
-            path: path
-        });
+        WorkareaFiles.mergeChunks({
+            type: "ingest",
+        }, { path: path });
     };
     $scope.fileTransferFilter = function(file)
     {
@@ -277,7 +274,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function ($scope, $cont
     };
     $scope.removeFiles = function() {
         $scope.selectedCards.forEach(function(file) {
-            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
+            listViewService.deleteWorkareaFile("access", $scope.previousGridArraysString(), file)
             .then(function () {
                 $scope.updateGridArray();
             });

@@ -10,6 +10,10 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
                 }
             },
         },
+        delete: {
+            method: 'DELETE',
+            params: { id: "@id" }
+        },
         events: {
             method: 'GET',
             params: {action: "events", id: "@id"},

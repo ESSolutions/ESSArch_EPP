@@ -1,5 +1,5 @@
 angular.module('myApp').factory('Workarea', function ($resource, appConfig) {
-    return $resource(appConfig.djangoUrl + 'workarea/:id/:action/', {}, {
+    return $resource(appConfig.djangoUrl + 'workareas/:id/:action/', {}, {
         query: {
             method: 'GET',
             isArray: true,
@@ -10,9 +10,9 @@ angular.module('myApp').factory('Workarea', function ($resource, appConfig) {
                 }
             },
         },
-        preserve: {
-            method: 'POST',
-            params: { action: "preserve", id: "@id" }
+        delete: {
+            method: 'DELETE',
+            params: { id: "@id" }
         },
     });
 }).factory('WorkareaFiles', function ($resource, appConfig) {
@@ -30,5 +30,9 @@ angular.module('myApp').factory('Workarea', function ($resource, appConfig) {
             method: "POST",
             params: { action: "add-directory" }
         },
+        mergeChunks: {
+            method: "POST",
+            params: { action: "merge-uploaded-chunks" }
+        }
     });
 });
