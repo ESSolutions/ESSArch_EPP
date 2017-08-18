@@ -306,5 +306,6 @@
     "APPROVAL": "Approval",
     "MOVE_TO_APPROVAL": "Move to Approval",
     "MOVE_TO_INGEST_APPROVAL": "Move to Ingest/Approval",
-    "UPLOADED": "Uploaded"
+    "UPLOADED": "Uploaded",
+    "UPLOAD_COMPLETE": "Upload complete"
 }
