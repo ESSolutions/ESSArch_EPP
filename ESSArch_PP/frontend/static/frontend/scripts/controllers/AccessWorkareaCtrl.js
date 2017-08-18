@@ -71,6 +71,35 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
         }
         $scope.statusShow = false;
     };
+
+    $scope.filebrowserClick = function (ip) {
+        if ($scope.filebrowser && $scope.ip == ip) {
+            $scope.filebrowser = false;
+            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+            }
+        } else {
+            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
+                $scope.filebrowser = true;
+                $scope.ip = ip;
+                $rootScope.ip = ip;
+                $scope.deckGridInit($scope.ip);
+                if(!$rootScope.flowObjects[$scope.ip.object_identifier_value]) {
+                    $scope.createNewFlow($scope.ip);
+                }
+                $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.object_identifier_value];
+                if($scope.filebrowser) {
+                    $scope.showFileUpload = false;
+                    $timeout(function() {
+                        $scope.showFileUpload = true;
+                    });
+                }
+                $scope.previousGridArrays = [];
+            }
+        }
+    }
+
     // ***********************
     //       FILEBROWSER
     // ***********************
@@ -90,22 +119,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
             $scope.deckGridData = dir;
         });
     };
-    $scope.$watch(function () { return $scope.ip; }, function (newValue, oldValue) {
-        if($scope.ip && $scope.filebrowser) {
-            $scope.deckGridInit($scope.ip);
-            if(!$rootScope.flowObjects[$scope.ip.object_identifier_value]) {
-                $scope.createNewFlow($scope.ip);
-            }
-            $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.object_identifier_value];
-            if($scope.filebrowser) {
-                $scope.showFileUpload = false;
-                $timeout(function() {
-                    $scope.showFileUpload = true;
-                });
-            }
-        }
-        $scope.previousGridArrays = [];
-    }, true);
+
     $scope.previousGridArray = function () {
         $scope.previousGridArrays.pop();
         listViewService.getWorkareaDir("access", $scope.previousGridArraysString()).then(function (dir) {
