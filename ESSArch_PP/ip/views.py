@@ -914,6 +914,7 @@ class WorkareaViewSet(viewsets.ModelViewSet):
 
         if not workarea.read_only:
             workarea.ip.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         return super(WorkareaViewSet, self).destroy(request, pk, **kwargs)
 
