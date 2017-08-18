@@ -275,7 +275,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles,
     };
     $scope.removeFiles = function () {
         $scope.selectedCards.forEach(function (file) {
-            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
+            listViewService.deleteWorkareaFile("ingest", $scope.previousGridArraysString(), file)
                 .then(function () {
                     $scope.updateGridArray();
                 });
