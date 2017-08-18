@@ -44,6 +44,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from lxml import etree
 
+from natsort import natsorted
+
 from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -70,6 +72,7 @@ from ESSArch_Core.util import (
     get_files_and_dirs,
     get_tree_size_and_count,
     in_directory,
+    mkdir_p,
     parse_content_range_header,
     timestamp_to_datetime,
 )
@@ -1050,6 +1053,117 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @list_route(methods=['get', 'post'], url_path='upload')
+    def upload(self, request):
+        try:
+            workarea = self.request.query_params['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        self.validate_workarea(workarea)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+
+        if request.method == 'GET':
+            path = os.path.join(root, request.query_params.get('destination', ''))
+        elif request.method == 'POST':
+            path = os.path.join(root, request.data.get('destination', ''))
+
+        self.validate_path(path, root)
+
+        real_given_path = os.path.realpath(path)[len(root)+1:]
+        relative_root = real_given_path.split('/')[0]
+
+        try:
+            workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
+        except Workarea.DoesNotExist:
+            raise exceptions.NotFound
+
+        if request.method == 'GET':
+            relative_path = request.query_params.get('flowRelativePath', '')
+
+            if len(relative_path) == 0:
+                raise exceptions.ParseError('The path cannot be empty')
+
+            path = os.path.join(path, relative_path)
+
+            try:
+                chunk_nr = request.query_params['flowChunkNumber']
+            except KeyError:
+                raise exceptions.ParseError('flowChunkNumber parameter missing')
+
+            chunk_path = "%s_%s" % (path, chunk_nr)
+
+            if os.path.exists(chunk_path):
+                return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            if workarea_obj.read_only:
+                raise exceptions.MethodNotAllowed(request.method)
+
+            relative_path = request.data.get('flowRelativePath', '')
+
+            if len(relative_path) == 0:
+                raise exceptions.ParseError('The path cannot be empty')
+
+            try:
+                chunk_nr = request.data['flowChunkNumber']
+            except KeyError:
+                raise exceptions.ParseError('flowChunkNumber parameter missing')
+
+            path = os.path.join(path, relative_path)
+
+            chunk_path = "%s_%s" % (path, chunk_nr)
+            chunk = request.FILES['file']
+            mkdir_p(os.path.dirname(chunk_path))
+
+            with open(chunk_path, 'wb+') as dst:
+                for c in chunk.chunks():
+                    dst.write(c)
+
+            return Response(status=status.HTTP_201_CREATED)
+
+    @list_route(methods=['post'], url_path='merge-uploaded-chunks')
+    def merge_uploaded_chunks(self, request):
+        print request.data
+        try:
+            workarea = self.request.query_params['type'].lower()
+        except KeyError:
+            raise exceptions.ParseError('Missing type parameter')
+
+        self.validate_workarea(workarea)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        relative_path = request.data.get('path', '')
+
+        if len(relative_path) == 0:
+            raise exceptions.ParseError('The path cannot be empty')
+
+        path = os.path.join(root, relative_path)
+
+        self.validate_path(path, root, existence=False)
+
+        real_given_path = os.path.realpath(path)[len(root)+1:]
+        relative_root = real_given_path.split('/')[0]
+
+        try:
+            workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
+        except Workarea.DoesNotExist:
+            raise exceptions.NotFound
+
+        if workarea_obj.read_only:
+            raise exceptions.MethodNotAllowed(request.method)
+
+        chunks = natsorted(glob.glob('%s_*' % re.sub(r'([\[\]])', '[\\1]', path)))
+        if len(chunks) == 0:
+            raise exceptions.NotFound('No chunks found')
+
+        with open(path, 'wb') as f:
+
+            for chunk_file in natsorted(glob.glob('%s_*' % re.sub(r'([\[\]])', '[\\1]', path))):
+                f.write(open(chunk_file).read())
+                os.remove(chunk_file)
+
+        return Response("Merged chunks")
 
     @list_route(methods=['post'], url_path='add-to-dip')
     def add_to_dip(self, request):
