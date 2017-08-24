@@ -53,7 +53,7 @@
     "DOYOUWANTTOLOCKPROFILE": "Vill du låsa profil",
     "TOSA": "till sa",
     "ENTERPROFILENAME": "Välj nytt profilnamn",
-    "RESTRICTEDVIEW": "Denna vy kräver rättigheter. Logga in för att fortsätta",
+    "RESTRICTEDVIEW": "Du har inte rättigheter för att se denna vy.",
     "YOUHAVELOGGEDOUT": "Du har loggat ut.",
     "ID": "ID",
     "EVENTDETAIL": "Eventdetalj",
@@ -307,5 +307,6 @@
     "MOVE_TO_APPROVAL": "Flytta till Godkännande",
     "MOVE_TO_INGEST_APPROVAL": "Flytta till Mottagande/Godkännande",
     "UPLOADED": "Uppladdat",
-    "UPLOAD_COMPLETE": "Uppladdning slutförd"
+    "UPLOAD_COMPLETE": "Uppladdning slutförd",
+    "TOACCESS": "för att få tillgång."
 }

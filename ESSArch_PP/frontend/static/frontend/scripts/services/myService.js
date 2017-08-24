@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPermissionStore, $anchorScroll, $http, appConfig, djangoAuth) {
+angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPermissionStore, PermRoleStore, $anchorScroll, $http, appConfig, djangoAuth) {
     function changePath(state) {
         $state.go(state);
     };
@@ -32,6 +32,25 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
         });
         return permissions;
     }
+
+    function defineRoles() {
+        PermRoleStore.defineRole('ACCESS_IP', ['ip.get_from_storage', 'ip.preserve']);
+    }
+
+    function checkPermissions(permissions) {
+        var hasPermissions = false;
+        permissions.forEach(function(permission) {
+            if(checkPermission(permission)) {
+                hasPermissions = true;
+            }
+        });
+        return hasPermissions;
+    }
+
+    function checkPermission(permission) {
+        return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permission));        
+    }
+
     function hasChild(node1, node2){
         var temp1 = false;
         if (node2.children) {
@@ -90,9 +109,12 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
     return {
         changePath: changePath,
         getPermissions: getPermissions,
+        defineRoles: defineRoles,
         hasChild: hasChild,
         getVersionInfo: getVersionInfo,
         getActiveColumns: getActiveColumns,
-        generateColumns: generateColumns
+        generateColumns: generateColumns,
+        checkPermission: checkPermission,
+        checkPermissions: checkPermissions,
     }
 });

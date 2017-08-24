@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource"])
+angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource"])
 .config(function($routeProvider, formlyConfigProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider) {
     $stateProvider
     .state('home', {
@@ -105,10 +105,22 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         templateUrl: '/static/frontend/views/reception.html',
         controller: 'ReceptionCtrl as vm',
         resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
+            authenticated: ['djangoAuth',  function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.receive'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.ingest.reception");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.ingest.ipApproval', {
         url: '/approval',
@@ -118,7 +130,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.ingest.ipApproval");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.ingest.workarea', {
         url: '/workarea',
@@ -128,7 +152,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.ingest.workarea");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.access', {
         url: 'access',
@@ -149,7 +185,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.access.accessIp");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.access.workarea', {
         url: '/workarea',
@@ -159,7 +207,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.access.workarea");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.access.createDip', {
         url: '/create-DIP',
@@ -170,7 +230,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.diff-check', 'ip.preserve'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.access.createDip");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.orders', {
         url: 'orders',
@@ -264,8 +336,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('restricted', {
-        url: '/restricted',
+    .state('home.restricted', {
+        url: 'restricted',
         templateUrl: '/static/frontend/views/restricted.html',
         controller: 'RestrictedCtrl as vm',
         resolve: {
@@ -284,7 +356,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     });
-    $urlRouterProvider.otherwise('my-page');
+    $urlRouterProvider.otherwise('/my-page');
 })
 .config(function($animateProvider) {
     // Only animate elements with the 'angular-animate' class
@@ -465,18 +537,17 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     };
 })
-.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
+.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
     formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
     formlyValidationMessages.addStringMessage('required', 'This field is required');
     
     $rootScope.flowObjects = {};
-
     djangoAuth.initialize('/rest-auth', false).then(function(response) {
         $rootScope.auth = response.data;
+        myService.getPermissions(response.data.permissions);
+        myService.defineRoles();
         $window.sessionStorage.setItem("view-type", response.data.ip_list_view_type);
         $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
-        myService.getPermissions(response.data.permissions);
-
         $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
             if (toState.name === 'login') {
                 return;
@@ -491,7 +562,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     }).catch(function(status) {
         $state.go('login');
     });
-    
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
         if (to.redirectTo) {
             evt.preventDefault();

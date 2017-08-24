@@ -52,7 +52,7 @@
     "DOYOUWANTTOLOCKPROFILE": "Would you like to lock profile",
     "TOSA": "to sa",
     "ENTERPROFILENAME": "Enter new profile name",
-    "RESTRICTEDVIEW": "This is a restricted view. Please login to continue.",
+    "RESTRICTEDVIEW": "You do not have permission to access this view.",
     "YOUHAVELOGGEDOUT": "You have logged out.",
     "ID": "ID",
     "EVENTDETAIL": "Event detail",
@@ -307,5 +307,6 @@
     "MOVE_TO_APPROVAL": "Move to Approval",
     "MOVE_TO_INGEST_APPROVAL": "Move to Ingest/Approval",
     "UPLOADED": "Uploaded",
-    "UPLOAD_COMPLETE": "Upload complete"
+    "UPLOAD_COMPLETE": "Upload complete",
+    "TOACCESS": "to gain access."
 }
