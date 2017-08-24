@@ -4,4 +4,14 @@ angular.module('myApp').factory('Profile', function ($resource, appConfig) {
         method: "GET",
     }
     });
+})
+.factory('ProfileIpData', function ($resource, appConfig) {
+    return $resource(appConfig.djangoUrl + 'profile-ip-data/:action/', {}, {
+    get: {
+        method: "GET",
+    },
+    post: {
+        method: "POST",
+    },
+    });
 });

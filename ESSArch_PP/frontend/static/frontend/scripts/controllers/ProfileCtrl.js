@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
+angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileIpData, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter) {
     var vm = this;
     $scope.angular = angular;
     $scope.select = true;
@@ -82,19 +82,27 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, $scope, 
         }
     };
 
-    vm.saveProfileModel = function(type, model) {
-        if(type === "aip") {
+    vm.saveProfileModel = function (type, model) {
+        if (type === "aip") {
             vm.savedAip = model;
             vm.profileModel = {};
             vm.profileFields = [];
             $scope.profileToSave = null;
         }
-        if(type === "dip") {
+        if (type === "dip") {
             vm.savedDip = model;
             vm.profileModel = {};
             vm.profileFields = [];
             $scope.profileToSave = null;
         }
+        ProfileIpData.post(
+            {
+                ip: $scope.ip.id,
+                profile: model.id,
+                data: model
+            }).$promise.then(function (resource) {
+                console.log("Updated: ", $resource);
+            })
     }
 
     vm.cancel = function() {
