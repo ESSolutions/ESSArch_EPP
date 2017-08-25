@@ -92,8 +92,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.ingest', {
         url: 'ingest',
         templateUrl: '/static/frontend/views/ingest.html',
-        redirectTo: 'home.ingest.reception',
-        controller: 'ReceptionCtrl as vm',
+        controller: 'IngestCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -169,8 +168,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.access', {
         url: 'access',
         templateUrl: '/static/frontend/views/access.html',
-        redirectTo: 'home.access.accessIp',
-        controller: 'AccessIpCtrl as vm',
+        controller: 'AccessCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -291,7 +289,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         url: 'administration',
         templateUrl: '/static/frontend/views/administration.html',
         controller: 'AdministrationCtrl as vm',
-        redirectTo: 'home.administration.mediaInformation',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
