@@ -1,8 +1,18 @@
 'use strict';
 
 angular.module('myApp')
-  .service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope) {
+  .service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope, PermPermissionStore, PermRoleStore) {
     // AngularJS will instantiate a singleton by calling "new" on this function
+    function getPermissions(permissions){
+        PermPermissionStore.defineManyPermissions(permissions, /*@ngInject*/ function (permissionName) {
+            return permissions.includes(permissionName);
+        });
+        return permissions;
+    }
+
+    function defineRoles() {
+        PermRoleStore.defineRole('ACCESS_IP', ['ip.get_from_storage', 'ip.preserve']);
+    }
     var service = {
         /* START CUSTOMIZATION HERE */
         // Change this to point to your Django REST Auth API
@@ -181,7 +191,7 @@ angular.module('myApp')
                 // We have a stored value which means we can pass it back right away.
                 if(this.authenticated == false && restrict){
                     getAuthStatus.reject("User is not logged in.");
-                }else{
+                } else {
                     getAuthStatus.resolve();
                 }
             }else{

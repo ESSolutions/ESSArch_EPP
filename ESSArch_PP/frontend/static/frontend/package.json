@@ -15,7 +15,7 @@
     "angular-marked": "~1.2.2",
     "angular-messages": "~1.6",
     "angular-mocks": "~1.6",
-    "angular-permission": "~5.2.1",
+    "angular-permission": "~5.3.2",
     "angular-route": "~1.6",
     "angular-sanitize": "~1.6",
     "angular-smart-table": "~2.1.8",

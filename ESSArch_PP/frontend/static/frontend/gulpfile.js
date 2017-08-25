@@ -60,6 +60,7 @@ var jsVendorFiles = [
         'node_modules/angular-ui-router/release/angular-ui-router.js',
         'node_modules/angular-cookies/angular-cookies.js ',
         'node_modules/angular-permission/dist/angular-permission.js',
+        'node_modules/angular-permission/dist/angular-permission-ui.js',
         'node_modules/angular-translate/dist/angular-translate.js',
         'node_modules/angular-translate-storage-cookie/angular-translate-storage-cookie.js',
         'node_modules/angular-translate-loader-static-files/angular-translate-loader-static-files.js',

@@ -61,6 +61,10 @@ angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope,
         });
     };
 
+    $scope.checkPermissions = function(permissions) {
+        return myService.checkPermissions(permissions);
+    }
+
     $scope.update_tabs();
     // Get active tab from localStorage
     $scope.go = function(tab) {

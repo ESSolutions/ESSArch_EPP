@@ -1,29 +1,29 @@
-angular.module('myApp').controller('AdministrationCtrl', function(StorageObject, StorageMedium, IP, $scope, $rootScope, $controller, $cookies, $http, appConfig) {
+angular.module('myApp').controller('AdministrationCtrl', function($state, myService) {
     var vm = this;
-    vm.ipViewType = $cookies.get('ip-view-type') || 1;
-    $scope.selectedObject = {id: "", class: ""};
-    vm.storageObjects = []
-    $scope.getStorageObjects = function() {
-        StorageObject.query().$promise.then(function(data) {
-            vm.storageObjects = data;
-        });
+    vm.checkPermissions = function(permissions) {
+        return myService.checkPermissions(permissions);
     }
-    $scope.getStorageObjects();
-
-    $scope.selectObject = function(row) {
-        vm.storageObjects.forEach(function(object) {
-            if(object.id == $scope.selectedObject.id){
-                object.class = "";
+    vm.$onInit = function () {
+        if (vm.checkPermissions(['storage.storage_management'])) {
+            $state.go('home.administration.mediaInformation');
+        } else {
+            if (vm.checkPermissions(['storage.storage_management'])) {
+                $state.go('home.administration.robotInformation')
+            } else {
+                if (vm.checkPermissions(['storage.storage_management'])) {
+                    $state.go('home.administration.queues');
+                } else {
+                    if (vm.checkPermissions(['storage.storage_migration'])) {
+                        $state.go('home.administration.storageMigration')
+                    } else {
+                        if (vm.checkPermissions(['storage.storage_maintenance'])) {
+                            $state.go('home.administration.storageMaintenance');
+                        } else {
+                            throw new Error("State has no available substate");
+                        }
+                    }
+                }
             }
-        });
-    }
-
-    $scope.objectTableClick = function(row) {
-        vm.storage_medium = StorageMedium.get({ id: row.storage_medium }).$promise.then(function(data) {
-            return data;
-        });
-        vm.ip = IP.get({id: row.ip }).$promise.then(function(data) {
-            return data;
-        });
+        }
     }
 });
