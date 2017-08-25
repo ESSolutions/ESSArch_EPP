@@ -252,7 +252,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['ip.prepare_order'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.orders");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.management', {
         url: 'management',
@@ -294,7 +306,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['storage.storage_management'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.administration.mediaInformation");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.administration.robotInformation', {
         url: '/robot-information',
@@ -304,7 +328,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['storage.storage_management'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.administration.robotInformation");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.administration.queues', {
         url: '/queues',
@@ -314,7 +350,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['storage.storage_management'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.administration.queues");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.administration.storageMigration', {
         url: '/storage-migration',
@@ -324,7 +372,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['storage.storage_migration'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.administration.storageMigration");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.administration.storageMaintenance', {
         url: '/storage-maintenance',
@@ -334,7 +394,19 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: ['storage.storage_maintenance'],
+                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
+                    if(angular.equals(PermPermissionStore.getStore(), {})) {
+                        $state.go("home.administration.storageMaintenance");
+                    } else {
+                        return 'home.restricted'
+                    }
+                }]
+            }
+        },
     })
     .state('home.restricted', {
         url: 'restricted',
@@ -356,7 +428,10 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     });
-    $urlRouterProvider.otherwise('/my-page');
+    $urlRouterProvider.otherwise( function($injector) {
+        var $state = $injector.get("$state");
+        $state.go('home.myPage');
+      });
 })
 .config(function($animateProvider) {
     // Only animate elements with the 'angular-animate' class

@@ -9,14 +9,14 @@
         <div ng-if="'home.access' | includedByState">
             <div ui-sref="home.access.accessIp" ng-class="{chosen: $state.current.name == 'home.access.accessIp'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'])">{{'SEARCH' | translate}}</div>
             <div ui-sref="home.access.workarea" ng-class="{chosen: $state.current.name == 'home.access.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])">{{'WORKAREA' | translate}}</div>
-            <div ui-sref="home.access.createDip" ng-class="{chosen: $state.current.name == 'home.access.createDip'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.diff-check', 'ip.preserve'])">{{'DISSEMINATION' | translate}}</div>
+            <div ui-sref="home.access.createDip" ng-class="{chosen: $state.current.name == 'home.access.createDip'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.preserve'])">{{'DISSEMINATION' | translate}}</div>
         </div>
         <div ng-if="'home.administration' | includedByState">
-            <div ui-sref="home.administration.mediaInformation" ng-class="{chosen: $state.current.name == 'home.administration.mediaInformation'}" class="nav-item sliding-middle-out">{{'MEDIAINFORMATION' | translate}}</div>
-            <div ui-sref="home.administration.robotInformation" ng-class="{chosen: $state.current.name == 'home.administration.robotInformation'}" class="nav-item sliding-middle-out">{{'ROBOTINFORMATION' | translate}}</div>
-            <div ui-sref="home.administration.queues" ng-class="{chosen: $state.current.name == 'home.administration.queues'}" class="nav-item sliding-middle-out">{{'QUEUES' | translate}}</div>
-            <div ui-sref="home.administration.storageMigration" ng-class="{chosen: $state.current.name == 'home.administration.storageMigration'}" class="nav-item sliding-middle-out">{{'STORAGEMIGRATION' | translate}}</div>
-            <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out">{{'STORAGEMAINTENANCE' | translate}}</div>
+            <div ui-sref="home.administration.mediaInformation" ng-class="{chosen: $state.current.name == 'home.administration.mediaInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['storage.storage_management'])">{{'MEDIAINFORMATION' | translate}}</div>
+            <div ui-sref="home.administration.robotInformation" ng-class="{chosen: $state.current.name == 'home.administration.robotInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['storage.storage_management'])">{{'ROBOTINFORMATION' | translate}}</div>
+            <div ui-sref="home.administration.queues" ng-class="{chosen: $state.current.name == 'home.administration.queues'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['storage.storage_management'])">{{'QUEUES' | translate}}</div>
+            <div ui-sref="home.administration.storageMigration" ng-class="{chosen: $state.current.name == 'home.administration.storageMigration'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['storage.storage_migration'])">{{'STORAGEMIGRATION' | translate}}</div>
+            <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['storage.storage_maintenance'])">{{'STORAGEMAINTENANCE' | translate}}</div>
         </div>
         <div ng-if="$state.current.name == 'home.appraisal'" class="nav-item sliding-middle-out" style="margin-left: 5px;" translate="APPRAISAL"></div>
     </div>
