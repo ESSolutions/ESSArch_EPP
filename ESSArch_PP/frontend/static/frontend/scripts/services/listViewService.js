@@ -40,7 +40,7 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         }, columnFilters);
 
         if (workarea) {
-            data = angular.extend(data, {workarea, workarea});
+            data = angular.extend(data, {workarea: workarea});
         }
 
         if ($rootScope.selectedTag != null) {
