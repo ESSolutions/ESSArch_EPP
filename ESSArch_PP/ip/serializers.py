@@ -72,6 +72,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     workarea = serializers.SerializerMethodField()
+    aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],
