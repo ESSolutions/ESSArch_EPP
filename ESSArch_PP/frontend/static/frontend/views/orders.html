@@ -19,7 +19,7 @@
                 <tbody>
                     <tr ng-class="{'selected': ip.id == row.id}" ng-repeat="row in vm.displayedIps"  ng-attr-context-menu="menuOptions" class="table-item">
                         <td class="clickable" ng-click="ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{row.label}}</td>
-                        <td class="clickable" ng-click="ipTableClick(row)">{{row.responsible}}</td>
+                        <td class="clickable" ng-click="ipTableClick(row)">{{row.responsible.username}}</td>
                         <td ng-click="ipRowClick(row)">
                             <button type="button"
                                     ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
