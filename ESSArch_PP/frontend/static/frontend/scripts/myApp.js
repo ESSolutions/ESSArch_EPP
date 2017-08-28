@@ -39,16 +39,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('logout', {
-        url: '/logout',
-        templateUrl: '/static/frontend/views/logout.html',
-        controller: 'LogoutCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        }
-    })
     .state('home.userSettings', {
         url: 'user-settings',
         templateUrl: '/static/frontend/views/user_settings.html',

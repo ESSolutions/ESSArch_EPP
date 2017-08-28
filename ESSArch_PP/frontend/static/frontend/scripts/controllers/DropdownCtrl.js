@@ -54,10 +54,18 @@ angular.module('myApp').controller('DropdownCtrl', function ($scope, $log, $root
             {
                 label: $scope.logOut,
                 link: 'logout',
-                click: function(){$scope.gotoLink('logout');}
+                click: function(){
+                    $rootScope.auth = null;
+                    djangoAuth.logout();
+                }
             }
         ];
     });
+
+    $rootScope.$on("djangoAuth.logged_out", function(event) {
+        $state.go("login");
+    });
+
     $scope.$watch(function() {
         return djangoAuth.authenticated;
     }, function() {
