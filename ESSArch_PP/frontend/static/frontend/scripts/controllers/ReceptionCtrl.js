@@ -227,4 +227,9 @@ angular.module('myApp').controller('ReceptionCtrl', function (Tag, ArchivePolicy
     $scope.closeAlert = function() {
         $scope.informationClassAlert = null;
     }
+    $scope.clickSubmit = function() {
+       if(vm.requestForm.$valid) {
+           $scope.receive($scope.includedIps);
+       }
+    }
 });

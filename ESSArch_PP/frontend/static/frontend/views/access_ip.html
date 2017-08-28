@@ -2,7 +2,7 @@
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
         <div ng-if="requestForm && (checkPermission('ip.get_from_storage') || checkPermission('ip.get_from_storage_as_new') || checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id)" class="request-layout">
-            <form id="request-form" class="request-form" ng-submit="submitRequest(ip, vm.request)">
+            <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
                     <div ng-if="checkPermission('ip.get_from_storage') || auth.id == ip.responsible.id">
                         <input type="radio" ng-model="vm.request.type" value="get">
@@ -49,7 +49,7 @@
                             <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
                         </label>
                     </div>
-                    <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
+                    <button type="button" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                 </form>
             </div>
         </div>

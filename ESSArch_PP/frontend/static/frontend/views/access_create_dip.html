@@ -2,7 +2,7 @@
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
             <div ng-if="requestForm" class="request-layout">
-                <form id="request-form" name="request-form" class="request-form" ng-submit="submitRequest(ip, vm.request)">
+                <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                     <div class="request-type">
                         <div ng-if="checkPermission('ip.diff_check')">
                             <input type="radio" ng-model="vm.request.type" value="diff_check">
@@ -86,7 +86,7 @@
                             <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
                         </label>
                     </div>
-                    <button class="btn btn-info submit-button" ng-dblClick="" ng-disabled="!approvedToCreate" type="submit" style="float: right;">{{'CREATEDIP' | translate}}</button>
+                    <button class="btn btn-info submit-button" ng-click="clickSubmit()"ng-dblClick="" ng-disabled="!approvedToCreate" type="button" style="float: right;">{{'CREATEDIP' | translate}}</button>
                 </form>
             </div>
         </div>

@@ -9,7 +9,7 @@
         </div>
         <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
         <div ng-if="requestForm" class="request-layout">
-            <form id="request-form" name="request-form" class="request-form" ng-submit="receive(includedIps)">
+            <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="receive(includedIps)">
                 <div class="request-type">
                     <label ng-if="checkPermission('ip.receive')">
                             <input type="radio" ng-model="vm.request.type" value="receive">
@@ -74,7 +74,7 @@
                             <input type="checkBox" ng-disabled="informationClassAlert" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
                         </label>
                     </div>
-                    <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToReceive" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
+                    <button type="button" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToReceive" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
                 </form>
             </div>
         </div>

@@ -833,4 +833,12 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
         $scope.createFilterObject();
         $scope.getListViewData();
     }
+
+    // Click function for request form submit.
+    // Replaced form="vm.requestForm" to work in IE
+    $scope.clickSubmit = function () {
+        if (vm.requestForm.$valid) {
+            $scope.submitRequest($scope.ip, vm.request);
+        }
+    }
 });

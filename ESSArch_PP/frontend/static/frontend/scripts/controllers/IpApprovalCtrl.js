@@ -74,5 +74,5 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$rootScope.ip = $scope.ip;
 		}
 		$scope.statusShow = false;
-	};
+    };
 });

@@ -352,5 +352,4 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles,
         });
         $rootScope.flowObjects[ip.object_identifier_value] = flowObj;
     }
-
 });
