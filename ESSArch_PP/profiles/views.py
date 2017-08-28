@@ -224,6 +224,9 @@ class ProfileIPViewSet(viewsets.ModelViewSet):
     queryset = ProfileIP.objects.all()
     serializer_class = ProfileIPSerializer
 
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('ip', 'profile',)
+
 
 class ProfileIPDataViewSet(viewsets.ModelViewSet):
     queryset = ProfileIPData.objects.all()
