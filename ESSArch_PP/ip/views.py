@@ -38,6 +38,7 @@ from operator import itemgetter
 
 from celery import states as celery_states
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -245,7 +246,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         # Filter ips based on conditions
         new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k,v) in conditions.iteritems())), ips)
 
-        from_db = InformationPackage.objects.filter(state='Receiving', **conditions)
+        from_db = InformationPackage.objects.filter(state__in=['Prepared', 'Receiving'], **conditions)
         serializer = InformationPackageSerializer(
             data=from_db, many=True, context={'request': request, 'view': self}
         )
@@ -268,13 +269,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         return Response(parse_submit_description(fullpath, srcdir=path))
 
-    @detail_route(methods=['post'], url_path='receive')
-    def receive(self, request, pk=None):
-        if InformationPackage.objects.filter(object_identifier_value=pk).exists():
-            raise exceptions.ParseError('IP with id %s already exist' % pk)
+    @detail_route(methods=['post'])
+    def prepare(self, request, pk=None):
+        existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
+        if existing is not None:
+            raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
-
         xmlfile = os.path.join(reception, '%s.xml' % pk)
 
         if not os.path.isfile(xmlfile):
@@ -314,6 +315,51 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         except (ValueError, SubmissionAgreement.DoesNotExist) as e:
             raise exceptions.ParseError(detail=e.message)
 
+        ip = InformationPackage.objects.create(
+            object_identifier_value=pk,
+            package_type=InformationPackage.AIP,
+            state='Prepared',
+            responsible=request.user,
+            generation=0,
+            submission_agreement=sa,
+            submission_agreement_locked=True,
+        )
+
+        data = InformationPackageSerializer(ip, context={'request': request}).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'], url_path='receive')
+    def receive(self, request, pk=None):
+        try:
+            ip = get_object_or_404(InformationPackage, id=pk)
+        except (ValueError, ValidationError):
+            raise exceptions.NotFound('Information package with id="%s" not found' % pk)
+
+        if ip.state != 'Prepared':
+            raise exceptions.ParseError('Information package must be in state "Prepared"')
+
+        reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+
+        objid = ip.object_identifier_value
+        xmlfile = os.path.join(reception, '%s.xml' % objid)
+
+        if not os.path.isfile(xmlfile):
+            return Response(
+                {'status': '%s does not exist' % xmlfile},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+
+        if not os.path.isfile(container):
+            return Response(
+                {'status': '%s does not exist' % container},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        container_type = os.path.splitext(os.path.basename(container))[1]
+        parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
+
         policy_id = request.data.get('archive_policy')
 
         try:
@@ -329,22 +375,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         if information_class != policy.information_class:
             raise ValueError('Information class of IP and policy does not match')
 
-        ip = InformationPackage.objects.create(
-            object_identifier_value=objid,
-            object_path=os.path.join(policy.ingest_path.value, objid),
-            policy=policy,
-            package_type=InformationPackage.AIP,
-            label=parsed.get('label'),
-            state='Receiving',
-            entry_date=parsed.get('create_date'),
-            responsible=request.user,
-            start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
-            end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
-            information_class=information_class,
-            generation=0,
-            submission_agreement=sa,
-            submission_agreement_locked=True,
-        )
+        ip.object_path=os.path.join(policy.ingest_path.value, objid)
+        ip.policy=policy
+        ip.label=parsed.get('label')
+        ip.state='Receiving'
+        ip.entry_date=parsed.get('create_date')
+        ip.start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None)
+        ip.end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None)
+        ip.information_class=information_class
+        ip.save()
 
         step = ProcessStep.objects.create(
             name="Receive SIP", eager=False,
@@ -423,6 +462,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             processstep=step,
             processstep_pos=0
         )
+
+        sa = ip.submission_agreement
 
         aip_profile = ProfileSA.objects.get(submission_agreement=sa, profile__profile_type='aip').profile
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
