@@ -42,7 +42,7 @@
                                 <input type="checkBox" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
                             </label>
                         </div>
-                        <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
+                        <button type="submit" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                     </form>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                             <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
                         </label>
                     </div>
-                    <button class="btn btn-info submit-button" ng-click="clickSubmit()"ng-dblClick="" ng-disabled="!approvedToCreate" type="button" style="float: right;">{{'CREATEDIP' | translate}}</button>
+                    <button class="btn btn-info submit-button" type="submit" ng-dblClick="" ng-disabled="!approvedToCreate" type="button" style="float: right;">{{'CREATEDIP' | translate}}</button>
                 </form>
             </div>
         </div>

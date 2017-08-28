@@ -327,4 +327,12 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
         $('#search-input')[0].value = "";
         $scope.getListViewData();
     }
+
+    // Click function for request form submit.
+    // Replaced form="vm.requestForm" to work in IE
+    $scope.clickSubmit = function () {
+        if (vm.requestForm.$valid) {
+            $scope.submitRequest($scope.ip, vm.request);
+        }
+    }
 });

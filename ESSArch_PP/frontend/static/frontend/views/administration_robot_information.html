@@ -132,7 +132,7 @@
         </div>
     </div>
     <div ng-if="requestForm" class="request-layout">
-            <form id="request-form" name="request-form" class="request-form" ng-submit="submitRequest(vm.selectedRobot, vm.request)">
+            <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(vm.selectedRobot, vm.request)">
                 <div class="request-type">
                     <div ng-repeat="type in vm.requestTypes">
                         <input type="radio" ng-model="vm.request.type" value="{{type}}">
@@ -166,7 +166,7 @@
                             <input type="checkBox" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
                         </label>
                     </div>
-                    <button type="submit" form="request-form" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
+                    <button type="submit" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
                 </form>
             </div>
         </div>
