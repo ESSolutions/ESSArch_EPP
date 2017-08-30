@@ -63,7 +63,7 @@ angular.module('myApp').controller('DropdownCtrl', function ($scope, $log, $root
     });
 
     $rootScope.$on("djangoAuth.logged_out", function(event) {
-        $state.go("login");
+        window.location.replace('/');
     });
 
     $scope.$watch(function() {
