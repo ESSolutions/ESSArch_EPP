@@ -8,7 +8,7 @@
         </div>
         <div ng-if="'home.access' | includedByState">
             <div ui-sref="home.access.accessIp" ng-class="{chosen: $state.current.name == 'home.access.accessIp'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'])">{{'SEARCH' | translate}}</div>
-            <div ui-sref="home.access.workarea" ng-class="{chosen: $state.current.name == 'home.access.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])">{{'WORKAREA' | translate}}</div>
+            <div ui-sref="home.access.workarea" ng-class="{chosen: $state.current.name == 'home.access.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.move_from_ingest_workarea'])">{{'WORKAREA' | translate}}</div>
             <div ui-sref="home.access.createDip" ng-class="{chosen: $state.current.name == 'home.access.createDip'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.preserve'])">{{'DISSEMINATION' | translate}}</div>
         </div>
         <div ng-if="'home.administration' | includedByState">
