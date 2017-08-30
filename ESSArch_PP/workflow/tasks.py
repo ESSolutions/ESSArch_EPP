@@ -327,6 +327,8 @@ class AccessAIP(DBTask):
             if not extracted and not new:
                 raise ValueError('An IP must be extracted when transferred to ingest workarea')
 
+            responsible = User.objects.get(pk=self.responsible)
+
             if new:
                 # Create new generation of the IP
 
@@ -338,6 +340,7 @@ class AccessAIP(DBTask):
                 new_aip.cached = False
                 new_aip.archived = False
                 new_aip.object_path = ''
+                new_aip.responsible = responsible
 
                 max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
                 new_aip.generation = max_generation + 1
@@ -349,8 +352,6 @@ class AccessAIP(DBTask):
                 aip = InformationPackage.objects.get(pk=old_aip)
             else:
                 new_aip = aip
-
-            responsible = User.objects.get(pk=self.responsible)
 
             workarea = Path.objects.get(entity='ingest_workarea').value
             workarea_user = os.path.join(workarea, responsible.username)
@@ -586,6 +587,7 @@ class PollAccessQueue(DBTask):
                 new_aip.cached = False
                 new_aip.archived = False
                 new_aip.object_path = ''
+                new_aip.responsible = entry.user
 
                 max_generation = InformationPackage.objects.filter(aic=new_aip.aic).aggregate(Max('generation'))['generation__max']
                 new_aip.generation = max_generation + 1
