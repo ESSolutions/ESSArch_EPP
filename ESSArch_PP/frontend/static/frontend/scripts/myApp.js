@@ -127,7 +127,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check'],
+                only: ['ip.preserve', 'ip.add_to_ingest_workarea', 'ip.add_to_ingest_workarea_as_new_generation', 'ip.diff-check'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
                     return permissionRedirect(PermPermissionStore, $state, "home.ingest.ipApproval");
                 }]
@@ -145,7 +145,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.move_from_ingest_workarea'],
+                only: ['ip.move_from_ingest_workarea', 'ip.preserve_from_ingest_workarea'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
                     return permissionRedirect(PermPermissionStore, $state, "home.ingest.workarea");
                 }]
@@ -191,7 +191,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'],
+                only: ['ip.move_from_access_workarea', 'ip.preserve_from_access_workarea'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
                     return permissionRedirect(PermPermissionStore, $state, "home.access.workarea");
                 }]

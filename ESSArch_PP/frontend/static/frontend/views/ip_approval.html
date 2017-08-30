@@ -4,13 +4,13 @@
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.get_from_storage')">
+                    <div ng-if="checkPermission('ip.add_to_ingest_workarea')">
                         <input type="radio" ng-model="vm.request.type" value="get">
                             <label>
                             {{'GET' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.get_from_storage_as_new')">
+                    <div ng-if="checkPermission('ip.add_to_ingest_workarea_as_new')">
                         <input type="radio" ng-model="vm.request.type" value="get_as_new">
                         <label>
                             {{'GET_AS_NEW_GENERATION' | translate}}

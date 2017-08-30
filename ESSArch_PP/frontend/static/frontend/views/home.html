@@ -25,8 +25,8 @@
     </div>
     <div class="menu-task-wrapper">
         <div class="nav" ng-controller="TabsCtrl">
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions(['ip.receive', 'ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check', 'ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])">{{('INGEST' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new', 'ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea', 'ip.preserve'])">{{('ACCESS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions(['ip.receive', 'ip.preserve', 'ip.add_to_ingest_workarea', 'ip.add_to_ingest_workarea_as_new_generation', 'ip.diff-check', 'ip.move_from_ingest_workarea', 'ip.preserve_from_ingest_workarea'])">{{('INGEST' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new', 'ip.move_from_access_workarea', 'ip.preserve_from_access_workarea'])">{{('ACCESS' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders" ng-if="checkPermissions(['ip.prepare_order'])">{{('ORDERS' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions(['storage.storage_management', 'storage.storage_migration', 'storage.storage_maintenance'])">{{('ADMINISTRATION' | translate)}}</p>
         </div>
