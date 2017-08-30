@@ -77,9 +77,11 @@ from ESSArch_Core.ip.permissions import (
     IsResponsibleOrReadOnly
 )
 from ESSArch_Core.profiles.models import (
-    ProfileSA,
+    Profile,
+    ProfileIP,
     SubmissionAgreement,
 )
+from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.util import (
     get_value_from_path,
     get_files_and_dirs,
@@ -338,6 +340,27 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         if ip.state != 'Prepared':
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
+        sa = ip.submission_agreement
+
+        profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
+        profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
+
+        if profile_ip_aip is None:
+            raise exceptions.ParseError('Information package missing AIP profile')
+
+        if profile_ip_dip is None:
+            raise exceptions.ParseError('Information package missing DIP profile')
+
+        try:
+            profile_ip_aip.clean()
+        except ValidationError as e:
+            raise exceptions.ValidationError('%s: %s' % (profile_ip_aip.profile.name, e.message))
+
+        try:
+            profile_ip_dip.clean()
+        except ValidationError as e:
+            raise exceptions.ValidationError('%s: %s' % (profile_ip_dip.profile.name, e.message))
+
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
         objid = ip.object_identifier_value
@@ -463,30 +486,30 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             processstep_pos=0
         )
 
-        sa = ip.submission_agreement
-
-        aip_profile = ProfileSA.objects.get(submission_agreement=sa, profile__profile_type='aip').profile
+        aip_profile = profile_ip_aip.profile
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
-
 
         filesToCreate = OrderedDict()
         filesToCreate[mets_path] = aip_profile.specification
 
         try:
-            premis_profile = ProfileSA.objects.get(submission_agreement=sa, profile__profile_type='preservation_metadata').profile
-        except ProfileSA.DoesNotExist as e:
+            profile_ip_premis = ProfileIP.objects.get(ip=ip, profile=sa.profile_preservation_metadata)
+            premis_profile = profile_ip_premis.profile
+        except ProfileIP.DoesNotExist as e:
             pass
         else:
             premis_dir, premis_name = find_destination("preservation_description_file", aip_profile.structure)
             premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
             filesToCreate[premis_path] = premis_profile.specification
 
+        data = fill_specification_data(profile_ip_aip.data.data, ip=ip, sa=sa)
+
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.GenerateXML',
             params={
                 'filesToCreate': filesToCreate,
-                'info': aip_profile.specification_data,
+                'info': data,
                 'folderToParse': ip.object_path,
             },
             responsible=request.user,
