@@ -24,6 +24,15 @@ Email - essarch@essolutions.se
 
 angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource"])
 .config(function($routeProvider, formlyConfigProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider) {
+
+    function permissionRedirect(store, state, dst) {
+        if(angular.equals(store.getStore(), {})) {
+            state.go(dst);
+        } else {
+            return 'home.restricted';
+        }
+    }
+
     $stateProvider
     .state('home', {
         url: '/',
@@ -102,11 +111,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.receive'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.ingest.reception");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.reception");
                 }]
             }
         },
@@ -124,11 +129,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.ingest.ipApproval");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.ipApproval");
                 }]
             }
         },
@@ -146,11 +147,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.move_from_ingest_workarea'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.ingest.workarea");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.workarea");
                 }]
             }
         },
@@ -178,11 +175,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.access.accessIp");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.access.accessIp");
                 }]
             }
         },
@@ -200,11 +193,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.access.workarea");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.access.workarea");
                 }]
             }
         },
@@ -223,11 +212,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.diff-check', 'ip.preserve'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.access.createDip");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.access.createDip");
                 }]
             }
         },
@@ -245,11 +230,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['ip.prepare_order'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.orders");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.orders");
                 }]
             }
         },
@@ -298,11 +279,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['storage.storage_management'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.administration.mediaInformation");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.administration.mediaInformation");
                 }]
             }
         },
@@ -320,11 +297,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['storage.storage_management'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.administration.robotInformation");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.administration.robotInformation");
                 }]
             }
         },
@@ -342,11 +315,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['storage.storage_management'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.administration.queues");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.administration.queues");
                 }]
             }
         },
@@ -364,11 +333,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['storage.storage_migration'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.administration.storageMigration");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.administration.storageMigration");
                 }]
             }
         },
@@ -386,11 +351,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             permissions: {
                 only: ['storage.storage_maintenance'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    if(angular.equals(PermPermissionStore.getStore(), {})) {
-                        $state.go("home.administration.storageMaintenance");
-                    } else {
-                        return 'home.restricted'
-                    }
+                    return permissionRedirect(PermPermissionStore, $state, "home.administration.storageMaintenance");
                 }]
             }
         },
