@@ -32,7 +32,7 @@ from django.db.models import Prefetch
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import exceptions, serializers, status
+from rest_framework import exceptions, permissions, serializers, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
@@ -64,6 +64,7 @@ from ESSArch_Core.profiles.serializers import (
     ProfileSerializer,
     ProfileSASerializer,
     ProfileIPSerializer,
+    ProfileIPWriteSerializer,
     ProfileIPDataSerializer,
     SubmissionAgreementSerializer
 )
@@ -222,10 +223,15 @@ class ProfileSAViewSet(viewsets.ModelViewSet):
 
 class ProfileIPViewSet(viewsets.ModelViewSet):
     queryset = ProfileIP.objects.all()
-    serializer_class = ProfileIPSerializer
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('ip', 'profile',)
+
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return ProfileIPSerializer
+
+        return ProfileIPWriteSerializer
 
 
 class ProfileIPDataViewSet(viewsets.ModelViewSet):
