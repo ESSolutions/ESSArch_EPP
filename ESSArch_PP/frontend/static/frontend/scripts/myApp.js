@@ -144,7 +144,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'],
+                only: ['ip.move_from_ingest_workarea'],
                 redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
                     if(angular.equals(PermPermissionStore.getStore(), {})) {
                         $state.go("home.ingest.workarea");
