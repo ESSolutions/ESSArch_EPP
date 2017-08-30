@@ -81,7 +81,7 @@ from ESSArch_Core.profiles.models import (
     ProfileIP,
     SubmissionAgreement,
 )
-from ESSArch_Core.profiles.utils import fill_specification_data
+from ESSArch_Core.profiles.utils import fill_specification_data, profile_types
 from ESSArch_Core.util import (
     get_value_from_path,
     get_files_and_dirs,
@@ -326,6 +326,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             submission_agreement=sa,
             submission_agreement_locked=True,
         )
+
+        for profile_type in profile_types:
+            lower_type = profile_type.lower().replace(' ', '_')
+            profile = getattr(sa, 'profile_%s' % lower_type, None)
+
+            if profile is None:
+                continue
+
+            ProfileIP.objects.create(ip=ip, profile=profile)
 
         data = InformationPackageSerializer(ip, context={'request': request}).data
         return Response(data, status=status.HTTP_201_CREATED)
