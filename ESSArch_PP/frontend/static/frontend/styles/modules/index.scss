@@ -252,6 +252,9 @@ body.modal-open[style] {
         max-width: 350px;
     }
 }
+.receive-modal-button {
+    align-items: center;
+}
 .request-form {
     display: flex;
     flex-direction: row;

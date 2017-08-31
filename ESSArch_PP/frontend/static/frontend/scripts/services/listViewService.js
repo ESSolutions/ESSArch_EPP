@@ -237,7 +237,7 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
             var promises = [];
             sas.forEach(function (sa) {
                 saProfile.profiles.push(sa);
-                if (ip.submission_agreement == sa.url || ip.altrecordids["SUBMISSIONAGREEMENT"] == sa.id ){
+                if (ip.submission_agreement == sa.url || (ip.altrecordids && ip.altrecordids["SUBMISSIONAGREEMENT"] == sa.id)){
                     saProfile.profile = sa;
                     saProfile.locked = ip.submission_agreement_locked;
                     if (saProfile.profile.profile_aip) {

@@ -319,5 +319,7 @@
     "MISSING_DIP": "DIP profile missing in Submission agreement",
     "GENERATE_TEMPLATE": "Generate template",
     "ADD_ATTRIBUTE": "Add Attribute",
-    "ADD_EXTENSION": "Add extension"
+    "ADD_EXTENSION": "Add extension",
+    "SELECTED": "Selected",
+    "PREPARE": "Prepare"
 }

@@ -22,5 +22,9 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
             method: 'POST',
             params: { action: "submit", id: "@id" }
         },
+        prepare: {
+            method: 'POST',
+            params: { action: "prepare", id: "@id" }
+        }
     });
 });

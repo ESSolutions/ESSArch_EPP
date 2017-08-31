@@ -15,6 +15,8 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 
+from ESSArch_Core.profiles.models import SubmissionAgreement
+
 from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
@@ -115,6 +117,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
+    submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -301,6 +304,7 @@ class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
 class InformationPackageDetailSerializer(InformationPackageSerializer):
     aic = InformationPackageAICSerializer(omit=['information_packages'])
     policy = ArchivePolicySerializer()
+    submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     class Meta:
         model = InformationPackageSerializer.Meta.model

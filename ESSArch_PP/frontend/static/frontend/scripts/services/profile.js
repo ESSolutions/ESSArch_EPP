@@ -1,7 +1,26 @@
 angular.module('myApp').factory('Profile', function ($resource, appConfig) {
-    return $resource(appConfig.djangoUrl + 'profiles/:id/:action/', {id: "@id"}, {
+    return $resource(appConfig.djangoUrl + 'profiles/:id/:action/', {}, {
     get: {
         method: "GET",
+        params: { id: "@id" }
+    }
+    });
+})
+.factory('ProfileIp', function ($resource, appConfig) {
+    return $resource(appConfig.djangoUrl + 'profile-ip/:id/', {}, {
+    query: {
+        method: "GET",
+        isArray: true,
+    },
+    get: {
+        method: "GET",
+    },
+    post: {
+        method: "POST",
+    },
+    patch: {
+        method: "PATCH",
+        params: { id: "@id" }
     }
     });
 })

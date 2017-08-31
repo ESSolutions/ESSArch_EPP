@@ -8,7 +8,9 @@
                     </td>
                     <td ng-if="!saAlert"><select class="form-control table-col" ng-disabled="(saProfile.disabled)"
                             ng-model="saProfile.profile" ng-change="changeSaProfile(saProfile.profile, ip, {{saProfile.profiles.indexOf(saProfile.profile)}}); getSelectCollection(saProfile.profile, ip)"
-                            ng-options="x as x.name for x in saProfile.profiles"></select></td>
+                            ng-options="x as x.name for x in saProfile.profiles"></select>
+                            <button ng-if="!saProfile.disabled" class="btn btn-success" ng-click="prepare(ip)">{{'PREPARE' | translate}}</button>
+                        </td>
                     <p>{{'PATH' | translate}}: {{ip.object_path}}</p>
                 </tr>
             </table>
@@ -24,18 +26,18 @@
         </div>
         <div ng-if="saProfile.profile" id="edit-view" class="edit-view">
             <form id="edit-form" ng-submit="vm.saveProfileModel(vm.selectedProfile.profile_type, vm.profileModel, vm.treeEditModel)" name="vm.editForm" novalidate>
-                <div ng-if="saProfile.profile.profile_aip"><b>AIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_aip, {})">{{saProfile.profile.profile_aip.name}}</a></div>
+                <div ng-if="saProfile.profile.profile_aip"><b>AIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_aip, {})">{{saProfile.profile.profile_aip}}</a></div>
                 <div uib-alert ng-if="!saProfile.profile.profile_aip" style="width: 100%;" ng-class="'alert-' + (aipAlert.type || 'warning')">{{aipAlert.msg}}</div>
-                <div ng-if="saProfile.profile.profile_dip"><b>DIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_dip, {})">{{saProfile.profile.profile_dip.name}}</a></div>
+                <div ng-if="saProfile.profile.profile_dip"><b>DIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_dip, {})">{{saProfile.profile.profile_dip}}</a></div>
                 <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
-                </form>
-                <br />
-                <div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
-                <br />
-                <button ng-if="vm.profileFields.length" form="edit-form" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
-                <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
+            </form>
+            <br />
+            <!--<div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
+            <br />-->
+            <button ng-if="vm.profileFields.length" form="edit-form" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
+            <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
         </div>
     </div>
 </div>

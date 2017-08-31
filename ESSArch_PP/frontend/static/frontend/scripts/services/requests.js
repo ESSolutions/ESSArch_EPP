@@ -27,10 +27,8 @@ angular.module('myApp').factory('Requests', function(IPReception, IP, $http, app
         return IPReception.receive({
                 id: ip.id,
                 archive_policy: request.archivePolicy.value.id,
-                submission_agreement: request.submissionAgreement.value,
                 purpose: request.purpose,
                 tags: request.tags.value.map(function(tag){return tag.id}),
-                profile_data: request.profileData,
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
         }).$promise.then(function(response) {

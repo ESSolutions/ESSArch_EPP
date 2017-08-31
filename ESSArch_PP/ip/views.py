@@ -336,7 +336,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             ProfileIP.objects.create(ip=ip, profile=profile)
 
-        data = InformationPackageSerializer(ip, context={'request': request}).data
+        data = InformationPackageDetailSerializer(ip, context={'request': request}).data
         return Response(data, status=status.HTTP_201_CREATED)
 
     @detail_route(methods=['post'], url_path='receive')

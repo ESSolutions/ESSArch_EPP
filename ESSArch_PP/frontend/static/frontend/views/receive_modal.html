@@ -1,5 +1,5 @@
 <div class="enter-profile-name">
-    <h3 style="margin: 15px;" class="modal-title" id="modal-title">IP: {{ip.label}}</h3>
+    <h3 style="margin: 15px;" class="modal-title" id="modal-title">IP: {{ip.id}}</h3>
 </div>
 <div class="modal-body" id="modal-body">
     <profile-editor ng-if="profileEditor" ip="ip" share-data="vm.getProfileData($event)"></profile-editor>
@@ -62,7 +62,7 @@
                 <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
             </label>
         </div>
-        <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(includedIps[0])">{{'RECEIVE' | translate}}</button>
+        <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}}</button>
         <button class="btn btn-warning" type="button" ng-click="vm.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </div>
