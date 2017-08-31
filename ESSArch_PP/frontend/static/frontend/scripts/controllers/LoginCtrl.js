@@ -29,7 +29,7 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
     $scope.model = {'username':'','password':''};
     $scope.complete = false;
     $scope.login = function(formData){
-        $scope.errors = [];
+        $scope.error = null;
         Validate.form_validation(formData,$scope.errors);
         if(!formData.$invalid){
             djangoAuth.login($scope.model.username, $scope.model.password)
@@ -43,9 +43,9 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                         myService.getPermissions(response.data.permissions);
                     });
                     $state.go('home.myPage');
-                },function(response){
+                }).catch(function(response){
                     // error case
-                    $scope.errors = response.data;
+                    $scope.error = response.data.detail;
                 });
         }
     }
