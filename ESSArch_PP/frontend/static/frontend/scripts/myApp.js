@@ -445,14 +445,17 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     });
 }])
-.config(['$httpProvider', function($httpProvider, $rootScope) {
+.config(['$httpProvider', '$windowProvider', function($httpProvider, $windowProvider, $rootScope) {
+    var $window = $windowProvider.$get();
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
-    $httpProvider.interceptors.push(['$q', function ($q, $location) {
+    $httpProvider.interceptors.push(['$q', '$location', function ($q, $location) {
         return {
             'responseError': function(response) {
                 if(response.status === 401 || response.status === 403) {
-                    location.assign('/');
+                    if ($location.path() != '/login' && $location.path() != ''){
+                        $window.location.assign('/');
+                    }
                 }
                 return $q.reject(response);
             }
