@@ -32,12 +32,12 @@
                 <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
+                <br />
+                <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
+                <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
             </form>
-            <br />
             <!--<div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
             <br />-->
-            <button ng-if="vm.profileFields.length" form="edit-form" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
-            <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
         </div>
     </div>
 </div>
