@@ -42,6 +42,7 @@
     <table class="table table-striped" style="margin-bottom: 0px;">
         <a ng-if="vm.expandAllVisible() && vm.showExpand" ng-click="vm.expandAll()" translate="EXPAND_ALL"></a>
         <a ng-if="vm.expandAllVisible() && !vm.showExpand" ng-click="vm.collapseAll()" translate="COLLAPSE_ALL"></a>
+        <a ng-if="'home.ingest.reception' | isState" ng-click="vm.uncheckAll()" translate="CLEAR_ALL"></a>
         <thead>
             <tr>
                 <th class="clickable" class="column-label"></th>

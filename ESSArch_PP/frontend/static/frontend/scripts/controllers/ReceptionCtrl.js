@@ -398,6 +398,14 @@ angular.module('myApp').controller('ReceptionCtrl', function (IPReception, IP, T
     $scope.closeAlert = function() {
         $scope.informationClassAlert = null;
     }
+
+    vm.uncheckAll = function() {
+        $scope.includedIps = [];
+        vm.displayedIps.forEach(function(row) {
+            row.checked = false;
+        });
+    }
+
     $scope.clickSubmit = function() {
        if(vm.requestForm.$valid) {
            $scope.receive($scope.includedIps);
