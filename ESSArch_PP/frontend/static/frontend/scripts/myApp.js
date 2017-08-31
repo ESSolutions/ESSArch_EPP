@@ -356,6 +356,46 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         },
     })
+    .state('home.administration.profileManager', {
+        url: '/profile-manager',
+        templateUrl: 'static/frontend/views/profile_manager.html',
+        controller: 'ProfileManagerCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.administration.profileManager.saEditor', {
+        url: '/sa-editor',
+        template: '<sa-editor></sa-editor>',
+        controller: 'SaEditorCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.administration.profileManager.profileMaker', {
+        url: '/profile-maker',
+        template: '<profile-maker></profile-maker>',
+        controller: 'ProfileMakerCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.administration.profileManager.import', {
+        url: '/import',
+        template: '<import></import>',
+        controller: 'ImportCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('home.restricted', {
         url: 'restricted',
         templateUrl: '/static/frontend/views/restricted.html',
@@ -408,11 +448,11 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 .config(['$httpProvider', function($httpProvider, $rootScope) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
-    $httpProvider.interceptors.push(['$q', '$location', function ($q, $location) {
+    $httpProvider.interceptors.push(['$q', function ($q, $location) {
         return {
             'responseError': function(response) {
                 if(response.status === 401 || response.status === 403) {
-                    $location.assign('/');
+                    location.assign('/');
                 }
                 return $q.reject(response);
             }
@@ -471,7 +511,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             };
         }
     });
-    
+
     formlyConfigProvider.setType({
         name: 'select',
         templateUrl: 'static/frontend/views/form_template_select.html',
@@ -491,7 +531,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             };
         },
     });
-    
+
     formlyConfigProvider.setType({
         name: 'datepicker',
         templateUrl: "static/frontend/views/datepicker_template.html",
@@ -522,7 +562,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 })
             };
         },
-        
+
         apiCheck: function apiCheck(check) {
             return {
                 templateOptions: {
@@ -536,7 +576,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             };
         }
     });
-    
+
     formlyConfigProvider.setWrapper({
         name: 'validation',
         types: ['input', 'datepicker', 'select'],
@@ -563,7 +603,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 .run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
     formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
     formlyValidationMessages.addStringMessage('required', 'This field is required');
-    
+
     $rootScope.flowObjects = {};
     djangoAuth.initialize('/rest-auth', false).then(function(response) {
         $rootScope.auth = response.data;

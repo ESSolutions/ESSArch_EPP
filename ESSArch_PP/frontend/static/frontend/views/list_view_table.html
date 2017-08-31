@@ -26,11 +26,11 @@
         />
         <span class="input-group-addon clickable" ng-click="initAdvancedFilters(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
     </div>
-    <div ng-if="!searchDisabled()" style="width: 50%;" class="input-group margin-bottom-sm">    
+    <div ng-if="!searchDisabled()" style="width: 50%;" class="input-group margin-bottom-sm">
     <input id="search-input" st-search="" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
         uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
     />
-        <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>    
+        <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
     </div>
     <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}"
         popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREDIP' | translate}}</button>
@@ -40,6 +40,8 @@
 </div>
 <div id="list-view" class="list-view-table">
     <table class="table table-striped" style="margin-bottom: 0px;">
+        <a ng-if="vm.expandAllVisible() && vm.showExpand" ng-click="vm.expandAll()" translate="EXPAND_ALL"></a>
+        <a ng-if="vm.expandAllVisible() && !vm.showExpand" ng-click="vm.collapseAll()" translate="COLLAPSE_ALL"></a>
         <thead>
             <tr>
                 <th class="clickable" class="column-label"></th>

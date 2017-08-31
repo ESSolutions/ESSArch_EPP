@@ -83,8 +83,8 @@ var jsVendorFiles = [
         'node_modules/angular-resource/angular-resource.js',
     ],
     jsFiles = [
-        'scripts/polyfills/*.js', 'scripts/myApp.js', 'scripts/controllers/*.js', 'scripts/services/*.js',
-        'scripts/directives/*.js', 'scripts/configs/*.js'
+        'scripts/polyfills/*.js', 'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
+        'scripts/services/*.js', 'scripts/directives/*.js', 'scripts/configs/*.js'
     ],
     jsDest = 'scripts',
     cssFiles = [
@@ -95,6 +95,7 @@ var jsVendorFiles = [
         'styles/modules/colors.scss',
         'styles/modules/mixins.scss',
         'styles/modules/tree_control.scss',
+        'styles/modules/profile_maker.scss',
         'styles/styles.scss'
     ],
     cssDest = 'styles';

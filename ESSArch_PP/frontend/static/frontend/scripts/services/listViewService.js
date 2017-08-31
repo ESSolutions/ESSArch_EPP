@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -212,52 +212,69 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
         });
     }
     //Returns map structure for a profile
-    function getStructure(profileUrl) {
-        return $http({
-            method: 'GET',
-            url: profileUrl
-        }).then(function(response) {
-            return response.data.structure;
-        }, function(response) {});
+    function getStructure(profileId) {
+        console.log(profileId)
+        return Profile.get({
+            id: profileId
+        }).$promise.then(function(data) {
+            return data.structure;
+        });
     }
-    //returns all SA-profiles and current as an object
+     //returns all SA-profiles and current as an object
     function getSaProfiles(ip) {
         var sas = [];
-        var saProfile = {
+        var saProfile =
+        {
             entity: "PROFILE_SUBMISSION_AGREEMENT",
             profile: null,
             profiles: [
 
             ],
         };
-        return SA.get().$promise.then(function (response) {
-            sas = response.data;
+        return SA.query({
+            pager: 'none'
+        }).$promise.then(function (resource) {
+            sas = resource;
             saProfile.profiles = [];
-            saProfile.profileObjects = sas;
+            var promises = [];
             sas.forEach(function (sa) {
                 saProfile.profiles.push(sa);
-                if (ip.submission_agreement == sa.url) {
+                if (ip.submission_agreement == sa.url || (ip.altrecordids && ip.altrecordids["SUBMISSIONAGREEMENT"] == sa.id)){
                     saProfile.profile = sa;
                     saProfile.locked = ip.submission_agreement_locked;
+                    if (saProfile.profile.profile_aip) {
+                        promises.push(Profile.get({ id: saProfile.profile.profile_aip })
+                            .$promise.then(function (resource) {
+                                saProfile.profile.profile_aip = resource;
+                            }));
+                    }
+                    if (saProfile.profile.profile_dip) {
+                        promises.push(Profile.get({ id: saProfile.profile.profile_dip })
+                            .$promise.then(function (resource) {
+                                saProfile.profile.profile_dip = resource;
+                            }));
+                    }
                 }
             });
-            return saProfile;
+            return $q.all(promises).then(function() {
+                return saProfile;
+            })
         });
     }
 
-    function getProfileByTypeFromSA(sa, type) {
+    function getProfileByTypeFromSA(sa, type){
         return sa['profile_' + type];
     }
 
-    function getProfileByTypeFromIP(ip, type) {
+    function getProfileByTypeFromIP(ip, type){
         return ip['profile_' + type];
     }
 
-    function findProfileByUrl(url, profiles) {
+    function findProfileByUrl(url, profiles){
         var p = null;
 
-        profiles.forEach(function(profile) {
-            if (profile.url == url) {
+        profiles.forEach(function(profile){
+            if (profile.url == url){
                 p = profile;
             }
         });
@@ -266,21 +283,14 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
     }
 
     //Ligher fetching of profiles start
-    function createProfileObjMinified(type, profiles, ip, sa) {
+    function createProfileObjMinified(type, profiles, ip, sa){
         var required = false;
         var locked = false;
         var checked = false;
         var profile = null;
 
-        p = getProfileByTypeFromIP(ip, type);
-        if (p) {
-            profile_from_ip = p;
-            profile = profile_from_ip;
-            locked = p.LockedBy ? true : false;
-            checked = p.included
-        }
         p = getProfileByTypeFromSA(sa, type);
-        if (p) {
+        if (p){
             checked = true;
             required = true;
             if (profile == null) {
@@ -288,7 +298,7 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
             }
         }
         active = profile;
-        if (profile) {
+        if(profile) {
             profiles = [profile];
         }
         return {
@@ -304,36 +314,36 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
 
     function getProfilesFromIp(sa, ip) {
         var selectCollapse = [];
-        if (sa == null) {
+        if(sa == null) {
             return [];
         }
-        if (sa.id != null) {
-            if (ip.profile_transfer_project) {
+        if(sa.id != null){
+            /*if(ip.profile_transfer_project) {
                 selectCollapse.push(createProfileObjMinified("transfer_project", [ip.profile_transfer_project], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("transfer_project", [], ip, sa));
             }
-            if (ip.profile_submit_description) {
+            if(ip.profile_submit_description) {
                 selectCollapse.push(createProfileObjMinified("submit_description", [ip.profile_submit_description], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("submit_description", [], ip, sa));
             }
-            if (ip.profile_sip) {
+            if(ip.profile_sip) {
                 selectCollapse.push(createProfileObjMinified("sip", [ip.profile_sip], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("sip", [], ip, sa));
-            }
-            /*
-            if(ip.profile_aip) {
-                selectCollapse.push(createProfileObjMinified("aip", [ip.profile_aip], ip, sa));
+            }*/
+            if(sa.profile_aip) {
+                selectCollapse.push(createProfileObjMinified("aip", [sa.profile_aip], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("aip", [], ip, sa));
             }
-            if(ip.profile_dip) {
-                selectCollapse.push(createProfileObjMinified("dip", [ip.profile_dip], ip, sa));
+            if(sa.profile_dip) {
+                selectCollapse.push(createProfileObjMinified("dip", [sa.profile_dip], ip, sa));
             } else {
                 selectCollapse.push(createProfileObjMinified("dip", [], ip, sa));
             }
+            /*
             if(ip.profile_content_type) {
                 selectCollapse.push(createProfileObjMinified("content_type", [ip.profile_content_type], ip, sa));
             } else {
@@ -393,7 +403,7 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
 
     //Execute prepare ip, which creates a new IP
     function prepareIp(label) {
-        ip.post({ 
+        ip.post({
             label: label
         }).$promise.then(function(response) {
             return "created";
@@ -516,7 +526,7 @@ angular.module('myApp').factory('listViewService', function(Tag, IP, Workarea, W
     }
 
     function deleteFile(ip, path, file) {
-        return IP.removeFile({ 
+        return IP.removeFile({
             id: ip.id,
             path: path + file.name,
         }).$promise.then(function(response) {

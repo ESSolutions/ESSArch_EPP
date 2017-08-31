@@ -10,6 +10,7 @@ django-redis==4.7.0
 django-rest-auth[with_social]==0.8.1
 drf-dynamic-fields==0.2.0
 drf-extensions==0.3.1
+drf-proxy-pagination==0.1.1
 httpretty==0.8.14
 jsonpickle==0.9.3
 lxml==3.6.4

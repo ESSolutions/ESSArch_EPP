@@ -33,12 +33,15 @@ import tarfile
 import uuid
 import zipfile
 
+from collections import OrderedDict
 from operator import itemgetter
 
 from celery import states as celery_states
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -55,6 +58,9 @@ from ESSArch_Core.configuration.models import (
     Path,
 )
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
+from ESSArch_Core.essxml.Generator.xmlGenerator import (
+    find_destination
+)
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -65,7 +71,19 @@ from ESSArch_Core.ip.models import (
     EventIP,
     Workarea,
 )
-from ESSArch_Core.ip.permissions import CanDeleteIP, IsOrderResponsibleOrAdmin, IsResponsibleOrReadOnly
+from ESSArch_Core.ip.permissions import (
+    CanChangeSA,
+    CanDeleteIP,
+    CanUnlockProfile,
+    IsOrderResponsibleOrAdmin,
+    IsResponsibleOrReadOnly
+)
+from ESSArch_Core.profiles.models import (
+    Profile,
+    ProfileIP,
+    SubmissionAgreement,
+)
+from ESSArch_Core.profiles.utils import fill_specification_data, profile_types
 from ESSArch_Core.util import (
     generate_file_response,
     get_value_from_path,
@@ -234,7 +252,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         # Filter ips based on conditions
         new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k,v) in conditions.iteritems())), ips)
 
-        from_db = InformationPackage.objects.filter(state='Receiving', **conditions)
+        from_db = InformationPackage.objects.filter(state__in=['Prepared', 'Receiving'], **conditions)
         serializer = InformationPackageSerializer(
             data=from_db, many=True, context={'request': request, 'view': self}
         )
@@ -257,13 +275,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         return Response(parse_submit_description(fullpath, srcdir=path))
 
-    @detail_route(methods=['post'], url_path='receive')
-    def receive(self, request, pk=None):
-        if InformationPackage.objects.filter(object_identifier_value=pk).exists():
-            raise exceptions.ParseError('IP with id %s already exist' % pk)
+    @detail_route(methods=['post'])
+    def prepare(self, request, pk=None):
+        existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
+        if existing is not None:
+            raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
-
         xmlfile = os.path.join(reception, '%s.xml' % pk)
 
         if not os.path.isfile(xmlfile):
@@ -283,6 +301,101 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         objid, container_type = os.path.splitext(os.path.basename(container))
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
 
+        provided_sa = request.data.get('submission_agreement')
+        parsed_sa = parsed.get('altrecordids', {}).get('SUBMISSIONAGREEMENT', [None])[0]
+
+        if parsed_sa is not None and provided_sa is not None:
+            if provided_sa == parsed_sa:
+                sa = provided_sa
+            if provided_sa != parsed_sa:
+                raise exceptions.ParseError(detail='Must use SA specified in XML')
+        elif parsed_sa and not provided_sa:
+            sa = parsed_sa
+        elif provided_sa and not parsed_sa:
+            sa = provided_sa
+        else:
+            raise exceptions.ParseError(detail='Missing parameter submission_agreement')
+
+        try:
+            sa = SubmissionAgreement.objects.get(pk=sa)
+        except (ValueError, SubmissionAgreement.DoesNotExist) as e:
+            raise exceptions.ParseError(detail=e.message)
+
+        ip = InformationPackage.objects.create(
+            object_identifier_value=pk,
+            package_type=InformationPackage.AIP,
+            state='Prepared',
+            responsible=request.user,
+            generation=0,
+            submission_agreement=sa,
+            submission_agreement_locked=True,
+        )
+
+        for profile_type in profile_types:
+            lower_type = profile_type.lower().replace(' ', '_')
+            profile = getattr(sa, 'profile_%s' % lower_type, None)
+
+            if profile is None:
+                continue
+
+            ProfileIP.objects.create(ip=ip, profile=profile)
+
+        data = InformationPackageDetailSerializer(ip, context={'request': request}).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'], url_path='receive')
+    def receive(self, request, pk=None):
+        try:
+            ip = get_object_or_404(InformationPackage, id=pk)
+        except (ValueError, ValidationError):
+            raise exceptions.NotFound('Information package with id="%s" not found' % pk)
+
+        if ip.state != 'Prepared':
+            raise exceptions.ParseError('Information package must be in state "Prepared"')
+
+        sa = ip.submission_agreement
+
+        profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
+        profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
+
+        if profile_ip_aip is None:
+            raise exceptions.ParseError('Information package missing AIP profile')
+
+        if profile_ip_dip is None:
+            raise exceptions.ParseError('Information package missing DIP profile')
+
+        try:
+            profile_ip_aip.clean()
+        except ValidationError as e:
+            raise exceptions.ValidationError('%s: %s' % (profile_ip_aip.profile.name, e.message))
+
+        try:
+            profile_ip_dip.clean()
+        except ValidationError as e:
+            raise exceptions.ValidationError('%s: %s' % (profile_ip_dip.profile.name, e.message))
+
+        reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+
+        objid = ip.object_identifier_value
+        xmlfile = os.path.join(reception, '%s.xml' % objid)
+
+        if not os.path.isfile(xmlfile):
+            return Response(
+                {'status': '%s does not exist' % xmlfile},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+
+        if not os.path.isfile(container):
+            return Response(
+                {'status': '%s does not exist' % container},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        container_type = os.path.splitext(os.path.basename(container))[1]
+        parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
+
         policy_id = request.data.get('archive_policy')
 
         try:
@@ -298,19 +411,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         if information_class != policy.information_class:
             raise ValueError('Information class of IP and policy does not match')
 
-        ip = InformationPackage.objects.create(
-            object_identifier_value=objid,
-            policy=policy,
-            package_type=InformationPackage.AIP,
-            label=parsed.get('label'),
-            state='Receiving',
-            entry_date=parsed.get('create_date'),
-            responsible=request.user,
-            start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None),
-            end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None),
-            information_class=information_class,
-            generation=0,
-        )
+        ip.object_path=os.path.join(policy.ingest_path.value, objid)
+        ip.policy=policy
+        ip.label=parsed.get('label')
+        ip.state='Receiving'
+        ip.entry_date=parsed.get('create_date')
+        ip.start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None)
+        ip.end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None)
+        ip.information_class=information_class
+        ip.save()
 
         step = ProcessStep.objects.create(
             name="Receive SIP", eager=False,
@@ -388,6 +497,38 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             responsible=self.request.user,
             processstep=step,
             processstep_pos=0
+        )
+
+        aip_profile = profile_ip_aip.profile
+        mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
+        mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
+
+        filesToCreate = OrderedDict()
+        filesToCreate[mets_path] = aip_profile.specification
+
+        try:
+            profile_ip_premis = ProfileIP.objects.get(ip=ip, profile=sa.profile_preservation_metadata)
+            premis_profile = profile_ip_premis.profile
+        except ProfileIP.DoesNotExist as e:
+            pass
+        else:
+            premis_dir, premis_name = find_destination("preservation_description_file", aip_profile.structure)
+            premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
+            filesToCreate[premis_path] = premis_profile.specification
+
+        data = fill_specification_data(profile_ip_aip.data.data, ip=ip, sa=sa)
+
+        ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.GenerateXML',
+            params={
+                'filesToCreate': filesToCreate,
+                'info': data,
+                'folderToParse': ip.object_path,
+            },
+            responsible=request.user,
+            information_package=ip,
+            processstep=step,
+            processstep_pos=3,
         )
 
         ProcessTask.objects.create(
@@ -606,6 +747,24 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         'start_date','aic__information_packages__start_date','information_packages__start_date',
         'end_date','aic__information_packages__end_date','information_packages__end_date',
     )
+
+    def get_permissions(self):
+        if self.action in ['partial_update', 'update']:
+            if self.request.data.get('submission_agreement'):
+                self.permission_classes = [CanChangeSA]
+        if self.action == 'destroy':
+            self.permission_classes = [CanDeleteIP]
+
+        return super(InformationPackageViewSet, self).get_permissions()
+
+    def update(self, request, *args, **kwargs):
+        ip = self.get_object()
+
+        if 'submission_agreement' in request.data:
+            if ip.submission_agreement_locked:
+                return Response("SA connected to IP is locked", status=status.HTTP_400_BAD_REQUEST)
+
+        return super(InformationPackageViewSet, self).update(request, *args, **kwargs)
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
@@ -902,6 +1061,59 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
 
         download = request.query_params.get('download', False)
         return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
+
+    @detail_route(methods=['put'], url_path='check-profile')
+    def check_profile(self, request, pk=None):
+        ip = self.get_object()
+        ptype = request.data.get("type")
+
+        pip = get_object_or_404(ProfileIP, ip=ip, profile__profile_type=ptype)
+
+        if not pip.LockedBy:
+            pip.included = request.data.get('checked', not pip.included)
+            pip.save()
+
+        return Response()
+
+    @detail_route(methods=['put'], url_path='change-profile')
+    def change_profile(self, request, pk=None):
+        ip = self.get_object()
+
+        try:
+            new_profile = get_object_or_404(Profile, pk=request.data.get("new_profile"))
+        except ValueError:
+            raise exceptions.NotFound
+
+        try:
+            ip.change_profile(new_profile)
+        except ValueError as e:
+            return Response({'status': e.message}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'status': 'updating IP (%s) with new profile (%s)' % (
+                ip.pk, new_profile
+            )
+        })
+
+    @detail_route(methods=['post'], url_path='unlock-profile', permission_classes=[CanUnlockProfile])
+    def unlock_profile(self, request, pk=None):
+        ip = self.get_object()
+
+        if ip.state in ['Submitting', 'Submitted']:
+            raise exceptions.ParseError('Cannot unlock profiles in an IP that is %s' % ip.state)
+
+        try:
+            ptype = request.data["type"]
+        except KeyError:
+            raise exceptions.ParseError('type parameter missing')
+
+        ip.unlock_profile(ptype)
+
+        return Response({
+            'status': 'unlocking profile with type "%s" in IP "%s"' % (
+                ptype, ip.pk
+            )
+        })
 
 
 class WorkareaViewSet(viewsets.ModelViewSet):

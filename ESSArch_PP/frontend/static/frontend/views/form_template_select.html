@@ -7,4 +7,4 @@
        id="{{::id}}"
        name="{{::id}}"
        class="form-control"
-       ng-model="model[options.key]" />
+        ng-model="model[options.key]" ><option ng-hide="to.notNull" value="">{{to.nullDisplay}}</option></select>

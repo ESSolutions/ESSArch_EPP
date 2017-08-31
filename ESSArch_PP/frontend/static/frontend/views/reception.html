@@ -8,74 +8,10 @@
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
-        <div ng-if="requestForm" class="request-layout">
-            <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="receive(includedIps)">
-                <div class="request-type">
-                    <label ng-if="checkPermission('ip.receive')">
-                            <input type="radio" ng-model="vm.request.type" value="receive">
-                            {{'RECEIVE' | translate}}
-                        </label><br/>
-                </div>
-                <div class="request-params">
-                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                        <label>
-                                {{'PURPOSE' | translate}}
-                            </label>
-                        <input class="form-control" required="true" ng-model="vm.request.purpose">
-                    </div>
-                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                        <label>
-                                {{'ARCHIVE_POLICY' | translate}}
-                            </label>
-                        <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
-                            ng-options="x as x.policy_name for x in vm.request.archivePolicy.options"></select>
-                    </div>
-                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                        <label>
-                                {{'INFORMATION_CLASS' | translate}}
-                            </label>
-                        <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
-                    </div>
-                    <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
-                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                        <div class="tags-row">
-                        <label>
-                                {{'TAGS' | translate}}
-                            </label>
-                            <span ng-click="updateTags()" class="clickable fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
-                                popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                        </div>
-                            <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false">
-                                <ui-select-match placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
-                                <ui-select-choices repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
-                                    <div ng-bind-html="x.name | highlight: $select.search"></div>
-                                </ui-select-choices>
-                            </ui-select>
-                    </div>
-                    <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                        <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
-                        <label>
-                                {{'ALLOW_UNKNOWN_FILES' | translate}}
-                            </label>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div ng-if="(edit || eventlog || requestForm) && vm.request.type == 'receive' && checkPermission('ip.receive')" class="select-sub-edit-eventlog-wrapper">
-            <div class="edit-view">
-
-                <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
-            </div>
-
-            <div ng-if="eventlog || requestForm" class="eventlog-view">
-                <form class="eventlog-form">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkBox" ng-disabled="informationClassAlert" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
-                        </label>
-                    </div>
-                    <button type="button" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToReceive" class="btn btn-info submit-button">{{'RECEIVESIP' | translate}}</button>
-                </form>
+        <div ng-if="includedIps.length>0" class="receive-button-wrapper">
+            <div id="request-form" class="request-form receive-modal-button">
+                <button class="btn btn-info" ng-click="receiveModal(includedIps[0])">{{'RECEIVE' | translate}}</button>
+                <p style="margin-left: 5px; margin-bottom: 0;">{{includedIps.length}} {{'SELECTED' | translate}}</p>
             </div>
         </div>
     </div>

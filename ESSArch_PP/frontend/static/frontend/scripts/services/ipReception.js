@@ -27,5 +27,9 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
             params: { action: "files", id: "@id" },
             isArray: true
         },
+        prepare: {
+            method: 'POST',
+            params: { action: "prepare", id: "@id" }
+        }
     });
 });

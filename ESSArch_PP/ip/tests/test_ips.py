@@ -39,6 +39,7 @@ from rest_framework.test import APIClient
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
+from ESSArch_Core.profiles.models import Profile, ProfileSA, SubmissionAgreement
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.util import timestamp_to_datetime
 
@@ -739,11 +740,15 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
         self.datadir = tempfile.mkdtemp()
         Path.objects.create(entity='reception', value=self.datadir)
 
-        tar_filepath = os.path.join(self.datadir, '1.tar')
-        xml_filepath = os.path.join(self.datadir, '1.xml')
+        self.sa = SubmissionAgreement.objects.create()
+        aip_profile = Profile.objects.create(profile_type='aip')
+        ProfileSA.objects.create(submission_agreement=self.sa, profile=aip_profile)
 
-        open(tar_filepath, 'a').close()
-        with open(xml_filepath, 'w') as xml:
+        self.tar_filepath = os.path.join(self.datadir, '1.tar')
+        self.xml_filepath = os.path.join(self.datadir, '1.xml')
+
+        open(self.tar_filepath, 'a').close()
+        with open(self.xml_filepath, 'w') as xml:
             xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
             <root OBJID="1" LABEL="my label">
                 <metsHdr/>
@@ -751,33 +756,114 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
             </root>
             ''')
 
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive(self, mock_receive):
-        data = {'archive_policy': str(self.policy.pk)}
+    def test_receive(self, mock_receive, mock_find_dest):
+        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
         res = self.client.post(self.url + '1/receive/', data=data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         mock_receive.assert_called_once()
 
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
     def test_receive_existing(self, mock_receive):
-        data = {'archive_policy': str(self.policy.pk)}
+        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
         InformationPackage.objects.create(object_identifier_value='1')
         res = self.client.post(self.url + '1/receive/', data=data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         mock_receive.assert_not_called()
 
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_invalid_validator(self, mock_receive):
-        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_invalid': True}}
+    def test_receive_no_sa(self, mock_receive, mock_find_dest):
+        data = {'archive_policy': str(self.policy.pk)}
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_non_existing_sa_in_xml(self, mock_receive, mock_find_dest):
+        with open(self.xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1" LABEL="my label">
+                <metsHdr>
+                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
+                </metsHdr>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''' % str(uuid.uuid4()))
+
+        data = {'archive_policy': str(self.policy.pk)}
+
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_sa_in_xml_and_no_provided(self, mock_receive, mock_find_dest):
+        with open(self.xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1" LABEL="my label">
+                <metsHdr>
+                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
+                </metsHdr>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''' % str(self.sa.pk))
+
+        data = {'archive_policy': str(self.policy.pk)}
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_sa_in_xml_and_provided_match(self, mock_receive, mock_find_dest):
+        with open(self.xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1" LABEL="my label">
+                <metsHdr>
+                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
+                </metsHdr>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''' % str(self.sa.pk))
+
+        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_sa_in_xml_and_provided_not_match(self, mock_receive, mock_find_dest):
+        new_sa = SubmissionAgreement.objects.create()
+
+        with open(self.xml_filepath, 'w') as xml:
+            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
+            <root OBJID="1" LABEL="my label">
+                <metsHdr>
+                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
+                </metsHdr>
+                <file><FLocat href="file:///1.tar"/></file>
+            </root>
+            ''' % str(new_sa.pk))
+
+        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
+        res = self.client.post(self.url + '1/receive/', data=data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
+    def test_receive_invalid_validator(self, mock_receive, mock_find_dest):
+        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_invalid': True}, 'submission_agreement': self.sa.pk}
         res = self.client.post(self.url + '1/receive/', data=data)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertFalse(ProcessStep.objects.filter(name='Validate').exists())
         mock_receive.assert_called_once()
 
+    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_validator(self, mock_receive):
-        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_xml_file': True}}
+    def test_receive_validator(self, mock_receive, mock_find_dest):
+        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_xml_file': True}, 'submission_agreement': self.sa.pk}
         res = self.client.post(self.url + '1/receive/', data=data)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)

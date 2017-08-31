@@ -1,0 +1,68 @@
+<div class="enter-profile-name">
+    <h3 style="margin: 15px;" class="modal-title" id="modal-title">IP: {{ip.id}}</h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <profile-editor ng-if="profileEditor" ip="ip" share-data="vm.getProfileData($event)"></profile-editor>
+    <div ng-if="requestForm" class="request-layout">
+        <form id="request-form" name="vm.form" class="request-form" ng-submit="vm.receive(includedIps[0])">
+            <div class="request-type">
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                    <label>
+                {{'PURPOSE' | translate}}
+            </label>
+                    <input class="form-control" required="true" ng-model="vm.request.purpose" required>
+                </div>
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                    <label>
+                {{'ARCHIVE_POLICY' | translate}}
+            </label>
+                    <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
+                        ng-options="x as x.policy_name for x in vm.request.archivePolicy.options" required></select>
+                </div>
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                    <label>
+                {{'INFORMATION_CLASS' | translate}}
+            </label>
+                    <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
+                </div>
+                <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                    <div class="tags-row">
+                        <label>
+                    {{'TAGS' | translate}}
+                </label>
+                        <span ng-click="updateTags()" class="clickable fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
+                            popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                    </div>
+                    <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false" append-to-body="false">
+                        <ui-select-match placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
+                        <ui-select-choices ng-hide="!$select.open" repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
+                            <div ng-bind-html="x.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                    <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
+                    <label>
+                {{'ALLOW_UNKNOWN_FILES' | translate}}
+            </label>
+                </div>
+            </div>
+            <div class="request-params modal-validators">
+                <div ng-include src="'static/frontend/views/validator_choices.html'"></div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" type="button" ng-click="vm.skip()">{{'SKIP' | translate}} <i class=" fa fa-angle-double-right"></i></button>
+    <div class="receive-footer">
+        <div class="checkbox">
+            <label>
+                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
+            </label>
+        </div>
+        <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="vm.cancel()">{{'CANCEL' | translate}}</button>
+    </div>
+</div>

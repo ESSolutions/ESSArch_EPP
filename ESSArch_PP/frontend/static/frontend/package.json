@@ -11,7 +11,7 @@
     "angular-date-time-input": "^1.2.1",
     "angular-filesize-filter": "^0.1.1",
     "angular-formly": "~8.4.1",
-    "angular-formly-templates-bootstrap": "^6.4.0",
+    "angular-formly-templates-bootstrap": "^6.5.1",
     "angular-marked": "~1.2.2",
     "angular-messages": "~1.6",
     "angular-mocks": "~1.6",

@@ -15,6 +15,8 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 
+from ESSArch_Core.profiles.models import SubmissionAgreement
+
 from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
@@ -124,6 +126,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
+    submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -181,7 +184,8 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
             'generation', 'archival_institution', 'archivist_organization',
             'archival_type', 'archival_location', 'policy', 'message_digest',
-            'message_digest_algorithm',
+            'message_digest_algorithm', 'submission_agreement',
+            'submission_agreement_locked'
         )
         extra_kwargs = {
             'id': {
@@ -228,11 +232,12 @@ class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
 class InformationPackageDetailSerializer(InformationPackageSerializer):
     aic = InformationPackageAICSerializer(omit=['information_packages'])
     policy = ArchivePolicySerializer()
+    submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
-            'tags',
+            'tags', 'submission_agreement', 'submission_agreement_locked',
         )
         extra_kwargs = {
             'id': {

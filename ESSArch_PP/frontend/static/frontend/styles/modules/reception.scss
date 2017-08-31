@@ -239,6 +239,48 @@ input[type="checkbox"] {
     }
 }
 
+.receive-footer {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    * {
+        margin-right: 3px;
+    }
+}
+
+.modal-validators {
+    .validator-choices {
+            border-bottom-style: none;
+        .formly {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: 45px;
+            .formly-field {
+                min-width: 105px;
+                width: 10%;
+            }
+            select {
+                width: 170px;
+            }
+        }
+    }
+}
+
+
+.modal-body {
+    .request-type {
+        box-shadow: none;
+    }
+    .request-params {
+        box-shadow: none;
+    }
+    .profile-editor {
+        box-shadow: none;
+    }
+}
 .control-label {
     font-size: 10px;
 }
@@ -322,4 +364,12 @@ input[type="checkbox"] {
     .action-buttons {
         float: right;
     }
+}
+
+.receive-button-wrapper {
+    @include container(10px);
+}
+
+.profile-manager {
+    margin-top: 10px;
 }
