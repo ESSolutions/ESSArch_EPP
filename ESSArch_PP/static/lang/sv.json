@@ -327,5 +327,6 @@
     "ADD_ATTRIBUTE": "Lägg till Attribut",
     "ADD_EXTENSION": "Lägg till tillägg",
     "SELECTED": "Vald(a)",
-    "PREPARE": "Förbered"
+    "PREPARE": "Förbered",
+    "CLEAR_ALL": "Avmarkera alla"
 }

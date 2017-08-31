@@ -403,6 +403,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 			});
         })
     }
+
     vm.expandAllVisible = function() {
         var visible = false;
         var expand = true;

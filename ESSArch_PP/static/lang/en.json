@@ -327,5 +327,6 @@
     "ADD_ATTRIBUTE": "Add Attribute",
     "ADD_EXTENSION": "Add extension",
     "SELECTED": "Selected",
-    "PREPARE": "Prepare"
+    "PREPARE": "Prepare",
+    "CLEAR_ALL": "Clear all"
 }

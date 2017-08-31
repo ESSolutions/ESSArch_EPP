@@ -25,9 +25,10 @@ angular.module('myApp').factory('Profile', function ($resource, appConfig) {
     });
 })
 .factory('ProfileIpData', function ($resource, appConfig) {
-    return $resource(appConfig.djangoUrl + 'profile-ip-data/:action/', {}, {
+    return $resource(appConfig.djangoUrl + 'profile-ip-data/:id/:action/', {}, {
     get: {
         method: "GET",
+        params: { id: "@id" }
     },
     post: {
         method: "POST",

@@ -11,6 +11,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
     $scope.saAlert = null;
     $scope.aipAlert = $scope.alerts.aipError;
     $scope.dipAlert = $scope.alerts.dipError;
+    vm.dataVersion = null;
     // On init
     vm.$onInit = function() {
         $scope.saProfile = {
@@ -193,6 +194,11 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
         });
     };
 
+    vm.getProfileData = function(id) {
+        ProfileIpData.get({id: id}).$promise.then(function(resource) {
+            vm.profileModel = angular.copy(resource.data);
+        });
+    }
     //Gets all submission agreement profiles
     $scope.getSaProfiles = function(ip) {
         listViewService.getSaProfiles(ip).then(function(value) {
