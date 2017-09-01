@@ -633,5 +633,60 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             evt.preventDefault();
             $state.go(to.redirectTo, params, {location: 'replace'})
         }
+        switch (to.name) {
+            case "home.ingest":
+                if (myService.checkPermissions(['ip.receive'])) {
+                    $state.go('home.ingest.reception');
+                } else {
+                    if (myService.checkPermissions(['ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check'])) {
+                        $state.go('home.ingest.ipApproval')
+                    } else {
+                        if (myService.checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])) {
+                            $state.go('home.ingest.workarea');
+                        } else {
+                            throw new Error("State has no available substate");
+                        }
+                    }
+                }
+                break;
+            case "home.access":
+                if (myService.checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'])) {
+                    $state.go('home.access.accessIp');
+                } else {
+                    if (myService.checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])) {
+                        $state.go('home.access.workarea')
+                    } else {
+                        if (myService.checkPermissions(['ip.diff-check', 'ip.preserve'])) {
+                            $state.go('home.access.createDip');
+                        } else {
+                            throw new Error("State has no available substate");
+                        }
+                    }
+                }
+                break;
+            case "home.administration":
+                if (myService.checkPermissions(['storage.storage_management'])) {
+                    $state.go('home.administration.mediaInformation');
+                } else {
+                    if (myService.checkPermissions(['storage.storage_management'])) {
+                        $state.go('home.administration.robotInformation')
+                    } else {
+                        if (myService.checkPermissions(['storage.storage_management'])) {
+                            $state.go('home.administration.queues');
+                        } else {
+                            if (myService.checkPermissions(['storage.storage_migration'])) {
+                                $state.go('home.administration.storageMigration')
+                            } else {
+                                if (myService.checkPermissions(['storage.storage_maintenance'])) {
+                                    $state.go('home.administration.storageMaintenance');
+                                } else {
+                                    throw new Error("State has no available substate");
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+        }
     });
-});
+    });
