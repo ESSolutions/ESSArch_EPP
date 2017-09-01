@@ -37,8 +37,6 @@
             "logDebug": true,
             "commentDirectives": true,
             "cssClassDirectives": true
-
         }
-
     }
 }

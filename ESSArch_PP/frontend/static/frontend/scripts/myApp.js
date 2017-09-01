@@ -22,16 +22,26 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource"])
-.config(function($routeProvider, formlyConfigProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider) {
+Object.resolve = function(path, obj) {
+    return path.split('.').reduce(function(prev, curr) {
+        return prev ? prev[curr] : undefined
+    }, obj || self)
+}
 
-    function permissionRedirect(store, state, dst) {
-        if(angular.equals(store.getStore(), {})) {
-            state.go(dst);
-        } else {
-            return 'home.restricted';
+function nestedPermissions(page) {
+    if(Array.isArray(page)) {
+        return page;
+    } else if(typeof(page) == "object") {
+        var temp = [];
+        for(var entry in page) {
+            temp = temp.concat(nestedPermissions(page[entry]));
         }
+        return temp;
     }
+}
+
+angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource"])
+.config(function($routeProvider, formlyConfigProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider, permissionConfig) {
 
     $stateProvider
     .state('home', {
@@ -109,10 +119,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.receive'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.reception");
-                }]
+                only: nestedPermissions("home.ingest.reception"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -127,10 +135,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.preserve', 'ip.add_to_ingest_workarea', 'ip.add_to_ingest_workarea_as_new_generation', 'ip.diff-check'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.ipApproval");
-                }]
+                only: nestedPermissions("home.ingest.ipApproval"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -145,10 +151,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.move_from_ingest_workarea', 'ip.preserve_from_ingest_workarea'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.ingest.workarea");
-                }]
+                only: nestedPermissions("home.ingest.workarea"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -173,10 +177,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.access.accessIp");
-                }]
+                only: nestedPermissions("home.access.accessIp"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -191,10 +193,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.move_from_access_workarea', 'ip.preserve_from_access_workarea'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.access.workarea");
-                }]
+                only: nestedPermissions("home.access.workarea"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -210,10 +210,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.diff-check', 'ip.preserve'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.access.createDip");
-                }]
+                only: nestedPermissions("home.access.createDip"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -228,10 +226,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['ip.prepare_order'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.orders");
-                }]
+                only: nestedPermissions("home.orders"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -277,10 +273,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['storage.storage_management'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.administration.mediaInformation");
-                }]
+                only: nestedPermissions("home.administration.mediaInformation"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -295,10 +289,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['storage.storage_management'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.administration.robotInformation");
-                }]
+                only: nestedPermissions("home.administration.robotInformation"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -313,10 +305,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['storage.storage_management'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.administration.queues");
-                }]
+                only: nestedPermissions("home.administration.queues"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -331,10 +321,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['storage.storage_migration'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.administration.storageMigration");
-                }]
+                only: nestedPermissions("home.administration.storageMigration"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -349,10 +337,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: ['storage.storage_maintenance'],
-                redirectTo: ['PermPermissionStore', '$state', function(PermPermissionStore, $state) {
-                    return permissionRedirect(PermPermissionStore, $state, "home.administration.storageMaintenance");
-                }]
+                only: nestedPermissions("home.administration.storageMaintenance"),
+                redirectTo: 'home.restricted'
             }
         },
     })
@@ -419,7 +405,9 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     $urlRouterProvider.otherwise( function($injector) {
         var $state = $injector.get("$state");
         $state.go('home.myPage');
-      });
+    });
+
+    $urlRouterProvider.deferIntercept();
 })
 .config(function($animateProvider) {
     // Only animate elements with the 'angular-animate' class
@@ -482,6 +470,9 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     $compileProvider.cssClassDirectivesEnabled(appConfig.cssClassDirectives);
     $logProvider.debugEnabled(appConfig.logDebug);
 }])
+.config(function ($permissionProvider) {
+    $permissionProvider.suppressUndefinedPermissionWarning(true);
+})
 .config(function(stConfig) {
     stConfig.sort.delay = -1;
 })
@@ -603,15 +594,18 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     };
 })
-.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages){
+.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages, $urlRouter, permissionConfig){
     formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
     formlyValidationMessages.addStringMessage('required', 'This field is required');
-
     $rootScope.flowObjects = {};
     djangoAuth.initialize('/rest-auth', false).then(function(response) {
         $rootScope.auth = response.data;
         myService.getPermissions(response.data.permissions);
         myService.defineRoles();
+        // kick-off router and start the application rendering
+        $urlRouter.sync();
+        // Also enable router to listen to url changes
+        $urlRouter.listen();
         $window.sessionStorage.setItem("view-type", response.data.ip_list_view_type);
         $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
         $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
@@ -628,65 +622,25 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     }).catch(function(status) {
         $state.go('login');
     });
+
+
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
         if (to.redirectTo) {
             evt.preventDefault();
             $state.go(to.redirectTo, params, {location: 'replace'})
         }
-        switch (to.name) {
-            case "home.ingest":
-                if (myService.checkPermissions(['ip.receive'])) {
-                    $state.go('home.ingest.reception');
-                } else {
-                    if (myService.checkPermissions(['ip.preserve', 'ip.get_from_storage', 'ip.get_from_storage_as_new', 'ip.diff-check'])) {
-                        $state.go('home.ingest.ipApproval')
-                    } else {
-                        if (myService.checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])) {
-                            $state.go('home.ingest.workarea');
-                        } else {
-                            throw new Error("State has no available substate");
-                        }
-                    }
+        if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration") {
+            evt.preventDefault();
+            var resolved = Object.resolve(to.name, permissionConfig);
+            for( var key in resolved) {
+                if(key != "_permissions" && myService.checkPermissions(nestedPermissions(resolved[key]))) {
+                    $state.go(to.name + "." + key);
+                    return;
                 }
-                break;
-            case "home.access":
-                if (myService.checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new'])) {
-                    $state.go('home.access.accessIp');
-                } else {
-                    if (myService.checkPermissions(['ip.move_from_ingest_workarea', 'ip.move_from_ingest_workarea'])) {
-                        $state.go('home.access.workarea')
-                    } else {
-                        if (myService.checkPermissions(['ip.diff-check', 'ip.preserve'])) {
-                            $state.go('home.access.createDip');
-                        } else {
-                            throw new Error("State has no available substate");
-                        }
-                    }
-                }
-                break;
-            case "home.administration":
-                if (myService.checkPermissions(['storage.storage_management'])) {
-                    $state.go('home.administration.mediaInformation');
-                } else {
-                    if (myService.checkPermissions(['storage.storage_management'])) {
-                        $state.go('home.administration.robotInformation')
-                    } else {
-                        if (myService.checkPermissions(['storage.storage_management'])) {
-                            $state.go('home.administration.queues');
-                        } else {
-                            if (myService.checkPermissions(['storage.storage_migration'])) {
-                                $state.go('home.administration.storageMigration')
-                            } else {
-                                if (myService.checkPermissions(['storage.storage_maintenance'])) {
-                                    $state.go('home.administration.storageMaintenance');
-                                } else {
-                                    throw new Error("State has no available substate");
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
+            }
+            $state.go("home.restricted");
+            return;
         }
+
     });
-    });
+});

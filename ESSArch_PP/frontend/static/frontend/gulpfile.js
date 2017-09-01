@@ -192,8 +192,21 @@ var configConstants = function() {
     .pipe(gulp.dest('./scripts/configs'));
 };
 
+var permissionConfig = function() {
+    var permissionConfig = require('./scripts/configs/permissions.json');
+    var envConfig = permissionConfig;
+    return ngConstant({
+        name: 'permission.config',
+        constants: envConfig,
+        stream: true
+    })
+    .pipe(rename('permission.config.js'))
+    .pipe(gulp.dest('./scripts/configs'));
+};
+
 gulp.task('default', function() {
     configConstants();
+    permissionConfig();
     compileSass();
     copyIcons();
     copyImages()

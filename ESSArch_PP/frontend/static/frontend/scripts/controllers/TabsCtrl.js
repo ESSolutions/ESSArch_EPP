@@ -22,51 +22,11 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope, $location, $window, myService, $translate, $rootScope){
+angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope, $location, $window, myService, $translate, $rootScope, permissionConfig){
     $rootScope.$on('$translateChangeSuccess', function () {
         $state.reload()
     });
-    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
-        if(toState.name == "home.myPage" || toState.name == "home.versionInfo" || toState.name == "home.appraisal" || toState.name == "home.userSettings") {
-            $scope.activeTab = null;
-        }
-    });
-    $scope.$state = $state;
-    $scope.activeTab = null;
-    $scope.myPage = $translate.instant('MYPAGE');
-    $scope.tabs = [
-    //{ link: 'home.myPage', label: $scope.myPage },
-    { link: 'home.ingest', label: $translate.instant('INGEST') },
-    { link: 'home.access', label: $translate.instant('ACCESS') },
-    { link: 'home.orders', label: $translate.instant('ORDERS') },
-    //{ link: 'home.management', label: $translate.instant('MANAGEMENT') },
-    { link: 'home.administration', label: $translate.instant('ADMINISTRATION') },
-    ];
-    $scope.is_active = function(tab) {
-        var isAncestorOfCurrentRoute = $state.includes(tab.link);
-        return isAncestorOfCurrentRoute;
-    };
-    $scope.update_tabs = function() {
 
-        // sets which tab is active (used for highlighting)
-        angular.forEach($scope.tabs, function(tab, index) {
-            tab.params = tab.params || {};
-            tab.options = tab.options || {};
-            tab.class = tab.class || '';
-
-            tab.active = $scope.is_active(tab);
-            if (tab.active) {
-                $scope.activeTab = index;
-            }
-        });
-    };
-
-    $scope.checkPermissions = function(permissions) {
-        return myService.checkPermissions(permissions);
-    }
-
-    $scope.update_tabs();
-    // Get active tab from localStorage
     $scope.go = function(tab) {
         $state.go(tab.link);
     }

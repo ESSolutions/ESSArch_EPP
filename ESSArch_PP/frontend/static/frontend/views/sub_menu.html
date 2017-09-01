@@ -1,8 +1,8 @@
 <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.administration' | includedByState) || ($state.current.name == 'home.appraisal')">
     <div class="sub-menu">
         <div ng-if="'home.ingest' | includedByState">
-            <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(['ip.receive'])">{{'RECEPTION' | translate}}</div>
-            <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;"  ng-if="checkPermissions(['ip.preserve', 'ip.add_to_ingest_workarea', 'ip.add_to_ingest_workarea_as_new_generation', 'ip.diff-check'])">{{'APPROVAL' | translate}}</div>
+            <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(getPermissions('home.ingest.reception'))">{{'RECEPTION' | translate}}</div>
+            <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;"  ng-if="checkPermissions(getPermissions('home.ingest.ipApproval'))">{{'APPROVAL' | translate}}</div>
             <div ui-sref="home.ingest.workarea"  ng-class="{chosen: $state.current.name == 'home.ingest.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions(['ip.move_from_ingest_workarea', 'ip.preserve_from_ingest_workarea'])">{{'WORKAREA' | translate}}</div>
             <div ng-if="$state.current.name == 'home.ingest.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">{{'CREATEDIP' | translate}}</div>
         </div>

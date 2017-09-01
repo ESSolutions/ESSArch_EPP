@@ -24,11 +24,11 @@
         </div>
     </div>
     <div class="menu-task-wrapper">
-        <div class="nav" ng-controller="TabsCtrl">
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions(['ip.receive', 'ip.preserve', 'ip.add_to_ingest_workarea', 'ip.add_to_ingest_workarea_as_new_generation', 'ip.diff-check', 'ip.move_from_ingest_workarea', 'ip.preserve_from_ingest_workarea'])">{{('INGEST' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions(['ip.get_from_storage', 'ip.get_tar_from_storage', 'ip.get_from_storage_as_new', 'ip.move_from_access_workarea', 'ip.preserve_from_access_workarea'])">{{('ACCESS' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders" ng-if="checkPermissions(['ip.prepare_order'])">{{('ORDERS' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions(['storage.storage_management', 'storage.storage_migration', 'storage.storage_maintenance'])">{{('ADMINISTRATION' | translate)}}</p>
+        <div class="nav" ng-controller="UtilCtrl">
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions(getPermissions('home.ingest'))">{{('INGEST' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions(getPermissions('home.access'))">{{('ACCESS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders" ng-if="checkPermissions(getPermissions('home.orders'))">{{('ORDERS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions(getPermissions('home.administration'))">{{('ADMINISTRATION' | translate)}}</p>
         </div>
         <div ng-controller="UtilCtrl" class="tasks-icons">
             <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
