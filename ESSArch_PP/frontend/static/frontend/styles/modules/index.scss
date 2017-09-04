@@ -656,7 +656,8 @@ padding: 0 12px;
     border-color: rgba(102, 102, 102, 0.4);
 }
 
-.nav {
+.header .nav {
+    cursor: default;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
