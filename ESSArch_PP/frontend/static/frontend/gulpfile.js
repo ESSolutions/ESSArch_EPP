@@ -110,11 +110,11 @@ var buildScripts = function() {
           // emit the end event, to properly end the task
           this.emit('end');
         }))
+        .pipe(license('/*\n'+licenseString+'\n*/'))
         .pipe(sourcemaps.init())
         .pipe(ngAnnotate())
         .pipe(concat('scripts.min.js'))
         .pipe(gulpif(isProduction, uglify()))
-        .pipe(license('/*\n'+licenseString+'\n*/\n'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(jsDest));
 };
