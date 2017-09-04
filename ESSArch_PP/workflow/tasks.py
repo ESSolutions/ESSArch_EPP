@@ -614,7 +614,11 @@ class PollAccessQueue(DBTask):
                     return
                 except:
                     # failed to copy from cache, get from storage instead
-                    pass
+                    entry.status = 2
+                    entry.save(update_fields=['status'])
+
+                    entry.ip.cached = False
+                    entry.ip.save(update_fields=['cached'])
 
             def get_optimal(objects):
                 # Prefer disks over tapes
