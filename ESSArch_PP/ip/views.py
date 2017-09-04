@@ -857,6 +857,9 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
     def preserve(self, request, pk=None):
         ip = self.get_object()
 
+        if ip.archived:
+            raise exceptions.ParseError('IP already archived')
+
         if ip.package_type == InformationPackage.DIP:
             policy = request.data.get('policy')
 
