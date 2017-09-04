@@ -801,6 +801,9 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
+            # if we preserved directly from workarea then we need to delete that workarea object
+            ip.workareas.all().delete()
+
     def is_cached(self, entry):
         cache_dir = entry.ip.policy.cache_storage.value
         cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
