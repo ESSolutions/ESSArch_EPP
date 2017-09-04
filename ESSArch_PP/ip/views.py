@@ -921,7 +921,7 @@ class InformationPackageViewSet(viewsets.ModelViewSet):
         ingest_path = Path.objects.get(entity='ingest_workarea')
         access_path = Path.objects.get(entity='access_workarea')
 
-        if ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
+        if not data.get('new') and ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
             return Response('IP already in workarea', status=status.HTTP_409_CONFLICT)
 
         if data.get('new'):
