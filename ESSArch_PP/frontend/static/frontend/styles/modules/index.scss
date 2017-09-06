@@ -856,3 +856,6 @@ padding: 0 12px;
 .edit-form {
     width: 100%;
 }
+.read-only {
+    transform: scale(0.6, 0.6);
+}

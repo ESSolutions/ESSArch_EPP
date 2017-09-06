@@ -30,6 +30,9 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
 
     //Click function for Ip table
     $scope.ipTableClick = function (row) {
+        if (row.workarea.read_only) {
+            return;
+        }
         if (row.package_type == 1) {
             $scope.select = false;
             $scope.eventlog = false;

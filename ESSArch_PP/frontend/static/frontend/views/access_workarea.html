@@ -4,19 +4,19 @@
         <div ng-if="requestForm" class="request-layout">
             <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.diff_check')">
+                    <div ng-if="checkPermission('ip.diff_check') && !ip.workarea.read_only">
                         <label>
                             <input type="radio" ng-model="vm.request.type" value="diff_check">
                             {{'DIFFCHECK' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.preserve_from_access_workarea')">
+                    <div ng-if="checkPermission('ip.preserve_from_access_workarea') && !ip.workarea.read_only">
                         <label>
                             <input type="radio" ng-model="vm.request.type" value="preserve">
                             {{'PRESERVE' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.move_from_access_workarea')">
+                    <div ng-if="checkPermission('ip.move_from_access_workarea') && !ip.workarea.read_only">
                         <input type="radio" ng-model="vm.request.type" value="move_to_approval">
                         <label>
                             {{'MOVE_TO_INGEST_APPROVAL' | translate}}
