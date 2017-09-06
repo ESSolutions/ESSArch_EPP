@@ -109,6 +109,12 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
         })
     }
 
+    vm.changeDataVersion = function(profileIp, data) {
+        ProfileIp.patch({ id: profileIp.id }, { data: data }).$promise.then(function(resource) {
+            vm.getAndShowProfile(vm.selectedProfile, {});
+        })
+    }
+
     $scope.pushData = function() {
         vm.shareData({$event: {aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id}});
     }
