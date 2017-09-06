@@ -60,7 +60,7 @@
                 <br />
                 <!--<div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
                 <br />-->
-                <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
+                <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="vm.editForm.$invalid || angular.equals(vm.profileOldModel, vm.profileModel)" translate="SAVE"></button>
                 <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
             </form>
         </div>

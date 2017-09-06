@@ -216,10 +216,10 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
                     if(profileIp[0].data == null) {
                         profileIp[0].data = { data: {}};
                     }
-                    vm.profileOldModel = profileIp[0].data.data;
+                    vm.profileOldModel = angular.copy(profileIp[0].data.data);
                     vm.profileModel = angular.copy(profileIp[0].data.data);
                     vm.profileIp = profileIp[0];
-                    vm.dataVersion = vm.profileIp.data_versions[vm.profileIp.data_versions.length-1];
+                    vm.dataVersion = vm.profileIp.data_versions[vm.profileIp.data_versions.indexOf(vm.profileIp.data.id)];
                     getStructure(row.active);
                     var temp = [];
                     row.active.template.forEach(function (x) {
