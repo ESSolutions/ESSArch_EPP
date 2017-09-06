@@ -49,6 +49,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
             disabled: false
         };
         $scope.ip = vm.ip;
+        vm.cancel();
         listViewService.getSaProfiles($scope.ip).then(function (result) {
             $scope.saProfile.profiles = result.profiles;
             var chosen_sa_id = null;
