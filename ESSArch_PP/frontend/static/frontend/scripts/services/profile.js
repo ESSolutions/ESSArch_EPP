@@ -1,5 +1,5 @@
 angular.module('myApp').factory('Profile', function ($resource, appConfig) {
-    return $resource(appConfig.djangoUrl + 'profiles/:id/:action/', {}, {
+    return $resource(appConfig.djangoUrl + 'profiles/:id/:action/?pager=none', {}, {
     get: {
         method: "GET",
         params: { id: "@id" }
