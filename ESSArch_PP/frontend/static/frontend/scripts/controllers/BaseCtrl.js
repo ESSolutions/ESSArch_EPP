@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests){
+angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests){
     // Initialize variables
 
     $scope.$window = $window;
@@ -536,27 +536,28 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, vm, ipSortStr
 
     //Click funciton for steps and tasks
     $scope.stepTaskClick = function (branch) {
-        var flow_type = branch.flow_type;
-        $scope.getStepTask(branch).then(function (data) {
-            if (flow_type == "task") {
+        $scope.stepTaskLoading = true;
+        if (branch.flow_type == "task") {
+            Task.get({ id: branch.id }).$promise.then(function (data) {
+                var started = moment(data.time_started);
+                var done = moment(data.time_done);
+                data.duration = done.diff(started);
+                $scope.currentStepTask = data;
+                $scope.stepTaskLoading = false;
                 $scope.taskInfoModal();
-            } else {
+            });
+        } else {
+            Step.get({ id: branch.id }).$promise.then(function (data) {
+                var started = moment(data.time_started);
+                var done = moment(data.time_done);
+                data.duration = done.diff(started);
+                $scope.currentStepTask = data;
+                $scope.stepTaskLoading = false;
                 $scope.stepInfoModal();
-            }
-        });
+            });
+        }
     };
 
-    $scope.getStepTask = function (branch) {
-        $scope.stepTaskLoading = true;
-        return branch.$get().then(function (data) {
-            var started = moment(data.time_started);
-            var done = moment(data.time_done);
-            data.duration = done.diff(started);
-            $scope.currentStepTask = data;
-            $scope.stepTaskLoading = false;
-            return data;
-        });
-    }
     //Redirect to admin page
     $scope.redirectAdmin = function () {
         $window.location.href="/admin/";
