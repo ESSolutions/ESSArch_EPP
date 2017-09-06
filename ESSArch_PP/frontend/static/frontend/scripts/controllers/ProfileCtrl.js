@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileIp, ProfileIpData, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter, IPReception) {
+angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, ProfileIp, ProfileIpData, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter, IPReception) {
     var vm = this;
     $scope.angular = angular;
     $scope.select = true;
@@ -69,8 +69,45 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
                 }
 ;
             }
+            vm.loadProfiles();
         });
     };
+
+    vm.loadProfiles = function() {
+        $scope.selectRowCollapse = [];
+        var profileObject = {
+            transfer_project: null,
+            submit_description: null,
+            sip: null,
+            aip: null,
+            dip: null,
+            content_type: null,
+            authority_information: null,
+            archival_description: null,
+            preservation_metadata: null,
+            data_selection: null,
+            import: null,
+            workflow: null
+        };
+        var promises = [];
+        for(var key in  $scope.saProfile.profile) {
+            if (/^profile/.test(key) && $scope.saProfile.profile[key] != null) {
+                promises.push(Profile.get({ id: $scope.saProfile.profile[key] }).$promise.then(function(resource) {
+                    profileObject[resource.profile_type] = resource;
+                    return resource;
+                }));
+            }
+        }
+        $q.all(promises).then(function() {
+            for(var key in profileObject) {
+                if(profileObject[key] != null) {
+                    $scope.selectRowCollapse.push(profileObject[key]);
+                }
+            }
+            $scope.selectRowCollection = $scope.selectRowCollapse;
+        })
+    }
+
     $scope.pushData = function() {
         vm.shareData({$event: {aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id}});
     }
@@ -85,8 +122,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
             data: vm.profileModel
         }).$promise.then(function (resource) {
             ProfileIp.patch({id: vm.profileIp.id}, {data: resource.id}).$promise.then(function(response) {
-                vm.profileModel = {};
-                vm.profileFields = {};
+                vm.cancel();
                 return response;
             })
         })
@@ -96,6 +132,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
         vm.profileModel = {};
         vm.profileFields = [];
         $scope.profileToSave = null;
+        vm.selectedProfile = null;
     }
 
     vm.profileModel = {};
@@ -144,20 +181,16 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
 
     //Click funciton for profile view
     $scope.profileClick = function(row){
-        if ($scope.selectProfile == row && $scope.edit){
+        if (vm.selectedProfile && vm.selectedProfile.id == row.id){
             $scope.eventlog = false;
             $scope.edit = false;
+            vm.cancel();
         } else {
             $scope.editSA = false;
-            $scope.closeAlert();
-            if (row.active.name){
-                var profileId = row.active.url;
-            } else {
-                var profileId = row.active.profile;
-            }
-            vm.getAndShowProfile(profile, row);
+            vm.getAndShowProfile(row, {});
+            $scope.edit = true;
         }
-    };
+};
 
     vm.profileIp = null;
     vm.selectedProfile = null;
@@ -165,7 +198,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
         vm.selectedProfile = profile;
         var profileId = profile.id;
         Profile.get({
-            id: profile,
+            id: profile.id,
         }).$promise.then(function (resource) {
             ProfileIp.query({ profile: resource.id, ip: $scope.ip.id })
                 .$promise.then(function (profileIp) {
@@ -179,6 +212,7 @@ angular.module('myApp').controller('ProfileCtrl', function(SA, Profile, ProfileI
                     vm.profileOldModel = profileIp[0].data.data;
                     vm.profileModel = angular.copy(profileIp[0].data.data);
                     vm.profileIp = profileIp[0];
+                    vm.dataVersion = vm.profileIp.data_versions[vm.profileIp.data_versions.length-1];
                     getStructure(row.active);
                     var temp = [];
                     row.active.template.forEach(function (x) {

@@ -26,24 +26,44 @@
         </div>
         <div ng-if="saProfile.profile" id="edit-view" class="edit-view">
             <div class="flex-row">
-            <form id="edit-form" ng-submit="vm.saveProfileModel(vm.selectedProfile.profile_type, vm.profileModel, vm.treeEditModel)" name="vm.editForm" novalidate>
-                <div ng-if="saProfile.profile.profile_aip"><b>AIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_aip, {})">{{saProfile.profile.profile_aip}}</a></div>
+            <form id="edit-form" class="edit-form" ng-submit="vm.saveProfileModel(vm.selectedProfile.profile_type, vm.profileModel, vm.treeEditModel)" name="vm.editForm" novalidate>
+            <div class="table-container" >
+                    <table ng-if="saProfile.profile" style="margin-top: 10px; margin-bottom: 0px;" st-table="selectCollection" st-skip-natural="true" st-safe-src="selectRowCollection" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="info-popover column-entity" uib-popover="{{'ENTITYDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'TYPE' | translate}}</th>
+                                <th class="info-popover column-profile" uib-popover="{{'PROFILEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PROFILE' | translate}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="profile in selectRowCollection">
+                                <div ng-if="profile.name">
+                                    <td>{{profile.profile_type}}</td>
+                                    <td><a ng-click="profileClick(profile, {})">{{profile.name}}</a></td>
+                                </div>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 <div uib-alert ng-if="!saProfile.profile.profile_aip" style="width: 100%;" ng-class="'alert-' + (aipAlert.type || 'warning')">{{aipAlert.msg}}</div>
-                <div ng-if="saProfile.profile.profile_dip"><b>DIP - </b><a ng-click="vm.getAndShowProfile(saProfile.profile.profile_dip, {})">{{saProfile.profile.profile_dip}}</a></div>
                 <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>
+                <hr />
+                <div ng-if="vm.profileFields.length">
+                    <h4 class="profile-name">{{ vm.selectedProfile.name }}</h4>
+                    <div class="data-version-list">
+                        Versions
+                        <select class="form-control" ng-change="vm.getProfileData(vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as vm.profileIp.data_versions.indexOf(x)+1 for x in vm.profileIp.data_versions">{{ x }}</select>
+                    </div>
+                </div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
                 <br />
+                <!--<div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
+                <br />-->
                 <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="$ctrl.editForm.$invalid" translate="SAVE"></button>
                 <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning" translate="CANCEL"></button>
             </form>
-            <div class="data-version-list" ng-if="vm.profileFields.length">
-                Versions
-                <select class="form-control" ng-change="vm.getProfileData(vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as x for x in vm.profileIp.data_versions">{{ x }}</select>
-            </div>
         </div>
-            <!--<div class="map-structure-editor" ng-if="profileToSave.structure && !angular.equals(profileToSave.structure, {})" ng-include src="'static/frontend/views/map_structure_tree.html'"></div>
-            <br />-->
         </div>
     </div>
 </div>
