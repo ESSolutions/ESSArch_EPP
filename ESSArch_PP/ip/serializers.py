@@ -127,6 +127,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     information_packages = serializers.SerializerMethodField()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
+    workarea = serializers.SerializerMethodField()
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -159,6 +160,12 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         )
         return ips.data
 
+    def get_workarea(self, obj):
+        workarea = obj.workareas.first()
+
+        if workarea is not None:
+            return WorkareaSerializer(workarea, context=self.context).data
+
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],
         read_only=True,
@@ -185,7 +192,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'generation', 'archival_institution', 'archivist_organization',
             'archival_type', 'archival_location', 'policy', 'message_digest',
             'message_digest_algorithm', 'submission_agreement',
-            'submission_agreement_locked'
+            'submission_agreement_locked', 'workarea',
         )
         extra_kwargs = {
             'id': {
