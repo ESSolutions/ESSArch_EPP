@@ -62,6 +62,7 @@ from ESSArch_Core.WorkflowEngine.models import (
 
 from ESSArch_Core.profiles.serializers import (
     ProfileSerializer,
+    ProfileDetailSerializer,
     ProfileSASerializer,
     ProfileIPSerializer,
     ProfileIPWriteSerializer,
@@ -244,7 +245,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
     API endpoint that allows profiles to be viewed or edited.
     """
     queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProfileSerializer
+
+        return ProfileDetailSerializer
 
     def get_queryset(self):
         queryset = Profile.objects.all()
