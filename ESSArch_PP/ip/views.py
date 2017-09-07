@@ -331,9 +331,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             submission_agreement_locked=True,
         )
 
-        for profile_type in profile_types:
-            lower_type = profile_type.lower().replace(' ', '_')
-            profile = getattr(sa, 'profile_%s' % lower_type, None)
+        for profile_type in ['aip', 'dip']:
+            profile = getattr(sa, 'profile_%s' % profile_type, None)
 
             if profile is None:
                 continue
