@@ -416,9 +416,6 @@ body.modal-open[style] {
 .fa.fa-refresh {
     font-size: 21px;
 }
-.fa.fa-pencil {
-    font-size: 21px;
-}
 .fa.fa-print {
     font-size: 21px;
 }
@@ -853,9 +850,11 @@ padding: 0 12px;
 .profile-name {
     float: left;
 }
+
 .edit-form {
     width: 100%;
 }
+
 .read-only {
-    transform: scale(0.6, 0.6);
+    font-size:.7em;
 }
