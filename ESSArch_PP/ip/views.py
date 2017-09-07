@@ -1223,7 +1223,8 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.NotFound
 
         if workarea_obj.read_only:
-            raise exceptions.MethodNotAllowed(request.method)
+            detail = 'You are not allowed to modify read-only IPs'
+            raise exceptions.MethodNotAllowed(method=request.method, detail=detail)
 
         try:
             os.makedirs(path)
@@ -1256,7 +1257,8 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             raise exceptions.NotFound
 
         if workarea_obj.read_only:
-            raise exceptions.MethodNotAllowed(request.method)
+            detail = 'You are not allowed to modify read-only IPs'
+            raise exceptions.MethodNotAllowed(method=request.method, detail=detail)
 
         try:
             shutil.rmtree(path)
@@ -1293,6 +1295,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         except Workarea.DoesNotExist:
             raise exceptions.NotFound
 
+        if workarea_obj.read_only:
+            detail = 'You are not allowed to modify read-only IPs'
+            raise exceptions.MethodNotAllowed(method=request.method, detail=detail)
+
         if request.method == 'GET':
             relative_path = request.query_params.get('flowRelativePath', '')
 
@@ -1313,9 +1319,6 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         if request.method == 'POST':
-            if workarea_obj.read_only:
-                raise exceptions.MethodNotAllowed(request.method)
-
             relative_path = request.data.get('flowRelativePath', '')
 
             if len(relative_path) == 0:
