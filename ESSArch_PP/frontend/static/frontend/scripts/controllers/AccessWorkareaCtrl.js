@@ -112,7 +112,7 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
     $scope.previousGridArraysString = function () {
         var retString = $scope.ip.object_identifier_value;
 
-        if ($scope.ip.workarea.packaged) {
+        if ($scope.ip.workarea.packaged && !$scope.ip.workarea.extracted) {
             retString += '.tar';
         }
         retString += '/'
