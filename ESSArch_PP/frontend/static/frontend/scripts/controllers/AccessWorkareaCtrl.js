@@ -110,7 +110,13 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
     $scope.previousGridArrays = [];
     $scope.ip = $rootScope.ip;
     $scope.previousGridArraysString = function () {
-        var retString = $scope.ip.object_identifier_value + "/";
+        var retString = $scope.ip.object_identifier_value;
+
+        if ($scope.ip.workarea.packaged) {
+            retString += '.tar';
+        }
+        retString += '/'
+
         $scope.previousGridArrays.forEach(function (card) {
             retString = retString.concat(card.name, "/");
         });

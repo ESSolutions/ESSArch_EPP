@@ -1161,9 +1161,11 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
 
         entries = []
-        path = os.path.join(root, request.query_params.get('path', ''))
+        path = request.query_params.get('path', '').strip('/ ')
+        force_download = request.query_params.get('download', False)
+        fullpath = os.path.join(root, path)
 
-        self.validate_path(path, root)
+        self.validate_path(fullpath, root, existence=False)
 
         mimetypes.suffix_map = {}
         mimetypes.encodings_map = {}
@@ -1175,12 +1177,46 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         mimetypes.init(files=[mimetypes_file])
         mtypes = mimetypes.types_map
 
-        if os.path.isfile(path):
-            content_type = mtypes.get(os.path.splitext(path)[1])
-            download = request.query_params.get('download', False)
-            return generate_file_response(open(path), content_type, force_download=download)
+        container = os.path.join(root, path.split('/')[0])
+        if os.path.isfile(container):
+            if tarfile.is_tarfile(container):
+                with tarfile.open(container) as tar:
+                    if fullpath == container:
+                        entries = []
+                        for member in tar.getmembers():
+                            if not member.isfile():
+                                continue
 
-        for entry in get_files_and_dirs(path):
+                            entries.append({
+                                "name": member.name,
+                                "type": 'file',
+                                "size": member.size,
+                                "modified": timestamp_to_datetime(member.mtime),
+                            })
+                        return Response(entries)
+                    else:
+                        subpath = path.split('/', 1)[-1]
+                        try:
+                            member = tar.getmember(subpath)
+
+                            if not member.isfile():
+                                raise exceptions.NotFound
+
+                            f = tar.extractfile(member)
+                            content_type = mtypes.get(os.path.splitext(subpath)[1])
+                            return generate_file_response(f, content_type, force_download)
+                        except KeyError:
+                            raise exceptions.NotFound
+
+            content_type = mtypes.get(os.path.splitext(fullpath)[1])
+            return generate_file_response(open(fullpath), content_type, force_download)
+
+        if os.path.isfile(fullpath):
+            content_type = mtypes.get(os.path.splitext(fullpath)[1])
+            download = request.query_params.get('download', False)
+            return generate_file_response(open(fullpath), content_type, force_download=download)
+
+        for entry in get_files_and_dirs(fullpath):
             entry_type = "dir" if entry.is_dir() else "file"
 
             if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk

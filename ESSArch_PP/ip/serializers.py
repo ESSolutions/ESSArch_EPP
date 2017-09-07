@@ -206,10 +206,20 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         }
 
 class WorkareaSerializer(serializers.ModelSerializer):
+    extracted = serializers.SerializerMethodField()
+    packaged = serializers.SerializerMethodField()
+
+    def get_extracted(self, obj):
+        return os.path.isdir(obj.path)
+
+    def get_packaged(self, obj):
+        return os.path.isfile(obj.path + '.tar')
+
     class Meta:
         model = Workarea
         fields = (
             'id', 'user', 'ip', 'read_only', 'type',
+            'extracted', 'packaged',
         )
 
 
