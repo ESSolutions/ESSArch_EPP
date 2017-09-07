@@ -36,10 +36,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="profile in selectRowCollection">
-                                <div ng-if="profile.name">
-                                    <td>{{profile.profile_type}}</td>
-                                    <td><a ng-click="profileClick(profile, {})">{{profile.name}}</a></td>
+                            <tr ng-repeat="profileIp in selectRowCollection">
+                                <div ng-if="profileIp.name">
+                                    <td>{{profileIp.profile_type}}</td>
+                                    <td><a ng-click="profileClick(profileIp, {})">{{profileIp.profile_name}}</a></td>
                                 </div>
                             </tr>
                         </tbody>
@@ -49,7 +49,7 @@
                 <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>
                 <hr />
                 <div ng-if="vm.profileFields.length">
-                    <h4 class="profile-name">{{ vm.selectedProfile.name }}</h4>
+                    <h4 class="profile-name">{{ vm.profileIp.profile_name }}</h4>
                     <div class="data-version-list">
                         Versions
                         <select class="form-control" ng-change="vm.changeDataVersion(vm.profileIp, vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as vm.profileIp.data_versions.indexOf(x)+1 for x in vm.profileIp.data_versions">{{ x }}</select>

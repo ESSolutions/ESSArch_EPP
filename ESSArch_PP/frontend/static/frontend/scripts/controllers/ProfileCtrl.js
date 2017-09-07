@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, ProfileIp, ProfileIpData, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter, IPReception) {
+angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $timeout, ProfileIp, ProfileIpData, $scope, $http, $rootScope, appConfig, listViewService, $log, $uibModal, $translate, $filter, IPReception) {
     var vm = this;
     $scope.angular = angular;
     $scope.select = true;
@@ -6,7 +6,6 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
         receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
         aipError: { type: 'danger', msg: $translate.instant('MISSING_AIP') },
         dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') }
-
     };
     $scope.saAlert = null;
     $scope.aipAlert = $scope.alerts.aipError;
@@ -70,48 +69,28 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
                 }
 ;
             }
-            vm.loadProfiles();
+            vm.loadProfiles($scope.ip);
         });
     };
 
-    vm.loadProfiles = function() {
+    vm.loadProfiles = function(ip) {
         $scope.selectRowCollapse = [];
-        var profileObject = {
-            transfer_project: null,
-            submit_description: null,
-            sip: null,
-            aip: null,
-            dip: null,
-            content_type: null,
-            authority_information: null,
-            archival_description: null,
-            preservation_metadata: null,
-            data_selection: null,
-            import: null,
-            workflow: null
-        };
-        var promises = [];
-        for(var key in  $scope.saProfile.profile) {
-            if (/^profile/.test(key) && $scope.saProfile.profile[key] != null) {
-                promises.push(Profile.get({ id: $scope.saProfile.profile[key] }).$promise.then(function(resource) {
-                    profileObject[resource.profile_type] = resource;
-                    return resource;
-                }));
-            }
-        }
-        $q.all(promises).then(function() {
-            for(var key in profileObject) {
-                if(profileObject[key] != null) {
-                    $scope.selectRowCollapse.push(profileObject[key]);
-                }
-            }
+        return ProfileIp.query({ip: ip.id}).$promise.then(function(resource) {
+            resource.forEach(function(profileIp) {
+                $scope.selectRowCollapse.push(profileIp);
+            });
             $scope.selectRowCollection = $scope.selectRowCollapse;
-        })
+            return $scope.selectRowCollection;
+        });
     }
 
     vm.changeDataVersion = function(profileIp, data) {
         ProfileIp.patch({ id: profileIp.id }, { data: data }).$promise.then(function(resource) {
-            vm.getAndShowProfile(vm.selectedProfile, {});
+            ProfileIp.get({id: resource.id}).$promise.then(function(response) {
+                vm.profileIp = response;
+                vm.loadProfiles($scope.ip);
+                vm.getAndShowProfile(vm.profileIp, {});
+            })
         })
     }
 
@@ -130,7 +109,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
         }).$promise.then(function (resource) {
             ProfileIp.patch({id: vm.profileIp.id}, {data: resource.id}).$promise.then(function(response) {
                 vm.cancel();
-                return response;
+                vm.loadProfiles($scope.ip);
             })
         })
     }
@@ -194,44 +173,43 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, Prof
             vm.cancel();
         } else {
             $scope.editSA = false;
-            vm.getAndShowProfile(row, {});
-            $scope.edit = true;
+            vm.cancel();
+            $timeout(function() {
+                vm.getAndShowProfile(row, {});
+                $scope.edit = true;
+            })
         }
 };
 
     vm.profileIp = null;
     vm.selectedProfile = null;
-    vm.getAndShowProfile = function(profile, row) {
-        vm.selectedProfile = profile;
-        var profileId = profile.id;
+    vm.getAndShowProfile = function (profileIp, row) {
+        vm.selectedProfile = profileIp;
+        vm.profileIp = profileIp;
         Profile.get({
-            id: profile.id,
+            id: profileIp.profile,
         }).$promise.then(function (resource) {
-            ProfileIp.query({ profile: resource.id, ip: $scope.ip.id })
-                .$promise.then(function (profileIp) {
-                    resource.profile_name = resource.name;
-                    row.active = resource;
-                    row.profiles = [resource];
-                    $scope.selectProfile = row;
-                    if(profileIp[0].data == null) {
-                        profileIp[0].data = { data: {}};
-                    }
-                    vm.profileOldModel = angular.copy(profileIp[0].data.data);
-                    vm.profileModel = angular.copy(profileIp[0].data.data);
-                    vm.profileIp = profileIp[0];
-                    vm.dataVersion = vm.profileIp.data_versions[vm.profileIp.data_versions.indexOf(vm.profileIp.data.id)];
-                    getStructure(row.active);
-                    var temp = [];
-                    row.active.template.forEach(function (x) {
-                        if (!x.templateOptions.disabled) {
-                            temp.push(x);
-                        }
-                    });
-                    $scope.profileToSave = row.active;
-                    vm.profileFields = temp;
-                    $scope.edit = true;
-                    $scope.eventlog = true;
-                });
+            resource.profile_name = resource.name;
+            row.active = resource;
+            row.profiles = [resource];
+            $scope.selectProfile = row;
+            if (profileIp.data == null) {
+                profileIp.data = { data: {} };
+            }
+            vm.profileOldModel = angular.copy(profileIp.data.data);
+            vm.profileModel = angular.copy(profileIp.data.data);
+            vm.dataVersion = profileIp.data_versions[profileIp.data_versions.indexOf(profileIp.data.id)];
+            getStructure(row.active);
+            var temp = [];
+            row.active.template.forEach(function (x) {
+                if (!x.templateOptions.disabled) {
+                    temp.push(x);
+                }
+            });
+            $scope.profileToSave = row.active;
+            vm.profileFields = temp;
+            $scope.edit = true;
+            $scope.eventlog = true;
         });
     };
 
