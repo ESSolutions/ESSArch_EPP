@@ -146,21 +146,21 @@ angular.module('myApp')
             return this.request({
                 'method': "GET",
                 'url': "/user/"
-            }); 
+            });
         },
         'updateProfile': function(data){
             return this.request({
                 'method': "PATCH",
                 'url': "/user/",
                 'data':data
-            }); 
+            });
         },
         'verify': function(key){
             return this.request({
                 'method': "POST",
                 'url': "/registration/verify-email/",
-                'data': {'key': key} 
-            });            
+                'data': {'key': key}
+            });
         },
         'confirmReset': function(uid,token,password1,password2){
             return this.request({

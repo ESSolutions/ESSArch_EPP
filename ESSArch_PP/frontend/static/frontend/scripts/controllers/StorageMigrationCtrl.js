@@ -18,7 +18,7 @@ angular.module('myApp').controller('StorageMigrationCtrl', function($scope, $roo
     }
 
     vm.selectionList = [];
-    
+
 
     vm.migrationForm = {
         purpose: "",
@@ -27,7 +27,7 @@ angular.module('myApp').controller('StorageMigrationCtrl', function($scope, $roo
         filters: {
             object: null,
             objectID: "",
-            status: { 
+            status: {
                 value: "",
                 options: ["Option 1", "Option 2"]
             },

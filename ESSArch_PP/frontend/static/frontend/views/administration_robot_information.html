@@ -49,7 +49,7 @@
                                 <th class="clickable" class="column-label">{{'STATUS' | translate}}</th>
                             </tr>
                         </thead>
-                        <tbody>                                
+                        <tbody>
                             <tr ng-class="row.class" ng-repeat="row in vm.robotQueue"  ng-attr-context-menu="menuOptions" class="table-item">
                                 <td>{{row.id}}</td>
                                 <td>{{row.posted | date:"yyyy-MM-dd HH:mm:ss"}}</td>
@@ -81,7 +81,7 @@
                                 <th class="clickable" class="column-label">{{'STATUS' | translate}}</th>
                             </tr>
                         </thead>
-                        <tbody>                                
+                        <tbody>
                             <tr ng-class="{'selected': vm.tapeSlot.id == row.id}" ng-repeat="row in vm.tapeSlots" ng-click="vm.tapeSlotClick(row)" ng-attr-context-menu="menuOptions" class="table-item clickable">
                                 <td>{{row.slot_id}}</td>
                                 <td>{{row.medium_id}}</td>
@@ -114,7 +114,7 @@
                                 <th class="clickable" class="column-label">{{'STATUS' | translate}}</th>
                             </tr>
                         </thead>
-                        <tbody>                                
+                        <tbody>
                             <tr ng-class="{'selected': vm.tapeDrive.id == row.id}" ng-click="vm.tapeDriveClick(row)" class="clickable" ng-repeat="row in vm.tapeDrives"  ng-attr-context-menu="menuOptions" class="table-item">
                                 <td>{{row.id}}</td>
                                 <td>{{row.device}}</td>

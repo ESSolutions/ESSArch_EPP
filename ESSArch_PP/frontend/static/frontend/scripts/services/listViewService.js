@@ -535,7 +535,7 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     }
 
     function deleteWorkareaFile(workareaType, path, file) {
-        return WorkareaFiles.removeFile({ 
+        return WorkareaFiles.removeFile({
             type: workareaType,
             path: path + file.name,
         }).$promise.then(function(response) {

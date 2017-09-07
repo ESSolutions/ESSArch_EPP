@@ -1,4 +1,4 @@
-# **User guide** 
+# **User guide**
 
 ## Table of Contents
 

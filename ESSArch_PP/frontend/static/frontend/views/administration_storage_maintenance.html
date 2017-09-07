@@ -23,7 +23,7 @@
                     </div>
                     <br>
                     </form>
-                    <button ng-class="vm.needToMigrateShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseNeedToMigrate()"> {{'NEEDTOMIGRATE' | translate}}</button>                    
+                    <button ng-class="vm.needToMigrateShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseNeedToMigrate()"> {{'NEEDTOMIGRATE' | translate}}</button>
                     <div ng-if="vm.needToMigrateShow" class="form-group">
                         <br>
                         <div class="table-container" st-table="vm.list" st-safe-src="vm.migrationList">
@@ -39,7 +39,7 @@
                                             <th st-sort="status" class="clickable" class="column-label">{{'status' | translate}}</th>
                                         </tr>
                                     </thead>
-                                    <tbody>                                
+                                    <tbody>
                                         <tr ng-class="row.class" ng-repeat="row in vm.list"  ng-attr-context-menu="menuOptions" class="table-item">
                                             <td>{{row.status}}</td>
                                         </tr>
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 <br>
-                <button ng-class="vm.deactivateStorageMedium ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseDeactivateStorageMedium()"> {{'DEACTIVATESTORAGEMEDIUM' | translate}}</button>               
+                <button ng-class="vm.deactivateStorageMedium ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseDeactivateStorageMedium()"> {{'DEACTIVATESTORAGEMEDIUM' | translate}}</button>
                 <div ng-if="vm.deactivateStorageMedium" class="form-group">
                 <br>
                     <div class="table-container" st-table="vm.list" st-safe-src="vm.deactivateList">
@@ -78,7 +78,7 @@
                                         <th st-sort="object_id" class="clickable" class="column-label">{{'OBJECTID' | translate}}</th>
                                     </tr>
                                 </thead>
-                                <tbody>                                
+                                <tbody>
                                     <tr ng-class="row.class" ng-repeat="row in vm.list"  ng-attr-context-menu="menuOptions" class="table-item">
                                         <td><input type="checkbox" ng-model="row.included"></td>
                                         <td>{{row.medium_id}}</td>

@@ -99,7 +99,7 @@ angular.module('myApp').factory('Storage', function(StorageMedium, StorageObject
 
     function getRobotQueueForRobot(pageNumber, pageSize, sortString, searchString, robot) {
         return Robot.queue({
-                id: robot.id, 
+                id: robot.id,
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,

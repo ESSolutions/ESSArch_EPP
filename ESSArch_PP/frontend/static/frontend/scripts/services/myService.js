@@ -48,7 +48,7 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
     }
 
     function checkPermission(permission) {
-        return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permission));        
+        return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permission));
     }
 
     function hasChild(node1, node2){

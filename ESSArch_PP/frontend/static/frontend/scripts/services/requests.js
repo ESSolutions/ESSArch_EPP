@@ -37,7 +37,7 @@ angular.module('myApp').factory('Requests', function(IPReception, IP, $http, app
     };
     function preserve(ip, request) {
         return IP.preserve(
-            angular.extend(request, { id: ip.id }) 
+            angular.extend(request, { id: ip.id })
         ).$promise.then(function (response) {
             return response;
         });

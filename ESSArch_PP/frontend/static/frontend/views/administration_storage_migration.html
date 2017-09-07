@@ -28,7 +28,7 @@
                         <button class="btn btn-default">{{'APPLYFILTERS' | translate}}</button>
                     </div>
                     <br>
-                    <button ng-class="vm.targetShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseTarget()"> {{'TARGET' | translate}}</button>                    
+                    <button ng-class="vm.targetShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseTarget()"> {{'TARGET' | translate}}</button>
                     <div ng-if="vm.targetShow" class="form-group">
                         <label for="medium-prefix" translate="MEDIUMPREFIX"></label>
                         <input type="checkbox" name="medium-prefix" ng-model="vm.migrationForm.mediumPrefix">
@@ -40,7 +40,7 @@
                         <input name="force-copies" type="checkbox" ng-model="vm.migrationForm.target.forceCopies">
                     </div>
                 </form>
-                <button ng-class="vm.selectionListShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseSelectionList()"> {{'SELECTIONLIST' | translate}}</button>               
+                <button ng-class="vm.selectionListShow ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseSelectionList()"> {{'SELECTIONLIST' | translate}}</button>
                 <div ng-if="vm.selectionListShow" class="form-group">
                 <br>
                     <div class="table-container" st-table="vm.list" st-safe-src="vm.selectionList">
@@ -70,7 +70,7 @@
                                         <th st-sort="target_value" class="clickable" class="column-label">{{'TARGETVALUE' | translate}}</th>
                                     </tr>
                                 </thead>
-                                <tbody>                                
+                                <tbody>
                                     <tr ng-class="row.class" ng-repeat="row in vm.list"  ng-attr-context-menu="menuOptions" class="table-item">
                                         <td><input type="checkbox" ng-model="row.included"></td>
                                         <td>{{row.object}}</td>

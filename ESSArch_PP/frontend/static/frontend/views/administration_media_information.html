@@ -107,7 +107,7 @@
                                 <th st-sort="last_changed_local" class="clickable" st-sort-default="reverse" class="column-label">{{'CREATED' | translate}}</th>
                             </tr>
                         </thead>
-                        <tbody>                                
+                        <tbody>
                             <tr ng-class="{'selected': ip.id == row.id}" ng-repeat="row in vm.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
                                 <td>{{row.ip.object_identifier_value}}</td>
                                 <td>{{row.content_location_value}}</td>
