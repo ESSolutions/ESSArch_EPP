@@ -45,7 +45,7 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
-from ESSArch_Core.profiles.views import ProfileIPViewSet
+from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
 
@@ -65,7 +65,6 @@ from ip.views import (
 from profiles.views import (
     ProfileViewSet,
     ProfileSAViewSet,
-    ProfileIPDataViewSet,
     ProfileMakerExtensionViewSet,
     ProfileMakerTemplateViewSet,
     SubmissionAgreementViewSet,

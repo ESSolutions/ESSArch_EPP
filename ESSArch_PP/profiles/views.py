@@ -222,11 +222,6 @@ class ProfileSAViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSASerializer
 
 
-class ProfileIPDataViewSet(viewsets.ModelViewSet):
-    queryset = ProfileIPData.objects.all()
-    serializer_class = ProfileIPDataSerializer
-
-
 class ProfileViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows profiles to be viewed or edited.
