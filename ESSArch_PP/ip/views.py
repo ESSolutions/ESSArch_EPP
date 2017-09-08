@@ -81,6 +81,7 @@ from ESSArch_Core.ip.permissions import (
 from ESSArch_Core.profiles.models import (
     Profile,
     ProfileIP,
+    ProfileIPData,
     SubmissionAgreement,
 )
 from ESSArch_Core.profiles.utils import fill_specification_data, profile_types
@@ -354,6 +355,30 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         sa = ip.submission_agreement
 
+        for profile_ip in ProfileIP.objects.filter(ip=ip).iterator():
+            try:
+                profile_ip.clean()
+            except ValidationError as e:
+                raise exceptions.ParseError('%s: %s' % (profile_ip.profile.name, e[0]))
+
+            if profile_ip.data is None:
+                if profile_ip.data_versions.count():
+                    profile_ip.data = profile_ip.data_versions.last()
+                else:
+                    data = {}
+                    for field in profile_ip.profile.template:
+                        try:
+                            data[field['key']] = field['defaultValue']
+                        except KeyError:
+                            pass
+                    data_obj = ProfileIPData.objects.create(
+                        relation=profile_ip, data=data, version=0, user=request.user,
+                    )
+                    profile_ip.data = data_obj
+
+            profile_ip.LockedBy = request.user
+            profile_ip.save()
+
         profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
         profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
 
@@ -362,16 +387,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         if profile_ip_dip is None:
             raise exceptions.ParseError('Information package missing DIP profile')
-
-        try:
-            profile_ip_aip.clean()
-        except ValidationError as e:
-            raise exceptions.ValidationError('%s: %s' % (profile_ip_aip.profile.name, e.message))
-
-        try:
-            profile_ip_dip.clean()
-        except ValidationError as e:
-            raise exceptions.ValidationError('%s: %s' % (profile_ip_dip.profile.name, e.message))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
