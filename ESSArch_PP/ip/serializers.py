@@ -1,5 +1,7 @@
 from _version import get_versions
 
+import os
+
 from rest_framework import exceptions, filters, serializers
 
 from ESSArch_Core.configuration.models import EventType
