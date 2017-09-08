@@ -222,19 +222,6 @@ class ProfileSAViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSASerializer
 
 
-class ProfileIPViewSet(viewsets.ModelViewSet):
-    queryset = ProfileIP.objects.all()
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('ip', 'profile',)
-
-    def get_serializer_class(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return ProfileIPSerializer
-
-        return ProfileIPWriteSerializer
-
-
 class ProfileIPDataViewSet(viewsets.ModelViewSet):
     queryset = ProfileIPData.objects.all()
     serializer_class = ProfileIPDataSerializer
