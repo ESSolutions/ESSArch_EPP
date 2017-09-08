@@ -22,11 +22,11 @@
                 </thead>
                 <tbody>
                     <tr ng-class="{'selected': storageMedium.id == row.id}" ng-repeat="row in vm.displayedMediums"  ng-attr-context-menu="menuOptions" class="table-item">
-                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.medium_id}}</td>
+                        <td class="clickable" style="white-space: nowrap;" ng-click="storageMediumTableClick(row)">{{row.medium_id}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.storage_target.name}}</td>
-                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                        <td class="clickable" style="white-space: nowrap;" ng-click="storageMediumTableClick(row)">{{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.status}}</td>
-                        <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location}}</td>
+                        <td class="clickable"  style="white-space: nowrap;" ng-click="storageMediumTableClick(row)">{{row.location}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.location_status}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.used_capacity | filesize}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.storage_target.max_capacity | filesize}}</td>
@@ -122,4 +122,3 @@
         </div>
     </div>
 </div>
-
