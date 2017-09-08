@@ -1024,276 +1024,237 @@ class PollIOQueue(DBTask):
     def event_outcome_success(self):
         pass
 
-class IOTape(DBTask):
+class IO(DBTask):
+    abstract = True
+
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        raise NotImplementedError()
+
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        raise NotImplementedError()
+
+    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        pass
+
+    def run(self, io_queue_entry, storage_medium):
+        entry = IOQueue.objects.get(pk=io_queue_entry)
+        entry.status = 5
+        entry.save(update_fields=['status'])
+
+        storage_method = entry.storage_method_target.storage_method
+        storage_target = entry.storage_method_target.storage_target
+
+        cache = entry.ip.policy.cache_storage.value
+        cache_obj = os.path.join(cache, entry.ip.object_identifier_value) + '.tar'
+
+        step = ProcessStep(name="IO %s" % self.storage_type.title(),)
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
+        else:
+            step.information_package = entry.ip
+
+        step.save()
+
+        try:
+            if entry.req_type in self.write_types:
+                self.write(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+            elif entry.req_type in self.read_types:
+                self.read(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+
+                with tarfile.open(cache_obj) as tar:
+                    tar.extractall(cache.encode('utf-8'))
+
+                entry.ip.cached = True
+                entry.ip.save(update_fields=['cached'])
+
+                if entry.remote_io:
+                    master_server = entry.storage_method_target.storage_target.master_server
+                    host, user, passw = master_server.split(',')
+                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+
+                    session = requests.Session()
+                    session.verify = False
+                    session.auth = (user, passw)
+
+                    ProcessTask.objects.create(
+                        name="ESSArch_Core.tasks.CopyFile",
+                        params={
+                            'src': cache_obj,
+                            'dst': dst,
+                            'requests_session': session,
+                        },
+                    ).run().get()
+
+                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                    response = session.post(dst)
+                    response.raise_for_status()
+            else:
+                raise ValueError('Invalid request type')
+        except:
+            entry.status = 100
+            raise
+        else:
+            entry.status = 20
+        finally:
+            entry.save(update_fields=['status'])
+
+            if entry.remote_io:
+                data = IOQueueSerializer(entry, context={'request': None}).data
+                entry.sync_with_master(data)
+
+            self.io_success(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+
+    def undo(self):
+        pass
+
+    def event_outcome_success(self):
+        pass
+
+
+class IOTape(IO):
     queue = 'io_tape'
+    storage_type = 'tape'
+    write_types = (10,)
+    read_types = (20,)
 
-    def run(self, io_queue_entry, storage_medium):
-        entry = IOQueue.objects.get(pk=io_queue_entry)
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        last_written_obj = StorageObject.objects.filter(
+            storage_medium=storage_medium
+        ).annotate(
+            content_location_value_int=Cast('content_location_value', IntegerField())
+        ).order_by('content_location_value_int').only('content_location_value').last()
 
-        storage_method = entry.storage_method_target.storage_method
-        storage_target = entry.storage_method_target.storage_target
-
-        entry.status = 5
-        entry.save(update_fields=['status'])
-
-        cache = entry.ip.policy.cache_storage.value
-        cache_obj = os.path.join(cache, entry.ip.object_identifier_value) + '.tar'
-
-        step = ProcessStep(name='IO Tape',)
-
-        task = ProcessTask.objects.filter(pk=entry.task_id).first()
-
-        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
-            step.parent_step = task.processstep
+        if last_written_obj is None:
+            content_location_value = '1'
         else:
-            step.information_package = entry.ip
+            content_location_value = str(last_written_obj.content_location_value_int + 1)
 
-        step.save()
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.SetTapeFileNumber",
+            params={
+                'medium': storage_medium,
+                'num': int(content_location_value),
+            },
+            processstep=step,
+            processstep_pos=1,
+        ).run().get()
+
+        if entry.ip.cached:
+            src = cache_obj
+        else:
+            src = entry.ip.object_path
+
+        medium = StorageMedium.objects.get(pk=storage_medium)
 
         try:
-            if entry.req_type == 10:  # Write to tape
-                last_written_obj = StorageObject.objects.filter(
-                    storage_medium=storage_medium
-                ).annotate(
-                    content_location_value_int=Cast('content_location_value', IntegerField())
-                ).order_by('content_location_value_int').only('content_location_value').last()
+            ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.WriteToTape",
+                params={
+                    'medium': storage_medium,
+                    'path': src,
+                    'block_size': medium.block_size * 512,
+                },
+                processstep=step,
+                processstep_pos=2,
+            ).run().get()
+        except OSError as e:
+            if e.errno == errno.ENOSPC:
+                medium.mark_as_full()
+                entry.status = 0
+                entry.storage_medium = None
+                entry.save(update_fields=['status', 'storage_medium'])
+                return
+            else:
+                raise
 
-                if last_written_obj is None:
-                    content_location_value = '1'
-                else:
-                    content_location_value = str(last_written_obj.content_location_value_int + 1)
+        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.SetTapeFileNumber",
-                    params={
-                        'medium': storage_medium,
-                        'num': int(content_location_value),
-                    },
-                    processstep=step,
-                    processstep_pos=1,
-                ).run().get()
+        storage_object = StorageObject.objects.create(
+            content_location_type=storage_method.type,
+            content_location_value=content_location_value,
+            ip=entry.ip, storage_medium_id=storage_medium
+        )
 
-                if entry.ip.cached:
-                    src = cache_obj
-                else:
-                    src = entry.ip.object_path
+        entry.storage_object = storage_object
+        entry.save(update_fields=['storage_object'])
 
-                medium = StorageMedium.objects.get(pk=storage_medium)
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        tape_pos = int(entry.storage_object.content_location_value)
 
-                try:
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.WriteToTape",
-                        params={
-                            'medium': storage_medium,
-                            'path': src,
-                            'block_size': medium.block_size * 512,
-                        },
-                        processstep=step,
-                        processstep_pos=2,
-                    ).run().get()
-                except OSError as e:
-                    if e.errno == errno.ENOSPC:
-                        medium.mark_as_full()
-                        entry.status = 0
-                        entry.storage_medium = None
-                        entry.save(update_fields=['status', 'storage_medium'])
-                        return
-                    else:
-                        raise
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.SetTapeFileNumber",
+            params={
+                'medium': storage_medium,
+                'num': tape_pos,
+            },
+            processstep=step,
+            processstep_pos=1,
+        ).run().get()
 
-                StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
+        medium = StorageMedium.objects.get(pk=storage_medium)
 
-                storage_object = StorageObject.objects.create(
-                    content_location_type=storage_method.type,
-                    content_location_value=content_location_value,
-                    ip=entry.ip, storage_medium_id=storage_medium
-                )
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ReadTape",
+            params={
+                'medium': storage_medium,
+                'path': cache,
+                'block_size': medium.block_size * 512,
+            },
+            processstep=step,
+            processstep_pos=2,
+        ).run().get()
 
-                entry.storage_object = storage_object
-                entry.save(update_fields=['storage_object'])
+    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
+        drive.io_queue_entry = None
+        drive.save(update_fields=['io_queue_entry'])
 
-            elif entry.req_type == 20:  # Read from tape
-                tape_pos = int(entry.storage_object.content_location_value)
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.SetTapeFileNumber",
-                    params={
-                        'medium': storage_medium,
-                        'num': tape_pos,
-                    },
-                    processstep=step,
-                    processstep_pos=1,
-                ).run().get()
-
-                medium = StorageMedium.objects.get(pk=storage_medium)
-
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.ReadTape",
-                    params={
-                        'medium': storage_medium,
-                        'path': cache,
-                        'block_size': medium.block_size * 512,
-                    },
-                    processstep=step,
-                    processstep_pos=2,
-                ).run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache.encode('utf-8'))
-
-                entry.ip.cached = True
-                entry.ip.save(update_fields=['cached'])
-
-                if entry.remote_io:
-                    master_server = entry.storage_method_target.storage_target.master_server
-                    host, user, passw = master_server.split(',')
-                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
-
-                    session = requests.Session()
-                    session.verify = False
-                    session.auth = (user, passw)
-
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.CopyFile",
-                        params={
-                            'src': cache_obj,
-                            'dst': dst,
-                            'requests_session': session,
-                        },
-                    ).run().get()
-
-                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
-                    response = session.post(dst)
-                    response.raise_for_status()
-        except:
-            entry.status = 100
-            raise
-        else:
-            entry.status = 20
-        finally:
-            drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
-            drive.io_queue_entry = None
-            drive.save(update_fields=['io_queue_entry'])
-            entry.save(update_fields=['status'])
-
-            if entry.remote_io:
-                data = IOQueueSerializer(entry, context={'request': None}).data
-                entry.sync_with_master(data)
-
-    def undo(self):
-        pass
-
-    def event_outcome_success(self):
-        pass
-
-class IODisk(DBTask):
+class IODisk(IO):
     queue = 'io_disk'
+    storage_type = 'disk'
+    write_types = (15,)
+    read_types = (25,)
 
-    def run(self, io_queue_entry, storage_medium):
-        entry = IOQueue.objects.get(pk=io_queue_entry)
-        entry.status = 5
-        entry.save(update_fields=['status'])
-
-        storage_method = entry.storage_method_target.storage_method
-        storage_target = entry.storage_method_target.storage_target
-
-        cache = entry.ip.policy.cache_storage.value
-        cache_obj = os.path.join(cache, entry.ip.object_identifier_value) + '.tar'
-
-        step = ProcessStep(name='IO Disk',)
-
-        task = ProcessTask.objects.filter(pk=entry.task_id).first()
-
-        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
-            step.parent_step = task.processstep
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        if entry.ip.cached:
+            src = cache_obj
         else:
-            step.information_package = entry.ip
+            src = entry.ip.object_path
 
-        step.save()
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.CopyFile",
+            params={
+                'src': src,
+                'dst': storage_target.target,
+            },
+            processstep=step,
+        )
+        step.run().get()
 
-        try:
-            if entry.req_type == 15:  # Write to disk
-                if entry.ip.cached:
-                    src = cache_obj
-                else:
-                    src = entry.ip.object_path
+        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.CopyFile",
-                    params={
-                        'src': src,
-                        'dst': storage_target.target,
-                    },
-                    processstep=step,
-                )
-                step.run().get()
+        storage_object = StorageObject.objects.create(
+            content_location_type=storage_method.type,
+            ip=entry.ip, storage_medium_id=storage_medium
+        )
 
-                StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
+        entry.storage_medium_id = storage_medium
+        entry.storage_object = storage_object
+        entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
-                storage_object = StorageObject.objects.create(
-                    content_location_type=storage_method.type,
-                    ip=entry.ip, storage_medium_id=storage_medium
-                )
-
-                entry.storage_medium_id = storage_medium
-                entry.storage_object = storage_object
-                entry.save(update_fields=['storage_medium_id', 'storage_object'])
-
-            elif entry.req_type == 25:  # Read from disk
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.CopyFile",
-                    params={
-                        'src': os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar'),
-                        'dst': cache,
-                    },
-                    processstep=step,
-                    processstep_pos=0,
-                ).run().get()
-
-                with tarfile.open(cache_obj) as tar:
-                    tar.extractall(cache.encode('utf-8'))
-
-                entry.ip.cached = True
-                entry.ip.save(update_fields=['cached'])
-
-                if entry.remote_io:
-                    master_server = entry.storage_method_target.storage_target.master_server
-                    host, user, passw = master_server.split(',')
-                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
-
-                    session = requests.Session()
-                    session.verify = False
-                    session.auth = (user, passw)
-
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.CopyFile",
-                        params={
-                            'src': cache_obj,
-                            'dst': dst,
-                            'requests_session': session,
-                        },
-                    ).run().get()
-
-                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
-                    response = session.post(dst)
-                    response.raise_for_status()
-        except:
-            entry.status = 100
-            raise
-        else:
-            entry.status = 20
-        finally:
-            entry.save(update_fields=['status'])
-
-            if entry.remote_io:
-                data = IOQueueSerializer(entry, context={'request': None}).data
-                entry.sync_with_master(data)
-
-    def undo(self):
-        pass
-
-    def event_outcome_success(self):
-        pass
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.CopyFile",
+            params={
+                'src': os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar'),
+                'dst': cache,
+            },
+            processstep=step,
+            processstep_pos=0,
+        ).run().get()
 
 
 class PollRobotQueue(DBTask):
