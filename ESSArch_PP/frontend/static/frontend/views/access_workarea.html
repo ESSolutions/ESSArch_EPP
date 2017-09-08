@@ -52,10 +52,10 @@
                         <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
                     </div>
                 </div>
-                <button ng-if="selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
-                <button ng-if="ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
+                <button ng-if="!ip.workarea.read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
+                <button ng-if="!ip.workarea.read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
             </div>
-            <div id="file-upload" ng-if="(ip.responsible.id == auth.id || checkPermission('ip.can_upload')) && showFileUpload" ng-include
+            <div id="file-upload" ng-if="!ip.workarea.read_only && (ip.responsible.id == auth.id || checkPermission('ip.can_upload')) && showFileUpload" ng-include
             src="'static/frontend/views/file_upload.html'"></div>
         </div>
         <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'move_to_approval')"
