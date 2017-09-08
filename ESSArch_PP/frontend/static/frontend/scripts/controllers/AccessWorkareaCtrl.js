@@ -150,6 +150,11 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
             listViewService.getWorkareaDir("access", $scope.previousGridArraysString()).then(function (dir) {
                 $scope.deckGridData = dir;
                 $scope.selectedCards = [];
+            }).catch(function(response) {
+                $scope.previousGridArrays.pop();
+                if(response.status == 200) {
+                    $scope.getFile(card);
+                }
             });
         } else {
             $scope.getFile(card);

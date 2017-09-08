@@ -147,6 +147,11 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles,
             listViewService.getWorkareaDir("ingest", $scope.previousGridArraysString()).then(function (dir) {
                 $scope.deckGridData = dir;
                 $scope.selectedCards = [];
+            }).catch(function(response) {
+                $scope.previousGridArrays.pop();
+                if(response.status == 200) {
+                    $scope.getFile(card);
+                }
             });
         } else {
             $scope.getFile(card);

@@ -475,8 +475,12 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
                 type: workareaType
             };
         }
-        return WorkareaFiles.query(sendData).$promise.then(function (data) {
-            return data;
+        return $http.get(appConfig.djangoUrl + "workarea-files/",{ params: sendData }).then(function (response) {
+            if(response.headers()['content-disposition']) {
+                return $q.reject(response);
+            } else {
+                return response.data;
+            }
         });
     }
 

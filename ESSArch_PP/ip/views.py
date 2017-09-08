@@ -1165,7 +1165,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
         force_download = request.query_params.get('download', False)
         fullpath = os.path.join(root, path)
 
-        self.validate_path(fullpath, root, existence=False)
+        self.validate_path(fullpath, root)
 
         mimetypes.suffix_map = {}
         mimetypes.encodings_map = {}
