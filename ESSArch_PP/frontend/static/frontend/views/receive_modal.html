@@ -35,7 +35,7 @@
                             popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false" append-to-body="false">
-                        <ui-select-match placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
+                        <ui-select-match ng-attr-placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
                         <ui-select-choices ng-hide="!$select.open" repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
                             <div ng-bind-html="x.name | highlight: $select.search"></div>
                         </ui-select-choices>
