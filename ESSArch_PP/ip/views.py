@@ -45,11 +45,13 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+from guardian.shortcuts import assign_perm, get_objects_for_user
+
 from lxml import etree
 
 from natsort import natsorted
 
-from rest_framework import exceptions, filters, status, viewsets
+from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
@@ -736,7 +738,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         return Response('Upload of %s complete' % filepath)
 
 
-class InformationPackageViewSet(viewsets.ModelViewSet):
+class InformationPackageViewSet(mixins.RetrieveModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
     """
     API endpoint that allows information packages to be viewed or edited.
     """
