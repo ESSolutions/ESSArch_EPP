@@ -225,13 +225,6 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         });
     };
 
-    //Changes SA profile for selected ip
-    $scope.changeSaProfile = function (sa, ip, oldSa_idx) {
-        $scope.saProfile.profile = sa;
-        vm.getAndShowProfile(sa.profile.profile_aip.profile, {})
-
-    }
-
     //Create and show modal when saving an SA
     vm.saveSAModal = function(){
         if (vm.editForm.$valid) {
@@ -569,7 +562,6 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         return IPReception.prepare({ id: ip.id, submission_agreement: $scope.saProfile.profile.id }).$promise.then(function(resource) {
             vm.ip = resource;
             $scope.$emit('update_ip', {ip: resource});
-            vm.$onChanges();
             return resource;
         });
     }

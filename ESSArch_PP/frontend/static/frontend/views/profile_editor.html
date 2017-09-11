@@ -6,10 +6,10 @@
                     <td ng-if="!saAlert">
                         <p ng-if="!saProfile.profile || !checkPermission('profiles.create_new_sa_generation')" class="table-col">{{'SUBMISSIONAGREEMENT' | translate}}</p>
                     </td>
-                    <td ng-if="!saAlert"><select class="form-control table-col" ng-disabled="(saProfile.disabled)"
-                            ng-model="saProfile.profile" ng-change="changeSaProfile(saProfile.profile, ip, {{saProfile.profiles.indexOf(saProfile.profile)}}); getSelectCollection(saProfile.profile, ip)"
+                    <td ng-if="!saAlert" class="flex-row"><select class="form-control table-col" ng-disabled="(saProfile.disabled)"
+                            ng-model="saProfile.profile"
                             ng-options="x as x.name for x in saProfile.profiles"></select>
-                            <button ng-if="!saProfile.disabled" class="btn btn-success" ng-click="prepare(ip)">{{'PREPARE' | translate}}</button>
+                            <button ng-if="!saProfile.disabled" class="btn btn-success prepare-button" ng-click="prepare(ip)">{{'PREPARE' | translate}}</button>
                         </td>
                     <p>{{'PATH' | translate}}: {{ip.object_path}}</p>
                 </tr>
@@ -24,7 +24,7 @@
                     type="submit" class="btn btn-info submit-button"><i class="fa fa-floppy-o"></i> {{'SAVESAPROFILE' | translate}}</button>
             </div>
         </div>
-        <div ng-if="saProfile.profile" id="edit-view" class="edit-view">
+        <div ng-if="saProfile.profile && saProfile.disabled" id="edit-view" class="edit-view">
             <div class="flex-row">
             <form id="edit-form" class="edit-form" ng-submit="vm.saveProfileModel(vm.selectedProfile.profile_type, vm.profileModel, vm.treeEditModel)" name="vm.editForm" novalidate>
             <div class="table-container" >
