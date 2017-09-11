@@ -767,24 +767,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         'end_date','aic__information_packages__end_date','information_packages__end_date',
     )
 
-    def get_permissions(self):
-        if self.action in ['partial_update', 'update']:
-            if self.request.data.get('submission_agreement'):
-                self.permission_classes = [CanChangeSA]
-        if self.action == 'destroy':
-            self.permission_classes = [CanDeleteIP]
-
-        return super(InformationPackageViewSet, self).get_permissions()
-
-    def update(self, request, *args, **kwargs):
-        ip = self.get_object()
-
-        if 'submission_agreement' in request.data:
-            if ip.submission_agreement_locked:
-                return Response("SA connected to IP is locked", status=status.HTTP_400_BAD_REQUEST)
-
-        return super(InformationPackageViewSet, self).update(request, *args, **kwargs)
-
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
 
