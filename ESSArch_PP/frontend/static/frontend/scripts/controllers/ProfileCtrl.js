@@ -24,7 +24,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             var chosen_sa_id = null;
             if($scope.ip.submission_agreement) {
                 chosen_sa_id = $scope.ip.submission_agreement;
-            } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0]) {
+            } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT) {
                 chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
             }
             if (chosen_sa_id) {
@@ -54,7 +54,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             var chosen_sa_id = null;
             if($scope.ip.submission_agreement) {
                 chosen_sa_id = $scope.ip.submission_agreement;
-            } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0]) {
+            } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT) {
                 chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
             }
             if (chosen_sa_id) {

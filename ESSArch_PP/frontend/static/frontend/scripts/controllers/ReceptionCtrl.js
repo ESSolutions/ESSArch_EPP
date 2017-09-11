@@ -209,7 +209,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (IPReception, IP, T
     $scope.receiveModal = function (ip) {
         if (ip.at_reception) {
             IPReception.get({ id: ip.id }).$promise.then(function (resource) {
-                if(resource.altrecordids.SUBMISSIONAGREEMENT[0]) {
+                if(resource.altrecordids.SUBMISSIONAGREEMENT) {
                     IPReception.prepare({ id: resource.id, submission_agreement: resource.altrecordids.SUBMISSIONAGREEMENT[0] }).$promise.then(function(prepared) {
                         var modalInstance = $uibModal.open({
                             animation: true,
