@@ -45,8 +45,6 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from guardian.shortcuts import assign_perm, get_objects_for_user
-
 from lxml import etree
 
 from natsort import natsorted
