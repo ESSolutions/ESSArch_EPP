@@ -358,7 +358,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         except (ValueError, ValidationError):
             raise exceptions.NotFound('Information package with id="%s" not found' % pk)
 
+        logger = logging.getLogger('essarch.epp.ingest')
+
         if ip.state != 'Prepared':
+            logger.warn('Tried to receive IP %s from reception which is in state "%s"' % (pk, ip.state), extra={'user': request.user.pk})
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
         sa = ip.submission_agreement
@@ -402,6 +405,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         xmlfile = os.path.join(reception, '%s.xml' % objid)
 
         if not os.path.isfile(xmlfile):
+            logger.warn('Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile), extra={'user': request.user.pk})
             return Response(
                 {'status': '%s does not exist' % xmlfile},
                 status=status.HTTP_400_BAD_REQUEST
@@ -410,6 +414,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
 
         if not os.path.isfile(container):
+            logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
             return Response(
                 {'status': '%s does not exist' % container},
                 status=status.HTTP_400_BAD_REQUEST
@@ -578,6 +583,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         )
 
         step.run()
+
+        logger.info('Started receiving IP %s from reception in step %s' % (pk, str(step.pk)), extra={'user': request.user.pk})
 
         return Response('Receiving %s...' % container)
 
