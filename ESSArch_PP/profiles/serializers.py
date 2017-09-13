@@ -68,7 +68,7 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         model = templatePackage
         fields = (
             'existingElements', 'allElements', 'name', 'root_element',
-            'extensions', 'prefix', 'schemaURL', 'targetNamespace',
+            'extensions', 'prefix', 'schemaURL', 'targetNamespace', 'structure'
         )
 
         read_only_fields = (

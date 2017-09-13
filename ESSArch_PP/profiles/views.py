@@ -666,7 +666,8 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         profile = Profile.objects.create(profile_type=validated_data['profile_type'],
                     name=validated_data['name'], type=validated_data['type'],
                     status=validated_data['status'], label=validated_data['label'],
-                    template=forms, specification=jsonString, specification_data=data)
+                    template=forms, specification=jsonString, specification_data=data,
+                    structure=obj.structure)
 
         profile_data = ProfileSerializer(profile, context={'request': request}).data
 

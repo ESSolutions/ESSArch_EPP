@@ -202,7 +202,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     };
 }).controller('TemplateModalInstanceCtrl', function (ProfileMakerTemplate, $uibModalInstance, djangoAuth, data) {
     var $ctrl = this;
+    $ctrl.angular = angular;
     $ctrl.template = data.template;
+    $ctrl.oldStructure = angular.copy(data.template.structure);
     $ctrl.allAttributes = data.allAttributes;
     $ctrl.save = data.save;
     $ctrl.model = data.model;
@@ -225,8 +227,16 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.data = $ctrl.model;
         data.generate($ctrl.data).then(function(response) {
             $uibModalInstance.close(response);
+
         })
     };
+    $ctrl.saveStructure = function (structure) {
+        $ctrl.data = structure;
+        ProfileMakerTemplate.update({ templateName: $ctrl.template.name }, { structure: structure })
+            .$promise.then(function (resource) {
+                $uibModalInstance.close(resource);
+            })
+    }
     $ctrl.addTemplate = function () {
         $ctrl.data = $ctrl.model;
         data.add($ctrl.data).then(function(response) {
