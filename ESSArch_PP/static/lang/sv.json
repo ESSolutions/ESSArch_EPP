@@ -328,5 +328,8 @@
     "ADD_EXTENSION": "Lägg till tillägg",
     "SELECTED": "Vald(a)",
     "PREPARE": "Förbered",
-    "CLEAR_ALL": "Avmarkera alla"
+    "CLEAR_ALL": "Avmarkera alla",
+    "IMPORT_URL": "Import-url",
+    "GET_SAS": "Hämta leveransöverenskommelser",
+    "IMPORT_SA": "Importera leveransöverenskommelse"
 }
