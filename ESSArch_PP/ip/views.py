@@ -807,6 +807,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         return super(InformationPackageViewSet, self).get_permissions()
 
     def destroy(self, request, pk=None):
+        logger = logging.getLogger('essarch.epp')
+        logger.info('Request issued to delete IP %s' % pk, extra={'user': request.user.pk})
+
         ip = self.get_object()
 
         if ip.archived:
