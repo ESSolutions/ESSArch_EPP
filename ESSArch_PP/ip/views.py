@@ -25,6 +25,7 @@
 import datetime
 import errno
 import glob
+import logging
 import mimetypes
 import os
 import re
@@ -278,14 +279,18 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
     @detail_route(methods=['post'])
     def prepare(self, request, pk=None):
+        logger = logging.getLogger('essarch.epp.ingest')
+
         existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
         if existing is not None:
+            logger.warn('Tried to prepare IP with id %s which already exists' % (pk), extra={'user': request.user.pk})
             raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
         xmlfile = os.path.join(reception, '%s.xml' % pk)
 
         if not os.path.isfile(xmlfile):
+            logger.warn('Tried to prepare IP with missing XML file %s' % (xmlfile), extra={'user': request.user.pk})
             return Response(
                 {'status': '%s does not exist' % xmlfile},
                 status=status.HTTP_400_BAD_REQUEST
@@ -294,6 +299,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
 
         if not os.path.isfile(container):
+            logger.warn('Tried to prepare IP with missing container file %s' % (container), extra={'user': request.user.pk})
             return Response(
                 {'status': '%s does not exist' % container},
                 status=status.HTTP_400_BAD_REQUEST
@@ -341,6 +347,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             ProfileIP.objects.create(ip=ip, profile=profile)
 
         data = InformationPackageDetailSerializer(ip, context={'request': request}).data
+
+        logger.info('Prepared information package %s' % str(ip.pk), extra={'user': request.user.pk})
         return Response(data, status=status.HTTP_201_CREATED)
 
     @detail_route(methods=['post'], url_path='receive')
