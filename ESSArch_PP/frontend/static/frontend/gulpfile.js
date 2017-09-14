@@ -96,6 +96,7 @@ var jsVendorFiles = [
         'styles/modules/mixins.scss',
         'styles/modules/tree_control.scss',
         'styles/modules/profile_maker.scss',
+        'styles/modules/top_alert.scss',
         'styles/styles.scss'
     ],
     cssDest = 'styles';
