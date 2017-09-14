@@ -1412,22 +1412,9 @@ class UnmountIdleDrives(DBTask):
         pass
 
 
-class ValidateFileFormat(tasks.ValidateFileFormat):
-    event_type = 30260
-
-
 class ValidateXMLFile(tasks.ValidateXMLFile):
     event_type = 30261
 
 
 class ValidateLogicalPhysicalRepresentation(tasks.ValidateLogicalPhysicalRepresentation):
     event_type = 30262
-
-
-class ValidateIntegrity(tasks.ValidateIntegrity):
-    event_type = 30263
-
-
-class ValidateFiles(tasks.ValidateFiles):
-    fileformat_task = "workflow.tasks.ValidateFileFormat"
-    checksum_task = "workflow.tasks.ValidateIntegrity"
