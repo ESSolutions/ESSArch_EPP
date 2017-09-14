@@ -1,10 +1,10 @@
 <div>
-    <div ng-if="vm.alerts.length > 0" ng-click="vm.viewAlerts()" class="angular-animate top-alert" ng-class="[vm.alerts[0].type, {'top-alert-expand': vm.alerts.length > 0}]">
+    <div ng-if="vm.visible && vm.alerts.length > 0" ng-click="vm.viewAlerts()" class="angular-animate top-alert" ng-class="[vm.alerts[0].type, {'top-alert-expand': vm.alerts.length > 0}]">
         {{vm.alerts[0].msg}}
         <i ng-click="vm.hideAlert()" class="top-alert-close">&times</i>
     </div>
     <div ng-if="vm.showAlerts && vm.alerts.length > 0" class="angular-animate alert-list">
-        <div ng-repeat="x in vm.alerts" class="top-alert-expand alert-list-item angular-animate" ng-class="x.type">
+        <div ng-repeat="x in vm.alerts | limitTo:10" class="top-alert-expand alert-list-item angular-animate" ng-class="x.type">
             {{x.msg}}
             <i ng-click="vm.removeAlert(x)" class="top-alert-close">&times</i>
         </div>

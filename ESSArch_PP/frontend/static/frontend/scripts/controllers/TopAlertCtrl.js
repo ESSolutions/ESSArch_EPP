@@ -31,6 +31,7 @@ angular.module('myApp').controller('TopAlertCtrl', function($timeout, $scope, $r
      */
 
     vm.showAlert = function (msg, type, time) {
+        vm.visible = true;
         var timer = null;
         var alert = {msg: msg, type: type};
         vm.alerts.unshift(alert);            
