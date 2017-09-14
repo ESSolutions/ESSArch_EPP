@@ -482,7 +482,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             if val_format or val_integrity:
                 ProcessTask.objects.create(
-                    name="workflow.tasks.ValidateFiles",
+                    name="ESSArch_Core.tasks.ValidateFiles",
                     params={
                         "rootdir": reception,
                         "xmlfile": xmlfile,
