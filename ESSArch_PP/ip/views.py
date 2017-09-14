@@ -62,6 +62,7 @@ from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.essxml.Generator.xmlGenerator import (
     find_destination
 )
+from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -291,19 +292,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         if not os.path.isfile(xmlfile):
             logger.warn('Tried to prepare IP with missing XML file %s' % (xmlfile), extra={'user': request.user.pk})
-            return Response(
-                {'status': '%s does not exist' % xmlfile},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
 
         if not os.path.isfile(container):
             logger.warn('Tried to prepare IP with missing container file %s' % (container), extra={'user': request.user.pk})
-            return Response(
-                {'status': '%s does not exist' % container},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('%s does not exist' % container)
 
         objid, container_type = os.path.splitext(os.path.basename(container))
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
@@ -406,19 +401,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         if not os.path.isfile(xmlfile):
             logger.warn('Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile), extra={'user': request.user.pk})
-            return Response(
-                {'status': '%s does not exist' % xmlfile},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
 
         if not os.path.isfile(container):
             logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
-            return Response(
-                {'status': '%s does not exist' % container},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('%s does not exist' % container)
 
         container_type = os.path.splitext(os.path.basename(container))[1]
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
@@ -586,7 +575,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         logger.info('Started receiving IP %s from reception in step %s' % (pk, str(step.pk)), extra={'user': request.user.pk})
 
-        return Response('Receiving %s...' % container)
+        return Response({'detail': 'Receiving %s...' % container})
 
     @detail_route(methods=['get'])
     def files(self, request, pk=None):
@@ -748,7 +737,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             responsible=self.request.user,
         ).run().get()
 
-        return Response('Upload of %s complete' % filepath)
+        return Response({'detail': 'Upload of %s complete' % filepath})
 
 
 class InformationPackageViewSet(mixins.RetrieveModelMixin,
@@ -868,7 +857,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         step.run()
 
-        return Response('Receiving %s' % str(ip.pk), status=status.HTTP_202_ACCEPTED)
+        return Response({'detail': 'Receiving %s' % str(ip.pk)}, status=status.HTTP_202_ACCEPTED)
 
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
@@ -881,12 +870,12 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             policy = request.data.get('policy')
 
             if not policy:
-                return Response('Policy required', status=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.ParseError('Policy required')
 
             try:
                 ip.policy = ArchivePolicy.objects.get(pk=policy)
             except ArchivePolicy.DoesNotExist:
-                return Response('Policy "%s" does not exist' % policy, status=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.ParseError('Policy "%s" does not exist' % policy)
             except ValueError as e:
                 raise exceptions.ParseError(e.message)
 
@@ -919,7 +908,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         main_step.run()
 
-        return Response(['Preserving IP %s...' % pk])
+        return Response({'detail': 'Preserving IP %s...' % pk})
 
     @detail_route(methods=['post'])
     def access(self, request, pk=None):
@@ -930,10 +919,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         options = ['tar', 'extracted', 'new']
 
         if not any(x in options for x in data.keys()):
-            return Response('No option set', status=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError('No option set')
 
         if not any(v for k, v in data.iteritems() if k in options):
-            return Response('Need atleast one option set to true', status=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError('Need at least one option set to true')
 
         workarea_type = Workarea.INGEST if aip.state == 'Received' else Workarea.ACCESS
 
@@ -942,7 +931,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         access_path = Path.objects.get(entity='access_workarea')
 
         if not data.get('new') and ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
-            return Response('IP already in workarea', status=status.HTTP_409_CONFLICT)
+            raise Conflict('IP already in workarea')
 
         if data.get('new'):
             data['extracted'] = True
@@ -967,23 +956,17 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         step.run()
 
-        return Response(['Accessing AIP %s...' % pk])
+        return Response({'detail': 'Accessing AIP %s...' % pk})
 
     @detail_route(methods=['post'], url_path='create-dip')
     def create_dip(self, request, pk=None):
         dip = InformationPackage.objects.get(pk=pk)
 
         if dip.package_type != InformationPackage.DIP:
-            return Response(
-                {'status': '"%s" is not a DIP, it is a %s' % (dip, dip.package_type)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('"%s" is not a DIP, it is a %s' % (dip, dip.package_type))
 
         if dip.state != 'Prepared':
-            return Response(
-                {'status': '"%s" is not in the "Prepared" state'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('"%s" is not in the "Prepared" state' % dip)
 
         step = ProcessStep.objects.create(
             name="Create DIP",
@@ -1011,29 +994,20 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         try:
             label = request.data['label']
         except KeyError:
-            return Response(
-                {'status': '"label" is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise exceptions.ParseError('"label" is required')
 
         object_identifier_value = request.data.get('object_identifier_value')
 
         if object_identifier_value:
             ip_exists = InformationPackage.objects.filter(object_identifier_value=object_identifier_value).exists()
             if ip_exists:
-                return Response(
-                    {'status': 'IP with object identifer value "%s" already exists' % object_identifier_value},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                raise exceptions.ParseError('IP with object identifer value "%s" already exists' % object_identifier_value)
 
         orders = request.data.get('orders', [])
 
         for order in orders:
             if not Order.objects.filter(pk=order, responsible=request.user).exists():
-                return Response(
-                    {'status': 'Order "%s" belonging to current user does not exist' % order},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                raise exceptions.ParseError('Order "%s" belonging to current user does not exist' % order)
 
         main_step = ProcessStep.objects.create(name='Prepare DIP',)
         task = ProcessTask.objects.create(
@@ -1077,7 +1051,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         ip = self.get_object()
 
         if ip.archived:
-            return Response('%s is archived' % ip, status=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError('%s is archived' % ip)
 
         download = request.query_params.get('download', False)
         return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
@@ -1107,10 +1081,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         try:
             ip.change_profile(new_profile)
         except ValueError as e:
-            return Response({'status': e.message}, status=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.ParseError(e.message)
 
         return Response({
-            'status': 'updating IP (%s) with new profile (%s)' % (
+            'detail': 'Updating IP (%s) with new profile (%s)' % (
                 ip.pk, new_profile
             )
         })
@@ -1125,12 +1099,12 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         try:
             ptype = request.data["type"]
         except KeyError:
-            raise exceptions.ParseError('type parameter missing')
+            raise exceptions.ParseError('Missing type parameter')
 
         ip.unlock_profile(ptype)
 
         return Response({
-            'status': 'unlocking profile with type "%s" in IP "%s"' % (
+            'detail': 'Unlocking profile with type "%s" in IP "%s"' % (
                 ptype, ip.pk
             )
         })
@@ -1435,7 +1409,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
                 f.write(open(chunk_file).read())
                 os.remove(chunk_file)
 
-        return Response("Merged chunks")
+        return Response({'detail': 'Merged chunks'})
 
     @list_route(methods=['post'], url_path='add-to-dip')
     def add_to_dip(self, request):
