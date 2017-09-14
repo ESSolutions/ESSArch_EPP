@@ -1,6 +1,13 @@
 <div class="my-page">
     <div class="content-wrapper">
         <div class="table-control">
+            <div class="flex-row">
+                <input class="form-control" placeholder="msg" ng-model="text">
+                <select class="form-control" placeholder="type" ng-model="type" ng-options="x as x for x in ['error', 'success', 'info']">{{x}}</select>
+                <input class="form-control" type="number" placehodler="time" ng-model="time">
+            </div>
+            <button class="brn btn-default" ng-click="addAlert()">Add alert</button>
+            <hr />
             <button class="btn btn-default" ng-click="tableControlCollapsed = !tableControlCollapsed">Choose visible requests</button>
             <div uib-collapse="tableControlCollapsed">
                 <div class="well">

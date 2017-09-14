@@ -1,4 +1,4 @@
-angular.module('myApp').controller('MyPageCtrl', function($scope, $controller, $rootScope) {
+angular.module('myApp').controller('MyPageCtrl', function(TopAlert, $scope, $controller, $rootScope) {
     var vm = this;
     $scope.visibleRequests = {
         access: false,
@@ -13,4 +13,11 @@ angular.module('myApp').controller('MyPageCtrl', function($scope, $controller, $
         create_date: new Date(),
         RequestType: "Request type"
     }];
+
+    $scope.text = "asd";
+    $scope.type = "error";
+    $scope.time = 3000;
+    $scope.addAlert = function() {
+        TopAlert.show($scope.text, $scope.type, $scope.time);
+    }
 });
