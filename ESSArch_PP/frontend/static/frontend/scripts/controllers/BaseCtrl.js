@@ -534,25 +534,36 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         listViewService.getChildrenForStep(step);
     };
 
+    $scope.getTask = function(branch) {
+        return Task.get({ id: branch.id }).$promise.then(function (data) {
+            var started = moment(data.time_started);
+            var done = moment(data.time_done);
+            data.duration = done.diff(started);
+            $scope.currentStepTask = data;
+            $scope.stepTaskLoading = false;
+            return data;
+        });
+    }
+
+    $scope.getStep = function(branch) {
+        return Step.get({ id: branch.id }).$promise.then(function (data) {
+            var started = moment(data.time_started);
+            var done = moment(data.time_done);
+            data.duration = done.diff(started);
+            $scope.currentStepTask = data;
+            $scope.stepTaskLoading = false;
+            return data;
+        });
+    }
     //Click funciton for steps and tasks
     $scope.stepTaskClick = function (branch) {
         $scope.stepTaskLoading = true;
         if (branch.flow_type == "task") {
-            Task.get({ id: branch.id }).$promise.then(function (data) {
-                var started = moment(data.time_started);
-                var done = moment(data.time_done);
-                data.duration = done.diff(started);
-                $scope.currentStepTask = data;
-                $scope.stepTaskLoading = false;
+            $scope.getTask(branch).then(function(data) {
                 $scope.taskInfoModal();
             });
         } else {
-            Step.get({ id: branch.id }).$promise.then(function (data) {
-                var started = moment(data.time_started);
-                var done = moment(data.time_done);
-                data.duration = done.diff(started);
-                $scope.currentStepTask = data;
-                $scope.stepTaskLoading = false;
+            $scope.getStep(branch).then(function(data) {
                 $scope.stepInfoModal();
             });
         }
