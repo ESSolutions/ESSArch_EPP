@@ -440,7 +440,10 @@ body.modal-open[style] {
     margin-left: 10px;
 }
 .param-value {
-    word-break: break-word;
+    pre {
+        overflow-x: scroll;
+        white-space: pre-wrap;
+    }
 }
 .global-search {
     width: 400px;

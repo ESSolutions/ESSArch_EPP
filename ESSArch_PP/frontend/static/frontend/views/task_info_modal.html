@@ -32,7 +32,7 @@
                             <table class="table">
                                 <thead>
                                     <tr ng-repeat="(key, value) in currentStepTask.params">
-                                        <td>{{key}}</td> <td class="param-value">{{value}}</td>
+                                        <td>{{key}}</td> <td class="param-value"><pre>{{value | json}}</pre></td>
                                 </thead>
                                     </tr>
                             </table>
