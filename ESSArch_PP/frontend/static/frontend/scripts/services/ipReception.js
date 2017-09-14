@@ -12,6 +12,7 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
         },
         receive: {
             method: 'POST',
+            isArray: false,
             params: { action: "receive", id: "@id" }
         },
         changeSa: {

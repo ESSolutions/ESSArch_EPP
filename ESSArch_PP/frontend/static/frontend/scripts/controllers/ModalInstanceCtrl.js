@@ -142,7 +142,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('ReceiveModalInstanceCtrl', function ($uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
+.controller('ReceiveModalInstanceCtrl', function (TopAlert, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
     var vm = data.vm;
     $scope.saAlert = null;
     $scope.alerts = {
@@ -181,7 +181,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             status: "received"
         }
         Requests.receive(ip, vm.request, vm.validatorModel)
-            .then(function(){
+            .then(function(response){
                 $uibModalInstance.close(vm.data);
             });
     };

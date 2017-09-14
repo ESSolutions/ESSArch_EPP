@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Requests', function(IPReception, IP, $http, appConfig) {
+angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, $http, appConfig) {
     function receive(ip, request, validators) {
         return IPReception.receive({
                 id: ip.id,
@@ -32,25 +32,37 @@ angular.module('myApp').factory('Requests', function(IPReception, IP, $http, app
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
         }).$promise.then(function(response) {
+            TopAlert.show(response.detail, "success", 3000);
             return response;
-        });
+        }).catch(function(response) {
+            TopAlert.show(response.data.detail, "error");
+        })
     };
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })
         ).$promise.then(function (response) {
+            TopAlert.show(response.detail, "success", 3000);
             return response;
-        });
+        }).catch(function(response) {
+            TopAlert.show(response.data.detail, "error");
+        })
     }
     function access(ip, data) {
         return IP.access(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
+            TopAlert.show(response.detail, "success", 3000);
             return response;
-        });
+        }).catch(function(response) {
+            TopAlert.show(response.data.detail, "error");
+        })
     }
     function moveToApproval(ip, data) {
         return IP.moveToApproval(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
+            TopAlert.show(response.detail, "success", 3000);
             return response;
-        });
+        }).catch(function(response) {
+            TopAlert.show(response.data.detail, "error");
+        })
     }
     return {
         receive: receive,

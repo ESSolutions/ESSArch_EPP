@@ -79,13 +79,13 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         },
         preserve: {
             method: 'POST',
-            isArray: true,
+            isArray: false,
             params: { action: "preserve", id: "@id" }
         },
         access: {
             method: "POST",
             params: { action: "access", id: "@id" },
-            isArray: true
+            isArray: false
         },
         changeSa: {
             method: "PATCH",
