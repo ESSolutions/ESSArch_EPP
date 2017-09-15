@@ -54,6 +54,7 @@ from scandir import walk
 from ESSArch_Core import tasks
 from ESSArch_Core.configuration.models import ArchivePolicy, Path, Parameter
 from ESSArch_Core.essxml.util import parse_submit_description
+from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -245,15 +246,7 @@ class CacheAIP(DBTask):
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
 
-        checksum = ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.CalculateChecksum',
-            params={
-                'filename': dsttar,
-                'algorithm': policy.get_checksum_algorithm_display(),
-            },
-            information_package_id=aip,
-            responsible_id=self.responsible,
-        ).run().get()
+        checksum = calculate_checksum(dsttar, algorithm=policy.get_checksum_algorithm_display())
 
         InformationPackage.objects.filter(pk=aip).update(
             message_digest=checksum, message_digest_algorithm=policy.checksum_algorithm,
