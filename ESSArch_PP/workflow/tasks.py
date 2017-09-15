@@ -69,6 +69,7 @@ from ESSArch_Core.storage.exceptions import (
     TapeMountedAndLockedByOtherError,
     TapeUnmountedError,
 )
+from ESSArch_Core.storage.copy import copy_file
 from ESSArch_Core.storage.models import (
     DISK,
     TAPE,
@@ -481,14 +482,7 @@ class PollAccessQueue(DBTask):
             if e.errno != errno.EEXIST:
                 raise
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.CopyFile",
-            params={
-                'src': cache_tar_obj,
-                'dst': dst_tar
-            },
-            processstep=step,
-        ).run().get()
+        copy_file(cache_tar_obj, dst_tar)
 
         if entry.extracted:
             with tarfile.open(dst_tar) as tarf:
@@ -819,14 +813,7 @@ class PollIOQueue(DBTask):
         cache_obj = os.path.join(cache_dir, entry.ip.object_identifier_value)
         cache_tar_obj = cache_obj + '.tar'
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.CopyFile",
-            params={
-                'src': cache_tar_obj,
-                'dst': dst,
-                'requests_session': session,
-            },
-        ).run().get()
+        copy_file(cache_tar_obj, dst, session)
 
         dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
         response = session.post(dst)
@@ -1071,14 +1058,7 @@ class IO(DBTask):
                     session.verify = False
                     session.auth = (user, passw)
 
-                    ProcessTask.objects.create(
-                        name="ESSArch_Core.tasks.CopyFile",
-                        params={
-                            'src': cache_obj,
-                            'dst': dst,
-                            'requests_session': session,
-                        },
-                    ).run().get()
+                    copy_file(cache_obj, dst, requests_session=session)
 
                     dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                     response = session.post(dst)
@@ -1217,14 +1197,7 @@ class IODisk(IO):
         else:
             src = entry.ip.object_path
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.CopyFile",
-            params={
-                'src': src,
-                'dst': storage_target.target,
-            },
-            processstep=step,
-        )
+        copy_file(src, storage_target.target)
         step.run().get()
 
         StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
@@ -1239,15 +1212,8 @@ class IODisk(IO):
         entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
     def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.CopyFile",
-            params={
-                'src': os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar'),
-                'dst': cache,
-            },
-            processstep=step,
-            processstep_pos=0,
-        ).run().get()
+        src = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar')
+        copy_file(src, cache)
 
 
 class PollRobotQueue(DBTask):
