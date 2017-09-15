@@ -41,7 +41,6 @@ from celery import states as celery_states
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -59,9 +58,6 @@ from ESSArch_Core.configuration.models import (
     Path,
 )
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
-from ESSArch_Core.essxml.Generator.xmlGenerator import (
-    find_destination
-)
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
@@ -74,8 +70,6 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 from ESSArch_Core.ip.permissions import (
-    CanChangeSA,
-    CanDeleteIP,
     CanUnlockProfile,
     IsOrderResponsibleOrAdmin,
     IsResponsibleOrReadOnly
@@ -86,10 +80,10 @@ from ESSArch_Core.profiles.models import (
     ProfileIPData,
     SubmissionAgreement,
 )
-from ESSArch_Core.profiles.utils import fill_specification_data, profile_types
+from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.util import (
+    find_destination,
     generate_file_response,
-    get_value_from_path,
     get_files_and_dirs,
     get_tree_size_and_count,
     in_directory,
