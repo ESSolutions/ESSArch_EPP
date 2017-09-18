@@ -798,9 +798,16 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
     def destroy(self, request, pk=None):
         logger = logging.getLogger('essarch.epp')
-        logger.info('Request issued to delete IP %s' % pk, extra={'user': request.user.pk})
 
         ip = self.get_object()
+
+        logger.info('Request issued to delete %s %s' % (ip.get_package_type_display(), pk), extra={'user': request.user.pk})
+
+        if ip.package_type == InformationPackage.AIC:
+            if ip.information_packages.filter(archived=True).exists():
+                raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
+
+            ip.information_packages.all().delete()
 
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
