@@ -9,6 +9,7 @@ body {
     margin: 0px auto;
     min-width: 680px;
     overflow: auto;
+    -ms-overflow-style: scrollbar;
 }
 body.modal-open {
     overflow: auto;
