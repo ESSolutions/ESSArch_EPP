@@ -74,6 +74,7 @@ var jsVendorFiles = [
         'bower_components/uri-util/dist/uri-util.js', // required by angular-link-header-parser
         'node_modules/marked/lib/marked.js',
         'node_modules/angular-marked/dist/angular-marked.js',
+        'node_modules/angular-relative-date/dist/angular-relative-date.js',
         'node_modules/angular-filesize-filter/angular-filesize-filter.js',
         'node_modules/moment/min/moment-with-locales.js',
         'node_modules/angular-date-time-input/src/dateTimeInput.js',
