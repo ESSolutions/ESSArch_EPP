@@ -1,17 +1,43 @@
-.top-alert {
+.top-alert-container {
     position: fixed;
-    z-index: 101;
+    z-index: 1150;
     top: 0;
     left: 0;
     right: 0;
+}
+.top-alert {
     text-align: center;
-    padding: 10px;
-    overflow: hidden; 
-    -webkit-box-shadow: 0 0 5px black;
-    -moz-box-shadow:    0 0 5px black;
-    box-shadow:         0 0 5px black;
+    padding: 5px;
+    box-shadow: 0 0 5px black;
     font-size: 16px;
     color: white;
+    padding-right: 10px;
+    padding-left: 10px;
+    .icon-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        span {
+            margin-left: 10px;
+        }
+        min-width: 70px;
+    }
+    .alert-text {
+        width:100%;
+        border-right-style: solid;
+        border-right-width: 2px;
+        .error, .info, .success, .critical {
+            border-right-color: white;
+        }
+        .warning {
+            border-right-color: black !important;
+        }
+    }
+    .alert-date {
+        font-size: 10px;
+        text-align: left;
+        white-space: nowrap;
+    }
 }
 .top-alert-expand {
     cursor: pointer;
@@ -24,6 +50,12 @@
 }
 .top-alert-expand.info:hover {
     background: lighten($step-in-progress, 10%);
+}
+.top-alert-expand.warning:hover {
+    background: lighten(#F3D464, 10%);
+}
+.top-alert-expand.critical:hover {
+    background: lighten($step-fail, 10%);
 }
 .top-alert-close {
     float: right;
@@ -38,61 +70,77 @@
 .info {
     background: $step-in-progress;
 }
+.warning {
+    background: #fde073;
+    color: black !important;
+}
+.critical {
+    background: $step-fail;
+}
 
 .top-alert.ng-enter, .top-alert.ng-leave {
     -webkit-transition: .1s linear all;
-    -moz-transition: .1s linear all;
-    -ms-transition: .1s linear all;
-    -o-transition: .1s linear all;
     transition: .1s linear all;
 }
- .top-alert.ng-enter {
-   opacity: 0;
-}
- .top-alert.ng-enter.ng-enter-active {
-    opacity: 1;
-}
- .top-alert.ng-leave {
-    opacity: 1;
-}
- .top-alert.ng-leave.ng-leave-active {
+.top-alert.ng-enter {
     opacity: 0;
 }
+.top-alert.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+.top-alert.ng-leave {
+    opacity: 1;
+}
+.top-alert.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+::-webkit-scrollbar {
+    width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
 .alert-list {
-    position: fixed;
-    z-index: 101;
-    top: 43px;
-    left: 0;
-    right: 0;
-    overflow: scroll;
     text-align: center;
-    overflow: hidden; 
-    -webkit-box-shadow: 0 0 5px black;
-    -moz-box-shadow:    0 0 5px black;
-    box-shadow:         0 0 5px black;
+    box-shadow: 0 0 5px black;
     font-size: 16px;
     color: white;
+    width: 100%;
+    .alert-text {
+        width:95%;
+    }
+    .alert-date {
+        font-size: 10px;
+        text-align: left;
+        white-space: nowrap;
+    }
 }
 
 .alert-list-item {
-    padding: 10px;
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+.alert-text-icons-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 .alert-list.ng-enter, .alert-list.ng-leave {
-    -webkit-transition: .1s linear all;
-    -moz-transition: .1s linear all;
-    -ms-transition: .1s linear all;
-    -o-transition: .1s linear all;
-    transition: .1s linear all;
+    -webkit-transition: .3s linear all;
+    transition: .3s linear all;
 }
  .alert-list.ng-enter {
-   opacity: 0;
+   min-height: 0;
+   opacity: .7;
 }
  .alert-list.ng-enter.ng-enter-active {
+    min-height: 1px;
     opacity: 1;
 }
  .alert-list.ng-leave {
+    min-height: 1px;
     opacity: 1;
 }
  .alert-list.ng-leave.ng-leave-active {
-    opacity: 0;
+    min-height: 0;
+    opacity: .7;
 }
