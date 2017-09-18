@@ -97,6 +97,15 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('published',)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.published:
+            detail = 'Method "{method}" is not allowed on published SAs'.format(method=request.method)
+            raise exceptions.MethodNotAllowed(method=request.method, detail=detail)
+
+        return super(SubmissionAgreementViewSet, self).update(request, *args, **kwargs)
+
     @detail_route(methods=['post'])
     def publish(self, request, pk=None):
         SubmissionAgreement.objects.filter(pk=pk).update(published=True)
