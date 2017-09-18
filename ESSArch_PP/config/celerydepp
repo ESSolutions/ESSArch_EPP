@@ -1,6 +1,6 @@
 # Names of nodes to start
 #   most will only start one node:
-CELERYD_NODES="workerepp workereppvalidation workereppfileoperation"
+CELERYD_NODES="workerepp workereppvalidation workereppfileoperation io_disk_worker io_tape_worker"
 
 # Absolute or relative path to the 'celery' command:
 CELERY_BIN="/ESSArch/pd/python/bin/celery"
@@ -14,7 +14,7 @@ CELERYD_CHDIR="/ESSArch/pd/python/lib/python2.7/site-packages/ESSArch_PP"
 #CELERYD_CHDIR="/ESSArch/git/epp3/ESSArch_EPP/ESSArch_PP"
 
 # Extra command-line arguments to the worker
-CELERYD_OPTS="-Q:workerepp celery -c:workerepp 4 -Q:workereppvalidation validation -c:workereppvalidation 4 -Q:workereppfileoperation file_operation -c:workereppfileoperation 4 --broker=amqp://guest:guest@localhost:5672/epp -Ofair --autoreload"
+CELERYD_OPTS="-Q:workerepp celery -c:workerepp 4 -Q:workereppvalidation validation -c:workereppvalidation 4 -Q:workereppfileoperation file_operation -c:workereppfileoperation 4 -Q:io_disk_worker io_disk -c:io_disk_worker 1 -Q:io_tape_worker io_tape -c:io_tape_worker 1 --broker=amqp://guest:guest@localhost:5672/epp -Ofair --autoreload"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_LEVEL=INFO
