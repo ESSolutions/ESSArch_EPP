@@ -852,15 +852,6 @@ def installProfileAIP(sa):
             },
         ],
         'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIP_Template.json')).read()),
-        'specification_data': {
-            "mets_type": "Personnel",
-            "RECORDSTATUS": "NEW",
-            "archivist_organization_note": "Archivist Organization 1 Note",
-            "creator_organization_name": "Creator Organization 1",
-            "creator_organization_note": "Creator Organization 1 Note",
-            "archivist_software_name": "Archivist Software 1",
-            "archivist_software_note": "Archivist Software 1 Note",
-        }
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1050,15 +1041,6 @@ def installProfileDIP(sa):
             },
         ],
         'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_DIP_Template.json')).read()),
-        'specification_data': {
-            "mets_type": "Personnel",
-            "RECORDSTATUS": "NEW",
-            "archivist_organization_note": "Archivist Organization 1 Note",
-            "creator_organization_name": "Creator Organization 1",
-            "creator_organization_note": "Creator Organization 1 Note",
-            "archivist_software_name": "Archivist Software 1",
-            "archivist_software_note": "Archivist Software 1 Note",
-        }
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
