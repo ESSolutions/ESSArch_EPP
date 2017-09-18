@@ -618,13 +618,10 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 event.preventDefault();
                 $state.go('login'); // go to login
             }
-
-            // now, redirect only not authenticated
         });
     }).catch(function(status) {
         $state.go('login');
     });
-
 
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
         if (to.redirectTo) {

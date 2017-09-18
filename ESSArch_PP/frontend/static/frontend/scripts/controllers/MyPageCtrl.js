@@ -13,11 +13,4 @@ angular.module('myApp').controller('MyPageCtrl', function(TopAlert, $scope, $con
         create_date: new Date(),
         RequestType: "Request type"
     }];
-
-    $scope.text = "asd";
-    $scope.type = "error";
-    $scope.time = 3000;
-    $scope.addAlert = function() {
-        TopAlert.show($scope.text, $scope.type, $scope.time);
-    }
 });
