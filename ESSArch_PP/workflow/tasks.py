@@ -268,6 +268,7 @@ class UpdateIPStatus(tasks.UpdateIPStatus):
 
 class StoreAIP(DBTask):
     event_type = 20300
+    hidden = True
 
     def run(self, aip):
         policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=aip).policy
@@ -287,12 +288,17 @@ class StoreAIP(DBTask):
             responsible_id=self.responsible,
         ).run().get()
 
+        step = ProcessStep.objects.create(
+            name='Write to storage',
+            parent_step_id=self.step,
+        )
+
         with transaction.atomic():
             for method in storage_methods:
                 for method_target in method.storage_method_target_relations.filter(status=1):
                     req_type = 10 if method_target.storage_method.type == TAPE else 15
 
-                    _, created = IOQueue.objects.get_or_create(
+                    entry, created = IOQueue.objects.get_or_create(
                         storage_method_target=method_target, req_type=req_type,
                         ip_id=aip, status__in=[0, 2, 5],
                         defaults={'user_id': self.responsible, 'status': 0, 'write_size': size}
@@ -300,6 +306,9 @@ class StoreAIP(DBTask):
 
                     if created:
                         InformationPackage.objects.filter(pk=aip).update(state='Preserving')
+
+                    entry.step = step
+                    entry.save(update_fields=['step'])
 
     def undo(self, aip):
         pass
@@ -979,6 +988,9 @@ class PollIOQueue(DBTask):
                     eager=False,
                 )
 
+                if entry.step is not None:
+                    entry.step.tasks.add(t)
+
                 entry.task_id = str(t.pk)
                 entry.save(update_fields=['task_id'])
 
@@ -992,6 +1004,9 @@ class PollIOQueue(DBTask):
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
                 )
+
+                if entry.step is not None:
+                    entry.step.tasks.add(t)
 
                 entry.task_id = str(t.pk)
                 entry.save(update_fields=['task_id'])
@@ -1007,13 +1022,13 @@ class PollIOQueue(DBTask):
 class IO(DBTask):
     abstract = True
 
-    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         raise NotImplementedError()
 
-    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         raise NotImplementedError()
 
-    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         pass
 
     def run(self, io_queue_entry, storage_medium):
@@ -1027,21 +1042,11 @@ class IO(DBTask):
         cache = entry.ip.policy.cache_storage.value
         cache_obj = os.path.join(cache, entry.ip.object_identifier_value) + '.tar'
 
-        step = ProcessStep(name="IO %s" % self.storage_type.title(),)
-        task = ProcessTask.objects.filter(pk=entry.task_id).first()
-
-        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
-            step.parent_step = task.processstep
-        else:
-            step.information_package = entry.ip
-
-        step.save()
-
         try:
             if entry.req_type in self.write_types:
-                self.write(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+                self.write(entry, cache, cache_obj, storage_medium, storage_method, storage_target)
             elif entry.req_type in self.read_types:
-                self.read(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+                self.read(entry, cache, cache_obj, storage_medium, storage_method, storage_target)
 
                 with tarfile.open(cache_obj) as tar:
                     tar.extractall(cache.encode('utf-8'))
@@ -1077,7 +1082,7 @@ class IO(DBTask):
                 data = IOQueueSerializer(entry, context={'request': None}).data
                 entry.sync_with_master(data)
 
-            self.io_success(entry, cache, cache_obj, storage_medium, storage_method, storage_target, step)
+            self.io_success(entry, cache, cache_obj, storage_medium, storage_method, storage_target)
 
     def undo(self):
         pass
@@ -1092,7 +1097,17 @@ class IOTape(IO):
     write_types = (10,)
     read_types = (20,)
 
-    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
+        step = ProcessStep(name="Write to tape" % self.storage_type.title(),)
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
+        else:
+            step.information_package = entry.ip
+
+        step.save()
+
         last_written_obj = StorageObject.objects.filter(
             storage_medium=storage_medium
         ).annotate(
@@ -1153,7 +1168,16 @@ class IOTape(IO):
         entry.storage_object = storage_object
         entry.save(update_fields=['storage_object'])
 
-    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
+        step = ProcessStep(name="Read from tape" % self.storage_type.title(),)
+        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+
+        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
+            step.parent_step = task.processstep
+        else:
+            step.information_package = entry.ip
+
+        step.save()
         tape_pos = int(entry.storage_object.content_location_value)
 
         ProcessTask.objects.create(
@@ -1179,7 +1203,7 @@ class IOTape(IO):
             processstep_pos=2,
         ).run().get()
 
-    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
         drive.io_queue_entry = None
         drive.save(update_fields=['io_queue_entry'])
@@ -1191,14 +1215,13 @@ class IODisk(IO):
     write_types = (15,)
     read_types = (25,)
 
-    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def write(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         if entry.ip.cached:
             src = cache_obj
         else:
             src = entry.ip.object_path
 
         copy_file(src, storage_target.target)
-        step.run().get()
 
         StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
 
@@ -1211,7 +1234,7 @@ class IODisk(IO):
         entry.storage_object = storage_object
         entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
-    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target, step):
+    def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         src = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar')
         copy_file(src, cache)
 
