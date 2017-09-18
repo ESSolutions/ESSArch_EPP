@@ -443,6 +443,7 @@ def installProfileSIP(sa):
             {
                 "key": "mets_type",
                 "type": "select",
+                "required": True,
                 "defaultValue": "Personnel",
                 "templateOptions": {
                     "label": "Content Type",
@@ -693,6 +694,8 @@ def installProfileAIP(sa):
             {
                 "key": "mets_type",
                 "type": "select",
+                "required": True,
+                "defaultValue": "Personnel",
                 "templateOptions": {
                     "label": "Content Type",
                     "options": [
@@ -889,6 +892,8 @@ def installProfileDIP(sa):
             {
                 "key": "mets_type",
                 "type": "select",
+                "required": True,
+                "defaultValue": "Personnel",
                 "templateOptions": {
                     "label": "Content Type",
                     "options": [
