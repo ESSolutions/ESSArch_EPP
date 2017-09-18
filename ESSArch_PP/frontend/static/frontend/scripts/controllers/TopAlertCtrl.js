@@ -54,11 +54,6 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         vm.visible = false;
         vm.showAlerts = false;
     }
-    vm.removeAndHideAlert = function(alert) {
-        vm.removeAlert(alert);
-        vm.visible = false;
-        vm.showAlerts = false;
-    }
 
     vm.removeAlert = function (alert) {
         if (alert.id) {
