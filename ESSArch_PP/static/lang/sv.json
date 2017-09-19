@@ -331,5 +331,6 @@
     "CLEAR_ALL": "Avmarkera alla",
     "IMPORT_URL": "Import-url",
     "GET_SAS": "Hämta leveransöverenskommelser",
-    "IMPORT_SA": "Importera leveransöverenskommelse"
+    "IMPORT_SA": "Importera leveransöverenskommelse",
+    "CREATE": "Skapa"
 }
