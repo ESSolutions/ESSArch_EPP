@@ -6,7 +6,7 @@ angular.module('myApp').controller('MyPageCtrl', function($scope, $controller, $
         receive: false
     };
     $scope.tableControlCollapsed = true;
-    $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
+    $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: 'Preserving,Receiving' });
     vm.displayedIps = [{
         label: "request",
         responsible: {username: "admin"},
