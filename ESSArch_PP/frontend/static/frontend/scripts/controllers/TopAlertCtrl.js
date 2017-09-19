@@ -75,6 +75,12 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
     }
 
+    vm.clearAll = function() {
+        vm.alerts.forEach(function(alert) {
+            vm.removeAlert(alert);
+        })
+    }
+
     vm.toggleAlerts = function() {
         if(vm.alerts.length > 0) {
             vm.showAlerts = !vm.showAlerts;

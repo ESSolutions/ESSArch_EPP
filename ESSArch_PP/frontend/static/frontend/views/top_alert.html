@@ -6,6 +6,7 @@
             <div class="icon-row">
                 <span ng-if="vm.alerts.length > 0 && vm.showAlerts" ng-click="vm.toggleAlerts()" class="fa fa-minus"></span>
                 <span ng-if="vm.alerts.length == 0 || !vm.showAlerts" ng-click="vm.toggleAlerts()" class="fa fa-plus"></span>
+                <span ng-click="vm.clearAll()" class="top-alert-remove fa fa-ban"></span>
                 <span ng-click="vm.removeAlert(vm.alerts[0])" class="top-alert-remove fa fa-trash-o"></span>
                 <span ng-click="vm.hideAlert()" class="top-alert-close fa fa-times"></span>
             </div>
