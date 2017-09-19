@@ -70,6 +70,7 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 from ESSArch_Core.ip.permissions import (
+    CanDeleteIP,
     CanUnlockProfile,
     IsOrderResponsibleOrAdmin,
     IsResponsibleOrReadOnly
