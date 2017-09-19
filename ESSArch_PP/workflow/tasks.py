@@ -102,7 +102,7 @@ class ReceiveSIP(DBTask):
         policy = ArchivePolicy.objects.get(pk=policy)
         objid, container_type = os.path.splitext(os.path.basename(container))
 
-        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC, responsible=aip.responsible)
         aip.aic = aic
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
