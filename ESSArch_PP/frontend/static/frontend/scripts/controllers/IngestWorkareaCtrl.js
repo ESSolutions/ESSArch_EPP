@@ -11,19 +11,24 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles,
 
     // Remove ip
     $scope.removeIp = function (ipObject) {
-        console.log(ipObject)
-        Workarea.delete({
-            id: ipObject.workarea.id
-        }).$promise.then(function() {
-            $scope.edit = false;
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.eventShow = false;
-            $scope.statusShow = false;
-            $scope.filebrowser = false;
-            $scope.requestForm = false;
-            $scope.getListViewData();
-        });
+        if(ipObject.package_type == 1) {
+            ipObject.information_packages.forEach(function(ip) {
+                $scope.removeIp(ip);
+            });
+        } else {
+            Workarea.delete({
+                id: ipObject.workarea.id
+            }).$promise.then(function() {
+                $scope.edit = false;
+                $scope.select = false;
+                $scope.eventlog = false;
+                $scope.eventShow = false;
+                $scope.statusShow = false;
+                $scope.filebrowser = false;
+                $scope.requestForm = false;
+                $scope.getListViewData();
+            });
+        }
     }
 
     //Click function for Ip table
