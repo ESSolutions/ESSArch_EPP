@@ -205,12 +205,44 @@ angular.module('myApp').controller('ReceptionCtrl', function (IPReception, IP, T
         });
     }
 
+    vm.uncheckIp = function (ip) {
+        $scope.includedIps.forEach(function(x, i, array) {
+            if(x.id == ip.id) {
+                $scope.includedIps.splice(i, 1);
+            }
+        });
+        $scope.getListViewData();
+    }
+
+    vm.updateCheckedIp = function(ip, newIp) {
+        $scope.includedIps[$scope.includedIps.indexOf(ip)] = { id: newIp.id, at_reception: newIp.state == "At reception" }
+        $scope.getListViewData()
+    }
+
+    // Remove ip
+	$scope.removeIp = function (ipObject) {
+		IP.delete({
+			id: ipObject.id
+		}).$promise.then(function() {
+			$scope.edit = false;
+			$scope.select = false;
+			$scope.eventlog = false;
+			$scope.eventShow = false;
+			$scope.statusShow = false;
+            $scope.filebrowser = false;
+            $scope.requestForm = false;
+            vm.uncheckIp(ipObject);
+			$scope.getListViewData();
+		});
+	}
+
     //Create and show modal for remove ip
     $scope.receiveModal = function (ip) {
         if (ip.at_reception) {
             IPReception.get({ id: ip.id }).$promise.then(function (resource) {
                 if(resource.altrecordids.SUBMISSIONAGREEMENT) {
                     IPReception.prepare({ id: resource.id, submission_agreement: resource.altrecordids.SUBMISSIONAGREEMENT[0] }).$promise.then(function(prepared) {
+                        vm.updateCheckedIp(ip, prepared);
                         var modalInstance = $uibModal.open({
                             animation: true,
                             ariaLabelledBy: 'modal-title',
