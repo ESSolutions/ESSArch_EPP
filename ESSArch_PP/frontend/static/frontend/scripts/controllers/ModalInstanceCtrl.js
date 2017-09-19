@@ -204,7 +204,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.template = data.template;
-    $ctrl.oldStructure = angular.copy(data.template.structure);
+    if(data.template && data.template.structure) {
+        $ctrl.oldStructure = angular.copy(data.template.structure);
+    }
     $ctrl.allAttributes = data.allAttributes;
     $ctrl.save = data.save;
     $ctrl.model = data.model;
