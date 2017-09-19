@@ -69,10 +69,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $scope.eventlog = true;
             $scope.edit = true;
             $scope.requestForm = true;
-            if (($scope.checkPermission('ip.get_from_storage') || $scope.checkPermission('ip.get_from_storage_as_new') || $scope.checkPermission('ip.get_tar_from_storage') || (row.responsible != null && $rootScope.auth.id == row.responsible.id)) && (!$scope.eventsShow || $scope.ip.object_identifier_value != row.object_identifier_value)) {
-                $scope.eventShow = false;
-                $scope.eventsClick(row);
-            };
+            $scope.eventShow = false;
             $scope.ip = row;
             $rootScope.ip = $scope.ip;
         }

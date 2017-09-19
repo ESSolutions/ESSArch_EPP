@@ -66,10 +66,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 			$scope.eventlog = true;
 			$scope.edit = true;
 			$scope.requestForm = true;
-			if(!$scope.eventsShow || $scope.ip.object_identifier_value != row.object_identifier_value) {
-				$scope.eventShow = false;
-				$scope.eventsClick(row);
-			}
+            $scope.eventShow = false;
 			$scope.ip = row;
 			$rootScope.ip = $scope.ip;
 		}

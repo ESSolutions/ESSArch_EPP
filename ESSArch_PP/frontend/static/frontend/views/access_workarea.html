@@ -33,7 +33,7 @@
                 </div>
             </form>
         </div>
-        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+        <div ng-if="(eventShow || statusShow || vm.request.type =='preserve')" class="events-status-wrapper">
             <div ng-include src="'static/frontend/views/event_table.html'"></div>
             <div ng-if="statusShow" class="status-view">
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>

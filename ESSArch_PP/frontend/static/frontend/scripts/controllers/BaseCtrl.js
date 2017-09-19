@@ -302,6 +302,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.requestEventlog = false;
             $scope.eventShow = false;
             $scope.filebrowser = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
             $scope.initRequestData();
             $scope.getListViewData();
         });
@@ -317,6 +319,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.filebrowser = false;
             $scope.edit = false;
             $scope.select = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
             $scope.initRequestData();
             $timeout(function() {
                 $scope.ip = null;
@@ -336,6 +340,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.filebrowser = false;
             $scope.edit = false;
             $scope.select = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
             $scope.initRequestData();
             $timeout(function() {
                 $scope.ip = null;

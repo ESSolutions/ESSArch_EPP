@@ -73,10 +73,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             $scope.eventShow = false;
             $scope.requestForm = true;
             $scope.requestEventlog = true;
-            if (!$scope.eventsShow || $scope.ip.object_identifier_value != row.object_identifier_value) {
-                $scope.eventShow = false;
-                $scope.eventsClick(row);
-            }
+            $scope.eventShow = false;
 			$scope.ip = row;
 			$rootScope.ip = $scope.ip;
 		}
