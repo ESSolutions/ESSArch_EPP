@@ -28,6 +28,7 @@ import errno
 import os
 import shutil
 import tarfile
+import tempfile
 import time
 import zipfile
 
@@ -494,10 +495,19 @@ class PollAccessQueue(DBTask):
         copy_file(cache_tar_obj, dst_tar)
 
         if entry.extracted:
-            with tarfile.open(dst_tar) as tarf:
-                tarf.extractall(access_user.encode('utf-8'))
+            # Since the IP is packaged with the name of the first IP generation it will be extracted under that name.
+            # If we are extracting for a new generation and we already have the first generation in the workarea as
+            # read-only, we have to make sure we don't move (rename) the read-only version.
+            # We do this by instead extracting the new generation to a temporary folder which we then move to the
+            # correct destination
 
-            os.rename(os.path.join(access_user, str(entry.ip.object_identifier_value)), dst_dir)
+            tmpdir = tempfile.mkdtemp(dir=access_user)
+
+            with tarfile.open(dst_tar) as tarf:
+                tarf.extractall(tmpdir.encode('utf-8'))
+
+            os.rename(os.path.join(tmpdir, str(entry.ip.object_identifier_value)), dst_dir)
+            shutil.rmtree(tmpdir)
 
         if not entry.package:
             os.remove(dst_tar)
