@@ -5,10 +5,11 @@
     tree-data="tree_data"
     tree-control="myTreeControl"
     expand-on="expanding_property"
-    icon-leaf="fa fa-bolt"
+    icon-leaf="{{branch.flow_type == 'task' ? 'fa fa-bolt':''}}"
     icon-expand="fa fa-plus"
     on-click="stepTaskClick(branch)"
     on-select="stepClick(branch)"
-    icon-collapse="fa fa-minus">
+    icon-collapse="fa fa-minus"
+    template-url="static/frontend/views/treeGrid.html">
 </tree-grid>
 </div>

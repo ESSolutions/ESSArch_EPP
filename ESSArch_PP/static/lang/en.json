@@ -332,5 +332,6 @@
     "IMPORT_URL": "Import URL",
     "GET_SAS": "Get submission agreements",
     "IMPORT_SA": "Import submission agreement",
-    "CREATE": "Create"
+    "CREATE": "Create",
+    "EMPTY": "Empty"
 }

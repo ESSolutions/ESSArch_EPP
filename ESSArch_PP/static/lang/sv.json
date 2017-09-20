@@ -332,5 +332,6 @@
     "IMPORT_URL": "Import-url",
     "GET_SAS": "Hämta leveransöverenskommelser",
     "IMPORT_SA": "Importera leveransöverenskommelse",
-    "CREATE": "Skapa"
+    "CREATE": "Skapa",
+    "EMPTY": "Tomt"
 }

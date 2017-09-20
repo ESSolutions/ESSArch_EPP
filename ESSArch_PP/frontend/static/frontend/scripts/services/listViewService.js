@@ -663,6 +663,9 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
                 c.time_started = $filter('date')(c.time_started, "yyyy-MM-dd HH:mm:ss");
                 return c
             });
+            if(step.children.length <= 0) {
+                step.children = [{ name: "Empty", empty: true }];
+            }
             return step;
         });
     }
