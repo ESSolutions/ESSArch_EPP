@@ -43,7 +43,4 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
     $scope.showAlert = function() {
         TopAlert.show();
     }
-    $scope.unseen = function() {
-        return TopAlert.getUnseen();
-    }
 });

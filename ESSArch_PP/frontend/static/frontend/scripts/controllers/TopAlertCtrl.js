@@ -10,6 +10,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         $interval.cancel(updateInterval);
         updateInterval = $interval(function() {
             vm.getNotifications();
+            vm.updateUnseen();
         }, appConfig.notificationInterval);
     }
     vm.getNotifications = function() {
@@ -24,14 +25,10 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         });
     }
 
-    $rootScope.getUnseen = function() {
-        var unseen = 0;
-        vm.alerts.forEach(function(alert) {
-            if(!alert.seen) {
-                unseen += 1;
-            }
-        })
-        return unseen;
+    vm.updateUnseen = function() {
+        $http.head(appConfig.djangoUrl + "notifications/", {params: { seen: false }}).then(function(response) {
+            $rootScope.unseenNotifications = response.headers().count;
+        });
     }
 
     vm.showAlert = function() {
@@ -134,6 +131,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         vm.showAlert();
         $timeout(function() {
             vm.showAlerts = true;
+            vm.setSeen(vm.alerts.slice(0, 5));
         }, 300);
     });
     $rootScope.$on('hide_top_alert', function (event, data) {
