@@ -9,16 +9,19 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.$onInit = function() {
         $interval.cancel(updateInterval);
         updateInterval = $interval(function() {
-            TopAlert.getNotifications().then(function(data) {
-                vm.backendAlerts = data;
-                vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
-                    return new Date(b.time_created) - new Date(a.time_created);
-                })
-                if(data.length > 0 && !data[0].seen) {
-                    vm.showAlert();
-                }
-            });
+            vm.getNotifications();
         }, appConfig.notificationInterval);
+    }
+    vm.getNotifications = function() {
+        TopAlert.getNotifications().then(function(data) {
+            vm.backendAlerts = data;
+            vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
+                return new Date(b.time_created) - new Date(a.time_created);
+            })
+            if(vm.alerts.length > 0 && !vm.alerts[0].seen) {
+                vm.showAlert();
+            }
+        });
     }
 
     $rootScope.getUnseen = function() {
@@ -73,6 +76,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 vm.showAlerts = false;
             }
         }
+        if(!vm.showAlerts) {
+            vm.visible = false;
+        }
     }
 
     vm.clearAll = function() {
@@ -99,12 +105,12 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
     vm.addAlert = function (message, level, time) {
         var timer = null;
-        var alert = {message: message, level: level, time_created: new Date(), seen: true};
+        var alert = {message: message, level: level, time_created: new Date(), seen: false};
         vm.frontendAlerts.unshift(alert);
         if (time) {
             timer = vm.setTimer(alert, time);
         }
-        vm.showAlert();
+        vm.getNotifications();
     }
 
     /**
@@ -114,7 +120,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.setTimer = function (alert, time) {
         return $timeout(function () {
             vm.removeAlert(alert);
-            vm.setSeen(vm.alerts.slice(0, 5));
+            if(vm.showAlerts) {
+                vm.setSeen(vm.alerts.slice(0,5));
+            }
         }, time)
     }
 
