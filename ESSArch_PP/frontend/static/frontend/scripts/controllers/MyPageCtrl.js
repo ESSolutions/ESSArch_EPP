@@ -1,4 +1,4 @@
-angular.module('myApp').controller('MyPageCtrl', function($scope, $controller, $rootScope) {
+angular.module('myApp').controller('MyPageCtrl', function(TopAlert, $scope, $controller, $rootScope) {
     var vm = this;
     $scope.visibleRequests = {
         access: false,

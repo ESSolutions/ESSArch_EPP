@@ -33,6 +33,7 @@ from ESSArch_Core.auth.views import (
     GroupViewSet,
     PermissionViewSet,
     MeView,
+    NotificationViewSet,
     UserViewSet,
 )
 
@@ -105,6 +106,7 @@ router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
 router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
+router.register(r'notifications', NotificationViewSet)
 router.register(r'orders', OrderViewSet)
 router.register(r'parameters', ParameterViewSet)
 router.register(r'paths', PathViewSet)

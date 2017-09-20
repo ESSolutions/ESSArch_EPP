@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('UtilCtrl', function($scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig) {
+angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig) {
     $scope.$state = $state;
     $scope.reloadPage = function (){
         $state.reload();
@@ -39,5 +39,11 @@ angular.module('myApp').controller('UtilCtrl', function($scope, $state, $locatio
 
     $scope.getPermissions = function(page) {
         return nestedPermissions(Object.resolve(page, permissionConfig));
+    }
+    $scope.showAlert = function() {
+        TopAlert.show();
+    }
+    $scope.unseen = function() {
+        return TopAlert.getUnseen();
     }
 });

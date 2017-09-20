@@ -164,6 +164,13 @@ angular-permission@~5.3.2:
   dependencies:
     angular ">=1.4.8"
 
+angular-relative-date@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/angular-relative-date/-/angular-relative-date-2.1.1.tgz#b65b302df9a16af8787816fe8f1b0f512602aba4"
+  dependencies:
+    angular "^1.5.6"
+    angular-translate "^2.11.0"
+
 angular-resource@^1.6.5:
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.6.5.tgz#d1e712ab01afa5d2ec649f5e471673a704f2be40"
@@ -193,6 +200,12 @@ angular-translate-storage-cookie@~2.14:
     angular-cookies ">=1.2.26 <1.7"
     angular-translate "~2.14.0"
 
+angular-translate@^2.11.0:
+  version "2.15.2"
+  resolved "https://registry.yarnpkg.com/angular-translate/-/angular-translate-2.15.2.tgz#f9a3c2b8d5daeb7d76c9e2c01ff3c3d57fe12b90"
+  dependencies:
+    angular ">=1.2.26 <=1.6"
+
 angular-translate@~2.14, angular-translate@~2.14.0:
   version "2.14.0"
   resolved "https://registry.yarnpkg.com/angular-translate/-/angular-translate-2.14.0.tgz#10dfcc3876fdb56280ef8fd30df63934a05755ff"
@@ -220,6 +233,10 @@ angular-ui-tree@~2.22.5:
 "angular@>=1.2.26 <=1.6", angular@>=1.4.8, angular@^1.0.8, angular@^1.4.0, angular@^1.6.3, angular@^1.x, angular@~1.6:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.4.tgz#03b7b15c01a0802d7e2cf593240e604054dc77fb"
+
+angular@^1.5.6:
+  version "1.6.6"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.6.tgz#fd5a3cfb437ce382d854ee01120797978527cb64"
 
 ansi-regex@^2.0.0:
   version "2.1.1"

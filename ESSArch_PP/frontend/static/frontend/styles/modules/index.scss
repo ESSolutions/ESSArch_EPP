@@ -9,6 +9,7 @@ body {
     margin: 0px auto;
     min-width: 680px;
     overflow: auto;
+    -ms-overflow-style: scrollbar;
 }
 body.modal-open {
     overflow: auto;
@@ -169,14 +170,33 @@ body.modal-open[style] {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 200px;
+    min-width: 250px;
     height: 100%;
 }
 .tasks-icons > .fa {
     margin-right: 2px;
-    margin-left: 2px;
     cursor: pointer;
 }
+
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+}
+.unseen-text {
+    width: auto;
+    position: absolute;
+    color: white;
+    height: 12px;
+    top: -5px;
+    right: -3px;
+    border-radius: 2px;
+    padding-right: 10%;
+    padding-left: 10%;
+    background-color: $step-fail;
+    font-size: 10px;
+    margin-left: 10px;
+}
+
 .shortcut-nav-calendar-wrapper {
     display: flex;
     flex-direction: column;
@@ -426,6 +446,9 @@ body.modal-open[style] {
     font-size: 21px;
 }
 .fa.fa-question-circle {
+    font-size: 21px;
+}
+.fa.fa-bell {
     font-size: 21px;
 }
 .status-tree-grid {

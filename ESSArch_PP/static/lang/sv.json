@@ -333,5 +333,6 @@
     "GET_SAS": "Hämta leveransöverenskommelser",
     "IMPORT_SA": "Importera leveransöverenskommelse",
     "CREATE": "Skapa",
-    "EMPTY": "Tomt"
+    "EMPTY": "Tomt",
+    "NOTIFICATIONS": "Notifications"
 }
