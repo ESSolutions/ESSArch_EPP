@@ -32,36 +32,36 @@ angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, 
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
         }).$promise.then(function(response) {
-            TopAlert.show(response.detail, "success", 3000);
+            TopAlert.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.show(response.data.detail, "error");
+            TopAlert.add(response.data.detail, "error");
         })
     };
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })
         ).$promise.then(function (response) {
-            TopAlert.show(response.detail, "success", 3000);
+            TopAlert.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.show(response.data.detail, "error");
+            TopAlert.add(response.data.detail, "error");
         })
     }
     function access(ip, data) {
         return IP.access(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            TopAlert.show(response.detail, "success", 3000);
+            TopAlert.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.show(response.data.detail, "error");
+            TopAlert.add(response.data.detail, "error");
         })
     }
     function moveToApproval(ip, data) {
         return IP.moveToApproval(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            TopAlert.show(response.detail, "success", 3000);
+            TopAlert.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.show(response.data.detail, "error");
+            TopAlert.add(response.data.detail, "error");
         })
     }
     return {
