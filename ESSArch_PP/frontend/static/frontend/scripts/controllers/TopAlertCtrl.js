@@ -79,8 +79,8 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     }
 
     vm.clearAll = function() {
-        vm.alerts.forEach(function(alert) {
-            vm.removeAlert(alert);
+        TopAlert.deleteAll().then(function(response) {
+            vm.visible = false;
         })
     }
 
@@ -172,12 +172,10 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 return response;
             })
         },
-        getUnseen: function() {
-            if($rootScope.getUnseen) {
-                return $rootScope.getUnseen();
-            } else {
-                return 0;
-            }
+        deleteAll: function() {
+            return $http.delete(appConfig.djangoUrl + "notifications/").then(function(response) {
+                return response;
+            })
         }
     }
 });
