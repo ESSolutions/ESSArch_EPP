@@ -5,4 +5,3 @@ angular.module('myApp').component('topAlert', {
     bindings: {
     }
   });
-  

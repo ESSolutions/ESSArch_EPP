@@ -167,7 +167,11 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             })
         },
         getUnseen: function() {
-            return $rootScope.getUnseen();
+            if($rootScope.getUnseen) {
+                return $rootScope.getUnseen();
+            } else {
+                return 0;
+            }
         }
     }
 });
