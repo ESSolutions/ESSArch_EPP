@@ -163,7 +163,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
         },
         getNotifications: function() {
-            return $http.get(appConfig.djangoUrl + "notifications/", {params: {pager: "none"}}).then(function(response) {
+            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: 5}}).then(function(response) {
                 return response.data;
             })
         },
