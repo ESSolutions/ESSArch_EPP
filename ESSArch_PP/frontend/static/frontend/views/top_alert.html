@@ -12,7 +12,7 @@
             </div>
         </div>
     </div>
-    <div ng-if="vm.showAlerts && vm.alerts.length > 0" class="angular-animate alert-list">
+    <div ng-if="vm.showAlerts && vm.alerts.length > 1" class="angular-animate alert-list">
         <div ng-repeat="x in vm.alerts.slice(1,5) | limitTo:5" class="top-alert-expand alert-list-item angular-animate" ng-class="x.level">
             <div class="alert-text-icons-row">
             <div class="alert-date">{{x.time_created | relativeDate}}</div>
