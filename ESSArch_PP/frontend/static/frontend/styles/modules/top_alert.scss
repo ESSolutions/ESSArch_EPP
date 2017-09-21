@@ -105,12 +105,21 @@
     color: white;
     width: 100%;
     .alert-text {
-        width:95%;
+        width: 100%;
     }
     .alert-date {
         font-size: 10px;
         text-align: left;
         white-space: nowrap;
+    }
+    .icon-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        span {
+            margin-left: 10px;
+        }
+        min-width: 90px;
     }
 }
 
@@ -119,6 +128,7 @@
     padding-right: 10px;
     padding-left: 10px;
 }
+
 .alert-text-icons-row {
     display: flex;
     flex-direction: row;

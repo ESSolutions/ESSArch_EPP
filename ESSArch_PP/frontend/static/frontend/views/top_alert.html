@@ -17,7 +17,9 @@
             <div class="alert-text-icons-row">
             <div class="alert-date">{{x.time_created | relativeDate}}</div>
                 <div class="alert-text">{{x.message}}</div>
-                <span ng-click="vm.removeAlert(x)" class="top-alert-close fa fa-trash-o"></span>
+                <div class="icon-row">
+                    <span ng-click="vm.removeAlert(x)" class="top-alert-close fa fa-trash-o"></span>
+                </div>
             </div>
         </div>
     </div>
