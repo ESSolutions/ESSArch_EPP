@@ -16,7 +16,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             vm.saProfile = null;
             delete sa.id;
             delete sa.url;
-            vm.createProfileModel(sa);
+            vm.saModel = sa;
         } else {
             vm.saProfile = null;
             vm.saModel = {};
