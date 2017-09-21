@@ -75,6 +75,7 @@ from ESSArch_Core.ip.permissions import (
     IsOrderResponsibleOrAdmin,
     IsResponsibleOrReadOnly
 )
+from ESSArch_Core.ip.serializers import EventIPSerializer
 from ESSArch_Core.profiles.models import (
     Profile,
     ProfileIP,
@@ -112,7 +113,6 @@ from ip.serializers import (
     InformationPackageDetailSerializer,
     NestedInformationPackageSerializer,
     OrderSerializer,
-    EventIPSerializer,
     WorkareaSerializer,
 )
 
@@ -159,13 +159,6 @@ class ArchivalLocationViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_class = ArchivalLocationFilter
-
-class EventIPViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows events to be viewed or edited.
-    """
-    queryset = EventIP.objects.all()
-    serializer_class = EventIPSerializer
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet):
@@ -1030,7 +1023,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     @detail_route()
     def events(self, request, pk=None):
         ip = self.get_object()
-        events = filters.OrderingFilter().filter_queryset(request, ip.events.all(), self)
+        events = filters.OrderingFilter().filter_queryset(request, EventIP.objects.filter(linkingObjectIdentifierValue=ip.object_identifier_value), self)
         page = self.paginate_queryset(events)
         if page is not None:
             serializers = EventIPSerializer(page, many=True, context={'request': request})

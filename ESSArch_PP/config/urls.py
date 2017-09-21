@@ -46,6 +46,8 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
+from ESSArch_Core.ip.views import EventIPViewSet
+
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
@@ -55,7 +57,6 @@ from ip.views import (
     ArchivistOrganizationViewSet,
     ArchivalTypeViewSet,
     ArchivalLocationViewSet,
-    EventIPViewSet,
     InformationPackageViewSet,
     InformationPackageReceptionViewSet,
     OrderViewSet,

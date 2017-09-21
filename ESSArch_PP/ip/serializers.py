@@ -51,27 +51,6 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
         fields = ('url', 'id', 'name', 'information_packages',)
 
 
-class EventIPSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True, source='linkingAgentIdentifierValue', default=serializers.CurrentUserDefault())
-    information_package = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=InformationPackage.objects.all(), source='linkingObjectIdentifierValue',)
-    eventType = serializers.PrimaryKeyRelatedField(queryset=EventType.objects.all())
-    eventDetail = serializers.SlugRelatedField(slug_field='eventDetail', source='eventType', read_only=True)
-
-    class Meta:
-        model = EventIP
-        fields = (
-                'url', 'id', 'eventType', 'eventDateTime', 'eventDetail',
-                'eventVersion', 'eventOutcome',
-                'eventOutcomeDetailNote', 'user',
-                'information_package',
-        )
-        extra_kwargs = {
-            'eventVersion': {
-                'default': VERSION
-            }
-        }
-
-
 class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
