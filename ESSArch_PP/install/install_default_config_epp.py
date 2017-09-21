@@ -150,11 +150,11 @@ def installDefaultPaths():
         'reception': '/ESSArch/data/gate/reception',
         'ingest': '/ESSArch/data/epp/ingest',
         'cache': '/ESSArch/data/epp/cache',
-        'access_workarea': '/ESSArch/data/epp/workarea',
-        'ingest_workarea': '/ESSArch/data/epp/workarea',
+        'access_workarea': '/ESSArch/data/epp/work',
+        'ingest_workarea': '/ESSArch/data/epp/work',
         'disseminations': '/ESSArch/data/epp/disseminations',
         'orders': '/ESSArch/data/epp/orders',
-        'verify': '/ESSArch/verify',
+        'verify': '/ESSArch/data/epp/verify',
     }
 
     for key in dct:
