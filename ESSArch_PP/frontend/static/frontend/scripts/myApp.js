@@ -352,7 +352,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions("home.administration.profileManager"),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.administration.profileManager.saEditor', {
         url: '/sa-editor',
@@ -362,7 +368,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions("home.administration.profileManager.saEditor"),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.administration.profileManager.profileMaker', {
         url: '/profile-maker',
@@ -372,7 +384,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions("home.administration.profileManager.profileMaker"),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.administration.profileManager.import', {
         url: '/import',
@@ -382,7 +400,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions("home.administration.profileManager.import"),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.restricted', {
         url: 'restricted',

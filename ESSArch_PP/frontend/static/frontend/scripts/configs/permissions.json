@@ -79,13 +79,19 @@
                 "profileManager": {
                     "_permissions": [],
                     "saEditor": {
-                        "_permissions": []
+                        "_permissions": [
+                            "profiles.add_submissionagreement"
+                        ]
                     },
                     "profileMaker": {
-                        "_permissions": []
+                        "_permissions": [
+                            "profiles.add_profile"
+                        ]
                     },
                     "import": {
-                        "_permissions": []
+                        "_permissions": [
+                            "profiles.add_submissionagreement"
+                        ]
                     }
                 }
             }

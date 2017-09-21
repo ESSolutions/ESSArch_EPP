@@ -4,11 +4,11 @@
             <div ng-if="select" class="select-view">
                 <div class="profile-manager-sub-menu" ng-controller="UtilCtrl as vm">
                     <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.saEditor'}"
-                        class="nav-item sliding-middle-out">{{'SAEDITOR' | translate}}</div>
+                        ng-if="checkPermissions(getPermissions('home.administration.profileManager.saEditor'))" class="nav-item sliding-middle-out">{{'SAEDITOR' | translate}}</div>
                     <div ui-sref="home.administration.profileManager.profileMaker" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.profileMaker'}"
-                        class="nav-item sliding-middle-out">{{'PROFILEMAKER' | translate}}</div>
+                    ng-if="checkPermissions(getPermissions('home.administration.profileManager.profileMaker'))" class="nav-item sliding-middle-out">{{'PROFILEMAKER' | translate}}</div>
                     <div ui-sref="home.administration.profileManager.import" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.import'}"
-                        class="nav-item sliding-middle-out">{{'IMPORT' | translate}}</div>
+                    ng-if="checkPermissions(getPermissions('home.administration.profileManager.import'))" class="nav-item sliding-middle-out">{{'IMPORT' | translate}}</div>
                 </div>
                 <div class="profile-manager-route" ui-view>
                 </div>
