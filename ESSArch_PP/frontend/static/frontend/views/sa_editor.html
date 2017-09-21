@@ -1,16 +1,16 @@
 <div class="sa-editor">
     <div class="flex-row">
-        <select id="submission-agreement" class="form-control sa-select" ng-change="vm.chooseSa(vm.saProfile)" ng-model="vm.saProfile" ng-options="x as x.name for x in vm.saProfiles">x</select>
+        <select id="submission-agreement" class="form-control sa-select" ng-change="vm.chooseSa(vm.saProfile)" ng-model="vm.saProfile" ng-options="x as x.name + (x.published?' (Published)':'') for x in vm.saProfiles">x</select>
         <button class="btn btn-default" ng-click="vm.newSa()"><i class="fa fa-plus"></i></button>
         <button class="btn btn-default" ng-click="vm.newSa(true)" ng-if="vm.saProfile" uib-popover="{{'USE_SELECTED_SA_AS_TEMPLATE' | translate}}" popover-placement="top-right" popover-popup-delay="500" popover-append-to-body="true"><i class="fa fa-plus"></i>{{ 'USE_TEMPLATE' | translate }}</button>
-        <button class="btn btn-success" ng-if="vm.saProfile" translate="PUBLISH" ng-click="vm.publishSa()"></button>
+        <button class="btn btn-success" ng-if="vm.saProfile" ng-disabled="vm.saProfile.published" translate="PUBLISH" ng-click="vm.publishSa()"></button>
     </div>
     <hr>
     <div class="edit-view" ng-if="edit">
         <h4>SA fields</h4>
-        <form name="sa-form" ng-submit="vm.saveSa()">
+        <form name="sa-form" ng-submit="vm.saveSa()" ng-if="vm.saModel">
             <formly-form model="vm.saModel" fields="vm.saFields" options="vm.validatorOptions"></formly-form>
-            <button class="btn btn-info" type="submit" translate="SAVE"></button>
+            <button class="btn btn-info" ng-disabled="vm.saProfile.published" type="submit" translate="SAVE"></button>
         </form>
     </div>
 </div>

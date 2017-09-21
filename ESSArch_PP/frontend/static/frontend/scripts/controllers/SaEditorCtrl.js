@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
+angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;
@@ -11,15 +11,21 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     }
     vm.newSa = function(use_template) {
         vm.getProfiles();
+        vm.enableFields();
+        vm.saModel = null;
         if(use_template && !angular.isUndefined(use_template)) {
             var sa = angular.copy(vm.saProfile);
             vm.saProfile = null;
             delete sa.id;
             delete sa.url;
-            vm.saModel = sa;
+            $timeout(function() {
+                vm.saModel = sa;
+            })
         } else {
             vm.saProfile = null;
-            vm.saModel = {};
+            $timeout(function() {
+                vm.saModel = {};
+            });
         }
         vm.createNewSa = true;
         $scope.edit = true;
@@ -28,11 +34,30 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     vm.chooseSa = function(sa) {
         vm.getProfiles();
         vm.saProfile = sa;
-        vm.saModel = sa;
+        vm.saModel = null;
+        if(sa.published) {
+            vm.disableFields();
+        } else {
+            vm.enableFields();
+        }
+        $timeout(function() {
+            vm.saModel = sa;
+        })
         vm.createNewSa = false;
         $scope.edit = true;
     }
 
+    vm.disableFields = function() {
+        vm.saFields.forEach(function(field) {
+            field.templateOptions.disabled = true;
+        })
+    }
+
+    vm.enableFields = function() {
+        vm.saFields.forEach(function(field) {
+            field.templateOptions.disabled = false;
+        })
+    }
     vm.createProfileModel = function(sa) {
         for(var key in sa) {
             if(/^profile/.test(key) && sa[key] != null) {
@@ -90,6 +115,12 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
     vm.publishSa = function () {
         SA.publish({id: vm.saProfile.id})
             .$promise.then(function (resource) {
+                SA.query().$promise.then(function(resource) {
+                    vm.saProfiles = resource;
+                    vm.getProfiles();
+                    $scope.edit = false;
+                    TopAlert.add("Submission agreement: " + vm.saProfile.name + "has been published!", "success", 5000);
+                });
                 return resource;
             });
     }
