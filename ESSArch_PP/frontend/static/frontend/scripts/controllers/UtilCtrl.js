@@ -36,7 +36,6 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
     $scope.checkPermissions = function(permissions) {
         return myService.checkPermissions(permissions);
     }
-
     $scope.getPermissions = function(page) {
         return nestedPermissions(Object.resolve(page, permissionConfig));
     }
