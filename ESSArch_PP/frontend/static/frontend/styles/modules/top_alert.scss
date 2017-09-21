@@ -20,10 +20,12 @@
         span {
             margin-left: 10px;
         }
-        min-width: 90px;
+        width: 90px;
     }
     .alert-text {
         width:100%;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
         border-right-style: solid;
         border-right-width: 2px;
         .error, .info, .success, .critical {
@@ -37,6 +39,8 @@
         font-size: 10px;
         text-align: left;
         white-space: nowrap;
+        width: 100px;
+        overflow-x: visible;
     }
 }
 .top-alert-expand {
@@ -106,11 +110,15 @@
     width: 100%;
     .alert-text {
         width: 100%;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
     }
     .alert-date {
         font-size: 10px;
         text-align: left;
         white-space: nowrap;
+        width: 100px;
+        overflow-x: visible;
     }
     .icon-row {
         display: flex;
@@ -119,7 +127,7 @@
         span {
             margin-left: 10px;
         }
-        min-width: 92px;
+        width: 92px;
     }
 }
 
