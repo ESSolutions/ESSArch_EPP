@@ -9,13 +9,22 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
             vm.saProfiles = resource;
         });
     }
-    vm.newSa = function() {
+    vm.newSa = function(use_template) {
         vm.getProfiles();
-        vm.saProfile = null;
-        vm.saModel = {};
+        if(use_template && !angular.isUndefined(use_template)) {
+            var sa = angular.copy(vm.saProfile);
+            vm.saProfile = null;
+            delete sa.id;
+            delete sa.url;
+            vm.createProfileModel(sa);
+        } else {
+            vm.saProfile = null;
+            vm.saModel = {};
+        }
         vm.createNewSa = true;
         $scope.edit = true;
     }
+
     vm.chooseSa = function(sa) {
         vm.getProfiles();
         vm.saProfile = sa;
@@ -23,6 +32,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(SA, Profile, $scope,
         vm.createNewSa = false;
         $scope.edit = true;
     }
+
     vm.createProfileModel = function(sa) {
         for(var key in sa) {
             if(/^profile/.test(key) && sa[key] != null) {

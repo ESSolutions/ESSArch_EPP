@@ -363,5 +363,7 @@
     "months_from_now": "{{time}} months from now",
     "a_year_from_now": "a year from now",
     "years_from_now": "{{time}} years from now",
-    "over_a_year_from_now": "over a year from now"
+    "over_a_year_from_now": "over a year from now",
+    "USE_SELECTED_SA_AS_TEMPLATE": "Use selected submission agreement as template",
+    "USE_TEMPLATE": "Use template"
 }
