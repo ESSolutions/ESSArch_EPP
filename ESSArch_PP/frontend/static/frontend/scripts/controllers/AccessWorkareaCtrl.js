@@ -29,6 +29,9 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
                 $scope.statusShow = false;
                 $scope.filebrowser = false;
                 $scope.requestForm = false;
+                if(vm.displayedIps.length == 0) {
+                    $state.reload();
+                }
                 $scope.getListViewData();
             });
         }

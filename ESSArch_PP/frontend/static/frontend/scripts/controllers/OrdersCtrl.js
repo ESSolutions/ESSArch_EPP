@@ -72,6 +72,10 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             $scope.eventlog = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            if(vm.displayedIps.length == 0) {
+                $state.reload();
+            }
+            $scope.getListViewData();
         });
     }
     $scope.newOrderModal = function() {

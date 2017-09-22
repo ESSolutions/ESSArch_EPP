@@ -231,6 +231,9 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
 			$scope.statusShow = false;
             $scope.filebrowser = false;
             $scope.requestForm = false;
+            if(vm.displayedIps.length == 0) {
+                $state.reload();
+            }
             vm.uncheckIp(ipObject);
 			$scope.getListViewData();
 		});

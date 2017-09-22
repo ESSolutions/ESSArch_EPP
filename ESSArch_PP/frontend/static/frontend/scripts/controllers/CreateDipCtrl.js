@@ -159,6 +159,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     $scope.edit = false;
     $scope.eventlog = false;
     $scope.requestForm = false;
+
     $scope.removeIp = function(ipObject) {
         IP.delete({
             id: ipObject.id
@@ -169,6 +170,10 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             $scope.eventlog = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            if(vm.displayedIps.length == 0) {
+                $state.reload();
+            }
+            $scope.getListViewData();
         });
     }
 
