@@ -4,33 +4,7 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	$controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
 
 	$scope.menuOptions = function(rowType) {
-		return [
-		[$translate.instant("APPRAISAL"), function ($itemScope, $event, modelValue, text, $li) {
-			var row;
-			if(rowType === "row") {
-				row = $itemScope.row;
-			} else {
-				row = $itemScope.subrow;
-				row.information_packages = [];
-			}
-			var ips = [];
-			if(row.information_packages.length>0) {
-				if(row.package_type != 1) {
-					ips.push(row.url);
-				}
-				row.information_packages.forEach(function(ip) {
-					if(ip.url) {
-						ips.push(ip.url);
-					} else {
-						ips.push(ip);
-					}
-				});
-			} else {
-				ips.push(row.url);
-			}
-			$state.go("home.appraisal", {tag: null, ips: ips, archive_policy: null});
-		}]
-		];
+		return [];
 	};
 
 	//Click function for Ip table
