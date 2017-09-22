@@ -93,7 +93,7 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
                 eventOutcome: "",
                 comment: ""
             };
-        }, function error() {
+        }).catch(function error() {
             $scope.addEventAlert = $scope.alerts.addEventError;
         });
     }

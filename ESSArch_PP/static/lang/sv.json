@@ -365,5 +365,6 @@
     "years_from_now": "om {{time}} år",
     "over_a_year_from_now": "om över ett år",
     "USE_SELECTED_SA_AS_TEMPLATE": "Använd vald leveransöverenskommelse som mall",
-    "USE_TEMPLATE": "Använd mall"
+    "USE_TEMPLATE": "Använd mall",
+    "ERROR_MESSAGE": "Event kunde inte bli tillagt"
 }
