@@ -59,6 +59,7 @@ from ESSArch_Core.configuration.models import (
 )
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
+from ESSArch_Core.fixity.validation import validate_checksum
 from ESSArch_Core.ip.models import (
     ArchivalInstitution,
     ArchivistOrganization,
@@ -715,16 +716,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         filepath = request.data['path']
         filepath = os.path.join(path, filepath)
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.ValidateIntegrity",
-            params={
-                "filename": filepath,
-                "checksum": md5,
-                "algorithm": 'MD5'
-            },
-            responsible=self.request.user,
-        ).run().get()
-
+        validate_checksum(filepath, 'MD5', md5)
         return Response({'detail': 'Upload of %s complete' % filepath})
 
 
@@ -886,6 +878,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         tasks.append(ProcessTask(
             name='workflow.tasks.CacheAIP',
             params={'aip': pk},
+            information_package_id=pk,
             processstep=main_step,
             processstep_pos=10,
             responsible=self.request.user,
@@ -894,6 +887,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         tasks.append(ProcessTask(
             name='workflow.tasks.StoreAIP',
             params={'aip': pk},
+            information_package_id=pk,
             processstep=main_step,
             processstep_pos=20,
             responsible=self.request.user,
@@ -946,6 +940,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             },
             responsible=self.request.user,
             eager=False,
+            information_package_id=pk,
             processstep=step,
         )
 

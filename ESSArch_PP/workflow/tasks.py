@@ -361,6 +361,7 @@ class AccessAIP(DBTask):
             ProcessTask.objects.create(
                 name='ESSArch_Core.tasks.CopyDir',
                 args=[aip.object_path, dst_dir],
+                information_package=aip
             ).run().get()
 
             workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
@@ -937,6 +938,7 @@ class PollIOQueue(DBTask):
                             name='ESSArch_Core.tasks.CopyFile',
                             args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
                             params={'requests_session': session},
+                            information_package=entry.ip,
                             eager=False,
                         )
 
@@ -996,6 +998,7 @@ class PollIOQueue(DBTask):
                     name="workflow.tasks.IOTape",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
+                    information_package=entry.ip,
                 )
 
                 if entry.step is not None:
@@ -1013,6 +1016,7 @@ class PollIOQueue(DBTask):
                     name="workflow.tasks.IODisk",
                     args=[entry.pk, storage_medium.pk],
                     eager=False,
+                    information_package=entry.ip,
                 )
 
                 if entry.step is not None:
