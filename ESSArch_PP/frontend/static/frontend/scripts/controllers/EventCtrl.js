@@ -53,11 +53,8 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
         comment: ""
     };
     $scope.eventLevels = {
-        10: 'debug',
-        20: 'info',
-        30: 'warning',
-        40: 'error',
-        50: 'critical',
+        0: 'Success',
+        1: 'Failure'
     };
     $scope.getEventOutcome = function(outcome) {
         level = $scope.eventLevels[outcome];
