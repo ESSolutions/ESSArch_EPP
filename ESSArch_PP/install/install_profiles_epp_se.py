@@ -581,7 +581,7 @@ def installProfileSIP(sa):
                     "required": True,
                 },
                 "type": "input",
-                "defaultValue": "Archivist Software 1",
+                "defaultValue": "ESSArch",
                 "key": "archivist_software_name"
             },
             {
@@ -811,6 +811,7 @@ def installProfileAIP(sa):
                     "required": True,
                 },
                 "type": "input",
+                "defaultValue": "Creator Organization 1",
                 "key": "creator_organization_name"
             },
             {
@@ -828,6 +829,7 @@ def installProfileAIP(sa):
                     "required": True,
                 },
                 "type": "input",
+                "defaultValue": "ESSArch",
                 "key": "archivist_software_name"
             },
             {
@@ -1000,6 +1002,7 @@ def installProfileDIP(sa):
                     "required": True,
                 },
                 "type": "input",
+                "defaultValue": "Creator Organization 1",
                 "key": "creator_organization_name"
             },
             {
@@ -1017,6 +1020,7 @@ def installProfileDIP(sa):
                     "required": True,
                 },
                 "type": "input",
+                "defaultValue": "ESSArch",
                 "key": "archivist_software_name"
             },
             {
