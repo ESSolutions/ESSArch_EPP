@@ -25,6 +25,7 @@
 from __future__ import absolute_import
 
 import errno
+import logging
 import os
 import shutil
 import tarfile
@@ -95,8 +96,10 @@ from ip.serializers import InformationPackageDetailSerializer
 
 from storage.serializers import IOQueueSerializer
 
+logger = logging.getLogger('essarch')
+
 class ReceiveSIP(DBTask):
-    event_type = 30100
+    event_type = 20100
 
     def run(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=[]):
         aip = InformationPackage.objects.get(pk=ip)
@@ -176,6 +179,8 @@ class ReceiveSIP(DBTask):
 
 
 class ReceiveAIP(DBTask):
+    event_type = 30710
+
     def run(self, workarea):
         workarea = Workarea.objects.prefetch_related('ip').get(pk=workarea)
         ip = workarea.ip
@@ -208,7 +213,7 @@ class ReceiveAIP(DBTask):
 
 
 class CacheAIP(DBTask):
-    event_type = 20200
+    event_type = 30310
 
     def run(self, aip):
         aip_obj = InformationPackage.objects.prefetch_related('policy').get(pk=aip)
@@ -264,7 +269,6 @@ class CacheAIP(DBTask):
 
 
 class StoreAIP(DBTask):
-    event_type = 20300
     hidden = True
 
     def run(self, aip):
@@ -424,6 +428,8 @@ class PrepareDIP(DBTask):
 
 
 class CreateDIP(DBTask):
+    event_type = 30600
+
     def run(self, ip):
         ip = InformationPackage.objects.get(pk=ip)
 
@@ -804,6 +810,12 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
+            msg = 'IP preserved to %s' % ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True))
+            objid = ip.object_identifier_value
+            agent = entries.first().user.username
+            extra = {'event_type': 30300, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+            logger.info(msg, extra=extra)
+
             # if we preserved directly from workarea then we need to delete that workarea object
             ip.workareas.all().delete()
 
@@ -1157,6 +1169,12 @@ class IOTape(IO):
                 processstep=step,
                 processstep_pos=2,
             ).run().get()
+
+            msg = 'IP written to %s' % medium.medium_id
+            objid = entry.ip.object_identifier_value
+            agent = entry.user.username
+            extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+            logger.info(msg, extra=extra)
         except OSError as e:
             if e.errno == errno.ENOSPC:
                 medium.mark_as_full()
@@ -1213,6 +1231,12 @@ class IOTape(IO):
             processstep_pos=2,
         ).run().get()
 
+        msg = 'IP read from %s' % medium.medium_id
+        objid = entry.ip.object_identifier_value
+        agent = entry.user.username
+        extra = {'event_type': 40710, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        logger.info(msg, extra=extra)
+
     def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
         drive.io_queue_entry = None
@@ -1244,9 +1268,21 @@ class IODisk(IO):
         entry.storage_object = storage_object
         entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
+        msg = 'IP written to %s' % entry.storage_medium.medium_id
+        objid = entry.ip.object_identifier_value
+        agent = entry.user.username
+        extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        logger.info(msg, extra=extra)
+
     def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
         src = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar')
         copy_file(src, cache)
+
+        msg = 'IP read from %s' % entry.storage_medium.medium_id
+        objid = entry.ip.object_identifier_value
+        agent = entry.user.username
+        extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        logger.info(msg, extra=extra)
 
 
 class PollRobotQueue(DBTask):
