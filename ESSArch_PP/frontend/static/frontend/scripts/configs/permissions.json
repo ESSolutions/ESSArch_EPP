@@ -38,8 +38,7 @@
                 },
                 "createDip": {
                     "_permissions": [
-                        "ip.diff-check",
-                        "ip.preserve"
+                        "ip.preserve_dip"
                     ]
                 }
             },

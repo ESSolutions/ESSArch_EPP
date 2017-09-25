@@ -29,15 +29,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     }
     //context menu data
     $scope.menuOptions = function() {
-        var label = $translate.instant('PRESERVE');
-        if($scope.requestForm) {
-            label = $translate.instant("CANCELPRESERVATION");
-        }
-        return [
-            [label, function($itemScope, $event, modelValue, text, $li) {
-                $scope.openRequestForm($itemScope.row);
-            }],
-        ];
+        return [];
     }
     $scope.requestForm = false;
     $scope.openRequestForm = function(row) {
@@ -75,7 +67,10 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             $scope.requestEventlog = true;
             $scope.eventShow = false;
 			$scope.ip = row;
-			$rootScope.ip = $scope.ip;
+            $rootScope.ip = $scope.ip;
+            $scope.getArchivePolicies().then(function(data) {
+                vm.request.archivePolicy.options = data;
+            })
 		}
 		$scope.statusShow = false;
     }
@@ -129,36 +124,41 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
 
 
     //Click function for Ip table
-    $scope.ipTableClick = function(row) {
-        if ( row.state === "Creating" || row.state === "Created" || (($scope.select || $scope.requestForm) && $scope.ip.id == row.id)) {
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.edit = false;
-            $scope.ip = null;
-            $rootScope.ip = null;
-            $scope.filebrowser = false;
+    $scope.ipTableClick = function (row) {
+        if (row.state == "Created") {
+            $scope.openRequestForm(row);
         } else {
-            $scope.ip = row;
-            $rootScope.ip = $scope.ip;
-            $scope.select = true;
-            $scope.eventlog = true;
-            $scope.edit = true;
-            $scope.deckGridInit(row);
+
+            if (row.state === "Creating" || (($scope.select || $scope.requestForm) && $scope.ip.id == row.id)) {
+                $scope.select = false;
+                $scope.eventlog = false;
+                $scope.edit = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
+                $scope.filebrowser = false;
+            } else {
+                $scope.ip = row;
+                $rootScope.ip = $scope.ip;
+                $scope.select = true;
+                $scope.eventlog = true;
+                $scope.edit = true;
+                $scope.deckGridInit(row);
+            }
+            $scope.requestForm = false;
+            $scope.requestEventlog = false;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
         }
-        $scope.requestForm = false;
-        $scope.requestEventlog = false;
-        $scope.eventShow = false;
-        $scope.statusShow = false;
     };
-    $scope.colspan = 9;
-    $scope.stepTaskInfoShow = false;
-    $scope.statusShow = false;
-    $scope.eventShow = false;
-    $scope.select = false;
-    $scope.subSelect = false;
-    $scope.edit = false;
-    $scope.eventlog = false;
-    $scope.requestForm = false;
+        $scope.colspan = 9;
+        $scope.stepTaskInfoShow = false;
+        $scope.statusShow = false;
+        $scope.eventShow = false;
+        $scope.select = false;
+        $scope.subSelect = false;
+        $scope.edit = false;
+        $scope.eventlog = false;
+        $scope.requestForm = false;
 
     $scope.removeIp = function(ipObject) {
         IP.delete({

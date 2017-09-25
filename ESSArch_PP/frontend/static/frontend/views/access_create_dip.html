@@ -23,6 +23,11 @@
                                 {{'PURPOSE' | translate}}
                             </label>
                             <input required class="form-control" ng-model="vm.request.purpose">
+                            <label>
+                                {{'ARCHIVE_POLICY' | translate}}
+                            </label>
+                            <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
+                            ng-options="x as x.policy_name for x in vm.request.archivePolicy.options" required></select>
                         </div>
                     </div>
                 </form>

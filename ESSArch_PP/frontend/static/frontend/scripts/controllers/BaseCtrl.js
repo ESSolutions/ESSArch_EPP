@@ -296,7 +296,9 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
 
     // Preserve IP
     $scope.preserveIp = function(ip, request) {
-        Requests.preserve(ip, {purpose: request.purpose}).then(function(result) {
+        var params = { purpose: request.purpose };
+        params.policy =  request.archivePolicy && request.archivePolicy.value != "" ? request.archivePolicy.value.id : null;
+        Requests.preserve(ip, params).then(function(result) {
             $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.requestEventlog = false;
