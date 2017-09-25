@@ -28,7 +28,7 @@ django.setup()
 
 from django.contrib.auth.models import User, Group, Permission
 
-from ESSArch_Core.configuration.models import ArchivePolicy, EventType, Parameter, Path
+from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
 from ESSArch_Core.storage.models import (
     DISK,
 
@@ -47,9 +47,6 @@ def installDefaultConfiguration():
 
     print "\nInstalling paths..."
     installDefaultPaths()
-
-    print "\nInstalling event types..."
-    installDefaultEventTypes()
 
     print "\nInstalling archive policies..."
     installDefaultArchivePolicies()
@@ -160,23 +157,6 @@ def installDefaultPaths():
     for key in dct:
         print '-> %s: %s' % (key, dct[key])
         Path.objects.get_or_create(entity=key, value=dct[key])
-
-    return 0
-
-
-def installDefaultEventTypes():
-    dct = {
-        'Delivery received': '30100',
-        'Delivery checked': '30200',
-        'Validate file format': '30260',
-        'Validate XML file': '30261',
-        'Validate logical representation against physical representation': '30262',
-        'Validate checksum': '30263',
-    }
-
-    for key in dct:
-        print '-> %s: %s' % (key, dct[key])
-        EventType.objects.get_or_create(eventType=dct[key], eventDetail=key)
 
     return 0
 

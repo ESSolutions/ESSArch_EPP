@@ -445,7 +445,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             if validators.get('validate_xml_file', False):
                 ProcessTask.objects.create(
-                    name="workflow.tasks.ValidateXMLFile",
+                    name="ESSArch_Core.tasks.ValidateXMLFile",
                     params={
                         "xml_filename": xmlfile
                     },
@@ -477,7 +477,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
             if validators.get('validate_logical_physical_representation'):
                 ProcessTask.objects.create(
-                    name="workflow.tasks.ValidateLogicalPhysicalRepresentation",
+                    name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
                     params={
                         "files": files,
                         "files_reldir": container,

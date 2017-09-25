@@ -263,10 +263,6 @@ class CacheAIP(DBTask):
         return "Cached AIP '%s'" % aip
 
 
-class UpdateIPStatus(tasks.UpdateIPStatus):
-    event_type = 30280
-
-
 class StoreAIP(DBTask):
     event_type = 20300
     hidden = True
@@ -1406,11 +1402,3 @@ class UnmountIdleDrives(DBTask):
 
     def event_outcome_success(self):
         pass
-
-
-class ValidateXMLFile(tasks.ValidateXMLFile):
-    event_type = 30261
-
-
-class ValidateLogicalPhysicalRepresentation(tasks.ValidateLogicalPhysicalRepresentation):
-    event_type = 30262
