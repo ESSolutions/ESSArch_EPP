@@ -783,7 +783,7 @@ class PollIOQueue(DBTask):
             msg = 'IP preserved to %s' % ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True))
             objid = ip.object_identifier_value
             agent = entries.first().user.username
-            extra = {'event_type': 30300, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+            extra = {'event_type': 30300, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
 
             # if we preserved directly from workarea then we need to delete that workarea object
