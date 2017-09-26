@@ -6,6 +6,10 @@
         popover-popup-delay="500" popover-append-to-body="true"></select>
     <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters}" ng-click="toggleAdvancedFilters()"></span>
     <div ng-show="showAdvancedFilters" class="advanced-filters">
+        <label>
+            <input type="checkbox" ng-model="filterOwnIps" ng-change="vm.toggleOwnIps(filterOwnIps)">
+            {{'SEE_MY_IPS' | translate}}
+        </label>
         <div ng-repeat="model in filterModels">
             <form name="form[{{$index}}]" style="position: relative;" novalidate ng-init="addFields($index)">
                 <div class="formly-buttons-wrapper" ng-class="{'field-no-label': $index !== 0}">

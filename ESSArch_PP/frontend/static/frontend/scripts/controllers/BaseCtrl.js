@@ -757,6 +757,16 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $scope.filterModels = [];
     $scope.filterFields = [];
 
+    vm.toggleOwnIps = function(filterIps) {
+        if(filterIps) {
+            $scope.columnFilters.responsible = $rootScope.auth.username;
+        } else {
+            if($scope.columnFilters.responsible == $rootScope.auth.username) {
+                delete $scope.columnFilters.responsible;
+            }
+        }
+    }
+
     //Toggle visibility of advanced filters
     $scope.toggleAdvancedFilters = function () {
         if ($scope.showAdvancedFilters) {
