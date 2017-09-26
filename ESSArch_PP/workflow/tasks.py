@@ -62,6 +62,7 @@ from ESSArch_Core.ip.models import (
     ArchivistOrganization,
     ArchivalLocation,
     ArchivalType,
+    EventIP,
     InformationPackage,
     Workarea,
 )
@@ -1142,7 +1143,7 @@ class IOTape(IO):
             msg = 'IP written to %s' % medium.medium_id
             objid = entry.ip.object_identifier_value
             agent = entry.user.username
-            extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+            extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
         except OSError as e:
             if e.errno == errno.ENOSPC:
@@ -1203,7 +1204,7 @@ class IOTape(IO):
         msg = 'IP read from %s' % medium.medium_id
         objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40710, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        extra = {'event_type': 40710, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
     def io_success(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
@@ -1240,7 +1241,7 @@ class IODisk(IO):
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        extra = {'event_type': 40600, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, storage_medium, storage_method, storage_target):
@@ -1250,7 +1251,7 @@ class IODisk(IO):
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': outcome}
+        extra = {'event_type': 40610, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
 
