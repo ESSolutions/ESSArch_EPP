@@ -334,22 +334,7 @@ class AccessAIP(DBTask):
                 # Create new generation of the IP
 
                 old_aip = aip.pk
-                new_aip = deepcopy(aip)
-                new_aip.pk = None
-                new_aip.object_identifier_value = None
-                new_aip.state = 'Ingest Workarea'
-                new_aip.cached = False
-                new_aip.archived = False
-                new_aip.object_path = ''
-                new_aip.responsible = responsible
-
-                max_generation = InformationPackage.objects.filter(aic=aip.aic).aggregate(Max('generation'))['generation__max']
-                new_aip.generation = max_generation + 1
-                new_aip.save()
-
-                new_aip.object_identifier_value = object_identifier_value if object_identifier_value is not None else str(new_aip.pk)
-                new_aip.save(update_fields=['object_identifier_value'])
-
+                new_aip = aip.create_new_generation('Ingest Workarea', responsible, object_identifier_value)
                 aip = InformationPackage.objects.get(pk=old_aip)
             else:
                 new_aip = aip
@@ -584,24 +569,8 @@ class PollAccessQueue(DBTask):
 
             if entry.new:
                 # Create new generation of the IP
-
                 old_aip = entry.ip.pk
-                new_aip = deepcopy(entry.ip)
-                new_aip.pk = None
-                new_aip.object_identifier_value = None
-                new_aip.state = 'Access Workarea'
-                new_aip.cached = False
-                new_aip.archived = False
-                new_aip.object_path = ''
-                new_aip.responsible = entry.user
-
-                max_generation = InformationPackage.objects.filter(aic=new_aip.aic).aggregate(Max('generation'))['generation__max']
-                new_aip.generation = max_generation + 1
-                new_aip.save()
-
-                new_aip.object_identifier_value = entry.object_identifier_value if entry.object_identifier_value is not None else str(new_aip.pk)
-                new_aip.save(update_fields=['object_identifier_value'])
-
+                new_aip = entry.ip.create_new_generation('Access Workarea', entry.user, entry.object_identifier_value)
                 aip = InformationPackage.objects.get(pk=old_aip)
             else:
                 new_aip = entry.ip
