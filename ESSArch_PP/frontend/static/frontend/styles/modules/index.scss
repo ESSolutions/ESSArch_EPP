@@ -351,9 +351,10 @@ body.modal-open[style] {
 .nav-dynamic-wrapper {
     width:100%;
     padding: 0 10px 0 10px;
+    height: 100%;
 }
 .dynamic-part {
-    height: 100%;
+    min-height: 605px;
     overflow: hidden;
 }
 .sub-menu {
@@ -630,6 +631,8 @@ padding: 0 12px;
     border-width: 1px;
     border-color: $border-color;
     max-width:400px;
+    max-height:300px;
+    overflow-y: auto;
     background-color: white;
     padding: 10px;
     z-index: 1000;

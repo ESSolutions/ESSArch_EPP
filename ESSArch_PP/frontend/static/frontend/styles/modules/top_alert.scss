@@ -98,10 +98,6 @@
 .top-alert.ng-leave.ng-leave-active {
     opacity: 0;
 }
-::-webkit-scrollbar {
-    width: 0px;  /* remove scrollbar space */
-    background: transparent;  /* optional: just make scrollbar invisible */
-}
 .alert-list {
     text-align: center;
     box-shadow: 0 0 5px black;

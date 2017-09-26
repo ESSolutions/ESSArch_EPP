@@ -777,16 +777,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             }
                 $scope.showAdvancedFilters = true;
         }
-        /* if ($scope.showAdvancedFilters) {
-            console.log("set window click")
-            $window.onclick = function (event) {
-                closeSearchWhenClickingElsewhere(event, $scope.toggleAdvancedFilters);
-            }
-        } else {
-            $scope.showAdvancedFilters = false;
-            $scope.$window.onClick = null;
-            $scope.$apply();
-         }*/
          if ($scope.showAdvancedFilters) {
              $window.onclick = function (event) {
                  var clickedElement = $(event.target);
