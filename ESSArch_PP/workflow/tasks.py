@@ -816,9 +816,8 @@ class PollIOQueue(DBTask):
             ip.save(update_fields=['archived', 'state'])
 
             msg = 'IP preserved to %s' % ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True))
-            objid = ip.object_identifier_value
             agent = entries.first().user.username
-            extra = {'event_type': 30300, 'object': objid, 'agent': agent, 'outcome': EventIP.SUCCESS}
+            extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
 
             # if we preserved directly from workarea then we need to delete that workarea object
@@ -1193,9 +1192,8 @@ class IOTape(IO):
             ).run().get()
 
             msg = 'IP written to %s' % medium.medium_id
-            objid = entry.ip.object_identifier_value
             agent = entry.user.username
-            extra = {'event_type': 40700, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+            extra = {'event_type': 40700, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
         except OSError as e:
             if e.errno == errno.ENOSPC:
@@ -1254,9 +1252,8 @@ class IOTape(IO):
         ).run().get()
 
         msg = 'IP read from %s' % medium.medium_id
-        objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40710, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {'event_type': 40710, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
     def io_success(self, entry, cache, cache_obj, cache_obj_xml, storage_medium, storage_method, storage_target):
@@ -1287,9 +1284,8 @@ class IODisk(IO):
         entry.save(update_fields=['storage_medium_id', 'storage_object'])
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
-        objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40600, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {'event_type': 40600, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, storage_medium, storage_method, storage_target):
@@ -1297,9 +1293,8 @@ class IODisk(IO):
         copy_file(src, cache)
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
-        objid = entry.ip.object_identifier_value
         agent = entry.user.username
-        extra = {'event_type': 40610, 'object': objid, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {'event_type': 40610, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
 
 
