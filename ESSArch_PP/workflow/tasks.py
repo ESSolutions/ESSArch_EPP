@@ -320,8 +320,9 @@ class StoreAIP(DBTask):
             responsible_id=self.responsible,
         ).run().get()
 
-        cache_dir = aip.policy.cache_storage.value
-        xml_file = os.path.join(cache_dir, aip.object_identifier_value) + '.xml'
+        objid = InformationPackage.objects.values_list('object_identifier_value', flat=True).get(pk=aip)
+        cache_dir = policy.cache_storage.value
+        xml_file = os.path.join(cache_dir, objid) + '.xml'
         xml_size = os.path.getsize(xml_file)
 
         step = ProcessStep.objects.create(
