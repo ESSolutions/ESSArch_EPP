@@ -48,6 +48,7 @@ def installProfiles():
     installProfileSubmitDescription(sa)
 
     installProfileAIP(sa)
+    installProfileAIPDescription(sa)
     installProfileDIP(sa)
     installProfilePreservationMetadata(sa)
 
@@ -860,6 +861,157 @@ def installProfileAIP(sa):
     ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
 
     print 'Installed profile AIP'
+
+    return 0
+
+
+def installProfileAIPDescription(sa):
+
+    dct = {
+        'name': 'AIP Description SE',
+        'profile_type': 'aip_description',
+        'type': 'Implementation',
+        'status': 'Draft',
+        'label': 'AIP Description profile for SE Packages',
+        'representation_info': 'Documentation 1',
+        'preservation_descriptive_info': 'Documentation 2',
+        'supplemental': 'Documentation 3',
+        'access_constraints': 'Documentation 4',
+        'datamodel_reference': 'Documentation 5',
+        'additional': 'Documentation 6',
+        'submission_method': 'Electronically',
+        'submission_schedule': 'Once',
+        'submission_data_inventory': 'According to submit description',
+        'template': [
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "disabled": True,
+                    "label": "Archivist Organization"
+                },
+                "type": "input",
+                "key": "_IP_ARCHIVIST_ORGANIZATION"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Archivist Organization Note"
+                },
+                "type": "input",
+                "key": "archivist_organization_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Organization",
+                    "required": True,
+                },
+                "type": "input",
+                "defaultValue": "Creator Organization 1",
+                "key": "creator_organization_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Organization Note"
+                },
+                "type": "input",
+                "key": "creator_organization_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Archivist Software",
+                    "required": True,
+                },
+                "type": "input",
+                "defaultValue": "ESSArch",
+                "key": "archivist_software_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Archivist Software Note"
+                },
+                "type": "input",
+                "key": "archivist_software_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Individual",
+                },
+                "type": "input",
+                "defaultValue": "ESSArch",
+                "key": "creator_individual_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Individual Note"
+                },
+                "type": "input",
+                "key": "creator_individual_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Software",
+                },
+                "type": "input",
+                "defaultValue": "ESSArch",
+                "key": "creator_software_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Software Note"
+                },
+                "type": "input",
+                "key": "creator_software_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Organization",
+                },
+                "type": "input",
+                "defaultValue": "ESSArch",
+                "key": "preservation_organization_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Organization Note"
+                },
+                "type": "input",
+                "key": "preservation_organization_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Software",
+                },
+                "type": "input",
+                "defaultValue": "ESSArch",
+                "key": "preservation_software_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Software Note"
+                },
+                "type": "input",
+                "key": "preservation_software_note"
+            },
+        ],
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIP_Description_Template.json')).read()),
+    }
+
+    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
+    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+
+    print 'Installed profile AIP Description'
 
     return 0
 
