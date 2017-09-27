@@ -45,6 +45,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div uib-alert ng-if="!saProfile.profile.profile_aic_description" style="width: 100%;" ng-class="'alert-' + (aicDescriptionAlert.type || 'warning')">{{aicDescriptionAlert.msg}}</div>
                 <div uib-alert ng-if="!saProfile.profile.profile_aip" style="width: 100%;" ng-class="'alert-' + (aipAlert.type || 'warning')">{{aipAlert.msg}}</div>
                 <div uib-alert ng-if="!saProfile.profile.profile_aip_description" style="width: 100%;" ng-class="'alert-' + (aipDescriptionAlert.type || 'warning')">{{aipDescriptionAlert.msg}}</div>
                 <div uib-alert ng-if="!saProfile.profile.profile_dip" style="width: 100%;" ng-class="'alert-' + (dipAlert.type || 'warning')">{{dipAlert.msg}}</div>

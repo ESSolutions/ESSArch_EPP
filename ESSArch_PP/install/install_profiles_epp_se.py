@@ -47,6 +47,7 @@ def installProfiles():
     installProfileTransferProject(sa)
     installProfileSubmitDescription(sa)
 
+    installProfileAICDescription(sa)
     installProfileAIP(sa)
     installProfileAIPDescription(sa)
     installProfileDIP(sa)
@@ -618,6 +619,33 @@ def installProfileSIP(sa):
     return 0
 
 
+def installProfileAICDescription(sa):
+
+    dct = {
+        'name': 'AIC Description SE',
+        'profile_type': 'aic_description',
+        'type': 'Implementation',
+        'status': 'Draft',
+        'label': 'AIC Description profile for SE Packages',
+        'representation_info': 'Documentation 1',
+        'preservation_descriptive_info': 'Documentation 2',
+        'supplemental': 'Documentation 3',
+        'access_constraints': 'Documentation 4',
+        'datamodel_reference': 'Documentation 5',
+        'additional': 'Documentation 6',
+        'submission_method': 'Electronically',
+        'submission_schedule': 'Once',
+        'submission_data_inventory': 'According to submit description',
+        'template': [],
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIC_Description_Template.json')).read()),
+    }
+
+    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
+    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+
+    print 'Installed profile AIC Description'
+
+    return 0
 
 
 def installProfileAIP(sa):

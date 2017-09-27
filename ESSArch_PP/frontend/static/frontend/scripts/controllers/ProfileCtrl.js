@@ -4,11 +4,13 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     $scope.select = true;
     $scope.alerts = {
         receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
+        aicDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIC_DESCRIPTION') },
         aipError: { type: 'danger', msg: $translate.instant('MISSING_AIP') },
         dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') },
         aipDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIP_DESCRIPTION') }
     };
     $scope.saAlert = null;
+    $scope.aicDescriptionAlert = $scope.alerts.aicDescriptionError;
     $scope.aipAlert = $scope.alerts.aipError;
     $scope.dipAlert = $scope.alerts.dipError;
     $scope.aipDescriptionAlert = $scope.alerts.aipDescriptionError;
