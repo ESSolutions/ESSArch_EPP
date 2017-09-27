@@ -322,7 +322,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             submission_agreement_locked=True,
         )
 
-        for profile_type in ['aip', 'dip']:
+        for profile_type in ['aip', 'aip_description', 'dip']:
             profile = getattr(sa, 'profile_%s' % profile_type, None)
 
             if profile is None:
@@ -375,10 +375,14 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             profile_ip.save()
 
         profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
+        profile_ip_aip_description = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip_description).first()
         profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
 
         if profile_ip_aip is None:
             raise exceptions.ParseError('Information package missing AIP profile')
+
+        if profile_ip_aip_description is None:
+            raise exceptions.ParseError('Information package missing AIP Description profile')
 
         if profile_ip_dip is None:
             raise exceptions.ParseError('Information package missing DIP profile')
