@@ -11,7 +11,7 @@
                     "_permissions": [
                         "ip.preserve",
                         "ip.add_to_ingest_workarea",
-                        "ip.add_to_ingest_workarea_as_new_generation",
+                        "ip.add_to_ingest_workarea_as_new",
                         "ip.diff-check"
                     ]
                 },
