@@ -5,11 +5,13 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     $scope.alerts = {
         receiveError: { type: 'danger', msg: $translate.instant('CANNOT_RECEIVE_ERROR') },
         aipError: { type: 'danger', msg: $translate.instant('MISSING_AIP') },
-        dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') }
+        dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') },
+        aipDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIP_DESCRIPTION') }
     };
     $scope.saAlert = null;
     $scope.aipAlert = $scope.alerts.aipError;
     $scope.dipAlert = $scope.alerts.dipError;
+    $scope.aipDescriptionAlert = $scope.alerts.aipDescriptionError;
     vm.dataVersion = null;
     // On init
     vm.$onInit = function() {
