@@ -647,11 +647,21 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         $state.go('login');
     });
 
-    $rootScope.$on('$stateChangeStart', function(evt, to, params) {
+    $rootScope.$on('$stateChangeStart', function(evt, to, params, from) {
         if (to.redirectTo) {
             evt.preventDefault();
             $state.go(to.redirectTo, params, {location: 'replace'})
         }
+
+        if(to.name == 'login' && djangoAuth.authenticated) {
+            evt.preventDefault();
+            if(from.name != "") {
+                $state.transitionTo(from.name);
+            } else {
+                $state.transitionTo('home.myPage');
+            }
+        }
+
         if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration") {
             evt.preventDefault();
             var resolved = Object.resolve(to.name, permissionConfig);
