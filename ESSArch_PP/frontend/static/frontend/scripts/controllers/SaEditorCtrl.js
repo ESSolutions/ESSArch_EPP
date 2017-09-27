@@ -135,6 +135,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
         submit_description: [],
         sip: [],
         aip: [],
+        aip_description: [],
         dip: [],
         workflow: [],
         preservation_metadata: [],
@@ -494,6 +495,15 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
         },
         "type": "select",
         "key": "profile_aip",
+    },
+    {
+        "templateOptions": {
+            "label": "profile_aip_description",
+            "valueProp": "id",
+            "options": vm.profiles["aip_description"],
+        },
+        "type": "select",
+        "key": "profile_aip_description",
     },
     {
         "templateOptions": {
