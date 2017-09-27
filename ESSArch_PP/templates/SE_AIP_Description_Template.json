@@ -572,7 +572,7 @@
                                     "-name": "fptr",
                                     "-namespace": "mets",
                                     "-containsFiles": true,
-                                    "-filters": {"href":".tar$"},
+                                    "-filters": {"href":".xml$"},
                                     "-attr": [
                                         {
                                             "#content": [
@@ -612,7 +612,7 @@
                                     "-name": "fptr",
                                     "-namespace": "mets",
                                     "-containsFiles": true,
-                                    "-filters": {"href": ".xml$"},
+                                    "-filters": {"href": ".tar$"},
                                     "-attr": [
                                         {
                                             "#content": [
