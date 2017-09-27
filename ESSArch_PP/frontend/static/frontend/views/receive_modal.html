@@ -59,7 +59,7 @@
     <div class="receive-footer">
         <div class="checkbox">
             <label>
-                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
+                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
             </label>
         </div>
         <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}}</button>
