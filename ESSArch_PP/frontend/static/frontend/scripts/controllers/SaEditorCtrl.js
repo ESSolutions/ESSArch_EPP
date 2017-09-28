@@ -119,7 +119,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
                     vm.saProfiles = resource;
                     vm.getProfiles();
                     $scope.edit = false;
-                    TopAlert.add("Submission agreement: " + vm.saProfile.name + "has been published!", "success", 5000);
+                    TopAlert.add("Submission agreement: " + vm.saProfile.name + " has been published!", "success", 5000);
                 });
                 return resource;
             });
