@@ -1159,7 +1159,7 @@ class IOTape(IO):
     read_types = (20,)
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        step = ProcessStep(name="Write to tape" % self.storage_type.title(),)
+        step = ProcessStep(name="Write to tape")
         task = ProcessTask.objects.filter(pk=entry.task_id).first()
 
         if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
@@ -1272,7 +1272,7 @@ class IOTape(IO):
         entry.save(update_fields=['storage_object'])
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        step = ProcessStep(name="Read from tape" % self.storage_type.title(),)
+        step = ProcessStep(name="Read from tape")
         task = ProcessTask.objects.filter(pk=entry.task_id).first()
 
         if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
