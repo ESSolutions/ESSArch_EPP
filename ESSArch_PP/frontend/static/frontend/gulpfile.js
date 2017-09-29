@@ -166,7 +166,7 @@ var compileSass = function() {
       tidySelectors: true, // controls selectors optimizing; defaults to `true`,
       transform: function () {} // defines a callback for fine-grained property optimization; defaults to no-op
     }))
-    .pipe(sourcemaps.write('./styles.css.map'))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('styles'));
 };
 var copyIcons = function() {
