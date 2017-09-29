@@ -15,7 +15,7 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
     vm.getSaProfiles = function() {
         var auth = window.btoa(vm.user.username + ":" + vm.user.password);
         var headers = {"Authorization": "Basic " + auth};
-        $http.get(vm.url + '/api/submission-agreements/', { headers: headers, published: true }).then(function(response) {
+        $http.get(vm.url + '/api/submission-agreements/', { headers: headers, published: true, params: {pager: "none"}}).then(function(response) {
             vm.saProfile.profiles = response.data;
             vm.select = true;
         });

@@ -5,7 +5,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
     vm.saProfiles = [];
     vm.createNewSa = false;
     vm.$onInit = function() {
-        SA.query().$promise.then(function(resource) {
+        SA.query({pager: "none"}).$promise.then(function(resource) {
             vm.saProfiles = resource;
         });
     }
@@ -93,7 +93,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
                 vm.saProfile = null;
                 vm.saModel = {};
                 $scope.edit = false;
-                SA.query().$promise.then(function (resource) {
+                SA.query({pager: "none"}).$promise.then(function (resource) {
                     vm.saProfiles = resource;
                     $anchorScroll();
                 });
@@ -115,7 +115,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
     vm.publishSa = function () {
         SA.publish({id: vm.saProfile.id})
             .$promise.then(function (resource) {
-                SA.query().$promise.then(function(resource) {
+                SA.query({pager: "none"}).$promise.then(function(resource) {
                     vm.saProfiles = resource;
                     vm.getProfiles();
                     $scope.edit = false;
