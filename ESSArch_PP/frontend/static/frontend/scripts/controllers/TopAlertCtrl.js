@@ -187,13 +187,13 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         vm.getNotifications();
     });
 
-}).factory('TopAlert', function ($rootScope, $q, appConfig, $http) {
+}).factory('TopAlert', function ($rootScope, $q, appConfig, $http, $window) {
     // Keep all pending requests here until they get responses
     var callbacks = {};
     // Create a unique callback ID to map requests to responses
     var currentCallbackId = 0;
     // Create our websocket object with the address to the websocket
-    var ws = new WebSocket("ws://localhost:8002/notifications/");
+    var ws = new WebSocket(appConfig.webSocketProtocol + "://" + $window.location.host + "/");
     ws.onopen = function () {
     }
 
