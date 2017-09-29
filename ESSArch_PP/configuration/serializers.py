@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework import serializers
 
 from ESSArch_Core.configuration.models import ArchivePolicy
@@ -41,6 +43,7 @@ class StorageTargetSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'id': {
                 'read_only': False,
+                'default': uuid.uuid4,
             },
             'name': {
                 'validators': [],
@@ -61,6 +64,7 @@ class StorageMethodTargetRelationSerializer(serializers.HyperlinkedModelSerializ
             'id': {
                 'read_only': False,
                 'validators': [],
+                'default': uuid.uuid4,
             },
         }
 
@@ -80,6 +84,7 @@ class StorageMethodSerializer(DynamicHyperlinkedModelSerializer):
             'id': {
                 'read_only': False,
                 'validators': [],
+                'default': uuid.uuid4,
             },
         }
 
