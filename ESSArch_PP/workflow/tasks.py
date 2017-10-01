@@ -1193,57 +1193,13 @@ class IOTape(IO):
                 processstep_pos=1,
             ).run().get()
 
+            paths = [cache_obj_xml, cache_obj_aic_xml, cache_obj]
             ProcessTask.objects.create(
                 name="ESSArch_Core.tasks.WriteToTape",
-                params={
-                    'medium': storage_medium,
-                    'path': cache_obj_xml,
-                    'block_size': medium.block_size * 512,
-                },
+                args=[storage_medium, paths],
+                params={'block_size': medium.block_size * 512},
                 processstep=step,
                 processstep_pos=2,
-            ).run().get()
-
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.SetTapeFileNumber",
-                params={
-                    'medium': storage_medium,
-                    'num': content_location_value+1,
-                },
-                processstep=step,
-                processstep_pos=3,
-            ).run().get()
-
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.WriteToTape",
-                params={
-                    'medium': storage_medium,
-                    'path': cache_obj_aic_xml,
-                    'block_size': medium.block_size * 512,
-                },
-                processstep=step,
-                processstep_pos=4,
-            ).run().get()
-
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.SetTapeFileNumber",
-                params={
-                    'medium': storage_medium,
-                    'num': content_location_value+2,
-                },
-                processstep=step,
-                processstep_pos=5,
-            ).run().get()
-
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.WriteToTape",
-                params={
-                    'medium': storage_medium,
-                    'path': cache_obj,
-                    'block_size': medium.block_size * 512,
-                },
-                processstep=step,
-                processstep_pos=6,
             ).run().get()
 
             msg = 'IP written to %s' % medium.medium_id
