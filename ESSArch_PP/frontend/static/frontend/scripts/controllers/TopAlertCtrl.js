@@ -134,6 +134,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             vm.alerts = [];
             vm.backendAlerts = [];
             vm.frontendAlerts = [];
+            vm.updateUnseen();
         })
     }
 
