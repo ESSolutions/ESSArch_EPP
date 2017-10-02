@@ -21,6 +21,8 @@
             margin-left: 10px;
         }
         width: 90px;
+        min-width: 90px;
+        max-width: 90px;
     }
     .alert-text {
         width:100%;
@@ -40,6 +42,8 @@
         text-align: left;
         white-space: nowrap;
         width: 100px;
+        min-width: 100px;
+        max-width: 100px;
         overflow-x: visible;
     }
 }
@@ -114,6 +118,8 @@
         text-align: left;
         white-space: nowrap;
         width: 100px;
+        min-width: 100px;
+        max-width: 100px;
         overflow-x: visible;
     }
     .icon-row {
@@ -124,6 +130,8 @@
             margin-left: 10px;
         }
         width: 92px;
+        min-width: 92px;
+        max-width: 92px;
     }
 }
 
