@@ -911,6 +911,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     def access(self, request, pk=None):
         aip = self.get_object()
 
+        if aip.state != 'Received' and not aip.archived:
+            raise exceptions.ParseError('IP must either have state "Received" or be archived to be accessed')
+
         data = request.data
 
         options = ['tar', 'extracted', 'new']
