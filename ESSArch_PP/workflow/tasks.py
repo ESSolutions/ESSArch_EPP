@@ -31,6 +31,7 @@ import shutil
 import tarfile
 import tempfile
 import time
+import uuid
 import zipfile
 
 from copy import deepcopy
@@ -286,6 +287,16 @@ class CacheAIP(DBTask):
             responsible_id=self.responsible,
         ).run().get()
 
+        InformationPackage.objects.filter(pk=aip).update(
+            message_digest=checksum, message_digest_algorithm=policy.checksum_algorithm,
+        )
+
+        ProcessTask.objects.create(
+            name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
+            params={'ip': aip},
+            information_package_id=aip,
+            responsible_id=self.responsible,
+        ).run().get()
 
         aicxml = os.path.join(policy.cache_storage.value, str(aip_obj.aic.pk) + '.xml')
         aicinfo = fill_specification_data(aip_obj.get_profile_data('aic_description'), ip=aip_obj.aic)
@@ -295,19 +306,38 @@ class CacheAIP(DBTask):
             aicxml: aic_desc_profile.specification
         }
 
-        extra_files = []
+        parsed_files = []
 
         for ip in aip_obj.aic.information_packages.order_by('generation'):
-            ip_tar = os.path.join(policy.cache_storage.value, ip.object_identifier_value + '.tar')
-            if os.path.isfile(ip_tar):
-                extra_files.append(ip_tar)
+            parsed_files.append({
+                'FName': ip.object_identifier_value + '.tar',
+                'FDir': '',
+                'FParentDir': '',
+                'FChecksum': ip.message_digest,
+                'FID': str(uuid.uuid4()),
+                'daotype': "borndigital",
+                'href': ip.object_identifier_value + '.tar',
+                'FMimetype': 'application/x-tar',
+                'FCreated': ip.create_date,
+                'FFormatName': 'Tape Archive Format',
+                'FFormatVersion': 'None',
+                'FFormatRegistryKey': 'x-fmt/265',
+                'FSize': str(ip.object_size),
+                'FUse': 'Datafile',
+                'FChecksumType': ip.get_message_digest_algorithm_display(),
+                'FLoctype': 'URL',
+                'FLinkType': 'simple',
+                'FChecksumLib': 'hashlib',
+                'FLocationType': 'URI',
+                'FIDType': 'UUID',
+            })
 
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.GenerateXML",
             params={
                 "info": aicinfo,
                 "filesToCreate": filesToCreate,
-                "extra_paths_to_parse": extra_files,
+                "parsed_files": parsed_files,
                 "algorithm": algorithm,
             },
             processstep_id=self.step,
@@ -317,9 +347,9 @@ class CacheAIP(DBTask):
         ).run().get()
 
         InformationPackage.objects.filter(pk=aip).update(
-            message_digest=checksum, message_digest_algorithm=policy.checksum_algorithm,
-            cached=True
+            object_path=dstdir, cached=True
         )
+
         return aip
 
     def undo(self, aip):
@@ -343,14 +373,7 @@ class StoreAIP(DBTask):
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
 
-        size, count = ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
-            params={'ip': aip},
-            information_package_id=aip,
-            responsible_id=self.responsible,
-        ).run().get()
-
-        objid, aic = InformationPackage.objects.values_list('object_identifier_value', 'aic_id').get(pk=aip)
+        objid, aic, size = InformationPackage.objects.values_list('object_identifier_value', 'aic_id', 'object_size').get(pk=aip)
         aic = str(aic)
         cache_dir = policy.cache_storage.value
         xml_file = os.path.join(cache_dir, objid) + '.xml'
