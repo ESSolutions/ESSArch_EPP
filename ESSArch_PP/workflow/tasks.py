@@ -411,7 +411,7 @@ class StoreAIP(DBTask):
 
 
 class AccessAIP(DBTask):
-    def run(self, aip, tar=True, extracted=False, new=False, object_identifier_value=""):
+    def run(self, aip, tar=True, extracted=False, new=False, package_xml=False, aic_xml=False, object_identifier_value=""):
         aip = InformationPackage.objects.get(pk=aip)
 
         # if it is a received IP, i.e. from ingest and not from storage,
@@ -454,7 +454,8 @@ class AccessAIP(DBTask):
         AccessQueue.objects.get_or_create(
             ip=aip, status__in=[0, 2, 5], package=tar,
             extracted=extracted, new=new,
-            defaults={'user_id': self.responsible, 'object_identifier_value': object_identifier_value}
+            defaults={'user_id': self.responsible, 'object_identifier_value': object_identifier_value,
+                      'package_xml': package_xml, 'aic_xml': aic_xml}
         )
         return
 
@@ -573,6 +574,12 @@ class PollAccessQueue(DBTask):
                 raise
 
         copy_file(cache_tar_obj, dst_tar)
+
+        if entry.package_xml:
+            copy_file(cache_obj + '.xml', dst_dir + '.xml')
+
+        if entry.aic_xml:
+            copy_file(os.path.join(cache_dir, str(entry.ip.aic.pk) + '.xml'), os.path.join(access_user, str(entry.ip.aic.pk) + '.xml'))
 
         if entry.extracted:
             # Since the IP is packaged with the name of the first IP generation it will be extracted under that name.
@@ -1325,7 +1332,12 @@ class IODisk(IO):
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
         src = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar')
+        src_xml = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.xml')
+        src_aic_xml = os.path.join(storage_target.target, str(entry.ip.aic.pk) + '.xml')
+
         copy_file(src, cache)
+        copy_file(src_xml, cache)
+        copy_file(src_aic_xml, cache)
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
