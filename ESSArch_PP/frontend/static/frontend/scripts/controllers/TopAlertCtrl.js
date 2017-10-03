@@ -179,6 +179,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
      */
     vm.setTimer = function (alert, time) {
         return $timeout(function () {
+            if (vm.visible && !vm.showAlerts) {
+                vm.visible = false;
+            }
             vm.removeAlert(alert);
             if(vm.showAlerts) {
                 vm.setSeen(vm.alerts.slice(0,5));

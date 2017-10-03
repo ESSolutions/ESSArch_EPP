@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA) {
+angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, TopAlert) {
     var vm = this;
     vm.saProfile = {
         profiles: [],
@@ -49,8 +49,10 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                 }
             }
             SA.new(sa).$promise.then(function (resource) {
+                TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported" , "success", 5000);
                 vm.select = false;
             }).catch(function(response) {
+                TopAlert.add("Sa could not be added", "error", 5000);
             })
         })
     }
