@@ -213,15 +213,40 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
+                ipExists();
             });
         }
     };
+
+    function ipExists() {
+        if($scope.ip != null) {
+            var temp = false;
+            vm.displayedIps.forEach(function(aic) {
+                if($scope.ip.id == aic.id) {
+                    temp = true;
+                } else {
+                    aic.information_packages.forEach(function(ip) {
+                        if($scope.ip.id == ip.id) {
+                            temp = true;
+                        }
+                    })
+                }
+            })
+            if(!temp) {
+                $scope.eventShow = false;
+                $scope.statusShow = false;
+                $scope.filebrowser = false;
+                $scope.requestForm = false;
+                $scope.eventlog = false;
+                $scope.requestEventlog = false;
+            }
+        }
+    }
 
     //Get data for list view
     $scope.getListViewData = function() {
         vm.callServer($scope.tableState);
         $rootScope.$broadcast('load_tags', {})
-
     };
 
     // Validators
@@ -298,7 +323,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.requestEventlog = false;
-            $scope.eventShow = false;
             $scope.filebrowser = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
@@ -313,7 +337,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.requestForm = false;
             $scope.eventlog = false;
             $scope.requestEventlog = false;
-            $scope.eventShow = false;
             $scope.filebrowser = false;
             $scope.edit = false;
             $scope.select = false;
