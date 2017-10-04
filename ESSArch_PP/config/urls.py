@@ -106,6 +106,12 @@ router.register(r'archivist-organizations', ArchivistOrganizationViewSet)
 router.register(r'archival-types', ArchivalTypeViewSet)
 router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
+router.register(r'information-packages', InformationPackageViewSet).register(
+    r'events',
+    EventIPViewSet,
+    base_name='ip-events',
+    parents_query_lookups=['linkingObjectIdentifierValue']
+)
 router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'notifications', NotificationViewSet)

@@ -1028,16 +1028,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         return Response(dip, status.HTTP_201_CREATED)
 
-    @detail_route()
-    def events(self, request, pk=None):
-        ip = self.get_object()
-        events = filters.OrderingFilter().filter_queryset(request, EventIP.objects.filter(linkingObjectIdentifierValue=ip.pk), self)
-        page = self.paginate_queryset(events)
-        if page is not None:
-            serializers = EventIPSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializers.data)
-        serializers = EventIPSerializer(events, many=True, context={'request': request})
-        return Response(serializers.data)
 
     @detail_route()
     def steps(self, request, pk=None):
