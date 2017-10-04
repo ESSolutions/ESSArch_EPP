@@ -84,7 +84,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
         model = InformationPackage
         fields = (
-            'url', 'id', 'label', 'object_identifier_value',
+            'url', 'id', 'label', 'object_identifier_value', 'object_size',
             'package_type', 'responsible', 'create_date',
             'entry_date', 'state', 'status', 'step_state',
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
