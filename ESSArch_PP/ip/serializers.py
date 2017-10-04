@@ -189,6 +189,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 class WorkareaSerializer(serializers.ModelSerializer):
     extracted = serializers.SerializerMethodField()
     packaged = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True, default=serializers.CurrentUserDefault())
 
     def get_extracted(self, obj):
         return os.path.isdir(obj.path)
