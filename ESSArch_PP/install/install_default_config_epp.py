@@ -104,7 +104,7 @@ def installDefaultUsers():
 
     user_sysadmin, created = User.objects.get_or_create(
         username='sysadmin', email='sysadmin@essolutions.se',
-        is_staff=True, is_superuser=True
+        is_staff=True
     )
     if created:
         user_sysadmin.set_password('sysadmin')
@@ -114,25 +114,137 @@ def installDefaultUsers():
     group_admin, _ = Group.objects.get_or_create(name='admin')
     group_sysadmin, _ = Group.objects.get_or_create(name='sysadmin')
 
-    can_add_ip_event = Permission.objects.get(codename='add_eventip')
-    can_change_ip_event = Permission.objects.get(codename='change_eventip')
-    can_delete_ip_event = Permission.objects.get(codename='delete_eventip')
-
-    group_user.permissions.add(can_add_ip_event, can_change_ip_event, can_delete_ip_event)
-
-    permission_list = [
-        'receive', 'preserve', 'view', 'view_tar', 'edit_as_new', 'diff-check',
-        'query',
+    permission_list_user = [
+        ## ---- app: ip ---- model: informationpackage
+        ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
+        ['delete_informationpackage','ip','informationpackage'], # Can delete Information Package (Ingest)
+        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
+        ['preserve','ip','informationpackage'],                        # Can preserve IP (Ingest)
+        ['preserve_dip','ip','informationpackage'],                 # Can preserve DIP (Access)
+        ['get_from_storage','ip','informationpackage'],         # Can get extracted IP from storage (Access)
+        ['get_tar_from_storage','ip','informationpackage'],   # Can get packaged IP from storage (Access)
+        ['get_from_storage_as_new','ip','informationpackage'], # Can get IP "as new" from storage (Access)
+        ['add_to_ingest_workarea','ip','informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
+        ['add_to_ingest_workarea_as_new','ip','informationpackage'],   # Can add IP as new generation to ingest workarea (Ingest)
+        ['diff-check','ip','informationpackage'],                      # Can diff-check IP (?)
+        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
+        ## ---- app: ip ---- model: workarea
+        ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
+        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)        
+        ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
+        ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
+        ## ---- app: ip ---- model: order
+        ['prepare_order','ip','order'],                                        # Can prepare order (Access) 
+        ## ---- app: WorkflowEngine ---- model: processtask
+        #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
+        #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
     ]
 
-    permissions = Permission.objects.filter(
-        codename__in=permission_list, content_type__app_label='ip',
-        content_type__model='informationpackage',
-    )
+    for p in permission_list_user:
+        p_obj = Permission.objects.get(
+                                          codename=p[0], content_type__app_label=p[1],
+                                          content_type__model=p[2],
+                                          )
+        group_user.permissions.add(p_obj)
 
-    for p in permissions:
-        group_user.permissions.add(p)
-        group_admin.permissions.add(p)
+    permission_list_admin = [
+        ## ---- app: ip ---- model: informationpackage
+        ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
+        ['delete_informationpackage','ip','informationpackage'], # Can delete Information Package (Ingest)
+        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
+        ['preserve','ip','informationpackage'],                        # Can preserve IP (Ingest)
+        ['preserve_dip','ip','informationpackage'],                 # Can preserve DIP (Access)
+        ['get_from_storage','ip','informationpackage'],         # Can get extracted IP from storage (Access)
+        ['get_tar_from_storage','ip','informationpackage'],   # Can get packaged IP from storage (Access)
+        ['get_from_storage_as_new','ip','informationpackage'], # Can get IP "as new" from storage (Access)
+        ['add_to_ingest_workarea','ip','informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
+        ['add_to_ingest_workarea_as_new','ip','informationpackage'],   # Can add IP as new generation to ingest workarea (Ingest)
+        ['diff-check','ip','informationpackage'],                      # Can diff-check IP (?)
+        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
+        ## ---- app: ip ---- model: workarea
+        ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
+        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)        
+        ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
+        ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
+        ## ---- app: ip ---- model: order
+        ['prepare_order','ip','order'],                                        # Can prepare order (Access) 
+        ## ---- app: WorkflowEngine ---- model: processtask
+        #['can_undo','WorkflowEngine','processtask'],           # Can undo tasks (other)
+        #['can_retry','WorkflowEngine','processtask'],           # Can retry tasks (other)
+        ## ---- app: profiles ---- model: profile
+        ['add_profile','profiles','profile'],                                  # Can add Profile (Administration)
+        ## ---- app: profiles ---- model: submissionagreement
+        ['add_submissionagreement','profiles','submissionagreement'], # Can add Submission Agreement (Administration)
+        ## ---- app: storage ---- model: storageobject
+        ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
+        ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
+        ['storage_management','storage','storageobject'],   # Storage management (Administration)        
+    ]
+   
+    for p in permission_list_admin:
+        p_obj = Permission.objects.get(
+                                          codename=p[0], content_type__app_label=p[1],
+                                          content_type__model=p[2],
+                                          )        
+        group_admin.permissions.add(p_obj)
+
+    permission_list_sysadmin = [
+        ## ---- app: auth ---- model: group
+        ['add_group','auth','group'],                    # Can add group
+        ['change_group','auth','group'],                    # Can change group
+        ['delete_group','auth','group'],                    # Can delete group
+        ## ---- app: auth ---- model: user
+        ['add_user','auth','user'],                    # Can add user
+        ['change_user','auth','user'],                    # Can change user
+        ['delete_user','auth','user'],                    # Can delete user
+        ## ---- app: configuration ---- model: parameter
+        ['add_parameter','configuration','parameter'],                    # Can add parameter
+        ['change_parameter','configuration','parameter'],                    # Can change parameter
+        ['delete_parameter','configuration','parameter'],                    # Can delete parameter
+        ## ---- app: configuration ---- model: archivepolicy
+        ['add_archivepolicy','configuration','archivepolicy'],                    # Can add archivepolicy
+        ['change_archivepolicy','configuration','archivepolicy'],                    # Can change archivepolicy
+        ['delete_archivepolicy','configuration','archivepolicy'],                    # Can delete archivepolicy
+        ## ---- app: configuration ---- model: path
+        ['add_path','configuration','path'],                    # Can add path
+        ['change_path','configuration','path'],                    # Can change path
+        ['delete_path','configuration','path'],                    # Can delete path
+        ## ---- app: configuration ---- model: eventtype
+        ['add_eventtype','configuration','eventtype'],                    # Can add eventtype
+        ['change_eventtype','configuration','eventtype'],                    # Can change eventtype
+        ['delete_eventtype','configuration','eventtype'],                    # Can delete eventtype        
+        ## ---- app: profiles ---- model: profile
+        ['add_profile','profiles','profile'],                    # Can add profile
+        ['change_profile','profiles','profile'],                    # Can change profile
+        ['delete_profile','profiles','profile'],                    # Can delete profile
+        ## ---- app: profiles ---- model: submissionagreement
+        ['add_submissionagreement','profiles','submissionagreement'],                    # Can add submissionagreement
+        ['change_submissionagreement','profiles','submissionagreement'],                    # Can change submissionagreement
+        ['delete_submissionagreement','profiles','submissionagreement'],                    # Can delete submissionagreement        
+        ## ---- app: storage ---- model: storagemethod
+        ['add_storagemethod','storage','storagemethod'],                    # Can add storagemethod
+        ['change_storagemethod','storage','storagemethod'],                    # Can change storagemethod
+        ['delete_storagemethod','storage','storagemethod'],                    # Can delete storagemethod
+        ## ---- app: storage ---- model: storagetarget
+        ['add_storagetarget','storage','storagetarget'],                    # Can add storagetarget
+        ['change_storagetarget','storage','storagetarget'],                    # Can change storagetarget
+        ['delete_storagetarget','storage','storagetarget'],                    # Can delete storagetarget
+        ## ---- app: storage ---- model: storagemethodtargetrelation
+        ['add_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can add storagemethodtargetrelation
+        ['change_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can change storagemethodtargetrelation
+        ['delete_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can delete storagemethodtargetrelation
+        ## ---- app: storage ---- model: storageobject
+        ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
+        ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
+        ['storage_management','storage','storageobject'],   # Storage management (Administration)        
+    ]
+   
+    for p in permission_list_sysadmin:
+        p_obj = Permission.objects.get(
+                                          codename=p[0], content_type__app_label=p[1],
+                                          content_type__model=p[2],
+                                          )        
+        group_sysadmin.permissions.add(p_obj)
 
     group_user.user_set.add(user_user)
     group_admin.user_set.add(user_admin)
