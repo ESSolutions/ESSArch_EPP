@@ -41,6 +41,8 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
     }
     vm.$onChanges = function() {
         $scope.addEventAlert = null;
+        $scope.ip = vm.ip;
+        vm.getEventlogData();
         if($scope.stCtrl) {
             $scope.stCtrl.pipe();
         }
