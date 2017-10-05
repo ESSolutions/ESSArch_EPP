@@ -33,10 +33,6 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
         return permissions;
     }
 
-    function defineRoles() {
-        PermRoleStore.defineRole('ACCESS_IP', ['ip.get_from_storage', 'ip.preserve']);
-    }
-
     function checkPermissions(permissions) {
         var hasPermissions = false;
         permissions.forEach(function(permission) {

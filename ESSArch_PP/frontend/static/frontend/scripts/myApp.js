@@ -627,7 +627,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     djangoAuth.initialize('/rest-auth', false).then(function(response) {
         $rootScope.auth = response.data;
         myService.getPermissions(response.data.permissions);
-        myService.defineRoles();
         // kick-off router and start the application rendering
         $urlRouter.sync();
         // Also enable router to listen to url changes
