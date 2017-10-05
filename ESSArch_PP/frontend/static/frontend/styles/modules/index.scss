@@ -780,7 +780,15 @@ padding: 0 12px;
 .list-view-buttons .btn {
     margin-left: 10px;
 }
-
+.event-view {
+    .list-view-table {
+        position: relative;
+        overflow-x: auto;
+        thead, tbody {
+            border: 1px solid $border-color;
+        }
+    }
+}
 .enter-profile-name {
     display: flex;
     flex-direction: row;
