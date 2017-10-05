@@ -396,23 +396,6 @@ def installProfileSIP(sa):
             {
                 'type': 'folder',
                 'name': 'content',
-                'children': [
-                    {
-                        'type': 'file',
-                        'name': 'mets_grp',
-                        'use': 'mets_grp',
-                    },
-                    {
-                        'type': 'folder',
-                        'name': 'data',
-                        'children': [],
-                    },
-                    {
-                        'type': 'folder',
-                        'name': 'metadata',
-                        'children': [],
-                    },
-                ]
             },
             {
                 'type': 'folder',

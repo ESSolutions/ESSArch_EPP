@@ -512,100 +512,25 @@
                             ],
                             "-children": [
                                 {
-                                    "-name": "div",
-                                    "-namespace": "mets",
+                                    "-containsFiles": true,
+                                    "-filters": {"href":"metadata/*"},
                                     "-attr": [
                                         {
-                                            "-name": "LABEL",
                                             "#content": [
                                                 {
-                                                    "text": "preservation"
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    "-children": [
-                                        {
-                                            "-containsFiles": true,
-                                            "-filters": {"href": "(metadata/premis.xml|metadata/administrative/premis.xml)"},
-                                            "-attr": [
-                                                {"-name": "ID"},
+                                                    "text": "ID"
+                                                },
                                                 {
-                                                    "-name": "FILEID",
-                                                    "#content": [{"text": "ID"}, {"var": "FID"}],
-                                                    "-req": 1
+                                                    "var": "FID"
                                                 }
                                             ],
-                                            "-children": [],
-                                            "-name": "fptr",
-                                            "-namespace": "mets"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "-name": "div",
-                                    "-namespace": "mets",
-                                    "-attr": [
-                                        {
-                                            "-name": "LABEL",
-                                            "#content": [
-                                                {
-                                                    "text": "descriptive"
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    "-children": [
-                                        {
-                                            "-name": "fptr",
-                                            "-namespace": "mets",
-                                            "-containsFiles": true,
-                                            "-filters": {"href":"metadata/ead.xml"},
-                                            "-attr": [
-                                                {
-                                                    "#content": [
-                                                        {
-                                                            "text": "ID"
-                                                        },
-                                                        {
-                                                            "var": "FID"
-                                                        }
-                                                    ],
-                                                    "-name": "FILEID",
-                                                    "-req": 1
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "-name": "div",
-                            "-namespace": "mets",
-                            "-attr": [
-                                {
-                                    "-name": "LABEL",
-                                    "#content": [
-                                        {
-                                            "text": "schemas"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "-children": [
-                                {
-                                    "-name": "fptr",
-                                    "-namespace": "mets",
-                                    "-containsFiles": true,
-                                    "-filters": {"href":"schemas/*"},
-                                    "-attr": [
-                                        {
                                             "-name": "FILEID",
-                                            "#content": [{"text": "ID"}, {"var": "FID"}],
                                             "-req": 1
                                         }
-                                    ]
+                                    ],
+                                    "-children": [],
+                                    "-name": "fptr",
+                                    "-namespace": "mets"
                                 }
                             ]
                         }
