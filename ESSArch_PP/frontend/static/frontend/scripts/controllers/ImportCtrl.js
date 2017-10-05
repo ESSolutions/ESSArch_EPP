@@ -12,13 +12,25 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
 
     vm.url = null;
 
-    vm.getSaProfiles = function() {
+    vm.getSaProfiles = function () {
+        $scope.error = null;
         var auth = window.btoa(vm.user.username + ":" + vm.user.password);
-        var headers = {"Authorization": "Basic " + auth};
-        $http.get(vm.url + '/api/submission-agreements/', { headers: headers, published: true, params: {pager: "none"}}).then(function(response) {
+        var headers = { "Authorization": "Basic " + auth };
+        $http({
+            method: "GET",
+            url: vm.url + '/api/submission-agreements/',
+            headers: headers,
+            params: {
+                published: true,
+                pager: "none",
+            },
+            noAuth: true
+        }).then(function (response) {
             vm.saProfile.profiles = response.data;
             vm.select = true;
-        });
+        }).catch(function(response) {
+            $scope.error = response.data.detail;
+        })
     }
 
     vm.importSa = function (sa) {

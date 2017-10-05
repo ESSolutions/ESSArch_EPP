@@ -864,11 +864,21 @@ padding: 0 12px;
 }
 .import {
     @include container(10px);
-    display: inline-block;
-    width: 100%;
-    box-shadow: none;
-    margin-top: 5px;
+    margin-top: 10px;
+    width:100%;
+    min-width: 400px;
+    input {
+        width: 33%;
+    }
+    .alert {
+        width: 33%;
+        margin-top: 10px;
+    }
+    .btn-info {
+        margin-top: 5px;
+    }
 }
+
 .data-version-list {
     width: 10%;
     min-width: 50px;
