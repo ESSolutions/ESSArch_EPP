@@ -105,7 +105,6 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
     return {
         changePath: changePath,
         getPermissions: getPermissions,
-        defineRoles: defineRoles,
         hasChild: hasChild,
         getVersionInfo: getVersionInfo,
         getActiveColumns: getActiveColumns,
