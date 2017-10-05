@@ -314,12 +314,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_TRANSFER_PROJECT_ID"
+                            "var": "_PROFILE_TRANSFER_PROJECT_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -338,12 +340,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_SUBMIT_DESCRIPTION_ID"
+                            "var": "_PROFILE_SUBMIT_DESCRIPTION_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -362,12 +366,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_SIP_ID"
+                            "var": "_PROFILE_SIP_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -386,12 +392,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_AIP_ID"
+                            "var": "_PROFILE_AIP_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -410,12 +418,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_DIP_ID"
+                            "var": "_PROFILE_DIP_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -434,12 +444,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_CONTENT_TYPE_ID"
+                            "var": "_PROFILE_CONTENT_TYPE_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -458,12 +470,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_AUTHORITY_INFORMATION_ID"
+                            "var": "_PROFILE_AUTHORITY_INFORMATION_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -482,12 +496,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_ARCHIVAL_DESCRIPTION_ID"
+                            "var": "_PROFILE_ARCHIVAL_DESCRIPTION_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -506,12 +522,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_PRESERVATION_METADATA_ID"
+                            "var": "_PROFILE_PRESERVATION_METADATA_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -530,12 +548,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_DATA_SELECTION_ID"
+                            "var": "_PROFILE_DATA_SELECTION_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -554,12 +574,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_IMPORT_ID"
+                            "var": "_PROFILE_IMPORT_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
@@ -578,12 +600,14 @@
                 {
                     "-name": "altRecordID",
                     "-namespace": "mets",
+                    "-hideEmptyContent": true,
                     "#content": [
                         {
                             "text": "ESSARCH_"
                         },
                         {
-                            "var": "_PROFILE_WORKFLOW_ID"
+                            "var": "_PROFILE_WORKFLOW_ID",
+                            "hide_content_if_missing": true
                         }
                     ],
                     "-attr": [
