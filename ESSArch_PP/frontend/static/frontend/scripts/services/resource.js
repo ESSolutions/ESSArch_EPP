@@ -27,7 +27,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
 	function getEventPage(start, number, pageNumber, params, selected, sort) {
         var sortString = sort.predicate;
         if(sort.predicate == "eventDateTime") {
-            sortString = sortString + ",-id";
+            if(sort.reverse) {
+                sortString = sortString + ",-id";
+            } else {
+                sortString = sortString + ",id";
+            }
         }
         if(sort.reverse) {
             sortString = "-"+sortString;
