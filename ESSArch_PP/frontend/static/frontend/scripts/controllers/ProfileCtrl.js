@@ -204,14 +204,8 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             vm.profileModel = angular.copy(profileIp.data.data);
             vm.dataVersion = profileIp.data_versions[profileIp.data_versions.indexOf(profileIp.data.id)];
             getStructure(row.active);
-            var temp = [];
-            row.active.template.forEach(function (x) {
-                if (!x.templateOptions.disabled) {
-                    temp.push(x);
-                }
-            });
             $scope.profileToSave = row.active;
-            vm.profileFields = temp;
+            vm.profileFields = row.active.template;
             $scope.edit = true;
             $scope.eventlog = true;
         });
