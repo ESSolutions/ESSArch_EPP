@@ -1,5 +1,16 @@
 <div class="body-wrapper">
     <top-alert></top-alert>
+    <div ng-if="disconnected" ng-controller="UtilCtrl"class="top-alert-container">
+        <div class="top-alert error">
+            <div class="alert-text-icons-row">
+                <div class="alert-text" style="border: none;">
+                    {{ disconnected.message }}
+                    <span class="fa fa-lg fa-plug"></span>
+                    <a ng-click="reloadPage()" translate="RETRY_CONNECTION"></a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="header">
     <div class="logo-search-user-admin-wrapper">
         <div class="hamburger" ng-show="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState)">

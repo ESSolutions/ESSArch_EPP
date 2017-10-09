@@ -459,17 +459,27 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     });
 }])
-.config(['$httpProvider', '$windowProvider', function($httpProvider, $windowProvider, $rootScope) {
+.config(['$httpProvider', '$windowProvider', function($httpProvider, $windowProvider) {
     var $window = $windowProvider.$get();
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
-    $httpProvider.interceptors.push(['$q', '$location', function ($q, $location) {
+    $httpProvider.interceptors.push(['$q', '$location', '$rootScope', function ($q, $location, $rootScope) {
         return {
+            'response': function(response) {
+                if($rootScope.disconnected) {
+                    $rootScope.disconnected = null;
+                    $rootScope.$broadcast("reconnected", {detail: "Connection has been restored"});
+                }
+                return response;
+            },
             'responseError': function(response) {
                 if((response.status === 401 || response.status === 403) && !response.config.noAuth) {
                     if ($location.path() != '/login' && $location.path() != ''){
                         $window.location.assign('/');
                     }
+                }
+                if(response.status <= 0) {
+                    $rootScope.$broadcast("disconnected", {detail: "Lost connection to server"});
                 }
                 return $q.reject(response);
             }
@@ -645,7 +655,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     }).catch(function(status) {
         $state.go('login');
     });
-
+    $rootScope.$on('disconnected', function (event, data) {
+        $rootScope.disconnected = {message: data.detail, time: new Date()};
+    });
+    $rootScope.$on('reconnected', function (event, data) {
+        $rootScope.disconnected = null;
+    });
     $rootScope.$on('$stateChangeStart', function(evt, to, params, from) {
         if (to.redirectTo) {
             evt.preventDefault();

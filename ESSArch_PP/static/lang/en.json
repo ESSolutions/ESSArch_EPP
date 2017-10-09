@@ -367,5 +367,9 @@
     "USE_SELECTED_SA_AS_TEMPLATE": "Use selected submission agreement as template",
     "USE_TEMPLATE": "Use template",
     "ERROR_MESSAGE": "Event could not be added",
-    "SEE_MY_IPS": "See own IP's"
+    "SEE_MY_IPS": "See own IP's",
+    "EVENTOUTCOME": "Event outcome",
+    "LINKINGAGENTROLE": "Agent",
+    "EVENTDATETIME": "Event time",
+    "RETRY_CONNECTION": "Retry connection"
 }

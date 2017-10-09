@@ -367,5 +367,9 @@
     "USE_SELECTED_SA_AS_TEMPLATE": "Använd vald leveransöverenskommelse som mall",
     "USE_TEMPLATE": "Använd mall",
     "ERROR_MESSAGE": "Event kunde inte bli tillagt",
-    "SEE_MY_IPS": "Se egna IPn"
+    "SEE_MY_IPS": "Se egna IPn",
+    "EVENTOUTCOME": "Event-resultat",
+    "LINKINGAGENTROLE": "Agent",
+    "EVENTDATETIME": "Event-tid",
+    "RETRY_CONNECTION": "Försök igen"
 }
