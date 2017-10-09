@@ -4,7 +4,7 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
     // Create a unique callback ID to map requests to responses
     var currentCallbackId = 0;
     // Create our websocket object with the address to the websocket
-    var ws = new WebSocket(appConfig.webSocketProtocol + "://" + $window.location.host + "/");
+    var ws = new WebSocket(appConfig.webSocketProtocol + "://" + $window.location.host + "/ws/");
     ws.onopen = function () {
         $rootScope.useWebsocket = true;
     }
