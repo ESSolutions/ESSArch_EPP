@@ -316,6 +316,7 @@ class CacheAIP(DBTask):
         for ip in aip_obj.aic.information_packages.order_by('generation'):
             parsed_files.append({
                 'FName': ip.object_identifier_value + '.tar',
+                'FExtension': 'tar',
                 'FDir': '',
                 'FParentDir': '',
                 'FChecksum': ip.message_digest,
@@ -332,8 +333,7 @@ class CacheAIP(DBTask):
                 'FChecksumType': ip.get_message_digest_algorithm_display(),
                 'FLoctype': 'URL',
                 'FLinkType': 'simple',
-                'FChecksumLib': 'hashlib',
-                'FLocationType': 'URI',
+                'FChecksumLib': 'ESSArch',
                 'FIDType': 'UUID',
             })
 
