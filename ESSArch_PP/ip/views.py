@@ -322,7 +322,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             submission_agreement_locked=True,
         )
 
-        for profile_type in ['aic_description', 'aip', 'aip_description', 'dip']:
+        for profile_type in ['aic_description', 'aip', 'aip_description', 'dip', 'preservation_metadata']:
             profile = getattr(sa, 'profile_%s' % profile_type, None)
 
             if profile is None:
