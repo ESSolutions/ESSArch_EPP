@@ -61,16 +61,9 @@
     <div class="nav-dynamic-wrapper">
         <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState) || ('home.appraisal' | includedByState)" class="shortcut-nav-calendar-wrapper" ng-class="{'active-hamburger': hamburgerActive}">
             <div ng-controller="AngularTreeCtrl" class="navigation" context-menu="navMenuOptions(item)">
-                </br>
+                <br />
                 <p>
-                <treecontrol class="tree-light"
-                             tree-model="tags"
-                             options="treeOptions"
-                             selected-node="vm.selectedTag"
-                             expanded-nodes="expandedNodes"
-                             on-selection="showSelectedNode(node)"
-                             on-node-toggle="onNodeToggle(node)"
-                             >
+                <treecontrol class="tree-light" tree-model="tags" options="treeOptions" selected-node="vm.selectedTag"expanded-nodes="expandedNodes" on-selection="showSelectedNode(node)" on-node-toggle="onNodeToggle(node)">
                              <span context-menu="navMenuItemOptions(item)">{{node.name}}</span>
                 </treecontrol>
                 </p>

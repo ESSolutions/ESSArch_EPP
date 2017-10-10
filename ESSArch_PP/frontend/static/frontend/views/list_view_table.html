@@ -1,7 +1,7 @@
 <div st-table="vm.displayedIps" st-pipe="vm.callServer">
 <div class="search-prepare-wrapper">
     <label for items-per-page></label>
-    <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page"
+    <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" class="form-control items-per-page"
         ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
         popover-popup-delay="500" popover-append-to-body="true"></select>
     <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters}" ng-click="toggleAdvancedFilters()"></span>

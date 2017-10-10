@@ -371,5 +371,7 @@
     "EVENTOUTCOME": "Event-resultat",
     "LINKINGAGENTROLE": "Agent",
     "EVENTDATETIME": "Event-tid",
-    "RETRY_CONNECTION": "Försök igen"
+    "RETRY_CONNECTION": "Försök igen",
+    "EVENTDATETIME_START": "Event-tid start",
+    "EVENTDATETIME_END": "Event-tid slut"
 }

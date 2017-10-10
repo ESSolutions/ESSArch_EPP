@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies) {
+angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http) {
     var vm = this;
     vm.itemsPerPage = $cookies.get('epp-events-per-page') || 10;
     $scope.updateEventsPerPage = function(items) {
@@ -38,6 +38,12 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
     vm.$onInit = function() {
         $scope.ip = vm.ip;
         vm.getEventlogData();
+        $http({
+            method: "OPTIONS",
+            url: appConfig.djangoUrl + "events/"
+        }).then(function(response) {
+            $scope.usedColumns = response.data.filters;
+        })
     }
     vm.$onChanges = function() {
         $scope.addEventAlert = null;
@@ -124,6 +130,10 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
         if(vm.displayed.length == 0) {
             $scope.initLoad = true;
         }
+        var search = "";
+        if(tableState.search.predicateObject) {
+            var search = tableState.search.predicateObject["$"];
+        }
         $scope.stCtrl = ctrl;
         var sorting = tableState.sort;
         var pagination = tableState.pagination;
@@ -131,7 +141,7 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
         var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
         var pageNumber = start/number+1;
 
-        service.getEventPage(start, number, pageNumber, tableState, $scope.selected, sorting).then(function (result) {
+        service.getEventPage(start, number, pageNumber, tableState, $scope.selected, sorting, $scope.columnFilters, search).then(function (result) {
             vm.displayed = result.data;
             tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
             $scope.tableState = tableState;
@@ -139,5 +149,126 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
             $scope.initLoad = false;
         });
     };
+    //advanced filter form data
+    $scope.columnFilters = {};
+    $scope.filterModel = {};
+    $scope.options = {};
+    $scope.fields = [];
+    vm.setupForm = function() {
+        $scope.fields = [];
+        $scope.filterModel = {};
+         for(var key in $scope.usedColumns) {
+             var column = $scope.usedColumns[key];
+             switch(column.type) {
+                 case "ModelChoiceFilter":
+                 case "ChoiceFilter":
+                    $scope.fields.push({
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()),
+                            "labelProp": "display_name",
+                            "valueProp": "value",
+                            "options": column.choices,
+                        },
+                        "type": "select",
+                        "key": key,
+                    })
+                 break;
+                 case "CharFilter":
+                    $scope.fields.push({
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()),
+                            "labelProp": key,
+                            "valueProp": key,
+                        },
+                        "type": "input",
+                        "key": key,
+                    })
+                 break;
+                 case "IsoDateTimeFromToRangeFilter":
+                 $scope.fields.push(
+                    {
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()) + " start",
+                        },
+                        "type": "datepicker",
+                        "key": key + "_0"
+                    }
+                 )
+                 $scope.fields.push(
+                    {
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()) + " end",
+                        },
+                        "type": "datepicker",
+                        "key": key + "_1"
+                    }
+                 )
+                 break;
+             }
+         }
+    }
 
+    //Toggle visibility of advanced filters
+    $scope.toggleAdvancedFilters = function () {
+        if ($scope.showAdvancedFilters) {
+            $scope.showAdvancedFilters = false;
+        } else {
+            if ($scope.fields.length <=0) {
+                vm.setupForm();
+            }
+            $scope.showAdvancedFilters = true;
+        }
+         if ($scope.showAdvancedFilters) {
+             $window.onclick = function (event) {
+                 var clickedElement = $(event.target);
+                 if (!clickedElement) return;
+                 var elementClasses = event.target.classList;
+                 var clickedOnAdvancedFilters = elementClasses.contains('filter-icon') ||
+                 elementClasses.contains('advanced-filters') ||
+                 clickedElement.parents('.advanced-filters').length ||
+                 clickedElement.parents('.button-group').length;
+
+                 if (!clickedOnAdvancedFilters) {
+                     $scope.showAdvancedFilters = !$scope.showAdvancedFilters;
+                     $window.onclick = null;
+                     $scope.$apply();
+                 }
+             }
+         } else {
+             $window.onclick = null;
+         }
+    }
+
+    $scope.clearSearch = function() {
+        delete $scope.tableState.search.predicateObject;
+        $('#event-search-input')[0].value = "";
+        $scope.stCtrl.pipe();
+    }
+
+    $scope.filterActive = function() {
+        var temp = false;
+        for(var key in $scope.columnFilters) {
+            if($scope.columnFilters[key] !== "" && $scope.columnFilters[key] !== null) {
+                temp = true;
+            }
+        }
+        return temp;
+    }
+
+    $scope.submitAdvancedFilters = function() {
+        $scope.columnFilters = angular.copy($scope.filterModel);
+        $scope.stCtrl.pipe();
+    }
+
+    // Click function for request form submit.
+    // Replaced form="vm.requestForm" to work in IE
+    $scope.clickSubmit = function () {
+        if (vm.requestForm.$valid) {
+            $scope.submitRequest($scope.ip, vm.request);
+        }
+    }
 }]);

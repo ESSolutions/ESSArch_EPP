@@ -4,7 +4,11 @@
 a {
     cursor: pointer;
 }
+html {
+    height: 100%;
+}
 body {
+    height: 100%;
     background-color: $body-background;
     margin: 0px auto;
     min-width: 680px;
@@ -354,7 +358,7 @@ body.modal-open[style] {
     height: 100%;
 }
 .dynamic-part {
-    min-height: 605px;
+    height:100%;
     overflow: hidden;
 }
 .sub-menu {
@@ -472,8 +476,9 @@ body.modal-open[style] {
 .global-search {
     width: 400px;
 }
-#items-per-page {
-    width: 100px;
+.items-per-page {
+    width: 100px !important;
+    margin-right: 10px;
 }
 .fa-refresh-animate {
     animation: spin 0.7s infinite linear;
@@ -627,11 +632,12 @@ padding: 0 12px;
 }
 .advanced-filters {
     position: absolute;
+    display: block;
     border-style: solid;
     border-width: 1px;
     border-color: $border-color;
     max-width:400px;
-    max-height:300px;
+    max-height:none;
     overflow-y: auto;
     background-color: white;
     padding: 10px;
@@ -677,6 +683,9 @@ padding: 0 12px;
     &:active {
         border-color: rgba(102, 102, 102, 0.4);
     }
+}
+.filter-active {
+    color: $step-success;
 }
 .blue-border {
     border-color: rgba(102, 102, 102, 0.4);
@@ -786,6 +795,15 @@ padding: 0 12px;
         overflow-x: auto;
         thead, tbody {
             border: 1px solid $border-color;
+        }
+    }
+    .advanced-filters {
+        overflow-y: auto;
+        .formly {
+            max-height: none;
+        }
+        .formly-field {
+            width: 66% !important;
         }
     }
 }
