@@ -69,6 +69,7 @@ def installDefaultParameters():
     dct = {
         'site_name': site_name,
         'medium_location': 'Media_%s' % site_name,
+        'content_location_type': 'AIP',
     }
 
     for key in dct:
