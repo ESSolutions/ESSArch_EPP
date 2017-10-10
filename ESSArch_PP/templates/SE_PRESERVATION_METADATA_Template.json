@@ -32,6 +32,86 @@
         {
             "-name": "object",
             "-namespace": "premis",
+            "-attr": [
+                {
+                  "-name": "type",
+                  "-namespace": "xsi",
+                  "-req": "1",
+                  "#content": [{"text":"premis:file"}]
+                }
+            ],
+            "-children": [
+                {
+                    "-name": "objectIdentifier",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "objectIdentifierType",
+                            "-namespace": "premis",
+                            "#content": [{"var":"_OBJECT_IDENTIFIER_TYPE"}]
+                        },
+                        {
+                            "-name": "objectIdentifierValue",
+                            "-namespace": "premis",
+                            "#content": [{"var":"_OBJID"}]
+                        }
+                    ]
+                },
+                {
+                    "-name": "preservationLevel",
+                    "-namespace": "premis",
+                    "-skipIfNoChildren": true,
+                    "-children": [{
+                        "-name": "preservationLevelValue",
+                        "-namespace": "premis",
+                        "-hideEmptyContent": true,
+                        "#content": [{"var": "preservation_level_value", "default": 0}]
+                    }]
+                },
+                {
+                    "-name": "objectCharacteristics",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "compositionLevel",
+                            "-namespace": "premis",
+                            "#content": [{"var": "composition_level", "default": 0}]
+                        },
+                        {
+                            "-name": "format",
+                            "-namespace": "premis",
+                            "-children": [
+                                {
+                                    "-name": "formatDesignation",
+                                    "-namespace": "premis",
+                                    "-children": [
+                                        {
+                                            "-name": "formatName",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "$transfer_project__container_format"}]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "-name": "storage",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "storageMedium",
+                            "-namespace": "premis",
+                            "#content": [{"var": "storage_medium", "default": "ESSArch"}]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "-name": "object",
+            "-namespace": "premis",
             "-containsFiles": true,
             "-attr": [
                 {
@@ -49,12 +129,12 @@
                         {
                             "-name": "objectIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"var":"FIDType"}]
+                            "#content": [{"var":"_OBJECT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "objectIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"text":"ID"},{"var":"FID"}]
+                            "#content": [{"var":"_OBJID"},{"text": "/"},{"var":"href"}]
                         }
                     ]
                 },
@@ -62,6 +142,11 @@
                     "-name": "objectCharacteristics",
                     "-namespace": "premis",
                     "-children": [
+                        {
+                            "-name": "compositionLevel",
+                            "-namespace": "premis",
+                            "#content": [{"var": "composition_level", "default": 0}]
+                        },
                         {
                             "-name": "fixity",
                             "-namespace": "premis",
@@ -114,16 +199,49 @@
                         {
                             "-name": "contentLocation",
                             "-namespace": "premis",
+                            "-requiredParameters": ["_CONTENT_LOCATION_TYPE"],
                             "-children": [
                                 {
                                     "-name": "contentLocationType",
                                     "-namespace": "premis",
-                                    "#content": [{"var": "FLocationType"}]
+                                    "#content": [{"var": "_CONTENT_LOCATION_TYPE"}]
                                 },
                                 {
                                     "-name": "contentLocationValue",
                                     "-namespace": "premis",
-                                    "#content": [{"text": "file:///"},{"var": "href"}]
+                                    "#content": [{"var": "_OBJID"}]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "-name": "relationship",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "relationshipType",
+                            "-namespace": "premis",
+                            "#content": [{"text": "structural"}]
+                        },
+                        {
+                            "-name": "relationshipSubType",
+                            "-namespace": "premis",
+                            "#content": [{"text": "is part of"}]
+                        },
+                        {
+                            "-name": "relatedObjectIdentifier",
+                            "-namespace": "premis",
+                            "-children": [
+                                {
+                                    "-name": "relatedObjectIdentifierType",
+                                    "-namespace": "premis",
+                                    "#content": [{"var": "_RELATED_OBJECT_IDENTIFIER_TYPE"}]
+                                },
+                                {
+                                    "-name": "relatedObjectIdentifierValue",
+                                    "-namespace": "premis",
+                                    "#content": [{"var": "_OBJID"}]
                                 }
                             ]
                         }
@@ -142,103 +260,24 @@
                         {
                             "-name": "agentIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
+                            "#content": [{"var":"_AGENT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "agentIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"var":"agentnote1"}]
+                            "#content": [{"var":"agent_identifier_value"}]
                         }
                     ]
                 },
                 {
                     "-name": "agentName",
                     "-namespace": "premis",
-                    "#content": [{"var": "_IP_ARCHIVIST_ORGANIZATION"}]
+                    "#content": [{"var": "agent_name"}]
                 },
                 {
                     "-name": "agentType",
                     "-namespace": "premis",
-                    "#content": [{"text": "ORGANIZATION"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ARCHIVIST"}]
-                }
-            ]
-        },
-        {
-            "-name": "agent",
-            "-namespace": "premis",
-            "-children": [
-                {
-                    "-name": "agentIdentifier",
-                    "-namespace": "premis",
-                    "-children": [
-                        {
-                            "-name": "agentIdentifierType",
-                            "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
-                        },
-                        {
-                            "-name": "agentIdentifierValue",
-                            "-namespace": "premis",
-                            "#content": [{"var":"agentnote2"}]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agentName",
-                    "-namespace": "premis",
-                    "#content": [{"var": "agentname2"}]
-                },
-                {
-                    "-name": "agentType",
-                    "-namespace": "premis",
-                    "#content": [{"text": "SOFTWARE"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ARCHIVIST"}]
-                }
-            ]
-        },
-        {
-            "-name": "agent",
-            "-namespace": "premis",
-            "-children": [
-                {
-                    "-name": "agentIdentifier",
-                    "-namespace": "premis",
-                    "-children": [
-                        {
-                            "-name": "agentIdentifierType",
-                            "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
-                        },
-                        {
-                            "-name": "agentIdentifierValue",
-                            "-namespace": "premis",
-                            "#content": [{"var":"agentnote3"}]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agentName",
-                    "-namespace": "premis",
-                    "#content": [{"var": "agentname3"}]
-                },
-                {
-                    "-name": "agentType",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ORGANIZATION"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "CREATOR"}]
+                    "#content": [{"text": "software"}]
                 }
             ]
         }
