@@ -274,13 +274,15 @@ class CacheAIP(DBTask):
 
         aip_desc_profile = aip_obj.get_profile('aip_description')
         filesToCreate = {
-            dstxml: aip_desc_profile.specification
+            dstxml: {
+                'spec': aip_desc_profile.specification,
+                'data': info
+            }
         }
 
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.GenerateXML",
             params={
-                "info": info,
                 "filesToCreate": filesToCreate,
                 "folderToParse": dsttar,
                 "extra_paths_to_parse": [os.path.join(srcdir, 'mets.xml')],
@@ -308,7 +310,10 @@ class CacheAIP(DBTask):
         aic_desc_profile = aip_obj.get_profile('aic_description')
 
         filesToCreate = {
-            aicxml: aic_desc_profile.specification
+            aicxml: {
+                'spec': aic_desc_profile.specification,
+                'data': aicinfo
+            }
         }
 
         parsed_files = []
@@ -340,7 +345,6 @@ class CacheAIP(DBTask):
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.GenerateXML",
             params={
-                "info": aicinfo,
                 "filesToCreate": filesToCreate,
                 "parsed_files": parsed_files,
                 "algorithm": algorithm,

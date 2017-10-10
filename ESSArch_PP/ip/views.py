@@ -513,29 +513,35 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         )
 
         aip_profile = profile_ip_aip.profile
+        aip_profile_data = ip.get_profile_data('aip')
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
 
         filesToCreate = OrderedDict()
-        filesToCreate[mets_path] = aip_profile.specification
+        filesToCreate[mets_path] = {
+            'spec': aip_profile.specification,
+            'data': fill_specification_data(aip_profile_data, ip=ip, sa=sa)
+        }
 
         try:
             profile_ip_premis = ProfileIP.objects.get(ip=ip, profile=sa.profile_preservation_metadata)
             premis_profile = profile_ip_premis.profile
+            premis_profile_data = ip.get_profile_data('preservation_metadata')
         except ProfileIP.DoesNotExist as e:
             pass
         else:
             premis_dir, premis_name = find_destination("preservation_description_file", aip_profile.structure)
             premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
-            filesToCreate[premis_path] = premis_profile.specification
+            filesToCreate[premis_path] = {
+                'spec': premis_profile.specification,
+                'data': fill_specification_data(premis_profile_data, ip=ip, sa=sa)
+            }
 
-        data = fill_specification_data(profile_ip_aip.data.data, ip=ip, sa=sa)
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.GenerateXML',
             params={
                 'filesToCreate': filesToCreate,
-                'info': data,
                 'folderToParse': ip.object_path,
             },
             responsible=request.user,
