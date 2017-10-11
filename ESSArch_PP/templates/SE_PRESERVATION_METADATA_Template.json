@@ -185,6 +185,27 @@
                                             "-name": "formatName",
                                             "-namespace": "premis",
                                             "#content": [{"var": "FFormatName"}]
+                                        },
+                                        {
+                                            "-name": "formatVersion",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "FFormatVersion"}]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "-name": "formatRegistry",
+                                    "-namespace": "premis",
+                                    "-children": [
+                                        {
+                                            "-name": "formatRegistryName",
+                                            "-namespace": "premis",
+                                            "#content": [{"text": "PREMIS"}]
+                                        },
+                                        {
+                                            "-name": "formatRegistryKey",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "FFormatRegistryKey"}]
                                         }
                                     ]
                                 }
