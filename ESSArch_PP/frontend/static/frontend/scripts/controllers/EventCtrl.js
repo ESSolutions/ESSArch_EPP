@@ -191,7 +191,7 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
                     {
                         "templateOptions": {
                             "type": "text",
-                            "label": $translate.instant(key.toUpperCase()) + " start",
+                            "label": $translate.instant(key.toUpperCase()+"_START"),
                         },
                         "type": "datepicker",
                         "key": key + "_0"
@@ -201,7 +201,7 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
                     {
                         "templateOptions": {
                             "type": "text",
-                            "label": $translate.instant(key.toUpperCase()) + " end",
+                            "label": $translate.instant(key.toUpperCase()+"_END"),
                         },
                         "type": "datepicker",
                         "key": key + "_1"
