@@ -65,7 +65,7 @@
                         "-name": "preservationLevelValue",
                         "-namespace": "premis",
                         "-hideEmptyContent": true,
-                        "#content": [{"var": "preservation_level_value", "default": 0}]
+                        "#content": [{"var": "preservation_level_value", "default": "full"}]
                     }]
                 },
                 {
