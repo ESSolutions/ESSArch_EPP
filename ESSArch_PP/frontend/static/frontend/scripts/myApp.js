@@ -121,7 +121,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.ingest.reception"),
+                only: nestedPermissions(Object.resolve("home.ingest.reception", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -137,7 +137,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.ingest.ipApproval"),
+                only: nestedPermissions(Object.resolve("home.ingest.ipApproval", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -153,7 +153,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.ingest.workarea"),
+                only: nestedPermissions(Object.resolve("home.ingest.workarea", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -179,7 +179,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.access.accessIp"),
+                only: nestedPermissions(Object.resolve("home.access.accessIp", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -195,7 +195,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.access.workarea"),
+                only: nestedPermissions(Object.resolve("home.access.workarea", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -212,7 +212,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.access.createDip"),
+                only: nestedPermissions(Object.resolve("home.access.createDip", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -228,7 +228,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.orders"),
+                only: nestedPermissions(Object.resolve("home.orders", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -275,7 +275,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.mediaInformation"),
+                only: nestedPermissions(Object.resolve("home.administration.mediaInformation", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -291,7 +291,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.robotInformation"),
+                only: nestedPermissions(Object.resolve("home.administration.robotInformation", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -307,7 +307,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.queues"),
+                only: nestedPermissions(Object.resolve("home.administration.queues", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -323,7 +323,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.storageMigration"),
+                only: nestedPermissions(Object.resolve("home.administration.storageMigration", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -339,7 +339,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.storageMaintenance"),
+                only: nestedPermissions(Object.resolve("home.administration.storageMaintenance", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -355,7 +355,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.profileManager"),
+                only: nestedPermissions(Object.resolve("home.administration.profileManager", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -371,7 +371,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.profileManager.saEditor"),
+                only: nestedPermissions(Object.resolve("home.administration.profileManager.saEditor", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -387,7 +387,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.profileManager.profileMaker"),
+                only: nestedPermissions(Object.resolve("home.administration.profileManager.profileMaker", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -403,7 +403,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions("home.administration.profileManager.import"),
+                only: nestedPermissions(Object.resolve("home.administration.profileManager.import", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
