@@ -447,9 +447,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         if any(v is True and k in available_validators for k,v in validators.iteritems()):
             validation_step = ProcessStep.objects.create(
-                name="Validate",
-                parent_step=step
+                name="Validate SIP",
+                parent_step_pos=0,
             )
+            step.add_child_steps(validation_step)
 
             if validators.get('validate_xml_file', False):
                 ProcessTask.objects.create(
@@ -497,6 +498,12 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                     processstep=validation_step
                 )
 
+        generate_aip_step = ProcessStep.objects.create(
+            name="Generate AIP",
+            parent_step_pos=10,
+        )
+        pos = 0
+
         ProcessTask.objects.create(
             name='workflow.tasks.ReceiveSIP',
             args=[ip.pk, xmlfile, container, policy_id],
@@ -508,9 +515,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             log=EventIP,
             information_package=ip,
             responsible=self.request.user,
-            processstep=step,
-            processstep_pos=0
+            processstep=generate_aip_step,
+            processstep_pos=pos
         )
+
+        pos += 10
 
         aip_profile = profile_ip_aip.profile
         aip_profile_data = ip.get_profile_data('aip')
@@ -546,9 +555,49 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             },
             responsible=request.user,
             information_package=ip,
-            processstep=step,
-            processstep_pos=3,
+            processstep=generate_aip_step,
+            processstep_pos=pos,
         )
+
+        validate_aip_step = ProcessStep.objects.create(
+            name="Validate AIP",
+            parent_step_pos=20,
+        )
+        pos = 0
+
+        for generated_xmlfile in filesToCreate.keys():
+            ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.ValidateXMLFile",
+                params={
+                    "xml_filename": generated_xmlfile,
+                    "rootdir": ip.object_path,
+                },
+                processstep=validate_aip_step,
+                processstep_pos=pos,
+                information_package=ip,
+                responsible=self.request.user,
+            )
+            pos += 10
+
+            ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
+                params={
+                    "dirname": ip.object_path,
+                    "xmlfile": generated_xmlfile,
+                    "rootdir": ip.object_path,
+                },
+                processstep=validate_aip_step,
+                processstep_pos=pos,
+                information_package=ip,
+                responsible=self.request.user,
+            )
+            pos += 10
+
+        finalize_aip_step = ProcessStep.objects.create(
+            name="Finalize AIP",
+            parent_step_pos=30,
+        )
+        pos = 0
 
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.UpdateIPSizeAndCount",
@@ -556,9 +605,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             log=EventIP,
             information_package=ip,
             responsible=self.request.user,
-            processstep=step,
-            processstep_pos=5,
+            processstep=finalize_aip_step,
+            processstep_pos=pos,
         )
+
+        pos += 10
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.UpdateIPStatus',
@@ -570,9 +621,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             log=EventIP,
             information_package=ip,
             responsible=self.request.user,
-            processstep=step,
-            processstep_pos=10
+            processstep=finalize_aip_step,
+            processstep_pos=pos
         )
+
+        step.add_child_steps(generate_aip_step, validate_aip_step, finalize_aip_step)
 
         step.run()
 
