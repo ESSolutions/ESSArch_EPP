@@ -770,18 +770,88 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
+
     //advanced filter form data
     $scope.columnFilters = {};
-    $scope.options = [];
-    $scope.filterModels = [];
-    $scope.filterFields = [];
+    $scope.filterModel = {};
+    $scope.options = {};
+    $scope.fields = [];
+    vm.setupForm = function() {
+        $scope.fields = [];
+        $scope.filterModel = {};
+        for (var key in $scope.usedColumns) {
+            var column = $scope.usedColumns[key];
+            switch (column.type) {
+                case "ModelChoiceFilter":
+                case "ChoiceFilter":
+                    $scope.fields.push({
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()),
+                            "labelProp": "display_name",
+                            "valueProp": "value",
+                            "options": column.choices,
+                        },
+                        "type": "select",
+                        "key": key,
+                    })
+                    break;
+                case "BooleanFilter":
+                    $scope.fields.push({
+                        "templateOptions": {
+                            "label": $translate.instant(key.toUpperCase()),
+                            "labelProp": key,
+                            "valueProp": key,
+                        },
+                        "type": "checkbox",
+                        "key": key,
+                    })
+                    break;
+                case "ListFilter":
+                case "CharFilter":
+                    $scope.fields.push({
+                        "templateOptions": {
+                            "type": "text",
+                            "label": $translate.instant(key.toUpperCase()),
+                            "labelProp": key,
+                            "valueProp": key,
+                        },
+                        "type": "input",
+                        "key": key,
+                    })
+                    break;
+                case "IsoDateTimeFromToRangeFilter":
+                    $scope.fields.push(
+                        {
+                            "templateOptions": {
+                                "type": "text",
+                                "label": $translate.instant(key.toUpperCase() + "_START"),
+                            },
+                            "type": "datepicker",
+                            "key": key + "_0"
+                        }
+                    )
+                    $scope.fields.push(
+                        {
+                            "templateOptions": {
+                                "type": "text",
+                                "label": $translate.instant(key.toUpperCase() + "_END"),
+                            },
+                            "type": "datepicker",
+                            "key": key + "_1"
+                        }
+                    )
+                    break;
+            }
+        }
+    }
 
     vm.toggleOwnIps = function(filterIps) {
         if(filterIps) {
-            $scope.columnFilters.responsible = $rootScope.auth.username;
+            $scope.filterModel.responsible = $rootScope.auth.username;
         } else {
-            if($scope.columnFilters.responsible == $rootScope.auth.username) {
-                delete $scope.columnFilters.responsible;
+            if($scope.filterModel.responsible == $rootScope.auth.username) {
+                delete $scope.filterModel.responsible;
             }
         }
     }
@@ -791,10 +861,16 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         if ($scope.showAdvancedFilters) {
             $scope.showAdvancedFilters = false;
         } else {
-            if ($scope.filterModels.length === 0) {
-                $scope.initAdvancedFilters();
+            if ($scope.fields.length <=0) {
+                $http({
+                    method: "OPTIONS",
+                    url: appConfig.djangoUrl + "information-packages/"
+                }).then(function(response) {
+                    $scope.usedColumns = response.data.filters;
+                    vm.setupForm();
+                });
             }
-                $scope.showAdvancedFilters = true;
+            $scope.showAdvancedFilters = true;
         }
          if ($scope.showAdvancedFilters) {
              $window.onclick = function (event) {
@@ -817,97 +893,24 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
          }
     }
 
-    //Merge all filter models before fetching IP's
-    $scope.createFilterObject = function () {
-        $scope.filterModels.forEach(function (model) {
-            if(model.filterField !== null) {
-                $scope.columnFilters[model.column] = model.filterField;
+    $scope.clearSearch = function() {
+        delete $scope.tableState.search.predicateObject;
+        $('#search-input')[0].value = "";
+        $scope.getListViewData();
+    }
+
+    $scope.filterActive = function() {
+        var temp = false;
+        for(var key in $scope.columnFilters) {
+            if($scope.columnFilters[key] !== "" && $scope.columnFilters[key] !== null) {
+                temp = true;
             }
-        });
-    }
-
-    //Reset variables for advanced fiters
-    $scope.initAdvancedFilters = function () {
-        $scope.columnFilters = {};
-        $scope.filterModels = [getModelInput()];
-        $scope.filterFields = [];
-    }
-
-    //Removes model on index in filter models
-    $scope.removeForm = function($index) {
-        if($scope.filterModels.length > 1) {
-            delete $scope.columnFilters[$scope.filterModels[$index].column];
-            if($index === 0) {
-                $scope.filterModels[$index] = $scope.filterModels[$index+1];
-                $scope.filterFields.splice($scope.filterFields.indexOf($scope.filterFields[$index])+1, 1);
-                $scope.filterModels.splice($index+1, 1);
-            } else {
-                $scope.filterFields.splice($scope.filterFields.indexOf($scope.filterFields[$index]), 1);
-                $scope.filterModels.splice($index, 1);
-            }
-        } else {
-            $scope.initAdvancedFilters();
         }
+        return temp;
     }
 
-    //Get fields for every one model
-    function getFields($index) {
-        var allowedColumns = ["label", "object_identifier_value", "responsible", "create_date",
-            "object_size", "archival_institution", "archivist_organization", "start_date", "end_date"];
-        var columns = [];
-        angular.copy($rootScope.listViewColumns).forEach(function (column) {
-            if (allowedColumns.includes(column.label)) {
-                column.label_translated = $translate.instant(column.label.toUpperCase());
-                columns.push(column);
-            }
-        });
-        var columnLabel = null;
-        var filterLabel = null;
-
-        if($index === 0) {
-            columnLabel = $translate.instant("COLUMN");
-            filterLabel = $translate.instant("FILTER");
-        }
-        return [
-            {
-                "templateOptions": {
-                    "type": "text",
-                    "label": columnLabel,
-                    "labelProp": "label_translated",
-                    "valueProp": "label",
-                    "options": columns,
-                },
-                "type": "select",
-                "key": "column",
-            },
-            {
-                "templateOptions": {
-                    "label": filterLabel,
-                },
-                "type": "input",
-                "key": "filterField",
-            },
-        ];
-    }
-
-    //Add new field set to field array
-    $scope.addFields = function ($index) {
-        $scope.filterFields.push(new getFields($index));
-    }
-
-    //Get new empty model
-    function getModelInput() {
-        return {
-            column: null,
-            filterField: null
-        }
-    }
-    //Add new row of model and fields (fields are genereated automatically)
-    $scope.addFilterRow = function ($index) {
-        $scope.filterModels.push(getModelInput());
-    }
     $scope.submitAdvancedFilters = function() {
-        $scope.createFilterObject();
+        $scope.columnFilters = angular.copy($scope.filterModel);
         $scope.getListViewData();
     }
 

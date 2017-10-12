@@ -652,7 +652,7 @@ padding: 0 12px;
         flex-direction: row;
         flex-wrap: wrap;
         width: 100%;
-        max-height: 50px;
+        max-height: none;
         justify-content: flex-start;
     }
     .form-group {
@@ -667,7 +667,7 @@ padding: 0 12px;
         margin: 0px !important;
     }
     .formly-field {
-        width: 33% !important;
+        width: 66% !important;
         margin-bottom: 0px !important;
     }
 }
@@ -795,15 +795,6 @@ padding: 0 12px;
         overflow-x: auto;
         thead, tbody {
             border: 1px solid $border-color;
-        }
-    }
-    .advanced-filters {
-        overflow-y: auto;
-        .formly {
-            max-height: none;
-        }
-        .formly-field {
-            width: 66% !important;
         }
     }
 }
