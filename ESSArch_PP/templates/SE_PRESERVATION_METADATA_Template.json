@@ -88,7 +88,7 @@
                                         {
                                             "-name": "formatName",
                                             "-namespace": "premis",
-                                            "#content": [{"var": "$transfer_project__container_format"}]
+                                            "#content": [{"var": "_IP_CONTAINER_FORMAT"}]
                                         }
                                     ]
                                 }
