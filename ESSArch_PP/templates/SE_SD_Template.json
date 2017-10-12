@@ -666,6 +666,18 @@
                     "-namespace": "mets"
                 },
                 {
+                    "#content": [{ "var": "_POLICYID"}],
+                    "-attr": [{"-name": "TYPE", "#content": [{"text": "POLICYID"}]}],
+                    "-name": "altRecordID",
+                    "-namespace": "mets"
+                },
+                {
+                    "#content": [{ "var": "_POLICYNAME"}],
+                    "-attr": [{"-name": "TYPE", "#content": [{"text": "POLICYNAME"}]}],
+                    "-name": "altRecordID",
+                    "-namespace": "mets"
+                },
+                {
                     "#content": [
                         {
                             "var": "_XML_FILENAME"

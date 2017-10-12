@@ -8,7 +8,7 @@
         "ext": "ExtensionMETS"
     },
     "-schemasToPreserve": [
-        "http://xml.ra.se/e-arkiv/METS/version11/CSPackageMETS.xsd",
+        "http://xml.essarch.org/METS/version11/ESSPackageMETS.xsd",
         "http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd",
         "http://xml.ra.se/e-arkiv/xlink/xlink.xsd"
     ],
@@ -18,7 +18,7 @@
             "-name": "schemaLocation",
             "#content": [
                 {
-                    "text": "http://www.loc.gov/METS/ http://xml.ra.se/e-arkiv/METS/version11/CSPackageMETS.xsd ExtensionMETS http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd"
+                    "text": "http://www.loc.gov/METS/ http://xml.essarch.org/METS/version11/ESSPackageMETS.xsd ExtensionMETS http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd"
                 }
             ],
             "-namespace": "xsi"
@@ -162,6 +162,18 @@
                         }
                     ],
                     "-children": [],
+                    "-name": "altRecordID",
+                    "-namespace": "mets"
+                },
+                {
+                    "#content": [{ "var": "_POLICYID"}],
+                    "-attr": [{"-name": "TYPE", "#content": [{"text": "POLICYID"}]}],
+                    "-name": "altRecordID",
+                    "-namespace": "mets"
+                },
+                {
+                    "#content": [{ "var": "_POLICYNAME"}],
+                    "-attr": [{"-name": "TYPE", "#content": [{"text": "POLICYNAME"}]}],
                     "-name": "altRecordID",
                     "-namespace": "mets"
                 },
