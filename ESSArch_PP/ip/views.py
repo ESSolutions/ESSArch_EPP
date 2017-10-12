@@ -529,7 +529,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         filesToCreate = OrderedDict()
         filesToCreate[mets_path] = {
             'spec': aip_profile.specification,
-            'data': fill_specification_data(aip_profile_data, ip=ip, sa=sa)
+            'data': aip_profile_data
         }
 
         try:
@@ -543,7 +543,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
             filesToCreate[premis_path] = {
                 'spec': premis_profile.specification,
-                'data': fill_specification_data(premis_profile_data, ip=ip, sa=sa)
+                'data': premis_profile_data
             }
 
 
