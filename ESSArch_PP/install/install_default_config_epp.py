@@ -279,8 +279,9 @@ def installDefaultArchivePolicies():
     ingest = Path.objects.get(entity='ingest')
 
     ArchivePolicy.objects.update_or_create(
-        policy_name='default',
+        policy_id='1',
         defaults={
+            'policy_name': 'default',
             'cache_storage': cache, 'ingest_path': ingest,
             'receive_extract_sip': True
         }

@@ -161,11 +161,20 @@ def installProfileTransferProject(sa):
                 "templateOptions": {
                     "disabled": True,
                     "type": "text",
-                    "label": "Archive Policy",
+                    "label": "Archive Policy ID",
                 },
                 "type": "input",
-                "defaultValue": "archive policy 1",
-                "key": "archive_policy"
+                "defaultValue": "1",
+                "key": "archive_policy_id"
+            }, {
+                "templateOptions": {
+                    "disabled": True,
+                    "type": "text",
+                    "label": "Archive Policy Name",
+                },
+                "type": "input",
+                "defaultValue": "default",
+                "key": "archive_policy_name"
             }, {
                 'key': 'container_format',
                 'type': 'select',
