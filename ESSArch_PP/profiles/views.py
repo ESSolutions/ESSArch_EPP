@@ -23,9 +23,11 @@
 """
 
 import copy
+import json
 import os
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Prefetch
@@ -35,6 +37,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, permissions, serializers, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ESSArch_Core.configuration.models import (
     Path,
@@ -85,6 +88,12 @@ from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExt
 from rest_framework import viewsets
 
 
+def get_sa_template():
+    path = os.path.join(settings.BASE_DIR, 'templates/SUBMISSION_AGREEMENT.json')
+    with open(path) as json_file:
+        return json.load(json_file)
+
+
 class SubmissionAgreementViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows submission agreements to be viewed or edited.
@@ -111,7 +120,8 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
         if SubmissionAgreement.objects.values_list('published', flat=True).get(pk=pk):
             raise exceptions.ParseError('Submission agreement is already published')
 
-        SubmissionAgreement.objects.filter(pk=pk).update(published=True)
+        template = get_sa_template()
+        SubmissionAgreement.objects.filter(pk=pk).update(published=True, template=template)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(methods=['post'], url_path='include-type')
@@ -228,6 +238,12 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
                 {'status': 'This SA is not connected to the selected IP'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class SubmissionAgreementTemplateView(APIView):
+    def get(self, request):
+        return Response(get_sa_template())
+
 
 class ProfileSAViewSet(viewsets.ModelViewSet):
     queryset = ProfileSA.objects.all()
