@@ -373,5 +373,8 @@
     "EVENTDATETIME": "Event-tid",
     "RETRY_CONNECTION": "Försök igen",
     "EVENTDATETIME_START": "Event-tid start",
-    "EVENTDATETIME_END": "Event-tid slut"
+    "EVENTDATETIME_END": "Event-tid slut",
+    "ARCHIVAL_TYPE": "Arkivtyp",
+    "ARCHIVAL_LOCATION": "Arkivplats",
+    "PACKAGE_TYPE": "Pakettyp"
 }

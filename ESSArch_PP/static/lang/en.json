@@ -373,5 +373,8 @@
     "EVENTDATETIME": "Event time",
     "RETRY_CONNECTION": "Retry connection",
     "EVENTDATETIME_START": "Event time start",
-    "EVENTDATETIME_END": "Event time end"
+    "EVENTDATETIME_END": "Event time end",
+    "ARCHIVAL_TYPE": "Archival type",
+    "ARCHIVAL_LOCATION": "Archival location",
+    "PACKAGE_TYPE": "Package type"
 }
