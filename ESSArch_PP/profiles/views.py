@@ -108,6 +108,9 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def publish(self, request, pk=None):
+        if SubmissionAgreement.objects.values_list('published', flat=True).get(pk=pk):
+            raise exceptions.ParseError('Submission agreement is already published')
+
         SubmissionAgreement.objects.filter(pk=pk).update(published=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
