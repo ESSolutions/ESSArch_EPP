@@ -196,6 +196,7 @@
                                 {
                                     "-name": "formatRegistry",
                                     "-namespace": "premis",
+                                    "-requiredParameters": ["FFormatRegistryKey"],
                                     "-children": [
                                         {
                                             "-name": "formatRegistryName",
