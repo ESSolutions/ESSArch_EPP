@@ -157,7 +157,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $scope.receiveDisabled = true;
     });
     $scope.$on('update_ip', function (event, data) {
+        var temp = angular.copy($scope.ip);
         $scope.ip = data.ip;
+        vm.updateCheckedIp({id: temp.id}, $scope.ip);
     });
     $scope.getArchivePolicies().then(function (result) {
         vm.request.archivePolicy.options = result;

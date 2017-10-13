@@ -376,5 +376,7 @@
     "EVENTDATETIME_END": "Event-tid slut",
     "ARCHIVAL_TYPE": "Arkivtyp",
     "ARCHIVAL_LOCATION": "Arkivplats",
-    "PACKAGE_TYPE": "Pakettyp"
+    "PACKAGE_TYPE": "Pakettyp",
+    "VIEW": "Visa",
+    "EDIT": "Redigera"
 }

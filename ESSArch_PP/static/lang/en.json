@@ -376,5 +376,7 @@
     "EVENTDATETIME_END": "Event time end",
     "ARCHIVAL_TYPE": "Archival type",
     "ARCHIVAL_LOCATION": "Archival location",
-    "PACKAGE_TYPE": "Package type"
+    "PACKAGE_TYPE": "Package type",
+    "VIEW": "View",
+    "EDIT": "Edit"
 }

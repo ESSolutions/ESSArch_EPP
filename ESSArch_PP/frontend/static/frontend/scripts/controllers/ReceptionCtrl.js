@@ -215,8 +215,12 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
     }
 
     vm.updateCheckedIp = function(ip, newIp) {
-        $scope.includedIps[$scope.includedIps.indexOf(ip)] = { id: newIp.id, at_reception: newIp.state == "At reception" }
-        $scope.getListViewData()
+        $scope.includedIps.forEach(function(inc_ip, index, array) {
+            if(inc_ip.id == ip.id) {
+                array[index] = { id: newIp.id, at_reception: newIp.state == "At reception" };
+            }
+        });
+        $scope.getListViewData();
     }
 
     // Remove ip

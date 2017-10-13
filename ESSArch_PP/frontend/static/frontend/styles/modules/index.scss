@@ -907,8 +907,58 @@ padding: 0 12px;
     float: left;
 }
 
+.sa-table {
+    padding: 5px;
+    table {
+        table-layout: fixed;
+        tbody {
+            td {
+                border: none;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+        margin-top: 20px;
+        select {
+            min-width: 150px;
+            max-width: 50%;
+        }
+        .flex-row {
+            select {
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
 .edit-form {
-    width: 100%;
+    table {
+        table-layout: fixed;
+        .flex-row {
+            align-items: center;
+            p {
+                word-break: normal;
+            }
+        }
+        td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            .fa-pencil {
+                padding-right: 2px;
+            }
+        }
+    }
+}
+
+.sa-edit {
+    .formly {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: baseline;
+        padding: 5px;
+        width: 100%;
+    }
 }
 
 .read-only {
