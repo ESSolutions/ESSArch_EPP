@@ -18,13 +18,19 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
             vm.saProfile = null;
             delete sa.id;
             delete sa.url;
+            sa.published = false;
+            sa.name = "";
             $timeout(function() {
                 vm.saModel = sa;
+                vm.saProfiles.push(vm.saModel);
+                vm.saProfile = vm.saModel;
             })
         } else {
             vm.saProfile = null;
             $timeout(function() {
                 vm.saModel = {};
+                vm.saProfiles.push(vm.saModel);
+                vm.saProfile = vm.saModel;
             });
         }
         vm.createNewSa = true;
@@ -166,5 +172,11 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
 
             return field;
         });
+        for(i = 0; i<vm.saFields.length; i++){
+            if(!vm.saFields[i].templateOptions.disabled) {
+                vm.saFields[i].templateOptions.focus = true;
+                break;
+            }
+        };
     });
 });
