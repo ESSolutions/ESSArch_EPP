@@ -201,7 +201,7 @@
                                         {
                                             "-name": "formatRegistryName",
                                             "-namespace": "premis",
-                                            "#content": [{"text": "PREMIS"}]
+                                            "#content": [{"text": "PRONOM"}]
                                         },
                                         {
                                             "-name": "formatRegistryKey",
