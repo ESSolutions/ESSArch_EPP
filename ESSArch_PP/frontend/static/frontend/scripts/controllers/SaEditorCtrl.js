@@ -123,6 +123,12 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
             .$promise.then(function (resource) {
                 SA.query({pager: "none"}).$promise.then(function(resource) {
                     vm.saProfiles = resource;
+                    vm.saProfiles.forEach(function(sa) {
+                        if(sa.id == vm.saProfile.id) {
+                            vm.saProfile = sa;
+                        }
+                    });
+                    vm.chooseSa(vm.saProfile);
                     vm.getProfiles();
                     $scope.edit = false;
                     TopAlert.add("Submission agreement: " + vm.saProfile.name + " has been published!", "success", 5000);
