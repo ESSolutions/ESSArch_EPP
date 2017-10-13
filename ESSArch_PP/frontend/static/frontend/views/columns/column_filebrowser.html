@@ -1,6 +1,16 @@
-<div ng-if="!subrow && (row.responsible.id == auth.id || row.responsible == null) && row.package_type != 1 && row.state !== 'Receiving'">
-    <a ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
+<div ng-if="!('home.ingest.workarea' | isState) && !('home.access.workarea' | isState)">
+    <div ng-if="!subrow && (row.responsible.id == auth.id || row.responsible == null) && row.package_type != 1 && row.state !== 'Receiving'">
+        <a ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
+    </div>
+    <div ng-if="subrow && (subrow.responsible.id == auth.id || subrow.responsible == null)  && row.state !== 'Receiving'">
+        <a ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
+    </div>
 </div>
-<div ng-if="subrow && (subrow.responsible.id == auth.id || subrow.responsible == null)  && row.state !== 'Receiving'">
-    <a ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
+<div ng-if="('home.ingest.workarea' | isState) || ('home.access.workarea' | isState)">
+    <div ng-if="!subrow && (row.workarea.user.id == auth.id || row.workarea.user == null) && row.package_type != 1 && row.state !== 'Receiving'">
+        <a ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
+    </div>
+    <div ng-if="subrow && (subrow.workarea.user.id == auth.id || subrow.workarea.user == null)  && row.state !== 'Receiving'">
+        <a ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
+    </div>
 </div>
