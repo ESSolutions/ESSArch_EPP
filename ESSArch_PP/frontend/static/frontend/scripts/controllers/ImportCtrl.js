@@ -16,6 +16,7 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         $scope.error = null;
         var auth = window.btoa(vm.user.username + ":" + vm.user.password);
         var headers = { "Authorization": "Basic " + auth };
+        vm.url = vm.url.replace(/\/+$/, "");
         $http({
             method: "GET",
             url: vm.url + '/api/submission-agreements/',
