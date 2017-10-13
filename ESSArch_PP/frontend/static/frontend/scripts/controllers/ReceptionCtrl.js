@@ -141,21 +141,196 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
     }
     //Click function for Ip table
     $scope.ipTableClick = function(row) {
-        if($scope.select && $scope.ip.id == row.id){
-            $scope.select = false;
+        $scope.statusShow = false;
+        $scope.eventShow = false;
+        if($scope.edit && $scope.ip.id == row.id){
+            $scope.edit = false;
             $scope.ip = null;
             $rootScope.ip = null;
             $scope.profileEditor = false;
+            $scope.filebrowser = false;
         } else {
-            $scope.profileEditor = true;
-            $scope.select = true;
-            $scope.ip = row;
-            $rootScope.ip = $scope.ip;
-            if($scope.filebrowser && !$scope.ip.url) {
-                $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
+            vm.sdModel = {};
+            if(row.state == "At reception") {
+                $scope.ip = row;
+                $rootScope.ip = row;
+                $scope.buildSdForm(row);
+                $scope.getFileList(row);
+                $scope.edit = true;
+                if($scope.filebrowser && !$scope.ip.url) {
+                    $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
+                }
+            } else {
+                $scope.edit = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
             }
         }
     };
+
+    vm.sdModel = {};
+    vm.sdFields = [
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Start date",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "start_date",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "End date",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "end_date",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Archivist Organization",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "archivist_organization",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Creator",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "creator",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Submitter Organization",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "submitter_organization",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Submitter Individual",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "submitter_individual",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Producer Organization",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "producer_organization",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Producer Individual",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "producer_individual",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "IP owner",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "ip_owner",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "Preservation Organization",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "preservation_organization",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "System Name",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "system_name",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "System Version",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "system_version",
+        },
+        {
+            "templateOptions": {
+                "type": "text",
+                "label": "System Type",
+                "disabled": true
+            },
+            "type": "input",
+            "key": "system_type",
+        }
+    ];
+
+    $scope.buildSdForm = function(ip) {
+        var startDate, endDate;
+        try {
+            startDate = [ip.altrecordids.STARTDATE][0];
+        }
+        catch(err) {
+            console.log("FAIL", err)
+            startDate = "";
+        }
+        try {
+            endDate = ip.altrecordids.STARTDATE[0]
+        }
+        catch(err) {
+            console.log("FAIL", err)
+            endDate = "";
+        }
+        vm.sdModel = {
+            "start_date": startDate,
+            "end_date": endDate,
+            "archivist_organization": ip.archivist_organization.name,
+            "creator": ip.creator_organization,
+            "submitter_organization": ip.submitter_organization,
+            "submitter_individual": ip.submitter_individual,
+            "producer_organization": ip.producer_organization,
+            "producer_individual": ip.producer_individual,
+            "ip_owner": ip.ipowner_organization,
+            "preservation_organization": ip.preservation_organization,
+            "system_name": ip.system_name,
+            "system_version": ip.system_version,
+            "system_type": ip.system_type
+        };
+    };
+    $scope.getFileList = function(ip) {
+        var array = [];
+        var tempElement = {
+            filename: ip.object_path,
+            created: ip.create_date,
+            size: ip.object_size
+        };
+        array.push(tempElement);
+        $scope.fileListCollection = array;
+    }
     $scope.filebrowser = false;
     $scope.filebrowserClick = function (ip) {
         if ($scope.filebrowser && $scope.ip == ip) {
