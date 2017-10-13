@@ -88,16 +88,22 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
 
     vm.saveNewSa = function () {
         var newSa = new SA(vm.saModel);
-        newSa.$save().then(function (resource) {
+        newSa.$save().then(function (savedSa) {
                 vm.createNewSa = false;
                 vm.saProfile = null;
                 vm.saModel = {};
                 $scope.edit = false;
                 SA.query({pager: "none"}).$promise.then(function (resource) {
                     vm.saProfiles = resource;
+                    vm.saProfiles.forEach(function(sa) {
+                        if(sa.id == savedSa.id) {
+                            vm.saProfile = sa;
+                        }
+                    })
+                    vm.chooseSa(vm.saProfile);
                     $anchorScroll();
                 });
-                return resource;
+                return savedSa;
             });
     }
 
