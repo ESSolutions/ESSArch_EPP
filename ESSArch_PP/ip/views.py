@@ -349,6 +349,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
         sa = ip.submission_agreement
+        extra_data = fill_specification_data(ip=ip, sa=sa)
 
         for profile_ip in ProfileIP.objects.filter(ip=ip).iterator():
             try:
@@ -363,6 +364,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                     data = {}
                     for field in profile_ip.profile.template:
                         try:
+                            if field['defaultValue'] in extra_data:
+                                data[field['key']] = extra_data[field['defaultValue']]
+                                continue
+
                             data[field['key']] = field['defaultValue']
                         except KeyError:
                             pass
