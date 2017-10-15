@@ -82,12 +82,10 @@
                         },
                         {
                             "-name": "OTHERROLE",
-                            "-req": 1,
                             "#content": [{"var": "_AGENTS_OTHER_ROLE"}]
                         },
                         {
                             "-name": "OTHERTYPE",
-                            "-req": 1,
                             "#content": [{"var": "_AGENTS_OTHER_TYPE"}]
                         }
                     ],
@@ -108,7 +106,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
-                    "-replaceExisting": ["ROLE", "TYPE", "OTHERROLE", "OTHERTYPE"],
+                    "-replaceExisting": ["ROLE", "TYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "-req": 1,
@@ -134,6 +132,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-replaceExisting": ["ROLE", "TYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
@@ -158,6 +157,7 @@
                     "-name": "agent",
                     "-namespace": "mets",
                     "-requiredParameters": ["creator_individual_name"],
+                    "-replaceExisting": ["ROLE", "TYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
@@ -182,6 +182,7 @@
                     "-name": "agent",
                     "-namespace": "mets",
                     "-requiredParameters": ["creator_software_name"],
+                    "-replaceExisting": ["ROLE", "TYPE", "OTHERTYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
@@ -209,6 +210,7 @@
                     "-name": "agent",
                     "-namespace": "mets",
                     "-requiredParameters": ["preservation_organization_name"],
+                    "-replaceExisting": ["ROLE", "TYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"PRESERVATION"}]
@@ -233,6 +235,7 @@
                     "-name": "agent",
                     "-namespace": "mets",
                     "-requiredParameters": ["preservation_software_name"],
+                    "-replaceExisting": ["ROLE", "TYPE", "OTHERTYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"PRESERVATION"}]
