@@ -863,6 +863,90 @@ def installProfileAIP(sa):
             },
             {
                 "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Individual",
+                },
+                "type": "input",
+                "defaultValue": "_PARAMETER_SITE_NAME",
+                "key": "creator_individual_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Software",
+                    "required": True,
+                },
+                "type": "input",
+                "defaultValue": "ESSArch Preservation Platform",
+                "key": "creator_software_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Creator Software Note",
+                },
+                "type": "input",
+                "defaultValue": "VERSION=3",
+                "key": "creator_software_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Organization",
+                    "required": True,
+                },
+                "type": "input",
+                "defaultValue": "ES Solutions AB",
+                "key": "preservation_organization_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Organization Note",
+                },
+                "type": "input",
+                "defaultValue": "ORG:12345",
+                "key": "preservation_organization_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Software",
+                    "required": True,
+                },
+                "type": "input",
+                "defaultValue": "ESSArch Preservation Platform",
+                "key": "preservation_software_name"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Preservation Software Note",
+                },
+                "type": "input",
+                "defaultValue": "VERSION=3",
+                "key": "preservation_software_note"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Delivery Type",
+                },
+                "type": "input",
+                "defaultValue": "Delivery Type X",
+                "key": "delivery_type"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Delivery Specification",
+                },
+                "type": "input",
+                "defaultValue": "Delivery Specification X",
+                "key": "delivery_specification"
+            },
+            {
+                "templateOptions": {
                     "label": "Allow unknown file types",
                     "options": [
                         {"name": "Yes", "value": True},

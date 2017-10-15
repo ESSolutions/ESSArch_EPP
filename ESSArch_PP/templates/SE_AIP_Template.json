@@ -8,7 +8,7 @@
         "ext": "ExtensionMETS"
     },
     "-schemasToPreserve": [
-        "http://xml.ra.se/e-arkiv/METS/version11/CSPackageMETS.xsd",
+        "http://xml.essarch.org/METS/version11/ESSPackageMETS.xsd",
         "http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd",
         "http://xml.ra.se/e-arkiv/xlink/xlink.xsd"
     ],
@@ -18,7 +18,7 @@
             "-name": "schemaLocation",
             "#content": [
                 {
-                    "text": "http://www.loc.gov/METS/ http://xml.ra.se/e-arkiv/METS/version11/CSPackageMETS.xsd ExtensionMETS http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd"
+                    "text": "http://www.loc.gov/METS/ http://xml.essarch.org/METS/version11/ESSPackageMETS.xsd ExtensionMETS http://xml.ra.se/e-arkiv/METS/version11/CSPackageExtensionMETS.xsd"
                 }
             ],
             "-namespace": "xsi"
@@ -68,6 +68,47 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-foreach": "_AGENTS",
+                    "-attr": [
+                        {
+                            "-name": "ROLE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_ROLE"}]
+                        },
+                        {
+                            "-name": "TYPE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_TYPE"}]
+                        },
+                        {
+                            "-name": "OTHERROLE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_OTHER_ROLE"}]
+                        },
+                        {
+                            "-name": "OTHERTYPE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_OTHER_TYPE"}]
+                        }
+                    ],
+                    "-children": [
+                        {
+                            "-name": "name",
+                            "-namespace": "mets",
+                            "#content": [{"var": "_AGENTS_NAME"}]
+                        },
+                        {
+                            "-name": "note",
+                            "-namespace": "mets",
+                            "-foreach": "_AGENTS_NOTES",
+                            "#content": [{"var": "_AGENTS_NOTE"}]
+                        }
+                    ]
+                },
+                {
+                    "-name": "agent",
+                    "-namespace": "mets",
+                    "-replaceExisting": ["ROLE", "TYPE", "OTHERROLE", "OTHERTYPE"],
                     "-attr": [{
                         "-name": "ROLE",
                         "-req": 1,
@@ -116,6 +157,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-requiredParameters": ["creator_individual_name"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
@@ -139,6 +181,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-requiredParameters": ["creator_software_name"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
@@ -165,6 +208,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-requiredParameters": ["preservation_organization_name"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"PRESERVATION"}]
@@ -188,6 +232,7 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
+                    "-requiredParameters": ["preservation_software_name"],
                     "-attr": [{
                         "-name": "ROLE",
                         "#content": [{"text":"PRESERVATION"}]
@@ -294,14 +339,14 @@
                 {
                     "#content": [
                         {
-                            "var": "project_name"
+                            "var": "_POLICYNAME"
                         }
                     ],
                     "-attr": [
                         {
                             "#content": [
                                 {
-                                    "text": "PROJECTNAME"
+                                    "text": "POLICYNAME"
                                 }
                             ],
                             "-name": "TYPE"
