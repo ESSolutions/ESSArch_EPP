@@ -527,10 +527,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
 
         filesToCreate = OrderedDict()
-        filesToCreate[mets_path] = {
-            'spec': aip_profile.specification,
-            'data': aip_profile_data
-        }
 
         try:
             profile_ip_premis = ProfileIP.objects.get(ip=ip, profile=sa.profile_preservation_metadata)
@@ -546,6 +542,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                 'data': premis_profile_data
             }
 
+        filesToCreate[mets_path] = {
+            'spec': aip_profile.specification,
+            'data': aip_profile_data
+        }
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.GenerateXML',
@@ -579,19 +579,18 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             )
             pos += 10
 
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
-                params={
-                    "dirname": ip.object_path,
-                    "xmlfile": generated_xmlfile,
-                    "rootdir": ip.object_path,
-                },
-                processstep=validate_aip_step,
-                processstep_pos=pos,
-                information_package=ip,
-                responsible=self.request.user,
-            )
-            pos += 10
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
+            params={
+                'dirname': ip.object_path,
+                'xmlfile': mets_path,
+                "rootdir": ip.object_path,
+            },
+            processstep=validate_aip_step,
+            processstep_pos=pos,
+            information_package=ip,
+            responsible=self.request.user,
+        )
 
         finalize_aip_step = ProcessStep.objects.create(
             name="Finalize AIP",
