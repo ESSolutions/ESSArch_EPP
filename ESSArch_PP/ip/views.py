@@ -528,6 +528,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         aip_profile = profile_ip_aip.profile
         aip_profile_data = ip.get_profile_data('aip')
+        aip_profile_data['_AGENTS'] = parsed['_AGENTS']
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
 
