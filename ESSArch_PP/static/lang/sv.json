@@ -378,5 +378,7 @@
     "ARCHIVAL_LOCATION": "Arkivplats",
     "PACKAGE_TYPE": "Pakettyp",
     "VIEW": "Visa",
-    "EDIT": "Redigera"
+    "EDIT": "Redigera",
+    "INCLUDE_PACKAGE_XML": "Inkludera package XML",
+    "INCLUDE_AIC_XML": "Inkludera AIC XML"
 }

@@ -332,7 +332,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     }
 
     $scope.accessIp = function(ip, request) {
-        var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new"};
+        var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new", package_xml: request.package_xml, aic_xml: request.aic_xml};
         Requests.access(ip, data).then(function(response) {
             $scope.requestForm = false;
             $scope.eventlog = false;

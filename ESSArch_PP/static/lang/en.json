@@ -378,5 +378,7 @@
     "ARCHIVAL_LOCATION": "Archival location",
     "PACKAGE_TYPE": "Package type",
     "VIEW": "View",
-    "EDIT": "Edit"
+    "EDIT": "Edit",
+    "INCLUDE_PACKAGE_XML": "Include package XML",
+    "INCLUDE_AIC_XML": "Include AIC XML"
 }

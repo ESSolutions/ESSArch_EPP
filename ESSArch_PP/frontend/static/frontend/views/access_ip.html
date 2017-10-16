@@ -30,6 +30,18 @@
                         </label>
                         <input required class="form-control" ng-model="vm.request.purpose">
                     </div>
+                    <div ng-if="vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new'">
+                        <input type="checkbox" ng-model="vm.request.package_xml">
+                        <label>
+                            {{'INCLUDE_PACKAGE_XML' | translate}}
+                        </label>
+                    </div>
+                    <div ng-if="vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new'">
+                        <input type="checkbox" ng-model="vm.request.aic_xml">
+                        <label>
+                            {{'INCLUDE_AIC_XML' | translate}}
+                        </label>
+                    </div>
                 </div>
             </form>
         </div>
