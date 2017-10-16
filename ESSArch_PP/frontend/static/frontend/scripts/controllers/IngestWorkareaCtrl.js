@@ -80,7 +80,7 @@ angular.module('myApp').controller('IngestWorkareaCtrl', function(WorkareaFiles,
     $scope.filebrowserClick = function (ip) {
         if ($scope.filebrowser && $scope.ip == ip) {
             $scope.filebrowser = false;
-            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow) {
+            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow && !$scope.requestForm && !$scope.filebrowser) {
                 $scope.ip = null;
                 $rootScope.ip = null;
             }
