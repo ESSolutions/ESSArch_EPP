@@ -90,9 +90,10 @@ angular.module('myApp').controller('AccessWorkareaCtrl', function (WorkareaFiles
             }
         } else {
             if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
-                $scope.filebrowser = true;
                 $scope.ip = ip;
                 $rootScope.ip = ip;
+                $scope.previousGridArrays = [];
+                $scope.filebrowser = true;
                 $scope.deckGridInit($scope.ip);
                 if(!$rootScope.flowObjects[$scope.ip.id]) {
                     $scope.createNewFlow($scope.ip);
