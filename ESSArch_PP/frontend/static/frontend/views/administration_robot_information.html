@@ -31,7 +31,7 @@
     </div>
     <div ng-if="select" style="margin-top: 5px;" class="select-sub-edit-eventlog-wrapper">
         <div ng-if="select" id="select-view" class="select-view">
-            <button class="btn btn-info" ng-click="vm.inventoryClick(robot)">{{'INVENTORYROBOTS' | translate}}</button>
+            <button class="btn btn-info" ng-click="vm.inventoryClick(vm.selectedRobot)">{{'INVENTORYROBOTS' | translate}}</button>
             <h4>{{'ROBOTQUEUE' | translate}}</h4>
             <div class="table-container" st-table="vm.robotQueue" st-pipe="getRobotQueue">
                 <div class="search-prepare-wrapper">
@@ -131,43 +131,4 @@
             </div>
         </div>
     </div>
-    <div ng-if="requestForm" class="request-layout">
-            <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(vm.selectedRobot, vm.request)">
-                <div class="request-type">
-                    <div ng-repeat="type in vm.requestTypes">
-                        <input type="radio" ng-model="vm.request.type" value="{{type}}">
-                            <label>
-                            {{type.toUpperCase() | translate}}
-                        </label>
-                    </div>
-                </div>
-                <div class="request-params">
-                <span class="fa fa-times close-request clickable" ng-click="closeRequestForm()"></span>
-                    <div ng-if="vm.request.type == 'inventory' || vm.request.type == 'mount' || vm.request.type == 'unmount' || vm.request.type == 'unmount_force'">
-                        <label>
-                            {{'PURPOSE' | translate}}
-                        </label>
-                        <input required class="form-control" ng-model="vm.request.purpose">
-                    </div>
-                    <div ng-if="vm.request.type == 'mount' && vm.tapeSlot == null">
-                        <label>
-                            {{'STORAGEMEDIUM' | translate}}
-                        </label>
-                        <select required class="form-control" ng-model="vm.request.storageMedium" ng-options="medium.medium_id for medium in vm.storageMediums"></select>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div ng-if="eventlog && (vm.request.type)" class="select-sub-edit-eventlog-wrapper">
-            <div ng-if="eventlog" class="eventlog-view">
-                <form class="eventlog-form">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkBox" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
-                        </label>
-                    </div>
-                    <button type="submit" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
-                </form>
-            </div>
-        </div>
 </div>

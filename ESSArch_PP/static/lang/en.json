@@ -384,5 +384,6 @@
     "PROFILE_EXISTS": "Profile exists",
     "PROFILE_EXISTS_DESC": "Profile with same ID already exists. Would you like to overwrite it?",
     "SA_EXISTS": "Submission agreement exists",
-    "SA_EXISTS_DESC": "Submission agreement with same ID already exists. Would you like to overwrite it?"
+    "SA_EXISTS_DESC": "Submission agreement with same ID already exists. Would you like to overwrite it?",
+    "REQUEST": "Request"
 }

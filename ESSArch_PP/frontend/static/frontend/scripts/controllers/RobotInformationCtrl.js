@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('RobotInformationCtrl', function(StorageMedium, $scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage){
+angular.module('myApp').controller('RobotInformationCtrl', function(StorageMedium, $scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage, $uibModal){
     var vm = this;
     $scope.translate = $translate;
     vm.slotsPerPage = 10;
@@ -35,7 +35,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     vm.tapeSlots = [];
     vm.tapeDrives = [];
     vm.robotQueue = [];
-    vm.storageMediums = [];
+    $scope.storageMediums = [];
     $scope.requestForm = false;
     $scope.eventlog = false;
 
@@ -156,8 +156,6 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
         if($scope.select && vm.selectedRobot.id == robot.id){
             $scope.select = false;
             $scope.edit = false;
-            $scope.eventlog = false;
-            $scope.requestForm = false;
             vm.selectedRobot = null;
         } else {
             vm.selectedRobot = robot;
@@ -170,15 +168,12 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
 
     vm.inventoryClick = function(robot) {
         $scope.initRequestData(["inventory"]);
-        $scope.requestForm = true;
-        $scope.eventlog = true;
+        requestModal(vm.request, robot);
     }
 
     vm.tapeDriveClick = function(tapeDrive) {
         if(tapeDrive == vm.tapeDrive) {
             vm.tapeDrive = null;
-            $scope.eventlog = false;
-            $scope.requestForm = false;
         } else {
             vm.tapeSlot = null;
             vm.tapeDrive = tapeDrive;
@@ -196,12 +191,11 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             }
             if(types.includes("mount")) {
                 vm.getStorageMediumsByState(20).then(function(result) {
-                    vm.storageMediums = result;
+                    $scope.storageMediums = result;
                 });
             }
             $scope.initRequestData(types)
-            $scope.requestForm = true;
-            $scope.eventlog = true;
+            requestModal(vm.request, vm.tapeDrive);
         }
     }
 
@@ -211,8 +205,6 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
         }
         if (tapeSlot == vm.tapeSlot) {
             vm.tapeSlot = null;
-            $scope.eventlog = false;
-            $scope.requestForm = false;
         } else {
             vm.tapeDrive = null;
             vm.tapeSlot = tapeSlot;
@@ -229,8 +221,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
                 }
             }
             $scope.initRequestData(types)
-            $scope.requestForm = true;
-            $scope.eventlog = true;
+            requestModal(vm.request, vm.tapeSlot);
         }
     }
 
@@ -305,6 +296,36 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
         }
     }
 
+    function requestModal(request, object) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/request-modal.html',
+            controller: 'RequestModalInstanceCtrl',
+            scope: $scope,
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        request: request,
+                        types: vm.requestTypes,
+                        object: object
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            if (vm.tapeDrive && data.id == vm.tapeDrive.id) {
+                vm.tapeDrive = null;
+            } else
+            if (vm.tapeSlot && data.id == vm.tapeSlot.id){
+                vm.tapeSlot = null;
+            }
+
+        });
+    }
+
     $scope.closeRequestForm = function() {
         $scope.requestForm = false;
         $scope.eventlog = false;
@@ -332,7 +353,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     // Replaced form="vm.requestForm" to work in IE
     $scope.clickSubmit = function () {
         if (vm.requestForm.$valid) {
-            $scope.submitRequest($scope.ip, vm.request);
+            $scope.submitRequest(vm.selectedRobot, vm.request);
         }
     }
 });
