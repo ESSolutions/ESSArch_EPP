@@ -879,6 +879,14 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if ip.package_type == InformationPackage.AIC:
             raise exceptions.ParseError(detail='AICs cannot be deleted')
 
+        if ip.is_first_generation():
+            if not request.user.has_perm('ip.delete_first_generation'):
+                raise exceptions.PermissionDenied('You do not have permission to delete the first generation of an IP')
+
+        if ip.is_last_generation():
+            if not request.user.has_perm('ip.delete_last_generation'):
+                raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
+
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
 

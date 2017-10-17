@@ -56,6 +56,8 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     workarea = serializers.SerializerMethodField()
     aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
+    first_generation = serializers.SerializerMethodField()
+    last_generation = serializers.SerializerMethodField()
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],
@@ -74,6 +76,12 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         read_only=True,
     )
 
+    def get_first_generation(self, obj):
+        return obj.is_first_generation()
+
+    def get_last_generation(self, obj):
+        return obj.is_last_generation()
+
     def get_workarea(self, obj):
         workarea = obj.workareas.first()
 
@@ -90,6 +98,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
             'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
+            'first_generation', 'last_generation',
         )
         extra_kwargs = {
             'id': {
@@ -109,6 +118,8 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     information_packages = serializers.SerializerMethodField()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
     workarea = serializers.SerializerMethodField()
+    first_generation = serializers.SerializerMethodField()
+    last_generation = serializers.SerializerMethodField()
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -164,6 +175,12 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         read_only=True,
     )
 
+    def get_first_generation(self, obj):
+        return obj.is_first_generation()
+
+    def get_last_generation(self, obj):
+        return obj.is_last_generation()
+
     class Meta:
         model = InformationPackage
         fields = (
@@ -174,6 +191,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archival_type', 'archival_location', 'policy', 'message_digest',
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea',
+            'first_generation', 'last_generation',
         )
         extra_kwargs = {
             'id': {
