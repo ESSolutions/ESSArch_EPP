@@ -320,6 +320,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             generation=0,
             submission_agreement=sa,
             submission_agreement_locked=True,
+            label=parsed.get('label'),
+            entry_date=parsed.get('entry_date'),
+            start_date=parsed.get('start_date'),
+            end_date=parsed.get('end_date'),
         )
 
         for profile_type in ['aic_description', 'aip', 'aip_description', 'dip', 'preservation_metadata']:
@@ -431,11 +435,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         ip.object_path=os.path.join(policy.ingest_path.value, objid)
         ip.policy=policy
-        ip.label=parsed.get('label')
         ip.state='Receiving'
-        ip.entry_date=parsed.get('create_date')
-        ip.start_date=next(iter(parsed['altrecordids'].get('STARTDATE', [])), None)
-        ip.end_date=next(iter(parsed['altrecordids'].get('ENDDATE', [])), None)
         ip.information_class=information_class
         ip.save()
 
