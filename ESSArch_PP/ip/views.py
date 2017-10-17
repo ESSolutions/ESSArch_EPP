@@ -1008,6 +1008,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if not any(v for k, v in data.iteritems() if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
+        if data.get('new') and aip.aic.information_packages.filter(workareas__read_only=False).exists():
+            working_user = aip.aic.information_packages.filter(workareas__read_only=False).first().responsible
+            raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
+
         workarea_type = Workarea.INGEST if aip.state == 'Received' else Workarea.ACCESS
 
         ip_workarea = aip.workareas.filter(user=request.user)
