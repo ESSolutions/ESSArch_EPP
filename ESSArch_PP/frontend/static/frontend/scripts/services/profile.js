@@ -3,6 +3,13 @@ angular.module('myApp').factory('Profile', function ($resource, appConfig) {
     get: {
         method: "GET",
         params: { id: "@id" }
+    },
+    new: {
+        method: "POST"
+    },
+    update: {
+        method: "PUT",
+        params: { id: "@id" }
     }
     });
 })

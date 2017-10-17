@@ -15,6 +15,9 @@ angular.module('myApp').factory('SA', function ($resource, appConfig) {
         save: {
             method: "POST",
         },
+        new: {
+            method: "POST",
+        },
         update: {
             method: "PUT",
             params: { id: "@id" }

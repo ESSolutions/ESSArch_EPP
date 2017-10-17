@@ -380,5 +380,9 @@
     "VIEW": "Visa",
     "EDIT": "Redigera",
     "INCLUDE_PACKAGE_XML": "Inkludera package XML",
-    "INCLUDE_AIC_XML": "Inkludera AIC XML"
+    "INCLUDE_AIC_XML": "Inkludera AIC XML",
+    "PROFILE_EXISTS": "Profil finns redan",
+    "PROFILE_EXISTS_DESC": "Profil med samma ID finns redan. Vill du skriva över den?",
+    "SA_EXISTS": "Leveransöverenskommelse finns redan",
+    "SA_EXISTS_DESC": "Leveransöverenskommelse med samma ID finns redan. Vill du skriva över den?"
 }
