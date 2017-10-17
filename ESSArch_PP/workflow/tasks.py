@@ -452,8 +452,9 @@ class AccessAIP(DBTask):
 
             workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
 
-            new_aip.object_path = dst_dir
-            new_aip.save(update_fields=['object_path'])
+            if new:
+                new_aip.object_path = dst_dir
+                new_aip.save(update_fields=['object_path'])
 
             return str(workarea_obj.pk)
 
