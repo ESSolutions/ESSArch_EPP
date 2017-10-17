@@ -877,10 +877,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         logger.info('Request issued to delete %s %s' % (ip.get_package_type_display(), pk), extra={'user': request.user.pk})
 
         if ip.package_type == InformationPackage.AIC:
-            if ip.information_packages.filter(archived=True).exists():
-                raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
-
-            ip.information_packages.all().delete()
+            raise exceptions.ParseError(detail='AICs cannot be deleted')
 
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
