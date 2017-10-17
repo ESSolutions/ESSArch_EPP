@@ -597,6 +597,22 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             information_package=ip,
             responsible=self.request.user,
         )
+        pos += 10
+
+        if ip.profile_locked('preservation_metadata'):
+            ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.CompareXMLFiles",
+                args=[mets_path, premis_path],
+                params={
+                    "rootdir": ip.object_path,
+                    "compare_checksum": val_integrity,
+                    },
+                processstep=validate_aip_step,
+                processstep_pos=pos,
+                information_package=ip,
+                responsible=self.request.user,
+            )
+            pos += 10
 
         finalize_aip_step = ProcessStep.objects.create(
             name="Finalize AIP",
