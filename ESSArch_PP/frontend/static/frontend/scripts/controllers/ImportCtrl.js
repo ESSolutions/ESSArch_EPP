@@ -88,7 +88,6 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             },
         })
         modalInstance.result.then(function (data) {
-            console.log(data);
         });
     }
     function profileExistsModal(profile) {
@@ -108,7 +107,6 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             },
         })
         modalInstance.result.then(function (data) {
-            console.log(data);
         });
     }
 });
