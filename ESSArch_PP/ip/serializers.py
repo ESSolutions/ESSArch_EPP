@@ -98,7 +98,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
             'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
-            'first_generation', 'last_generation',
+            'first_generation', 'last_generation', 'start_date', 'end_date',
         )
         extra_kwargs = {
             'id': {
@@ -191,7 +191,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archival_type', 'archival_location', 'policy', 'message_digest',
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea',
-            'first_generation', 'last_generation',
+            'first_generation', 'last_generation', 'start_date', 'end_date',
         )
         extra_kwargs = {
             'id': {
