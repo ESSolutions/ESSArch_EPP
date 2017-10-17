@@ -54,6 +54,7 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
 class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
+    package_type_display = serializers.SerializerMethodField()
     workarea = serializers.SerializerMethodField()
     aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
     first_generation = serializers.SerializerMethodField()
@@ -76,6 +77,9 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         read_only=True,
     )
 
+    def get_package_type_display(self, obj):
+        return obj.get_package_type_display()
+
     def get_first_generation(self, obj):
         return obj.is_first_generation()
 
@@ -93,7 +97,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         model = InformationPackage
         fields = (
             'url', 'id', 'label', 'object_identifier_value', 'object_size',
-            'package_type', 'responsible', 'create_date',
+            'package_type', 'package_type_display', 'responsible', 'create_date',
             'entry_date', 'state', 'status', 'step_state',
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
@@ -115,11 +119,15 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
+    package_type_display = serializers.SerializerMethodField()
     information_packages = serializers.SerializerMethodField()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
     workarea = serializers.SerializerMethodField()
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
+
+    def get_package_type_display(self, obj):
+        return obj.get_package_type_display()
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -184,7 +192,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     class Meta:
         model = InformationPackage
         fields = (
-            'url', 'id', 'label', 'object_identifier_value', 'package_type',
+            'url', 'id', 'label', 'object_identifier_value', 'package_type', 'package_type_display',
             'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
             'generation', 'archival_institution', 'archivist_organization',
