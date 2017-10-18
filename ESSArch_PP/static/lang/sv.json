@@ -180,6 +180,7 @@
     "APPROVEDTORECEIVE": "Godkänd för att ta emot",
     "OTHER": "Andra",
     "CREATE_DATE": "Skapad",
+    "ENTRY_DATE": "Datum",
     "OBJECT_IDENTIFIER_VALUE": "ID",
     "OBJECT_SIZE": "Objektstorlek",
     "ARCHIVAL_INSTITUTION": "Arkivinstitution",

@@ -90,6 +90,7 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
             { label: "storage_status", sortString: "archived", template: "static/frontend/views/columns/column_storage_status.html"},
             { label: "filebrowser", sortString: "", template: "static/frontend/views/columns/column_filebrowser.html"},
             { label: "aic", sortString: "aic", template: "static/frontend/views/columns/column_aic.html" },
+            { label: "entry_date", sortString: "entry_date", template: "static/frontend/views/columns/column_entry_date.html" },
         ];
         var activeColumns = [];
         var simpleColumns = allColumns.map(function(a){return a.label});
