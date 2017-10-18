@@ -404,6 +404,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
 
         objid = ip.object_identifier_value
         xmlfile = os.path.join(reception, '%s.xml' % objid)
+        events_xmlfile = os.path.join(reception, '%s_ipevents.xml' % objid)
 
         if not os.path.isfile(xmlfile):
             logger.warn('Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile), extra={'user': request.user.pk})
@@ -518,6 +519,17 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                 'tags': request.data.get('tags', [])
             },
             log=EventIP,
+            information_package=ip,
+            responsible=self.request.user,
+            processstep=generate_aip_step,
+            processstep_pos=pos
+        )
+
+        pos += 10
+
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.ParseEvents",
+            args=[events_xmlfile],
             information_package=ip,
             responsible=self.request.user,
             processstep=generate_aip_step,
