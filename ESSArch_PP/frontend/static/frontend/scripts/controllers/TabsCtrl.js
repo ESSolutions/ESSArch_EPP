@@ -23,12 +23,7 @@
 */
 
 angular.module('myApp').controller('TabsCtrl', function TabsCtrl($state, $scope, $location, $window, myService, $translate, $rootScope, permissionConfig){
-    $rootScope.$on('$translateChangeSuccess', function () {
-        $state.reload()
-    });
-
     $scope.go = function(tab) {
         $state.go(tab.link);
     }
 });
-
