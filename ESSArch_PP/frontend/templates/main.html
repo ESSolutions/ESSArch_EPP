@@ -1,6 +1,6 @@
 <!doctype html>
 <html ng-app="myApp">
-    <head>
+    <head ng-controller="HeadCtrl as vm">
         <meta name="viewport" content="width=680, initial-scale=1">
         <link rel="stylesheet" type="text/css" href="static/frontend/styles/styles.css">
         <style>
@@ -12,7 +12,10 @@
 
         <!--App -->
         <script src="static/frontend/scripts/scripts.min.js"></script>
-        <title>ESSArch Preservation Platform</title>
+        {% verbatim %}
+        <title ng-bind="vm.pageTitle"></title>
+        {% endverbatim %}
+
     </head>
     {% verbatim %}
     <body ui-view>
