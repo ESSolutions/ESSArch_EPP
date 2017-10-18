@@ -22,8 +22,11 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth) {
+angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
     var $ctrl = this;
+    if(data.ip) {
+        $ctrl.ip = data.ip;
+    }
     $ctrl.editMode = false;
     $ctrl.error_messages_old = [];
     $ctrl.error_messages_pw1 = [];

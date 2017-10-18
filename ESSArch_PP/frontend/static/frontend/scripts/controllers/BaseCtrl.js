@@ -764,7 +764,14 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             ariaDescribedBy: 'modal-body',
             templateUrl: 'static/frontend/views/remove-ip-modal.html',
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ipObject,
+                    };
+                }
+            },
         })
         modalInstance.result.then(function (data) {
             $scope.removeIp(ipObject);
