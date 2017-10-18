@@ -386,5 +386,22 @@
     "PROFILE_EXISTS_DESC": "Profil med samma ID finns redan. Vill du skriva över den?",
     "SA_EXISTS": "Leveransöverenskommelse finns redan",
     "SA_EXISTS_DESC": "Leveransöverenskommelse med samma ID finns redan. Vill du skriva över den?",
-    "REQUEST": "Request"
+    "REQUEST": "Request",
+    "OBJECT_IDENTIFIER_VALUE_DESC": "IP-identifierare",
+    "LABEL_DESC": "IP-etikett",
+    "RESPONSIBLE_DESC": "Ansvarig användare för IP",
+    "CREATE_DATE_DESC": "Datum för skapande av IP",
+    "STATE_DESC": "IP-tillstånd",
+    "EVENTS_DESC": "Se events för IP",
+    "STATUS_DESC": "IP-status",
+    "DELETE_DESC": "Radera IP",
+    "OBJECT_SIZE_DESC": "Storlek på IP-objekt",
+    "ARCHIVAL_INSTITUTION_DESC": "Arkivinstitution",
+    "ARCHIVIST_ORGANIZATION_DESC": "Arkivorganisation",
+    "START_DATE_DESC": "Startdatum",
+    "END_DATE_DESC": "Slutdatum",
+    "STORAGE_STATUS_DESC": "Lagringsstatus, cachad eller arkiverad",
+    "FILEBROWSER_DESC": "Bläddra i filer för IP",
+    "AIC_DESC": "AIC för IP",
+    "ENTRY_DATE_DESC": "Datum för skapande av original-SIP"
 }
