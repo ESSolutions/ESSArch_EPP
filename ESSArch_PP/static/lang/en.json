@@ -406,5 +406,7 @@
     "FILEBROWSER_DESC": "Browse files in IP",
     "AIC_DESC": "AIC for IP",
     "ENTRY_DATE_DESC": "Date of creation of original SIP",
-    "IP_DELETE": "IP's to be deleted"
+    "IP_DELETE": "IP's to be deleted",
+    "VERSIONINFO": "Version info",
+    "USERSETTINGS": "User settings"
 }

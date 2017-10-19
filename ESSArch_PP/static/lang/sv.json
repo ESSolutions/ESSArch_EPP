@@ -406,5 +406,7 @@
     "FILEBROWSER_DESC": "Bläddra i filer för IP",
     "AIC_DESC": "AIC för IP",
     "ENTRY_DATE_DESC": "Datum för skapande av original-SIP",
-    "IP_DELETE": "IP'n som kommer at tas bort"
+    "IP_DELETE": "IP'n som kommer at tas bort",
+    "VERSIONINFO": "Version-info",
+    "USERSETTINGS": "Användarinställningar"
 }
