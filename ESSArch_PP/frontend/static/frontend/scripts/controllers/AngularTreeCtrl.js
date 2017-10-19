@@ -143,7 +143,10 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(T
             templateUrl: 'static/frontend/views/add_tag_modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
             $scope.addTag(tag, data, isRoot);
