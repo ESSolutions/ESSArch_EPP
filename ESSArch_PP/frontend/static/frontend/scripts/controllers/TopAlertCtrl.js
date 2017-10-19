@@ -70,7 +70,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                     data: { seen: true }
                 }).then(function(response) {
                     alert.seen = true;
-                    $rootScope.unseenNotifications -= 1;
+                    if($rootScope.unseenNotifications > 0) {
+                        $rootScope.unseenNotifications -= 1;
+                    }
                 }).catch(function(response) {});
             } else if(!alert.id) {
                 alert.seen = true;
