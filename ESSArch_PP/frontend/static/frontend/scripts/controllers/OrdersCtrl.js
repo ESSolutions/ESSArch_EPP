@@ -86,7 +86,10 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             templateUrl: 'static/frontend/views/new-order-modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
             $scope.prepareOrder(data.label);

@@ -447,7 +447,10 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             templateUrl: 'static/frontend/views/prepare-dip-modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function(data) {
             $scope.prepareDip(data.label, data.objectIdentifierValue, data.orders);

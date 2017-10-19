@@ -24,7 +24,7 @@
 
 angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
     var $ctrl = this;
-    if(data.ip) {
+    if(data && data.ip) {
         $ctrl.ip = data.ip;
     }
     $ctrl.editMode = false;
