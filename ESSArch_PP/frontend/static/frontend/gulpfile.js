@@ -66,6 +66,7 @@ var jsVendorFiles = [
         'node_modules/angular-translate-loader-static-files/angular-translate-loader-static-files.js',
         'node_modules/angular-sanitize/angular-sanitize.js',
         'node_modules/angular-bootstrap-contextmenu/contextMenu.js',
+        'node_modules/angular-websocket/dist/angular-websocket.js',
         'node_modules/ui-select/dist/select.js',
         'node_modules/bootstrap/dist/js/bootstrap.js',
         'node_modules/@flowjs/ng-flow/dist/ng-flow-standalone.js',

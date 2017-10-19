@@ -1,21 +1,22 @@
-angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig, $http, $window) {
+angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig, $http, $window, $websocket) {
     // Keep all pending requests here until they get responses
     var callbacks = {};
     // Create a unique callback ID to map requests to responses
     var currentCallbackId = 0;
     // Create our websocket object with the address to the websocket
-    var ws = new WebSocket(appConfig.webSocketProtocol + "://" + $window.location.host + "/ws/");
-    ws.onopen = function () {
+    var ws = $websocket(appConfig.webSocketProtocol + "://" + $window.location.host + "/ws/", null, { reconnectIfNotNormalClose: true });
+
+    ws.onOpen(function () {
         $rootScope.useWebsocket = true;
-    }
+    });
 
-    ws.onclose = function () {
+    ws.onClose(function () {
         $rootScope.useWebsocket = false;
-    }
+    });
 
-    ws.onmessage = function (message) {
+    ws.onMessage(function (message) {
         listener(message.data);
-    }
+    });
 
     function listener(data) {
         var messageObj = JSON.parse(data);
