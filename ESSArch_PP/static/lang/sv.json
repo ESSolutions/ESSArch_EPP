@@ -408,5 +408,6 @@
     "ENTRY_DATE_DESC": "Datum för skapande av original-SIP",
     "IP_DELETE": "IP'n som kommer at tas bort",
     "VERSIONINFO": "Version-info",
-    "USERSETTINGS": "Användarinställningar"
+    "USERSETTINGS": "Användarinställningar",
+    "CREATE_TEMPLATE": "Skapa template"
 }

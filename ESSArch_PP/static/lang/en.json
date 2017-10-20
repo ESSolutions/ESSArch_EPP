@@ -408,5 +408,6 @@
     "ENTRY_DATE_DESC": "Date of creation of original SIP",
     "IP_DELETE": "IP's to be deleted",
     "VERSIONINFO": "Version info",
-    "USERSETTINGS": "User settings"
+    "USERSETTINGS": "User settings",
+    "CREATE_TEMPLATE": "Create template"
 }
