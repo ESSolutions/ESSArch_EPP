@@ -717,7 +717,10 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             scope: $scope,
             size: 'lg',
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
         }, function () {
@@ -733,7 +736,10 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             templateUrl: 'static/frontend/views/task_info_modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         });
         modalInstance.result.then(function (data, $ctrl) {
         }, function () {
@@ -749,7 +755,10 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             templateUrl: 'static/frontend/views/step_info_modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         });
         modalInstance.result.then(function (data, $ctrl) {
         }, function () {
