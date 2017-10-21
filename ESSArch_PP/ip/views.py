@@ -1022,7 +1022,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if not any(v for k, v in data.iteritems() if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
-        if data.get('new') and aip.new_version_in_progress is not None:
+        if data.get('new') and aip.new_version_in_progress() is not None:
             working_user = aip.new_version_in_progress().ip.responsible
             raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
 
