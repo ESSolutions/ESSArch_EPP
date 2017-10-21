@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 """
 
-from django.db.models import OuterRef, Subquery, Prefetch, Q, F, Min, Count
+from django.db.models import OuterRef, Subquery, Prefetch, Q, F, Min, Count, Case, When, Value, IntegerField, BooleanField, Min, Max
 
 from django_filters import rest_framework as filters
 from django_filters.constants import EMPTY_VALUES
@@ -94,6 +94,24 @@ class InformationPackageFilter(filters.FilterSet):
         else:
             field = 'information_packages'
 
+        information_packages = information_packages.select_related('responsible').prefetch_related('workareas', 'steps')
+
+        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+        information_packages = information_packages.annotate(
+            first_generation=Case(
+               When(generation=Subquery(inner.values('min_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            ),
+            last_generation=Case(
+               When(generation=Subquery(inner.values('max_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            )
+        )
+
         return qs.prefetch_related(Prefetch(field, information_packages))
 
     @property
@@ -141,7 +159,7 @@ class WorkareaFilter(InformationPackageFilter):
 
     def prefetch_information_packages(self, qs):
         user = getattr(self.request, 'user', None)
-        information_packages = InformationPackage.objects.all()
+        information_packages = InformationPackage.objects.select_related('responsible').prefetch_related('steps').all()
 
         if user is not None:
             information_packages = information_packages.filter(workareas__user=user)

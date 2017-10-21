@@ -2,6 +2,8 @@ from _version import get_versions
 
 import os
 
+from django.db.models import F, Q, OuterRef, Subquery, Case, When, Value, IntegerField, BooleanField, Min, Max
+
 from rest_framework import exceptions, filters, serializers
 
 from ESSArch_Core.configuration.models import EventType
@@ -81,9 +83,15 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return obj.get_package_type_display()
 
     def get_first_generation(self, obj):
+        if hasattr(obj, 'first_generation'):
+            return obj.first_generation
+
         return obj.is_first_generation()
 
     def get_last_generation(self, obj):
+        if hasattr(obj, 'last_generation'):
+            return obj.last_generation
+
         return obj.is_last_generation()
 
     def get_workarea(self, obj):
@@ -147,6 +155,22 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             view.search_fields = ip_search_fields
             related = self.search_filter.filter_queryset(request, related, view)
 
+        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+        related = related.annotate(
+            first_generation=Case(
+               When(generation=Subquery(inner.values('min_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            ),
+            last_generation=Case(
+               When(generation=Subquery(inner.values('max_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            )
+        )
+
         return InformationPackageSerializer(related, many=True, context={'request': request}).data
 
     def get_workarea(self, obj):
@@ -173,9 +197,15 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     )
 
     def get_first_generation(self, obj):
+        if hasattr(obj, 'first_generation'):
+            return obj.first_generation
+
         return obj.is_first_generation()
 
     def get_last_generation(self, obj):
+        if hasattr(obj, 'last_generation'):
+            return obj.last_generation
+
         return obj.is_last_generation()
 
     class Meta:

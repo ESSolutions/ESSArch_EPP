@@ -40,7 +40,7 @@ from operator import itemgetter
 from celery import states as celery_states
 
 from django.core.exceptions import ValidationError
-from django.db.models import F, Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery, Case, When, Value, IntegerField, BooleanField, Min, Max
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -829,7 +829,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     """
     API endpoint that allows information packages to be viewed or edited.
     """
-    queryset = InformationPackage.objects.exclude(workareas__read_only=False).prefetch_related('steps')
+    queryset = InformationPackage.objects.exclude(workareas__read_only=False).select_related('responsible').prefetch_related('steps')
     filter_class = InformationPackageFilter
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -842,10 +842,25 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
+        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+
+        self.queryset = self.queryset.annotate(
+            first_generation=Case(
+               When(generation=Subquery(inner.values('min_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            ),
+            last_generation=Case(
+               When(generation=Subquery(inner.values('max_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            )
+        )
 
         if self.action == 'list':
             if view_type == 'ip':
-                inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
                 return self.queryset.exclude(
                     package_type=InformationPackage.AIC,
                 ).filter(
@@ -862,7 +877,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 ),
                 aic__isnull=True,
             ).distinct()
-            #.exclude(information_packages__workareas__read_only=False)
 
         return self.queryset
 
@@ -1206,11 +1220,27 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
 
 class WorkareaViewSet(InformationPackageViewSet):
-    queryset = InformationPackage.objects.all()
+    queryset = InformationPackage.objects.select_related('responsible').all()
     filter_class = WorkareaFilter
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
+        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+
+        self.queryset = self.queryset.annotate(
+            first_generation=Case(
+               When(generation=Subquery(inner.values('min_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            ),
+            last_generation=Case(
+               When(generation=Subquery(inner.values('max_gen')[:1]),
+                    then=Value(1)),
+               default=Value(0),
+               output_field=BooleanField()
+            )
+        )
 
         if self.action == 'list':
             if view_type == 'ip':
@@ -1221,7 +1251,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                         Q(workareas__user=self.request.user) |
                         Q(aic__information_packages__workareas__user=self.request.user)
                     ),
-                    Q(aic__information_packages__generation__gt=F('generation'))
+                    generation=Subquery(inner.values('generation')[:1]),
                 ).distinct()
 
             return self.queryset.filter(
