@@ -82,11 +82,11 @@
                         },
                         {
                             "-name": "OTHERROLE",
-                            "#content": [{"var": "_AGENTS_OTHER_ROLE"}]
+                            "#content": [{"var": "_AGENTS_OTHERROLE"}]
                         },
                         {
                             "-name": "OTHERTYPE",
-                            "#content": [{"var": "_AGENTS_OTHER_TYPE"}]
+                            "#content": [{"var": "_AGENTS_OTHERTYPE"}]
                         }
                     ],
                     "-children": [
