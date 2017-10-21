@@ -23,7 +23,7 @@ from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from configuration.serializers import ArchivePolicySerializer
-from ip.filters import InformationPackageFilter
+from ip.filters import ip_search_fields, InformationPackageFilter
 
 VERSION = get_versions()['version']
 
@@ -126,39 +126,28 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
 
+    search_filter = filters.SearchFilter()
+
     def get_package_type_display(self, obj):
         return obj.get_package_type_display()
 
     def get_information_packages(self, obj):
         request = self.context['request']
         view = self.context.get('view')
-
-        if view is None or not hasattr(view, 'search_fields'):
-            return obj.related_ips()
-
         view_type = request.query_params.get('view_type', 'aic')
 
-        related = obj.related_ips()
+        if view_type == 'ip':
+            related = obj.aic.information_packages
+        else:
+            related = obj.information_packages
 
-        qp = request.query_params.copy()
-        qp.__setitem__('view_type', 'self')
+        related = related.order_by('generation')
 
-        related = InformationPackageFilter(qp, queryset=related).qs
+        if view is not None or not getattr(view, 'search_fields', ''):
+            view.search_fields = ip_search_fields
+            related = self.search_filter.filter_queryset(request, related, view)
 
-        search_filter = filters.SearchFilter()
-
-        # do not need to check on IPs related to the related IPs
-        view.search_fields = [
-            s for s in view.search_fields
-            if not s.startswith('aic__information_packages__') and
-            not s.startswith('information_packages__')
-        ]
-        related = search_filter.filter_queryset(request, related, view)
-
-        ips = InformationPackageSerializer(
-            related, many=True, context={'request': request}
-        )
-        return ips.data
+        return InformationPackageSerializer(related, many=True, context={'request': request}).data
 
     def get_workarea(self, obj):
         workarea = obj.workareas.first()

@@ -40,7 +40,7 @@ from operator import itemgetter
 from celery import states as celery_states
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import F, Q, OuterRef, Subquery
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -99,11 +99,13 @@ from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
 from ESSArch_Core.pagination import LinkHeaderPagination
 
 from ip.filters import (
+    get_ip_search_fields,
     ArchivalInstitutionFilter,
     ArchivistOrganizationFilter,
     ArchivalTypeFilter,
     ArchivalLocationFilter,
     InformationPackageFilter,
+    WorkareaFilter,
 )
 from ip.serializers import (
     ArchivalInstitutionSerializer,
@@ -827,7 +829,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     """
     API endpoint that allows information packages to be viewed or edited.
     """
-    queryset = InformationPackage.objects.all()
+    queryset = InformationPackage.objects.exclude(workareas__read_only=False).prefetch_related('steps')
     filter_class = InformationPackageFilter
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -836,31 +838,31 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         'label', 'responsible', 'create_date', 'state',
         'id', 'object_identifier_value',
     )
-    search_fields = (
-        'object_identifier_value','aic__information_packages__object_identifier_value','information_packages__object_identifier_value',
-        'label','aic__information_packages__label','information_packages__label',
-        'responsible__first_name','aic__information_packages__responsible__first_name','information_packages__responsible__first_name',
-        'responsible__last_name','aic__information_packages__responsible__last_name','information_packages__responsible__last_name',
-        'responsible__username','aic__information_packages__responsible__username','information_packages__responsible__username',
-        'state','aic__information_packages__state','information_packages__state',
-        'submission_agreement__name','aic__information_packages__submission_agreement__name','information_packages__submission_agreement__name',
-        'start_date','aic__information_packages__start_date','information_packages__start_date',
-        'end_date','aic__information_packages__end_date','information_packages__end_date',
-    )
+    search_fields = get_ip_search_fields()
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
 
         if self.action == 'list':
             if view_type == 'ip':
+                inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
                 return self.queryset.exclude(
                     package_type=InformationPackage.AIC,
                 ).filter(
-                    Q(package_type=InformationPackage.AIP, generation=0) |
-                    ~Q(package_type=InformationPackage.AIP)
-                )
-
-            return self.queryset.filter(aic__isnull=True)
+                    Q(
+                        Q(aic__information_packages__workareas=None) |
+                        Q(aic__information_packages__workareas__read_only=True)
+                    ),
+                    generation=Subquery(inner.values('generation')[:1]),
+                ).distinct()
+            return self.queryset.filter(
+                Q(
+                    Q(information_packages__workareas=None) |
+                    Q(information_packages__workareas__read_only=True)
+                ),
+                aic__isnull=True,
+            ).distinct()
+            #.exclude(information_packages__workareas__read_only=False)
 
         return self.queryset
 
@@ -1020,8 +1022,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if not any(v for k, v in data.iteritems() if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
-        if data.get('new') and aip.aic.information_packages.filter(workareas__read_only=False).exists():
-            working_user = aip.aic.information_packages.filter(workareas__read_only=False).first().responsible
+        if data.get('new') and aip.new_version_in_progress is not None:
+            working_user = aip.new_version_in_progress().ip.responsible
             raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
 
         workarea_type = Workarea.INGEST if aip.state == 'Received' else Workarea.ACCESS
@@ -1203,19 +1205,40 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         })
 
 
-class WorkareaViewSet(viewsets.ModelViewSet):
-    queryset = Workarea.objects.all()
-    serializer_class = WorkareaSerializer
-    http_method_names = ['delete', 'get', 'head']
+class WorkareaViewSet(InformationPackageViewSet):
+    queryset = InformationPackage.objects.all()
+    filter_class = WorkareaFilter
+
+    def get_queryset(self):
+        view_type = self.request.query_params.get('view_type', 'aic')
+
+        if self.action == 'list':
+            if view_type == 'ip':
+                return self.queryset.exclude(
+                    package_type=InformationPackage.AIC
+                ).filter(
+                    Q(
+                        Q(workareas__user=self.request.user) |
+                        Q(aic__information_packages__workareas__user=self.request.user)
+                    ),
+                    Q(aic__information_packages__generation__gt=F('generation'))
+                ).distinct()
+
+            return self.queryset.filter(
+                aic__isnull=True,
+                information_packages__workareas__user=self.request.user,
+            ).distinct()
+
+        return self.queryset.filter(responsible=self.request.user)
 
     def destroy(self, request, pk=None, **kwargs):
-        workarea = self.get_object()
+        workarea = self.get_object().workarea
+        workarea.delete()
 
         if not workarea.read_only:
             workarea.ip.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
 
-        return super(WorkareaViewSet, self).destroy(request, pk, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class WorkareaFilesViewSet(viewsets.ViewSet):

@@ -159,7 +159,7 @@ router.register(r'tags', TagViewSet, base_name='tags').register(
 
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
-router.register(r'workareas', WorkareaViewSet)
+router.register(r'workareas', WorkareaViewSet, base_name='workarea')
 router.register(r'workarea-files', WorkareaFilesViewSet, base_name='workarea-files')
 
 router.register(r'storage-objects', StorageObjectViewSet)
