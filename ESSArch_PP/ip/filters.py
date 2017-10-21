@@ -137,7 +137,7 @@ class InformationPackageFilter(filters.FilterSet):
         'archival_institution', 'archivist_organization']
 
 class WorkareaFilter(InformationPackageFilter):
-    workarea = ListFilter(name='workareas__type', method='filter_workarea')
+    type = ListFilter(name='workareas__type', method='filter_workarea')
 
     def prefetch_information_packages(self, qs):
         user = getattr(self.request, 'user', None)
@@ -160,7 +160,7 @@ class WorkareaFilter(InformationPackageFilter):
 
     class Meta:
         model = InformationPackage
-        fields = InformationPackageFilter.Meta.fields + ['workarea']
+        fields = InformationPackageFilter.Meta.fields + ['type']
 
 
 class ArchivalInstitutionFilter(filters.FilterSet):
