@@ -33,91 +33,54 @@ import shutil
 import tarfile
 import uuid
 import zipfile
-
 from collections import OrderedDict
 from operator import itemgetter
 
 from celery import states as celery_states
-
 from django.core.exceptions import ValidationError
-from django.db.models import F, Q, OuterRef, Subquery, Case, When, Value, IntegerField, BooleanField, Min, Max
+from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Q,
+                              Subquery, Value, When)
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 from lxml import etree
-
 from natsort import natsorted
-
 from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-from ESSArch_Core.configuration.models import (
-    ArchivePolicy,
-    Path,
-)
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.validation import validate_checksum
-from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
-    ArchivistOrganization,
-    ArchivalType,
-    ArchivalLocation,
-    InformationPackage,
-    Order,
-    EventIP,
-    Workarea,
-)
-from ESSArch_Core.ip.permissions import (
-    CanDeleteIP,
-    CanUnlockProfile,
-    IsOrderResponsibleOrAdmin,
-    IsResponsibleOrReadOnly
-)
-from ESSArch_Core.ip.serializers import EventIPSerializer
-from ESSArch_Core.profiles.models import (
-    Profile,
-    ProfileIP,
-    ProfileIPData,
-    SubmissionAgreement,
-)
+from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
+                                    ArchivalType, ArchivistOrganization,
+                                    EventIP, InformationPackage, Order,
+                                    Workarea)
+from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
+                                         IsOrderResponsibleOrAdmin,
+                                         IsResponsibleOrReadOnly)
+from ESSArch_Core.pagination import LinkHeaderPagination
+from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
+                                          SubmissionAgreement)
 from ESSArch_Core.profiles.utils import fill_specification_data
-from ESSArch_Core.util import (
-    find_destination,
-    generate_file_response,
-    get_files_and_dirs,
-    get_tree_size_and_count,
-    in_directory,
-    mkdir_p,
-    parse_content_range_header,
-    timestamp_to_datetime,
-)
+from ESSArch_Core.util import (find_destination, generate_file_response,
+                               get_files_and_dirs, get_tree_size_and_count,
+                               in_directory, mkdir_p,
+                               parse_content_range_header,
+                               timestamp_to_datetime)
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
-from ESSArch_Core.pagination import LinkHeaderPagination
-
-from ip.filters import (
-    get_ip_search_fields,
-    ArchivalInstitutionFilter,
-    ArchivistOrganizationFilter,
-    ArchivalTypeFilter,
-    ArchivalLocationFilter,
-    InformationPackageFilter,
-    WorkareaFilter,
-)
-from ip.serializers import (
-    ArchivalInstitutionSerializer,
-    ArchivistOrganizationSerializer,
-    ArchivalTypeSerializer,
-    ArchivalLocationSerializer,
-    InformationPackageSerializer,
-    InformationPackageDetailSerializer,
-    NestedInformationPackageSerializer,
-    OrderSerializer,
-    WorkareaSerializer,
-)
+from ip.filters import (ArchivalInstitutionFilter, ArchivalLocationFilter,
+                        ArchivalTypeFilter, ArchivistOrganizationFilter,
+                        InformationPackageFilter, WorkareaFilter,
+                        get_ip_search_fields)
+from ip.serializers import (ArchivalInstitutionSerializer,
+                            ArchivalLocationSerializer, ArchivalTypeSerializer,
+                            ArchivistOrganizationSerializer,
+                            InformationPackageDetailSerializer,
+                            InformationPackageSerializer,
+                            NestedInformationPackageSerializer,
+                            OrderSerializer, WorkareaSerializer)
 
 
 class ArchivalInstitutionViewSet(viewsets.ModelViewSet):
@@ -418,7 +381,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % container)
 
-        container_type = os.path.splitext(os.path.basename(container))[1]
+        os.path.splitext(os.path.basename(container))[1]
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
 
         policy_id = request.data.get('archive_policy')

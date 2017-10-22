@@ -22,23 +22,16 @@
     Email - essarch@essolutions.se
 """
 
-from django.db.models import OuterRef, Subquery, Prefetch, Q, F, Min, Count, Case, When, Value, IntegerField, BooleanField, Min, Max
-
+from django.db.models import (BooleanField, Case, Count, F, IntegerField, Max,
+                              Min, OuterRef, Prefetch, Q, Subquery, Value,
+                              When)
 from django_filters import rest_framework as filters
-from django_filters.constants import EMPTY_VALUES
-
 from rest_framework import exceptions
 
 from ESSArch_Core.filters import ListFilter
-
-from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
-    ArchivistOrganization,
-    ArchivalType,
-    ArchivalLocation,
-    InformationPackage,
-    Workarea,
-)
+from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
+                                    ArchivalType, ArchivistOrganization,
+                                    InformationPackage, Workarea)
 
 ip_search_fields = (
     'object_identifier_value', 'label', 'responsible__first_name',
@@ -117,7 +110,7 @@ class InformationPackageFilter(filters.FilterSet):
     @property
     def qs(self):
         already_prefetched = hasattr(self, '_qs')
-        qs = super(InformationPackageFilter, self).qs
+        super(InformationPackageFilter, self).qs
 
         if self.recursive and self.is_bound and not already_prefetched:
             self._qs = self.prefetch_information_packages(self._qs)

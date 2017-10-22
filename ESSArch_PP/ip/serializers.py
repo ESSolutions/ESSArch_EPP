@@ -1,31 +1,19 @@
-from _version import get_versions
-
 import os
 
-from django.db.models import F, Q, OuterRef, Subquery, Case, When, Value, IntegerField, BooleanField, Min, Max
+from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Subquery,
+                              Value, When)
+from rest_framework import filters, serializers
 
-from rest_framework import exceptions, filters, serializers
-
-from ESSArch_Core.configuration.models import EventType
-
-from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
-    ArchivistOrganization,
-    ArchivalType,
-    ArchivalLocation,
-    EventIP,
-    InformationPackage,
-    Order,
-    Workarea,
-)
-
-from ESSArch_Core.profiles.models import SubmissionAgreement
-
-from ESSArch_Core.auth.serializers import UserSerializer
-from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
-
+from _version import get_versions
 from configuration.serializers import ArchivePolicySerializer
-from ip.filters import ip_search_fields, InformationPackageFilter
+from ESSArch_Core.auth.serializers import UserSerializer
+from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
+                                    ArchivalType, ArchivistOrganization,
+                                    EventIP, InformationPackage, Order,
+                                    Workarea)
+from ESSArch_Core.profiles.models import SubmissionAgreement
+from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
+from ip.filters import ip_search_fields
 
 VERSION = get_versions()['version']
 
