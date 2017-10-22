@@ -792,7 +792,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     """
     API endpoint that allows information packages to be viewed or edited.
     """
-    queryset = InformationPackage.objects.exclude(workareas__read_only=False).select_related('responsible').prefetch_related('steps')
+    queryset = InformationPackage.objects.select_related('responsible').prefetch_related('steps')
     filter_class = InformationPackageFilter
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
@@ -823,6 +823,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         )
 
         if self.action == 'list':
+            self.queryset = self.queryset.exclude(workareas__read_only=False)
             if view_type == 'ip':
                 return self.queryset.exclude(
                     package_type=InformationPackage.AIC,
