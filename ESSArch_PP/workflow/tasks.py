@@ -889,7 +889,7 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
-            msg = 'IP preserved to %s' % ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True))
+            msg = '%s preserved to %s' % (ip.object_identifier_value, ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True)))
             agent = entries.first().user.username
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
