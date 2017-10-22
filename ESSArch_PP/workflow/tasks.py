@@ -55,6 +55,7 @@ import requests
 from scandir import walk
 
 from ESSArch_Core import tasks
+from ESSArch_Core.auth.models import Notification
 from ESSArch_Core.configuration.models import ArchivePolicy, Path, Parameter
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.fixity.checksum import calculate_checksum
@@ -892,6 +893,7 @@ class PollIOQueue(DBTask):
             agent = entries.first().user.username
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
+            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=entries.first().user)
 
             # if we preserved directly from workarea then we need to delete that workarea object
             ip.workareas.all().delete()
