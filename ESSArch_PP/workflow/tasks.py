@@ -452,6 +452,7 @@ class AccessAIP(DBTask):
             ).run().get()
 
             workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
+            Notification.objects.create(message="%s is now in workarea" % new_aip.object_identifier_value, level=logging.INFO, user_id=self.responsible)
 
             if new:
                 new_aip.object_path = dst_dir
@@ -611,6 +612,7 @@ class PollAccessQueue(DBTask):
             os.remove(dst_tar)
 
         Workarea.objects.create(ip=entry.new_ip, user=entry.user, type=Workarea.ACCESS, read_only=not entry.new)
+        Notification.objects.create(message="%s is now in workarea" % entry.new_ip.object_identifier_value, level=logging.INFO, user=entry.user)
 
         if entry.new:
             entry.new_ip.object_path = dst_dir
