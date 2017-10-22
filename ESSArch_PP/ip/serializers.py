@@ -117,6 +117,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     package_type_display = serializers.SerializerMethodField()
     information_packages = serializers.SerializerMethodField()
+    aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
     workarea = serializers.SerializerMethodField()
     first_generation = serializers.SerializerMethodField()
