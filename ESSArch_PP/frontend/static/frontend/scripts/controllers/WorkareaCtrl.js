@@ -39,21 +39,20 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
                 $scope.removeIp(ip);
             });
         } else {
-            Workarea.delete({
-                id: ipObject.workarea.id
-            }).$promise.then(function() {
-                $scope.edit = false;
-                $scope.select = false;
-                $scope.eventlog = false;
-                $scope.eventShow = false;
-                $scope.statusShow = false;
-                $scope.filebrowser = false;
-                $scope.requestForm = false;
-                if(vm.displayedIps.length == 0) {
-                    $state.reload();
-                }
-                $scope.getListViewData();
-            });
+            $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea.id + "/")
+                .then(function () {
+                    $scope.edit = false;
+                    $scope.select = false;
+                    $scope.eventlog = false;
+                    $scope.eventShow = false;
+                    $scope.statusShow = false;
+                    $scope.filebrowser = false;
+                    $scope.requestForm = false;
+                    if (vm.displayedIps.length == 0) {
+                        $state.reload();
+                    }
+                    $scope.getListViewData();
+                });
         }
     }
 
