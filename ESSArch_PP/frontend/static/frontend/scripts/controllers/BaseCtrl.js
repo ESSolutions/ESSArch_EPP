@@ -72,6 +72,9 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         $interval.cancel(listViewInterval);
     });
 
+    $rootScope.$on('REFRESH_LIST_VIEW', function (event, data) {
+        $scope.getListViewData();
+    });
     var stateInterval;
     //If status view is visible, start update interval
     $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {

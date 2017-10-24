@@ -26,6 +26,7 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
             level: messageObj.level,
             count: messageObj.unseen_count
         });
+        $rootScope.$broadcast('REFRESH_LIST_VIEW', {});
         // If an object exists with callback_id in our callbacks object, resolve it
         if (callbacks.hasOwnProperty(messageObj.callback_id)) {
             $rootScope.$apply(callbacks[messageObj.callback_id].cb.resolve(messageObj.data));
