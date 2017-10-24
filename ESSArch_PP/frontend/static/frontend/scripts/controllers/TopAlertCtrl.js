@@ -57,7 +57,6 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.showAlert = function() {
         if(vm.alerts.length >0) {
             vm.visible = true;
-            vm.setSeen([vm.alerts[0]]);
         }
     }
 
@@ -91,6 +90,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 vm.backendAlerts.splice(vm.backendAlerts.indexOf(alert), 1);
                 vm.alerts.splice(vm.alerts.indexOf(alert), 1);
                 if (vm.alerts.length == 0) {
+                    vm.updateUnseen(0);
+                }
+                if (vm.alerts.length == 0 && vm.showAlerts) {
                     vm.showAlerts = false;
                 } else {
                 if(vm.alerts.length < 7) {
@@ -102,7 +104,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         } else {
             vm.frontendAlerts.splice(vm.frontendAlerts.indexOf(alert), 1);
             vm.alerts.splice(vm.alerts.indexOf(alert), 1);
-            if (vm.alerts.length == 0) {
+            if (vm.alerts.length == 0 && vm.showAlerts) {
                 vm.showAlerts = false;
             } else {
                 if(vm.alerts.length < 7) {
@@ -133,6 +135,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.clearAll = function() {
         TopAlert.deleteAll().then(function(response) {
             vm.visible = false;
+            vm.showAlerts = false;
             vm.alerts = [];
             vm.backendAlerts = [];
             vm.frontendAlerts = [];
@@ -143,9 +146,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.toggleAlerts = function() {
         if(vm.alerts.length > 0) {
             vm.showAlerts = !vm.showAlerts;
-        }
-        if(vm.showAlerts) {
-            vm.setSeen(vm.alerts.slice(0, 5));
+            if(vm.showAlerts) {
+                vm.setSeen(vm.alerts.slice(0, 5));
+            }
         }
     }
 
@@ -168,6 +171,8 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
         if (time) {
             timer = vm.setTimer(alert, time);
+        } else {
+            timer = vm.setTimer(alert, 5000);
         }
         vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
             return new Date(b.time_created) - new Date(a.time_created);
@@ -181,10 +186,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
      */
     vm.setTimer = function (alert, time) {
         return $timeout(function () {
-            if (vm.visible && !vm.showAlerts) {
-                vm.visible = false;
+            if (vm.visible && !vm.showAlerts && vm.alerts[0] == alert) {
+                vm.hideAlert();
             }
-            vm.removeAlert(alert);
             if(vm.showAlerts) {
                 vm.setSeen(vm.alerts.slice(0,5));
             }
@@ -193,18 +197,23 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
     // Listen for show/hide events
     $rootScope.$on('add_top_alert', function (event, data) {
-        vm.addAlert(data.id, data.message, data.level, data.time, data.seen);
+        vm.addAlert(data.id, data.message, data.level, data.time, true);
     });
     $rootScope.$on('add_unseen_top_alert', function (event, data) {
-        vm.updateUnseen(data.unseen_count);
+        vm.updateUnseen(data.count);
         vm.addAlert(data.id, data.message, data.level, data.time, false);
+        if(vm.showAlerts) {
+            vm.setSeen(vm.alerts.slice(0,5));
+        }
     });
     $rootScope.$on('show_top_alert', function (event, data) {
-        vm.showAlert();
-        $timeout(function() {
-            vm.showAlerts = true;
-            vm.setSeen(vm.alerts.slice(0, 5));
-        }, 300);
+        if(vm.alerts.length > 0) {
+            vm.showAlert();
+            $timeout(function() {
+                vm.showAlerts = true;
+                vm.setSeen(vm.alerts.slice(0, 5));
+            }, 300);
+        }
     });
     $rootScope.$on('hide_top_alert', function (event, data) {
         vm.hideAlert();
