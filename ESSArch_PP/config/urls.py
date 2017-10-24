@@ -45,7 +45,7 @@ from ESSArch_Core.configuration.views import (
     SysInfoView,
 )
 
-from ESSArch_Core.ip.views import EventIPViewSet
+from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
 
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 
@@ -62,7 +62,6 @@ from ip.views import (
     InformationPackageReceptionViewSet,
     OrderViewSet,
     WorkareaViewSet,
-    WorkareaEntryViewSet,
     WorkareaFilesViewSet,
 )
 

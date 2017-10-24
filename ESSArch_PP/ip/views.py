@@ -80,7 +80,7 @@ from ip.serializers import (ArchivalInstitutionSerializer,
                             InformationPackageDetailSerializer,
                             InformationPackageSerializer,
                             NestedInformationPackageSerializer,
-                            OrderSerializer, WorkareaSerializer)
+                            OrderSerializer)
 
 
 class ArchivalInstitutionViewSet(viewsets.ModelViewSet):
@@ -1224,21 +1224,6 @@ class WorkareaViewSet(InformationPackageViewSet):
             ).distinct()
 
         return self.queryset.filter(responsible=self.request.user)
-
-
-class WorkareaEntryViewSet(viewsets.ModelViewSet):
-    queryset = Workarea.objects.all()
-    serializer_class = WorkareaSerializer
-    http_method_names = ['delete', 'get', 'head']
-
-    def destroy(self, request, pk=None, **kwargs):
-        workarea = self.get_object()
-
-        if not workarea.read_only:
-            workarea.ip.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return super(WorkareaViewSet, self).destroy(request, pk, **kwargs)
 
 
 class WorkareaFilesViewSet(viewsets.ViewSet):
