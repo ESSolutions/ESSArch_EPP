@@ -602,7 +602,7 @@
                 {
                     "#content": [
                         {
-                            "var": "startdate"
+                            "var": "start_date"
                         }
                     ],
                     "-attr": [
@@ -623,7 +623,7 @@
                 {
                     "#content": [
                         {
-                            "var": "enddate"
+                            "var": "end_date"
                         }
                     ],
                     "-attr": [

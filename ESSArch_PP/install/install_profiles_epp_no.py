@@ -245,7 +245,7 @@ def installProfileSubmitDescription(sa):
                     "label": "Start Date"
                 },
                 "type": "datepicker",
-                "key": "startdate"
+                "key": "start_date"
             },
             {
                 "templateOptions": {
@@ -253,7 +253,7 @@ def installProfileSubmitDescription(sa):
                     "label": "End Date"
                 },
                 "type": "datepicker",
-                "key": "enddate"
+                "key": "end_date"
             },
             {
                 "templateOptions": {
@@ -348,8 +348,8 @@ def installProfileSubmitDescription(sa):
         'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_SD_Template.json')).read()),
         'specification_data': {
             "profile": "my profile",
-            "startdate": "2016-11-10",
-            "enddate": "2016-12-20",
+            "start_date": "2016-11-10",
+            "end_date": "2016-12-20",
             "creator": "the creator",
             "submitter_organization": "the submitter organization",
             "submitter_individual": "the submitter individual",

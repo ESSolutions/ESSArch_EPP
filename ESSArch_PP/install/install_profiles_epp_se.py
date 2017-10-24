@@ -257,7 +257,7 @@ def installProfileSubmitDescription(sa):
                 },
                 "type": "datepicker",
                 "defaultValue": "2016-11-10",
-                "key": "startdate"
+                "key": "start_date"
             },
             {
                 "templateOptions": {
@@ -266,7 +266,7 @@ def installProfileSubmitDescription(sa):
                 },
                 "type": "datepicker",
                 "defaultValue": "2016-12-20",
-                "key": "enddate"
+                "key": "end_date"
             },
             {
                 "templateOptions": {
