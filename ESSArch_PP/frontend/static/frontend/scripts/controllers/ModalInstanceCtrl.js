@@ -195,6 +195,8 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     });
     $scope.getArchivePolicies().then(function (result) {
         vm.request.archivePolicy.options = result;
+        vm.request.archivePolicy.value = $scope.ip.policy;
+        vm.request.informationClass = $scope.ip.policy ? $scope.ip.policy.information_class : null;
         $scope.getTags().then(function (result) {
             vm.request.tags.options = result;
             $scope.requestForm = true;

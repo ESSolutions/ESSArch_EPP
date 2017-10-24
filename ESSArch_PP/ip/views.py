@@ -277,6 +277,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         except (ValueError, SubmissionAgreement.DoesNotExist) as e:
             raise exceptions.ParseError(detail=e.message)
 
+        parsed_policy = parsed.get('altrecordids', {}).get('POLICYID', [None])[0]
+
+        try:
+            policy = ArchivePolicy.objects.get(policy_id=parsed_policy)
+        except (ValueError, ArchivePolicy.DoesNotExist) as e:
+            policy = None
+
         ip = InformationPackage.objects.create(
             object_identifier_value=pk,
             package_type=InformationPackage.AIP,
@@ -285,6 +292,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             generation=0,
             submission_agreement=sa,
             submission_agreement_locked=True,
+            policy=policy,
             label=parsed.get('label'),
             entry_date=parsed.get('entry_date'),
             start_date=parsed.get('start_date'),
