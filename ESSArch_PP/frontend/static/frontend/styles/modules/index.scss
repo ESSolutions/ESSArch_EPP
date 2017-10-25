@@ -174,11 +174,12 @@ body.modal-open[style] {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 250px;
+    min-width: 200px;
     height: 100%;
 }
 .tasks-icons > .fa {
     margin-right: 2px;
+    margin-left: 2px;
     cursor: pointer;
 }
 
