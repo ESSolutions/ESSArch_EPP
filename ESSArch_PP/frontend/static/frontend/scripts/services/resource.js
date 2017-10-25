@@ -64,7 +64,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
 	}
     //Get data for IP table
     function getIpPage(start, number, pageNumber, params, sort, search, state, expandedAics, columnFilters, archived, workarea) {
-        var viewType = $window.sessionStorage["view-type"] || 'aic';
+        if($rootScope.auth.ip_list_view_type) {
+            var viewType = $rootScope.auth.ip_list_view_type || 'aic';
+        } else {
+            var viewType = 'aic';
+        }
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
@@ -88,7 +92,11 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
     }
 
     function getWorkareaIps(workarea, start, number, pageNumber, params, sort, search, expandedAics, columnFilters) {
-        var viewType = $window.sessionStorage["view-type"] || 'aic';
+        if($rootScope.auth.ip_list_view_type) {
+            var viewType = $rootScope.auth.ip_list_view_type || 'aic';
+        } else {
+            var viewType = 'aic';
+        }
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;

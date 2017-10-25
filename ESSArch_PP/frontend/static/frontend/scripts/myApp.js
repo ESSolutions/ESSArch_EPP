@@ -641,7 +641,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         $urlRouter.sync();
         // Also enable router to listen to url changes
         $urlRouter.listen();
-        $window.sessionStorage.setItem("view-type", response.data.ip_list_view_type);
         $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
         $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
             if (toState.name === 'login') {

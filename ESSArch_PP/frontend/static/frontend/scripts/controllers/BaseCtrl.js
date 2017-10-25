@@ -41,7 +41,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $scope.ip = null;
     $rootScope.ip = null;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
-    vm.ipViewType = $cookies.get('ip-view-type') || 1;
     vm.archived = false;
 
     // Init request form
