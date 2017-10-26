@@ -896,21 +896,32 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         self.check_object_permissions(request, ip)
         path = ip.object_path
 
-        try:
-            shutil.rmtree(path)
-        except OSError as e:
-            if e.errno == errno.ENOTDIR:
-                no_ext = os.path.splitext(path)[0]
+        if os.path.isdir(path):
+            t = ProcessTask.objects.create(
+                name='ESSArch_Core.tasks.DeleteFiles',
+                params={'path': path},
+                eager=False,
+                responsible=request.user,
+                information_package=ip,
+            )
+            t.run()
+        else:
+            no_ext = os.path.splitext(path)[0]
+            step = ProcessStep.objects.create(
+                name="Delete files",
+                eager=False,
+            )
 
-                for fl in glob.glob(no_ext + "*"):
-                    try:
-                        os.remove(fl)
-                    except:
-                        raise
-            elif e.errno == errno.ENOENT:
-                pass
-            else:
-                raise
+            for fl in glob.glob(no_ext + "*"):
+                t = ProcessTask.objects.create(
+                    name='ESSArch_Core.tasks.DeleteFiles',
+                    params={'path': fl},
+                    processstep=step,
+                    responsible=request.user,
+                )
+                t.run()
+
+            step.run()
 
         return super(InformationPackageViewSet, self).destroy(request, pk=pk)
 
