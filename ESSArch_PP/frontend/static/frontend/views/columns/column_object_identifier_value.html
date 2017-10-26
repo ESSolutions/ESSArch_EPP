@@ -17,7 +17,9 @@
 <div ng-if="subrow">
     <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(subrow)" style="padding-left: 30px;" context-menu="menuOptions('subrow')">
         <div style="display: inline-block" class="object-identifier-value">{{subrow.object_identifier_value}}</div>
-            <div class="generation-indicator"><i class="fa fa-lg fa-code-fork"></i>  {{subrow.generation}}</div>
+            <div class="generation-indicator" uib-popover="{{'IP_GENERATION' | translate:subrow}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+                <i class="fa fa-lg fa-code-fork"></i>  {{subrow.generation}}
+            </div>
             <div class="read-only fa-stack fa-lg" ng-if="subrow.workarea.read_only && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))">
                     <i class="fa fa-pencil fa-stack-1x"></i>
                     <i class="fa fa-ban fa-stack-2x fa-rotate-90 text-danger"></i>
