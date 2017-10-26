@@ -813,17 +813,20 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
-        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+        inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
+        min_max_gen = InformationPackage.objects.annotate(
+            min_gen=Min('generation'), max_gen=Max('generation')
+        ).filter(aic=OuterRef('aic')).exclude(workareas__read_only=False).order_by('generation')
 
         self.queryset = self.queryset.annotate(
             first_generation=Case(
-               When(generation=Subquery(inner.values('min_gen')[:1]),
+               When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
                     then=Value(1)),
                default=Value(0),
                output_field=BooleanField()
             ),
             last_generation=Case(
-               When(generation=Subquery(inner.values('max_gen')[:1]),
+               When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
                     then=Value(1)),
                default=Value(0),
                output_field=BooleanField()

@@ -146,7 +146,10 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             view.search_fields = ip_search_fields
             related = self.search_filter.filter_queryset(request, related, view)
 
-        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+        inner = InformationPackage.objects.annotate(
+            min_gen=Min('generation'), max_gen=Max('generation')
+        ).filter(aic=OuterRef('aic')).exclude(workareas__read_only=False).order_by('generation')
+
         related = related.annotate(
             first_generation=Case(
                When(generation=Subquery(inner.values('min_gen')[:1]),
@@ -155,7 +158,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
                output_field=BooleanField()
             ),
             last_generation=Case(
-               When(generation=Subquery(inner.values('max_gen')[:1]),
+               When(generation=Subquery(inner.reverse().values('max_gen')[:1]),
                     then=Value(1)),
                default=Value(0),
                output_field=BooleanField()
