@@ -1,4 +1,4 @@
-<div ng-if="!subrow" class="clickable" ng-click="ipTableClick(row)" uib-popover="{{'LABELDESC' | translate}}: {{row.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')">{{row.label}}</div>
+<div ng-if="!subrow" class="clickable" ng-click="ipTableClick(row)" context-menu="menuOptions('row')">{{row.label}}</div>
 <div ng-if="subrow">
-    <div class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow)" uib-popover="{{'LABELDESC' | translate}}: {{subrow.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')">{{subrow.label}}</div>
+    <div class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.label}}</div>
 </div>

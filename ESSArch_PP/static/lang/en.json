@@ -409,5 +409,7 @@
     "IP_DELETE": "IP's to be deleted",
     "VERSIONINFO": "Version info",
     "USERSETTINGS": "User settings",
-    "CREATE_TEMPLATE": "Create template"
+    "CREATE_TEMPLATE": "Create template",
+    "WORKING_ON_NEW_GENERATION": "{{username}} is working on a new generation of this IP",
+    "IP_GENERATION": "IP generation: {{generation}}"
 }

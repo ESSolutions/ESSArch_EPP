@@ -409,5 +409,7 @@
     "IP_DELETE": "IP'n som kommer at tas bort",
     "VERSIONINFO": "Version-info",
     "USERSETTINGS": "Användarinställningar",
-    "CREATE_TEMPLATE": "Skapa template"
+    "CREATE_TEMPLATE": "Skapa template",
+    "WORKING_ON_NEW_GENERATION": "{{username}} arbetar med en ny generation av detta IP",
+    "IP_GENERATION": "IP-generation: {{generation}}"
 }
