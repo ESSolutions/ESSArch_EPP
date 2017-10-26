@@ -9,7 +9,7 @@
                     <form role="form" ng-submit="login(loginForm)" name="loginForm" novalidate>
                         <div class="form-group">
                             <label for="id_username">{{'USERNAME' | translate}}</label>
-                            <input name="username" id="id_username" type="text" ng-model="model.username" ng-attr-placeholder="{{'USERNAME' | translate}}" class="form-control" required focused="true" />
+                            <input name="username" id="id_username" type="text" ng-model="model.username" ng-attr-placeholder="{{'USERNAME' | translate}}" class="form-control" required focused="true" autocapitalize="none" />
                         </div>
                         <div class="form-group">
                             <label for="id_password">{{'PASSWORD' | translate}}</label>
