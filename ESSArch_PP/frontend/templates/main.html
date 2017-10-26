@@ -1,7 +1,8 @@
 <!doctype html>
 <html ng-app="myApp">
+    {% verbatim %}
     <head ng-controller="HeadCtrl as vm">
-        <meta name="viewport" content="width=680, initial-scale=1">
+        <meta name="viewport" content="{{vm.responsiveTag}}">
         <link rel="stylesheet" type="text/css" href="static/frontend/styles/styles.css">
         <style>
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
@@ -12,12 +13,9 @@
 
         <!--App -->
         <script src="static/frontend/scripts/scripts.min.js"></script>
-        {% verbatim %}
         <title ng-bind="vm.pageTitle"></title>
-        {% endverbatim %}
 
     </head>
-    {% verbatim %}
     <body ui-view>
     </body>
     {% endverbatim %}

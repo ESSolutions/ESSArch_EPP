@@ -11,7 +11,6 @@ body {
     height: 100%;
     background-color: $body-background;
     margin: 0px auto;
-    min-width: 680px;
     overflow: auto;
     -ms-overflow-style: scrollbar;
 }
@@ -94,6 +93,7 @@ body.modal-open[style] {
     width: 0 !important;
 }
 .body-wrapper {
+    min-width: 680px;
     display: flex;
     flex-direction: column;
     width: 100%;
