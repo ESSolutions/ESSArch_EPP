@@ -820,16 +820,16 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         self.queryset = self.queryset.annotate(
             first_generation=Case(
-               When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
+                When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
+                     then=Value(1)),
+                default=Value(0),
+                output_field=BooleanField()
             ),
             last_generation=Case(
-               When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
+                When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
+                     then=Value(1)),
+                default=Value(0),
+                output_field=BooleanField()
             )
         )
 
