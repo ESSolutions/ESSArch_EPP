@@ -553,7 +553,8 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         if(pathStr != "") {
             sendData = angular.extend(sendData, {path: pathStr});
         }
-        if(ip.state == "At reception") {
+        if(ip.state == "At reception" || ip.state == "Prepared") {
+            sendData.id = ip.object_identifier_value;
             return IPReception.files(sendData).$promise.then(function(data) {
                 return data;
             });
