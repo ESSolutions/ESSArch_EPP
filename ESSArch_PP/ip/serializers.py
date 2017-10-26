@@ -123,6 +123,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     workarea = serializers.SerializerMethodField()
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
+    new_version_in_progress = serializers.SerializerMethodField()
 
     search_filter = filters.SearchFilter()
 
@@ -198,6 +199,12 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
         return obj.is_last_generation()
 
+    def get_new_version_in_progress(self, obj):
+        new = obj.new_version_in_progress()
+        if new is None:
+            return None
+        return WorkareaSerializer(new, context=self.context).data
+
     class Meta:
         model = InformationPackage
         fields = (
@@ -209,6 +216,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea', 'object_size',
             'first_generation', 'last_generation', 'start_date', 'end_date',
+            'new_version_in_progress',
         )
         extra_kwargs = {
             'id': {

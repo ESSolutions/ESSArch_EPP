@@ -4,6 +4,9 @@
         <div ng-if="row.package_type != 1 && row.package_type != 4 && row.state !== 'At reception'" class="generation-indicator">
             <i class="fa fa-lg fa-code-fork"></i>  {{row.generation}}
         </div>
+        <div ng-if="row.new_version_in_progress != null" class="new-version-indicator">
+            <i class="fa fa-lg fa-wrench"></i>
+        </div>
         <div class="read-only fa-stack fa-lg" ng-if="row.workarea.read_only && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))">
                 <i class="fa fa-pencil fa-stack-1x"></i>
                 <i class="fa fa-ban fa-stack-2x fa-rotate-90 text-danger"></i>

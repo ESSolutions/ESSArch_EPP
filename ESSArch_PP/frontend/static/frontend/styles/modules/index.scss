@@ -817,15 +817,22 @@ padding: 0 12px;
     display: inline-block;
 }
 
-.generation-indicator {
+.generation-indicator, .new-version-indicator {
     margin-left: 5px;
     display: inline-block;
     padding: 3px 5px;
     font-size: 12px;
     color: white;
-    background-color: $gold-leaf;
     border-radius: 5px;
     box-shadow: 0px 1px 0px rgba(0,0,0,.15);
+}
+
+.generation-indicator {
+    background-color: $gold-leaf;
+}
+
+.new-version-indicator {
+    background-color: $step-fail;
 }
 
 .traceback-copied {
