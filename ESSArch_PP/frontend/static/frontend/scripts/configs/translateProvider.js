@@ -34,5 +34,6 @@ angular.module('myApp').config(['$translateProvider', function ($translateProvid
         'sv*': 'sv',
         '*': 'en',
     })
+    .fallbackLanguage('en')
     .determinePreferredLanguage().preferredLanguage();
 }]);
