@@ -90,16 +90,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.info', {
-        url: 'info',
-        templateUrl: '/static/frontend/views/essarch_info.html',
-        controller: 'InfoCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        }
-    })
     .state('home.ingest', {
         url: 'ingest',
         templateUrl: '/static/frontend/views/ingest.html',
