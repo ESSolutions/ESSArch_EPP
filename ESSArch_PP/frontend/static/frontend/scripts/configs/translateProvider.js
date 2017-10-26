@@ -32,7 +32,7 @@ angular.module('myApp').config(['$translateProvider', function ($translateProvid
     $translateProvider.registerAvailableLanguageKeys(['en', 'sv'], {
         'en*': 'en',
         'sv*': 'sv',
+        '*': 'en',
     })
-    .fallbackLanguage('en')
     .determinePreferredLanguage().preferredLanguage();
 }]);
