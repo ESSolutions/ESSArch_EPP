@@ -299,13 +299,31 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             end_date=parsed.get('end_date'),
         )
 
+        extra_data = fill_specification_data(ip=ip, sa=sa)
+
         for profile_type in ['aic_description', 'aip', 'aip_description', 'dip', 'preservation_metadata']:
             profile = getattr(sa, 'profile_%s' % profile_type, None)
 
             if profile is None:
                 continue
 
-            ProfileIP.objects.create(ip=ip, profile=profile)
+            profile_ip = ProfileIP.objects.create(ip=ip, profile=profile)
+            data = {}
+            for field in profile_ip.profile.template:
+                try:
+                    if field['defaultValue'] in extra_data:
+                        data[field['key']] = extra_data[field['defaultValue']]
+                        continue
+
+                    data[field['key']] = field['defaultValue']
+                except KeyError:
+                    pass
+
+            data_obj = ProfileIPData.objects.create(
+                relation=profile_ip, data=data, version=0, user=request.user,
+            )
+            profile_ip.data = data_obj
+            profile_ip.save()
 
         data = InformationPackageDetailSerializer(ip, context={'request': request}).data
 
@@ -326,32 +344,12 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
         sa = ip.submission_agreement
-        extra_data = fill_specification_data(ip=ip, sa=sa)
 
         for profile_ip in ProfileIP.objects.filter(ip=ip).iterator():
             try:
                 profile_ip.clean()
             except ValidationError as e:
                 raise exceptions.ParseError('%s: %s' % (profile_ip.profile.name, e[0]))
-
-            if profile_ip.data is None:
-                if profile_ip.data_versions.count():
-                    profile_ip.data = profile_ip.data_versions.last()
-                else:
-                    data = {}
-                    for field in profile_ip.profile.template:
-                        try:
-                            if field['defaultValue'] in extra_data:
-                                data[field['key']] = extra_data[field['defaultValue']]
-                                continue
-
-                            data[field['key']] = field['defaultValue']
-                        except KeyError:
-                            pass
-                    data_obj = ProfileIPData.objects.create(
-                        relation=profile_ip, data=data, version=0, user=request.user,
-                    )
-                    profile_ip.data = data_obj
 
             profile_ip.LockedBy = request.user
             profile_ip.save()
