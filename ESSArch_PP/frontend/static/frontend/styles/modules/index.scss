@@ -565,10 +565,15 @@ padding: 0 12px;
 }
 .file-explorer-nav {
     display: flex;
-    display: -webkit-flex;
     flex-direction: row;
-    -webkit-flex-direction: row;
     vertical-align: middle;
+    align-items: center;
+}
+.nav-refresh-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 .dir-path {
     margin-left: 10px;
