@@ -567,7 +567,32 @@ padding: 0 12px;
     display: flex;
     flex-direction: row;
     vertical-align: middle;
+    width: 100%;
     align-items: center;
+}
+.file-list-view {
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    thead, tbody {
+        border: 1px solid $border-color;
+    }
+    .type-name-column {
+        display: flex;
+        align-items: center;
+        .file, .dir {
+            margin-right: 5px;
+        }
+    }
+    table {
+        table-layout: fixed;
+        width: 100%;
+    }
+}
+.file-view-options {
+    display: flex;
+    flex-direction: row;
+    margin-right: 15px;
 }
 .nav-refresh-wrapper {
     width: 100%;

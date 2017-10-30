@@ -135,6 +135,18 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
 
     $scope.previousGridArrays = [];
     $scope.ip = $rootScope.ip;
+    $scope.listView = false;
+    $scope.gridView = true;
+    $scope.useListView = function() {
+        $scope.listView = true;
+        $scope.gridView = false;
+    }
+
+    $scope.useGridView = function() {
+        $scope.listView = false;
+        $scope.gridView = true;
+    }
+
     $scope.previousGridArraysString = function () {
         var retString = $scope.ip.object_identifier_value;
 
@@ -266,6 +278,9 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
             scope: $scope,
             controller: 'ModalInstanceCtrl',
             controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
             $scope.createFolder(data.dir_name);

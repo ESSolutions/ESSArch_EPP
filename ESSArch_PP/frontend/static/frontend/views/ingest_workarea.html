@@ -58,14 +58,50 @@
                     <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
                     <b class="dir-path">{{previousGridArraysString()}}</b>
                 </div>
+                <div class="file-view-options btn-group">
+                    <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()"
+                        uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                        <i class="fa fa-th-list fa-lg"></i>
+                    </button>
+                    <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()"
+                        uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                        <i class="fa fa-th fa-lg"></i>
+                    </button>
+                </div>
                 <span ng-click="updateGridArray(ip)" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': deckGridLoading }"
-                    uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                    uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                 </div>
 
-                <div class="deckgrid">
+                <div  ng-if="gridView" class="deckgrid">
                     <div class="flex-grid">
                         <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
                     </div>
+                </div>
+                <div ng-if="listView" class="file-list-view">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th translate="NAME"></th>
+                                <th translate="SIZE"></th>
+                                <th translate="CHANGED"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="isSelected(card)" ng-click="cardSelect(card)">
+                                <td class="type-name-column">
+                                    <div ng-class="card.type" ng-if="card.type == 'file'">
+                                        <li class="fa fa-file-o"></li>
+                                    </div>
+                                    <div ng-class="card.type" ng-if="card.type == 'dir'">
+                                        <li class="fa fa-folder-o"></li>
+                                    </div>
+                                    {{card.name}}
+                                </td>
+                                <td>{{card.size | filesize}}</td>
+                                <td>{{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <button ng-if="!ip.workarea.read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
                 <button ng-if="!ip.workarea.read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>

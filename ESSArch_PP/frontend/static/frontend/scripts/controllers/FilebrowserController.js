@@ -1,6 +1,18 @@
 angular.module('myApp').controller('FilebrowserController', function ($scope, $rootScope, $sce, appConfig, listViewService, $uibModal, $window) {
     $scope.previousGridArrays = [];
     $scope.ip = $rootScope.ip;
+    $scope.listView = false;
+    $scope.gridView = true;
+    $scope.useListView = function() {
+        $scope.listView = true;
+        $scope.gridView = false;
+    }
+
+    $scope.useGridView = function() {
+        $scope.listView = false;
+        $scope.gridView = true;
+    }
+
     $scope.previousGridArraysString = function () {
         var retString = "";
         $scope.previousGridArrays.forEach(function (card) {
