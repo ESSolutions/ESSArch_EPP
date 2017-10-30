@@ -32,6 +32,30 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
         }
     };
 
+    function ipExists() {
+        if($scope.ip != null) {
+            var temp = false;
+            vm.displayedIps.forEach(function(aic) {
+                if($scope.ip.id == aic.id) {
+                    temp = true;
+                } else {
+                    aic.information_packages.forEach(function(ip) {
+                        if($scope.ip.id == ip.id) {
+                            temp = true;
+                        }
+                    })
+                }
+            })
+            if(!temp) {
+                $scope.eventShow = false;
+                $scope.statusShow = false;
+                $scope.filebrowser = false;
+                $scope.requestForm = false;
+                $scope.eventlog = false;
+                $scope.requestEventlog = false;
+            }
+        }
+    }
     // Remove ip
     $scope.removeIp = function (ipObject) {
         if(ipObject.package_type == 1) {
