@@ -1,4 +1,4 @@
-<div class="pagination" ng-if="pages.length >= 2">
+<div class="pagination" ng-if="numPages && pages.length >= 2">
   <ul class="pagination">
     <li ng-if="currentPage > 1">
         <a ng-click="selectPage(1)"><span class="fa fa-step-backward"></span></a>
