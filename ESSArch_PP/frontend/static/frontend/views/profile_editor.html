@@ -20,7 +20,7 @@
                             ng-options="x as x.name for x in saProfile.profiles"></select>
                         </td>
                         <td class="flex-row">
-                            <button class="btn btn-default lock-button btn-sm" ng-click="saClick(saProfile)" uib-popover="{{saProfile.profile.name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="fa fa-eye"></i>{{'VIEW' | translate}}</i></button>
+                            <button ng-if="saProfile.profile" class="btn btn-default lock-button btn-sm" ng-click="saClick(saProfile)" uib-popover="{{saProfile.profile.name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="fa fa-eye"></i>{{'VIEW' | translate}}</i></button>
                             <button ng-if="!saProfile.disabled" ng-disabled="!saProfile.profile" class="btn btn-success prepare-button btn-sm" ng-click="prepare(ip)">{{'PREPARE' | translate}}</button>
                         </td>
                         <p>{{'PATH' | translate}}: {{ip.object_path}}</p>
