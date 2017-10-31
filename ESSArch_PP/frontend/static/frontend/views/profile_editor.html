@@ -71,7 +71,7 @@
                     <h4 class="profile-name">{{ vm.profileIp.profile_name }}</h4>
                     <div class="data-version-list">
                         Versions
-                        <select class="form-control" ng-change="vm.changeDataVersion(vm.profileIp, vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as vm.profileIp.data_versions.indexOf(x)+1 for x in vm.profileIp.data_versions">{{ x }}</select>
+                        <select class="form-control" ng-change="vm.changeDataVersion(vm.profileIp, vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as vm.profileIp.data_versions.indexOf(x) == 0 ? 'Default' : vm.profileIp.data_versions.indexOf(x) for x in vm.profileIp.data_versions">{{ x }}</select>
                     </div>
                 </div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
