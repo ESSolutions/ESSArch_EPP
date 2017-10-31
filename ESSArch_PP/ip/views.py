@@ -1153,7 +1153,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             raise exceptions.ParseError('%s is archived' % ip)
 
         download = request.query_params.get('download', False)
-        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
+        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download, paginator=self.paginator, request=request)
 
     @detail_route(methods=['put'], url_path='check-profile')
     def check_profile(self, request, pk=None):
