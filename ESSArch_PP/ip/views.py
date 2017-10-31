@@ -1252,7 +1252,7 @@ class WorkareaViewSet(InformationPackageViewSet):
         return self.queryset.filter(responsible=self.request.user)
 
 
-class WorkareaFilesViewSet(viewsets.ViewSet):
+class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
     def validate_workarea(self, area_type):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
 
@@ -1312,6 +1312,9 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
                                 "size": member.size,
                                 "modified": timestamp_to_datetime(member.mtime),
                             })
+                        if self.paginator is not None:
+                            paginated = self.paginator.paginate_queryset(entries, request)
+                            return self.paginator.get_paginated_response(paginated)
                         return Response(entries)
                     else:
                         subpath = path.split('/', 1)[-1]
@@ -1353,6 +1356,11 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             )
 
         sorted_entries = sorted(entries, key=itemgetter('name'))
+
+        if self.paginator is not None:
+            paginated = self.paginator.paginate_queryset(sorted_entries, request)
+            return self.paginator.get_paginated_response(paginated)
+
         return Response(sorted_entries)
 
 
