@@ -411,5 +411,6 @@
     "USERSETTINGS": "User settings",
     "CREATE_TEMPLATE": "Create template",
     "WORKING_ON_NEW_GENERATION": "{{username}} is working on a new generation of this IP",
-    "IP_GENERATION": "IP generation: {{generation}}"
+    "IP_GENERATION": "IP generation: {{generation}}",
+    "FILES_PER_PAGE": "Files per page"
 }

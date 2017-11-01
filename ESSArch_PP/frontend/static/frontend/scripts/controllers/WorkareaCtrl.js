@@ -162,15 +162,21 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
     $scope.listView = false;
     $scope.gridView = true;
     $scope.useListView = function() {
+        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = true;
         $scope.gridView = false;
     }
 
     $scope.useGridView = function() {
+        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = false;
         $scope.gridView = true;
     }
 
+    $scope.filesPerPage = $cookies.get("files-per-page") || 50;
+    $scope.changeFilesPerPage = function(filesPerPage) {
+        $cookies.put("files-per-page", filesPerPage, { expires: new Date("Fri, 31 Dec 9999 23:59:59 GMT") });
+    }
     $scope.previousGridArraysString = function () {
         var retString = $scope.ip.object_identifier_value;
 
@@ -185,39 +191,54 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
         return retString;
     }
     $scope.deckGridData = [];
+    $scope.dirPipe = function(tableState) {
+        $scope.gridArrayLoading = true;
+        if ($scope.deckGridData.length == 0) {
+            $scope.initLoad = true;
+        }
+        if (!angular.isUndefined(tableState)) {
+            $scope.tableState = tableState;
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString(), pageNumber, number).then(function(dir) {
+                $scope.deckGridData = dir.data;
+                tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
+                $scope.gridArrayLoading = false;
+                $scope.initLoad = false;
+            })
+        }
+    }
     $scope.deckGridInit = function (ip) {
-        listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString()).then(function (dir) {
-            $scope.deckGridData = dir;
-        });
+        $scope.previousGridArrays = [];
+        if($scope.tableState) {
+            $scope.dirPipe($scope.tableState);
+            $scope.selectedCards = [];
+        }
     };
 
     $scope.previousGridArray = function () {
         $scope.previousGridArrays.pop();
-        listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString()).then(function (dir) {
-            $scope.deckGridData = dir;
+        if($scope.tableState) {
+            $scope.dirPipe($scope.tableState);
             $scope.selectedCards = [];
-        });
+        }
     };
     $scope.gridArrayLoading = false;
     $scope.updateGridArray = function (ip) {
-        $scope.gridArrayLoading = true;
-        listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString()).then(function (dir) {
-            $scope.deckGridData = dir;
-            $scope.gridArrayLoading = false;
-        });
+        if($scope.tableState) {
+            $scope.dirPipe($scope.tableState);
+        }
     };
     $scope.expandFile = function (ip, card) {
         if (card.type == "dir" || card.name.endsWith('.tar') || card.name.endsWith('.zip')) {
             $scope.previousGridArrays.push(card);
-            listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString()).then(function (dir) {
-                $scope.deckGridData = dir;
+            if($scope.tableState) {
+                $scope.tableState.pagination.start = 0;
+                $scope.dirPipe($scope.tableState);
                 $scope.selectedCards = [];
-            }).catch(function(response) {
-                $scope.previousGridArrays.pop();
-                if(response.status == 200) {
-                    $scope.getFile(card);
-                }
-            });
+            }
         } else {
             $scope.getFile(card);
         }

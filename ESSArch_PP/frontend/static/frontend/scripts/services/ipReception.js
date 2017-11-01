@@ -26,7 +26,13 @@ angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
         files: {
             method: "GET",
             params: { action: "files", id: "@id" },
-            isArray: true
+            isArray: true,
+            interceptor: {
+                response: function (response) {
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            },
         },
         prepare: {
             method: 'POST',
