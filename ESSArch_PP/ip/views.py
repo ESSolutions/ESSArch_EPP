@@ -1145,12 +1145,60 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         serializer.is_valid()
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
+    @detail_route(methods=['delete', 'get', 'post'])
     def files(self, request, pk=None):
         ip = self.get_object()
 
         if ip.archived:
             raise exceptions.ParseError('%s is archived' % ip)
+
+        if request.method == 'DELETE':
+            if ip.package_type != InformationPackage.DIP:
+                raise exceptions.MethodNotAllowed(request.method)
+
+            try:
+                path = os.path.join(ip.object_path, request.data.__getitem__('path'))
+            except KeyError:
+                raise exceptions.ParseError('Path parameter missing')
+
+            try:
+                shutil.rmtree(path)
+            except OSError as e:
+                if e.errno != errno.ENOTDIR:
+                    raise
+
+                os.remove(path)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            if ip.package_type != InformationPackage.DIP:
+                raise exceptions.MethodNotAllowed(request.method)
+
+            try:
+                path = os.path.join(ip.object_path, request.data['path'])
+            except KeyError:
+                raise exceptions.ParseError('Path parameter missing')
+
+            try:
+                pathtype = request.data['type']
+            except KeyError:
+                raise exceptions.ParseError('Type parameter missing')
+
+            root = ip.object_path
+            fullpath = os.path.join(root, path)
+
+            if not in_directory(fullpath, root):
+                raise exceptions.ParseError('Illegal path %s' % fullpath)
+
+            if pathtype == 'dir':
+                os.mkdir(fullpath)
+            elif pathtype == 'file':
+                open(fullpath, 'a').close()
+            else:
+                raise exceptions.ParseError('Type must be either "file" or "dir"')
+
+            return Response('%s created' % path)
 
         download = request.query_params.get('download', False)
         return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download, paginator=self.paginator, request=request)
