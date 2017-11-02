@@ -52,6 +52,7 @@ from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.validation import validate_checksum
+from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
                                     ArchivalType, ArchivistOrganization,
                                     EventIP, InformationPackage, Order,
@@ -127,7 +128,7 @@ class ArchivalLocationViewSet(viewsets.ModelViewSet):
     filter_class = ArchivalLocationFilter
 
 
-class InformationPackageReceptionViewSet(viewsets.ViewSet):
+class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
     search_fields = (
         'object_identifier_value', 'label', 'responsible__first_name',
         'responsible__last_name', 'responsible__username', 'state',
@@ -216,10 +217,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
         serializer.is_valid()
         new_ips.extend(serializer.data)
 
-        paginator = LinkHeaderPagination()
-        page = paginator.paginate_queryset(new_ips, request)
-        if page is not None:
-            return paginator.get_paginated_response(page)
+        if self.paginator is not None:
+            paginated = self.paginator.paginate_queryset(new_ips, request)
+            return self.paginator.get_paginated_response(paginated)
 
         return Response(new_ips)
 
@@ -684,6 +684,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                                 "size": member.size,
                                 "modified": timestamp_to_datetime(member.mtime),
                             })
+                        if self.paginator is not None:
+                            paginated = self.paginator.paginate_queryset(entries, request)
+                            return self.paginator.get_paginated_response(paginated)
                         return Response(entries)
                     else:
                         subpath = fullpath[len(container)+1:]
@@ -717,6 +720,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet):
                                 "size": member.file_size,
                                 "modified": datetime.datetime(*member.date_time),
                             })
+                        if self.paginator is not None:
+                            paginated = self.paginator.paginate_queryset(entries, request)
+                            return self.paginator.get_paginated_response(paginated)
                         return Response(entries)
                     else:
                         subpath = fullpath[len(container)+1:]
@@ -1139,15 +1145,63 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         serializer.is_valid()
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
+    @detail_route(methods=['delete', 'get', 'post'])
     def files(self, request, pk=None):
         ip = self.get_object()
 
         if ip.archived:
             raise exceptions.ParseError('%s is archived' % ip)
 
+        if request.method == 'DELETE':
+            if ip.package_type != InformationPackage.DIP:
+                raise exceptions.MethodNotAllowed(request.method)
+
+            try:
+                path = os.path.join(ip.object_path, request.data.__getitem__('path'))
+            except KeyError:
+                raise exceptions.ParseError('Path parameter missing')
+
+            try:
+                shutil.rmtree(path)
+            except OSError as e:
+                if e.errno != errno.ENOTDIR:
+                    raise
+
+                os.remove(path)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            if ip.package_type != InformationPackage.DIP:
+                raise exceptions.MethodNotAllowed(request.method)
+
+            try:
+                path = os.path.join(ip.object_path, request.data['path'])
+            except KeyError:
+                raise exceptions.ParseError('Path parameter missing')
+
+            try:
+                pathtype = request.data['type']
+            except KeyError:
+                raise exceptions.ParseError('Type parameter missing')
+
+            root = ip.object_path
+            fullpath = os.path.join(root, path)
+
+            if not in_directory(fullpath, root):
+                raise exceptions.ParseError('Illegal path %s' % fullpath)
+
+            if pathtype == 'dir':
+                os.mkdir(fullpath)
+            elif pathtype == 'file':
+                open(fullpath, 'a').close()
+            else:
+                raise exceptions.ParseError('Type must be either "file" or "dir"')
+
+            return Response('%s created' % path)
+
         download = request.query_params.get('download', False)
-        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download)
+        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download, paginator=self.paginator, request=request)
 
     @detail_route(methods=['put'], url_path='check-profile')
     def check_profile(self, request, pk=None):
@@ -1246,7 +1300,7 @@ class WorkareaViewSet(InformationPackageViewSet):
         return self.queryset.filter(responsible=self.request.user)
 
 
-class WorkareaFilesViewSet(viewsets.ViewSet):
+class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
     def validate_workarea(self, area_type):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
 
@@ -1306,6 +1360,9 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
                                 "size": member.size,
                                 "modified": timestamp_to_datetime(member.mtime),
                             })
+                        if self.paginator is not None:
+                            paginated = self.paginator.paginate_queryset(entries, request)
+                            return self.paginator.get_paginated_response(paginated)
                         return Response(entries)
                     else:
                         subpath = path.split('/', 1)[-1]
@@ -1347,6 +1404,11 @@ class WorkareaFilesViewSet(viewsets.ViewSet):
             )
 
         sorted_entries = sorted(entries, key=itemgetter('name'))
+
+        if self.paginator is not None:
+            paginated = self.paginator.paginate_queryset(sorted_entries, request)
+            return self.paginator.get_paginated_response(paginated)
+
         return Response(sorted_entries)
 
 

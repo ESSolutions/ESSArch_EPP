@@ -142,6 +142,8 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
                 $scope.select = true;
                 $scope.eventlog = true;
                 $scope.edit = true;
+                $scope.filesPerPage = $cookies.get("files-per-page") || 50;
+                $scope.dipFilesPerPage = $cookies.get("files-per-page") || 50;
                 $scope.deckGridInit(row);
             }
             $scope.requestForm = false;
@@ -298,6 +300,41 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     }
     $scope.previousGridArrays1 = [];
     $scope.previousGridArrays2 = [];
+    $scope.workareaListView = false;
+    $scope.workareaGridView = true;
+    $scope.dipListView = false;
+    $scope.dipGridView = true;
+    $scope.useListView = function(whichArray) {
+        if(whichArray === 1) {
+            $scope.workareaListView = true;
+            $scope.workareaGridView = false;
+            $scope.filesPerPage = $cookies.get("files-per-page") || 50;
+
+        } else {
+            $scope.dipListView = true;
+            $scope.dipGridView = false;
+            $scope.dipFilesPerPage = $cookies.get("files-per-page") || 50;
+
+        }
+    }
+
+    $scope.useGridView = function(whichArray) {
+        if(whichArray === 1) {
+            $scope.workareaListView = false;
+            $scope.workareaGridView = true;
+            $scope.filesPerPage = $cookies.get("files-per-page") || 50;
+
+        } else {
+            $scope.dipListView = false;
+            $scope.dipGridView = true;
+            $scope.dipFilesPerPage = $cookies.get("files-per-page") || 50;
+
+        }
+    }
+
+    $scope.changeFilesPerPage = function(filesPerPage) {
+        $cookies.put("files-per-page", filesPerPage, { expires: new Date("Fri, 31 Dec 9999 23:59:59 GMT") });
+    }
     $scope.previousGridArraysString = function(whichArray) {
         var retString = "";
         if (whichArray === 1) {
@@ -312,39 +349,60 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
         return retString;
     }
     $scope.deckGridData = [];
+    $scope.workareaPipe = function(tableState) {
+        $scope.workArrayLoading = true;
+        if ($scope.deckGridData.length == 0) {
+            $scope.initLoad = true;
+        }
+        if (!angular.isUndefined(tableState)) {
+            $scope.workarea_tableState = tableState;
+            var pagination = $scope.workarea_tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1), pageNumber, number).then(function(dir) {
+                $scope.deckGridData = dir.data;
+                $scope.workarea_tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
+                $scope.workArrayLoading = false;
+                $scope.initLoad = false;
+            })
+        }
+    }
+    $scope.dipPipe = function(tableState) {
+        $scope.gridArrayLoading = true;
+        if ($scope.deckGridData.length == 0) {
+            $scope.initLoad = true;
+        }
+        if (!angular.isUndefined(tableState)) {
+            $scope.dip_tableState = tableState;
+            var pagination = $scope.dip_tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2), pageNumber, number).then(function(dir) {
+                $scope.chosenFiles = dir.data;
+                $scope.dip_tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
+                $scope.gridArrayLoading = false;
+                $scope.initLoad = false;
+            })
+        }
+    }
     $scope.deckGridInit = function(ip) {
-        listViewService.getWorkareaDir("access", null).then(function(workareaDir) {
-            listViewService.getDipDir(ip, null).then(function(dipDir) {
-                $scope.deckGridData = workareaDir;
-                $scope.chosenFiles = dipDir;
-                $scope.previousGridArrays1 = [];
-                $scope.previousGridArrays2 = [];
-            });
-        });
+        $scope.previousGridArrays1 = [];
+        $scope.previousGridArrays2 = [];
+        if($scope.dip_tablestate && $sope.workarea_tablestate) {
+            $scope.workareaPipe($scope.workarea_tableState);
+            $scope.dipPipe($scope.dip_tableState);
+        }
     };
+
     $scope.previousGridArray = function(whichArray) {
         if (whichArray == 1) {
             $scope.previousGridArrays1.pop();
-            if ($scope.previousGridArraysString(1) == "") {
-                listViewService.getWorkareaDir("access", null).then(function(workareaDir) {
-                    $scope.deckGridData = workareaDir;
-                });
-            } else {
-                listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function(dir) {
-                    $scope.deckGridData = dir;
-                })
-            }
+            $scope.workareaPipe($scope.workarea_tableState);
         } else {
             $scope.previousGridArrays2.pop();
-            if ($scope.previousGridArraysString(2) == "") {
-                listViewService.getDipDir($scope.ip, null).then(function(dipDir) {
-                    $scope.chosenFiles = dipDir;
-                });
-            } else {
-                listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function(dir) {
-                    $scope.chosenFiles = dir;
-                })
-            }
+            $scope.dipPipe($scope.dip_tableState);
         }
     };
     $scope.workArrayLoading = false;
@@ -354,34 +412,33 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
         $scope.updateDipFiles();
     };
     $scope.updateWorkareaFiles = function () {
-        $scope.workArrayLoading = true;
-        return listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1)).then(function (dir) {
-            $scope.deckGridData = dir;
-            $scope.workArrayLoading = false;
-        });
-
+        if($scope.workarea_tableState) {
+            $scope.workareaPipe($scope.workarea_tableState);
+        }
     }
     $scope.updateDipFiles = function () {
-        $scope.dipArrayLoading = true;
-        return listViewService.getDipDir($scope.ip, $scope.previousGridArraysString(2)).then(function (dirir) {
-            $scope.chosenFiles = dirir;
-            $scope.dipArrayLoading = false;
-        });
+        if($scope.dip_tableState) {
+            $scope.dipPipe($scope.dip_tableState);
+        }
     }
     $scope.expandFile = function(whichArray, ip, card) {
         if (card.type == "dir") {
             if (whichArray == 1) {
-                listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1) + card.name).then(function (dir) {
-                    $scope.deckGridData = dir;
-                    $scope.selectedCards1 = [];
-                    $scope.previousGridArrays1.push(card);
-                });
+                $scope.selectedCards1 = [];
+                $scope.previousGridArrays1.push(card);
+                if($scope.workarea_tableState) {
+                    $scope.workarea_tableState.pagination.start = 0;
+                    $scope.workareaPipe($scope.workarea_tableState);
+                    $scope.selectedCards = [];
+                }
             } else {
-                listViewService.getDipDir(ip, $scope.previousGridArraysString(2) + card.name).then(function (dir) {
-                    $scope.chosenFiles = dir;
-                    $scope.selectedCards2 = [];
-                    $scope.previousGridArrays2.push(card);
-                });
+                $scope.selectedCards2 = [];
+                $scope.previousGridArrays2.push(card);
+                if($scope.dip_tableState) {
+                    $scope.dip_tableState.pagination.start = 0;
+                    $scope.dipPipe($scope.dip_tableState);
+                    $scope.selectedCards = [];
+                }
             }
         } else {
             $scope.getFile(card);
@@ -473,7 +530,10 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             templateUrl: 'static/frontend/views/new-dir-modal.html',
             scope: $scope,
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function(data) {
             $scope.createDipFolder(data.dir_name);

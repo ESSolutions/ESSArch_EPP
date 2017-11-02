@@ -411,5 +411,8 @@
     "USERSETTINGS": "Användarinställningar",
     "CREATE_TEMPLATE": "Skapa template",
     "WORKING_ON_NEW_GENERATION": "{{username}} arbetar med en ny generation av detta IP",
-    "IP_GENERATION": "IP-generation: {{generation}}"
+    "IP_GENERATION": "IP-generation: {{generation}}",
+    "FILES_PER_PAGE": "Filer per sida",
+    "LIST_VIEW": "Lista",
+    "GRID_VIEW": "Rutnät"
 }

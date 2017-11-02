@@ -39,7 +39,13 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         files: {
             method: "GET",
             params: { action: "files", id: "@id" },
-            isArray: true
+            isArray: true,
+            interceptor: {
+                response: function (response) {
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            },
         },
         steps: {
             method: "GET",

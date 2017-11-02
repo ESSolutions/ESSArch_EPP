@@ -464,40 +464,92 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
             return response;
         })
     }
-    function getWorkareaDir(workareaType, pathStr) {
+    function getWorkareaDir(workareaType, pathStr, pageNumber, pageSize) {
         var sendData;
         if (pathStr == "") {
             sendData = {
+                page: pageNumber,
+                page_size: pageSize,
                 type: workareaType
             };
         } else {
             sendData = {
+                page: pageNumber,
+                page_size: pageSize,
                 path: pathStr,
                 type: workareaType
             };
         }
+
         return $http.get(appConfig.djangoUrl + "workarea-files/",{ params: sendData }).then(function (response) {
+            var count = response.headers('Count');
+            if (count == null) {
+                count = response.data.length;
+            }
             if(response.headers()['content-disposition']) {
                 return $q.reject(response);
             } else {
-                return response.data;
+                return {
+                    numberOfPages: Math.ceil(count/pageSize),
+                    data: response.data
+                };
             }
         });
     }
 
-    function getDipDir(ip, pathStr) {
-        var sendData = {
-            id: ip.id
-        };
-        if (pathStr != "") {
-            sendData.path = pathStr;
+    function getDipDir(ip, pathStr, pageNumber, pageSize) {
+        if(pathStr == "") {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+            };
+        } else {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+                path: pathStr,
+            };
         }
-        return IP.files(sendData)
-            .$promise.then(function(data) {
-                return data;
-            });
+        return IP.files(sendData).$promise.then(function(data) {
+            var count = data.$httpHeaders('Count');
+            if (count == null) {
+                count = data.length;
+            }
+            return {
+                numberOfPages: Math.ceil(count/pageSize),
+                data: data
+            };
+        });
     }
 
+    function getDir(ip, pathStr, pageNumber, pageSize) {
+        if(pathStr == "") {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+            };
+        } else {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+                path: pathStr,
+            };
+        }
+        return IP.files(sendData).$promise.then(function(data) {
+            var count = data.$httpHeaders('Count');
+            if (count == null) {
+                count = data.length;
+            }
+            return {
+                numberOfPages: Math.ceil(count/pageSize),
+                data: data
+            };
+        });
+    }
     function addFileToDip(ip, path, file, destination, type) {
         var src = path + file.name;
         var dst = destination + file.name;
@@ -548,19 +600,43 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
 
-    function getDir(ip, pathStr) {
-        var sendData = {'id': ip.id};
-        if(pathStr != "") {
-            sendData = angular.extend(sendData, {path: pathStr});
+    function getDir(ip, pathStr, pageNumber, pageSize) {
+        if(pathStr == "") {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+            };
+        } else {
+            sendData = {
+                id: ip.id,
+                page: pageNumber,
+                page_size: pageSize,
+                path: pathStr,
+            };
         }
-        if(ip.state == "At reception" || ip.state == "Prepared") {
+        if (ip.state == "At reception" || ip.state == "Prepared") {
             sendData.id = ip.object_identifier_value;
             return IPReception.files(sendData).$promise.then(function(data) {
-                return data;
+                var count = data.$httpHeaders('Count');
+                if (count == null) {
+                    count = data.length;
+                }
+                return {
+                    numberOfPages: Math.ceil(count/pageSize),
+                    data: data
+                };
             });
         } else {
             return IP.files(sendData).$promise.then(function(data) {
-                return data;
+                var count = data.$httpHeaders('Count');
+                if (count == null) {
+                    count = data.length;
+                }
+                return {
+                    numberOfPages: Math.ceil(count/pageSize),
+                    data: data
+                };
             });
         }
     }

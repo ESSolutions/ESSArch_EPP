@@ -52,7 +52,7 @@
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser">
-            <div class="file-explorer">
+            <div class="file-explorer" st-table="deckGridData" st-pipe="dirPipe">
                     <div class="nav-refresh-wrapper">
                 <div class="file-explorer-nav">
                     <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
@@ -71,10 +71,20 @@
                 <span ng-click="updateGridArray(ip)" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': deckGridLoading }"
                     uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                 </div>
-
-                <div  ng-if="gridView" class="deckgrid">
-                    <div class="flex-grid">
-                        <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
+                <div ng-if="gridView">
+                    <div class="deckgrid">
+                        <div class="flex-grid">
+                            <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
+                        </div>
+                    </div>
+                    <div class="files-per-page-pagination-wrapper">
+                        <div>
+                            <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
+                            uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                                {{x}}
+                            </select>
+                        </div>
+                        <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
                     </div>
                 </div>
                 <div ng-if="listView" class="file-list-view">
@@ -102,6 +112,15 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div class="files-per-page-pagination-wrapper">
+                        <div>
+                            <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
+                            uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                                {{x}}
+                            </select>
+                        </div>
+                        <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
+                    </div>
                 </div>
                 <button ng-if="!ip.workarea.read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
                 <button ng-if="!ip.workarea.read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>

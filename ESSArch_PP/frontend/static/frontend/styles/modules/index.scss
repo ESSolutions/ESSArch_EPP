@@ -572,8 +572,6 @@ padding: 0 12px;
 }
 .file-list-view {
     margin-top: 10px;
-    max-height: 400px;
-    overflow-y: auto;
     thead, tbody {
         border: 1px solid $border-color;
     }
@@ -587,12 +585,36 @@ padding: 0 12px;
     table {
         table-layout: fixed;
         width: 100%;
+        margin-bottom: 5px;
     }
 }
 .file-view-options {
     display: flex;
     flex-direction: row;
     margin-right: 15px;
+}
+.files-per-page-pagination-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.file-pagination {
+    a {
+        color: black;
+        float: left;
+        padding: 6px 12px;
+        line-height: 1.428571429;
+        text-decoration: none;
+        border: 1px solid #e8e8e8;
+    }
+    a.active {
+        background-color: rgba(0,0,0,0.03);
+    }
+
+    a:hover:not(.active) {background-color: rgba(0,0,0,0.03);}
+
 }
 .nav-refresh-wrapper {
     width: 100%;
@@ -614,14 +636,14 @@ padding: 0 12px;
 }
 .deckgrid {
     margin-top:10px;
+    margin-bottom: 5px;
     padding: 15px;
     width: 100%;
     min-width: 520px;
     min-height: 100px;
-    max-height: 400px;
-    overflow-y: scroll;
     border-style: solid;
     border-color: #bbb;
+    border-width: 1px;
 }
 .flex-grid {
     display: flex;
