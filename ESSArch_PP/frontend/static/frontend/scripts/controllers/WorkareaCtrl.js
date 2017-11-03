@@ -368,7 +368,6 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
     $scope.showFileUpload = true;
     $scope.currentFlowObject = null;
     $scope.getFlowTarget = function() {
-        console.log("set target");
         return appConfig.djangoUrl + 'workarea-files/upload/?type=' + vm.workarea + '/';
     };
     $scope.getQuery = function(FlowFile, FlowChunk, isTest) {

@@ -214,7 +214,6 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     }
     //Returns map structure for a profile
     function getStructure(profileId) {
-        console.log(profileId)
         return Profile.get({
             id: profileId
         }).$promise.then(function(data) {

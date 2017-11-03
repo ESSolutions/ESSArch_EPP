@@ -1,5 +1,4 @@
 angular.module('myApp').controller('AddCtrl', function (ProfileMakerTemplate, $http, $scope, appConfig) {
-  console.log("add controller")
   var vm = this;
   vm.options = {};
 
