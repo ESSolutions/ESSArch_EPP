@@ -407,9 +407,7 @@ class InformationPackageViewSetTestCase(TestCase):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
 
         res = self.client.get(self.url, data={'view_type': 'aic'})
-        self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]['id'], str(aic.pk))
-        self.assertEqual(res.data[0]['information_packages'], [])
+        self.assertEqual(len(res.data), 0)
 
     def test_aic_view_type_aic_multiple_aips_one_in_workarea(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)

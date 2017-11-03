@@ -22,9 +22,9 @@
     Email - essarch@essolutions.se
 """
 
-from django.db.models import (BooleanField, Case, Count, F, IntegerField, Max,
-                              Min, OuterRef, Prefetch, Q, Subquery, Value,
-                              When)
+from django.db.models import (BooleanField, Case, Count, Exists, F,
+                              IntegerField, Max, Min, OuterRef, Prefetch, Q,
+                              Subquery, Value, When)
 from django_filters import rest_framework as filters
 from rest_framework import exceptions
 
@@ -81,6 +81,9 @@ class InformationPackageFilter(filters.FilterSet):
         if self.recursive:
             information_packages = self.__class__(recursive=False, data=self.form.cleaned_data, queryset=information_packages, request=self.request).qs
 
+            if self.form.data.get('view_type', 'aic') == 'aic':
+                nested_exists_query = information_packages.filter(aic_id=OuterRef('id'))
+
         if self.form.data.get('view_type', 'aic') == 'ip':
             field = 'aic__information_packages'
             inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
@@ -106,7 +109,12 @@ class InformationPackageFilter(filters.FilterSet):
             )
         )
 
-        return qs.prefetch_related(Prefetch(field, information_packages))
+        prefetched = qs.prefetch_related(Prefetch(field, information_packages))
+
+        if self.form.data.get('view_type', 'aic') == 'aic':
+            return prefetched.annotate(nested_exists=Exists(nested_exists_query)).filter(nested_exists=True)
+
+        return prefetched
 
     @property
     def qs(self):
