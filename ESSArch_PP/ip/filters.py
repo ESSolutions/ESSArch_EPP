@@ -54,6 +54,7 @@ class InformationPackageFilter(filters.FilterSet):
     archival_type = ListFilter(name='archival_type__name', method='filter_fields')
     archival_location = ListFilter(name='archival_location__name', method='filter_fields')
     package_type = ListFilter(name='package_type')
+    package_type_name_exclude = filters.CharFilter(name='Package Type Name', method='filter_package_type_name')
     state = ListFilter(name='state', method='filter_fields_in_list')
     object_identifier_value = ListFilter(name='object_identifier_value', method='filter_fields')
     label = ListFilter(name='label', method='filter_fields')
@@ -117,6 +118,12 @@ class InformationPackageFilter(filters.FilterSet):
 
         return self._qs
 
+    def filter_package_type_name(self, queryset, name, value):
+        for package_type_id, package_type_name in InformationPackage.PACKAGE_TYPE_CHOICES:
+            if package_type_name.lower() == value.lower():
+                return queryset.exclude(package_type=package_type_id)
+        return queryset.none()
+
     def filter_fields(self, queryset, name, value, lookup=''):
         view_type = self.data.get('view_type', 'aic')
 
@@ -143,7 +150,7 @@ class InformationPackageFilter(filters.FilterSet):
 
     class Meta:
         model = InformationPackage
-        fields = ['package_type', 'state', 'label','object_identifier_value',
+        fields = ['package_type', 'package_type_name_exclude', 'state', 'label','object_identifier_value',
         'responsible', 'create_date','object_size', 'start_date', 'end_date',
         'archival_institution', 'archivist_organization']
 
