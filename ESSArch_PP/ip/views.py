@@ -30,9 +30,7 @@ import mimetypes
 import os
 import re
 import shutil
-import tarfile
 import uuid
-import zipfile
 from collections import OrderedDict
 from operator import itemgetter
 
@@ -66,7 +64,7 @@ from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.util import (find_destination, generate_file_response,
                                get_files_and_dirs, get_tree_size_and_count,
-                               in_directory, mkdir_p,
+                               in_directory, list_files, mkdir_p,
                                parse_content_range_header,
                                timestamp_to_datetime)
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
@@ -639,16 +637,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
     @detail_route(methods=['get'])
     def files(self, request, pk=None):
-        mimetypes.suffix_map = {}
-        mimetypes.encodings_map = {}
-        mimetypes.types_map = {}
-        mimetypes.common_types = {}
-        mimetypes_file = Path.objects.get(
-            entity="path_mimetypes_definitionfile"
-        ).value
-        mimetypes.init(files=[mimetypes_file])
-        mtypes = mimetypes.types_map
-
         reception = Path.objects.get(entity="reception").value
         xml = os.path.join(reception, "%s.xml" % pk)
 
@@ -658,86 +646,12 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         ip = parse_submit_description(xml, srcdir=reception)
         container = ip['object_path']
 
-        path = request.query_params.get('path')
+        path = request.query_params.get('path', '').rstrip('/ ')
         download = request.query_params.get('download', False)
 
-        if path is not None:
-            path = path.rstrip('/ ')
-
-        if path is not None and path.startswith(os.path.basename(container)):
-            fullpath = os.path.join(os.path.dirname(container), path)
-            if tarfile.is_tarfile(container):
-                with tarfile.open(container) as tar:
-                    if fullpath == container:
-                        if download:
-                            content_type = mtypes.get(os.path.splitext(fullpath)[1])
-                            return generate_file_response(open(fullpath), content_type, download)
-
-                        entries = []
-                        for member in tar.getmembers():
-                            if not member.isfile():
-                                continue
-
-                            entries.append({
-                                "name": member.name,
-                                "type": 'file',
-                                "size": member.size,
-                                "modified": timestamp_to_datetime(member.mtime),
-                            })
-                        if self.paginator is not None:
-                            paginated = self.paginator.paginate_queryset(entries, request)
-                            return self.paginator.get_paginated_response(paginated)
-                        return Response(entries)
-                    else:
-                        subpath = fullpath[len(container)+1:]
-                        try:
-                            member = tar.getmember(subpath)
-
-                            if not member.isfile():
-                                raise exceptions.NotFound
-
-                            f = tar.extractfile(member)
-                            content_type = mtypes.get(os.path.splitext(subpath)[1])
-                            return generate_file_response(f, content_type, download)
-                        except KeyError:
-                            raise exceptions.NotFound
-
-            elif zipfile.is_zipfile(container):
-                with zipfile.ZipFile(container) as zipf:
-                    if fullpath == container:
-                        if download:
-                            content_type = mtypes.get(os.path.splitext(fullpath)[1])
-                            return generate_file_response(open(fullpath), content_type, download)
-
-                        entries = []
-                        for member in zipf.filelist:
-                            if member.filename.endswith('/'):
-                                continue
-
-                            entries.append({
-                                "name": member.filename,
-                                "type": 'file',
-                                "size": member.file_size,
-                                "modified": datetime.datetime(*member.date_time),
-                            })
-                        if self.paginator is not None:
-                            paginated = self.paginator.paginate_queryset(entries, request)
-                            return self.paginator.get_paginated_response(paginated)
-                        return Response(entries)
-                    else:
-                        subpath = fullpath[len(container)+1:]
-                        try:
-                            f = zipf.open(subpath)
-                            content_type = mtypes.get(os.path.splitext(subpath)[1])
-                            return generate_file_response(f, content_type, download)
-                        except KeyError:
-                            raise exceptions.NotFound
-        elif path in [os.path.basename(container), os.path.basename(xml)]:
-            fullpath = os.path.join(os.path.dirname(container), path)
-            content_type = mtypes.get(os.path.splitext(fullpath)[1])
-            return generate_file_response(open(fullpath), content_type, download)
-        elif path is not None:
-            raise exceptions.NotFound
+        if len(path):
+            path = os.path.join(os.path.dirname(container), path)
+            return list_files(path, download, paginator=self.paginator, request=request)
 
         entry = {
             "name": os.path.basename(container),
@@ -1330,90 +1244,22 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         self.validate_workarea(workarea)
         root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
 
-        entries = []
         path = request.query_params.get('path', '').strip('/ ')
         force_download = request.query_params.get('download', False)
         fullpath = os.path.join(root, path)
 
-        self.validate_path(fullpath, root)
+        try:
+            self.validate_path(fullpath, root)
+        except exceptions.NotFound:
+            if len(fullpath.split('.tar/')) == 2:
+                tar_path, tar_subpath = fullpath.split('.tar/')
+                tar_path += '.tar'
+                if not os.path.isfile(tar_path):
+                    raise
+            else:
+                raise
 
-        mimetypes.suffix_map = {}
-        mimetypes.encodings_map = {}
-        mimetypes.types_map = {}
-        mimetypes.common_types = {}
-        mimetypes_file = Path.objects.get(
-            entity="path_mimetypes_definitionfile"
-        ).value
-        mimetypes.init(files=[mimetypes_file])
-        mtypes = mimetypes.types_map
-
-        container = os.path.join(root, path.split('/')[0])
-        if os.path.isfile(container):
-            if tarfile.is_tarfile(container):
-                with tarfile.open(container) as tar:
-                    if fullpath == container:
-                        entries = []
-                        for member in tar.getmembers():
-                            if not member.isfile():
-                                continue
-
-                            entries.append({
-                                "name": member.name,
-                                "type": 'file',
-                                "size": member.size,
-                                "modified": timestamp_to_datetime(member.mtime),
-                            })
-                        if self.paginator is not None:
-                            paginated = self.paginator.paginate_queryset(entries, request)
-                            return self.paginator.get_paginated_response(paginated)
-                        return Response(entries)
-                    else:
-                        subpath = path.split('/', 1)[-1]
-                        try:
-                            member = tar.getmember(subpath)
-
-                            if not member.isfile():
-                                raise exceptions.NotFound
-
-                            f = tar.extractfile(member)
-                            content_type = mtypes.get(os.path.splitext(subpath)[1])
-                            return generate_file_response(f, content_type, force_download)
-                        except KeyError:
-                            raise exceptions.NotFound
-
-            content_type = mtypes.get(os.path.splitext(fullpath)[1])
-            return generate_file_response(open(fullpath), content_type, force_download)
-
-        if os.path.isfile(fullpath):
-            content_type = mtypes.get(os.path.splitext(fullpath)[1])
-            download = request.query_params.get('download', False)
-            return generate_file_response(open(fullpath), content_type, force_download=download)
-
-        for entry in get_files_and_dirs(fullpath):
-            entry_type = "dir" if entry.is_dir() else "file"
-
-            if entry_type == 'file' and re.search(r'\_\d+$', entry.name) is not None:  # file chunk
-                continue
-
-            size, _ = get_tree_size_and_count(entry.path)
-
-            entries.append(
-                {
-                    "name": os.path.basename(entry.path),
-                    "type": entry_type,
-                    "size": size,
-                    "modified": timestamp_to_datetime(entry.stat().st_mtime),
-                }
-            )
-
-        sorted_entries = sorted(entries, key=itemgetter('name'))
-
-        if self.paginator is not None:
-            paginated = self.paginator.paginate_queryset(sorted_entries, request)
-            return self.paginator.get_paginated_response(paginated)
-
-        return Response(sorted_entries)
-
+        return list_files(fullpath, force_download, paginator=self.paginator, request=request)
 
     @list_route(methods=['post'], url_path='add-directory')
     def add_directory(self, request):
