@@ -1,6 +1,13 @@
 angular.module('myApp').controller('FilebrowserController', function ($scope, $rootScope, $sce, appConfig, listViewService, $uibModal, $window, $cookies) {
     $scope.previousGridArrays = [];
     $scope.ip = $rootScope.ip;
+    var vm = this;
+    var watchers = [];
+    vm.$onDestroy = function() {
+        watchers.forEach(function(watcher) {
+            watcher();
+        });
+    };
     $scope.listView = false;
     $scope.gridView = true;
     $scope.useListView = function() {
@@ -56,11 +63,11 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     if($rootScope.ip) {
         $scope.deckGridInit($rootScope.ip);
     }
-    $scope.$watch(function () { return $rootScope.ip; }, function (newValue, oldValue) {
+    watchers.push($scope.$watch(function () { return $rootScope.ip; }, function (newValue, oldValue) {
         $scope.ip = $rootScope.ip;
         $scope.deckGridInit($rootScope.ip);
         $scope.previousGridArrays = [];
-    }, true);
+    }, true));
     $scope.previousGridArray = function () {
         $scope.previousGridArrays.pop();
         if($scope.tableState) {
