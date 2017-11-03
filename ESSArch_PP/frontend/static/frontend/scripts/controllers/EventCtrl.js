@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http) {
+angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', 'TopAlert', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http, TopAlert) {
     var vm = this;
     vm.itemsPerPage = $cookies.get('epp-events-per-page') || 10;
     $scope.updateEventsPerPage = function(items) {
@@ -106,14 +106,14 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
         $scope.addEventAlert = null;
         listViewService.addEvent(ip, eventType, eventDetail, eventOutcome).then(function(value) {
             $scope.stCtrl.pipe();
-            $scope.addEventAlert = $scope.alerts.addEventSuccess;
             $scope.newEventForm = {
                 eventType: "",
                 eventOutcome: "",
                 comment: ""
             };
+            TopAlert.add($translate.instant('EVENT_ADDED'), "success");
         }).catch(function error() {
-            $scope.addEventAlert = $scope.alerts.addEventError;
+            TopAlert.add($translate.instant('ERROR_MESSAGE'), "error");
         });
     }
     var eventInterval;
