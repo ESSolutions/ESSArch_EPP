@@ -1027,3 +1027,7 @@ padding: 0 12px;
     background-color: rgba(244, 66, 66, 0.30);
     text-align: center;
 }
+
+.no-select {
+    user-select: none;
+}

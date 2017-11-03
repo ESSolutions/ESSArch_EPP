@@ -1,9 +1,9 @@
 <div ng-if="!subrow">
-    <div ng-if="row.state != 'At reception'" class="clickable" style="white-space: nowrap;" ng-click="stateClicked(row)" uib-popover="{{'IPSTATEDESC' | translate}}: {{row.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')"><a href="">{{row.state}}</a></div>
+    <div ng-if="row.state != 'At reception'" class="clickable" style="white-space: nowrap;" ng-click="stateClicked(row)" uib-popover="{{'IPSTATEDESC' | translate}}: {{row.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('row')"><a class="no-select" href="">{{row.state}}</a></div>
     <div ng-if="row.state == 'At reception' || row.state == 'Unidentified'" style="white-space: nowrap;">
         <span href="">{{row.state}}</span>
     </div>
 </div>
 <div ng-if="subrow">
-    <div class="clickable" style="white-space: nowrap;" ng-click="stateClicked(subrow)" uib-popover="{{'IPSTATEDESC' | translate}}: {{subrow.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a href="">{{subrow.state}}</a></div>
+    <div class="clickable" style="white-space: nowrap;" ng-click="stateClicked(subrow)" uib-popover="{{'IPSTATEDESC' | translate}}: {{subrow.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a class="no-select" href="">{{subrow.state}}</a></div>
 </div>
