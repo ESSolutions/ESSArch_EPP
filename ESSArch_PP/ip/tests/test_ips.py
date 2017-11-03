@@ -641,6 +641,22 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(dip.pk))
 
+    def test_aic_view_type_detail_aip(self):
+        user2 = User.objects.create(username="another", password='another')
+        aip = InformationPackage.objects.create(package_type=InformationPackage.AIP, responsible=user2, archived=True)
+
+        url = reverse('informationpackage-detail', args=(str(aip.pk),))
+        res = self.client.get(url, {'view_type': 'aic'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_ip_view_type_detail_aip(self):
+        user2 = User.objects.create(username="another", password='another')
+        aip = InformationPackage.objects.create(package_type=InformationPackage.AIP, responsible=user2, archived=True)
+
+        url = reverse('informationpackage-detail', args=(str(aip.pk),))
+        res = self.client.get(url, {'view_type': 'ip'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
     @mock.patch('ip.views.shutil.rmtree')
     @mock.patch('ip.views.os.remove')
     def test_delete_ip_without_permission(self, mock_os, mock_shutil):
