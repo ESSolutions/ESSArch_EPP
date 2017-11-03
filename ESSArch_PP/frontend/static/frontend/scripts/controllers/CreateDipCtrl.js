@@ -1,6 +1,7 @@
 angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window) {
     var vm = this;
     var ipSortString = "";
+    var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     $scope.orderObjects = [];
     listViewService.getOrderPage().then(function(response) {
@@ -78,19 +79,22 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     //Cancel update intervals on state change
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(fileBrowserInterval);
+        watchers.forEach(function(watcher) {
+            watcher();
+        });
     });
 
 
     //Initialize file browser update interval
     var fileBrowserInterval;
-    $scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {
+    watchers.push($scope.$watch(function() { return $scope.select; }, function(newValue, oldValue) {
         if (newValue) {
             $interval.cancel(fileBrowserInterval);
             fileBrowserInterval = $interval(function() { $scope.updateGridArray() }, appConfig.fileBrowserInterval);
         } else {
             $interval.cancel(fileBrowserInterval);
         }
-    });
+    }));
     /*******************************************/
     /*Piping and Pagination for List-view table*/
     /*******************************************/

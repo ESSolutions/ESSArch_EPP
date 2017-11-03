@@ -43,6 +43,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     vm.archived = false;
 
+    var watchers = [];
     // Init request form
 
     //Request form data
@@ -59,9 +60,9 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $scope.initRequestData();
 
     // Watchers
-    $rootScope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
+    watchers.push($rootScope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
         $scope.getListViewData();
-    }, true);
+    }, true));
 
     // Initialize intervals
 
@@ -69,6 +70,9 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
+        watchers.forEach(function(watcher) {
+            watcher();
+        });
     });
 
     $rootScope.$on('REFRESH_LIST_VIEW', function (event, data) {
@@ -76,14 +80,14 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     });
     var stateInterval;
     //If status view is visible, start update interval
-    $scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
+    watchers.push($scope.$watch(function(){return $scope.statusShow;}, function(newValue, oldValue) {
         if(newValue) {
             $interval.cancel(stateInterval);
             stateInterval = $interval(function(){$scope.statusViewUpdate($scope.ip)}, appConfig.stateInterval);
         } else {
             $interval.cancel(stateInterval);
         }
-    });
+    }));
 
     // list view update interval
 

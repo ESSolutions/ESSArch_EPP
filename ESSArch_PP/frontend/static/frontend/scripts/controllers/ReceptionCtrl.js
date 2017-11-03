@@ -25,6 +25,7 @@ Email - essarch@essolutions.se
 angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
     var vm = this;
     var ipSortString = "";
+    var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     $scope.includedIps = [];
     $scope.profileEditor = false;
@@ -53,6 +54,9 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
     $scope.initRequestData();
     $rootScope.$on('$stateChangeStart', function() {
         $interval.cancel(tagsInterval);
+        watchers.forEach(function(watcher) {
+            watcher();
+        });
     });
     $scope.includeIp = function(row) {
         var temp = true;
@@ -91,14 +95,14 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
 
     //If status view is visible, start update interval
     var tagsInterval;
-    $scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
+    watchers.push($scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
         if(newValue) {
             $interval.cancel(tagsInterval);
             tagsInterval = $interval(function(){$scope.updateTags()}, appConfig.tagsInterval);
         } else {
             $interval.cancel(tagsInterval);
         }
-    });
+    }));
     //Get data for status view
 
     /*******************************************/

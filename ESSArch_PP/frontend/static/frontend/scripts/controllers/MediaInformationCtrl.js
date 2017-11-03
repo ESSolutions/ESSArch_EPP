@@ -24,6 +24,7 @@ Email - essarch@essolutions.se
 
 angular.module('myApp').controller('MediaInformationCtrl', function($scope, $rootScope, $controller, $cookies, $http, appConfig, Resource, $interval, $anchorScroll, $timeout) {
     var vm = this;
+    var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
     $scope.colspan = 6;
     $scope.storageMedium = null;
@@ -36,15 +37,19 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
     mediumInterval = $interval(function() {
         vm.getMediumData();
     }, appConfig.storageMediumInterval)
-    $scope.$watch(function(){return $scope.select;}, function(newValue, oldValue) {
+    watchers.push($scope.$watch(function(){return $scope.select;}, function(newValue, oldValue) {
 		if(newValue) {
 			$interval.cancel(objectInterval);
 			objectInterval = $interval(function(){vm.getObjectData()}, appConfig.storageObjectInterval);
 		} else {
 			$interval.cancel(objectInterval);
 		}
-	});
-
+	}));
+    $rootScope.$on('$stateChangeStart', function() {
+        watchers.forEach(function(watcher) {
+            watcher();
+        });
+    });
     //Cancel update intervals on state change
 	$rootScope.$on('$stateChangeStart', function() {
 		$interval.cancel(mediumInterval);
