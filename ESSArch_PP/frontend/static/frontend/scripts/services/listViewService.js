@@ -564,10 +564,12 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
 
     function addNewFolder(ip, path, file) {
         return IP.addFile({
-            id: ip.id,
-            path: path + file.name,
-            type: file.type
-        }).$promise.then(function(response) {
+            id: ip.id
+            },
+            {
+                path: path + file.name,
+                type: file.type
+            }).$promise.then(function (response) {
             return response;
         });
     }
