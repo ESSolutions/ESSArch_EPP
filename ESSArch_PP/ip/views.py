@@ -847,7 +847,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                         Q(aic__information_packages__workareas=None) |
                         Q(aic__information_packages__workareas__read_only=True)
                     ),
-                    generation=Subquery(inner.values('generation')[:1]),
+                    Q(
+                        Q(generation=Subquery(inner.values('generation')[:1])) |
+                        Q(package_type=InformationPackage.DIP)
+                    ),
                 ).distinct()
             return self.queryset.filter(
                 Q(

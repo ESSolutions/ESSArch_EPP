@@ -627,6 +627,19 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
 
+    def test_aic_view_type_dip(self):
+        dip = InformationPackage.objects.create(package_type=InformationPackage.DIP, generation=0)
+
+        res = self.client.get(self.url, {'view_type': 'aic'})
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['id'], str(dip.pk))
+
+    def test_ip_view_type_dip(self):
+        dip = InformationPackage.objects.create(package_type=InformationPackage.DIP)
+
+        res = self.client.get(self.url, {'view_type': 'ip'})
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['id'], str(dip.pk))
 
     @mock.patch('ip.views.shutil.rmtree')
     @mock.patch('ip.views.os.remove')

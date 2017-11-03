@@ -136,7 +136,10 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         view_type = request.query_params.get('view_type', 'aic')
 
         if view_type == 'ip':
-            related = obj.aic.information_packages
+            if obj.aic is not None:
+                related = obj.aic.information_packages
+            else:
+                related = InformationPackage.objects.none()
         else:
             related = obj.information_packages
 

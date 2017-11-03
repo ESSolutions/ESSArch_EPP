@@ -112,7 +112,7 @@ class InformationPackageFilter(filters.FilterSet):
         prefetched = qs.prefetch_related(Prefetch(field, information_packages))
 
         if self.form.data.get('view_type', 'aic') == 'aic':
-            return prefetched.annotate(nested_exists=Exists(nested_exists_query)).filter(nested_exists=True)
+            return prefetched.annotate(nested_exists=Exists(nested_exists_query)).filter(Q(nested_exists=True) | Q(package_type=InformationPackage.DIP))
 
         return prefetched
 
