@@ -132,7 +132,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
                 $rootScope.ip = null;
             }
         } else {
-            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
+            if ($rootScope.auth.id == ip.workarea.user.id || !ip.workarea.user) {
                 $scope.ip = ip;
                 $rootScope.ip = ip;
                 $scope.previousGridArrays = [];
