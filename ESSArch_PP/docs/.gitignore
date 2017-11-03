@@ -1,3 +1,2 @@
-build
-source/ESSArch_TP*.rst
-source/modules.rst
+_build
+source
