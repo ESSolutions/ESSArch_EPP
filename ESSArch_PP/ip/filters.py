@@ -171,7 +171,7 @@ class WorkareaFilter(InformationPackageFilter):
         user = getattr(self.request, 'user', None)
         information_packages = InformationPackage.objects.select_related('responsible').prefetch_related('steps').all()
 
-        if user is not None:
+        if user is not None and not user.has_perm('ip.see_all_in_workspaces'):
             information_packages = information_packages.filter(workareas__user=user)
 
         return super(WorkareaFilter, self).prefetch_information_packages(qs, ips=information_packages)

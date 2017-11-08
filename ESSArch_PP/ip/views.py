@@ -1197,24 +1197,37 @@ class WorkareaViewSet(InformationPackageViewSet):
             )
         )
 
+        see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
+
         if self.action == 'list':
             if view_type == 'ip':
-                return self.queryset.exclude(
+                queryset = self.queryset.exclude(
                     package_type=InformationPackage.AIC
                 ).filter(
-                    Q(
+                    generation=Subquery(inner.values('generation')[:1]),
+                )
+
+                if not see_all:
+                    queryset = queryset.filter(
                         Q(workareas__user=self.request.user) |
                         Q(aic__information_packages__workareas__user=self.request.user)
-                    ),
-                    generation=Subquery(inner.values('generation')[:1]),
-                ).distinct()
+                    )
 
-            return self.queryset.filter(
-                aic__isnull=True,
-                information_packages__workareas__user=self.request.user,
-            ).distinct()
+                return queryset.distinct()
 
-        return self.queryset.filter(responsible=self.request.user)
+            queryset = self.queryset.filter(aic__isnull=True)
+
+            if not see_all:
+                queryset = queryset.filter(
+                    information_packages__workareas__user=self.request.user,
+                )
+
+            return queryset.distinct()
+
+        if see_all:
+            return self.queryset.filter(workareas__user=self.request.user)
+
+        return self.queryset
 
 
 class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
