@@ -198,7 +198,7 @@ class TagSearchViewSet(ViewSet, PaginatedViewMixin):
 
     @detail_route(methods=['get'])
     def children(self, request, pk=None):
-        s = Search(index=self.index)
+        s = Search(index=self.index).sort('reference_code')
 
         try:
             tree_id = request.query_params['tree_id']
