@@ -1,0 +1,60 @@
+<div class="search">
+    <div class="content-wrapper">
+        <div class="search-page">
+            <h4>{{'SEARCH' | translate}}</h4>
+            <form ng-submit="vm.searchSubmit(vm.searchString)">
+                <input class="form-control search-field" placeholder="Search" ng-model="vm.searchString">
+                <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}}</button>
+            </form>
+            <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <div ng-if="vm.showFilters">
+                <label>
+                    {{'START_DATE' | translate}}
+                    <input type="number" class="form-control" ng-model="vm.filterObject.start_date">
+                </label>
+                <label>
+                    {{'END_DATE' | translate}}
+                    <input type="number" class="form-control" ng-model="vm.filterObject.end_date">
+                </label>
+                <label>
+                    {{'TREE_ID' | translate}}
+                    <select class="form-control" ng-model="vm.treeId" ng-options="x for x in vm.treeIds">{{x}}</select>
+                </label>
+            </div>
+        </div>
+        <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
+            <uib-tab index="0" heading="{{'HITS' | translate}}">
+            <div class="tree-result-wrapper">
+                <div class="filter-tree">
+                    <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
+                </div>
+                <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                    <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                    <div ng-repeat="x in vm.searchResult" class="result-item clickable"  ng-click="vm.openResult(x)">
+                        {{vm.resultNumber($index)}}.
+                        {{x.type}}
+                        <p class="result-name" ng-bind-html="x.name"></h5>
+                        <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
+                        <p class="result-description">{{x.desc}}</p>
+                    </div>
+                    <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                </div>
+            </div>
+            </uib-tab>
+            <uib-tab ng-show="vm.viewContent" index="1" heading="{{'RECORD' | translate}}">
+                <div class="tree-result-wrapper" id="view-record">
+                    <div class="record-tree">
+                        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord"></div>
+                    </div>
+                    <div class="view-content">
+                        <h4>{{vm.record._type}}</h4>
+                        <h4>{{vm.record.name}}</h4>
+                        <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
+                        <p class="result-description">{{vm.record.desc}}</p>
+                    </div>
+                </div>
+            </uib-tab>
+        </uib-tabset>
+    </div>
+</div>

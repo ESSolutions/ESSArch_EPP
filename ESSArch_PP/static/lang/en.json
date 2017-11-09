@@ -414,5 +414,9 @@
     "IP_GENERATION": "IP generation: {{generation}}",
     "FILES_PER_PAGE": "Files per page",
     "LIST_VIEW": "List",
-    "GRID_VIEW": "Grid"
+    "GRID_VIEW": "Grid",
+    "SHOWING_RESULT": "Showing result",
+    "OF": "of",
+    "HITS": "List",
+    "RECORD": "Record"
 }

@@ -83,6 +83,8 @@ var jsVendorFiles = [
         'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js',
         'node_modules/angular-clipboard/angular-clipboard.js',
         'node_modules/angular-resource/angular-resource.js',
+        'node_modules/jstree/dist/jstree.js',
+        'node_modules/ng-js-tree/dist/ngJsTree.js',
     ],
     jsFiles = [
         'scripts/polyfills/*.js', 'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
@@ -99,6 +101,7 @@ var jsVendorFiles = [
         'styles/modules/tree_control.scss',
         'styles/modules/profile_maker.scss',
         'styles/modules/top_alert.scss',
+        'styles/modules/search.scss',
         'styles/styles.scss'
     ],
     cssDest = 'styles';
@@ -178,7 +181,10 @@ var copyImages = function() {
     return gulp.src('node_modules/angular-tree-control/images/**.*') 
         .pipe(gulp.dest('images')); 
 };
-
+var copyImagesJstree = function() {
+    return gulp.src('node_modules/jstree/dist/themes/default/**.{png,gif}')
+        .pipe(gulp.dest('styles'));
+};
 var configConstants = function() {
     var myConfig = require('./scripts/configs/config.json');
     if(isProduction) {
@@ -212,7 +218,8 @@ gulp.task('default', function() {
     permissionConfig();
     compileSass();
     copyIcons();
-    copyImages()
+    copyImages();
+    copyImagesJstree();
     buildScripts();
     return buildVendors();
 });
