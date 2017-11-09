@@ -205,7 +205,7 @@ class TagSearchViewSet(ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('tree_id parameter missing')
 
-        p = {'parents.%s' % tree_id: pk}
+        p = {'parents.%s' % tree_id: {'query': pk, 'operator': 'and'}}
         s = s.query('match', **p)
 
         if self.paginator is not None:
