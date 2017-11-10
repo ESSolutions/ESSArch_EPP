@@ -1,11 +1,13 @@
-angular.module('myApp').factory('Search', function($http, $sce) {
+angular.module('myApp').factory('Search', function($http, $sce, appConfig) {
     var service = {};
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
+    var url = appConfig.djangoUrl;
+    //var url = "http://192.168.6.105:8002/api/";
     service.query = function (filters, pageNumber, pageSize) {
         return $http({
             method: 'GET',
-            url: "http://192.168.6.105:8002/api/search/",
+            url: url+"search/",
             headers: headers,
             params: angular.extend(
                 {
@@ -38,7 +40,7 @@ angular.module('myApp').factory('Search', function($http, $sce) {
     }
 
     service.getChildrenForTag = function(tag){
-        return $http.get("http://192.168.6.105:8002/api/search/"+tag.id+"/children/", {headers: headers}).then(function(response) {
+        return $http.get(url+"search/"+tag.id+"/children/", {headers: headers}).then(function(response) {
             var temp  = response.data.map(function(item) {
                 item._source.id = item._id;
                 item._source.text = item._source.reference_code + " - "+item._source.name;

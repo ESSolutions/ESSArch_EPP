@@ -1,7 +1,8 @@
 angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll) {
     var vm = this;
 
-    vm.url = "http://192.168.6.105:8002/api";
+    vm.url = appConfig.djangoUrl;
+    //vm.url = "http://192.168.6.105:8002/api/";
 
     vm.currentItem = null;
     vm.displayed = null;
@@ -110,23 +111,14 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         vm.recreateFilterTree(tags)
     }
 
-    vm.getChildrenForTag = function(tag){
-        return $http.get(vm.url+"/search/"+tag.id+"/children/", {headers: headers}).then(function(response) {
-            var temp  = response.data.map(function(item) {
-                item._source.id = item._id;
-                item._source.text = item._source.reference_code + " - "+item._source.name;
-                return item._source;
-            });
-            return temp;
-        })
-    }
     vm.getPathFromParents = function(tag) {
         if(tag.parents.length > 0) {
             vm.getTag(tag.parents[0]);
         }
     }
+
     vm.getTag = function(tag) {
-        return $http.get(vm.url+"/search/"+tag.id+"/").then(function(response) {
+        return $http.get(vm.url+"search/"+tag.id+"/").then(function(response) {
             return response.data;
         });
     }
@@ -136,7 +128,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             result.id = result._id;
         }
         vm.viewContent = true;
-        $http.get(vm.url+"/search/"+result.id+"/", {headers: headers}).then(function(response) {
+        $http.get(vm.url+"search/"+result.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
             vm.activeTab = 1;
             $anchorScroll();
@@ -163,7 +155,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             startNode.state.selected = true;
         }
         if(startNode.parents) {
-            return $http.get(vm.url+"/search/"+startNode.parents[vm.treeId]+"/", {headers: headers}).then(function(response) {
+            return $http.get(vm.url+"search/"+startNode.parents[vm.treeId]+"/", {headers: headers}).then(function(response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function(children) {
@@ -193,7 +185,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
     }
     function getChildren(node) {
-        return $http.get(vm.url+"/search/"+node._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: 1}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: 1}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
@@ -314,7 +306,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parents[0]);
             var children = tree[tree.map(function(x) {return x._id; }).indexOf(parent.original._id)].children;
-            $http.get(vm.url+"/search/"+e.node.original.parent+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original.parent+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var see_more = children.pop()
                 response.data.forEach(function(child) {
