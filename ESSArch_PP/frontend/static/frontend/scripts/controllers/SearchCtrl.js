@@ -2,7 +2,6 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     var vm = this;
 
     vm.url = appConfig.djangoUrl;
-    //vm.url = "http://192.168.6.105:8002/api/";
 
     vm.currentItem = null;
     vm.displayed = null;

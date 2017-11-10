@@ -3,7 +3,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig) {
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
     var url = appConfig.djangoUrl;
-    //var url = "http://192.168.6.105:8002/api/";
     service.query = function (filters, pageNumber, pageSize) {
         return $http({
             method: 'GET',
