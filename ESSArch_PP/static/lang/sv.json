@@ -418,5 +418,6 @@
     "SHOWING_RESULT": "Visar träff",
     "OF": "av",
     "HITS": "Träfflista",
-    "RECORD": "Postvisning"
+    "RECORD": "Postvisning",
+    "CLASSIFICATION_STRUCTURE": "Klassificeringsstruktur"
 }
