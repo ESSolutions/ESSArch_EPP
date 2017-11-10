@@ -28,7 +28,10 @@ django.setup()
 
 from django.contrib.auth.models import User, Group, Permission
 
+from elasticsearch_dsl import Index, exceptions as elastic_exceptions
+
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
+from ESSArch_Core.search import get_connection
 from ESSArch_Core.storage.models import (
     DISK,
 
@@ -36,6 +39,7 @@ from ESSArch_Core.storage.models import (
     StorageMethodTargetRelation,
     StorageTarget,
 )
+from ESSArch_Core.tags.documents import Tag
 
 
 def installDefaultConfiguration():
@@ -59,6 +63,9 @@ def installDefaultConfiguration():
 
     print "\nInstalling storage method target relations..."
     installDefaultStorageMethodTargetRelations()
+
+    print "\nInstalling search indices..."
+    installSearchIndices()
 
     return 0
 
@@ -322,6 +329,23 @@ def installDefaultStorageMethodTargetRelations():
 
     return 0
 
+
+def installSearchIndices():
+    get_connection()
+    indices = [Tag]
+
+    for index in indices:
+        name = index().meta.index
+        print '-> %s...' % name,
+        try:
+            index.init()
+        except elastic_exceptions.IllegalOperation:
+            if Index(name).exists():
+                print 'already exists'
+            else:
+                raise
+        else:
+            print 'done'
 
 if __name__ == '__main__':
     installDefaultConfiguration()
