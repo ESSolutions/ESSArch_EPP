@@ -290,7 +290,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     };
     vm.recordTreeData = [];
     vm.selectRecord = function (jqueryobj, e) {
-        if(e.node.original.see_more) {
+        if(e.node && e.node.original.see_more) {
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parents[0]);
             var children = tree[tree.map(function(x) {return x._id; }).indexOf(parent.original._id)].children;
