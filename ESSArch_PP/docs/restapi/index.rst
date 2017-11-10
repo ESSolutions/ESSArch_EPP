@@ -9,5 +9,6 @@
     :maxdepth: 2
 
     information-packages
+    search
     profiles
     storage
