@@ -9,20 +9,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.viewResult = false;
     vm.numberOfResults = 0;
     vm.resultsPerPage = 25;
-    var watchers = [];
-    watchers.push($rootScope.$watch(function(){return $rootScope.selectedTag}, function(newVal, oldVal) {
-        vm.currentItem = newVal;
-        if(oldVal) {
-            vm.search(vm.searchString);
-        }
-    }));
+
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
-    $rootScope.$on('$stateChangeStart', function() {
-        watchers.forEach(function(watcher) {
-            watcher();
-        });
-    });
 
     vm.filterObject = {
         q: "",
