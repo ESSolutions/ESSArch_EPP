@@ -34,7 +34,7 @@
                     <div ng-repeat="x in vm.searchResult" class="result-item clickable"  ng-click="vm.openResult(x)">
                         {{vm.resultNumber($index)}}.
                         {{x.type}}
-                        <p class="result-name" ng-bind-html="x.name"></h5>
+                        <p class="result-name" ng-bind-html="x.name"></p>
                         <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
                         <p class="result-description">{{x.desc}}</p>
                     </div>
