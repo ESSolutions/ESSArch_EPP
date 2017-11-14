@@ -27,7 +27,7 @@ import shutil
 import tempfile
 import uuid
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.http.response import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
@@ -133,6 +133,35 @@ class WorkareaViewSetTestCase(TestCase):
         res = self.client.get(self.url, data={'view_type': 'aic', 'object_identifier_value': aip2.object_identifier_value})
 
         self.assertEqual(len(res.data), 0)
+
+    def test_ip_in_workarea_by_other_user_with_permission_to_see_all_aic_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        self.ip.aic = aic
+        self.ip.save()
+
+        self.user.user_permissions.add(Permission.objects.get(codename='see_all_in_workspaces'))
+        user2 = User.objects.create()
+        Workarea.objects.create(user=user2, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'workarea': 'access', 'view_type': 'aic'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(aic.pk))
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(self.ip.pk))
+
+    def test_ip_in_workarea_by_other_user_with_permission_to_see_all_ip_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        ip2 = InformationPackage.objects.create(package_type=InformationPackage.AIP, aic=aic, generation=1)
+        self.ip.aic = aic
+        self.ip.save()
+
+        self.user.user_permissions.add(Permission.objects.get(codename='see_all_in_workspaces'))
+        user2 = User.objects.create()
+        Workarea.objects.create(user=user2, ip=self.ip, type=Workarea.ACCESS)
+
+        res = self.client.get(self.url, {'workarea': 'access', 'view_type': 'ip'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data[0]['id'], str(self.ip.pk))
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(ip2.pk))
 
     def test_ip_in_workarea_by_current_user_ip_view_type(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
