@@ -135,6 +135,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 vm.recreateRecordTree(treeData);
             }
             vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
+            vm.record.state.opened = false;
             getChildren(vm.record).then(function(response) {
                 vm.record_children = response.data;
             })
