@@ -1,4 +1,4 @@
-<div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.administration' | includedByState) || ($state.current.name == 'home.appraisal')">
+<div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.administration' | includedByState) || ('home.archiveMaintenance' | includedByState)">
     <div class="sub-menu">
         <div ng-if="'home.ingest' | includedByState">
             <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(getPermissions('home.ingest.reception'))">{{'RECEPTION' | translate}}</div>
@@ -19,6 +19,8 @@
             <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out" ng-if="checkPermissions(getPermissions('home.administration.storageMaintenance'))">{{'STORAGEMAINTENANCE' | translate}}</div>
             <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.includes('home.administration.profileManager')}" class="nav-item sliding-middle-out" ng-if="checkPermissions(getPermissions('home.administration.profileManager'))">{{'PROFILEMANAGER' | translate}}</div>
         </div>
-        <div ng-if="$state.current.name == 'home.appraisal'" class="nav-item sliding-middle-out" style="margin-left: 5px;" translate="APPRAISAL"></div>
+        <div ng-if="'home.archiveMaintenance' | includedByState">
+            <div ui-sref="home.archiveMaintenance.appraisal" ng-class="{chosen: $state.current.name == 'home.archiveMaintenance.appraisal'}" class="nav-item sliding-middle-out" >{{'APPRAISAL' | translate}}</div>
+        </div>
     </div>
 </div>

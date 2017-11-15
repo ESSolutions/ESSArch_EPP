@@ -1,0 +1,14 @@
+<div class="enter-profile-name" style="padding: 5px;">
+        <h3 class="modal-title" id="modal-title">{{'APPRAISAL' | translate}}</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <h4>{{$ctrl.data.state}}</h4>
+        <p>{{$ctrl.data.appraisal.name}}</p>
+        <p>{{$ctrl.data.appraisal.type}}</p>
+        <p>{{$ctrl.data.appraisal.start | date:"yyyy-MM-dd hh:mm:ss"}}</p>
+        <p>{{$ctrl.data.appraisal.stop | date:"yyyy-MM-dd hh:mm:ss"}}</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()" focused="true">{{'OK' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>

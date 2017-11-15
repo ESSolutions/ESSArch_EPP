@@ -420,5 +420,17 @@
     "HITS": "Träfflista",
     "RECORD": "Postvisning",
     "CLASSIFICATION_STRUCTURE": "Klassificeringsstruktur",
-    "SEE_MORE": "Se mer"
+    "SEE_MORE": "Se mer",
+    "ARCHIVE_MAINTENANCE": "Arkiunderhåll",
+    "RUN_NOW": "Kör nu",
+    "FREQUENCY": "Frekvens",
+    "START": "Start",
+    "RULE": "Regel",
+    "ONGOING": "Pågående",
+    "NEXT": "Nästa",
+    "FINISHED": "Avslutade",
+    "END": "Slut",
+    "REPORT": "Rapport",
+    "CREATE_APPRAISAL_RULE": "Skapa gallringsregel",
+    "APPRAISAL_RULE": "Gallringsregel"
 }

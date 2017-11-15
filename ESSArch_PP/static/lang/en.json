@@ -420,5 +420,17 @@
     "HITS": "List",
     "RECORD": "Record",
     "CLASSIFICATION_STRUCTURE": "Classification structure",
-    "SEE_MORE": "See more"
+    "SEE_MORE": "See more",
+    "ARCHIVE_MAINTENANCE": "Archive maintenance",
+    "RUN_NOW": "Run now",
+    "FREQUENCY": "Frequency",
+    "START": "Start",
+    "RULE": "Rule",
+    "ONGOING": "Ongoing",
+    "NEXT": "next",
+    "FINISHED": "Finished",
+    "END": "End",
+    "REPORT": "Report",
+    "CREATE_APPRAISAL_RULE": "Create appraisal rule",
+    "APPRAISAL_RULE": "Appraisal rule"
 }

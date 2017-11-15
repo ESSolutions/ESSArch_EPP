@@ -321,4 +321,24 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
+}).controller('AppraisalModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $scope) {
+    var $ctrl = this;
+    $ctrl.angular = angular;
+    $ctrl.data = data;
+    $ctrl.requestTypes = data.types;
+    $ctrl.request = data.request;
+    $ctrl.create = function() {
+        $ctrl.data = {
+            name: $ctrl.name,
+            frequency: $ctrl.frequency,
+            type: $ctrl.type
+        };
+        $uibModalInstance.close($ctrl.data);
+    }
+    $ctrl.ok = function() {
+        $uibModalInstance.close();
+    }
+    $ctrl.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
 })

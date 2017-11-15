@@ -243,11 +243,20 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.appraisal', {
-        url: 'appraisal',
+    .state('home.archiveMaintenance', {
+        url: 'archive-maintenance',
+        templateUrl: '/static/frontend/views/archive_maintenance.html',
+        controller: 'ArchiveMaintenanceCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.archiveMaintenance.appraisal', {
+        url: '/appraisal',
         templateUrl: '/static/frontend/views/appraisal.html',
         controller: 'AppraisalCtrl as vm',
-        params: {tag: null, ips: [], archive_policy: null},
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();

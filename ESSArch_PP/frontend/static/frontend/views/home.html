@@ -40,6 +40,7 @@
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions(getPermissions('home.ingest'))">{{('INGEST' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions(getPermissions('home.access'))">{{('ACCESS' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders" ng-if="checkPermissions(getPermissions('home.orders'))">{{('ORDERS' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.archiveMaintenance')}" ui-sref="home.archiveMaintenance">{{('ARCHIVE_MAINTENANCE' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions(getPermissions('home.administration'))">{{('ADMINISTRATION' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.search')}" ui-sref="home.search">{{('SEARCH' | translate)}}</p>
         </div>
