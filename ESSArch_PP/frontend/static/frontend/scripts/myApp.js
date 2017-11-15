@@ -40,7 +40,7 @@ function nestedPermissions(page) {
     }
 }
 
-angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource", 'relativeDate', 'ngWebSocket'])
+angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource", 'relativeDate', 'ngWebSocket', 'ngJsTree'])
 .config(function($routeProvider, formlyConfigProvider, $urlMatcherFactoryProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider, permissionConfig) {
 
     $urlMatcherFactoryProvider.strictMode(false);
@@ -74,6 +74,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         url: 'my-page',
         templateUrl: '/static/frontend/views/my_page.html',
         controller: 'MyPageCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search', {
+        url: 'search',
+        templateUrl: '/static/frontend/views/search.html',
+        controller: 'SearchCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();

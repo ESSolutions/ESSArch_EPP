@@ -173,6 +173,12 @@ CACHES = {
     }
 }
 
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}
+
 # Logging
 LOGGING = {
     'version': 1,

@@ -414,5 +414,11 @@
     "IP_GENERATION": "IP-generation: {{generation}}",
     "FILES_PER_PAGE": "Filer per sida",
     "LIST_VIEW": "Lista",
-    "GRID_VIEW": "Rutnät"
+    "GRID_VIEW": "Rutnät",
+    "SHOWING_RESULT": "Visar träff",
+    "OF": "av",
+    "HITS": "Träfflista",
+    "RECORD": "Postvisning",
+    "CLASSIFICATION_STRUCTURE": "Klassificeringsstruktur",
+    "SEE_MORE": "Se mer"
 }

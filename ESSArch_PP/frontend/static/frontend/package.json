@@ -67,7 +67,8 @@
     "angular-clipboard": "^1.5.0",
     "angular-relative-date": "^2.1.1",
     "angular-resource": "^1.6.5",
-    "angular-websocket": "^2.0.1"
+    "angular-websocket": "^2.0.1",
+    "ng-js-tree": "^0.0.10"
   },
   "scripts": {
     "update-deps": "npm update",

@@ -30,6 +30,7 @@
 @import '../node_modules/angular-bootstrap-grid-tree/src/treeGrid';
 @import '../node_modules/angular-tree-control/css/tree-control-attribute';
 @import '../node_modules/angular-tree-control/css/tree-control';
+@import '../node_modules/jstree/dist/themes/default/style';
 @import 'modules/index';
 @import 'modules/login';
 @import 'modules/reception';
@@ -38,3 +39,4 @@
 @import 'modules/tables';
 @import 'modules/tree_control';
 @import 'modules/top_alert';
+@import 'modules/search';

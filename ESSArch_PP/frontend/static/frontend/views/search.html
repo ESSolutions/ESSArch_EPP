@@ -1,0 +1,100 @@
+<div class="search">
+    <div class="content-wrapper">
+        <div class="search-page">
+            <h4>{{'SEARCH' | translate}}</h4>
+            <form ng-submit="vm.searchSubmit(vm.searchString)">
+                <input class="form-control search-field" placeholder="Search" ng-model="vm.searchString">
+                <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}}</button>
+            </form>
+            <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <div ng-if="vm.showFilters">
+                <label>
+                    {{'START_DATE' | translate}}
+                    <input type="number" class="form-control" ng-model="vm.filterObject.start_date">
+                </label>
+                <label>
+                    {{'END_DATE' | translate}}
+                    <input type="number" class="form-control" ng-model="vm.filterObject.end_date">
+                </label>
+                <label>
+                    {{'CLASSIFICATION_STRUCTURE' | translate}}
+                    <select class="form-control" ng-model="vm.treeId" ng-options="x for x in vm.treeIds">{{x}}</select>
+                </label>
+            </div>
+        </div>
+        <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
+            <uib-tab index="0" heading="{{'HITS' | translate}}">
+            <div class="tree-result-wrapper">
+                <div class="filter-tree">
+                    <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
+                </div>
+                <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                    <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                    <div ng-repeat="x in vm.searchResult" class="result-item clickable"  ng-click="vm.openResult(x)">
+                        {{vm.resultNumber($index)}}.
+                        {{x.type}}
+                        <p class="result-name" ng-bind-html="x.name"></p>
+                        <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
+                        <p class="result-description">{{x.desc}}</p>
+                    </div>
+                    <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                </div>
+            </div>
+            </uib-tab>
+            <uib-tab ng-show="vm.viewContent" index="1" heading="{{'RECORD' | translate}}">
+                <div class="tree-result-wrapper" id="view-record">
+                    <div class="record-tree" ng-if="vm.recordTreeData">
+                        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;open_node:vm.expandChildren;"></div>
+                    </div>
+                    <div class="view-content">
+                        <h4>{{vm.record._type}}</h4>
+                        <h4 ng-bind-html="vm.record.text"></h4>
+                        <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
+                        <p class="result-description">{{vm.record.desc}}</p>
+                        <div ng-if="vm.record.type != 'volume'" st-table="vm.record_children" style="width:100%;">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Referenskod</th>
+                                        <th>Namn</th>
+                                        <th>Tid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="x in vm.record_children">
+                                        <td><b>{{x._source.reference_code}}</b></td>
+                                        <td>{{x._source.name}}</td>
+                                        <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+                        </div>
+                        <div ng-if="vm.record.type == 'volume'" st-table="vm.record_children" style="width:100%;">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr class="clickable">
+                                            <th>Referenskod</th>
+                                            <th>Namn</th>
+                                            <th>Tid</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="x in vm.record_children">
+                                            <td><b>{{x._source.reference_code}}</b></td>
+                                            <td>{{x._source.name}}</td>
+                                            <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
+                                            <td><button class="btn btn-success lock-button" ng-click="vm.viewResult()"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+                            </div>
+                    </div>
+                </div>
+            </uib-tab>
+        </uib-tabset>
+    </div>
+</div>

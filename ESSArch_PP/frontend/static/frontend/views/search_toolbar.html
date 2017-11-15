@@ -1,0 +1,7 @@
+<div class="number-per-page-wrapper">
+    <div class="page-number">
+        {{vm.calculatePageNumber()}}
+    </div>
+    <select class="form-control items-per-page" ng-model="vm.resultsPerPage" ng-options="x for x in [10,25,50,100]">{{x}}</select>
+</div>
+<div class="search-pagination" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.resultsPerPage" st-displayed-pages="7"></div>
