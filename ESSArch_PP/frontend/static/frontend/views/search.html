@@ -44,14 +44,54 @@
             </uib-tab>
             <uib-tab ng-show="vm.viewContent" index="1" heading="{{'RECORD' | translate}}">
                 <div class="tree-result-wrapper" id="view-record">
-                    <div class="record-tree">
-                        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord"></div>
+                    <div class="record-tree" ng-if="vm.recordTreeData">
+                        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;open_node:vm.expandChildren;"></div>
                     </div>
                     <div class="view-content">
                         <h4>{{vm.record._type}}</h4>
-                        <h4>{{vm.record.name}}</h4>
+                        <h4 ng-bind-html="vm.record.text"></h4>
                         <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
                         <p class="result-description">{{vm.record.desc}}</p>
+                        <div ng-if="vm.record.type != 'volume'" st-table="vm.record_children" style="width:100%;">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Referenskod</th>
+                                        <th>Namn</th>
+                                        <th>Tid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="x in vm.record_children">
+                                        <td><b>{{x._source.reference_code}}</b></td>
+                                        <td>{{x._source.name}}</td>
+                                        <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+                        </div>
+                        <div ng-if="vm.record.type == 'volume'" st-table="vm.record_children" style="width:100%;">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr class="clickable">
+                                            <th>Referenskod</th>
+                                            <th>Namn</th>
+                                            <th>Tid</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="x in vm.record_children">
+                                            <td><b>{{x._source.reference_code}}</b></td>
+                                            <td>{{x._source.name}}</td>
+                                            <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
+                                            <td><button class="btn btn-success lock-button" ng-click="vm.viewResult()"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+                            </div>
                     </div>
                 </div>
             </uib-tab>

@@ -1,6 +1,6 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll) {
+angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal) {
     var vm = this;
-
+    $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
 
     vm.currentItem = null;
@@ -36,6 +36,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             vm.tableState.pagination.start = 0;
         }
         vm.search(vm.tableState);
+        vm.activeTab = 0;
     }
 
     /**
@@ -119,24 +120,33 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         $http.get(vm.url+"search/"+result.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
             vm.activeTab = 1;
-            $anchorScroll();
             if(response.data.parents) {
                 vm.buildRecordTree(response.data).then(function(node) {
                     var treeData = [node];
                     vm.recreateRecordTree(treeData);
                 })
             } else {
-                response.data.text = response.data.name;
+                if(angular.isUndefined(response.data.name)) {
+                    response.data.name = "";
+                }
+                response.data.text = "<b>" + response.data.reference_code + "</b> " + response.data.name;
                 response.data.type = response.data._type;
                 var treeData = [response.data];
                 vm.recreateRecordTree(treeData);
             }
+            vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
+            getChildren(vm.record).then(function(response) {
+                vm.record_children = response.data;
+            })
         });
     }
     vm.treeIds = ["tree_id1", "Allänna arkivschemat"]
     vm.treeId = "tree_id1";
     vm.buildRecordTree = function(startNode) {
-        startNode.text = startNode.name;
+        if(angular.isUndefined(startNode.name)) {
+            startNode.name = "";
+        }
+        startNode.text = "<b>" + startNode.reference_code + "</b> " + startNode.name;
         startNode.type = startNode._type;
         startNode.state = {opened: true};
         if(startNode._id == vm.record._id) {
@@ -151,9 +161,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                         if(child._id == startNode._id) {
                             p.children.push(startNode);
                         } else {
-                            child._source.text = child._source.name;
+                            if(angular.isUndefined(child._source.name)) {
+                                child._source.name = "";
+                            }
+                            child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
                             child._source.type = child._type;
                             child._source.state = {opened: true};
+                            if(!child._source.children) {
+                                child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
+                            }
+                            child._source.state = { opened: false };
+                            child._source._id = child._id;
                             p.children.push(child._source);
                         }
                     });
@@ -164,6 +182,10 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                             type: "plus",
                             parent: p._id,
                         });
+                        if(!getNodeById(p, startNode._id)) {
+                            startNode.state.opened = false;
+                            p.children.push(startNode);
+                        }
                     }
                     return vm.buildRecordTree(p);
                 })
@@ -173,6 +195,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
     }
     function getChildren(node) {
+        if(!node._id && node.id) {
+            node._id = node.id;
+        }
         return $http.get(vm.url+"search/"+node._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: 1}}).then(function(response) {
             var count = response.headers('Count');
             return {
@@ -249,7 +274,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.recreateRecordTree = function(tags) {
         vm.ignoreRecordChanges = true;
         if(angular.equals(tags, vm.recordTreeData)) {
-        vm.recordTreeConfig.version++;
+            vm.recordTreeConfig.version++;
         } else {
             angular.copy(tags, vm.recordTreeData);
             vm.recordTreeConfig.version++;
@@ -293,18 +318,41 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if(e.node && e.node.original.see_more) {
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parents[0]);
-            var children = tree[tree.map(function(x) {return x._id; }).indexOf(parent.original._id)].children;
+            var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
             $http.get(vm.url+"search/"+e.node.original.parent+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
-                var see_more = children.pop()
+                var selectedElement = null;
+                var see_more = null;
+                if(children[children.length-1].see_more) {
+                    see_more = children.pop();
+                } else {
+                    selectedElement = children.pop();
+                    see_more = children.pop();
+                }
                 response.data.forEach(function(child) {
-                    child._source.text = child._source.name;
+                    if(angular.isUndefined(child._source.name)) {
+                        child._source.name = "";
+                    }
+                    child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
                     child._source.type = child._type;
-                    child._source.state = {opened: true};
+                    if(!child._source.children) {
+                        child._source.children = [{text: "", parent: child._id, icon: false, placeholder: true, state: {disabled: true}}];
+                    }
+                    child._source.state = { opened: false };
+                    child._source._id = child._id;
                     children.push(child._source);
                 });
                 if(children.length < count) {
                     children.push(see_more);
+                    if(selectedElement) {
+                        var resultInChildren = getNodeById(children, selectedElement._id);
+                        if(!resultInChildren) {
+                            selectedElement.state.opened = false;
+                            children.push(selectedElement);
+                        } else {
+                            resultInChildren.state.selected = true;
+                        }
+                    }
                 }
                 vm.recreateRecordTree(tree);
             });
@@ -312,6 +360,79 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
         if (e.action == "select_node") {
             vm.record = e.node.original;
+            vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
+            getChildren(vm.record).then(function(response) {
+                vm.record_children = response.data;
+            })
         }
+    }
+
+    vm.expandChildren = function (jqueryobj, e) {
+        var tree = vm.recordTreeData;
+        var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
+        var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
+        if(e.node.children.length < 2) {
+            $http.get(vm.url+"search/"+e.node.original._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+                var count = response.headers('Count');
+                children.pop();
+                response.data.forEach(function(child) {
+                    if(angular.isUndefined(child._source.name)) {
+                        child._source.name = "";
+                    }
+                    child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
+                    child._source.type = child._type;
+                    if(!child._source.children) {
+                        child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
+                    }
+                    child._source.state = { opened: false };
+                    child._source._id = child._id;
+                    child._source.id = child._id;
+                    children.push(child._source);
+                });
+                if(children.length < count) {
+                    children.push({
+                        text: $translate.instant("SEE_MORE"),
+                        see_more: true,
+                        type: "plus",
+                        parent: parent._id,
+                    });
+                }
+                parent.state = {opened: true}
+                vm.recordTreeConfig.version++;
+                return;
+            });
+        }
+    }
+    function getNodeById(node, id){
+        var reduce = [].reduce;
+        function runner(result, node){
+            if(result || !node) return result;
+            return node._id === id && node || //is this the proper node?
+                runner(null, node.children) || //process this nodes children
+                reduce.call(Object(node), runner, result);  //maybe this is some ArrayLike Structure
+        }
+        return runner(null, node);
+    }
+    vm.viewFile = function(record) {
+    }
+
+    vm.viewResult = function() {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/universal_viewer_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {}
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
     }
 });
