@@ -1,11 +1,12 @@
 {
     "-name": "premis",
+    "-min": "1",
+    "-max": "1",
     "-allowEmpty": "0",
     "-namespace": "premis",
     "-nsmap": {
         "premis": "http://arkivverket.no/standarder/PREMIS",
-        "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-        "xlink": "http://www.w3.org/1999/xlink"
+        "xsi": "http://www.w3.org/2001/XMLSchema-instance"
     },
     "-schemasToPreserve": [
         "http://schema.arkivverket.no/PREMIS/v2.0/DIAS_PREMIS.xsd"
@@ -34,6 +35,86 @@
         {
             "-name": "object",
             "-namespace": "premis",
+            "-attr": [
+                {
+                  "-name": "type",
+                  "-namespace": "xsi",
+                  "-req": "1",
+                  "#content": [{"text":"premis:file"}]
+                }
+            ],
+            "-children": [
+                {
+                    "-name": "objectIdentifier",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "objectIdentifierType",
+                            "-namespace": "premis",
+                            "#content": [{"var":"_PARAMETER_OBJECT_IDENTIFIER_TYPE"}]
+                        },
+                        {
+                            "-name": "objectIdentifierValue",
+                            "-namespace": "premis",
+                            "#content": [{"var":"_OBJID"}]
+                        }
+                    ]
+                },
+                {
+                    "-name": "preservationLevel",
+                    "-namespace": "premis",
+                    "-skipIfNoChildren": true,
+                    "-children": [{
+                        "-name": "preservationLevelValue",
+                        "-namespace": "premis",
+                        "-hideEmptyContent": true,
+                        "#content": [{"var": "preservation_level_value", "default": "full"}]
+                    }]
+                },
+                {
+                    "-name": "objectCharacteristics",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "compositionLevel",
+                            "-namespace": "premis",
+                            "#content": [{"var": "composition_level", "default": 0}]
+                        },
+                        {
+                            "-name": "format",
+                            "-namespace": "premis",
+                            "-children": [
+                                {
+                                    "-name": "formatDesignation",
+                                    "-namespace": "premis",
+                                    "-children": [
+                                        {
+                                            "-name": "formatName",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "_IP_CONTAINER_FORMAT"}]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "-name": "storage",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "storageMedium",
+                            "-namespace": "premis",
+                            "#content": [{"var": "storage_medium", "default": "ESSArch"}]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "-name": "object",
+            "-namespace": "premis",
             "-containsFiles": true,
             "-attr": [
                 {
@@ -51,12 +132,12 @@
                         {
                             "-name": "objectIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"var":"FIDType"}]
+                            "#content": [{"var":"_PARAMETER_OBJECT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "objectIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"text":"ID"},{"var":"FID"}]
+                            "#content": [{"var":"_OBJID"},{"text": "/"},{"var":"href"}]
                         }
                     ]
                 },
@@ -64,6 +145,11 @@
                     "-name": "objectCharacteristics",
                     "-namespace": "premis",
                     "-children": [
+                        {
+                            "-name": "compositionLevel",
+                            "-namespace": "premis",
+                            "#content": [{"var": "composition_level", "default": 0}]
+                        },
                         {
                             "-name": "fixity",
                             "-namespace": "premis",
@@ -102,6 +188,28 @@
                                             "-name": "formatName",
                                             "-namespace": "premis",
                                             "#content": [{"var": "FFormatName"}]
+                                        },
+                                        {
+                                            "-name": "formatVersion",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "FFormatVersion"}]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "-name": "formatRegistry",
+                                    "-namespace": "premis",
+                                    "-requiredParameters": ["FFormatRegistryKey"],
+                                    "-children": [
+                                        {
+                                            "-name": "formatRegistryName",
+                                            "-namespace": "premis",
+                                            "#content": [{"text": "PRONOM"}]
+                                        },
+                                        {
+                                            "-name": "formatRegistryKey",
+                                            "-namespace": "premis",
+                                            "#content": [{"var": "FFormatRegistryKey"}]
                                         }
                                     ]
                                 }
@@ -116,6 +224,7 @@
                         {
                             "-name": "contentLocation",
                             "-namespace": "premis",
+                            "-requiredParameters": ["_PARAMETER_CONTENT_LOCATION_TYPE"],
                             "-children": [
                                 {
                                     "-name": "contentLocationType",
@@ -125,7 +234,39 @@
                                 {
                                     "-name": "contentLocationValue",
                                     "-namespace": "premis",
-                                    "#content": [{"text": "file:///"},{"var": "href"}]
+                                    "#content": [{"var": "_OBJID"}]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "-name": "relationship",
+                    "-namespace": "premis",
+                    "-children": [
+                        {
+                            "-name": "relationshipType",
+                            "-namespace": "premis",
+                            "#content": [{"text": "structural"}]
+                        },
+                        {
+                            "-name": "relationshipSubType",
+                            "-namespace": "premis",
+                            "#content": [{"text": "is part of"}]
+                        },
+                        {
+                            "-name": "relatedObjectIdentification",
+                            "-namespace": "premis",
+                            "-children": [
+                                {
+                                    "-name": "relatedObjectIdentifierType",
+                                    "-namespace": "premis",
+                                    "#content": [{"var": "_PARAMETER_RELATED_OBJECT_IDENTIFIER_TYPE"}]
+                                },
+                                {
+                                    "-name": "relatedObjectIdentifierValue",
+                                    "-namespace": "premis",
+                                    "#content": [{"var": "_OBJID"}]
                                 }
                             ]
                         }
@@ -144,19 +285,19 @@
                         {
                             "-name": "agentIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"text":"NO/RA"}]
+                            "#content": [{"var":"_PARAMETER_AGENT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "agentIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"text":"ESSArch"}]
+                            "#content": [{"var":"agent_identifier_value"}]
                         }
                     ]
                 },
                 {
                     "-name": "agentName",
                     "-namespace": "premis",
-                    "#content": [{"text": "ESSArch Tools"}]
+                    "#content": [{"var": "agent_name"}]
                 },
                 {
                     "-name": "agentType",
