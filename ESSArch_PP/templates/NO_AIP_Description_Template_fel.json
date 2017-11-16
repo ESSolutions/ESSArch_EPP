@@ -37,7 +37,7 @@
         },
         {
             "-name": "TYPE",
-            "#content": [{"text": "SIP"}],
+            "#content": [{"text": "AIP"}],
             "-req": 1
         },
         {
@@ -59,10 +59,6 @@
                     "-name": "CREATEDATE",
                     "#content": [{"var": "_NOW"}],
                     "-req": 1
-                },
-                {
-                    "-name": "RECORDSTATUS",
-                    "#content": [{"var": "RECORDSTATUS"}]
                 }
             ],
             "-children": [
@@ -90,8 +86,7 @@
                             "#content": [{"var":"archivist_organization_note"}]
                         }
                     ]
-                },
-                {
+                },{
                     "-name": "agent",
                     "-namespace": "mets",
                     "-attr": [{
@@ -113,8 +108,7 @@
                             "#content": [{"var":"creator_organization_note"}]
                         }
                     ]
-                },
-                {
+                },{
                     "-name": "agent",
                     "-namespace": "mets",
                     "-attr": [{
@@ -145,27 +139,21 @@
                     "-namespace": "mets",
                     "-attr": [{
                         "-name": "ROLE",
-                        "-req": 1,
-                        "#content": [{"text":"OTHER" }]
-                    },{
-                        "-name": "OTHERROLE",
-                        "-req": 1,
-                        "#content": [{"text":"SUBMITTER" }]
+                        "#content": [{"text":"CREATOR"}]
                     },{
                         "-name": "TYPE",
-                        "-req": 1,
-                        "#content": [{"text":"ORGANIZATION" }]
+                        "#content": [{"text":"INDIVIDUAL"}]
                     }],
                     "-children": [
                         {
                             "-name": "name",
                             "-namespace": "mets",
-                            "#content": [{"var":"submitter_organization_name" }]
+                            "#content": [{"var":"creator_individual_name"}]
                         },
                         {
                             "-name": "note",
                             "-namespace": "mets",
-                            "#content": [{"var":"submitter_organization_note" }]
+                            "#content": [{"var":"creator_individual_note"}]
                         }
                     ]
                 },
@@ -174,195 +162,80 @@
                     "-namespace": "mets",
                     "-attr": [{
                         "-name": "ROLE",
-                        "-req": 1,
-                        "#content": [{"text":"PRESERVATION" }]
+                        "#content": [{"text":"CREATOR"}]
                     },{
                         "-name": "TYPE",
-                        "-req": 1,
-                        "#content": [{"text":"ORGANIZATION" }]
+                        "#content": [{"text":"OTHER"}]
+                    },{
+                        "-name": "OTHERTYPE",
+                        "#content": [{"text":"SOFTWARE"}]
                     }],
                     "-children": [
                         {
                             "-name": "name",
                             "-namespace": "mets",
-                            "#content": [{"var":"preservation_organization_name" }]
+                            "#content": [{"var":"creator_software_name"}]
                         },
                         {
                             "-name": "note",
                             "-namespace": "mets",
-                            "#content": [{"var":"preservation_organization_note" }]
+                            "#content": [{"var":"creator_software_note"}]
                         }
                     ]
                 },
                 {
                     "-name": "agent",
                     "-namespace": "mets",
-                    "-attr": [
-	                    {
-	                        "-name": "ROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"OTHER" }]
-	                    },
-	                    {
-	                        "-name": "OTHERROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"PRODUCER" }]
-	                    },
-	                    {
-	                        "-name": "TYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"ORGANIZATION" }]
-	                    }
-                    ],
+                    "-attr": [{
+                        "-name": "ROLE",
+                        "#content": [{"text":"PRESERVATION"}]
+                    },{
+                        "-name": "TYPE",
+                        "#content": [{"text":"ORGANIZATION"}]
+                    }],
                     "-children": [
                         {
                             "-name": "name",
                             "-namespace": "mets",
-                            "#content": [{"var":"producer_organization_name" }]
+                            "#content": [{"var":"preservation_organization_name"}]
                         },
                         {
                             "-name": "note",
                             "-namespace": "mets",
-                            "#content": [{"var":"producer_organization_note" }]
+                            "#content": [{"var":"preservation_organization_note"}]
                         }
                     ]
                 },
                 {
                     "-name": "agent",
                     "-namespace": "mets",
-                    "-attr": [
-	                    {
-	                        "-name": "ROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"OTHER" }]
-	                    },
-	                    {
-	                        "-name": "OTHERROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"PRODUCER" }]
-	                    },
-	                    {
-	                        "-name": "TYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"INDIVIDUAL" }]
-	                    }
-                    ],
+                    "-attr": [{
+                        "-name": "ROLE",
+                        "#content": [{"text":"PRESERVATION"}]
+                    },{
+                        "-name": "TYPE",
+                        "#content": [{"text":"OTHER"}]
+                    },{
+                        "-name": "OTHERTYPE",
+                        "#content": [{"text":"SOFTWARE"}]
+                    }],
                     "-children": [
                         {
                             "-name": "name",
                             "-namespace": "mets",
-                            "#content": [{"var":"producer_individual_name" }]
+                            "#content": [{"var":"preservation_software_name"}]
                         },
                         {
                             "-name": "note",
                             "-namespace": "mets",
-                            "#content": [{"var":"producer_individual_note" }]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agent",
-                    "-namespace": "mets",
-                    "-attr": [
-	                    {
-	                        "-name": "ROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"OTHER" }]
-	                    },
-	                    {
-	                        "-name": "OTHERROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"PRODUCER" }]
-	                    },
-	                    {
-	                        "-name": "TYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"OTHER" }]
-	                    },
-	                    {
-	                        "-name": "OTHERTYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"SOFTWARE" }]
-	                    }
-                    ],
-                    "-children": [
-                        {
-                            "-name": "name",
-                            "-namespace": "mets",
-                            "#content": [{"var":"producer_software_name" }]
-                        },
-                        {
-                            "-name": "note",
-                            "-namespace": "mets",
-                            "#content": [{"var":"producer_software_note" }]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agent",
-                    "-namespace": "mets",
-                    "-attr": [
-	                    {
-	                        "-name": "ROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"OTHER" }]
-	                    },
-	                    {
-	                        "-name": "OTHERROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"SUBMITTER" }]
-	                    },
-	                    {
-	                        "-name": "TYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"INDIVIDUAL" }]
-	                    }
-                    ],
-                    "-children": [
-                        {
-                            "-name": "name",
-                            "-namespace": "mets",
-                            "#content": [{"var":"submitter_individual_name" }]
-                        },
-                        {
-                            "-name": "note",
-                            "-namespace": "mets",
-                            "#content": [{"var":"submitter_individual_note" }]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agent",
-                    "-namespace": "mets",
-                    "-attr": [
-	                    {
-	                        "-name": "ROLE",
-	                        "-req": 1,
-	                        "#content": [{"text":"IPOWNER" }]
-	                    },
-	                    {
-	                        "-name": "TYPE",
-	                        "-req": 1,
-	                        "#content": [{"text":"ORGANIZATION" }]
-	                    }
-                    ],
-                    "-children": [
-                        {
-                            "-name": "name",
-                            "-namespace": "mets",
-                            "#content": [{"var":"ipowner_organization_name" }]
-                        },
-                        {
-                            "-name": "note",
-                            "-namespace": "mets",
-                            "#content": [{"var":"ipowner_organization_note" }]
+                            "#content": [{"var":"preservation_software_note"}]
                         }
                     ]
                 },
                 {
                     "#content": [
                         {
-                            "var": "_SA_ID"
+                            "var": "_SA_NAME"
                         }
                     ],
                     "-attr": [
@@ -376,6 +249,17 @@
                         }
                     ],
                     "-children": [],
+                    "-name": "altRecordID",
+                    "-namespace": "mets"
+                },
+                {
+                    "#content": [{"var": "_INFORMATIONCLASS"}],
+                    "-attr": [
+                        {
+                            "#content": [{ "text": "INFORMATIONCLASS"}],
+                            "-name": "TYPE"
+                        }
+                    ],
                     "-name": "altRecordID",
                     "-namespace": "mets"
                 },
@@ -417,7 +301,11 @@
             "-attr": [
                 {
                     "-name": "ID",
-                   "#content": [{"text": "amdSec001"}]
+                    "#content": [
+                        {
+                            "text": "amdSec001"
+                        }
+                    ]
                 }
             ],
             "-children": [
@@ -428,7 +316,11 @@
                     "-attr": [
                         {
                             "-name": "ID",
-                             "#content": [{"text": "digiprovMD001"}]
+                            "#content": [
+                                {
+                                    "text": "digiprovMD001"
+                                }
+                            ]
                         }
                     ],
                     "-children": [
@@ -512,12 +404,20 @@
                     "-namespace": "mets",
                     "-attr": [
                         {
-                            "-name": "ID",
-                            "#content": [{"text": "fgrp001"}]
+                            "#content": [
+                                {
+                                    "text": "fgrp001"
+                                }
+                            ],
+                            "-name": "ID"
                         },
                         {
-                            "-name": "USE",
-                            "#content": [{"text": "FILES"}]
+                            "#content": [
+                                {
+                                    "text": "FILES"
+                                }
+                            ],
+                            "-name": "USE"
                         }
                     ],
                     "-children": [
@@ -697,7 +597,11 @@
                                 },
                                 {
                                     "-name": "LABEL",
-                                    "#content": [{"text": "Datafiles"}]
+                                    "#content": [
+                                        {
+                                            "text": "Datafiles"
+                                        }
+                                    ]
                                 }
                             ],
                             "-children": [
