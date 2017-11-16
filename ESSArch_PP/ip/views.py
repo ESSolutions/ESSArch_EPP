@@ -297,6 +297,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             end_date=parsed.get('end_date'),
         )
 
+        # refresh date fields to convert them to datetime instances instead of
+        # strings to allow further datetime manipulation
+        ip.refresh_from_db(entry_date, start_date, end_date)
+
         extra_data = fill_specification_data(ip=ip, sa=sa)
 
         for profile_type in ['aic_description', 'aip', 'aip_description', 'dip', 'preservation_metadata']:
