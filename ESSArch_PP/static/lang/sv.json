@@ -421,7 +421,7 @@
     "RECORD": "Postvisning",
     "CLASSIFICATION_STRUCTURE": "Klassificeringsstruktur",
     "SEE_MORE": "Se mer",
-    "ARCHIVE_MAINTENANCE": "Arkiunderhåll",
+    "ARCHIVE_MAINTENANCE": "Arkivvård",
     "RUN_NOW": "Kör nu",
     "FREQUENCY": "Frekvens",
     "START": "Start",
@@ -432,5 +432,12 @@
     "END": "Slut",
     "REPORT": "Rapport",
     "CREATE_APPRAISAL_RULE": "Skapa gallringsregel",
-    "APPRAISAL_RULE": "Gallringsregel"
+    "APPRAISAL_RULE": "Gallringsregel",
+    "MANUAL_APPRAISAL": "Manuell gallring",
+    "KEY": "Nyckel",
+    "CREATE_NEW_FIELD": "Skapa nytt fält",
+    "CONTENTS": "Innehåll",
+    "ADD_FIELD": "Lägg till fält",
+    "EDIT_FIELD": "Ändra fält",
+    "METADATA": "Metadata"
 }

@@ -52,6 +52,20 @@
                         <h4 ng-bind-html="vm.record.text"></h4>
                         <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
                         <p class="result-description">{{vm.record.desc}}</p>
+                        <br/>
+                        <h4>{{'METADATA' | translate}}</h4>
+                        <table class="">
+                            <tr ng-repeat="(key, value) in vm.record" ng-if="key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != '_id'">
+                                <td style="padding-right: 10px;"><b>{{key}}</b></td>
+                                <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                                <td class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
+                            </tr>
+                            <tr>
+                                <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
+                            </tr>
+                        </table>
+                        <br/>
+                        <h4>{{'CONTENTS' | translate}}</h4>
                         <div ng-if="vm.record.type != 'volume'" st-table="vm.record_children" style="width:100%;">
                             <table class="table table-striped">
                                 <thead>

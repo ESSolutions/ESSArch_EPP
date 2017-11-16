@@ -27,6 +27,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     if(data && data.ip) {
         $ctrl.ip = data.ip;
     }
+    if(data && data.field) {
+        $ctrl.field = data.field;
+    }
     $ctrl.editMode = false;
     $ctrl.error_messages_old = [];
     $ctrl.error_messages_pw1 = [];
@@ -47,6 +50,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         subject: "",
         body: ""
     };
+    $ctrl.updateField = function() {
+        $uibModalInstance.close($ctrl.field);
+    }
     $ctrl.newOrder = function() {
         $ctrl.data = {
             label: $ctrl.label
@@ -321,12 +327,22 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
-}).controller('AppraisalModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $scope) {
+}).controller('AppraisalModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $scope, TopAlert) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
     $ctrl.requestTypes = data.types;
     $ctrl.request = data.request;
+    $ctrl.appraisalRules = [
+        { id: 1, name: "Rule 1", frequency: "24h", type: "Arkivobjekt" },
+        { id: 2, name: "Rule 2", frequency: "1 week", type: "Metadata" },
+        { id: 3, name: "Rule 4", frequency: "10 years", type: "Metadata" },
+        { id: 4, name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
+        { id: 5, name: "Rule 6", frequency: "1 year", type: "Metadata" },
+        { id: 6, name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
+        { id: 7, name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
+    ];
+    $ctrl.appraisalRule = null;
     $ctrl.create = function() {
         $ctrl.data = {
             name: $ctrl.name,
@@ -341,4 +357,8 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
+    $ctrl.submitAppraisal = function(appraisal) {
+        TopAlert.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
+        $uibModalInstance.close(appraisal);
+    }
 })

@@ -312,7 +312,25 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             }
         },
         version : 1,
-        plugins : ['types']
+        contextmenu: {
+            items: function (o, cb) {
+                var archiveManagement = {
+                    label: "Arkivvård",
+                    submenu: {
+                        appraisal: {
+                            label: "Gallring",
+                            action: function (o) {
+                                vm.appraisal(vm.record);
+                            },
+                        }
+                    }
+                };
+                var actions = { archiveManagement: archiveManagement };
+                cb(actions);
+                return actions;
+            }
+        },
+        plugins : ['types', 'contextmenu']
     };
     vm.recordTreeData = [];
     vm.selectRecord = function (jqueryobj, e) {
@@ -417,6 +435,67 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.viewFile = function(record) {
     }
 
+    vm.editField = function(key, value) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/edit_field_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    field: {
+                        key: key,
+                        value: value
+                    }
+                }
+            }
+        });
+        modalInstance.result.then(function (data) {
+            delete vm.record[key]
+            vm.record[data.key] = data.value;
+            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.name, "success");
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.addField = function(key, value) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/add_field_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    field: {
+                        key: "",
+                        value: ""
+                    }
+                }
+            }
+        });
+        modalInstance.result.then(function (data) {
+            vm.record[data.key] = data.value;
+            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.name, "success");
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.removeField = function(field) {
+        delete vm.record[field];
+        TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
+
+    }
+
     vm.viewResult = function() {
         var modalInstance = $uibModal.open({
             animation: true,
@@ -429,6 +508,27 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             size: "lg",
             resolve: {
                 data: {}
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.appraisal = function(record) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/search_appraisal_modal.html',
+            controller: 'AppraisalModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    record: record
+                }
             }
         });
         modalInstance.result.then(function (data, $ctrl) {

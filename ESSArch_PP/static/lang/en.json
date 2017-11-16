@@ -432,5 +432,12 @@
     "END": "End",
     "REPORT": "Report",
     "CREATE_APPRAISAL_RULE": "Create appraisal rule",
-    "APPRAISAL_RULE": "Appraisal rule"
+    "APPRAISAL_RULE": "Appraisal rule",
+    "MANUAL_APPRAISAL": "Manual appraisal",
+    "KEY": "Key",
+    "CREATE_NEW_FIELD": "Create new field",
+    "CONTENTS": "Contents",
+    "ADD_FIELD": "Add field",
+    "EDIT_FIELD": "Edit field",
+    "METADATA": "Metadata"
 }
