@@ -3,8 +3,8 @@
         <div class="table-container" st-table="vm.rules" st-pipe="vm.rulePipe">
             <div class="search-prepare-wrapper">
                     <label for items-per-page></label>
-                    <select id="items-per-page" class="form-control items-per-page"
-                        ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
+                    <select class="form-control items-per-page"
+                        ng-model="vm.rulesPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                         popover-popup-delay="500" popover-append-to-body="true"></select>
                     <div style="width: 50%;" class="input-group margin-bottom-sm">
                     <input id="search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
@@ -40,12 +40,13 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.rulesPerPage" st-displayed-pages="7"></div>
         </div>
         <h4>{{"ONGOING" | translate}}</h4>
         <div class="table-container" st-table="vm.ongoing" st-pipe="vm.ongoingPipe">
             <div class="search-prepare-wrapper">
-                    <select id="items-per-page" class="form-control items-per-page"
-                    ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
+                    <select class="form-control items-per-page"
+                    ng-model="vm.ongoingPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                 <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable fa fa-refresh fa-lg"
                 ng-class="{'fa-refresh-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
@@ -67,12 +68,13 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.ongoingPerPage" st-displayed-pages="7"></div>
         </div>
         <h4>{{"NEXT" | translate}}</h4>
         <div class="table-container" st-table="vm.next" st-pipe="vm.nextPipe">
             <div class="search-prepare-wrapper">
-                    <select id="items-per-page" class="form-control items-per-page"
-                    ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
+                    <select class="form-control items-per-page"
+                    ng-model="vm.nextPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                 <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable fa fa-refresh fa-lg"
                 ng-class="{'fa-refresh-animate': nextLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
@@ -94,12 +96,13 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.nextPerPage" st-displayed-pages="7"></div>
         </div>
         <h4>{{"FINISHED" | translate}}</h4>
         <div class="table-container" st-table="vm.finished" st-pipe="vm.finishedPipe">
             <div class="search-prepare-wrapper">
-                    <select id="items-per-page" class="form-control items-per-page"
-                    ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
+                    <select class="form-control items-per-page"
+                    ng-model="vm.finishedPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                 <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable fa fa-refresh fa-lg"
                 ng-class="{'fa-refresh-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
@@ -125,6 +128,7 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.finishedPerPage" st-displayed-pages="7"></div>
         </div>
     </div>
 </div>

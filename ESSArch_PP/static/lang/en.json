@@ -160,7 +160,7 @@
     "DOCS": "Documentation",
     "REFRESHPAGE": "Refresh page",
     "HELP": "Help",
-    "ITEMSPERPAGE": "IP's per page",
+    "ITEMSPERPAGE": "Items per page",
     "GLOBALSEARCHDESC":"List all IP's associated to the search term",
     "PREPAREIPDESC": "Create a new IP",
     "REFRESHTABLEDESC": "Refresh table",

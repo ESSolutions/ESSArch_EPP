@@ -1,13 +1,18 @@
 angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log) {
     var vm = this;
-    vm.itemsPerPage = 10;
-    function getArchivePolicies() {
-        ArchivePolicy.query().$promise.then(function(data) {
-            vm.archivePolicies = data;
-        });
-    }
-    getArchivePolicies();
+    vm.rulesPerPage = 10;
+    vm.ongoingPerPage = 10;
+    vm.nextPerPage = 10;
+    vm.finishedPerPage = 10;
     $scope.ruleLoading = false;
+    $scope.ongoingLoading = false;
+    $scope.nextLoading = false;
+    $scope.finishedLoading = false;
+
+    /**
+     * Smart table pipe function for appraisal rules
+     * @param {*} tableState
+     */
     vm.rulePipe = function(tableState) {
         $scope.ruleLoading = true;
         $timeout(function() {
@@ -24,7 +29,11 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $scope.ruleLoading = false;
         }, 200)
     }
-    $scope.ongoingLoading = false;
+
+    /**
+     * Smart table pipe function for ongoing appraisals
+     * @param {*} tableState
+     */
     vm.ongoingPipe = function(tableState) {
         $scope.ongoingLoading = true;
         $timeout(function() {
@@ -34,7 +43,11 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $scope.ongoingLoading = false;
         }, 400)
     }
-    $scope.nextLoading = false;
+
+    /**
+     * Smart table pipe function for next appraisals
+     * @param {*} tableState
+     */
     vm.nextPipe = function(tableState) {
         $scope.nextLoading = true;
         $timeout(function() {
@@ -44,7 +57,11 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $scope.nextLoading = false;
         }, 700)
     }
-    $scope.finishedLoading = false;
+
+    /**
+     * Smart table pipe function for finished appraisals
+     * @param {*} tableState
+     */
     vm.finishedPipe = function(tableState) {
         $scope.finishedLoading = true;
         $timeout(function() {
@@ -54,17 +71,39 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $scope.finishedLoading = false;
         }, 650)
     }
+
+    /**
+     * Run appraisal rule now
+     * @param {Object} appraisal
+     */
     vm.runNow = function(appraisal) {
         alert(appraisal.name + " is running!");
     }
+
+    /*
+     * Array containing chosen(checked) appraisal rules to use
+     * as filter for the other appraisal tables
+     */
     vm.ruleFilters = [];
+
+    /**
+     * Add chosen appraisal rule to list of filters or remove it.
+     * Connected to apprailsal rule table checkbox
+     * @param {Object} rule
+     */
     vm.useAsFilter = function(rule) {
         if(!vm.ruleFilters.includes(rule.id)) {
             rule.used_as_filter = true;
             vm.ruleFilters.push(rule.id);
+        } else {
+            vm.ruleFilters.splice(vm.ruleFilters.indexOf(rule.id), 1);
+            rule.used_as_filter = false;
         }
     }
-
+    /**
+     * Show appraisal report
+     * @param {Object} appraisal
+     */
     vm.showReport = function(appraisal) {
         console.log(appraisal.report);
     }
@@ -185,7 +224,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
         { id: 4, name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
         { id: 5, name: "Rule 6", frequency: "1 year", type: "Metadata" },
         { id: 6, name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
-        { id: 7, name: "Rule 7", frequency: "1h", type: "Arkivobjekt" }
+        { id: 7, name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
     ];
     var ongoing =  [
         { id: 1, start: new Date("2017-11-10 12:53:00"), rule: ruleset[0] },
