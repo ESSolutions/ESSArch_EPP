@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log) {
+angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -71,13 +71,27 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $scope.finishedLoading = false;
         }, 650)
     }
-
+    function guid() {
+        function s4() {
+          return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+          s4() + '-' + s4() + s4() + s4();
+      }
     /**
      * Run appraisal rule now
      * @param {Object} appraisal
      */
     vm.runNow = function(appraisal) {
-        alert(appraisal.name + " is running!");
+        var object = {
+            id: guid(),
+            start: new Date(),
+            rule: appraisal
+        };
+        TopAlert.add(appraisal.name +", started at: "+$filter("date")(object.start, "yyyy-MM-dd HH:mm:ss"), "success");
+        vm.ongoing.push(object);
     }
 
     /*
@@ -105,7 +119,8 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * @param {Object} appraisal
      */
     vm.showReport = function(appraisal) {
-        console.log(appraisal.report);
+        var file = $sce.trustAsResourceUrl("/static/frontend/gallringsrapport.pdf");
+        $window.open(file, '_blank');
     }
 
     /**
