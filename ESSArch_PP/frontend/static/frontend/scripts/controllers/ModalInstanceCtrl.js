@@ -24,6 +24,9 @@
 
 angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
     var $ctrl = this;
+    if(data) {
+        $ctrl.data = data;
+    }
     if(data && data.ip) {
         $ctrl.ip = data.ip;
     }
@@ -133,6 +136,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             $ctrl.error_messages_pw2 = error.new_password2 || [];
         });
     };
+    $ctrl.ok = function() {
+        $uibModalInstance.close();
+    }
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };

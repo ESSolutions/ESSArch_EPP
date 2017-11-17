@@ -441,5 +441,6 @@
     "EDIT_FIELD": "Ändra fält",
     "METADATA": "Metadata",
     "FORMAT_CONVERSION": "Formatkonvertering",
-    "MEDIA_MIGRATION": "Mediamigrering"
+    "MEDIA_MIGRATION": "Mediamigrering",
+    "DELETE_FIELD": "Vill du ta bort fält: {{field}}?"
 }

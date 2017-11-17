@@ -441,5 +441,6 @@
     "EDIT_FIELD": "Edit field",
     "METADATA": "Metadata",
     "FORMAT_CONVERSION": "Format conversion",
-    "MEDIA_MIGRATION": "Media migration"
+    "MEDIA_MIGRATION": "Media migration",
+    "DELETE_FIELD": "Do you want to delete field: {{field}}?"
 }

@@ -16,6 +16,10 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         q: "",
         type: null
     }
+    vm.changeClassificationStructure = function() {
+        vm.searchSubmit(vm.filterObject.q);
+        vm.openResult(vm.record);
+    }
     vm.calculatePageNumber = function() {
         if(!angular.isUndefined(vm.tableState) && vm.tableState.pagination) {
             var pageNumber = vm.tableState.pagination.start/vm.tableState.pagination.number;
@@ -491,8 +495,26 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     }
 
     vm.removeField = function(field) {
-        delete vm.record[field];
-        TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/delete_field_modal.html',
+            scope: $scope,
+            controller: 'ModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {
+                    field: field
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            delete vm.record[field];
+            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
 
     }
 
