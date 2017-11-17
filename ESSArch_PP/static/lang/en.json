@@ -439,5 +439,7 @@
     "CONTENTS": "Contents",
     "ADD_FIELD": "Add field",
     "EDIT_FIELD": "Edit field",
-    "METADATA": "Metadata"
+    "METADATA": "Metadata",
+    "FORMAT_CONVERSION": "Format conversion",
+    "MEDIA_MIGRATION": "Media migration"
 }

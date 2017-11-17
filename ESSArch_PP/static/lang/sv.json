@@ -439,5 +439,7 @@
     "CONTENTS": "Innehåll",
     "ADD_FIELD": "Lägg till fält",
     "EDIT_FIELD": "Ändra fält",
-    "METADATA": "Metadata"
+    "METADATA": "Metadata",
+    "FORMAT_CONVERSION": "Formatkonvertering",
+    "MEDIA_MIGRATION": "Mediamigrering"
 }

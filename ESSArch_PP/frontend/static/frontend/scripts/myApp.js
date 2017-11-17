@@ -247,6 +247,17 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         url: 'archive-maintenance',
         templateUrl: '/static/frontend/views/archive_maintenance.html',
         controller: 'ArchiveMaintenanceCtrl as vm',
+        redirectTo: 'home.archiveMaintenance.start',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.archiveMaintenance.start', {
+        url: '',
+        templateUrl: '/static/frontend/views/archive_maintenance_start.html',
+        controller: 'AppraisalCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
