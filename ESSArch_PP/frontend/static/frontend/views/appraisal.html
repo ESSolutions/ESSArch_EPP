@@ -63,7 +63,7 @@
                 <tbody>
                     <tr ng-repeat="x in vm.ongoing" class="clickable" ng-click="vm.ongoingModal(x)">
                         <td>{{x.id}}</td>
-                        <td>{{x.start | date:"yyyy-MM-dd hh:mm:ss"}}</td>
+                        <td>{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                         <td>{{x.rule.name}}</td>
                     </tr>
                 </tbody>
@@ -91,7 +91,7 @@
                 <tbody>
                     <tr ng-repeat="x in vm.next" class="clickable" ng-click="vm.nextModal(x)">
                         <td>{{x.id}}</td>
-                        <td>{{x.start | date:"yyyy-MM-dd hh:mm:ss"}}</td>
+                        <td>{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                         <td>{{x.rule.name}}</td>
                     </tr>
                 </tbody>
@@ -121,8 +121,8 @@
                 <tbody>
                     <tr ng-repeat="x in vm.finished">
                         <td class="clickable" ng-click="vm.finishedModal(x)">{{x.id}}</td>
-                        <td class="clickable" ng-click="vm.finishedModal(x)">{{x.start | date:"yyyy-MM-dd hh:mm:ss"}}</td>
-                        <td class="clickable" ng-click="vm.finishedModal(x)">{{x.end | date:"yyyy-MM-dd hh:mm:ss"}}</td>
+                        <td class="clickable" ng-click="vm.finishedModal(x)">{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                        <td class="clickable" ng-click="vm.finishedModal(x)">{{x.end | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                         <td><a ng-click="vm.showReport(x)">{{x.report}}</a></td>
                         <td class="clickable" ng-click="vm.finishedModal(x)">{{x.rule.name}}</td>
                     </tr>
