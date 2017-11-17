@@ -6,11 +6,11 @@
         <p>{{$ctrl.data.record.name}}</p>
         <p>{{$ctrl.data.record.type}}</p>
         <label>
-            <select class="form-control" required ng-model="$ctrl.appraisalRule" ng-options="x as x.name for x in $ctrl.appraisalRules">{{x}}</select>
+            <select focused="true" class="form-control" required ng-model="$ctrl.appraisalRule" ng-options="x as x.name for x in $ctrl.appraisalRules">{{x}}</select>
         </label>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="submit" focused="true">{{'OK' | translate}}</button>
+        <button class="btn btn-primary" type="submit">{{'OK' | translate}}</button>
         <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </form>
