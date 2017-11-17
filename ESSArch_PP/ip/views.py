@@ -299,7 +299,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         # refresh date fields to convert them to datetime instances instead of
         # strings to allow further datetime manipulation
-        ip.refresh_from_db(entry_date, start_date, end_date)
+        ip.refresh_from_db(fields=['entry_date', 'start_date', 'end_date'])
 
         extra_data = fill_specification_data(ip=ip, sa=sa)
 
