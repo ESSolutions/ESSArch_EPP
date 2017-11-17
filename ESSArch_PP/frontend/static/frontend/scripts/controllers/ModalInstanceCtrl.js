@@ -334,13 +334,13 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.requestTypes = data.types;
     $ctrl.request = data.request;
     $ctrl.appraisalRules = [
-        { id: 1, name: "Rule 1", frequency: "24h", type: "Arkivobjekt" },
-        { id: 2, name: "Rule 2", frequency: "1 week", type: "Metadata" },
-        { id: 3, name: "Rule 4", frequency: "10 years", type: "Metadata" },
-        { id: 4, name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
-        { id: 5, name: "Rule 6", frequency: "1 year", type: "Metadata" },
-        { id: 6, name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
-        { id: 7, name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
+        { id: 'ad961193-6162-4871-9ceb-d464e2276586', name: "Gallring fakturor", frequency: "24h", type: "Arkivobjekt" },
+        { id: 'b987a27f-a111-43d6-83cf-dbbab1a8de8c', name: "Gallring lönsespecefikationer", frequency: "1 week", type: "Metadata" },
+        { id: '2a4ffd3e-8796-4040-a0ca-7a27420541f9', name: "Rule 4", frequency: "10 years", type: "Metadata" },
+        { id: 'fc84bbef-7387-4528-b667-e24efa2940c4', name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
+        { id: 'b53f58f5-b062-4f3d-9c01-31835c90b04c', name: "Rule 6", frequency: "1 year", type: "Metadata" },
+        { id: '21fdd706-cbb5-40d5-897a-363939589db6', name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
+        { id: '1bff3bd2-f7df-4555-b539-26c175ac216d', name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
     ];
     $ctrl.appraisalRule = null;
     $ctrl.create = function() {

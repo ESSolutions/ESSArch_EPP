@@ -233,26 +233,26 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * Test data
      */
     var ruleset = [
-        { id: 1, name: "Rule 1", frequency: "24h", type: "Arkivobjekt" },
-        { id: 2, name: "Rule 2", frequency: "1 week", type: "Metadata" },
-        { id: 3, name: "Rule 4", frequency: "10 years", type: "Metadata" },
-        { id: 4, name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
-        { id: 5, name: "Rule 6", frequency: "1 year", type: "Metadata" },
-        { id: 6, name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
-        { id: 7, name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
+        { id: 'ad961193-6162-4871-9ceb-d464e2276586', name: "Gallring fakturor", frequency: "24h", type: "Arkivobjekt" },
+        { id: 'b987a27f-a111-43d6-83cf-dbbab1a8de8c', name: "Gallring lönsespecefikationer", frequency: "1 week", type: "Metadata" },
+        { id: '2a4ffd3e-8796-4040-a0ca-7a27420541f9', name: "Rule 4", frequency: "10 years", type: "Metadata" },
+        { id: 'fc84bbef-7387-4528-b667-e24efa2940c4', name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
+        { id: 'b53f58f5-b062-4f3d-9c01-31835c90b04c', name: "Rule 6", frequency: "1 year", type: "Metadata" },
+        { id: '21fdd706-cbb5-40d5-897a-363939589db6', name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
+        { id: '1bff3bd2-f7df-4555-b539-26c175ac216d', name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
     ];
     var ongoing =  [
-        { id: 1, start: new Date("2017-11-10 12:53:00"), rule: ruleset[0] },
-        { id: 2, start: new Date(), rule: ruleset[2] }
+        { id: '7569aeb6-5601-47dc-96bd-219af2079dcb', start: new Date("2017-11-10 12:53:00"), rule: ruleset[0] },
+        { id: '2621bced-ae07-492d-9428-2fed980e3ae8', start: new Date("2017-11-10 15:53:00"), rule: ruleset[2] }
     ];
 
     var next =  [
-        { id: 3, start: new Date("2017-11-10 12:53:00"), rule: ruleset[1] },
-        { id: 4, start: new Date(), rule: ruleset[3] }
+        { id: '7a77e432-abd8-4fee-af05-1343b721db52', start: new Date("2017-11-10 12:53:00"), rule: ruleset[1] },
+        { id: '4e9728f9-4e15-4eb6-97da-8fdae209410e', start: new Date("2017-11-10 05:52:00"), rule: ruleset[3] }
     ];
 
     var finished =  [
-        { id: 5, start: new Date("2017-11-10 12:53:00"), end: new Date("2017-11-10 15:50:22"), report: "gallring_5.pdf", rule: ruleset[0]},
-        { id: 6, start: new Date("2017-11-14 15:53:26"), end: new Date("2017-11-15 15:01:06"), report: "gallring_6.pdf", rule: ruleset[1]}
+        { id: '93abbe52-f79b-4b09-af2c-34c9ac20a04f', start: new Date("2017-11-10 12:53:00"), end: new Date("2017-11-10 15:50:22"), report: "gallring_93abbe52-f79b-4b09-af2c-34c9ac20a04f.pdf", rule: ruleset[0]},
+        { id: 'a34dbf51-b4fa-409b-8039-b397b15d77c5', start: new Date("2017-11-14 15:53:26"), end: new Date("2017-11-15 15:01:06"), report: "gallring_a34dbf51-b4fa-409b-8039-b397b15d77c5.pdf", rule: ruleset[1]}
     ];
 });
