@@ -141,8 +141,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             })
         });
     }
-    vm.treeIds = ["tree_id1", "Allänna arkivschemat"]
-    vm.treeId = "tree_id1";
+    vm.treeIds = ["Allmänna arkivschemat", "Verksamhetsbaserad"]
+    vm.treeId = "Allmänna arkivschemat";
     vm.buildRecordTree = function(startNode) {
         if(angular.isUndefined(startNode.name)) {
             startNode.name = "";
