@@ -1301,8 +1301,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root, existence=False)
 
-        real_given_path = os.path.realpath(path)[len(root)+1:]
-        relative_root = real_given_path.split('/')[0]
+        relative_root = path[len(root)+1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1335,8 +1334,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root)
 
-        real_given_path = os.path.realpath(path)[len(root)+1:]
-        relative_root = real_given_path.split('/')[0]
+        relative_root = path[len(root)+1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1373,9 +1371,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
             path = os.path.join(root, request.data.get('destination', ''))
 
         self.validate_path(path, root)
-
-        real_given_path = os.path.realpath(path)[len(root)+1:]
-        relative_root = real_given_path.split('/')[0]
+        relative_root = path[len(root)+1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1447,8 +1443,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         self.validate_path(path, root, existence=False)
 
-        real_given_path = os.path.realpath(path)[len(root)+1:]
-        relative_root = real_given_path.split('/')[0]
+        relative_root = path[len(root)+1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
