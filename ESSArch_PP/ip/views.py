@@ -295,6 +295,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             entry_date=parsed.get('entry_date'),
             start_date=parsed.get('start_date'),
             end_date=parsed.get('end_date'),
+            object_path=container,
         )
 
         # refresh date fields to convert them to datetime instances instead of
@@ -1122,7 +1123,16 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             return Response('%s created' % path)
 
         download = request.query_params.get('download', False)
-        return ip.files(request.query_params.get('path', '').rstrip('/'), force_download=download, paginator=self.paginator, request=request)
+        path = request.query_params.get('path', '').rstrip('/')
+
+        if os.path.isfile(ip.object_path):
+            fullpath = os.path.join(os.path.dirname(ip.object_path), path)
+            if not in_directory(fullpath, ip.object_path) and fullpath != os.path.splitext(ip.object_path)[0] + '.xml':
+                raise exceptions.ParseError('Illegal path %s' % path)
+
+            return list_files(fullpath, force_download=download, paginator=self.paginator, request=request)
+
+        return ip.files(path, force_download=download, paginator=self.paginator, request=request)
 
     @detail_route(methods=['put'], url_path='check-profile')
     def check_profile(self, request, pk=None):
