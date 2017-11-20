@@ -247,12 +247,12 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     ];
 
     var next =  [
-        { id: '7a77e432-abd8-4fee-af05-1343b721db52', start: new Date("2017-11-10 12:53:00"), rule: ruleset[1] },
-        { id: '4e9728f9-4e15-4eb6-97da-8fdae209410e', start: new Date("2017-11-10 05:52:00"), rule: ruleset[3] }
+        { id: '7a77e432-abd8-4fee-af05-1343b721db52', start: new Date("2017-11-12 12:45:25"), rule: ruleset[1] },
+        { id: '4e9728f9-4e15-4eb6-97da-8fdae209410e', start: new Date("2017-11-12 05:15:30"), rule: ruleset[3] }
     ];
 
     var finished =  [
-        { id: '93abbe52-f79b-4b09-af2c-34c9ac20a04f', start: new Date("2017-11-10 12:53:00"), end: new Date("2017-11-10 15:50:22"), report: "gallring_93abbe52-f79b-4b09-af2c-34c9ac20a04f.pdf", rule: ruleset[0]},
-        { id: 'a34dbf51-b4fa-409b-8039-b397b15d77c5', start: new Date("2017-11-14 15:53:26"), end: new Date("2017-11-15 15:01:06"), report: "gallring_a34dbf51-b4fa-409b-8039-b397b15d77c5.pdf", rule: ruleset[1]}
+        { id: '93abbe52-f79b-4b09-af2c-34c9ac20a04f', start: new Date("2017-11-9 12:58:03"), end: new Date("2017-11-9 12:59:58"), report: "gallring_93abbe52-f79b-4b09-af2c-34c9ac20a04f.pdf", rule: ruleset[0]},
+        { id: 'a34dbf51-b4fa-409b-8039-b397b15d77c5', start: new Date("2017-11-9 15:18:26"), end: new Date("2017-11-9 15:25:01"), report: "gallring_a34dbf51-b4fa-409b-8039-b397b15d77c5.pdf", rule: ruleset[1]}
     ];
 });
