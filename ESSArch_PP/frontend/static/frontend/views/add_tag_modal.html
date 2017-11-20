@@ -1,6 +1,6 @@
 <div class="enter-profile-name">
-    <h3 style="margin: 15px;" class="modal-title" id="modal-title">Enter Tag name</h3>
-    <h4 ng-if="parentTag" style="margin:15px;">Parent: {{parentTag.name}}</h4>
+    <h3 class="modal-title" id="modal-title">Enter Tag name</h3>
+    <h4 ng-if="parentTag">Parent: {{parentTag.name}}</h4>
 </div>
 <form ng-submit="$ctrl.addTag()">
     <div class="modal-body" id="modal-body">
