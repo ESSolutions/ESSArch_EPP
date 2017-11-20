@@ -105,7 +105,10 @@ angular.module('myApp').controller('DropdownCtrl', function ($scope, $log, $root
             scope: $scope,
             size: 'md',
             controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl'
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
         }, function () {
