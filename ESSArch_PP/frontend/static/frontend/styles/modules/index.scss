@@ -464,10 +464,6 @@ body.modal-open[style] {
 .well-sm {
     padding: 0px;
 }
-.info-wrapper {
-    width: 100%;
-    margin-left: 10px;
-}
 .param-value {
     pre {
         overflow-x: scroll;
@@ -1030,4 +1026,10 @@ padding: 0 12px;
 
 .no-select {
     user-select: none;
+}
+
+.info-wrapper {
+    @include container(10px);
+    width: 100%;
+    margin-top: 10px;
 }
