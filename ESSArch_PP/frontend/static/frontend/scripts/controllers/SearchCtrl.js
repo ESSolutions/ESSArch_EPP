@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal) {
+angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -11,7 +11,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
 
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
-
+    $scope.checkPermission = function(permissionName) {
+        return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
+    };
     vm.filterObject = {
         q: "",
         type: null
@@ -140,6 +142,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             }
             vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
             vm.record.state.opened = false;
+            if(angular.isUndefined(vm.record.terms_and_condition)) {
+                vm.record.terms_and_condition = null;
+            }
             getChildren(vm.record).then(function(response) {
                 vm.record_children = response.data;
             })
@@ -383,6 +388,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
         if (e.action == "select_node") {
             vm.record = e.node.original;
+            if(angular.isUndefined(vm.record.terms_and_condition)) {
+                vm.record.terms_and_condition = null;
+            }
             vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
             getChildren(vm.record).then(function(response) {
                 vm.record_children = response.data;
@@ -436,7 +444,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
         return runner(null, node);
     }
-    vm.viewFile = function(record) {
+    vm.viewFile = function(name) {
+        var file = $sce.trustAsResourceUrl("/static/frontend/"+name);
+        $window.open(file, '_blank');
     }
 
     vm.editField = function(key, value) {

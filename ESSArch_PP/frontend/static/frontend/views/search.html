@@ -55,12 +55,15 @@
                         <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
                         <p class="result-description">{{vm.record.desc}}</p>
                         <br/>
+                        <button ng-if="vm.record.type == 'document' && (vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                        <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
                         <h4>{{'METADATA' | translate}}</h4>
                         <table class="">
                             <tr ng-repeat="(key, value) in vm.record" ng-if="key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
                                 <td style="padding-right: 10px;"><b>{{key}}</b></td>
-                                <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                                <td class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
+                                <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                                <td ng-if="key == 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{value == null?"Nej":value}}</td>
+                                <td ng-if="key != 'terms_and_condition'" class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
                             </tr>
                             <tr>
                                 <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
@@ -68,13 +71,14 @@
                         </table>
                         <br/>
                         <h4>{{'CONTENTS' | translate}}</h4>
-                        <div ng-if="vm.record.type != 'volume'" st-table="vm.record_children" style="width:100%;">
+                        <div st-table="vm.record_children" style="width:100%;">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Referenskod</th>
                                         <th>Namn</th>
                                         <th>Tid</th>
+                                        <th ng-if="x._type == 'document'"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -82,27 +86,10 @@
                                         <td><b>{{x._source.reference_code}}</b></td>
                                         <td>{{x._source.name}}</td>
                                         <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
-                        </div>
-                        <div ng-if="vm.record.type == 'volume'" st-table="vm.record_children" style="width:100%;">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr class="clickable">
-                                        <th>Referenskod</th>
-                                        <th>Namn</th>
-                                        <th>Tid</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="x in vm.record_children">
-                                        <td><b>{{x._source.reference_code}}</b></td>
-                                        <td>{{x._source.name}}</td>
-                                        <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
-                                        <td><button class="btn btn-success lock-button" ng-click="vm.viewResult()"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button></td>
+                                        <td>
+                                            <button ng-if="x._type == 'document' && (x._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                                            <p style="color: red; white-space: nowrap;" ng-if="x._type == 'document' && !(x._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
