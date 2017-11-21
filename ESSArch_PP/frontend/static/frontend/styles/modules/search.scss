@@ -93,4 +93,9 @@
         @include container(10px);
         margin-top: 10px;
     }
+    .filters {
+        label {
+            vertical-align: top;
+        }
+    }
 }

@@ -8,7 +8,7 @@
             </form>
             <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
-            <div ng-if="vm.showFilters">
+            <div ng-if="vm.showFilters" class="filters">
                 <label>
                     {{'START_DATE' | translate}}
                     <input type="number" class="form-control" ng-model="vm.filterObject.start_date">
