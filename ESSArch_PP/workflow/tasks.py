@@ -95,6 +95,7 @@ from ESSArch_Core.storage.models import (
 )
 from ESSArch_Core.util import (
     creation_date,
+    find_destination,
     timestamp_to_datetime,
 )
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
@@ -158,14 +159,20 @@ class ReceiveSIP(DBTask):
         aip_dir = aip.object_path
         os.makedirs(aip_dir)
 
-        content = os.path.join(aip_dir, 'content')
-        metadata = os.path.join(aip_dir, 'metadata')
-
-        os.mkdir(content)
-        os.mkdir(metadata)
+        ProcessTask.objects.create(
+            name="ESSArch_Core.tasks.CreatePhysicalModel",
+            params={
+                "structure": aip.get_profile('aip').structure,
+                "root": aip_dir,
+            },
+            log=EventIP,
+            information_package=aip,
+            responsible_id=self.responsible,
+        ).run().get()
 
         if policy.receive_extract_sip:
-            dst = content
+            dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
+            dst = os.path.join(dst[0], dst[1])
 
             if container_type.lower() == '.tar':
                 with tarfile.open(container) as tar:
