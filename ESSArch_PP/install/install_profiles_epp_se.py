@@ -666,6 +666,7 @@ def installProfileAIP(sa):
             {
                 'type': 'folder',
                 'name': 'content',
+                'use': 'content',
                 'children': [
                     {
                         'type': 'file',
