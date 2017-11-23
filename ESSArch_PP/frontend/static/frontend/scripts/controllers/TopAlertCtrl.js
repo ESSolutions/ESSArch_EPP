@@ -8,7 +8,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     var interval;
     var updateInterval;
     vm.$onInit = function () {
-        vm.getNotifications();
+        vm.getNotifications(false);
         vm.updateUnseen();
         if(!$rootScope.useWebsocket) {
             interval = $interval(function() {
@@ -31,13 +31,16 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
     })
 
-    vm.getNotifications = function() {
+    vm.getNotifications = function(show) {
+        if(angular.isUndefined(show)) {
+            show = true;
+        }
         return TopAlert.getNotifications().then(function(data) {
             vm.backendAlerts = data;
             vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
                 return new Date(b.time_created) - new Date(a.time_created);
             })
-            if(vm.alerts.length > 0 && !vm.alerts[0].seen) {
+            if(vm.alerts.length > 0 && !vm.alerts[0].seen && show) {
                 vm.showAlert();
             }
             return vm.alerts;
