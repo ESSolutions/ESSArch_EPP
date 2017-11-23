@@ -1238,7 +1238,7 @@ class WorkareaViewSet(InformationPackageViewSet):
 
             return queryset.distinct()
 
-        if see_all:
+        if not see_all:
             return self.queryset.filter(workareas__user=self.request.user)
 
         return self.queryset
