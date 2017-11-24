@@ -501,16 +501,16 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         pos += 10
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.ParseEvents",
-            args=[events_xmlfile],
-            information_package=ip,
-            responsible=self.request.user,
-            processstep=generate_aip_step,
-            processstep_pos=pos
-        )
-
-        pos += 10
+        if os.path.isfile(events_xmlfile):
+            ProcessTask.objects.create(
+                name="ESSArch_Core.tasks.ParseEvents",
+                args=[events_xmlfile],
+                information_package=ip,
+                responsible=self.request.user,
+                processstep=generate_aip_step,
+                processstep_pos=pos
+            )
+            pos += 10
 
         aip_profile = profile_ip_aip.profile
         aip_profile_data = ip.get_profile_data('aip')
