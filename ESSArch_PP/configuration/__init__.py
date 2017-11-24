@@ -22,3 +22,4 @@
     Email - essarch@essolutions.se
 """
 
+default_app_config = 'configuration.apps.ConfigurationConfig'

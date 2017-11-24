@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'ESSArch_Core.storage',
     'ESSArch_Core.tags',
     'ESSArch_Core.WorkflowEngine',
+    'configuration',
     'storage',
 ]
 
