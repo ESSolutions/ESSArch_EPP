@@ -2,8 +2,8 @@ from django.apps import AppConfig
 
 
 class StorageConfig(AppConfig):
-    name = 'ESSArch_Core.storage'
-    verbose_name = 'Storage'
+    name = 'storage'
+    label = 'epp_storage'
 
     def ready(self):
         import storage.signals  # noqa
