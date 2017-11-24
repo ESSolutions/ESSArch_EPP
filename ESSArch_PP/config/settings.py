@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.sites',
     'django_filters',
+    'nested_inline',
     'rest_auth',
     'rest_auth.registration',
     'rest_framework',
