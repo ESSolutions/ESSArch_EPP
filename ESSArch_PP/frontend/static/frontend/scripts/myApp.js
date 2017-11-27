@@ -428,6 +428,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         },
     })
+    .state('home.administration.profileManager.export', {
+        url: '/export',
+        template: '<export></export>',
+        controller: 'ExportCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+    })
     .state('home.restricted', {
         url: 'restricted',
         templateUrl: '/static/frontend/views/restricted.html',
@@ -532,6 +542,9 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 .config(function(stConfig) {
     stConfig.sort.delay = -1;
 })
+.config(['$compileProvider', function ($compileProvider) {
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|file|blob|data):/);
+}])
 .config(function (formlyConfigProvider){
     function _defineProperty(obj, key, value) {
         if (key in obj) {

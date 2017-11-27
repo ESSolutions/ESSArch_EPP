@@ -442,5 +442,13 @@
     "METADATA": "Metadata",
     "FORMAT_CONVERSION": "Format conversion",
     "MEDIA_MIGRATION": "Media migration",
-    "DELETE_FIELD": "Do you want to delete field: {{field}}?"
+    "DELETE_FIELD": "Do you want to delete field: {{field}}?",
+    "SUBMISSION_AGREEMENT": "Submission agreement",
+    "IMPORT_SA_FROM_FILE": "Import SA from file",
+    "IMPORT_PROFILE_FROM_FILE": "Import profile from file",
+    "IMPORT_PROFILE": "Import profile",
+    "EXPORT": "Export",
+    "EXPORT_SUBMISSION_AGREEMENT": "Export submission agreement",
+    "EXPORT_PROFILE": "Export profile",
+    "EXPORT_AS_JSON": "Export as JSON"
 }

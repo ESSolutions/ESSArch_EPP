@@ -9,6 +9,8 @@
                     ng-if="checkPermissions(getPermissions('home.administration.profileManager.profileMaker'))" class="nav-item sliding-middle-out">{{'PROFILEMAKER' | translate}}</div>
                     <div ui-sref="home.administration.profileManager.import" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.import'}"
                     ng-if="checkPermissions(getPermissions('home.administration.profileManager.import'))" class="nav-item sliding-middle-out">{{'IMPORT' | translate}}</div>
+                    <div ui-sref="home.administration.profileManager.export" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.export'}"
+                    ng-if="checkPermissions(getPermissions('home.administration.profileManager.import'))" class="nav-item sliding-middle-out">{{'EXPORT' | translate}}</div>
                 </div>
                 <div class="profile-manager-route" ui-view>
                 </div>
