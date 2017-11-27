@@ -1,4 +1,18 @@
 <div class="import">
+    <form ng-submit="vm.addProfileFromFile(vm.profileFromFile)">
+        <label class="btn btn-success">
+            {{'IMPORT_PROFILE_FROM_FILE' | translate}}&nbsp;<i class="fa fa-upload"></i>
+            <input type="file" style="display: none;" fileread="vm.profileFromFile">
+        </label>
+    </form>
+    <br/>
+    <form name="saForm" ng-submit="vm.addSaFromFile(vm.saFromFile)">
+        <label class="btn btn-success">
+        {{'IMPORT_SA_FROM_FILE' | translate}}&nbsp;<i class="fa fa-upload"></i>
+            <input type="file" style="display: none;" fileread="vm.saFromFile">
+        </label>
+    </form>
+    <hr/>
     <form ng-submit="vm.getSaProfiles()">
         <label>
             {{ "IMPORT_URL" | translate }}

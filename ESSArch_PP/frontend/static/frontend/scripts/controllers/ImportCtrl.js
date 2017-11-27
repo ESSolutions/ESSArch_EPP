@@ -1,5 +1,6 @@
 angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, TopAlert, $uibModal) {
     var vm = this;
+    $scope.angular = angular;
     vm.saProfile = {
         profiles: [],
         profile: null
@@ -71,6 +72,39 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             })
         })
     }
+
+    vm.addSaFromFile = function(sa){
+        if(angular.isUndefined(sa)) {
+            sa = vm.saFromFile;
+        }
+        SA.new(JSON.parse(sa)).$promise.then(function (resource) {
+            TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported" , "success", 5000);
+            vm.select = false;
+        }).catch(function(response) {
+            saProfileExistsModal(JSON.parse(sa));
+        });
+    }
+    vm.addProfileFromFile = function(profile) {
+        Profile.new(JSON.parse(profile)).$promise.then(function(response) {
+            return response;
+        }).catch(function(response) {
+            profileExistsModal(JSON.parse(profile));
+            return response;
+        });
+    }
+
+    $scope.$watch(function(){return vm.saFromFile}, function() {
+        if(vm.saFromFile) {
+            vm.addSaFromFile(vm.saFromFile);
+        }
+    });
+
+    $scope.$watch(function(){return vm.profileFromFile}, function() {
+        if(vm.profileFromFile){
+            vm.addProfileFromFile(vm.profileFromFile);
+        }
+    });
+
     function saProfileExistsModal(profile) {
         var modalInstance = $uibModal.open({
             animation: true,
