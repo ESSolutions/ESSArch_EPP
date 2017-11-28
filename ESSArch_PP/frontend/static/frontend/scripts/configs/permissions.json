@@ -3,43 +3,24 @@
         "home": {
             "ingest": {
                 "reception": {
-                    "_permissions": [
-                        "ip.receive"
-                    ]
+                    "_permissions": []
                 },
                 "ipApproval": {
-                    "_permissions": [
-                        "ip.preserve",
-                        "ip.add_to_ingest_workarea",
-                        "ip.add_to_ingest_workarea_as_new",
-                        "ip.diff-check"
-                    ]
+                    "_permissions": []
                 },
                 "workarea": {
-                    "_permissions": [
-                        "ip.move_from_ingest_workarea",
-                        "ip.preserve_from_ingest_workarea"
-                    ]
+                    "_permissions": []
                 }
             },
             "access": {
                 "accessIp": {
-                    "_permissions": [
-                        "ip.get_from_storage",
-                        "ip.get_tar_from_storage",
-                        "ip.get_from_storage_as_new"
-                    ]
+                    "_permissions": []
                 },
                 "workarea": {
-                    "_permissions": [
-                        "ip.move_from_access_workarea",
-                        "ip.preserve_from_access_workarea"
-                    ]
+                    "_permissions": []
                 },
                 "createDip": {
-                    "_permissions": [
-                        "ip.preserve_dip"
-                    ]
+                    "_permissions": []
                 }
             },
             "orders": {

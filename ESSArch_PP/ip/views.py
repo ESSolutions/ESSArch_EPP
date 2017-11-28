@@ -35,11 +35,13 @@ from collections import OrderedDict
 from operator import itemgetter
 
 from celery import states as celery_states
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Q,
+from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from groups_manager.models import Member
 from lxml import etree
 from natsort import natsorted
 from rest_framework import exceptions, filters, mixins, status, viewsets
@@ -301,6 +303,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         # refresh date fields to convert them to datetime instances instead of
         # strings to allow further datetime manipulation
         ip.refresh_from_db(fields=['entry_date', 'start_date', 'end_date'])
+
+        member = Member.objects.get(django_user=request.user)
+        try:
+            perms = settings.IP_CREATION_PERMS_MAP
+        except AttributeError:
+            raise exceptions.ParseError('Missing IP_CREATION_PERMS_MAP in settings')
+
+        organization = request.user.user_profile.current_organization
+        member.assign_object(organization, ip, custom_permissions=perms)
 
         extra_data = fill_specification_data(ip=ip, sa=sa)
 
@@ -736,47 +747,51 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
-        inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
+        user = self.request.user
+
+
         min_max_gen = InformationPackage.objects.annotate(
             min_gen=Min('generation'), max_gen=Max('generation')
         ).filter(aic=OuterRef('aic')).exclude(workareas__read_only=False).order_by('generation')
 
-        self.queryset = self.queryset.annotate(
-            first_generation=Case(
-                When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
-                     then=Value(1)),
-                default=Value(0),
-                output_field=BooleanField()
-            ),
-            last_generation=Case(
-                When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
-                     then=Value(1)),
-                default=Value(0),
-                output_field=BooleanField()
+        if self.action == 'retrieve' or view_type == 'ip':
+            self.queryset = self.queryset.annotate(
+                first_generation=Case(
+                    When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
+                         then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField()
+                ),
+                last_generation=Case(
+                    When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
+                         then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField()
+                )
             )
-        )
 
         if self.action == 'list':
             self.queryset = self.queryset.exclude(workareas__read_only=False)
+            inner = InformationPackage.objects.visible_to_user(user).filter(
+                Q(Q(workareas=None) | Q(workareas__read_only=True)),
+            )
+
             if view_type == 'ip':
-                return self.queryset.exclude(
+                inner = inner.filter(aic=OuterRef('aic')).order_by('generation')
+
+                return self.queryset.annotate(has_ip=Exists(inner)).exclude(
                     package_type=InformationPackage.AIC,
                 ).filter(
                     Q(
-                        Q(aic__information_packages__workareas=None) |
-                        Q(aic__information_packages__workareas__read_only=True)
-                    ),
-                    Q(
-                        Q(generation=Subquery(inner.values('generation')[:1])) |
+                        Q(generation=Subquery(inner.values('generation')[:1]), has_ip=True) |
                         Q(package_type=InformationPackage.DIP)
                     ),
                 ).distinct()
-            return self.queryset.filter(
-                Q(
-                    Q(information_packages__workareas=None) |
-                    Q(information_packages__workareas__read_only=True)
-                ),
-                aic__isnull=True,
+
+            inner = inner.filter(aic=OuterRef('pk'))
+            return self.queryset.annotate(has_ip=Exists(inner)).filter(
+                Q(package_type=InformationPackage.AIC, has_ip=True) |
+                ~Q(package_type__in=[InformationPackage.AIC, InformationPackage.AIP])
             ).distinct()
 
         return self.queryset
@@ -1232,9 +1247,8 @@ class WorkareaViewSet(InformationPackageViewSet):
             queryset = self.queryset.filter(aic__isnull=True)
 
             if not see_all:
-                queryset = queryset.filter(
-                    information_packages__workareas__user=self.request.user,
-                )
+                inner = InformationPackage.objects.filter(workareas__user=self.request.user)
+                queryset = queryset.annotate(has_ip=Exists(inner)).filter(has_ip=True)
 
             return queryset.distinct()
 

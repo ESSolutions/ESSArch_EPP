@@ -173,7 +173,8 @@ body.modal-open[style] {
 .tasks-icons {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-left: auto;
     min-width: 200px;
     height: 100%;
 }
@@ -746,7 +747,6 @@ padding: 0 12px;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    width: 100%;
     font-size: 12pt;
     .sliding-middle-out {
         display: inline-block;
