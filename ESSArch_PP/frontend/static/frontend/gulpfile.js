@@ -40,6 +40,12 @@ var fs = require('fs');
 var argv = require('yargs').argv;
 var isProduction = (argv.production === undefined) ? false : true;
 
+var jsPolyfillFiles = [
+    'node_modules/string.prototype.startswith/startswith.js',
+    'node_modules/string.prototype.endswith/endswith.js',
+    'node_modules/string.prototype.contains/contains.js',
+    'scripts/polyfills/*.js',
+]
 var jsVendorFiles = [
         'node_modules/api-check/dist/api-check.js',
         'node_modules/jquery/dist/jquery.js',
@@ -87,7 +93,7 @@ var jsVendorFiles = [
         'node_modules/ng-js-tree/dist/ngJsTree.js',
     ],
     jsFiles = [
-        'scripts/polyfills/*.js', 'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
+        'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
         'scripts/services/*.js', 'scripts/directives/*.js', 'scripts/configs/*.js'
     ],
     jsDest = 'scripts',
@@ -107,6 +113,24 @@ var jsVendorFiles = [
     cssDest = 'styles';
 
 var licenseString = fs.readFileSync('license.txt');
+
+var buildPolyfills= function() {
+    return gulp.src(jsPolyfillFiles)
+        .pipe(plumber(function(error) {
+          // output an error message
+
+          gutil.log(gutil.colors.red('error (' + error.plugin + '): ' + error.message));
+          // emit the end event, to properly end the task
+          this.emit('end');
+        }))
+        .pipe(sourcemaps.init())
+        .pipe(ngAnnotate())
+        .pipe(concat('polyfills.min.js'))
+        .pipe(gulpif(isProduction, uglify()))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(jsDest));
+};
+
 var buildScripts = function() {
     return gulp.src(jsFiles)
         .pipe(plumber(function(error) {
@@ -220,12 +244,14 @@ gulp.task('default', function() {
     copyIcons();
     copyImages();
     copyImagesJstree();
+    buildPolyfills();
     buildScripts();
     return buildVendors();
 });
 
 gulp.task('icons', copyIcons);
 gulp.task('images', copyImages);
+gulp.task('polyfills', buildPolyfills);
 gulp.task('scripts', buildScripts);
 gulp.task('vendors', buildVendors);
 gulp.task('sass', compileSass);
@@ -233,6 +259,7 @@ gulp.task('config', configConstants);
 
 gulp.task('watch', function(){
     gulp.watch(jsFiles, ['scripts']);
+    gulp.watch(jsPolyfillFiles, ['polyfills']);
     gulp.watch(jsVendorFiles, ['vendors']);
     gulp.watch(cssFiles, ['sass']);
 })
