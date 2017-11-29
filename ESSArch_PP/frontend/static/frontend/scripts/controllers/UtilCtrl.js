@@ -33,11 +33,13 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
     $scope.infoPage = function() {
         $state.go('home.myPage');
     }
-    $scope.checkPermissions = function(permissions) {
+    $scope.checkPermissions = function(page) {
+        // Check if there is a sub state that does not require permissions
+        if(nestedEmptyPermissions(Object.resolve(page, permissionConfig))) {
+            return true;
+        }
+        var permissions = nestedPermissions(Object.resolve(page, permissionConfig));
         return myService.checkPermissions(permissions);
-    }
-    $scope.getPermissions = function(page) {
-        return nestedPermissions(Object.resolve(page, permissionConfig));
     }
     $scope.showAlert = function() {
         TopAlert.show();

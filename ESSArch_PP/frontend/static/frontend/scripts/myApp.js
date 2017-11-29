@@ -42,6 +42,23 @@ function nestedPermissions(page) {
     }
 }
 
+/**
+ * Check if state has a sub state that requires no permissions
+ * @param {*} page
+ */
+function nestedEmptyPermissions(page) {
+    if(Array.isArray(page)) {
+        return page.length == 0;
+    } else if(typeof(page) == "object") {
+        for(var entry in page) {
+            if(nestedEmptyPermissions(page[entry])) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource", 'relativeDate', 'ngWebSocket', 'ngJsTree'])
 .config(function($routeProvider, formlyConfigProvider, $urlMatcherFactoryProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider, permissionConfig) {
 
