@@ -41,8 +41,8 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                         PermPermissionStore.clearStore();
                         PermRoleStore.clearStore();
                         myService.getPermissions(response.data.permissions);
+                        $state.go('home.myPage');
                     });
-                    $state.go('home.myPage');
                 }).catch(function(response){
                     // error case
                     $scope.error = response.data.detail;
