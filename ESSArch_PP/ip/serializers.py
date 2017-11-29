@@ -2,6 +2,7 @@ import os
 
 from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Subquery,
                               Value, When)
+from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
 from _version import get_versions
@@ -50,6 +51,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],
@@ -83,6 +85,13 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
         return obj.is_last_generation()
 
+    def get_permissions(self, obj):
+        request = self.context.get('request')
+        if hasattr(request, 'user'):
+            return get_perms(request.user, obj)
+
+        return []
+
     def get_workarea(self, obj):
         workarea = obj.workareas.first()
 
@@ -100,6 +109,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archivist_organization', 'archival_type', 'archival_location',
             'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
             'first_generation', 'last_generation', 'start_date', 'end_date',
+            'permissions',
         )
         extra_kwargs = {
             'id': {

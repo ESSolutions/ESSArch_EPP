@@ -101,7 +101,29 @@ INSTALLED_APPS = [
     'ESSArch_Core.WorkflowEngine',
     'configuration',
     'storage',
+    'guardian',
+    'groups_manager',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
+GROUPS_MANAGER = {
+    'AUTH_MODELS_SYNC': True,
+    'PERMISSIONS': {
+        'owner': [],
+        'group': [],
+        'groups_upstream': [],
+        'groups_downstream': [],
+        'groups_siblings': [],
+    },
+    'GROUP_NAME_PREFIX': '',
+    'GROUP_NAME_SUFFIX': '',
+    'USER_USERNAME_PREFIX': '',
+    'USER_USERNAME_SUFFIX': '',
+}
 
 CHANNEL_LAYERS = {
     "default": {

@@ -27,6 +27,7 @@ angular.module('myApp').factory('myService', function(Sysinfo, $location, PermPe
         $state.go(state);
     };
     function getPermissions(permissions){
+        PermPermissionStore.clearStore();
         PermPermissionStore.defineManyPermissions(permissions, /*@ngInject*/ function (permissionName) {
             return permissions.includes(permissionName);
         });

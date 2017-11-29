@@ -1,7 +1,7 @@
 <div ng-if="!subrow && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState) || (row.package_type_display != 'AIC' && row.package_type !== undefined && (!row.first_generation || checkPermission('ip.delete_first_generation')) && (!row.last_generation || checkPermission('ip.delete_last_generation')) && !row.archived))">
     <div ng-click="ipRowClick(row)" context-menu="menuOptions('row')">
         <button type="button"
-                ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
+                ng-if="row.permissions.includes('delete_informationpackage')"
                 ng-click="removeIpModal(row)"
                 class="fa fa-trash"
                 uib-popover="{{'REMOVEIP' | translate}}: {{row.label}}"
@@ -13,7 +13,7 @@
 <div ng-if="subrow && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState) || (subrow.package_type_display != 'AIC' && subrow.package_type !== undefined && (!subrow.first_generation || checkPermission('ip.delete_first_generation')) && (!subrow.last_generation || checkPermission('ip.delete_last_generation')) && !subrow.archived))">
     <div ng-click="ipRowClick(subrow)" context-menu="menuOptions('subrow')">
         <button type="button"
-                ng-if="subrow.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
+                ng-if="subrow.permissions.includes('delete_informationpackage')"
                 ng-click="removeIpModal(subrow)"
                 class="fa fa-trash"
                 uib-popover="{{'REMOVEIP' | translate}}: {{subrow.label}}"
