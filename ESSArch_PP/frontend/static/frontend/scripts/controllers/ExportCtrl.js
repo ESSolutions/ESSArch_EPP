@@ -24,13 +24,14 @@ angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $h
 
     vm.profileFileName = function (item) {
         if (item) {
-            var name = "profile_" + item.id + ".json";
+            var name = item.name + ".json";
             return name;
         }
     }
+
     vm.saFileName = function(item) {
         if(item) {
-            var name = "submission_agreement_" + item.id + ".json";
+            var name = item.name + ".json";
             return name;
         }
     }
