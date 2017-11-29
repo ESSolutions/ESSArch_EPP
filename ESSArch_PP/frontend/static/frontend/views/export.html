@@ -1,7 +1,7 @@
 <div class="export">
     <label>
         {{'SUBMISSION_AGREEMENT' | translate}}
-        <select class="form-control" ng-model="vm.sa" ng-options="x as vm.saLabel(x) for x in vm.sas"></select>
+        <select class="form-control" ng-model="vm.sa" ng-options="x as x.name for x in vm.sas"></select>
     </label>
     <a ng-if="vm.sa" class="btn btn-success" href="data:text/json;charset=utf-8,{{encodeJson(vm.sa)}}" download="{{vm.saFileName(vm.sa)}}">{{'EXPORT_SUBMISSION_AGREEMENT' | translate}}</a>
     <br/>
