@@ -35,26 +35,4 @@ angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $h
             return name;
         }
     }
-    vm.saLabel = function(sa) {
-        var published = sa.published?" (Published)":"";
-        return sa.name + published;
-    }
-    /**
-     *
-     * @param {Object} sa - Submission agreement to export
-     * @param {Boolean} file - If true, export to file
-     */
-    vm.exportSa = function (sa, file) {
-
-    }
-
-    /**
-     *
-     * @param {Object} profile - Profile to export
-     * @param {Boolean} file - If true, export to file
-     */
-    vm.exportProfile = function (profile, file) {
-
-    }
-
 });
