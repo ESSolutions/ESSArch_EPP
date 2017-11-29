@@ -29,11 +29,13 @@ Object.resolve = function(path, obj) {
 }
 
 function nestedPermissions(page) {
+    // If page is an array it means that page is the field _permissions
     if(Array.isArray(page)) {
         return page;
     } else if(typeof(page) == "object") {
         var temp = [];
         for(var entry in page) {
+            // Recursively build permission list
             temp = temp.concat(nestedPermissions(page[entry]));
         }
         return temp;
