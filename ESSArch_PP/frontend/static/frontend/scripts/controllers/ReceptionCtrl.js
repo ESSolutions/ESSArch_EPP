@@ -155,20 +155,15 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
             $scope.filebrowser = false;
         } else {
             vm.sdModel = {};
-            if(row.state == "At reception") {
-                $scope.ip = row;
-                $rootScope.ip = row;
-                $scope.buildSdForm(row);
-                $scope.getFileList(row);
-                $scope.edit = true;
-                if($scope.filebrowser && !$scope.ip.url) {
-                    $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
-                }
-            } else {
-                $scope.edit = false;
-                $scope.ip = null;
-                $rootScope.ip = null;
+            $scope.ip = row;
+            $rootScope.ip = row;
+            $scope.buildSdForm(row);
+            $scope.getFileList(row);
+            $scope.edit = true;
+            if($scope.filebrowser && !$scope.ip.url) {
+                $scope.ip.url = appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/";
             }
+
         }
     };
 
@@ -297,7 +292,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
         vm.sdModel = {
             "start_date": ip.start_date,
             "end_date": ip.end_date,
-            "archivist_organization": ip.archivist_organization.name,
+            "archivist_organization": ip.archivist_organization?ip.archivist_organization.name:null,
             "creator": ip.creator_organization,
             "submitter_organization": ip.submitter_organization,
             "submitter_individual": ip.submitter_individual,
