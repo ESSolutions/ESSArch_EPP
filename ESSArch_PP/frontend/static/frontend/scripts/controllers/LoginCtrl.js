@@ -35,17 +35,15 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
             djangoAuth.login($scope.model.username, $scope.model.password)
                 .then(function(data){
                     // success case
-                    djangoAuth.profile().then(function(response){
-                        $rootScope.auth = response.data;
-                        $rootScope.listViewColumns = myService.generateColumns(response.data.ip_list_columns).activeColumns;
-                        PermPermissionStore.clearStore();
-                        PermRoleStore.clearStore();
-                        myService.getPermissions(response.data.permissions);
-                        $state.go('home.myPage');
-                    });
-                }).catch(function(response){
+                    $rootScope.auth = data;
+                    $rootScope.listViewColumns = myService.generateColumns(data.ip_list_columns).activeColumns;
+                    PermPermissionStore.clearStore();
+                    PermRoleStore.clearStore();
+                    myService.getPermissions(data.permissions);
+                    $state.go('home.myPage');
+                }).catch(function(data){
                     // error case
-                    $scope.error = response.data.detail;
+                    $scope.error = data.data.non_field_errors[0];
                 });
         }
     }
