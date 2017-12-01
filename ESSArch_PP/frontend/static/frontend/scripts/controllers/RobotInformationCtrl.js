@@ -42,7 +42,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     // Table states
 
     var robotInterval;
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
 		$interval.cancel(robotInterval);
 	});
     $interval.cancel(robotInterval);

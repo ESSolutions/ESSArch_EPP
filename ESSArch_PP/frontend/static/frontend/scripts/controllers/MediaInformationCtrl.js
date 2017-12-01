@@ -45,13 +45,13 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
 			$interval.cancel(objectInterval);
 		}
 	}));
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
         watchers.forEach(function(watcher) {
             watcher();
         });
     });
     //Cancel update intervals on state change
-	$rootScope.$on('$stateChangeStart', function() {
+	$scope.$on('$stateChangeStart', function() {
 		$interval.cancel(mediumInterval);
 		$interval.cancel(objectInterval);
 	});

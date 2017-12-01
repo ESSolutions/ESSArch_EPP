@@ -18,7 +18,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
     }
 
-    $rootScope.$watch(function () { return $rootScope.useWebsocket }, function (newValue, oldValue) {
+    $scope.$watch(function () { return $rootScope.useWebsocket }, function (newValue, oldValue) {
         if (newValue != oldValue) {
             if ($rootScope.useWebsocket) {
                 $interval.cancel(interval);
@@ -199,17 +199,17 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     }
 
     // Listen for show/hide events
-    $rootScope.$on('add_top_alert', function (event, data) {
+    $scope.$on('add_top_alert', function (event, data) {
         vm.addAlert(data.id, data.message, data.level, data.time, true);
     });
-    $rootScope.$on('add_unseen_top_alert', function (event, data) {
+    $scope.$on('add_unseen_top_alert', function (event, data) {
         vm.updateUnseen(data.count);
         vm.addAlert(data.id, data.message, data.level, data.time, false);
         if(vm.showAlerts) {
             vm.setSeen(vm.alerts.slice(0,5));
         }
     });
-    $rootScope.$on('show_top_alert', function (event, data) {
+    $scope.$on('show_top_alert', function (event, data) {
         if(vm.alerts.length > 0) {
             vm.showAlert();
             $timeout(function() {
@@ -218,10 +218,10 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             }, 300);
         }
     });
-    $rootScope.$on('hide_top_alert', function (event, data) {
+    $scope.$on('hide_top_alert', function (event, data) {
         vm.hideAlert();
     });
-    $rootScope.$on('get_top_alerts', function (event, data) {
+    $scope.$on('get_top_alerts', function (event, data) {
         vm.getNotifications();
     });
 });

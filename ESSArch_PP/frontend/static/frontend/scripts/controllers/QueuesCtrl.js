@@ -17,7 +17,7 @@ angular.module('myApp').controller('QueuesCtrl', function(appConfig, $scope, $ro
         vm.getRobotQueue(vm.robotTableState);
     }, appConfig.queueInterval);
 
-    $rootScope.$on('$stateChangeStart', function() {
+     $scope.$on('$stateChangeStart', function() {
 		$interval.cancel(ioInterval);
 		$interval.cancel(robotInterval);
 	});

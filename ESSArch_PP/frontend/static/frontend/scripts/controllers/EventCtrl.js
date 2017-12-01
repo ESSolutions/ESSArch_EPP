@@ -63,7 +63,7 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
     $scope.closeAlert = function() {
         $scope.addEventAlert = null;
     }
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
         $interval.cancel(eventInterval);
     });
     $scope.$on("$destroy", function() {

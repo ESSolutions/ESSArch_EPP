@@ -60,14 +60,14 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $scope.initRequestData();
 
     // Watchers
-    watchers.push($rootScope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
+    watchers.push($scope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
         $scope.getListViewData();
     }, true));
 
     // Initialize intervals
 
     //Cancel update intervals on state change
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
         $interval.cancel(stateInterval);
         $interval.cancel(listViewInterval);
         watchers.forEach(function(watcher) {
@@ -75,7 +75,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         });
     });
 
-    $rootScope.$on('REFRESH_LIST_VIEW', function (event, data) {
+    $scope.$on('REFRESH_LIST_VIEW', function (event, data) {
         $scope.getListViewData();
     });
     var stateInterval;

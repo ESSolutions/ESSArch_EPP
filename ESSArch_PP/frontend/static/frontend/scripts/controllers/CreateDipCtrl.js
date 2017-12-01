@@ -77,7 +77,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     }
 
     //Cancel update intervals on state change
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
         $interval.cancel(fileBrowserInterval);
         watchers.forEach(function(watcher) {
             watcher();

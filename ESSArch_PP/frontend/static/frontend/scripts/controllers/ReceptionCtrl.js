@@ -52,7 +52,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (TopAlert, IPRecept
         };
     }
     $scope.initRequestData();
-    $rootScope.$on('$stateChangeStart', function() {
+    $scope.$on('$stateChangeStart', function() {
         $interval.cancel(tagsInterval);
         watchers.forEach(function(watcher) {
             watcher();

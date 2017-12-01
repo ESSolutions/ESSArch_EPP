@@ -54,7 +54,7 @@ angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(T
         });
     }
     $rootScope.loadTags();
-    $rootScope.$on('load_tags', function() {
+    $scope.$on('load_tags', function() {
         $rootScope.loadTags();
     });
     $scope.onNodeToggle = function(node) {
