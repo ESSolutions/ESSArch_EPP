@@ -23,9 +23,6 @@
 */
 
 angular.module('myApp').controller('OrganizationCtrl', function($scope, $rootScope, $cookies, Organization) {
-    $scope.updateListView = function() {
-        $rootScope.$broadcast('REFRESH_LIST_VIEW', {});
-    }
 
     $scope.changeOrganization = function() {
         var org = $scope.currentOrganization;
