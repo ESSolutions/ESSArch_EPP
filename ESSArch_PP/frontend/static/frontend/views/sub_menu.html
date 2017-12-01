@@ -20,9 +20,9 @@
             <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.includes('home.administration.profileManager')}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.profileManager')">{{'PROFILEMANAGER' | translate}}</div>
         </div>
         <div ng-if="'home.archiveMaintenance' | includedByState">
-            <div ui-sref="home.archiveMaintenance.appraisal" ng-class="{chosen: $state.current.name == 'home.archiveMaintenance.appraisal'}" class="nav-item sliding-middle-out" >{{'APPRAISAL' | translate}}</div>
-            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" >{{'FORMAT_CONVERSION' | translate}}</div>
-            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" >{{'MEDIA_MIGRATION' | translate}}</div>
+            <div ui-sref="home.archiveMaintenance.appraisal" ng-class="{chosen: $state.current.name == 'home.archiveMaintenance.appraisal'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.appraisal')">{{'APPRAISAL' | translate}}</div>
+            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.conversion')">{{'FORMAT_CONVERSION' | translate}}</div>
+            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.mediaMigration')">{{'MEDIA_MIGRATION' | translate}}</div>
         </div>
     </div>
 </div>

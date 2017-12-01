@@ -40,9 +40,9 @@
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.ingest')}" ui-sref="home.ingest" ng-if="checkPermissions('home.ingest')">{{('INGEST' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.access')}" ui-sref="home.access" ng-if="checkPermissions('home.access')">{{('ACCESS' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.orders')}" ui-sref="home.orders" ng-if="checkPermissions('home.orders')">{{('ORDERS' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.archiveMaintenance')}" ui-sref="home.archiveMaintenance">{{('ARCHIVE_MAINTENANCE' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.archiveMaintenance')}" ui-sref="home.archiveMaintenance" ng-if="checkPermissions('home.archiveMaintenance')">{{('ARCHIVE_MAINTENANCE' | translate)}}</p>
             <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions('home.administration')">{{('ADMINISTRATION' | translate)}}</p>
-            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.search')}" ui-sref="home.search">{{('SEARCH' | translate)}}</p>
+            <p class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.search')}" ui-sref="home.search" ng-if="checkPermissions('home.search')">{{('SEARCH' | translate)}}</p>
         </div>
         <div ng-controller="UtilCtrl" class="tasks-icons">
             <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>

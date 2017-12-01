@@ -28,8 +28,23 @@
                     "ip.prepare_order"
                 ]
             },
-            "management": {},
-            "appraisal": {},
+            "management": {
+                "_permissions": []
+            },
+            "archiveMaintenance": {
+                "start": {
+                    "_permissions": []
+                },
+                "appraisal": {
+                    "_permissions": []
+                },
+                "conversion": {
+                    "_permissions": []
+                },
+                "mediaMigration": {
+                    "_permissions": []
+                }
+            },
             "administration": {
                 "mediaInformation": {
                     "_permissions": [
@@ -57,7 +72,6 @@
                     ]
                 },
                 "profileManager": {
-                    "_permissions": [],
                     "saEditor": {
                         "_permissions": [
                             "profiles.add_submissionagreement"
@@ -72,8 +86,14 @@
                         "_permissions": [
                             "profiles.add_submissionagreement"
                         ]
+                    },
+                    "export": {
+                        "_permissions": []
                     }
                 }
+            },
+            "search": {
+                "_permissions": []
             }
         }
     }

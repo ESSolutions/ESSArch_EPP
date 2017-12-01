@@ -260,7 +260,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.management", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.archiveMaintenance', {
         url: 'archive-maintenance',
@@ -281,7 +287,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.archiveMaintenance.start", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.archiveMaintenance.appraisal', {
         url: '/appraisal',
@@ -291,7 +303,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.archiveMaintenance.appraisal", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.administration', {
         url: 'administration',
@@ -450,11 +468,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.administration.profileManager.export', {
         url: '/export',
         template: '<export></export>',
-        controller: 'ExportCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.administration.profileManager.export", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
         },
     })
     .state('home.restricted', {
