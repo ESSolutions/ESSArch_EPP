@@ -50,7 +50,13 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                     return Profile.new(data).$promise.then(function(response) {
                         return response;
                     }).catch(function(response) {
-                        profileExistsModal(data);
+                        if(response.status == 409) {
+                            profileExistsModal(data);
+                        } else if(response.status == 400) {
+                            TopAlert.add("Invalid profile", "error");
+                        } else if(response.status >= 500) {
+                            TopAlert.add("Server error", "error");
+                        }
                         return response;
                     });
                 }));
@@ -68,7 +74,13 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                 TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported" , "success", 5000);
                 vm.select = false;
             }).catch(function(response) {
-                saProfileExistsModal(sa);
+                if(response.status == 409) {
+                    saProfileExistsModal(sa);
+                } else if(response.status == 400) {
+                    TopAlert.add("Invalid submission agreement", "error");
+                } else if(response.status >= 500) {
+                    TopAlert.add("Server error", "error");
+                }
             })
         })
     }
@@ -81,14 +93,26 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported" , "success", 5000);
             vm.select = false;
         }).catch(function(response) {
-            saProfileExistsModal(JSON.parse(sa));
+            if(response.status == 409) {
+                saProfileExistsModal(JSON.parse(sa));
+            } else if(response.status == 400) {
+                TopAlert.add("Invalid submission agreement", "error");
+            } else if(response.status >= 500) {
+                TopAlert.add("Server error", "error");
+            }
         });
     }
     vm.addProfileFromFile = function(profile) {
         Profile.new(JSON.parse(profile)).$promise.then(function(response) {
             return response;
         }).catch(function(response) {
-            profileExistsModal(JSON.parse(profile));
+            if(response.status == 409) {
+                profileExistsModal(JSON.parse(profile));
+            } else if(response.status == 400) {
+                TopAlert.add("Invalid profile", "error");
+            } else if(response.status >= 500) {
+                TopAlert.add("Server error", "error");
+            }
             return response;
         });
     }
