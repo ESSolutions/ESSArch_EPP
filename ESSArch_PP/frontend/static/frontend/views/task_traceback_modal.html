@@ -5,7 +5,7 @@
     <div class="step-task-info">
         <b style="margin: 5px;">{{'ID' | translate}}: </b>{{currentStepTask.id}}
         <div>
-            <pre  style="max-height:500px; overflow-y:auto;" id="traceback_pre">{{currentStepTask.traceback}}</pre>
+            <pre style="max-height:500px; overflow-y:auto;" id="traceback_pre">{{currentStepTask.traceback}}</pre>
         </div>
     </div>
     <button class="btn btn-default" clipboard text="currentStepTask.traceback" on-copied="$ctrl.copied()">{{'COPYTRACEBACK' | translate}}</button>
