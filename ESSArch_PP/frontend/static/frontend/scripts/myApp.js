@@ -420,7 +420,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.administration.profileManager.saEditor', {
         url: '/sa-editor',
         template: '<sa-editor></sa-editor>',
-        controller: 'SaEditorCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -436,7 +435,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.administration.profileManager.profileMaker', {
         url: '/profile-maker',
         template: '<profile-maker></profile-maker>',
-        controller: 'ProfileMakerCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -452,7 +450,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.administration.profileManager.import', {
         url: '/import',
         template: '<import></import>',
-        controller: 'ImportCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
