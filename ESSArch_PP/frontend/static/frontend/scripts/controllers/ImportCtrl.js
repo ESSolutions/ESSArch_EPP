@@ -103,8 +103,9 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         });
     }
     vm.addProfileFromFile = function(profile) {
-        Profile.new(JSON.parse(profile)).$promise.then(function(response) {
-            return response;
+        Profile.new(JSON.parse(profile)).$promise.then(function(resource) {
+            TopAlert.add("Profile: \"" + resource.name + "\" has been imported" , "success", 5000);
+            return resource;
         }).catch(function(response) {
             if(response.status == 409) {
                 profileExistsModal(JSON.parse(profile));
