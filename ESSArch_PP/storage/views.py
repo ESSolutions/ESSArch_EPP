@@ -418,8 +418,8 @@ class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     )
 
     search_fields = (
-        'id', 'user', 'posted', 'robot', 'io_queue_entry',
-        'storage_medium', 'req_type', 'status',
+        'id', 'user__username', 'posted', 'robot__label',
+        'storage_medium__medium_id', 'req_type', 'status',
     )
 
 class TapeDriveViewSet(viewsets.ModelViewSet):
