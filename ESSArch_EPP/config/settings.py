@@ -171,7 +171,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS': (
         #'rest_framework_filters.backends.DjangoFilterBackend',
-        'rest_framework.filters.DjangoFilterBackend',
+        #'rest_framework.filters.DjangoFilterBackend',   # djangorestframework-3.6.3
+        'django_filters.rest_framework.DjangoFilterBackend',    # djangorestframework-3.7.0
     ),
 }
 
