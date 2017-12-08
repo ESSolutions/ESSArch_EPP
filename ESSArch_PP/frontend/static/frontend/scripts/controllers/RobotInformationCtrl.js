@@ -87,6 +87,18 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getTapeDrives(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.tapeDrives = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("tapedrive", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.getDrives(tableState);
+                    });
+                }
             });
         }
     }
@@ -106,6 +118,18 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getTapeSlots(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.tapeSlots = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("tapeslot", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.getSlots(tableState);
+                    });
+                }
             });
         }
     }
@@ -125,6 +149,18 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getRobotQueueForRobot(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.robotQueue = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("robot_queue_for_robot", number, filters, vm.selectedRobot.id).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.getRobotQueue(tableState);
+                    });
+                }
             });
         }
     }
@@ -146,6 +182,18 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
                 vm.robots = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("robot", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.loadRobots(tableState);
+                    });
+                }
             });
         }
     }

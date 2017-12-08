@@ -37,6 +37,18 @@ angular.module('myApp').controller('QueuesCtrl', function(appConfig, $scope, $ro
             Resource.getIoQueue(start, number, pageNumber, tableState, sorting, search).then(function (result) {
                 vm.ioQueue = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("io_queue", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.getIoQueue(tableState);
+                    });
+                }
             });
         }
     }
@@ -56,6 +68,18 @@ angular.module('myApp').controller('QueuesCtrl', function(appConfig, $scope, $ro
             Resource.getRobotQueue(start, number, pageNumber, tableState, sorting, search).then(function (result) {
                 vm.robotQueue = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("robot_queue", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        $scope.getIoQueue(tableState);
+                    });
+                }
             });
         }
     }

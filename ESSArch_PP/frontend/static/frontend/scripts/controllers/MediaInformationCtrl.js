@@ -105,6 +105,18 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("storage_medium", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        vm.callServer(tableState);
+                    });
+                }
             });
         }
     };
@@ -129,6 +141,18 @@ angular.module('myApp').controller('MediaInformationCtrl', function($scope, $roo
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.objectLoading = false;
                 $scope.initObjLoad = false;
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = {
+                        search: search
+                    };
+
+                    listViewService.checkPages("storage_object", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        vm.objectPipe(tableState);
+                    });
+                }
             });
         }
     };

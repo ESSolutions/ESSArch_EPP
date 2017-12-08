@@ -27,6 +27,64 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     function changePath(state) {
         $state.go(state);
     }
+
+        /**
+     * Map given table type with an url
+     * @param {String} table - Type of table, example: "ip", "events", "workspace"
+     * @param {string} [id] - Optional id for url
+     */
+    function tableMap(table, id){
+        var map =  {
+            ip: "information-packages/",
+            events: "information-packages/" + id + "/events/",
+            reception: "ip-reception/",
+            workspace: "workareas/",
+            storage_medium: "storage-mediums/",
+            storage_object: "storage-objects/",
+            robot: "robots/",
+            tapeslot: "tape-slots/",
+            tapedrive: "tape-drives/",
+            robot_queue: "robot-queue/",
+            robot_queue_for_robot: "robots/" + id + "/queue/",
+            io_queue: "io-queue/",
+        }
+        return map[table];
+    }
+
+    /**
+     * Check number of items and how many pages a table has.
+     * Used to update tables correctly when amount of pages is reduced.
+     * @param {String} table - Type of table, example: "ip", "events", "workspace"
+     * @param {Integer} pageSize - Page size
+     * @param {Object} filters - All filters and relevant sort string etc
+     * @param {String} [id] - ID used in table url, for example IP ID
+     */
+    function checkPages(table, pageSize, filters, id) {
+        var data = angular.extend({
+            page: 1,
+            page_size: pageSize,
+        }, filters);
+        var url;
+        if(id) {
+            url = tableMap(table, id);
+        } else {
+            url = tableMap(table);
+        }
+        return $http.head(appConfig.djangoUrl + url, {params: data}).then(function (response) {
+            count = response.headers('Count');
+            if (count == null) {
+                count = response.length;
+            }
+            if ( count == 0) {
+                count = 1;
+            }
+            return {
+                count: count,
+                numberOfPages: Math.ceil(count / pageSize)
+            };
+        });
+    }
+
     //Gets data for list view i.e information packages
     function getListViewData(pageNumber, pageSize, filters, sortString, searchString, state, viewType, columnFilters, archived, workarea) {
         var data = angular.extend({
@@ -880,5 +938,6 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         getDir: getDir,
         getfile: getFile,
         getWorkareaFile: getWorkareaFile,
+        checkPages: checkPages,
     };
 });

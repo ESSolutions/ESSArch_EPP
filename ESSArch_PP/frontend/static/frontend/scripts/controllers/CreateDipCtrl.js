@@ -122,7 +122,20 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
                 $scope.initLoad = false;
-            });
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    var filters = angular.extend({
+                        state: ipSortString,
+                        package_type: 4,
+                    }, $scope.columnFilters)
+
+                    listViewService.checkPages("ip", number, filters).then(function (result) {
+                        tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                        tableState.pagination.start = (result.numberOfPages*number) - number;
+                        vm.callServer(tableState);
+                    });
+                }
+            })
         }
     };
 
