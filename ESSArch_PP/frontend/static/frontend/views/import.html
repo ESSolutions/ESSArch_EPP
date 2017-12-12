@@ -13,11 +13,11 @@
         </label>
     </form>
     <hr/>
-    <form ng-submit="vm.getSaProfiles()">
+    <form name="vm.importSaForm"  ng-submit="vm.getSaProfiles()">
         <label>
             {{ "IMPORT_URL" | translate }}
         </label>
-        <input class="form-control" ng-model="vm.url" type="url" required />
+        <input class="form-control" ng-model="vm.url" type="url" ng-pattern="^https?:\/\/" required />
         <label>
             {{ "USERNAME" | translate }}
         </label>
@@ -27,7 +27,7 @@
         </label>
         <input class="form-control" ng-model="vm.user.password" type="password" required />
         <div class="alert alert-danger" ng-if="error">{{error}}</div>
-        <button class="btn btn-info" type="submit" translate="GET_SAS"></button>
+        <button ng-disabled="vm.importSaForm.$invalid" class="btn btn-info" type="submit" translate="GET_SAS"></button>
     </form>
     <div ng-if="vm.select" class="select-view">
         <form ng-submit="vm.importSa(vm.saProfile.profile)">
