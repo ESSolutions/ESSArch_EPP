@@ -89,12 +89,19 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         if(angular.isUndefined(sa)) {
             sa = vm.saFromFile;
         }
-        SA.new(JSON.parse(sa)).$promise.then(function (resource) {
+        var parsedSa;
+        try {
+            parsedSa = JSON.parse(sa);
+        } catch(e) {
+            TopAlert.add(e, "error");
+            return;
+        }
+        SA.new(parsedSa).$promise.then(function (resource) {
             TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported" , "success", 5000);
             vm.select = false;
         }).catch(function(response) {
             if(response.status == 409) {
-                saProfileExistsModal(JSON.parse(sa));
+                saProfileExistsModal(parsedSa);
             } else if(response.status == 400) {
                 TopAlert.add("Invalid submission agreement", "error");
             } else if(response.status >= 500) {
@@ -103,12 +110,19 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         });
     }
     vm.addProfileFromFile = function(profile) {
-        Profile.new(JSON.parse(profile)).$promise.then(function(resource) {
+        var parsedProfile;
+        try {
+            parsedProfile = JSON.parse(profile);
+        } catch(e) {
+            TopAlert.add(e, "error");
+            return;
+        }
+        Profile.new(parsedProfile).$promise.then(function(resource) {
             TopAlert.add("Profile: \"" + resource.name + "\" has been imported" , "success", 5000);
             return resource;
         }).catch(function(response) {
             if(response.status == 409) {
-                profileExistsModal(JSON.parse(profile));
+                profileExistsModal(parsedProfile);
             } else if(response.status == 400) {
                 TopAlert.add("Invalid profile", "error");
             } else if(response.status >= 500) {
