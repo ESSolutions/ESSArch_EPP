@@ -110,6 +110,12 @@
                                 <td>{{card.size | filesize}}</td>
                                 <td>{{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
                             </tr>
+                            <tr ng-if="!deckGridData.length && !deckGridLoading" class="empty-table-indicator">
+                                <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                            </tr>
+                            <tr ng-if="!deckGridData.length && deckGridLoading" class="empty-table-indicator">
+                                <td colspan="3">{{'LOADING' | translate}}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <div class="files-per-page-pagination-wrapper">

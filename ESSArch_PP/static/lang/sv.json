@@ -450,5 +450,6 @@
     "EXPORT": "Export",
     "EXPORT_SUBMISSION_AGREEMENT": "Exportera leveransöverenskollelse",
     "EXPORT_PROFILE": "Exportera profil",
-    "EXPORT_AS_JSON": "Exportera som JSON"
+    "EXPORT_AS_JSON": "Exportera som JSON",
+    "NO_RESULTS_FOUND": "Inga resultat hittade"
 }
