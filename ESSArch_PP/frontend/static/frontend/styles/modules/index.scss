@@ -1044,5 +1044,32 @@ body.modal-open {
 .empty-table-indicator {
     text-align: center;
     background-color: #b6c8e4;
-    color: #999595;
+    color: #757575;
 }
+
+.loading-column:after {
+    content: "...";
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: left;
+    animation: ellipsis-dot 1s infinite .3s;
+    animation-fill-mode: fowards;
+    width: 1.25em;
+  }
+
+
+  @keyframes ellipsis-dot {
+    25% {
+        content: "";
+    }
+    50% {
+        content: ".";
+    }
+    75% {
+        content: "..";
+    }
+    100% {
+        content: "...";
+    }
+  }
