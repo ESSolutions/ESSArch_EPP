@@ -35,7 +35,9 @@
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
-        <div ng-if="filebrowser" class="file-browser" ng-controller="FilebrowserController" ng-include src="'static/frontend/views/filebrowser.html'"></div>
+        <div ng-if="filebrowser" class="file-browser">
+            <filebrowser ip="ip"></filebrowser>
+        </div>
         <div ng-if="includedIps.length>0" class="receive-button-wrapper">
             <div id="request-form" class="request-form receive-modal-button">
                 <button class="btn btn-info" ng-click="receiveModal(includedIps[0])">{{'RECEIVE' | translate}}</button>
