@@ -774,6 +774,7 @@ padding: 0 12px;
 }
 .nav-item {
     cursor: pointer;
+    user-select: none;
     margin: 0 15px 0 0 !important;
 }
 
