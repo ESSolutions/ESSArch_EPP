@@ -178,7 +178,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         if($scope.ip.workarea) {
             file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=" + vm.workarea + "&path=" + $scope.previousGridArraysString() + file.name);
         } else {
-            file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString() + file.name);
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/" + $scope.ip.id + "/files/?path=" + $scope.previousGridArraysString() + file.name);
         }
         $window.open(file.content, '_blank');
     }
