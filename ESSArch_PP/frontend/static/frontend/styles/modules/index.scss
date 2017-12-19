@@ -593,7 +593,7 @@ padding: 0 12px;
     width: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 5px;
 }
 .file-pagination {
@@ -774,6 +774,7 @@ padding: 0 12px;
 }
 .nav-item {
     cursor: pointer;
+    user-select: none;
     margin: 0 15px 0 0 !important;
 }
 

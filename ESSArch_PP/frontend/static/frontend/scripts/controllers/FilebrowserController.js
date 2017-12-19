@@ -1,7 +1,15 @@
-angular.module('myApp').controller('FilebrowserController', function ($scope, $rootScope, $sce, appConfig, listViewService, $uibModal, $window, $cookies) {
+angular.module('myApp').controller('FilebrowserController', function ($scope, $rootScope, $sce, appConfig, listViewService, $uibModal, $window, $cookies, $state) {
     $scope.previousGridArrays = [];
-    $scope.ip = $rootScope.ip;
     var vm = this;
+    vm.$onInit = function() {
+        if(vm.ip) {
+            $scope.ip = vm.ip;
+        } else {
+            $scope.ip = $rootScope.ip;
+        }
+        $scope.listView = false;
+        $scope.gridView = true;
+    }
     var watchers = [];
     vm.$onDestroy = function() {
         watchers.forEach(function(watcher) {
@@ -11,13 +19,11 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.listView = false;
     $scope.gridView = true;
     $scope.useListView = function() {
-        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = true;
         $scope.gridView = false;
     }
 
     $scope.useGridView = function() {
-        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = false;
         $scope.gridView = true;
     }
@@ -26,15 +32,28 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.changeFilesPerPage = function(filesPerPage) {
         $cookies.put("files-per-page", filesPerPage, { expires: new Date("Fri, 31 Dec 9999 23:59:59 GMT") });
     }
+
     $scope.previousGridArraysString = function () {
         var retString = "";
+        if($state.includes("**.workarea.**")) {
+            retString = $scope.ip.object_identifier_value;
+            if ($scope.ip.workarea.packaged && !$scope.ip.workarea.extracted) {
+                retString += '.tar';
+            }
+            retString += '/';
+        }
+
         $scope.previousGridArrays.forEach(function (card) {
             retString = retString.concat(card.name, "/");
         });
         return retString;
     }
+
     $scope.deckGridData = [];
     $scope.dirPipe = function(tableState) {
+        if(vm.browserstate) {
+            vm.browserstate.path = $scope.previousGridArraysString();
+        }
         $scope.gridArrayLoading = true;
         if ($scope.deckGridData.length == 0) {
             $scope.initLoad = true;
@@ -45,14 +64,28 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
-            listViewService.getDir($scope.ip, $scope.previousGridArraysString(), pageNumber, number).then(function(dir) {
-                $scope.deckGridData = dir.data;
-                tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
-                $scope.gridArrayLoading = false;
-                $scope.initLoad = false;
-            })
+            if($state.includes("**.workarea.**")) {
+                listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString(), pageNumber, number).then(function(dir) {
+                    $scope.deckGridData = dir.data;
+                    tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
+                    $scope.gridArrayLoading = false;
+                    $scope.initLoad = false;
+                })
+            } else {
+                listViewService.getDir($scope.ip, $scope.previousGridArraysString(), pageNumber, number).then(function(dir) {
+                    $scope.deckGridData = dir.data;
+                    tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
+                    $scope.gridArrayLoading = false;
+                    $scope.initLoad = false;
+                })
+            }
         }
     }
+
+    $scope.$on('UPDATE_FILEBROWSER', function(data) {
+        $scope.dirPipe($scope.tableState);
+    });
+
     $scope.deckGridInit = function (ip) {
         $scope.previousGridArrays = [];
         if($scope.tableState) {
@@ -125,15 +158,26 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             }
         });
         if (!fileExists) {
-            listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
-                .then(function (response) {
-                    $scope.updateGridArray();
-                });
+            if($state.includes("**.workarea.**")) {
+                listViewService.addNewWorkareaFolder(vm.workarea, $scope.previousGridArraysString(), folder)
+                    .then(function (response) {
+                        $scope.updateGridArray();
+                    });
+            } else {
+                listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
+                    .then(function (response) {
+                        $scope.updateGridArray();
+                    });
+            }
         }
     }
 
     $scope.getFile = function(file) {
-        file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString() + file.name);
+        if($state.includes("**.workarea.**")) {
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=" + vm.workarea + "&path=" + $scope.previousGridArraysString() + file.name);
+        } else {
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/" + $scope.ip.id + "/files/?path=" + $scope.previousGridArraysString() + file.name);
+        }
         $window.open(file.content, '_blank');
     }
     function folderNameExistsModal(index, folder, fileToOverwrite) {
@@ -155,13 +199,23 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             },
         })
         modalInstance.result.then(function (data) {
-            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), fileToOverwrite)
-                .then(function () {
-                    listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
+            if($state.includes("**.workarea.**")) {
+                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), fileToOverwrite)
+                    .then(function () {
+                        listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
+                            .then(function () {
+                                $scope.updateGridArray();
+                            });
+                    })
+            } else {
+                listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), fileToOverwrite)
+                    .then(function () {
+                        listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
                         .then(function () {
                             $scope.updateGridArray();
                         });
-                })
+                    })
+            }
         });
     }
     $scope.newDirModal = function () {
@@ -173,6 +227,9 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             scope: $scope,
             controller: 'ModalInstanceCtrl',
             controllerAs: '$ctrl',
+            resolve: {
+                data: {}
+            }
         })
         modalInstance.result.then(function (data) {
             $scope.createFolder(data.dir_name);
@@ -180,10 +237,17 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     }
     $scope.removeFiles = function () {
         $scope.selectedCards.forEach(function (file) {
-            listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
-                .then(function () {
-                    $scope.updateGridArray();
-                });
+            if($state.includes("**.workarea.**")) {
+                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), file)
+                    .then(function () {
+                        $scope.updateGridArray();
+                    });
+            } else {
+                listViewService.deleteFile($scope.ip, $scope.previousGridArraysString(), file)
+                    .then(function () {
+                        $scope.updateGridArray();
+                    });
+            }
         });
         $scope.selectedCards = [];
     }

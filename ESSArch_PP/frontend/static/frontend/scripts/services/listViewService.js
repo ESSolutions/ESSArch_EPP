@@ -581,32 +581,6 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
 
-    function getDir(ip, pathStr, pageNumber, pageSize) {
-        if(pathStr == "") {
-            sendData = {
-                id: ip.id,
-                page: pageNumber,
-                page_size: pageSize,
-            };
-        } else {
-            sendData = {
-                id: ip.id,
-                page: pageNumber,
-                page_size: pageSize,
-                path: pathStr,
-            };
-        }
-        return IP.files(sendData).$promise.then(function(data) {
-            var count = data.$httpHeaders('Count');
-            if (count == null) {
-                count = data.length;
-            }
-            return {
-                numberOfPages: Math.ceil(count/pageSize),
-                data: data
-            };
-        });
-    }
     function addFileToDip(ip, path, file, destination, type) {
         var src = path + file.name;
         var dst = destination + file.name;
@@ -660,7 +634,7 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     }
 
     function getDir(ip, pathStr, pageNumber, pageSize) {
-        if(pathStr == "") {
+        if(pathStr == ip.object_identifier_value+"/") {
             sendData = {
                 id: ip.id,
                 page: pageNumber,
