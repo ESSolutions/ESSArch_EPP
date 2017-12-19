@@ -19,13 +19,11 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.listView = false;
     $scope.gridView = true;
     $scope.useListView = function() {
-        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = true;
         $scope.gridView = false;
     }
 
     $scope.useGridView = function() {
-        $scope.filesPerPage = $cookies.get("files-per-page") || 50;
         $scope.listView = false;
         $scope.gridView = true;
     }

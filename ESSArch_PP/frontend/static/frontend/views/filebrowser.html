@@ -30,9 +30,6 @@
                 <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
             </div>
         </div>
-        <div class="files-per-page-pagination-wrapper">
-            <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
-        </div>
     </div>
     <div ng-show="listView" class="file-list-view">
         <table class="table table-striped">
@@ -65,9 +62,9 @@
                 </tr>
             </tbody>
         </table>
-        <div class="files-per-page-pagination-wrapper">
-            <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
-        </div>
+    </div>
+    <div class="files-per-page-pagination-wrapper">
+        <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
     </div>
     <button ng-if="ip.workarea && !ip.workarea.read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
     <button ng-if="ip.workarea && !ip.workarea.read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
