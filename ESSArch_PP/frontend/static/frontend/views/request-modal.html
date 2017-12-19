@@ -18,7 +18,7 @@
                     <label>
                         {{'PURPOSE' | translate}}
                     </label>
-                    <input required class="form-control" ng-model="$ctrl.request.purpose">
+                    <input required class="form-control" ng-model="$ctrl.request.purpose" focused="true">
                 </div>
                 <div ng-if="$ctrl.request.type == 'mount' && $ctrl.tapeSlot == null">
                     <label>

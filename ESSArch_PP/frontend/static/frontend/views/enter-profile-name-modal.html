@@ -3,7 +3,7 @@
 </div>
 <form ng-submit="$ctrl.save()">
     <div class="modal-body" id="modal-body">
-        <input class="form-control" ng-model="$ctrl.profileName"></input>
+        <input class="form-control" ng-model="$ctrl.profileName" focused="true"></input>
     </div>
     <div class="modal-footer">
         <button ng-disabled="!$ctrl.profileName" class="btn btn-primary" type="button" ng-click="$ctrl.save()">{{'OK' | translate}}</button>
