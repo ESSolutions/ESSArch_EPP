@@ -100,7 +100,7 @@ When a notification is visible, the user has 4 different options
 
 1. The plus("+") symbol expands the notification showing the five latest notifications. Becomes a minus("-") when expanded that can be used to collapse the list. This option is only available for the first notification.
 2. "Clear all" removes all notifications and they can not be seen again. This option is only available for the first notification.
-3. Removes notification. This option is  available for all notifications i nthe list and the next notification will pop up as the last one.
+3. Removes notification. This option is  available for all notifications in the list and the next notification will pop up as the last one.
 4. The cross("X") symbol closes the notification bar without removing any notifications. This option is only available for the first notification.
 
 [user-settings1]: ./static/frontend/img/user_settings1.png "User settings"
@@ -118,7 +118,7 @@ The Ingest section of EPP consists of 3 different pages: *Reception*, *Approval*
 The purpose of reception is to receive SIP's. This is the first action we can take in EPP.
 
 #### Receive(guide)
-To receive one or many SIP's: check the checkboxes of the SIP's to receive and click the "Receive" button.
+To receive one or many SIP's: check the checkboxes of the SIP's in the reception list view to receive and click the "Receive" button.
 Individual popup modals for each IP will pop up in the same order as they were selected. An IP can be skipped by clicking the "Skip" button and the IP will be unchecked in the list view aswell.
 The "Cancel" button will close the modal without showing the next one, keeping the SIP's selected in the list view.
 
@@ -183,7 +183,7 @@ TBI
 ### Storage maintenance
 TBI
 ### Profile manager
-The Profile manager section of EPP consists of 3 different pages: *SA editor*, *Profile maker* and *Import*. The functionality and purpose of each is described in the following 3 sub sections.
+The Profile manager section of EPP consists of 3 different pages: *SA editor*, *Profile maker* and *Import*. The functionality and purpose of each is described in the following 4 sub sections.
 
 #### SA editor
 A user can create New, edit existing and publish Submission Agreements.
@@ -194,3 +194,8 @@ A user can create Profile templates, selecting metadata fields, map structure et
 #### Import
 The purpose of Import is to be able to import a Submission Agreement from another EPP instance with profiles.
 Enter url of the other EPP instance with username and password and import an SA. If SA or profiles already exists, the user gets to choose between not importing or overwriting SA/profile.
+
+Submission Agreements or profiles can also be imported from JSON files, which can be exported from an EPP instance aswell.
+
+#### Export
+Export Submission Agreements or Profiles to JSON files that can be imported in another EPP, ETP or ETA instance.
