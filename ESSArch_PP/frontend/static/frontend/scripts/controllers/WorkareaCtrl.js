@@ -102,7 +102,15 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
 
     //Click function for Ip table
     $scope.ipTableClick = function (row) {
-        if (row.workarea.read_only) {
+        if (row.workarea && row.workarea.read_only) {
+            $scope.ip = row;
+            $rootScope.ip = row;
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.eventShow = false;
+            $scope.requestForm = false;
+            $scope.filebrowser = false;
             return;
         }
         if (row.package_type == 1) {

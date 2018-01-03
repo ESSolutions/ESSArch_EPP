@@ -1,8 +1,11 @@
 <!doctype html>
-<html ng-app="myApp">
+<html ng-app="myApp" ng-controller="AppCtrl as vm" ng-keydown="vm.questionMarkListener($event)">
     {% verbatim %}
     <head ng-controller="HeadCtrl as vm">
         <meta name="viewport" content="{{vm.responsiveTag}}">
+
+        <!-- To allow removal of focus outline https://css-tricks.com/removing-the-dotted-outline/#article-header-id-4 -->
+        <meta http-equiv="X-UA-Compatible" content="IE=9" />
         <link rel="stylesheet" type="text/css" href="static/frontend/styles/styles.css">
         <style>
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }

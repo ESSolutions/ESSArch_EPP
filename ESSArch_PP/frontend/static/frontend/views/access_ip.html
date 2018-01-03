@@ -1,7 +1,7 @@
 <div class="access-ip">
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-        <div ng-if="requestForm && (checkPermission('ip.get_from_storage') || checkPermission('ip.get_from_storage_as_new') || checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id)" class="request-layout">
+        <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="requestForm && (checkPermission('ip.get_from_storage') || checkPermission('ip.get_from_storage_as_new') || checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id)" class="request-layout">
             <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
                     <div ng-if="checkPermission('ip.get_from_storage') || auth.id == ip.responsible.id">
@@ -45,16 +45,16 @@
                 </div>
             </form>
         </div>
-        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
             <event-table ng-if="eventShow || vm.request.type == 'preserve'" ip="ip"></event-table>
             <div ng-if="statusShow" class="status-view">
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
-        <div ng-if="filebrowser" class="file-browser">
+        <div ng-if="filebrowser" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
             <filebrowser ip="ip"></filebrowser>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new' || vm.request.type == 'query')"
+        <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="eventlog && (vm.request.type == 'get' || vm.request.type == 'get_tar' || vm.request.type == 'get_as_new' || vm.request.type == 'query')"
             class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">

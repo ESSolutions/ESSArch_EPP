@@ -451,5 +451,22 @@
     "EXPORT_SUBMISSION_AGREEMENT": "Export submission agreement",
     "EXPORT_PROFILE": "Export profile",
     "EXPORT_AS_JSON": "Export as JSON",
-    "NO_RESULTS_FOUND": "No results found"
+    "NO_RESULTS_FOUND": "No results found",
+    "KEYBORD_SHORTCUTS": "Keyboard shortcuts",
+    "IP_LIST": "IP list",
+    "SELECT_NEXT_IP": "Select next IP",
+    "SELECT_PREVIOUS_IP": "Select previous IP",
+    "DESELECT_IP_AND_CLOSE_VIEWS": "Deselect IP and close opened views",
+    "STATUS_TREE_VIEW": "Status tree view",
+    "MOVE_SELECTION_DOWN": "Move selection down",
+    "MOVE_SELECTION_UP": "Move selection up",
+    "SEE_STEP_TASK_REPORT": "See step/task report",
+    "EXPAND_STEP": "Expand step",
+    "EXPAND_ROW": "Expand row",
+    "IN_GENERAL_SELECTED_IP": "In general when IP is selected",
+    "STEP_PAGINATION_NEXT": "Go to next page in pagination",
+    "STEP_PAGINATION_PREVIOUS": "Go to previous page in pagination",
+    "INCLUDE_IP_FOR_RECEIVE": "Include IP for receive",
+    "OPEN_KEYBOARD_SHORTCUT_INFO": "Open keyboard shortcut info page",
+    "VALIDATION_TABLE": "Validation table"
 }

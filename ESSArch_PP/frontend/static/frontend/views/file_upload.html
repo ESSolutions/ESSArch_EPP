@@ -10,10 +10,10 @@
 		<!--
         <input class="form-control" style="margin-bottom: 5px;" ng-model="vm.flowDestination" placeholder="Destination "type="text"></input>
 		-->
-        <span class="btn btn-default" flow-btn><i class="fa fa-file-o"></i> {{'CHOOSEFILES' | translate}}</span>
-        <span class="btn btn-default" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="fa fa-folder-o"></i>
+        <button class="btn btn-default" flow-btn><i class="fa fa-file-o"></i> {{'CHOOSEFILES' | translate}}</button>
+        <button class="btn btn-default" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="fa fa-folder-o"></i>
             {{'CHOOSEFOLDER' | translate}}
-        </span>
+        </button>
         <br>
         <span class="label label-info">{{transfers.length}} {{'FILES' | translate}}</span>
         <span class="label label-info">{{$flow.getSize() | filesize}}</span>

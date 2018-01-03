@@ -107,9 +107,15 @@
 .select-sub-edit-eventlog-wrapper {
     @include container;
     position: relative;
+    &:focus {
+        outline: 0;
+    }
 }
 .events-status-wrapper {
     @include container;
+    &:focus {
+        outline: 0;
+    }
 }
 .event-view {
     margin: 5px;

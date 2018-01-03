@@ -451,5 +451,21 @@
     "EXPORT_SUBMISSION_AGREEMENT": "Exportera leveransöverenskollelse",
     "EXPORT_PROFILE": "Exportera profil",
     "EXPORT_AS_JSON": "Exportera som JSON",
-    "NO_RESULTS_FOUND": "Inga resultat hittade"
+    "NO_RESULTS_FOUND": "Inga resultat hittade",
+    "KEYBORD_SHORTCUTS": "Tangentbordsgenvägar",
+    "IP_LIST": "IP-lista",
+    "SELECT_NEXT_IP": "Välj nästa IP",
+    "SELECT_PREVIOUS_IP": "Välj föregående IP",
+    "DESELECT_IP_AND_CLOSE_VIEWS": "Avmarkera valt IP ochstäng öppnade vyer",
+    "STATUS_TREE_VIEW": "Status-träd-vy",
+    "MOVE_SELECTION_DOWN": "Flytta merkering nedåt",
+    "MOVE_SELECTION_UP": "Flytta markering uppåt",
+    "SEE_STEP_TASK_REPORT": "Se step/task-rapport",
+    "EXPAND_STEP": "Expandera step",
+    "EXPAND_ROW": "Expandera rad",
+    "IN_GENERAL_SELECTED_IP": "Generellt när ett IP är valt",
+    "STEP_PAGINATION_NEXT": "Gå till nästa sida i paginering",
+    "STEP_PAGINATION_PREVIOUS": "Gå till föregående sida i paginering",
+    "INCLUDE_IP_FOR_RECEIVE": "Inkludera IP för att ta emot",
+    "OPEN_KEYBOARD_SHORTCUT_INFO": "Öppna tangentbordsgenväg-sida"
 }

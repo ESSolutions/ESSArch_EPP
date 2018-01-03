@@ -1,7 +1,7 @@
 <div class="ip-approval">
     <div class="content-wrapper">
         <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
-        <div ng-if="requestForm" class="request-layout">
+        <div ng-if="requestForm" class="request-layout" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
             <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
                 <div class="request-type">
                     <div ng-if="checkPermission('ip.add_to_ingest_workarea')">
@@ -40,16 +40,16 @@
             </form>
         </div>
 
-        <div ng-if="(eventShow || statusShow || vm.request.type == 'preserve')" class="events-status-wrapper">
+        <div ng-if="(eventShow || statusShow || vm.request.type == 'preserve')" class="events-status-wrapper" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
             <event-table ng-if="eventShow || vm.request.type == 'preserve'" ip="ip"></event-table>
             <div ng-if="statusShow" class="status-view">
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
         </div>
-        <div ng-if="filebrowser" class="file-browser">
+        <div ng-if="filebrowser" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
             <filebrowser ip="ip"></filebrowser>
         </div>
-        <div ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'get' || vm.request.type == 'get_as_new')" class="select-sub-edit-eventlog-wrapper">
+        <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="eventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'get' || vm.request.type == 'get_as_new')" class="select-sub-edit-eventlog-wrapper">
             <div ng-if="eventlog" class="eventlog-view">
                 <form class="eventlog-form">
                     <div class="checkbox">
