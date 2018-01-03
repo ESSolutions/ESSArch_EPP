@@ -182,4 +182,10 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         modalInstance.result.then(function (data) {
         });
     }
+    vm.triggerProfileUpload = function() {
+        document.getElementById('profile-upload').click();
+    }
+    vm.triggerSaUpload = function() {
+        document.getElementById('sa-upload').click();
+    }
 });
