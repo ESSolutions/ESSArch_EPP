@@ -149,7 +149,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         ips = []
 
         for xmlfile in self.find_xml_files(path):
-            container = os.path.join(path, self.get_container_for_xml(xmlfile))
+            try:
+                container = os.path.join(path, self.get_container_for_xml(xmlfile))
+            except etree.LxmlError:
+                continue
 
             ip_id = os.path.splitext(os.path.basename(xmlfile))[0]
 
@@ -248,7 +251,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             logger.warn('Tried to prepare IP with missing XML file %s' % (xmlfile), extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % xmlfile)
 
-        container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+        try:
+            container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+        except etree.LxmlError:
+            logger.warn('Tried to prepare IP with invalid XML file %s' % (xmlfile), extra={'user': request.user.pk})
+            raise exceptions.ParseError('Invalid XML file, %s' % xmlfile)
 
         if not os.path.isfile(container):
             logger.warn('Tried to prepare IP with missing container file %s' % (container), extra={'user': request.user.pk})
