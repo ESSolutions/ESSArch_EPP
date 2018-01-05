@@ -1,7 +1,7 @@
 <div class="profile-editor">
     <div ng-if="select" id="select-view" class="select-view">
         <div class="sa-table">
-            <table style="margin-top: 20px;" class="table">
+            <table ng-if="!saAlert" style="margin-top: 20px;" class="table">
                 <thead>
                     <tr>
                         <th class="info-popover column-entity" uib-popover="{{'ENTITYDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'TYPE' | translate}}</th>
@@ -11,10 +11,10 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td ng-if="!saAlert">
+                        <td>
                             <p ng-if="!saProfile.profile || !checkPermission('profiles.create_new_sa_generation')" class="table-col">{{'SUBMISSIONAGREEMENT' | translate}}</p>
                         </td>
-                        <td ng-if="!saAlert">
+                        <td>
                             <select class="form-control table-col" ng-disabled="(saProfile.disabled)"
                             ng-model="saProfile.profile"
                             ng-options="x as x.name for x in saProfile.profiles"></select>

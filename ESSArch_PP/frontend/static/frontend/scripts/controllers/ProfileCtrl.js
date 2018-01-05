@@ -7,7 +7,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         aicDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIC_DESCRIPTION') },
         aipError: { type: 'danger', msg: $translate.instant('MISSING_AIP') },
         dipError: { type: 'danger', msg: $translate.instant('MISSING_DIP') },
-        aipDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIP_DESCRIPTION') }
+        aipDescriptionError: { type: 'danger', msg: $translate.instant('MISSING_AIP_DESCRIPTION') },
+        noSas: { type: 'danger', msg: $translate.instant('NO_SUBMISSION_AGREEMENT_AVAILABLE') },
+
     };
     $scope.saAlert = null;
     $scope.aicDescriptionAlert = $scope.alerts.aicDescriptionError;
@@ -31,6 +33,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT) {
                 chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
             }
+            if(result.profiles.length <= 0) {
+                $scope.saAlert = $scope.alerts.noSas;
+            } else
             if (chosen_sa_id) {
                 var found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
                 if (found.length) {
@@ -62,6 +67,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT) {
                 chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
             }
+            if(result.profiles.length <= 0) {
+                $scope.saAlert = $scope.alerts.noSas;
+            } else
             if (chosen_sa_id) {
                 var found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
                 if (found.length) {
