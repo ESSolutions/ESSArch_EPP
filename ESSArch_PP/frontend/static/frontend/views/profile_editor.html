@@ -49,7 +49,7 @@
                             <tr ng-repeat="profileIp in selectRowCollection">
                                 <div ng-if="profileIp.name">
                                     <td>
-                                        {{profileIp.profile_type}}
+                                        {{vm.mapProfileType(profileIp.profile_type)}}
                                     </td>
                                     <td>
                                         {{profileIp.profile_name}}
