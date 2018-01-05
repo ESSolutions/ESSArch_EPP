@@ -348,11 +348,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
      * @param {String} type
      */
     vm.mapProfileType = function(type) {
-        if(typeMap[type]) {
-            return typeMap[type];
-        } else {
-            return type;
-        }
+        return typeMap[type] || type;
     }
 
     vm.treeEditModel = {
