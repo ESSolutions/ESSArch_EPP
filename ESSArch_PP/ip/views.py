@@ -51,7 +51,7 @@ from rest_framework.response import Response
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
-from ESSArch_Core.fixity.validation import validate_checksum
+from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
                                     ArchivalType, ArchivistOrganization,
@@ -730,7 +730,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         filepath = request.data['path']
         filepath = os.path.join(path, filepath)
 
-        validate_checksum(filepath, 'MD5', md5)
+        options = {'expected': md5, 'algorithm': 'md5'}
+        validator = ChecksumValidator(context='checksum_str', options=options)
+        validator.validate(filepath)
         return Response({'detail': 'Upload of %s complete' % filepath})
 
 
