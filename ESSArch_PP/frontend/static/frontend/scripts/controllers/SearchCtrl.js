@@ -76,39 +76,56 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         }
     }
     vm.tags = [];
-    vm.loadTags = function(aggregations) {
-        var tags = [];
-        var typeMissing = true;
-        var children = aggregations._filter_type.type.buckets.map(function(item) {
-            item.text = item.key + " (" + item.doc_count + ")";
+
+    var getAggregationChildren = function(aggregations, aggrType){
+        var aggregation = aggregations['_filter_' + aggrType][aggrType]
+        var missing = true;
+        children = aggregation.buckets.map(function(item) {
+            if (item.title) {
+                item.text = item.title + " (" + item.doc_count + ")";
+            } else {
+                item.text = item.key + " (" + item.doc_count + ")";
+            }
             item.state = {opened: true, selected: vm.filterObject.type==item.key?true:false}
             item.type = item.key;
-            if(item.key == vm.filterObject.type) {
-                typeMissing = false;
+            if(item.key == vm.filterObject[aggrType]) {
+                missing = false;
             }
             item.children = [];
             return item;
         });
-        if(vm.filterObject.type && typeMissing) {
+
+        if (vm.filterObject[aggrType] && missing) {
             children.push({
-                key: vm.filterObject.type,
-                text: vm.filterObject.type+"(0)",
+                key: vm.filterObject[aggrType],
+                text: vm.filterObject[aggrType] + " (0)",
                 state: {opened: true, selected: true},
-                type: vm.filterObject.type,
+                type: vm.filterObject[aggrType],
                 children: []
             });
         }
+
+        return children;
+    }
+
+    vm.loadTags = function(aggregations) {
+        var tags = [];
+        var typeMissing = true;
+        var typeChildren = getAggregationChildren(aggregations, 'type');
         var rootTag = {
             text: "Arkiv",
             parent: "#",
             type: "archive",
             state: {opened: true, disabled: true},
-            children: [ {
-                text: "Typ" + " (" + aggregations._filter_type.doc_count + ")",
-                state: {opened: true, disabled: true},
-                type: 'series',
-                children: children,
-            }]
+            children: [
+                {
+                    text: "Typ",
+                    state: {opened: true, disabled: true},
+                    type: 'series',
+                    children: typeChildren,
+                    branch: 'type',
+                }
+            ]
         };
         tags = [rootTag];
         vm.recreateFilterTree(tags)
@@ -170,15 +187,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
 
     vm.selectFilter = function(jqueryobj, e) {
         if(e.action == "select_node") {
-            if(vm.filterObject.type == e.node.original.key) {
+            var parent = vm.treeInstance.jstree(true).get_node(e.node.parent);
+            var branch = parent.original.branch;
+            if(vm.filterObject[branch] == e.node.original.key) {
                 vm.treeInstance.jstree(true).deselect_node(e.node);
-                vm.filterObject.type = null;
+                vm.filterObject[branch] = null;
                 if(vm.tableState) {
                     vm.tableState.pagination.start = 0;
                 }
                 vm.search(vm.tableState);
             } else {
-                vm.filterObject.type = e.node.original.key;
+                vm.filterObject[branch] = e.node.original.key;
                 if(vm.tableState) {
                     vm.tableState.pagination.start = 0;
                 }
