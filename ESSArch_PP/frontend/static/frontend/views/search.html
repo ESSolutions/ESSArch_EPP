@@ -23,81 +23,32 @@
                 </label>
             </div>
         </div>
-        <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
-            <uib-tab index="0" heading="{{'HITS' | translate}}">
-            <div class="tree-result-wrapper">
-                <div class="filter-tree">
-                    <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
-                </div>
-                <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
-                    <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
-                    <div ng-repeat="x in vm.searchResult" class="result-item clickable"  ng-click="vm.openResult(x)">
-                        {{vm.resultNumber($index)}}.
-                        {{x.type}}
-                        <br/>
-                        <b>{{x.reference_code}}</b>
-                        <p class="result-name" ng-bind-html="x.name"></p>
-                        <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
-                        <p class="result-description">{{x.desc}}</p>
-                    </div>
-                    <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
-                </div>
-            </div>
-            </uib-tab>
-            <uib-tab ng-show="vm.viewContent" index="1" heading="{{'RECORD' | translate}}">
-                <div class="tree-result-wrapper" id="view-record">
-                    <div class="record-tree" ng-if="vm.recordTreeData">
-                        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;open_node:vm.expandChildren;"></div>
-                    </div>
-                    <div class="view-content">
-                        <h4>{{vm.record.type}}</h4>
-                        <h4 ng-bind-html="vm.record.text"></h4>
-                        <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
-                        <p class="result-description">{{vm.record.desc}}</p>
-                        <br/>
-                        <button ng-if="vm.record.type == 'document' && (vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-                        <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
-                        <h4>{{'METADATA' | translate}}</h4>
-                        <table class="">
-                            <tr ng-repeat="(key, value) in vm.record" ng-if="key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
-                                <td style="padding-right: 10px;"><b>{{key}}</b></td>
-                                <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                                <td ng-if="key == 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{value == null?"Nej":value}}</td>
-                                <td ng-if="key != 'terms_and_condition'" class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
-                            </tr>
-                            <tr>
-                                <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
-                            </tr>
-                        </table>
-                        <br/>
-                        <h4>{{'CONTENTS' | translate}}</h4>
-                        <div st-table="vm.record_children" style="width:100%;">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Referenskod</th>
-                                        <th>Namn</th>
-                                        <th>Tid</th>
-                                        <th ng-if="x._type == 'document'"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="x in vm.record_children">
-                                        <td><b>{{x._source.reference_code}}</b></td>
-                                        <td>{{x._source.name}}</td>
-                                        <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
-                                        <td>
-                                            <button ng-if="x._type == 'document' && (x._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-                                            <p style="color: red; white-space: nowrap;" ng-if="x._type == 'document' && !(x._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+        <div class="search-detail-wrapper">
+            <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
+                <uib-tab index="0" heading="{{'HITS' | translate}}">
+                    <div class="tree-result-wrapper">
+                        <div class="filter-tree">
+                            <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
+                        </div>
+                        <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                            <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                            <div ng-repeat="x in vm.searchResult" class="result-item clickable"  ng-click="vm.openResult(x)">
+                                {{vm.resultNumber($index)}}.
+                                {{x.type}}
+                                <br/>
+                                <b>{{x.reference_code}}</b>
+                                <p class="result-name" ng-bind-html="x.name"></p>
+                                <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
+                                <p class="result-description">{{x.desc}}</p>
+                            </div>
+                            <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                         </div>
                     </div>
-                </div>
-            </uib-tab>
-        </uib-tabset>
+                </uib-tab>
+                <uib-tab ng-show="'home.search.detail' | isState" index="1" heading="{{'RECORD' | translate}}">
+                    <div ui-view></div>
+                </uib-tab>
+            </uib-tabset>
+        </div>
     </div>
 </div>

@@ -109,6 +109,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
+    .state('home.search.detail', {
+        url: '/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('home.versionInfo', {
         url: 'version',
         templateUrl: '/static/frontend/views/version_info.html',
