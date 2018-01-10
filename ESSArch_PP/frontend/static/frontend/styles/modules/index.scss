@@ -93,7 +93,6 @@ body.modal-open[style] {
     width: 0 !important;
 }
 .body-wrapper {
-    min-width: 680px;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -108,21 +107,33 @@ body.modal-open[style] {
     box-shadow: 0px 5px 2px $shadow-color;
 }
 .logo-search-user-admin-wrapper {
-    display: flex;
-    align-items:center;
     width: 100%;
     height: 50px;
 }
 .logo {
     width: 85%;
     height: 100%;
-    margin: 0 auto;
+    display: inline-block;
 }
-.logo h3 {
+
+.page-title {
     display: inline-block;
     margin-top: 12px;
     margin-bottom: 12px;
     cursor: pointer;
+    @include small-screen {
+        display: none;
+    }
+}
+.page-title-small {
+    display: none;
+    margin-left: 50%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    @include small-screen {
+        display: inline-block;
+    }
 }
 .search {
     display: flex;
@@ -137,9 +148,8 @@ body.modal-open[style] {
 }
 .user-admin {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: flex-end;
-    width: 15%;
     height: 100%;
     float: right;
     margin-right: 15px;
@@ -177,6 +187,14 @@ body.modal-open[style] {
     margin-left: auto;
     min-width: 200px;
     height: 100%;
+    @include medium-screen {
+        .fa {
+            display: none;
+        }
+    }
+    @include small-screen {
+        display: none;
+    }
 }
 .tasks-icons > .fa {
     margin-right: 2px;
@@ -213,6 +231,21 @@ body.modal-open[style] {
     margin: 5px 0 0 0;
     height: 600px;
     background-color: transparent;
+    @include small-screen {
+        cursor: pointer;
+        height: 100%;
+        max-width: 0;
+        overflow: visible;
+        padding: 0;
+        display: none;
+        position: fixed;
+        left: -10px;
+        top: 105px;
+        z-index: 100;
+        .navigation {
+            background-color: white;
+        }
+    }
 }
 .shortcut-list {
     width: 100%;
@@ -230,42 +263,30 @@ body.modal-open[style] {
 }
 .hamburger {
     display: none;
-}
-.language-select {
-    min-width: 100px!important;
-}
-@media screen and (max-width: 1200px) {
-    .active-hamburger {
-        display: block!important;
-        min-width:180px;
-    }
-    .shortcut-nav-calendar-wrapper {
-        cursor: pointer;
-        height: 100%;
-        max-width: 0;
-        overflow: visible !important;
-        padding: 0 !important;
-        display: none;
-        position: fixed;
-        left: -10px;
-        top: 105px;
-        z-index: 100;
-        .calendar {
-            display: none;
-        }
-        .navigation {
-            background-color: white;
-        }
-    }
-    .hamburger {
+
+    @include small-screen {
         margin-right: 5px;
         display: inline;
         cursor: pointer;
     }
-    .dynamic-part {
-        width: 100%!important;
+}
+.active-hamburger {
+    display: none;
+    @include small-screen {
+        display: block;
+        min-width:180px;
     }
 }
+.language-select {
+    min-width: 100px;
+}
+.username {
+    display: block;
+    @include small-screen {
+        display: none;
+    }
+}
+
 .step-task-pagination {
     user-select: none;
     min-width: 60px;
@@ -361,6 +382,9 @@ body.modal-open[style] {
 }
 .dynamic-part {
     min-height:100%;
+    @include small-screen {
+        width: 100%;
+    }
 }
 .sub-menu {
     box-shadow: 0px 5px 2px $shadow-color;
@@ -396,6 +420,10 @@ body.modal-open[style] {
         width: 100%;
         height: 1px;
         background: white;
+    }
+    @include small-screen {
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 }
 .profile-manager-sub-menu {
@@ -434,6 +462,10 @@ body.modal-open[style] {
         width: 100%;
         height: 1px;
         background: black;
+    }
+    @include small-screen {
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 }
 .profile-manager-route {
@@ -621,6 +653,7 @@ padding: 0 12px;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    overflow-x: auto;
 }
 .dir-path {
     margin-left: 10px;
@@ -638,7 +671,6 @@ padding: 0 12px;
     margin-bottom: 5px;
     padding: 15px;
     width: 100%;
-    min-width: 520px;
     min-height: 100px;
     border-style: solid;
     border-color: #bbb;
@@ -774,18 +806,21 @@ padding: 0 12px;
         height: 1px;
         background: #fff;
     }
+    @include small-screen {
+        overflow-x: auto;
+    }
 }
 .nav-item {
     cursor: pointer;
     user-select: none;
+    white-space: nowrap;
     margin: 0 15px 0 0 !important;
 }
 
 .user-settings {
     @include container(10px);
     margin-top: 10px;
-    width:50%;
-    min-width: 400px;
+    width:100%;
     .ip-view-type {
         margin-bottom: 10px;
     }
@@ -799,6 +834,25 @@ padding: 0 12px;
         }
         select {
             width: 150px;
+        }
+    }
+    .main-page-selects {
+        display: none;
+        @include small-screen {
+            display: flex;
+        }
+    }
+    .main-view-options {
+        display: none;
+        margin-bottom: 10px;
+        .fa {
+            cursor: pointer;
+        }
+        @include medium-screen {
+            display: flex;
+        }
+        @include small-screen {
+            display: flex;
         }
     }
 }
@@ -842,7 +896,14 @@ padding: 0 12px;
 .list-view-buttons .btn {
     margin-left: 10px;
 }
+.table-x-overflow {
+    overflow-x: auto;
+}
 .event-view {
+    .refresh-icon {
+        align-self: center;
+        margin-left: auto;
+    }
     .list-view-table {
         position: relative;
         overflow-x: auto;
@@ -1092,4 +1153,49 @@ body.modal-open {
     border-radius: 3px;
     box-shadow: 0 1px 0 rgba(12,13,14,0.2), 0 0 0 2px #FFF inset;
     white-space: nowrap;
+}
+
+.page-footer {
+    position: absolute;
+    //margin-bottom: 0;
+    width: 100%;
+    border-style: soid;
+    border-width: 1px;
+    border-color: $border-color;
+    background-color: $header-color;
+    color: white;
+    padding-top: 5px;
+    h4 {
+        text-align: center;
+    }
+    .footer-info {
+        padding-bottom: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+    .company-info-wrapper {
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        padding: 5px;
+        .logo {
+            border-radius: 10%;
+            max-width: 50px;
+            max-height: 50px;
+            box-shadow: 0px 1px 0px $shadow-color;
+        }
+
+    }
+    .copyright {
+        margin: 0 auto;
+        padding: 10px;
+        text-align: center;
+        background-color: $sub-menu;
+        color: white;
+        a {
+            color: white;
+        }
+    }
 }

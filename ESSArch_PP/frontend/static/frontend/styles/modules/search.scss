@@ -80,22 +80,50 @@
     }
     .view-content {
         margin-top: 10px;
-        width: 50%;
+        margin-left: 0;
+        width: 100%;
+        @include medium-screen {
+            width: 100%;
+        }
+        @include small-screen {
+            width: 100%;
+        }
     }
     .filter-tree {
-        width: 200px;
+        width: auto;
         margin-top: 10px;
     }
     .record-tree {
         margin-top: 10px;
+        @include medium-screen {
+            overflow-x: auto;
+        }
+        @include small-screen {
+            overflow-x: auto;
+        }
     }
     .tabs {
         @include container(10px);
-        margin-top: 10px;
     }
     .filters {
         label {
             vertical-align: top;
+        }
+    }
+    .search-detail-wrapper {
+        width: 100%;
+    }
+    .search-detail {
+        margin-left: 5px;
+    }
+    .tree-result-wrapper {
+        display: flex;
+        flex-direction: row;
+        @include medium-screen {
+            flex-direction: column;
+        }
+        @include small-screen {
+            flex-direction: column;
         }
     }
 }

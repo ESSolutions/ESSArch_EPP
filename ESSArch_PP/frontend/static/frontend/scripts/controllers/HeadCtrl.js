@@ -11,10 +11,6 @@ angular.module('myApp').controller('HeadCtrl', function($scope, $rootScope, $tim
         vm.pageTitle = $translate.instant($state.current.name.split(".").pop().toUpperCase())+appName;
     });
     $scope.getResponsiveTag = function() {
-        if($state.is("login")) {
-            vm.responsiveTag = "width=device-width, initial-scale=1";
-        } else {
-            vm.responsiveTag = "width=680";
-        }
+        vm.responsiveTag = "width=device-width, initial-scale=1";
     }
 });

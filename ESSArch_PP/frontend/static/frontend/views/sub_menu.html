@@ -1,28 +1,26 @@
 <div ng-if="('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.administration' | includedByState) || ('home.archiveMaintenance' | includedByState)">
-    <div class="sub-menu">
-        <div ng-if="'home.ingest' | includedByState">
-            <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.ingest.reception')">{{'RECEPTION' | translate}}</div>
-            <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;"  ng-if="checkPermissions('home.ingest.ipApproval')">{{'APPROVAL' | translate}}</div>
-            <div ui-sref="home.ingest.workarea"  ng-class="{chosen: $state.current.name == 'home.ingest.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.ingest.workarea')">{{'WORKAREA' | translate}}</div>
-            <div ng-if="$state.current.name == 'home.ingest.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">{{'CREATEDIP' | translate}}</div>
-        </div>
-        <div ng-if="'home.access' | includedByState">
-            <div ui-sref="home.access.accessIp" ng-class="{chosen: $state.current.name == 'home.access.accessIp'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.access.accessIp')">{{'SEARCH' | translate}}</div>
-            <div ui-sref="home.access.workarea" ng-class="{chosen: $state.current.name == 'home.access.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.access.workarea')">{{'WORKAREA' | translate}}</div>
-            <div ui-sref="home.access.createDip" ng-class="{chosen: $state.current.name == 'home.access.createDip'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.access.createDip')">{{'DISSEMINATION' | translate}}</div>
-        </div>
-        <div ng-if="'home.administration' | includedByState">
-            <div ui-sref="home.administration.mediaInformation" ng-class="{chosen: $state.current.name == 'home.administration.mediaInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.mediaInformation')">{{'MEDIAINFORMATION' | translate}}</div>
-            <div ui-sref="home.administration.robotInformation" ng-class="{chosen: $state.current.name == 'home.administration.robotInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.robotInformation')">{{'ROBOTINFORMATION' | translate}}</div>
-            <div ui-sref="home.administration.queues" ng-class="{chosen: $state.current.name == 'home.administration.queues'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.queues')">{{'QUEUES' | translate}}</div>
-            <div ui-sref="home.administration.storageMigration" ng-class="{chosen: $state.current.name == 'home.administration.storageMigration'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.storageMigration')">{{'STORAGEMIGRATION' | translate}}</div>
-            <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.storageMaintenance')">{{'STORAGEMAINTENANCE' | translate}}</div>
-            <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.includes('home.administration.profileManager')}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.profileManager')">{{'PROFILEMANAGER' | translate}}</div>
-        </div>
-        <div ng-if="'home.archiveMaintenance' | includedByState">
-            <div ui-sref="home.archiveMaintenance.appraisal" ng-class="{chosen: $state.current.name == 'home.archiveMaintenance.appraisal'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.appraisal')">{{'APPRAISAL' | translate}}</div>
-            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.conversion')">{{'FORMAT_CONVERSION' | translate}}</div>
-            <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.mediaMigration')">{{'MEDIA_MIGRATION' | translate}}</div>
-        </div>
+    <div ng-if="'home.ingest' | includedByState" class="sub-menu">
+        <div ui-sref="home.ingest.reception" ng-class="{chosen: $state.current.name == 'home.ingest.reception'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.ingest.reception')">{{'RECEPTION' | translate}}</div>
+        <div ui-sref="home.ingest.ipApproval"  ng-class="{chosen: $state.current.name == 'home.ingest.ipApproval'}" class="nav-item sliding-middle-out" style="margin-left: 5px;"  ng-if="checkPermissions('home.ingest.ipApproval')">{{'APPROVAL' | translate}}</div>
+        <div ui-sref="home.ingest.workarea"  ng-class="{chosen: $state.current.name == 'home.ingest.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.ingest.workarea')">{{'WORKAREA' | translate}}</div>
+        <div ng-if="$state.current.name == 'home.ingest.createDip'" class="btn btn-sub-menu btn-create-dip btn-default" style="margin-left: 5px;">{{'CREATEDIP' | translate}}</div>
+    </div>
+    <div ng-if="'home.access' | includedByState" class="sub-menu">
+        <div ui-sref="home.access.accessIp" ng-class="{chosen: $state.current.name == 'home.access.accessIp'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.access.accessIp')">{{'SEARCH' | translate}}</div>
+        <div ui-sref="home.access.workarea" ng-class="{chosen: $state.current.name == 'home.access.workarea'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.access.workarea')">{{'WORKAREA' | translate}}</div>
+        <div ui-sref="home.access.createDip" ng-class="{chosen: $state.current.name == 'home.access.createDip'}" class="nav-item sliding-middle-out" style="margin-left: 5px;" ng-if="checkPermissions('home.access.createDip')">{{'DISSEMINATION' | translate}}</div>
+    </div>
+    <div ng-if="'home.administration' | includedByState" class="sub-menu">
+        <div ui-sref="home.administration.mediaInformation" ng-class="{chosen: $state.current.name == 'home.administration.mediaInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.mediaInformation')">{{'MEDIAINFORMATION' | translate}}</div>
+        <div ui-sref="home.administration.robotInformation" ng-class="{chosen: $state.current.name == 'home.administration.robotInformation'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.robotInformation')">{{'ROBOTINFORMATION' | translate}}</div>
+        <div ui-sref="home.administration.queues" ng-class="{chosen: $state.current.name == 'home.administration.queues'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.queues')">{{'QUEUES' | translate}}</div>
+        <div ui-sref="home.administration.storageMigration" ng-class="{chosen: $state.current.name == 'home.administration.storageMigration'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.storageMigration')">{{'STORAGEMIGRATION' | translate}}</div>
+        <div ui-sref="home.administration.storageMaintenance" ng-class="{chosen: $state.current.name == 'home.administration.storageMaintenance'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.storageMaintenance')">{{'STORAGEMAINTENANCE' | translate}}</div>
+        <div ui-sref="home.administration.profileManager.saEditor" ng-class="{chosen: $state.includes('home.administration.profileManager')}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.administration.profileManager')">{{'PROFILEMANAGER' | translate}}</div>
+    </div>
+    <div ng-if="'home.archiveMaintenance' | includedByState" class="sub-menu">
+        <div ui-sref="home.archiveMaintenance.appraisal" ng-class="{chosen: $state.current.name == 'home.archiveMaintenance.appraisal'}" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.appraisal')">{{'APPRAISAL' | translate}}</div>
+        <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.conversion')">{{'FORMAT_CONVERSION' | translate}}</div>
+        <div ui-sref="home.archiveMaintenance.appraisal" class="nav-item sliding-middle-out" ng-if="checkPermissions('home.archiveMaintenance.mediaMigration')">{{'MEDIA_MIGRATION' | translate}}</div>
     </div>
 </div>

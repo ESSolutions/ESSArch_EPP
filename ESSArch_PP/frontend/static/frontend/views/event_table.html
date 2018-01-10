@@ -1,7 +1,6 @@
 <div class="event-view">
     <div st-table="vm.displayed" st-pipe="eventPipe" class="table-container">
         <div class="search-prepare-wrapper">
-            <span style="float: right; margin-bottom: 5px;" ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <select tabindex="-1" class="form-control items-per-page" ng-change="updateEventsPerPage(vm.itemsPerPage)" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]"></select>
             <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters, 'filter-active': filterActive()}" ng-click="toggleAdvancedFilters()"></span>
             <div ng-show="showAdvancedFilters" class="advanced-filters">
@@ -14,10 +13,13 @@
                 <button class="btn btn-default" style="float: right;margin-top: 5px;" ng-click="submitAdvancedFilters()">{{'APPLY' | translate}}</button>
             </div>
             <div style="width: 50%;" class="input-group margin-bottom-sm">
-            <input id="event-search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
+                <input id="event-search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
                 uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
-            />
+                />
                 <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); stCtrl.pipe();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
+            </div>
+            <div class="refresh-icon">
+                <span ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
         </div>
         <div class="list-view-table">
@@ -63,13 +65,13 @@
         <form class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
             <div class="form-group" style="margin-right: 5px;">
                 <label>{{'EVENTTYPE' | translate}}</label>
-                <select style="max-width: 125px;" class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in vm.eventTypeCollection" ng-required="true">
+                <select class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in vm.eventTypeCollection" ng-required="true">
                     <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>{{'OUTCOME' | translate}}</label>
-                <select style="max-width: 125px;" class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
+                <select class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
                     <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
                 </select>
             </div>
