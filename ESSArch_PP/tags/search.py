@@ -3,6 +3,8 @@ from __future__ import division
 import datetime
 import math
 
+from django.core.cache import cache
+
 from django_filters.constants import EMPTY_VALUES
 
 from elasticsearch.exceptions import TransportError
@@ -17,17 +19,19 @@ from six import iteritems
 
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
+from ESSArch_Core.tags.documents import Archive
 
 
-class TagSearch(FacetedSearch):
-    index = 'tags'
-    doc_types = None
-    fields = ['name', 'reference_code']
+class ComponentSearch(FacetedSearch):
+    index = 'archive'
+    doc_types = ['component', 'archive']
+    fields = ['title', 'desc']
 
     facets = {
         # use bucket aggregations to define facets
         'parents': TermsFacet(field='parents'),
-        'type': TermsFacet(field='_type'),
+        'type': TermsFacet(field='type'),
+        'archive': TermsFacet(field='archive'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -58,14 +62,14 @@ class TagSearch(FacetedSearch):
             if self.start_date > self.end_date:
                 raise exceptions.ParseError('start_date cannot be set to date after end_date')
 
-        super(TagSearch, self).__init__(*args, **kwargs)
+        super(ComponentSearch, self).__init__(*args, **kwargs)
 
     def search(self):
         """
         We override this to add filters on start and end date
         """
 
-        s = super(TagSearch, self).search()
+        s = super(ComponentSearch, self).search()
 
         if self.start_date not in EMPTY_VALUES:
             s = s.filter('range', end_date={'gte': self.start_date})
@@ -100,18 +104,30 @@ class TagSearch(FacetedSearch):
 
         pre_tags = ["<strong>"]
         post_tags = ["</strong>"]
-        search = search.highlight_options(pre_tags=pre_tags, post_tags=post_tags, require_field_match=True)
-        return super(TagSearch, self).highlight(search)
+        search = search.highlight_options(number_of_fragments=0, pre_tags=pre_tags, post_tags=post_tags, require_field_match=True)
+        return super(ComponentSearch, self).highlight(search)
+
+def get_archive(id):
+    # try to get from cache first
+    cache_key = 'archive_%s' % id
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    archive = Archive.get(id=id)
+    archive_data = archive.to_dict()
+    cache.set(cache_key, archive_data)
+    return archive_data
 
 
-class TagSearchViewSet(ViewSet, PaginatedViewMixin):
-    index = TagSearch.index
+class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
+    index = ComponentSearch.index
     lookup_field = 'pk'
     lookup_url_kwarg = None
 
     def __init__(self, *args, **kwargs):
         get_connection('default')
-        super(TagSearchViewSet, self).__init__(*args, **kwargs)
+        super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
     def get_object(self):
         """
@@ -148,9 +164,12 @@ class TagSearchViewSet(ViewSet, PaginatedViewMixin):
         if query:
             query = '%s' % query
 
-        filters = {'type': params.pop('type', None)}
+        filters = {
+            'type': params.pop('type', None),
+            'archive': params.pop('archive', None),
+        }
 
-        s = TagSearch(query, filters=filters, start_date=params.get('start_date'), end_date=params.get('end_date'))
+        s = ComponentSearch(query, filters=filters, start_date=params.get('start_date'), end_date=params.get('end_date'))
 
         if self.paginator is not None:
             # Paginate in search engine
@@ -183,6 +202,11 @@ class TagSearchViewSet(ViewSet, PaginatedViewMixin):
                 raise exceptions.NotFound('Invalid page.')
 
         results_dict = results.to_dict()
+
+        for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
+            archive_data = get_archive(archive['key'])
+            archive['title'] = archive_data['title']
+
         r = {
             'hits': results_dict['hits']['hits'],
             'aggregations': results_dict['aggregations'],

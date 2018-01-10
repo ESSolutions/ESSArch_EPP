@@ -88,7 +88,7 @@ from storage.views import (
     TapeSlotViewSet,
 )
 
-from tags.search import TagSearchViewSet
+from tags.search import ComponentSearchViewSet
 from tags.views import TagViewSet, TagInformationPackagesViewSet
 
 
@@ -193,7 +193,7 @@ router.register(r'robots', RobotViewSet, base_name='robots').register(
     parents_query_lookups=['tape_drives']
 )
 
-router.register(r'search', TagSearchViewSet, base_name='search')
+router.register(r'search', ComponentSearchViewSet, base_name='search')
 
 urlpatterns = [
     url(r'^', include('frontend.urls'), name='home'),
