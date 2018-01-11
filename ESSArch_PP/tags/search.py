@@ -23,8 +23,7 @@ from ESSArch_Core.tags.documents import Archive
 
 
 class ComponentSearch(FacetedSearch):
-    index = 'archive'
-    doc_types = ['component', 'archive']
+    index = ['component', 'archive']
     fields = ['title', 'desc']
 
     facets = {
