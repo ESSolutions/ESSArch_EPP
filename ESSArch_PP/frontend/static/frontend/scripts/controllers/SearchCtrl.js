@@ -110,6 +110,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
 
     vm.loadTags = function(aggregations) {
         var typeChildren = getAggregationChildren(aggregations, 'type');
+        var archiveChildren = getAggregationChildren(aggregations, 'archive');
+        var institutionChildren = getAggregationChildren(aggregations, 'institution');
         var filters = [
             {
                 text: "Typ",
@@ -117,7 +119,19 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 type: 'series',
                 children: typeChildren,
                 branch: 'type',
-            }
+            },
+            {
+                text: "Arkiv",
+                state: {opened: true, disabled: true},
+                children: archiveChildren,
+                branch: 'archive',
+            },
+            {
+                text: "Arkivinstitution",
+                state: {opened: true, disabled: true},
+                children: institutionChildren,
+                branch: 'institution',
+            },
         ];
         vm.recreateFilterTree(filters)
     }
