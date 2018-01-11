@@ -109,26 +109,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     }
 
     vm.loadTags = function(aggregations) {
-        var tags = [];
-        var typeMissing = true;
         var typeChildren = getAggregationChildren(aggregations, 'type');
-        var rootTag = {
-            text: "Arkiv",
-            parent: "#",
-            type: "archive",
-            state: {opened: true, disabled: true},
-            children: [
-                {
-                    text: "Typ",
-                    state: {opened: true, disabled: true},
-                    type: 'series',
-                    children: typeChildren,
-                    branch: 'type',
-                }
-            ]
-        };
-        tags = [rootTag];
-        vm.recreateFilterTree(tags)
+        var filters = [
+            {
+                text: "Typ",
+                state: {opened: true, disabled: true},
+                type: 'series',
+                children: typeChildren,
+                branch: 'type',
+            }
+        ];
+        vm.recreateFilterTree(filters)
     }
 
     vm.getPathFromParents = function(tag) {
