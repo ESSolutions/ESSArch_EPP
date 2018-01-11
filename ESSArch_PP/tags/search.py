@@ -235,12 +235,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def children(self, request, pk=None):
         s = Search(index=self.index).sort('reference_code')
 
-        try:
-            tree_id = request.query_params['tree_id']
-        except KeyError:
-            raise exceptions.ParseError('tree_id parameter missing')
-
-        p = {'parents.%s' % tree_id: {'query': pk, 'operator': 'and'}}
+        p = {'parent': {'query': pk, 'operator': 'and'}}
         s = s.query('match', **p)
 
         if self.paginator is not None:
