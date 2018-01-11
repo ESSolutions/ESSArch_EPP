@@ -17,6 +17,7 @@ from rest_framework.viewsets import ViewSet
 
 from six import iteritems
 
+from ESSArch_Core.ip.models import ArchivalInstitution
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive
@@ -31,6 +32,7 @@ class ComponentSearch(FacetedSearch):
         'parents': TermsFacet(field='parents'),
         'type': TermsFacet(field='type'),
         'archive': TermsFacet(field='archive'),
+        'institution': TermsFacet(field='institution'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -118,6 +120,11 @@ def get_archive(id):
     cache.set(cache_key, archive_data)
     return archive_data
 
+def get_institution(id):
+    inst = ArchivalInstitution.objects.get(pk=id)
+    return {
+        'title': inst.name
+    }
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     index = ComponentSearch.index
@@ -166,6 +173,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         filters = {
             'type': params.pop('type', None),
             'archive': params.pop('archive', None),
+            'institution': params.pop('institution', None),
         }
 
         s = ComponentSearch(query, filters=filters, start_date=params.get('start_date'), end_date=params.get('end_date'))
@@ -205,6 +213,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
             archive_data = get_archive(archive['key'])
             archive['title'] = archive_data['title']
+
+        for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
+            institution_data = get_institution(institution['key'])
+            institution['title'] = institution_data['title']
 
         r = {
             'hits': results_dict['hits']['hits'],
