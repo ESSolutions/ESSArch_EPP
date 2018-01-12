@@ -1,5 +1,6 @@
 from __future__ import division
 
+import copy
 import datetime
 import math
 
@@ -200,7 +201,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'organization': params.pop('organization', None),
         }
 
-        filter_values = params
+        filter_values = copy.copy(params)
         for f in ('page', 'page_size'):
             filter_values.pop(f, None)
 
