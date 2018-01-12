@@ -20,7 +20,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
                 item._source.text = item._source.reference_code + " - " + item._source.title;
                 item._source.parent = "#";
                 if(item._index == "archive") {
-                    item._source.type = $translate.instant("archive");
+                    item._source.type = $translate.instant("ARCHIVE");
                 }
                 for (var key in item.highlight) {
                     item._source[key] = $sce.trustAsHtml(item.highlight[key][0]);
