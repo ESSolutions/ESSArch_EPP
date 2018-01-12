@@ -35,7 +35,7 @@
                                 <b>{{x.reference_code}}</b>
                                 <p class="result-name" ng-bind-html="x.title"></p>
                                 <p ng-if="x.unit_dates.date">{{x.date}}</p>
-                                <p class="result-description">{{x.desc}}</p>
+                                <p class="result-description" ng-bind-html="x.desc"></p>
                             </div>
                             <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                         </div>
