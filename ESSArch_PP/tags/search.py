@@ -17,7 +17,7 @@ from rest_framework.viewsets import ViewSet
 
 from six import iteritems
 
-from ESSArch_Core.ip.models import ArchivalInstitution
+from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive
@@ -33,6 +33,7 @@ class ComponentSearch(FacetedSearch):
         'type': TermsFacet(field='type'),
         'archive': TermsFacet(field='archive'),
         'institution': TermsFacet(field='institution'),
+        'organization': TermsFacet(field='organization'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -126,6 +127,12 @@ def get_institution(id):
         'title': inst.name
     }
 
+def get_organization(id):
+    org = ArchivistOrganization.objects.get(pk=id)
+    return {
+        'title': org.name,
+    }
+
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     index = ComponentSearch.index
     lookup_field = 'pk'
@@ -174,6 +181,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'type': params.pop('type', None),
             'archive': params.pop('archive', None),
             'institution': params.pop('institution', None),
+            'organization': params.pop('organization', None),
         }
 
         s = ComponentSearch(query, filters=filters, start_date=params.get('start_date'), end_date=params.get('end_date'))
@@ -217,6 +225,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
             institution_data = get_institution(institution['key'])
             institution['title'] = institution_data['title']
+
+        for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
+            organization_data = get_organization(organization['key'])
+            organization['title'] = organization_data['title']
 
         if len(results_dict['_shards'].get('failures', [])):
             return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
