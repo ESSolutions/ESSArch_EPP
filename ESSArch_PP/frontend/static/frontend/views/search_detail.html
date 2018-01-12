@@ -30,17 +30,17 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Referenskod</th>
-                            <th>Namn</th>
-                            <th>Tid</th>
+                            <th>{{'REFERENCE_CODE' | translate}}</th>
+                            <th>{{'TITLE' | translate}}</th>
+                            <th>{{'TIME' | translate}}</th>
                             <th ng-if="x._type == 'document'"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="x in vm.record_children">
                             <td><b>{{x._source.reference_code}}</b></td>
-                            <td>{{x._source.name}}</td>
-                            <td>{{x._source.start_date | date:'yyyy-MM-dd'}} - {{x._source.end_date | date:'yyyy-MM-dd'}}</td>
+                            <td>{{x._source.title}}</td>
+                            <td>{{x._source.unit_dates.date}}</td>
                             <td>
                                 <button ng-if="x._type == 'document' && (x._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                                 <p style="color: red; white-space: nowrap;" ng-if="x._type == 'document' && !(x._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>

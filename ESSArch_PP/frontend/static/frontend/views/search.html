@@ -33,8 +33,8 @@
                                 {{x.type}}
                                 <br/>
                                 <b>{{x.reference_code}}</b>
-                                <p class="result-name" ng-bind-html="x.name"></p>
-                                <p ng-if="x.start_date">{{x.start_date | date:"yyyy-MM-dd"}} - {{x.end_date | date:"yyyy-MM-dd"}}</p>
+                                <p class="result-name" ng-bind-html="x.title"></p>
+                                <p ng-if="x.unit_dates.date">{{x.date}}</p>
                                 <p class="result-description">{{x.desc}}</p>
                             </div>
                             <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>

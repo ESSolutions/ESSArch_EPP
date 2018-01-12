@@ -469,5 +469,6 @@
     "INCLUDE_IP_FOR_RECEIVE": "Inkludera IP för att ta emot",
     "OPEN_KEYBOARD_SHORTCUT_INFO": "Öppna tangentbordsgenväg-sida",
     "NO_SUBMISSION_AGREEMENT_AVAILABLE": "Inga leveransöverenskommelser tillgängliga",
-    "ARCHIVE": "Arkiv"
+    "ARCHIVE": "Arkiv",
+    "REFERENCE_CODE": "Referenskod"
 }
