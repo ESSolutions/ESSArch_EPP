@@ -159,15 +159,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         },
         types : {
             default : {
+                icon: 'fa fa-folder-o'
             },
             archive : {
                 icon : 'fa fa-archive'
-            },
-            series : {
-                icon : 'fa fa-file-o'
-            },
-            volume: {
-                icon: 'fa fa-hdd-o'
             },
             plus: {
                 icon: "fa fa-plus"
@@ -194,6 +189,16 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         },
         plugins : ['types', 'contextmenu']
     };
+
+    vm.setType = function() {
+        var array = vm.recordTreeInstance.jstree(true).get_json("#", {flat: true}).forEach(function(item) {
+            var fullItem = vm.recordTreeInstance.jstree(true).get_node(item.id);
+            if(fullItem.original._index == "archive") {
+                vm.recordTreeInstance.jstree(true).set_type(item, "archive");
+            }
+        });
+    }
+
     vm.recordTreeData = [];
     vm.selectRecord = function (jqueryobj, e) {
         if(e.node && e.node.original.see_more) {
