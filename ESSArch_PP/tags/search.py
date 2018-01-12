@@ -37,8 +37,10 @@ class ComponentSearch(FacetedSearch):
     }
 
     def __init__(self, *args, **kwargs):
-        self.start_date = kwargs.pop('start_date', None)
-        self.end_date = kwargs.pop('end_date', None)
+        self.filter_values = kwargs.pop('filter_values', {})
+        self.start_date = self.filter_values.get('start_date', None)
+        self.end_date = self.filter_values.get('end_date', None)
+        self.archive = self.filter_values.get('archive', None)
 
         def validate_date(d):
             try:
@@ -68,7 +70,11 @@ class ComponentSearch(FacetedSearch):
 
     def search(self):
         """
-        We override this to add filters on start and end date
+        We override this to add filters on archive, start and end date
+
+        We have to manually filter archives since we want to filter against a
+        script field representing the archive which is the `archive` field on
+        components and `_id` on archives.
         """
 
         s = super(ComponentSearch, self).search()
@@ -79,6 +85,11 @@ class ComponentSearch(FacetedSearch):
         if self.end_date not in EMPTY_VALUES:
             s = s.filter('range', start_date={'lte': self.end_date})
 
+        if self.archive is not None:
+            s = s.query(Q('bool', must=Q('script', script={
+                'source': "(doc.containsKey('archive') && doc['archive'].value==params.archive) || doc['_id'].value==params.archive",
+                'params': {'archive': self.archive},
+            })))
         return s
 
     def aggregate(self, search):
@@ -98,6 +109,12 @@ class ComponentSearch(FacetedSearch):
                 'filter',
                 filter=agg_filter
             ).bucket(f, agg)
+
+
+        search.aggs.bucket('_filter_archive', 'filter', filter=agg_filter).bucket(
+            'archive', 'terms',
+            script="doc.containsKey('archive') ? doc['archive'].value : doc['_id'].value"
+        )
 
     def highlight(self, search):
         """
@@ -179,12 +196,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         filters = {
             'type': params.pop('type', None),
-            'archive': params.pop('archive', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
         }
 
-        s = ComponentSearch(query, filters=filters, start_date=params.get('start_date'), end_date=params.get('end_date'))
+        filter_values = params
+        for f in ('page', 'page_size'):
+            filter_values.pop(f, None)
+
+        s = ComponentSearch(query, filters=filters, filter_values=filter_values)
 
         if self.paginator is not None:
             # Paginate in search engine
