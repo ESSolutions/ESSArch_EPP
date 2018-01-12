@@ -10,7 +10,7 @@ from django_filters.constants import EMPTY_VALUES
 from elasticsearch.exceptions import TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet, Search
 
-from rest_framework import exceptions
+from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
@@ -217,6 +217,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
             institution_data = get_institution(institution['key'])
             institution['title'] = institution_data['title']
+
+        if len(results_dict['_shards'].get('failures', [])):
+            return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         r = {
             'hits': results_dict['hits']['hits'],
