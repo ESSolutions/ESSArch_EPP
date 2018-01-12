@@ -111,7 +111,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if(!node._id && node.id) {
             node._id = node.id;
         }
-        return $http.get(vm.url+"search/"+node._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: 1}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._id+"/children/", {headers: headers, params: {page_size: 10, page: 1}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
