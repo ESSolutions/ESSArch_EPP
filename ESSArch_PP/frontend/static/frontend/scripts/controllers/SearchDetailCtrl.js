@@ -12,21 +12,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         $http.get(vm.url+"search/"+vm.item.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
             vm.activeTab = 1;
-            if(response.data.parent) {
-                vm.buildRecordTree(response.data).then(function(node) {
-                    var treeData = [node];
-                    vm.recreateRecordTree(treeData);
-                })
-            } else {
-                if(angular.isUndefined(response.data.title)) {
-                    response.data.title = "";
-                }
-                response.data.text = "<b>" + (response.data.reference_code ? response.data.reference_code : "") + "</b> " + response.data.title;
-                var treeData = [response.data];
+            vm.buildRecordTree(response.data).then(function(node) {
+                var treeData = [node];
                 vm.recreateRecordTree(treeData);
-            }
-            vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
-            vm.record.state.opened = false;
+            })
+            vm.record.children = [];//[{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
             if(angular.isUndefined(vm.record.terms_and_condition)) {
                 vm.record.terms_and_condition = null;
             }
@@ -65,47 +55,79 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if(startNode._id == vm.record._id) {
             startNode.state.selected = true;
         }
-        if(startNode.parent) {
-            return $http.get(vm.url+"search/"+startNode.parent+"/", {headers: headers}).then(function(response) {
-                var p = response.data;
-                p.children = [];
-                return getChildren(p).then(function(children) {
-                    children.data.forEach(function(child) {
-                        if(child._id == startNode._id) {
-                            p.children.push(startNode);
-                        } else {
-                            if(angular.isUndefined(child._source.title)) {
-                                child._source.title = "";
-                            }
-                            child._source._index = child._index;
-                            child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
-                            child._source.state = {opened: true};
-                            if(!child._source.children) {
-                                child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
-                            }
-                            child._source.state = { opened: false };
-                            child._source._id = child._id;
-                            p.children.push(child._source);
-                        }
-                    });
-                    if(children.data.length < children.count) {
-                        p.children.push({
-                            text: $translate.instant("SEE_MORE"),
-                            see_more: true,
-                            type: "plus",
-                            parent: p._id,
-                        });
-                        if(!getNodeById(p, startNode._id)) {
-                            startNode.state.opened = false;
-                            p.children.push(startNode);
-                        }
+        return getChildren(startNode).then(function (start_node_children) {
+            start_node_children.data.forEach(function (child) {
+                if (child._id == startNode._id) {
+                    startNode.children.push(startNode);
+                } else {
+                    if (angular.isUndefined(child._source.title)) {
+                        child._source.title = "";
                     }
-                    return vm.buildRecordTree(p);
-                })
+                    child._source._index = child._index;
+                    child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
+                    child._source.state = { opened: true };
+                    if (!child._source.children) {
+                        child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
+                    }
+                    child._source.state = { opened: false };
+                    child._source._id = child._id;
+                    startNode.children.push(child._source);
+                }
             });
-        } else {
-            return startNode;
-        }
+            if (start_node_children.data.length < start_node_children.count) {
+                startNode.children.push({
+                    text: $translate.instant("SEE_MORE"),
+                    see_more: true,
+                    type: "plus",
+                    parent: startNode._id,
+                });
+                if (!getNodeById(startNode, startNode._id)) {
+                    startNode.state.opened = false;
+                    startNode.children.push(startNode);
+                }
+            }
+            if (startNode.parent) {
+                return $http.get(vm.url + "search/" + startNode.parent + "/", { headers: headers }).then(function (response) {
+                    var p = response.data;
+                    p.children = [];
+                    return getChildren(p).then(function (children) {
+                        children.data.forEach(function (child) {
+                            if (child._id == startNode._id) {
+                                p.children.push(startNode);
+                            } else {
+                                if (angular.isUndefined(child._source.title)) {
+                                    child._source.title = "";
+                                }
+                                child._source._index = child._index;
+                                child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
+                                child._source.state = { opened: true };
+                                if (!child._source.children) {
+                                    child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
+                                }
+                                child._source.state = { opened: false };
+                                child._source._id = child._id;
+                                p.children.push(child._source);
+                            }
+                        });
+                        if (children.data.length < children.count) {
+                            p.children.push({
+                                text: $translate.instant("SEE_MORE"),
+                                see_more: true,
+                                type: "plus",
+                                parent: p._id,
+                            });
+                            if (!getNodeById(p, startNode._id)) {
+                                startNode.state.opened = false;
+                                p.children.push(startNode);
+                            }
+                        }
+                        return vm.buildRecordTree(p);
+                    })
+                });
+            } else {
+                return startNode;
+            }
+        })
     }
     function getChildren(node) {
         if(!node._id && node.id) {
