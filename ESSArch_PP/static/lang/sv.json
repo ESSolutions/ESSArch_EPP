@@ -470,5 +470,6 @@
     "OPEN_KEYBOARD_SHORTCUT_INFO": "Öppna tangentbordsgenväg-sida",
     "NO_SUBMISSION_AGREEMENT_AVAILABLE": "Inga leveransöverenskommelser tillgängliga",
     "ARCHIVE": "Arkiv",
-    "REFERENCE_CODE": "Referenskod"
+    "REFERENCE_CODE": "Referenskod",
+    "TITLE": "Titel"
 }

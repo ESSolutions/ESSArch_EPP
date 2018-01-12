@@ -471,5 +471,6 @@
     "VALIDATION_TABLE": "Validation table",
     "NO_SUBMISSION_AGREEMENT_AVAILABLE": "No Submission Agreement available",
     "ARCHIVE": "Archive",
-    "REFERENCE_CODE": "Reference code"
+    "REFERENCE_CODE": "Reference code",
+    "TITLE": "Title"
 }
