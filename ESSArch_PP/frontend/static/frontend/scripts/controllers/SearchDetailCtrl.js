@@ -245,6 +245,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         if (e.action == "select_node") {
             vm.record = e.node.original;
+            $state.go(".", {id: vm.record._id}, {notify: false});
             if(angular.isUndefined(vm.record.terms_and_condition)) {
                 vm.record.terms_and_condition = null;
             }
