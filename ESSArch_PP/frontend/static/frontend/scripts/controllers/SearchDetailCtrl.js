@@ -2,6 +2,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
+    var auth = window.btoa("user:user");
+    var headers = { "Authorization": "Basic " + auth };
     vm.$onInit = function() {
         vm.item = {
             id: $stateParams.id,
@@ -37,8 +39,6 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
 
     vm.currentItem = null;
 
-    var auth = window.btoa("user:user");
-    var headers = { "Authorization": "Basic " + auth };
     $scope.checkPermission = function(permissionName) {
         return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
     };
