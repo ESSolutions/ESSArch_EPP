@@ -12,17 +12,16 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         $http.get(vm.url+"search/"+vm.item.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
             vm.activeTab = 1;
-            if(response.data.parents) {
+            if(response.data.parent) {
                 vm.buildRecordTree(response.data).then(function(node) {
                     var treeData = [node];
                     vm.recreateRecordTree(treeData);
                 })
             } else {
-                if(angular.isUndefined(response.data.name)) {
-                    response.data.name = "";
+                if(angular.isUndefined(response.data.title)) {
+                    response.data.title = "";
                 }
-                response.data.text = "<b>" + response.data.reference_code + "</b> " + response.data.name;
-                response.data.type = response.data._type;
+                response.data.text = "<b>" + (response.data.reference_code ? response.data.reference_code : "") + "</b> " + response.data.title;
                 var treeData = [response.data];
                 vm.recreateRecordTree(treeData);
             }
@@ -58,17 +57,16 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.treeIds = ["Allmänna arkivschemat", "Verksamhetsbaserad"]
     vm.treeId = "Allmänna arkivschemat";
     vm.buildRecordTree = function(startNode) {
-        if(angular.isUndefined(startNode.name)) {
-            startNode.name = "";
+        if(angular.isUndefined(startNode.title)) {
+            startNode.title = "";
         }
-        startNode.text = "<b>" + startNode.reference_code + "</b> " + startNode.name;
-        startNode.type = startNode._type;
+        startNode.text = "<b>" + (startNode.reference_code ? startNode.reference_code : "") + "</b> " + startNode.title;
         startNode.state = {opened: true};
         if(startNode._id == vm.record._id) {
             startNode.state.selected = true;
         }
-        if(startNode.parents) {
-            return $http.get(vm.url+"search/"+startNode.parents[vm.treeId]+"/", {headers: headers}).then(function(response) {
+        if(startNode.parent) {
+            return $http.get(vm.url+"search/"+startNode.parent+"/", {headers: headers}).then(function(response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function(children) {
@@ -76,11 +74,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         if(child._id == startNode._id) {
                             p.children.push(startNode);
                         } else {
-                            if(angular.isUndefined(child._source.name)) {
-                                child._source.name = "";
+                            if(angular.isUndefined(child._source.title)) {
+                                child._source.title = "";
                             }
-                            child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
-                            child._source.type = child._type;
+                            child._source._index = child._index;
+                            child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
                             child._source.state = {opened: true};
                             if(!child._source.children) {
                                 child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
@@ -200,7 +198,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.selectRecord = function (jqueryobj, e) {
         if(e.node && e.node.original.see_more) {
             var tree = vm.recordTreeData;
-            var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parents[0]);
+            var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
             $http.get(vm.url+"search/"+e.node.original.parent+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
@@ -213,11 +211,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     see_more = children.pop();
                 }
                 response.data.forEach(function(child) {
-                    if(angular.isUndefined(child._source.name)) {
-                        child._source.name = "";
+                    if(angular.isUndefined(child._source.title)) {
+                        child._source.title = "";
                     }
-                    child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
-                    child._source.type = child._type;
+                    child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
                     if(!child._source.children) {
                         child._source.children = [{text: "", parent: child._id, icon: false, placeholder: true, state: {disabled: true}}];
                     }
@@ -262,11 +259,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
-                    if(angular.isUndefined(child._source.name)) {
-                        child._source.name = "";
+                    if(angular.isUndefined(child._source.title)) {
+                        child._source.title = "";
                     }
-                    child._source.text = "<b>" + child._source.reference_code + "</b> " + child._source.name;
-                    child._source.type = child._type;
+                    child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
                     if(!child._source.children) {
                         child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
                     }
@@ -326,7 +322,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         modalInstance.result.then(function (data) {
             delete vm.record[key]
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.name, "success");
+            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.title, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -353,7 +349,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data) {
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.name, "success");
+            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.title, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -376,7 +372,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data, $ctrl) {
             delete vm.record[field];
-            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
+            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.title, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
