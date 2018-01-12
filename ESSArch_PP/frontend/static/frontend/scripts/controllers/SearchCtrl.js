@@ -86,7 +86,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             } else {
                 item.text = item.key + " (" + item.doc_count + ")";
             }
-            item.state = {opened: true, selected: vm.filterObject.type==item.key?true:false}
+            item.state = {opened: true, selected: vm.filterObject[aggrType]==item.key?true:false}
             item.type = item.key;
             if(item.key == vm.filterObject[aggrType]) {
                 missing = false;
