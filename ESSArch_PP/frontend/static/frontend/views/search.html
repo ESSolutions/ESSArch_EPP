@@ -11,15 +11,11 @@
             <div ng-if="vm.showFilters" class="filters">
                 <label>
                     {{'START_DATE' | translate}}
-                    <input type="number" class="form-control" ng-model="vm.filterObject.start_date">
+                    <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.start_date">
                 </label>
                 <label>
                     {{'END_DATE' | translate}}
-                    <input type="number" class="form-control" ng-model="vm.filterObject.end_date">
-                </label>
-                <label>
-                    {{'CLASSIFICATION_STRUCTURE' | translate}}
-                    <select ng-change="vm.changeClassificationStructure()" class="form-control" ng-model="vm.treeId" ng-options="x for x in vm.treeIds">{{x}}</select>
+                    <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.end_date">
                 </label>
             </div>
         </div>
