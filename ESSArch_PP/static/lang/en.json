@@ -469,5 +469,6 @@
     "INCLUDE_IP_FOR_RECEIVE": "Include IP for receive",
     "OPEN_KEYBOARD_SHORTCUT_INFO": "Open keyboard shortcut info page",
     "VALIDATION_TABLE": "Validation table",
-    "NO_SUBMISSION_AGREEMENT_AVAILABLE": "No Submission Agreement available"
+    "NO_SUBMISSION_AGREEMENT_AVAILABLE": "No Submission Agreement available",
+    "ARCHIVE": "Archive"
 }

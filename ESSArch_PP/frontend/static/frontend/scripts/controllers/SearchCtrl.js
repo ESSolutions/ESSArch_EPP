@@ -114,20 +114,20 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         var institutionChildren = getAggregationChildren(aggregations, 'institution');
         var filters = [
             {
-                text: "Typ",
+                text: $translate.instant("TYPE"),
                 state: {opened: true, disabled: true},
                 type: 'series',
                 children: typeChildren,
                 branch: 'type',
             },
             {
-                text: "Arkiv",
+                text: $translate.instant("ARCHIVE"),
                 state: {opened: true, disabled: true},
                 children: archiveChildren,
                 branch: 'archive',
             },
             {
-                text: "Arkivinstitution",
+                text: $translate.instant("ARCHIVALINSTITUTION"),
                 state: {opened: true, disabled: true},
                 children: institutionChildren,
                 branch: 'institution',
