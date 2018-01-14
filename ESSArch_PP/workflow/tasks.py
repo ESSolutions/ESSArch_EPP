@@ -42,6 +42,7 @@ from celery.exceptions import Ignore
 from celery.result import allow_join_result, AsyncResult
 
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
@@ -903,6 +904,12 @@ class PollIOQueue(DBTask):
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
             Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=entries.first().user)
+
+            recipient = entries.first().user.email
+            if recipient:
+                subject = 'Preserved "%s"' % ip.object_identifier_value
+                body = '"%s" is now preserved' % ip.object_identifier_value
+                send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
 
             # if we preserved directly from workarea then we need to delete that workarea object
             ip.workareas.all().delete()
