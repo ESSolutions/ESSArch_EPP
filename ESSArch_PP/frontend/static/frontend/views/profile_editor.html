@@ -30,7 +30,9 @@
             <form ng-if="vm.saFields.length" class="edit-form sa-edit">
                 <formly-form ng-if="vm.saFields.length" model="vm.saModel" fields="vm.saFields" options="vm.options" form="vm.editForm">
                 </formly-form>
-                <button ng-if="vm.saFields.length && !vm.disabled" ng-click="vm.saCancel()" class="btn btn-warning" translate="CANCEL"></button>
+                <div class="button-wrapper">
+                    <button ng-if="vm.saFields.length && !vm.disabled" ng-click="vm.saCancel()" class="btn btn-warning" translate="CANCEL"></button>
+                </div>
             </form>
             <div uib-alert ng-if="saAlert" style="width: 100%;" ng-class="'alert-' + (saAlert.type || 'warning')">{{saAlert.msg}}</div>
         </div>
@@ -77,8 +79,10 @@
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
                 <br />
-                <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="vm.editForm.$invalid || angular.equals(vm.profileOldModel, vm.profileModel)" translate="SAVE"></button>
-                <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning">{{'CANCEL' | translate}}</button>
+                <div class="button-wrapper">
+                    <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="vm.editForm.$invalid || angular.equals(vm.profileOldModel, vm.profileModel)" translate="SAVE"></button>
+                    <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning">{{'CANCEL' | translate}}</button>
+                </div>
             </form>
         </div>
         </div>
