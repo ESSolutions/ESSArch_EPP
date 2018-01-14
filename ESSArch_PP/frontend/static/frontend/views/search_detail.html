@@ -4,7 +4,7 @@
         </div>
         <div class="view-content">
             <h4>{{vm.record.type}}</h4>
-            <h4 ng-bind-html="vm.record.text"></h4>
+            <h4><span ng-bind-html="vm.record.text"></span> <span ng-if="vm.record.unit_dates.date">({{vm.record.unit_dates.date}})</span></h4>
             <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
             <p class="result-description">{{vm.record.desc}}</p>
             <br/>
@@ -15,17 +15,12 @@
                 <div class="table-x-overflow metadata-table">
                     <table>
                         <tr ng-repeat="(key, value) in vm.record" ng-if="key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
-                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
+                            <td ng-if="key != 'terms_and_condition'" style="padding-right: 10px;"><b>{{key}}</b></td>
                             <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                            <td ng-if="key == 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{value == null?"Nej":value}}</td>
-                            <td ng-if="key != 'terms_and_condition'" class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
-                        </tr>
-                        <tr>
-                            <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
                         </tr>
                     </table>
                 </div>
-                <h4>{{'IDS' | translate}}</h4>
+                <!--<h4>{{'IDS' | translate}}</h4>
                 <div class="table-x-overflow ids-table">
                     <table>
                         <tr ng-repeat="(key, value) in vm.record.unit_ids">
@@ -42,7 +37,7 @@
                             <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
                         </tr>
                     </table>
-                </div>
+                </div>-->
             </div>
             <br/>
             <h4>{{'CONTENTS' | translate}}</h4>
@@ -62,8 +57,7 @@
                             <td>{{x._source.title}}</td>
                             <td>{{x._source.unit_dates.date}}</td>
                             <td>
-                                <button ng-if="x._type == 'document' && (x._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-                                <p style="color: red; white-space: nowrap;" ng-if="x._type == 'document' && !(x._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
+                                <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                             </td>
                         </tr>
                     </tbody>

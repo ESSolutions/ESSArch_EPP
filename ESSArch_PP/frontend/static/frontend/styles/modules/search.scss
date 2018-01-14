@@ -80,13 +80,15 @@
     }
     .view-content {
         margin-top: 10px;
-        margin-left: 0;
+        margin-left: 50px;
         width: 100%;
         @include medium-screen {
             width: 100%;
+            margin-left: 0;
         }
         @include small-screen {
             width: 100%;
+            margin-left: 0;
         }
     }
     .filter-tree {

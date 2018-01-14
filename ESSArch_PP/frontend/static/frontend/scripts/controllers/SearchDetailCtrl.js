@@ -323,6 +323,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         return runner(null, node);
     }
+
     vm.viewFile = function(name) {
         var file = $sce.trustAsResourceUrl("/static/frontend/"+name);
         $window.open(file, '_blank');
