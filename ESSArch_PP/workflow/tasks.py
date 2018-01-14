@@ -41,7 +41,7 @@ from celery import states as celery_states
 from celery.exceptions import Ignore
 from celery.result import allow_join_result, AsyncResult
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F, IntegerField, Max
