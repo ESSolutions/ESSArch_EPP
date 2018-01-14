@@ -38,7 +38,7 @@ import ESSMSSQL
 import datetime
 
 def clear_packagename_for_all_objects_related_to_storagemediumid(storageMediumID, dryrun=False, allflag=False):
-    ext_table='' #'IngestObject'
+    ext_table='IngestObject' #'IngestObject'
     tz=timezone.get_default_timezone()
     if dryrun:
         print 'Dry run clear packagename for objects related to storagemedium: %s' % storageMediumID
@@ -57,10 +57,12 @@ def clear_packagename_for_all_objects_related_to_storagemediumid(storageMediumID
             #archiveobject_obj.ObjectPackageName = '%s.tar' % archiveobject_obj.ObjectIdentifierValue
             archiveobject_obj.LocalDBdatetime=timestamp_utc
             #archiveobject_obj.LocalDBdatetime=archiveobject_obj.ExtDBdatetime
-            #archiveobject_obj.StatusProcess=0
-            #archiveobject_obj.StatusActivity=0
-            #archiveobject_obj.save(update_fields=['ObjectPackageName','LocalDBdatetime','StatusProcess','StatusActivity'])
-            archiveobject_obj.save(update_fields=['ObjectPackageName','LocalDBdatetime'])
+            if ext_table:
+                archiveobject_obj.StatusProcess=0
+                archiveobject_obj.StatusActivity=0
+                archiveobject_obj.save(update_fields=['ObjectPackageName','LocalDBdatetime','StatusProcess','StatusActivity'])
+            else:
+                archiveobject_obj.save(update_fields=['ObjectPackageName','LocalDBdatetime'])
             if ext_table:
                 ext_res,ext_errno,ext_why = ESSMSSQL.DB().action(ext_table,'UPD',('ObjectPackageName','',
                                                                                  'LastEventDate',timestamp_dst.replace(tzinfo=None)),
