@@ -41,7 +41,12 @@ from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+
 from groups_manager.models import Member
+from groups_manager.utils import get_permission_name
+
+from guardian.shortcuts import assign_perm
+
 from lxml import etree
 from natsort import natsorted
 from rest_framework import exceptions, filters, mixins, status, viewsets
@@ -317,8 +322,14 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except AttributeError:
             raise exceptions.ParseError('Missing IP_CREATION_PERMS_MAP in settings')
 
+        user_perms = perms.pop('owner', [])
+
         organization = request.user.user_profile.current_organization
-        member.assign_object(organization, ip, custom_permissions=perms)
+        organization.assign_object(ip, custom_permissions=perms)
+
+        for perm in user_perms:
+            perm_name = get_permission_name(perm, ip)
+            assign_perm(perm_name, member.django_user, ip)
 
         extra_data = fill_specification_data(ip=ip, sa=sa)
 
