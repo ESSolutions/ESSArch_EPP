@@ -472,5 +472,7 @@
     "NO_SUBMISSION_AGREEMENT_AVAILABLE": "No Submission Agreement available",
     "ARCHIVE": "Archive",
     "REFERENCE_CODE": "Reference code",
-    "TITLE": "Title"
+    "TITLE": "Title",
+    "IDS": "IDs",
+    "DATES": "Dates"
 }

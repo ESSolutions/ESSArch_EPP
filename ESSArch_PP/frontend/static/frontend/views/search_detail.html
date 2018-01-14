@@ -10,19 +10,39 @@
             <br/>
             <button ng-if="vm.record.type == 'document' && (vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
             <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
-            <h4>{{'METADATA' | translate}}</h4>
-            <div class="table-x-overflow">
-                <table>
-                    <tr ng-repeat="(key, value) in vm.record" ng-if="key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
-                        <td style="padding-right: 10px;"><b>{{key}}</b></td>
-                        <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                        <td ng-if="key == 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{value == null?"Nej":value}}</td>
-                        <td ng-if="key != 'terms_and_condition'" class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
-                    </tr>
-                    <tr>
-                        <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
-                    </tr>
-                </table>
+            <div class="metadata-tables-wrapper">
+                <h4>{{'METADATA' | translate}}</h4>
+                <div class="table-x-overflow metadata-table">
+                    <table>
+                        <tr ng-repeat="(key, value) in vm.record" ng-if="key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
+                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
+                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                            <td ng-if="key == 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{value == null?"Nej":value}}</td>
+                            <td ng-if="key != 'terms_and_condition'" class="flex-row"><i class="fa fa-pencil clickable" style="margin-left: 5px;" ng-click="vm.editField(key, value)"></i><i ng-if="key != 'reference_code'" class="fa fa-close clickable" style="margin-left: 2px;" ng-click="vm.removeField(key)"></i></td>
+                        </tr>
+                        <tr>
+                            <td><a ng-click="vm.addField()">{{'CREATE_NEW_FIELD' | translate}}</a></td>
+                        </tr>
+                    </table>
+                </div>
+                <h4>{{'IDS' | translate}}</h4>
+                <div class="table-x-overflow ids-table">
+                    <table>
+                        <tr ng-repeat="(key, value) in vm.record.unit_ids">
+                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
+                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                        </tr>
+                    </table>
+                </div>
+                <h4>{{'DATES' | translate}}</h4>
+                <div class="table-x-overflow dates-table">
+                    <table>
+                        <tr ng-repeat="(key, value) in vm.record.unit_dates">
+                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
+                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             <br/>
             <h4>{{'CONTENTS' | translate}}</h4>
