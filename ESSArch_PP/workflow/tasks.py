@@ -106,6 +106,8 @@ from ip.serializers import InformationPackageDetailSerializer
 
 from storage.serializers import IOQueueSerializer
 
+User = get_user_model()
+
 logger = logging.getLogger('essarch')
 
 class ReceiveSIP(DBTask):
@@ -196,6 +198,12 @@ class ReceiveSIP(DBTask):
         pass
 
     def event_outcome_success(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
+        recipient = User.objects.get(pk=self.responsible).email
+        ip = InformationPackage.objects.get(pk=ip)
+        if recipient:
+            subject = 'Received "%s"' % ip.object_identifier_value
+            body = '"%s" is now received and ready for archiving' % ip.object_identifier_value
+            send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
         return "Received IP '%s'" % str(ip)
 
 
