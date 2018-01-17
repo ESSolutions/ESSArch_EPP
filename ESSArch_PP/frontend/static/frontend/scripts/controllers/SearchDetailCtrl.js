@@ -272,15 +272,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     see_more = children.pop();
                 }
                 response.data.forEach(function(child) {
-                    if(angular.isUndefined(child._source.title)) {
-                        child._source.title = "";
-                    }
-                    child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
-                    if(!child._source.children) {
-                        child._source.children = [{text: "", parent: child._id, icon: false, placeholder: true, state: {disabled: true}}];
-                    }
-                    child._source.state = { opened: false };
-                    child._source._id = child._id;
+                    createChild(child);
                     children.push(child._source);
                 });
                 if(children.length < count) {
@@ -356,16 +348,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
-                    if(angular.isUndefined(child._source.title)) {
-                        child._source.title = "";
-                    }
-                    child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
-                    if(!child._source.children) {
-                        child._source.children = [{text: "", parent: child._id, placeholder: true, icon: false, state: {disabled: true}}];
-                    }
-                    child._source.state = { opened: false };
-                    child._source._id = child._id;
-                    child._source.id = child._id;
+                    createChild(child);
                     children.push(child._source);
                 });
                 if(children.length < count) {
