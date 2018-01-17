@@ -221,7 +221,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             size = int(size)
             offset = (number-1)*size
-            max_results = int(Index('tags').get_settings()['tags']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+            max_results = int(Index('archive').get_settings()['archive']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
             s[offset:offset+size]
 
         try:
@@ -288,7 +288,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             size = int(size)
             offset = (number-1)*size
-            max_results = int(Index('tags').get_settings()['tags']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+            max_results = int(Index('archive').get_settings()['archive']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
             s = s[offset:offset+size]
 
         try:
