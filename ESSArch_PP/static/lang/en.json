@@ -474,5 +474,7 @@
     "REFERENCE_CODE": "Reference code",
     "TITLE": "Title",
     "IDS": "IDs",
-    "DATES": "Dates"
+    "DATES": "Dates",
+    "RESULT_NUMBER": "Number",
+    "DESCRIPTION": "Description"
 }

@@ -42,15 +42,21 @@
     .page-number {
         align-self: center;
     }
+
     .number-per-page-wrapper {
         display: flex;
         flex-direction: row;
         margin-bottom: 5px;
+        white-space: nowrap;
     }
     .search-pagination {
         margin-bottom: 5px;
     }
     .items-per-page {
+        margin-left: 10px;
+        align-self: center;
+    }
+    .view-type {
         margin-left: 10px;
         align-self: center;
     }
@@ -66,6 +72,45 @@
         border-width: 1px;
         box-shadow: 0 2px 2px #dfdfdf;
         padding: 5px;
+        &:hover {
+            background-color: $sky-blue;
+            color: white;
+        }
+    }
+    .result-item-table {
+        &:hover {
+            background-color: $sky-blue;
+            color: white;
+        }
+    }
+    .result-item-grid {
+        padding: 5px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: $border-color;
+        overflow: hidden;
+        height: 75px;
+        width: 250px;
+        margin: 10px;
+        word-break: break-all;
+        display: flex;
+        flex-direction: row;
+        .metadata-wrapper {
+            margin-left: 3px;
+        }
+        .item-image {
+            align-self: center;
+        }
+        &:hover {
+            background-color: $sky-blue;
+            color: white;
+        }
+    }
+    .grid-view {
+        border-style: solid;
+        border-width: 1px;
+        border-color: $border-color;
+        margin-bottom: 10px;
     }
     .result-name {
         text-decoration: underline;
@@ -73,10 +118,6 @@
     .result-description {
         font-style: italic;
         white-space: pre-wrap;
-    }
-    .result-item:hover {
-        background-color: $sky-blue;
-        color: white;
     }
     .view-content {
         margin-top: 10px;

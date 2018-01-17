@@ -19,6 +19,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
                 item._source.name = item._source.name;
                 item._source.text = item._source.reference_code + " - " + item._source.title;
                 item._source.parent = "#";
+                item._source._index = item._index;
                 if(item._index == "archive") {
                     item._source.type = $translate.instant("ARCHIVE");
                 }

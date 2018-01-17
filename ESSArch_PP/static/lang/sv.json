@@ -473,5 +473,7 @@
     "REFERENCE_CODE": "Referenskod",
     "TITLE": "Titel",
     "IDS": "IDn",
-    "DATES": "Datum"
+    "DATES": "Datum",
+    "RESULT_NUMBER": "Nummer",
+    "DESCRIPTION": "Beskrivning"
 }

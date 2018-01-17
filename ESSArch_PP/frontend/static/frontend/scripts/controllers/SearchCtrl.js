@@ -9,6 +9,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.numberOfResults = 0;
     vm.resultsPerPage = 25;
 
+    vm.resultViewType = "list";
+
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
 
