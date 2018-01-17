@@ -79,6 +79,20 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
     }
 
+    createChild = function(child) {
+        if (angular.isUndefined(child._source.title)) {
+            child._source.title = "";
+        }
+        child._source._index = child._index;
+        child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
+        if (!child._source.children) {
+            child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
+        }
+        child._source.state = { opened: false };
+        child._source._id = child._id;
+        return child;
+    }
+
     vm.treeIds = ["Allmänna arkivschemat", "Verksamhetsbaserad"]
     vm.treeId = "Allmänna arkivschemat";
     vm.buildRecordTree = function(startNode) {
@@ -94,22 +108,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             var startNodePromise = getChildren(startNode).then(function (start_node_children) {
 
                 start_node_children.data.forEach(function (child) {
-                    if (child._id == startNode._id) {
-                        startNode.children.push(startNode);
-                    } else {
-                        if (angular.isUndefined(child._source.title)) {
-                            child._source.title = "";
-                        }
-                        child._source._index = child._index;
-                        child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
-                        child._source.state = { opened: true };
-                        if (!child._source.children) {
-                            child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
-                        }
-                        child._source.state = { opened: false };
-                        child._source._id = child._id;
-                        startNode.children.push(child._source);
-                    }
+                    child = createChild(child);
+                    startNode.children.push(child._source);
                 });
 
                 if (start_node_children.data.length < start_node_children.count) {
@@ -135,17 +135,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         if (child._id == startNode._id) {
                             p.children.push(startNode);
                         } else {
-                            if (angular.isUndefined(child._source.title)) {
-                                child._source.title = "";
-                            }
-                            child._source._index = child._index;
-                            child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
-                            child._source.state = { opened: true };
-                            if (!child._source.children) {
-                                child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
-                            }
-                            child._source.state = { opened: false };
-                            child._source._id = child._id;
+                            child = createChild(child);
                             p.children.push(child._source);
                         }
                     });
