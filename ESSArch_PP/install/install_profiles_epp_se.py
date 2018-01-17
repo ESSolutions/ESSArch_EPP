@@ -368,7 +368,7 @@ def installProfileSubmitDescription(sa):
                 "key": "systemtype"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_SD_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_SD_VERSION10.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -600,7 +600,7 @@ def installProfileSIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_SIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_SIP_VERSION11.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -629,7 +629,7 @@ def installProfileAICDescription(sa):
         'submission_schedule': 'Once',
         'submission_data_inventory': 'According to submit description',
         'template': [],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIC_Description_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIC_DESCRIPTION_VERSION11.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -959,7 +959,7 @@ def installProfileAIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_VERSION11.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1110,7 +1110,7 @@ def installProfileAIPDescription(sa):
                 "key": "preservation_software_note"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_AIP_Description_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_DESCRIPTION_VERSION11.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1301,7 +1301,7 @@ def installProfileDIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_DIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_DIP_VERSION11.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1349,7 +1349,7 @@ def installProfilePreservationMetadata(sa):
                 "key": "$transfer_project__container_format",
             }
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/SE_PRESERVATION_METADATA_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_PREMIS.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)

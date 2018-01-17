@@ -368,7 +368,7 @@ def installProfileSubmitDescription(sa):
                 "key": "systemtype"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_SD_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_SD.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -605,7 +605,7 @@ def installProfileSIP(sa):
                 "type": "input",
                 "defaultValue": "Preservation Organization 1 Note",
                 "key": "preservation_organization_note"
-            },                     
+            },
             {
                 "templateOptions": {
                     "type": "text",
@@ -733,7 +733,7 @@ def installProfileSIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_SIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_SIP.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -762,7 +762,7 @@ def installProfileAICDescription(sa):
         'submission_schedule': 'Once',
         'submission_data_inventory': 'According to submit description',
         'template': [],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_AIC_Description_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_AIC_DESCRIPTION.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1092,7 +1092,7 @@ def installProfileAIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_AIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_AIP.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1243,7 +1243,7 @@ def installProfileAIPDescription(sa):
                 "key": "preservation_software_note"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_AIP_Description_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_AIP_DESCRIPTION.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1434,7 +1434,7 @@ def installProfileDIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_DIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_DIP.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1482,7 +1482,7 @@ def installProfilePreservationMetadata(sa):
                 "key": "$transfer_project__container_format",
             }
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/NO_Premis_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/no/NO_PREMIS.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)

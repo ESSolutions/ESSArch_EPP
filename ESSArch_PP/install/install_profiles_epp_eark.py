@@ -433,7 +433,7 @@ def installProfileSubmitDescription(sa):
                 "key": "systemtype"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/EARK_SD_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/eark/EARK_SD.json')).read()),
         'specification_data': {
             "profile": "my profile",
             "start_date": "2016-11-10",
@@ -717,7 +717,7 @@ def installProfileSIP(sa):
                 "key": "preservation_organization_note"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/EARK_SIP_REP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/eark/EARK_SIP_REP.json')).read()),
         'specification_data': {
             "mets_type": "ERMS",
             "RECORDSTATUS": "NEW",
@@ -987,7 +987,7 @@ def installProfileSIP(sa):
                 "key": "preservation_organization_note"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/EARK_SIP_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/eark/EARK_SIP.json')).read()),
         'specification_data': {
             "mets_type": "ERMS",
             "RECORDSTATUS": "NEW",
@@ -1087,7 +1087,7 @@ def installProfilePreservationMetadata(sa):
         'type': 'Implementation',
         'status': 'Draft',
         'label': 'Preservation profile for AIP xxyy',
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/Premis_Template.json')).read()),
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/eark/EARK_PREMIS.json')).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
