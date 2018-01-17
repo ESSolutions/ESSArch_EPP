@@ -165,7 +165,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 })
             });
         } else {
-            return startNode;
+            var defer = $q.defer();
+            defer.resolve(startNode);
+            var parentPromise = defer.promise;
         }
         return $q.all([parentPromise, startNodePromise]).then(function(result) {
             return result[0];
