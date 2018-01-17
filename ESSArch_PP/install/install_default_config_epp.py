@@ -138,11 +138,11 @@ def installDefaultUsers():
         ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
         ## ---- app: ip ---- model: workarea
         ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
-        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)        
+        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)
         ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
         ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
         ## ---- app: ip ---- model: order
-        ['prepare_order','ip','order'],                                        # Can prepare order (Access) 
+        ['prepare_order','ip','order'],                                        # Can prepare order (Access)
         ## ---- app: WorkflowEngine ---- model: processtask
         #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
         #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
@@ -171,11 +171,11 @@ def installDefaultUsers():
         ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
         ## ---- app: ip ---- model: workarea
         ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
-        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)        
+        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)
         ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
         ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
         ## ---- app: ip ---- model: order
-        ['prepare_order','ip','order'],                                        # Can prepare order (Access) 
+        ['prepare_order','ip','order'],                                        # Can prepare order (Access)
         ## ---- app: WorkflowEngine ---- model: processtask
         #['can_undo','WorkflowEngine','processtask'],           # Can undo tasks (other)
         #['can_retry','WorkflowEngine','processtask'],           # Can retry tasks (other)
@@ -186,14 +186,14 @@ def installDefaultUsers():
         ## ---- app: storage ---- model: storageobject
         ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
-        ['storage_management','storage','storageobject'],   # Storage management (Administration)        
+        ['storage_management','storage','storageobject'],   # Storage management (Administration)
     ]
-   
+
     for p in permission_list_admin:
         p_obj = Permission.objects.get(
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
-                                          )        
+                                          )
         group_admin.permissions.add(p_obj)
 
     permission_list_sysadmin = [
@@ -220,7 +220,7 @@ def installDefaultUsers():
         ## ---- app: configuration ---- model: eventtype
         ['add_eventtype','configuration','eventtype'],                    # Can add eventtype
         ['change_eventtype','configuration','eventtype'],                    # Can change eventtype
-        ['delete_eventtype','configuration','eventtype'],                    # Can delete eventtype        
+        ['delete_eventtype','configuration','eventtype'],                    # Can delete eventtype
         ## ---- app: profiles ---- model: profile
         ['add_profile','profiles','profile'],                    # Can add profile
         ['change_profile','profiles','profile'],                    # Can change profile
@@ -228,7 +228,7 @@ def installDefaultUsers():
         ## ---- app: profiles ---- model: submissionagreement
         ['add_submissionagreement','profiles','submissionagreement'],                    # Can add submissionagreement
         ['change_submissionagreement','profiles','submissionagreement'],                    # Can change submissionagreement
-        ['delete_submissionagreement','profiles','submissionagreement'],                    # Can delete submissionagreement        
+        ['delete_submissionagreement','profiles','submissionagreement'],                    # Can delete submissionagreement
         ## ---- app: storage ---- model: storagemethod
         ['add_storagemethod','storage','storagemethod'],                    # Can add storagemethod
         ['change_storagemethod','storage','storagemethod'],                    # Can change storagemethod
@@ -244,14 +244,14 @@ def installDefaultUsers():
         ## ---- app: storage ---- model: storageobject
         ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
-        ['storage_management','storage','storageobject'],   # Storage management (Administration)        
+        ['storage_management','storage','storageobject'],   # Storage management (Administration)
     ]
-   
+
     for p in permission_list_sysadmin:
         p_obj = Permission.objects.get(
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
-                                          )        
+                                          )
         group_sysadmin.permissions.add(p_obj)
 
     group_user.user_set.add(user_user)
