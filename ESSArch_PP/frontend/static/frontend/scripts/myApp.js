@@ -552,6 +552,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 return response;
             },
             'responseError': function(response) {
+                if(response.status == 500) {
+                    var msg = "Internal server error";
+                    if(response.data.detail) {
+                        msg = response.data.detail;
+                    }
+                    $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
+                }
                 if((response.status === 401 || response.status === 403) && !response.config.noAuth) {
                     if ($location.path() != '/login' && $location.path() != ''){
                         $window.location.assign('/');

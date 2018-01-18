@@ -35,7 +35,9 @@ angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, 
             TopAlert.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            if(response.status != 500 && response.data.detail) {
+                TopAlert.add(response.data.detail, "error");
+            }
         })
     };
     function preserve(ip, request) {
