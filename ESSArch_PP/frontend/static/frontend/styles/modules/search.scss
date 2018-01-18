@@ -42,7 +42,9 @@
     .page-number {
         align-self: center;
     }
-
+    .search-td-nowrap {
+        white-space: nowrap;
+    }
     .number-per-page-wrapper {
         display: flex;
         flex-direction: row;

@@ -28,7 +28,7 @@
                         </div>
                         <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
                             <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
-                            <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow">
+                            <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
@@ -42,7 +42,7 @@
                                     </thead>
                                     <tbody>
                                         <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x)" class="result-item-table clickable">
-                                            <td>{{vm.resultNumber($index)}}</td>
+                                            <td class="search-td-nowrap">{{vm.resultNumber($index)}}</td>
                                             <td>
                                                 <span ng-if="x._index == 'archive'" class="fa fa-archive" uib-popover="{{x.type}}"
                                                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
@@ -54,9 +54,9 @@
                                                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                                                 </span>
                                             </td>
-                                            <td>{{x.reference_code}}</td>
+                                            <td class="search-td-nowrap">{{x.reference_code}}</td>
                                             <td ng-bind-html="x.title"></td>
-                                            <td>{{x.unit_dates.date}}</td>
+                                            <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
                                             <td ng-bind-html="x.desc"></td>
                                         </tr>
                                     </tbody>
