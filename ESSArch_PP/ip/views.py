@@ -36,7 +36,7 @@ from operator import itemgetter
 
 from celery import states as celery_states
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
@@ -244,6 +244,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
     def prepare(self, request, pk=None):
         logger = logging.getLogger('essarch.epp.ingest')
 
+        try:
+            perms = settings.IP_CREATION_PERMS_MAP
+        except AttributeError:
+            msg = 'IP_CREATION_PERMS_MAP not defined in settings'
+            logger.error(msg)
+            raise ImproperlyConfigured(msg)
+
         existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
         if existing is not None:
             logger.warn('Tried to prepare IP with id %s which already exists' % (pk), extra={'user': request.user.pk})
@@ -317,11 +324,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         ip.refresh_from_db(fields=['entry_date', 'start_date', 'end_date'])
 
         member = Member.objects.get(django_user=request.user)
-        try:
-            perms = settings.IP_CREATION_PERMS_MAP
-        except AttributeError:
-            raise exceptions.ParseError('Missing IP_CREATION_PERMS_MAP in settings')
-
         user_perms = perms.pop('owner', [])
 
         organization = request.user.user_profile.current_organization
