@@ -15,7 +15,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     var headers = { "Authorization": "Basic " + auth };
 
     vm.$onInit = function() {
-        if($state.is('home.search.detail')) {
+        if($state.is('home.search.detail') || $state.is('home.search.ipDetail')) {
             vm.activeTab = 1;
             vm.showResults = true;
         }

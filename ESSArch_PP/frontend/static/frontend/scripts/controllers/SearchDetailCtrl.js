@@ -11,6 +11,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+vm.item.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.title});
             vm.activeTab = 1;
             vm.buildRecordTree(response.data).then(function(node) {
                 var treeData = [node];
@@ -294,6 +295,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (e.action == "select_node") {
             vm.record = e.node.original;
             $state.go(".", {id: vm.record._id}, {notify: false});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.title});
             if(angular.isUndefined(vm.record.terms_and_condition)) {
                 vm.record.terms_and_condition = null;
             }

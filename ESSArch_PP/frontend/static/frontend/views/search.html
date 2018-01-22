@@ -22,7 +22,7 @@
         <div class="search-detail-wrapper">
             <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
                 <uib-tab index="0" heading="{{'HITS' | translate}}">
-                    <div class="tree-result-wrapper">
+                    <div class="tree-result-wrapper" ng-if="vm.activeTab == 0">
                         <div class="filter-tree">
                             <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
                         </div>
@@ -87,7 +87,7 @@
                         </div>
                     </div>
                 </uib-tab>
-                <uib-tab ng-show="'home.search.detail' | isState" index="1" heading="{{'RECORD' | translate}}">
+                <uib-tab ng-show="('home.search.detail' | isState) || ('home.search.ipDetail' | isState)" index="1" heading="{{'RECORD' | translate}}">
                     <div ui-view></div>
                 </uib-tab>
             </uib-tabset>

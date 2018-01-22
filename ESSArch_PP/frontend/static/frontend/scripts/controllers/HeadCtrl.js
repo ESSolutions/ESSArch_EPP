@@ -10,6 +10,9 @@ angular.module('myApp').controller('HeadCtrl', function($scope, $rootScope, $tim
     $scope.$on('$translateChangeSuccess', function () {
         vm.pageTitle = $translate.instant($state.current.name.split(".").pop().toUpperCase())+appName;
     });
+    $rootScope.$on('UPDATE_TITLE', function (event, data) {
+        vm.pageTitle = data.title + appName;
+    });
     $scope.getResponsiveTag = function() {
         vm.responsiveTag = "width=device-width, initial-scale=1";
     }

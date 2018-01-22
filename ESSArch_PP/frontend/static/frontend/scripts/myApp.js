@@ -119,6 +119,16 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
+    .state('home.search.ipDetail', {
+        url: '/ip/:id',
+        templateUrl: '/static/frontend/views/search_ip_detail.html',
+        controller: 'SearchIpDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
     .state('home.versionInfo', {
         url: 'version',
         templateUrl: '/static/frontend/views/version_info.html',
