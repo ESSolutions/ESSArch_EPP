@@ -18,6 +18,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if($state.is('home.search.detail') || $state.is('home.search.ipDetail')) {
             vm.activeTab = 1;
             vm.showResults = true;
+        } else {
+            vm.activeTab = 0;
+            vm.showResults = false;
         }
     }
 
