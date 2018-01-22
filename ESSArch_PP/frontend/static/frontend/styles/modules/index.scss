@@ -593,6 +593,10 @@ padding: 0 12px;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
+    .refresh-icon {
+        align-self: center;
+        margin-left: auto;
+    }
 }
 .file-explorer-nav {
     display: flex;

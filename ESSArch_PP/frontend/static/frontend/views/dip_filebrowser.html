@@ -5,6 +5,12 @@
             <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
         </div>
         <div class="file-view-options btn-group">
+            <div>
+                <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
+                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                    {{x}}
+                </select>
+            </div>
             <button class="btn btn-default btn-sm" ng-class="{'active': workareaListView}" ng-click="useListView(1)"
                 uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-th-list fa-lg"></i>
@@ -14,27 +20,20 @@
                 <i class="fa fa-th fa-lg"></i>
             </button>
         </div>
-        <span ng-click="updateWorkareaFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate':
-            workArrayLoading }" uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500"
+        <div class="refresh-icon">
+            <span ng-click="updateWorkareaFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': workArrayLoading }"
+            uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500"
             popover-append-to-body="true"></span>
+        </div>
     </div>
-    <div ng-if="workareaGridView">
+    <div ng-show="workareaGridView">
         <div class="deckgrid">
             <div class="flex-grid">
                 <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card1.html'"></div>
             </div>
         </div>
-        <div class="files-per-page-pagination-wrapper">
-            <div>
-                <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                    {{x}}
-                </select>
-            </div>
-            <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
-        </div>
     </div>
-    <div ng-if="workareaListView" class="file-list-view">
+    <div ng-show="workareaListView" class="file-list-view">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -59,15 +58,9 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="files-per-page-pagination-wrapper">
-                <div>
-                    <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                    uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                        {{x}}
-                    </select>
-                </div>
-                <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
-            </div>
+        </div>
+        <div class="files-per-page-pagination-wrapper">
+            <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
         </div>
 </div>
 <button ng-if="selectedCards1.length" ng-click="chooseFiles(selectedCards1)" class="btn btn-default" translate="ADD"></button>
@@ -81,6 +74,12 @@
             <b class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString(2)}}</b>
         </div>
         <div class="file-view-options btn-group">
+            <div>
+                <select class="form-control items-per-page" ng-change="changeFilesPerPage(dipFilesPerPage)" ng-model="dipFilesPerPage" ng-options="x for x in [5, 10, 25, 50]"
+                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                    {{x}}
+                </select>
+            </div>
             <button class="btn btn-default btn-sm" ng-class="{'active': dipListView}" ng-click="useListView(2)" uib-popover="{{'LIST_VIEW' | translate}}"
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-th-list fa-lg"></i>
@@ -90,26 +89,22 @@
                 <i class="fa fa-th fa-lg"></i>
             </button>
         </div>
-        <span ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
-        uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+        <div class="refresh-icon">
+            <span ng-click="updateDipFiles()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+            uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+        </div>
     </div>
-    <div ng-if="dipGridView">
+    <div ng-show="dipGridView">
         <div class="deckgrid">
             <div class="flex-grid">
                 <div class="card" ng-repeat="card in chosenFiles" ng-include src="'static/frontend/views/deckgrid_card2.html'"></div>
             </div>
         </div>
         <div class="files-per-page-pagination-wrapper">
-            <div>
-                <select class="form-control items-per-page" ng-change="changeFilesPerPage(dipFilesPerPage)" ng-model="dipFilesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                    {{x}}
-                </select>
-            </div>
             <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="dipFilesPerPage" st-displayed-pages="7"></div>
         </div>
     </div>
-    <div ng-if="dipListView" class="file-list-view">
+    <div ng-show="dipListView" class="file-list-view">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -135,12 +130,6 @@
             </tbody>
         </table>
         <div class="files-per-page-pagination-wrapper">
-            <div>
-                <select class="form-control items-per-page" ng-change="changeFilesPerPage(dipFilesPerPage)" ng-model="dipFilesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                    {{x}}
-                </select>
-            </div>
             <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="dipFilesPerPage" st-displayed-pages="7"></div>
         </div>
     </div>

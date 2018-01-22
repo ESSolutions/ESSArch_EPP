@@ -2,9 +2,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.previousGridArrays = [];
     var vm = this;
     vm.$onInit = function() {
-        if(vm.ip) {
-            $scope.ip = vm.ip;
-        } else {
+        if(!$scope.ip) {
             $scope.ip = $rootScope.ip;
         }
         $scope.listView = false;
