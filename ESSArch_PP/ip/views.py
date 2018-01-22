@@ -70,6 +70,7 @@ from ESSArch_Core.pagination import LinkHeaderPagination
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
 from ESSArch_Core.profiles.utils import fill_specification_data
+from ESSArch_Core.tags.documents import Document
 from ESSArch_Core.util import (find_destination, generate_file_response,
                                get_files_and_dirs, get_tree_size_and_count,
                                in_directory, list_files, mkdir_p,
@@ -1110,7 +1111,20 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         ip = self.get_object()
 
         if ip.archived:
-            raise exceptions.ParseError('%s is archived' % ip)
+            s = Document.search()
+            s = s.filter('term', ip=str(ip.pk))
+
+            results = []
+            for f in s.execute():
+                f_dict = {
+                    'type': 'file',
+                    'name': f.href,
+                    'modified': f.modified,
+                    'size': f.size,
+                }
+                results.append(f_dict)
+
+            return Response(results)
 
         if request.method == 'DELETE':
             if ip.package_type != InformationPackage.DIP:
