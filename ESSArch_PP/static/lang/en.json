@@ -476,5 +476,8 @@
     "IDS": "IDs",
     "DATES": "Dates",
     "RESULT_NUMBER": "Number",
-    "DESCRIPTION": "Description"
+    "DESCRIPTION": "Description",
+    "COMPONENT": "Component",
+    "FILE": "File",
+    "INCLUDED_TYPES": "Included types"
 }

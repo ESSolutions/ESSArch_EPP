@@ -17,6 +17,29 @@
                     {{'END_DATE' | translate}}
                     <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.end_date">
                 </label>
+                <br/>
+                <span ng-click="vm.showIncludedTypes = !vm.showIncludedTypes" class="clickable no-select">{{'INCLUDED_TYPES' | translate}}
+                    <i ng-if="!vm.showIncludedTypes" class="fa fa-caret-right"></i>
+                    <i ng-if="vm.showIncludedTypes"class="fa fa-caret-down"></i>
+                </span>
+                <div ng-if="vm.showIncludedTypes" class="form-group">
+                    <label>
+                        <input type="checkbox" ng-model="vm.includedTypes.archive">
+                        {{'ARCHIVE' | translate}}
+                    </label><br/>
+                    <label>
+                        <input type="checkbox" ng-model="vm.includedTypes.ip">
+                        IP
+                    </label><br/>
+                    <label>
+                        <input type="checkbox" ng-model="vm.includedTypes.component">
+                        {{'COMPONENT' | translate}}
+                    </label><br/>
+                    <label>
+                        <input type="checkbox" ng-model="vm.includedTypes.file">
+                        {{'FILE' | translate}}
+                    </label>
+                </div>
             </div>
         </div>
         <div class="search-detail-wrapper">

@@ -475,5 +475,8 @@
     "IDS": "IDn",
     "DATES": "Datum",
     "RESULT_NUMBER": "Nummer",
-    "DESCRIPTION": "Beskrivning"
+    "DESCRIPTION": "Beskrivning",
+    "COMPONENT": "Komponent",
+    "FILE": "Fil",
+    "INCLUDED_TYPES": "Inkluderade typer"
 }

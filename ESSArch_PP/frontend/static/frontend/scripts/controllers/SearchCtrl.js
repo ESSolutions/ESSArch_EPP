@@ -29,8 +29,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     };
     vm.filterObject = {
         q: "",
-        type: null
+        type: null,
+        index: null
     }
+
+    vm.includedTypes = {
+        archive: true,
+        ip: true,
+        component: true,
+        file: true
+    }
+
     vm.changeClassificationStructure = function() {
         vm.searchSubmit(vm.filterObject.q);
         vm.openResult(vm.record);
@@ -58,6 +67,16 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         vm.activeTab = 0;
     }
 
+    function formatFilters() {
+        var included = [];
+        for(var key in vm.includedTypes) {
+            if(vm.includedTypes[key]) {
+                included.push(key);
+            }
+        }
+        vm.filterObject.index = included.join(',');
+    }
+
     /**
      * Pipe function for search results
      */
@@ -69,6 +88,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
+            formatFilters();
             Search.query(vm.filterObject, pageNumber, number).then(function (response) {
                 angular.copy(response.data, vm.searchResult);
                 vm.numberOfResults = response.count;
