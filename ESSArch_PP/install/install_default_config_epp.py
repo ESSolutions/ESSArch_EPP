@@ -28,6 +28,8 @@ django.setup()
 
 from django.contrib.auth.models import User, Group, Permission
 
+from elasticsearch import Elasticsearch
+from elasticsearch.client.ingest import IngestClient
 from elasticsearch_dsl import Index, exceptions as elastic_exceptions
 
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
@@ -39,7 +41,7 @@ from ESSArch_Core.storage.models import (
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Tag
+from ESSArch_Core.tags.documents import Archive, Component, Document
 
 
 def installDefaultConfiguration():
@@ -63,6 +65,9 @@ def installDefaultConfiguration():
 
     print "\nInstalling storage method target relations..."
     installDefaultStorageMethodTargetRelations()
+
+    print "\nInstalling Elasticsearch pipelines..."
+    installPipelines()
 
     print "\nInstalling search indices..."
     installSearchIndices()
@@ -330,22 +335,41 @@ def installDefaultStorageMethodTargetRelations():
     return 0
 
 
+def installPipelines():
+    conn = get_connection()
+    client = IngestClient(conn)
+    client.put_pipeline(id='ingest_attachment', body={
+        'description': "Extract attachment information",
+        'processors': [
+            {
+                "attachment": {
+                    "field": "data"
+                },
+                "remove": {
+                    "field": "data"
+                }
+            }
+        ]
+    })
+
+
 def installSearchIndices():
     get_connection()
-    indices = [Tag]
+    client = Elasticsearch()
+    doc_types = [Archive, Component, Document]
 
-    for index in indices:
-        name = index().meta.index
+    for doc_type in doc_types:
+        name = doc_type().meta.index
         print '-> %s...' % name,
-        try:
-            index.init()
-        except elastic_exceptions.IllegalOperation:
-            if Index(name).exists():
-                print 'already exists'
-            else:
-                raise
-        else:
-            print 'done'
+
+        if Index(name).exists():
+            print 'already exists'
+            client.indices.close(index=name)
+            continue
+
+        doc_type.init()
+        client.indices.open(index=name)
+        print 'done'
 
 if __name__ == '__main__':
     installDefaultConfiguration()
