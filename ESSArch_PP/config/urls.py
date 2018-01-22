@@ -205,6 +205,7 @@ urlpatterns = [
     url(r'^api/sysinfo/', SysInfoView.as_view()),
     url(r'^api/me/$', MeView.as_view(), name='me'),
     url(r'^api/submission-agreement-template/$', SubmissionAgreementTemplateView.as_view()),
+    url(r'^docs/', include('ESSArch_Core.docs.urls')),
     url(r'^rest-auth/', include('ESSArch_Core.auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
 ]

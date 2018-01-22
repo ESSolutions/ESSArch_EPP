@@ -41,6 +41,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+import django
 import importlib
 import inspect
 import os
@@ -52,6 +53,8 @@ proj_folder = os.path.realpath(
 sys.path.append(proj_folder)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+django.setup()
 
 # Stop Django from executing DB queries
 from django.db.models.query import QuerySet
@@ -149,7 +152,7 @@ extensions = ['sphinxtogithub', 'sphinx.ext.autodoc', 'sphinx.ext.autosectionlab
 autosectionlabel_prefix_document = True
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.5', None),
+    'python': ('https://docs.python.org/2.7', None),
     'sphinx': ('http://sphinx.pocoo.org/', None),
     'django': ('https://docs.djangoproject.com/en/dev/', 'https://docs.djangoproject.com/en/dev/_objects/'),
     'celery': ('https://celery.readthedocs.org/en/latest/', None),
@@ -274,9 +277,3 @@ texinfo_documents = [
      author, 'ESSArchPreservationPlatform', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
