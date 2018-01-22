@@ -389,6 +389,9 @@ input[type="checkbox"] {
 
 .receive-button-wrapper {
     @include container(10px);
+    .request-form {
+        justify-content: flex-end;
+    }
 }
 
 .profile-manager {
