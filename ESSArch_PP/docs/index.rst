@@ -11,6 +11,7 @@ ESSArch Preservation Platform
 
    restapi/index
    source/modules
+   user_guide/index
 
 
 
