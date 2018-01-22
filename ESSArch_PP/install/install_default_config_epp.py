@@ -364,7 +364,7 @@ def installSearchIndices():
 
         if Index(name).exists():
             print 'already exists'
-            client.indices.close(index=name)
+            client.indices.open(index=name)
             continue
 
         doc_type.init()
