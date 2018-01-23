@@ -54,7 +54,7 @@
                 <form class="eventlog-form">
                     <div class="checkbox">
                         <label>
-                            <input type="checkBox" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
+                            <input type="checkBox" ng-disabled="vm.requestForm.$invalid" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
                         </label>
                     </div>
                     <button type="button" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToPreserve" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>

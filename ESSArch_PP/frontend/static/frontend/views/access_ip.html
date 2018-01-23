@@ -60,7 +60,7 @@
                 <form class="eventlog-form">
                     <div class="checkbox">
                         <label>
-                            <input type="checkBox" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
+                            <input type="checkBox" ng-disabled="vm.requestForm.$invalid" ng-model="approvedToSubmit">{{'REQUESTAPPROVED' | translate}}</input>
                         </label>
                     </div>
                     <button type="button" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToSubmit" class="btn btn-info submit-button">{{'SUBMIT' | translate}}</button>
