@@ -11,7 +11,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+vm.item.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.title});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             vm.activeTab = 1;
             vm.buildRecordTree(response.data).then(function(node) {
                 var treeData = [node];
@@ -27,7 +27,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     vm.record_children = [
                         {
                             _source: {
-                                title: "bild.jpg",
+                                name: "bild.jpg",
                                 reference_code: "101",
                                 unit_dates: {
                                     date: "1100 - 1200"
@@ -38,7 +38,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         {
 
                             _source: {
-                                title: "faktura.doc",
+                                name: "faktura.doc",
                                 reference_code: "102",
                                 unit_dates: {
                                     date: "1200 - 1300"
@@ -48,7 +48,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         },
                         {
                             _source: {
-                                title: "faktura.pdf",
+                                name: "faktura.pdf",
                                 reference_code: "103",
                                 unit_dates: {
                                     date: "1300 - 1400"
@@ -81,11 +81,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     }
 
     createChild = function(child) {
-        if (angular.isUndefined(child._source.title)) {
-            child._source.title = "";
+        if (angular.isUndefined(child._source.name)) {
+            child._source.name = "";
         }
         child._source._index = child._index;
-        child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.title;
+        child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.name;
         if (!child._source.children) {
             child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
@@ -97,10 +97,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.treeIds = ["Allmänna arkivschemat", "Verksamhetsbaserad"]
     vm.treeId = "Allmänna arkivschemat";
     vm.buildRecordTree = function(startNode) {
-        if(angular.isUndefined(startNode.title)) {
-            startNode.title = "";
+        if(angular.isUndefined(startNode.name)) {
+            startNode.name = "";
         }
-        startNode.text = "<b>" + (startNode.reference_code ? startNode.reference_code : "") + "</b> " + startNode.title;
+        startNode.text = "<b>" + (startNode.reference_code ? startNode.reference_code : "") + "</b> " + startNode.name;
         startNode.state = {opened: true};
         if(startNode._id == vm.record._id) {
             startNode.state.selected = true;
@@ -295,7 +295,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (e.action == "select_node") {
             vm.record = e.node.original;
             $state.go(".", {id: vm.record._id}, {notify: false});
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.title});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             if(angular.isUndefined(vm.record.terms_and_condition)) {
                 vm.record.terms_and_condition = null;
             }
@@ -306,7 +306,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     vm.record_children = [
                         {
                             _source: {
-                                title: "bild.jpg",
+                                name: "bild.jpg",
                                 reference_code: "101",
                                 unit_dates: {
                                     date: "1100 - 1200"
@@ -317,7 +317,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         {
 
                             _source: {
-                                title: "faktura.doc",
+                                name: "faktura.doc",
                                 reference_code: "102",
                                 unit_dates: {
                                     date: "1200 - 1300"
@@ -327,7 +327,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         },
                         {
                             _source: {
-                                title: "faktura.pdf",
+                                name: "faktura.pdf",
                                 reference_code: "103",
                                 unit_dates: {
                                     date: "1300 - 1400"
@@ -405,7 +405,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         modalInstance.result.then(function (data) {
             delete vm.record[key]
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.title, "success");
+            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -432,7 +432,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data) {
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.title, "success");
+            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -455,7 +455,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data, $ctrl) {
             delete vm.record[field];
-            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.title, "success");
+            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

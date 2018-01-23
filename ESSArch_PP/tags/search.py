@@ -26,7 +26,7 @@ from ESSArch_Core.tags.documents import Archive
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive']
-    fields = ['title', 'desc']
+    fields = ['name', 'desc']
 
     facets = {
         # use bucket aggregations to define facets
@@ -142,13 +142,13 @@ def get_archive(id):
 def get_institution(id):
     inst = ArchivalInstitution.objects.get(pk=id)
     return {
-        'title': inst.name
+        'name': inst.name
     }
 
 def get_organization(id):
     org = ArchivistOrganization.objects.get(pk=id)
     return {
-        'title': org.name,
+        'name': org.name,
     }
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
@@ -241,15 +241,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
             archive_data = get_archive(archive['key'])
-            archive['title'] = archive_data['title']
+            archive['name'] = archive_data['name']
 
         for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
             institution_data = get_institution(institution['key'])
-            institution['title'] = institution_data['title']
+            institution['name'] = institution_data['name']
 
         for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
             organization_data = get_organization(organization['key'])
-            organization['title'] = organization_data['title']
+            organization['name'] = organization_data['name']
 
         if len(results_dict['_shards'].get('failures', [])):
             return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)

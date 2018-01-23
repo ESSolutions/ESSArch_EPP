@@ -109,8 +109,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         var aggregation = aggregations['_filter_' + aggrType][aggrType]
         var missing = true;
         children = aggregation.buckets.map(function(item) {
-            if (item.title) {
-                item.text = item.title + " (" + item.doc_count + ")";
+            if (item.name) {
+                item.text = item.name + " (" + item.doc_count + ")";
             } else {
                 item.text = item.key + " (" + item.doc_count + ")";
             }
