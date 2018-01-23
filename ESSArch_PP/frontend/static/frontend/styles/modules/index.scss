@@ -331,6 +331,11 @@ body.modal-open[style] {
         }
     }
 }
+.request-layout {
+    &:focus {
+        outline: 0;
+    }
+}
 .calendar {
     display: flex;
     flex-direction: column;
@@ -384,6 +389,9 @@ body.modal-open[style] {
     min-height:100%;
     @include small-screen {
         width: 100%;
+    }
+    &:focus {
+        outline: 0;
     }
 }
 .sub-menu {
