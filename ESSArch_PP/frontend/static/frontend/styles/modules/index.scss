@@ -517,15 +517,22 @@ body.modal-open[style] {
     width: 100px !important;
     margin-right: 10px;
 }
-.fa-refresh-animate {
+.fa-refresh-animate.ng-animate {
     animation: spin 0.7s infinite linear;
+    -webkit-animation: spin 0.7s infinite linear;
 }
 .fa-refresh-animate-once {
     animation: spin 0.7s;
 }
 @keyframes spin {
-    from { transform: rotate(0deg);}
-    to { transform: rotate(360deg);}
+    from {
+        transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+    }
 }
 
 .ui-select-placeholder {
@@ -601,10 +608,6 @@ padding: 0 12px;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
-    .refresh-icon {
-        align-self: center;
-        margin-left: auto;
-    }
 }
 .file-explorer-nav {
     display: flex;
@@ -911,11 +914,13 @@ padding: 0 12px;
 .table-x-overflow {
     overflow-x: auto;
 }
+.refresh-icon {
+    margin-left: auto;
+    align-self: center;
+    overflow: hidden;
+    padding: 3px 0 3px 3px;
+}
 .event-view {
-    .refresh-icon {
-        align-self: center;
-        margin-left: auto;
-    }
     .list-view-table {
         position: relative;
         overflow-x: auto;

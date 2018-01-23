@@ -31,7 +31,7 @@
                         <label>
                     {{'TAGS' | translate}}
                 </label>
-                        <span ng-click="updateTags()" class="clickable fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
+                        <span ng-click="updateTags()" class="clickable angular-animate fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
                             popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                     <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false" append-to-body="false">

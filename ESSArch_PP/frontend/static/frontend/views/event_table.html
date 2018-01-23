@@ -19,7 +19,7 @@
                 <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); stCtrl.pipe();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
             </div>
             <div class="refresh-icon">
-                <span ng-click="stCtrl.pipe()" class="clickable fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                <span ng-click="stCtrl.pipe()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
         </div>
         <div class="list-view-table">

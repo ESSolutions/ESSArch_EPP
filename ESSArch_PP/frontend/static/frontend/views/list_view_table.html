@@ -27,7 +27,7 @@
     <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}"
         popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'PREPAREDIP' | translate}}</button>
     <div class="refresh-icon">
-        <span ng-click="getListViewData()" class="clickable fa fa-refresh fa-lg"
+        <span ng-click="getListViewData()" class="clickable angular-animate fa fa-refresh fa-lg"
         ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
         popover-popup-delay="500" popover-append-to-body="true"></span>
     </div>
