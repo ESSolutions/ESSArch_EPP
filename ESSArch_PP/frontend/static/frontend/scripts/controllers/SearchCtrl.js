@@ -46,6 +46,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     }
     vm.calculatePageNumber = function() {
         if(!angular.isUndefined(vm.tableState) && vm.tableState.pagination) {
+            if(vm.searchResult.length == 0) {
+                return $translate.instant("SHOWING_RESULT") + " " + "0" + " " + $translate.instant("OF") + " " + "0";
+            }
             var pageNumber = vm.tableState.pagination.start/vm.tableState.pagination.number;
             var firstResult = pageNumber*vm.tableState.pagination.number+1;
             var lastResult = vm.searchResult.length+((vm.tableState.pagination.start/vm.tableState.pagination.number)*vm.tableState.pagination.number);
