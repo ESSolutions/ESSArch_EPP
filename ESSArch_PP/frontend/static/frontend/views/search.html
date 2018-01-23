@@ -51,7 +51,7 @@
                         </div>
                         <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
                             <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
-                            <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container">
+                            <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container search-result-table">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
@@ -82,6 +82,12 @@
                                             <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
                                             <td ng-bind-html="x.desc"></td>
                                         </tr>
+                                        <tr ng-if="!vm.searchResult.length && !ipLoading" class="empty-table-indicator">
+                                                <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                                            </tr>
+                                            <tr ng-if="!vm.searchResult.length && ipLoading" class="empty-table-indicator">
+                                                <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
+                                            </tr>
                                     </tbody>
                                 </table>
                             </div>
