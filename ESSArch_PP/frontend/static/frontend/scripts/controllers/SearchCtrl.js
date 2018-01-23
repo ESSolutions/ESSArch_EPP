@@ -114,7 +114,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             } else {
                 item.text = item.key + " (" + item.doc_count + ")";
             }
-            item.state = {opened: true, selected: vm.filterObject[aggrType]==item.key?true:false}
+            item.state = {opened: true, selected: vm.filterObject[aggrType]==item.key}
             item.type = item.key;
             if(item.key == vm.filterObject[aggrType]) {
                 missing = false;
@@ -239,17 +239,13 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             if(vm.filterObject[branch] == e.node.original.key) {
                 vm.treeInstance.jstree(true).deselect_node(e.node);
                 vm.filterObject[branch] = null;
-                if(vm.tableState) {
-                    vm.tableState.pagination.start = 0;
-                }
-                vm.search(vm.tableState);
             } else {
                 vm.filterObject[branch] = e.node.original.key;
-                if(vm.tableState) {
-                    vm.tableState.pagination.start = 0;
-                }
-                vm.search(vm.tableState);
             }
+            if(vm.tableState) {
+                vm.tableState.pagination.start = 0;
+            }
+            vm.search(vm.tableState);
         }
     }
 
