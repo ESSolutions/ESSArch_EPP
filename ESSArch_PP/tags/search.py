@@ -30,12 +30,12 @@ class ComponentSearch(FacetedSearch):
 
     facets = {
         # use bucket aggregations to define facets
-        'index': TermsFacet(field='_index'),
-        'parents': TermsFacet(field='parents'),
-        'type': TermsFacet(field='type'),
-        'archive': TermsFacet(field='archive'),
-        'institution': TermsFacet(field='institution'),
-        'organization': TermsFacet(field='organization'),
+        'index': TermsFacet(field='_index', min_doc_count=0),
+        'parents': TermsFacet(field='parents', min_doc_count=0),
+        'type': TermsFacet(field='type', min_doc_count=0),
+        'archive': TermsFacet(field='archive', min_doc_count=0),
+        'institution': TermsFacet(field='institution', min_doc_count=0),
+        'organization': TermsFacet(field='organization', min_doc_count=0),
     }
 
     def __init__(self, *args, **kwargs):
