@@ -403,6 +403,9 @@ body.modal-open[style] {
     color: white;
     padding: 5px 10px 5px 10px;
     width: 100%;
+    &:focus {
+        outline: 0;
+    }
     p {
         font-size: 12pt;
     }
@@ -445,6 +448,9 @@ body.modal-open[style] {
     color: black;
     padding: 5px 10px 5px 10px;
     width: 100%;
+    &:focus {
+        outline: 0;
+    }
     p {
         font-size: 12pt;
     }
@@ -478,6 +484,9 @@ body.modal-open[style] {
 }
 .profile-manager-route {
     margin-top: 5px;
+    &:focus {
+        outline: 0;
+    }
 }
 .fa.fa-refresh {
     font-size: 21px;
@@ -828,8 +837,16 @@ padding: 0 12px;
 .nav-item {
     cursor: pointer;
     user-select: none;
-    white-space: nowrap;
     margin: 0 15px 0 0 !important;
+    white-space: nowrap;
+
+    &:focus {
+        outline: 0;
+        color: #b4caf8;
+        &:after {
+            color: #b4caf8;
+        }
+    }
 }
 
 .user-settings {
@@ -1096,7 +1113,6 @@ padding: 0 12px;
         width: 100%;
     }
 }
-
 .read-only {
     font-size:.7em;
 }

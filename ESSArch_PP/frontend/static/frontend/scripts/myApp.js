@@ -774,7 +774,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         }
 
-        if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration") {
+        if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration" || to.name == "home.administration.profileManager") {
             evt.preventDefault();
             var resolved = Object.resolve(to.name, permissionConfig);
             for( var key in resolved) {

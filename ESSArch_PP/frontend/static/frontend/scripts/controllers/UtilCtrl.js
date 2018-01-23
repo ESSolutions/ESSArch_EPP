@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig) {
+angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
     $scope.$state = $state;
     $scope.reloadPage = function (){
         $state.reload();
@@ -43,5 +43,75 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
     }
     $scope.showAlert = function() {
         TopAlert.show();
+    }
+
+    $scope.navigateToState = function(state) {
+        $state.go(state);
+    }
+
+    var enter = 13;
+    var space = 32;
+
+    var stateChangeListeners = [];
+    function resetStateListeners() {
+        stateChangeListeners.forEach(function(listener) {
+            listener();
+        });
+        stateChangeListeners = [];
+    }
+    /**
+     * Handle keydown events navigation
+     * @param {Event} e
+     */
+    $scope.navKeydownListener = function (e, state) {
+        switch (e.keyCode) {
+            case space:
+            case enter:
+                e.preventDefault();
+                stateChangeListeners.push($scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
+                    event.preventDefault();
+                    if(state == "home.ingest" || state == "home.access" || state == "home.administration" || state == "home.storageMaintenance") {
+                        $scope.focusSubmenu();
+                    } else if(state == "home.administration.profileManager") {
+                        $scope.focusProfileManagerSubmenu();
+                    } else if (state.match(/home\.administration\.profileManager/)) {
+                        console.log("should focus profile manager route")
+                        $scope.focusProfileManagerRouterView();
+                    } else {
+                        $scope.focusRouterView();
+                    }
+                    resetStateListeners();
+                }));
+                $state.go(state);
+                break;
+        }
+    }
+    $scope.focusRouterView = function() {
+        $timeout(function() {
+            var elm = document.getElementsByClassName('dynamic-part')[0];
+            elm.focus();
+            $anchorScroll();
+        })
+    }
+    $scope.focusSubmenu = function() {
+        $timeout(function() {
+            var elm = document.getElementsByClassName('sub-menu')[0];
+            angular.element(elm)[0].children[0].focus();
+            $anchorScroll();
+        })
+    }
+    $scope.focusProfileManagerSubmenu = function() {
+        $timeout(function() {
+            var elm = document.getElementsByClassName('profile-manager-sub-menu')[0];
+            angular.element(elm)[0].children[0].focus();
+            $anchorScroll();
+        })
+    }
+    $scope.focusProfileManagerRouterView = function() {
+        $timeout(function() {
+            var elm = document.getElementsByClassName('profile-manager-route')[0];
+            angular.element(elm)[0].focus();
+            $anchorScroll();
+        })
     }
 });
