@@ -137,11 +137,18 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     }
 
     vm.loadTags = function(aggregations) {
+        var indexChildren = getAggregationChildren(aggregations, 'index');
         var typeChildren = getAggregationChildren(aggregations, 'type');
         var archiveChildren = getAggregationChildren(aggregations, 'archive');
         var institutionChildren = getAggregationChildren(aggregations, 'institution');
         var organizationChildren = getAggregationChildren(aggregations, 'organization');
         var filters = [
+            {
+                text: $translate.instant("INDEX"),
+                state: {opened: true, disabled: true},
+                children: indexChildren,
+                branch: 'index',
+            },
             {
                 text: $translate.instant("TYPE"),
                 state: {opened: true, disabled: true},

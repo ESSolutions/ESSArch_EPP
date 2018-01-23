@@ -30,6 +30,7 @@ class ComponentSearch(FacetedSearch):
 
     facets = {
         # use bucket aggregations to define facets
+        'index': TermsFacet(field='_index'),
         'parents': TermsFacet(field='parents'),
         'type': TermsFacet(field='type'),
         'archive': TermsFacet(field='archive'),
@@ -196,6 +197,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             query = '%s' % query
 
         filters = {
+            'index': params.pop('index', None),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
