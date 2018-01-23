@@ -30,6 +30,7 @@
     "bootstrap": "~3.3.7",
     "bootstrap-sass": "~3.3.7",
     "bower": "^1.8.0",
+    "console-polyfill": "^0.3.0",
     "font-awesome": "~4.7.0",
     "gulp": "^3.9.1",
     "gulp-clean-css": "^2.3.2",
