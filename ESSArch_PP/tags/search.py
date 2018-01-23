@@ -201,6 +201,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'organization': params.pop('organization', None),
         }
 
+        for k, v in iteritems(filters):
+            filters[k] = v.split(',') if v is not None else v
+
         filter_values = copy.copy(params)
         for f in ('page', 'page_size'):
             filter_values.pop(f, None)
