@@ -30,7 +30,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.filterObject = {
         q: "",
         type: null,
-        index: null
+        indices: null
     }
 
     vm.includedTypes = {
@@ -77,7 +77,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 included.push(key);
             }
         }
-        vm.filterObject.index = included.join(',');
+        vm.filterObject.indices = included.join(',');
     }
 
     /**
