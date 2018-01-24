@@ -40,7 +40,7 @@
         <thead>
             <tr>
                 <th class="clickable" class="column-label"></th>
-                <th class="clickable"  ng-if="!(((('home.access.createDip' | isState) || ('home.access.accessIp' | isState)) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))"
+                <th class="clickable"  ng-if="!((('home.access.createDip' | isState) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))"
                 class="column-label" st-sort="{{col.sortString}}" st-sort-default="{{col.sortString == 'create_date'? 'reverse' : ''}}" ng-repeat="col in listViewColumns"
                 uib-popover="{{col.label.toUpperCase()+'_DESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
                     <span ng-hide="col.label=='step_state' || col.label == 'storage_status'" style="white-space: nowrap;">
@@ -60,13 +60,13 @@
                     </div>
                 </td>
                 <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="expandAic(row)"><i class="fa fa-plus" ng-if="row.collapsed && row.information_packages.length > 0"></i><i class="fa fa-minus" ng-if="!row.collapsed && row.information_packages.length > 0"></i></td>
-                <td ng-repeat="col in listViewColumns" ng-if="!(((('home.access.createDip' | isState) || ('home.access.accessIp' | isState)) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))">
+                <td ng-repeat="col in listViewColumns" ng-if="!((('home.access.createDip' | isState) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))">
                     <div ng-include src="col.template"></div>
                 </td>
             </tr>
             <tr ng-if="!row.collapsed" ng-repeat="subrow in row.information_packages"  ng-repeat-end class="table-item" ng-class="{'selected': ip.object_identifier_value == subrow.object_identifier_value}" style="background-color:rgba(50,120,255,.1);">
                 <td context-menu="menuOptions('subrow')"></td>
-                <td ng-repeat="col in listViewColumns" ng-if="!(((('home.access.createDip' | isState) || ('home.access.accessIp' | isState)) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))">
+                <td ng-repeat="col in listViewColumns" ng-if="!((('home.access.createDip' | isState) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))">
                     <div ng-include src="col.template"></div>
                 </td>
             </tr>
