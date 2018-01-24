@@ -43,6 +43,8 @@ from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
+from elasticsearch_dsl import Search
+
 from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
 
@@ -1111,18 +1113,28 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         ip = self.get_object()
 
         if ip.archived:
-            s = Document.search()
-            s = s.filter('term', ip=str(ip.pk))
+            path = request.query_params.get('path', '').rstrip('/')
+            s = Search(index=['directory', 'document'])
+            s = s.filter('term', ip=str(ip.pk)).query('term', href=path)
+            #s = Document.search()
+            #s = s.filter('term', ip=str(ip.pk))
 
             results = []
-            for f in s.execute():
-                f_dict = {
-                    'type': 'file',
-                    'name': f.href,
-                    'modified': f.modified,
-                    'size': f.size,
-                }
-                results.append(f_dict)
+            for hit in s.execute():
+                if hit.meta.index == 'directory':
+                    d = {
+                        'type': 'dir',
+                        'name': hit.name,
+                    }
+                else:
+                    d = {
+                        'type': 'file',
+                        'name': hit.name,
+                        'modified': hit.modified,
+                        'size': hit.size,
+                    }
+
+                results.append(d)
 
             return Response(results)
 
