@@ -25,7 +25,7 @@ from ESSArch_Core.tags.documents import Archive
 
 
 class ComponentSearch(FacetedSearch):
-    index = ['component', 'archive', 'document']
+    index = ['component', 'archive', 'document', 'information_package']
     fields = ['name', 'desc']
 
     facets = {
@@ -115,7 +115,7 @@ class ComponentSearch(FacetedSearch):
 
         search.aggs.bucket('_filter_archive', 'filter', filter=agg_filter).bucket(
             'archive', 'terms',
-            script="doc.containsKey('archive') ? doc['archive'].value : doc['_id'].value"
+            script="doc['_index'].value != 'information_package' ? (doc.containsKey('archive') ? doc['archive'].value : doc['_id'].value) : null"
         )
 
     def highlight(self, search):
