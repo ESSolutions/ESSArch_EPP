@@ -70,7 +70,7 @@ from ESSArch_Core.ip.models import (
     Workarea,
 )
 from ESSArch_Core.profiles.utils import fill_specification_data
-from ESSArch_Core.search.ingest import index_document
+from ESSArch_Core.search.ingest import index_path
 from ESSArch_Core.storage.exceptions import (
     TapeDriveLockedError,
     TapeMountedError,
@@ -268,6 +268,9 @@ class CacheAIP(DBTask):
                     src = os.path.join(root, d)
                     arc = os.path.join(objid, rel, d)
                     arc = os.path.normpath(arc)
+
+                    index_path(aip_obj, src)
+
                     tar.add(src, arc, recursive=False)
 
                     try:
@@ -281,7 +284,7 @@ class CacheAIP(DBTask):
                     dst = os.path.join(dstdir, rel, f)
                     dst = os.path.normpath(dst)
 
-                    index_document(aip, src)
+                    index_path(aip_obj, src)
 
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
