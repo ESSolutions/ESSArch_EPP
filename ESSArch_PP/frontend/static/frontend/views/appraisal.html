@@ -25,7 +25,6 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>{{'FILTER' | translate}}</th>
                             <th>{{'NAME' | translate}}</th>
                             <th>{{'FREQUENCY' | translate}}</th>
                             <th>{{'SPECIFICATION' | translate}}</th>
@@ -35,9 +34,6 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="x in vm.rules">
-                            <td>
-                                <input type="checkbox" ng-model="x.used_as_filter" ng-change="vm.useAsFilter(x)">
-                            </td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.name}}</td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.specification}}</td>
