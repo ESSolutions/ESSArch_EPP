@@ -38,7 +38,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.ongoingPipe = function(tableState) {
         $scope.ongoingLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {params: {state: "STARTED"}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {params: {status: "STARTED"}}).then(function(response) {
             vm.ongoingTableState = tableState;
             vm.ongoing = response.data;
             $scope.ongoingLoading = false;
@@ -55,7 +55,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.nextPipe = function(tableState) {
         $scope.nextLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {state: "PENDING"}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {status: "PENDING"}}).then(function(response) {
             vm.nextTableState = tableState;
             vm.next = response.data;
             $scope.nextLoading = false;
