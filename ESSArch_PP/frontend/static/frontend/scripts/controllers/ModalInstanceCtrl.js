@@ -345,7 +345,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.ip = null;
     $ctrl.showRulesTable = function(ip) {
         $ctrl.ip = ip;
-        return $http.get(appConfig.djangoUrl+"appraisal-rules/").then(function(response) {
+        return $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.appraisalRules = response.data;
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
@@ -356,9 +356,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         if(ip.expanded) {
             ip.expanded = false;
         } else {
+            ip.expanded = true;
             IP.appraisalRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
-                ip.expanded = true;
             }).catch(function(response) {
                 TopAlert.add(response.data.detail, "error");
             })
