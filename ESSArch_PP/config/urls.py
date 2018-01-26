@@ -47,6 +47,7 @@ from ESSArch_Core.configuration.views import (
 
 from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
 
+from ESSArch_Core.maintenance.views import AppraisalRuleViewSet, AppraisalJobViewSet
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
@@ -103,11 +104,19 @@ router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
+router.register(r'appraisal-jobs', AppraisalJobViewSet)
+router.register(r'appraisal-rules', AppraisalRuleViewSet)
 router.register(r'archival-institutions', ArchivalInstitutionViewSet)
 router.register(r'archivist-organizations', ArchivistOrganizationViewSet)
 router.register(r'archival-types', ArchivalTypeViewSet)
 router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
+router.register(r'information-packages', InformationPackageViewSet).register(
+    r'appraisal-rules',
+    AppraisalRuleViewSet,
+    base_name='ip-appraisal-rules',
+    parents_query_lookups=['information_packages']
+)
 router.register(r'information-packages', InformationPackageViewSet).register(
     r'events',
     EventIPViewSet,

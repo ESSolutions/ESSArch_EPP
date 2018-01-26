@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'ESSArch_Core.configuration',
     'ESSArch_Core.docs',
     'ESSArch_Core.ip',
+    'ESSArch_Core.maintenance',
     'ESSArch_Core.profiles',
     'ESSArch_Core.essxml.Generator',
     'ESSArch_Core.essxml.ProfileMaker',
@@ -329,6 +330,14 @@ CELERYBEAT_SCHEDULE = {
     },
     'UnmountIdleDrives-queue-every-10-seconds': {
         'task': 'workflow.tasks.UnmountIdleDrives',
+        'schedule': timedelta(seconds=10),
+    },
+    'PollAppraisalJobs-every-10-seconds': {
+        'task': 'workflow.tasks.PollAppraisalJobs',
+        'schedule': timedelta(seconds=10),
+    },
+    'ScheduleAppraisalJobs-every-10-seconds': {
+        'task': 'workflow.tasks.ScheduleAppraisalJobs',
         'schedule': timedelta(seconds=10),
     },
 }

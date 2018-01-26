@@ -68,6 +68,7 @@ from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
 from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
                                          IsOrderResponsibleOrAdmin,
                                          IsResponsibleOrReadOnly)
+from ESSArch_Core.maintenance.models import AppraisalRule
 from ESSArch_Core.pagination import LinkHeaderPagination
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
@@ -1250,6 +1251,40 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 ptype, ip.pk
             )
         })
+
+    @detail_route(methods=['post'], url_path='add-appraisal-rule')
+    def add_appraisal_rule(self, request, pk=None):
+        ip = self.get_object()
+
+        try:
+            rule_id = request.data['id']
+        except KeyError:
+            raise exceptions.ParseError('Missing id parameter')
+
+        try:
+            rule = AppraisalRule.objects.get(pk=rule_id)
+        except AppraisalRule.DoesNotExist:
+            raise exceptions.ParseError('No rule with id "%s"' % rule_id)
+
+        rule.information_packages.add(ip)
+        return Response()
+
+    @detail_route(methods=['post'], url_path='remove-appraisal-rule')
+    def remove_appraisal_rule(self, request, pk=None):
+        ip = self.get_object()
+
+        try:
+            rule_id = request.data['id']
+        except KeyError:
+            raise exceptions.ParseError('Missing id parameter')
+
+        try:
+            rule = AppraisalRule.objects.get(pk=rule_id)
+        except AppraisalRule.DoesNotExist:
+            raise exceptions.ParseError('No rule with id "%s"' % rule_id)
+
+        rule.information_packages.remove(ip)
+        return Response()
 
 
 class WorkareaViewSet(InformationPackageViewSet):
