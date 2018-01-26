@@ -21,9 +21,8 @@
                         <td>{{ip.responsible.username}}</td>
                         <td>
                         </td>
-                        <tr ng-if="ip.expanded" ng-repeat="x in ip.rules" style="background-color:rgba(50,120,255,.1);">
-                            <td>{{x.name}}</td>
-                            <td>next: {{x.next}}</td>
+                        <tr ng-if="ip.expanded" ng-repeat="x in ip.rules track by $index" style="background-color:rgba(50,120,255,.1);">
+                            <td colspan="2" style="padding-left: 15px;">{{x.name}}</td>
                             <td>{{x.frequency}}</td>
                             <td>
                                 <button class="fa fa-trash" ng-click="$ctrl.removeRule(ip, x)"></button>
