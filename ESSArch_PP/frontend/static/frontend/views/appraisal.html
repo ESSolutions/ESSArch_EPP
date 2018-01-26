@@ -40,6 +40,12 @@
                             <td><button class="btn btn-success lock-button" ng-click="vm.runNow(x)">{{'RUN' | translate}}</button></td>
                             <td><button class="fa fa-trash" ng-click="vm.removeAppraisalRuleModal(x)"></button></td>
                         </tr>
+                        <tr ng-if="!vm.rules.length && !ruleLoading" class="empty-table-indicator">
+                            <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                        </tr>
+                        <tr ng-if="!vm.rules.length && ruleLoading" class="empty-table-indicator">
+                            <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
+                        </tr>
                     </tbody>
                 </table>
                 <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.rulesPerPage" st-displayed-pages="7"></div>
@@ -72,6 +78,12 @@
                                 <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td>{{x.rule}}</td>
                             </tr>
+                            <tr ng-if="!vm.ongoing.length && !ongoingLoading" class="empty-table-indicator">
+                                <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                            </tr>
+                            <tr ng-if="!vm.ongoing.length && ongoingLoading" class="empty-table-indicator">
+                                <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.ongoingPerPage" st-displayed-pages="7"></div>
@@ -103,6 +115,12 @@
                             <td>{{x.id}}</td>
                             <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                             <td>{{x.rule}}</td>
+                        </tr>
+                        <tr ng-if="!vm.next.length && !nextLoading" class="empty-table-indicator">
+                            <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                        </tr>
+                        <tr ng-if="!vm.next.length && nextLoading" class="empty-table-indicator">
+                            <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -139,6 +157,12 @@
                                 <td class="clickable">{{x.end_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td><a ng-click="vm.showReport(x)">{{'REPORT' | translate}}</a></td>
                                 <td class="clickable">{{x.rule}}</td>
+                            </tr>
+                            <tr ng-if="!vm.finished.length && !finishedLoading" class="empty-table-indicator">
+                                <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                            </tr>
+                            <tr ng-if="!vm.finished.length && finishedLoading" class="empty-table-indicator">
+                                <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
                             </tr>
                         </tbody>
                     </table>
