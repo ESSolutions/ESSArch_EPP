@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter) {
+angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -8,6 +8,24 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     $scope.ongoingLoading = false;
     $scope.nextLoading = false;
     $scope.finishedLoading = false;
+
+        //Cancel update intervals on state change
+        $scope.$on('$stateChangeStart', function() {
+            $interval.cancel(appraisalInterval);
+        });
+    var appraisalInterval = $interval(function() {
+        vm.rulePipe(vm.ruleTableState);
+        vm.nextPipe(vm.nextTableState);
+        vm.ongoingPipe(vm.ongoingTableState);
+        vm.finishedPipe(vm.finishedTableState);
+    }, appConfig.ipInterval);
+
+    $scope.$on('REFRESH_LIST_VIEW', function (event, data) {
+        vm.rulePipe(vm.ruleTableState);
+        vm.nextPipe(vm.nextTableState);
+        vm.ongoingPipe(vm.ongoingTableState);
+        vm.finishedPipe(vm.finishedTableState);
+    });
 
     /**
      * Smart table pipe function for appraisal rules
