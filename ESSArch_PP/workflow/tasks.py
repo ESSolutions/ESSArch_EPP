@@ -307,12 +307,16 @@ class CacheAIP(DBTask):
             }
         }
 
+        aip_profile = aip_obj.get_profile_rel('aip').profile
+        mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
+        mets_path = os.path.join(srcdir, mets_dir, mets_name)
+
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.GenerateXML",
             params={
                 "filesToCreate": filesToCreate,
                 "folderToParse": dsttar,
-                "extra_paths_to_parse": [os.path.join(srcdir, 'mets.xml')],
+                "extra_paths_to_parse": [mets_path],
                 "algorithm": algorithm,
             },
             processstep_id=self.step,
