@@ -277,6 +277,7 @@ def installDefaultPaths():
         'disseminations': '/ESSArch/data/epp/disseminations',
         'orders': '/ESSArch/data/epp/orders',
         'verify': '/ESSArch/data/epp/verify',
+        'appraisal_reports': '/ESSArch/data/epp/reports/appraisal',
     }
 
     for key in dct:
