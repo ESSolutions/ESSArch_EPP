@@ -42,7 +42,7 @@
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.specification}}</td>
                             <td><button class="btn btn-success lock-button" ng-click="vm.runNow(x)">{{'RUN' | translate}}</button></td>
-                            <td><button class="fa fa-trash-o" ng-click="vm.removeAppraisalRuleModal(x)"></button></td>
+                            <td><button class="fa fa-trash" ng-click="vm.removeAppraisalRuleModal(x)"></button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -71,7 +71,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="x in vm.ongoing" class="clickable">
+                            <tr ng-repeat="x in vm.ongoing">
                                 <td>{{x.id}}</td>
                                 <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td>{{x.rule}}</td>
@@ -103,7 +103,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="x in vm.next" class="clickable">
+                        <tr ng-repeat="x in vm.next">
                             <td>{{x.id}}</td>
                             <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                             <td>{{x.rule}}</td>

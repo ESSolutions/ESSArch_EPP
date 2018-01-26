@@ -26,7 +26,7 @@
                             <td>next: {{x.next}}</td>
                             <td>{{x.frequency}}</td>
                             <td>
-                                <button class="btn btn-danger lock-button" ng-click="$ctrl.removeRule(ip, x)">{{'REMOVE' | translate}}</button>
+                                <button class="fa fa-trash" ng-click="$ctrl.removeRule(ip, x)"></button>
                             </td>
                         </tr>
                         <tr ng-if="ip.expanded" ng-repeat-end>
