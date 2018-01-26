@@ -14,8 +14,11 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * @param {*} tableState
      */
     vm.rulePipe = function(tableState) {
+        if(tableState && tableState.search.predicateObject) {
+            var search = tableState.search.predicateObject["$"];
+        }
         $scope.ruleLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-rules/").then(function(response) {
+        $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {search: search}}).then(function(response) {
             vm.ruleTableState = tableState;
             vm.ruleFilters.forEach(function(x) {
                 response.data.forEach(function(rule) {
