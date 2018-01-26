@@ -108,6 +108,7 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         appraisalRules: {
             method: "GET",
             params: { action: "appraisal-rules", id: "@id"},
+            isArray: true
         },
     });
 });
