@@ -1,12 +1,12 @@
 <div ng-if="!subrow">
-<div class="step-state clickable" context-menu="menuOptions('row')" ng-click="ipTableClick(row)">
+<div class="step-state clickable" context-menu="menuOptions('row')" ng-click="ipTableClick(row, $event)">
     <div ng-if="row.step_state == 'SUCCESS'" class="step-state-success"><b>{{'SUCCESS' | translate}}</b></div>
     <div ng-if="row.step_state == 'FAILURE'" class="step-state-failure"><b>{{'FAILURE' | translate}}</b></div>
     <div ng-if="row.step_state != 'SUCCESS' && row.step_state !='FAILURE'" class="step-state-in-progress"><b>{{'INPROGRESS' | translate}}</b></div>
 </div>
 </div>
 <div ng-if="subrow">
-    <div class="step-state clickable" context-menu="menuOptions('subrow')" ng-click="ipTableClick(subrow)">
+    <div class="step-state clickable" context-menu="menuOptions('subrow')" ng-click="ipTableClick(subrow, $event)">
         <div ng-if="subrow.step_state == 'SUCCESS'" class="step-state-success"><b>{{'SUCCESS' | translate}}</b></div>
         <div ng-if="subrow.step_state == 'FAILURE'" class="step-state-failure"><b>{{'FAILURE' | translate}}</b></div>
         <div ng-if="subrow.step_state != 'SUCCESS' && subrow.step_state !='FAILURE'" class="step-state-in-progress"><b>{{'INPROGRESS' | translate}}</b></div>

@@ -1,5 +1,5 @@
 <div ng-if="!subrow">
-    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(row)" context-menu="menuOptions('row')">
+    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row')">
         <div class="object-identifier-value">{{row.object_identifier_value}}</div>
         <div ng-if="row.package_type != 1 && row.package_type != 4 && row.state !== 'At reception'" class="generation-indicator"
         uib-popover="{{'IP_GENERATION' | translate:row}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
@@ -15,7 +15,7 @@
     </div>
 </div>
 <div ng-if="subrow">
-    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(subrow)" style="padding-left: 30px;" context-menu="menuOptions('subrow')">
+    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(subrow, $event)" style="padding-left: 30px;" context-menu="menuOptions('subrow')">
         <div style="display: inline-block" class="object-identifier-value">{{subrow.object_identifier_value}}</div>
             <div class="generation-indicator" uib-popover="{{'IP_GENERATION' | translate:subrow}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-lg fa-code-fork"></i>  {{subrow.generation}}

@@ -335,29 +335,97 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
-}).controller('AppraisalModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $scope, TopAlert) {
+}).controller('AppraisalModalInstanceCtrl', function (IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
     $ctrl.requestTypes = data.types;
     $ctrl.request = data.request;
-    $ctrl.appraisalRules = [
-        { id: 'ad961193-6162-4871-9ceb-d464e2276586', name: "Gallring fakturor", frequency: "24h", type: "Arkivobjekt" },
-        { id: 'b987a27f-a111-43d6-83cf-dbbab1a8de8c', name: "Gallring lönsespecefikationer", frequency: "1 week", type: "Metadata" },
-        { id: '2a4ffd3e-8796-4040-a0ca-7a27420541f9', name: "Rule 4", frequency: "10 years", type: "Metadata" },
-        { id: 'fc84bbef-7387-4528-b667-e24efa2940c4', name: "Rule 3", frequency: "24h", type: "Arkivobjekt" },
-        { id: 'b53f58f5-b062-4f3d-9c01-31835c90b04c', name: "Rule 6", frequency: "1 year", type: "Metadata" },
-        { id: '21fdd706-cbb5-40d5-897a-363939589db6', name: "Rule 5", frequency: "2h", type: "Arkivobjekt" },
-        { id: '1bff3bd2-f7df-4555-b539-26c175ac216d', name: "Rule 7", frequency: "Manual", type: "Arkivobjekt" }
-    ];
+    $ctrl.appraisalRules = [];
+    $ctrl.ip = null;
+    $ctrl.showRulesTable = function(ip) {
+        $ctrl.ip = ip;
+        return $http.get(appConfig.djangoUrl+"appraisal-rules/").then(function(response) {
+            $ctrl.appraisalRules = response.data;
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        })
+    }
+
+    $ctrl.expandIp = function(ip) {
+        if(ip.expanded) {
+            ip.expanded = false;
+        } else {
+            IP.appraisalRules({id: ip.id}).$promise.then(function(resource) {
+                ip.rules = resource;
+                ip.expanded = true;
+            }).catch(function(response) {
+                TopAlert.add(response.data.detail, "error");
+            })
+        }
+    }
+
+    $ctrl.addRule = function(ip, rule) {
+        $http({
+            url: appConfig.djangoUrl+"information-packages/"+ip.id+"/add-appraisal-rule/",
+            method: "POST",
+            data: {
+                id: rule.id
+            }
+        }).then(function(response) {
+            ip.rules.push(rule);
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        });
+    }
+    $ctrl.removeRule = function(ip, rule) {
+        $http({
+            url: appConfig.djangoUrl+"information-packages/"+ip.id+"/remove-appraisal-rule/",
+            method: "POST",
+            data: {
+                id: rule.id
+            }
+        }).then(function(response) {
+            ip.rules.forEach(function(x, index, array) {
+                if(x.id == rule.id) {
+                    array.splice(index, 1);
+                }
+            })
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        });
+    }
+    $ctrl.closeRulesTable = function(){
+        $ctrl.appraisalRules = [];
+        $ctrl.ip = null;
+    }
+    $ctrl.path = "";
+    $ctrl.pathList = [];
+    $ctrl.addPath = function(path) {
+        if(path.length > 0) {
+            $ctrl.pathList.push(path);
+        }
+    }
+    $ctrl.removePath = function(path) {
+        $ctrl.pathList.splice($ctrl.pathList.indexOf(path), 1);
+    }
     $ctrl.appraisalRule = null;
     $ctrl.create = function() {
         $ctrl.data = {
             name: $ctrl.name,
             frequency: $ctrl.frequency,
-            type: $ctrl.type
+            specification: $ctrl.pathList
         };
-        $uibModalInstance.close($ctrl.data);
+        $http({
+            url: appConfig.djangoUrl+"appraisal-rules/",
+            method: "POST",
+            data: $ctrl.data
+        }).then(function(response) {
+            TopAlert.add(response.data.detail, "success")
+            $uibModalInstance.close($ctrl.data);
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error")
+        })
     }
     $ctrl.ok = function() {
         $uibModalInstance.close();

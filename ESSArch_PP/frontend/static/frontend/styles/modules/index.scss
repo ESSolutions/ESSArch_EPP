@@ -1245,3 +1245,33 @@ body.modal-open {
     margin-top: 10px;
     padding: 5px;
 }
+
+.add-rule-row {
+    text-align: center;
+    background-color: white;
+    &:hover {
+        background-color: darken(white, 10%);
+
+    }
+}
+
+.close-rules-button {
+    float: right;
+}
+
+.path-item {
+    color: #d72b3f;
+    background-color: $container-background;
+    margin-right: 5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: $border-color;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.path-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}

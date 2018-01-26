@@ -479,5 +479,12 @@
     "DESCRIPTION": "Description",
     "COMPONENT": "Component",
     "FILE": "File",
-    "INCLUDED_TYPES": "Included types"
+    "INCLUDED_TYPES": "Included types",
+    "INDEX": "Index",
+    "ARCHIVE_OBJECTS": "Archive objects",
+    "APPRAISAL_RULES": "Appraisal rules",
+    "PATHS": "Paths",
+    "NO_PATHS_CHOSEN": "No paths chosen",
+    "SPECIFICATION": "Specification",
+    "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Do you want to remove appraisal rule: {{name}}"
 }

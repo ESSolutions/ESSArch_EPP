@@ -15,19 +15,21 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.rulePipe = function(tableState) {
         $scope.ruleLoading = true;
-        $timeout(function() {
-
+        $http.get(appConfig.djangoUrl+"appraisal-rules/").then(function(response) {
             vm.ruleTableState = tableState;
             vm.ruleFilters.forEach(function(x) {
-                ruleset.forEach(function(rule) {
+                response.data.forEach(function(rule) {
                     if(x == rule.id) {
                         rule.usedAsFilter = true;
                     }
                 });
             });
-            vm.rules = ruleset;
+            vm.rules = response.data;
             $scope.ruleLoading = false;
-        }, 200)
+        }).catch(function(response) {
+            TopAlert.add("Failed to get appraisal rules", "error");
+            $scope.ruleLoading = false;
+        })
     }
 
     /**
@@ -36,12 +38,15 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.ongoingPipe = function(tableState) {
         $scope.ongoingLoading = true;
-        $timeout(function() {
-
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {state: "STARTED"}).then(function(response) {
             vm.ongoingTableState = tableState;
-            vm.ongoing = ongoing;
+            vm.ongoing = response.data;
             $scope.ongoingLoading = false;
-        }, 400)
+
+        }).catch(function(response) {
+            TopAlert.add("Failed to get ongoing appraisal jobs", "error");
+            $scope.ongoingLoading = false;
+        })
     }
 
     /**
@@ -50,12 +55,15 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.nextPipe = function(tableState) {
         $scope.nextLoading = true;
-        $timeout(function() {
-
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {state: "PENDING"}).then(function(response) {
             vm.nextTableState = tableState;
-            vm.next = next;
+            vm.next = response.data;
             $scope.nextLoading = false;
-        }, 700)
+
+        }).catch(function(response) {
+            TopAlert.add("Failed to get next appraisal jobs", "error");
+            $scope.nextLoading = false;
+        });
     }
 
     /**
@@ -64,12 +72,15 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.finishedPipe = function(tableState) {
         $scope.finishedLoading = true;
-        $timeout(function() {
-
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {end_date__isnull: false}).then(function(response) {
             vm.finishedTableState = tableState;
-            vm.finished = finished;
+            vm.finished = response.data;
             $scope.finishedLoading = false;
-        }, 650)
+
+        }).catch(function(response) {
+            TopAlert.add("Failed to get finished appraisal jobs", "error");
+            $scope.finishedLoading = false;
+        })
     }
     function guid() {
         function s4() {
@@ -90,8 +101,16 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             start: new Date(),
             rule: appraisal
         };
-        TopAlert.add(appraisal.name +", started at: "+$filter("date")(object.start, "yyyy-MM-dd HH:mm:ss"), "success");
-        vm.ongoing.push(object);
+        $http({
+            url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id+"/run",
+            method: "POST",
+        }).then(function(response) {
+            TopAlert.add(response.data, "success");
+            vm.rulePipe(vm.ruleTableState);
+            vm.ongoingPipe(vm.ongoingTableState);
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        })
     }
 
     /*
@@ -119,8 +138,12 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * @param {Object} appraisal
      */
     vm.showReport = function(appraisal) {
-        var file = $sce.trustAsResourceUrl("/static/frontend/gallringsrapport.pdf");
-        $window.open(file, '_blank');
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/"+appraisal.id+"/report").then(function(response) {
+            var file = $sce.trustAsResourceUrl(response.data);
+            $window.open(file, '_blank');
+        }).catch(function(response) {
+            TopAlert.add("Failed to get appraisal report", "error");
+        })
     }
 
     /**
@@ -224,6 +247,33 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.removeAppraisalRuleModal = function(appraisal) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/remove_appraisal_rule_modal.html',
+            controller: 'AppraisalModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {
+                    appraisal: appraisal,
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            $http({
+                url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id,
+                method: "DELETE"
+            }).then(function(response) {
+                TopAlert.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
+            }).catch(function(response) {
+                TopAlert.add("Appraisal rule could not be removed", "errorepp");
+            })
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

@@ -478,5 +478,12 @@
     "DESCRIPTION": "Beskrivning",
     "COMPONENT": "Komponent",
     "FILE": "Fil",
-    "INCLUDED_TYPES": "Inkluderade typer"
+    "INCLUDED_TYPES": "Inkluderade typer",
+    "INDEX": "Index",
+    "ARCHIVE_OBJECTS": "Arkivobjekt",
+    "APPRAISAL_RULES": "Gallringsregler",
+    "PATHS": "Sökvägar",
+    "NO_PATHS_CHOSEN": "Inga sökvägar valda",
+    "SPECIFICATION": "Specifikation",
+    "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Vill du ta bor gallringsregeln: {{name}}"
 }

@@ -285,7 +285,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
                 if ($scope.ip.id === ip.id) {
                     index = idx + 1;
                 }
-                if(ip.information_packages && ip.package_type == 1) {
+                if(ip.information_packages) {
                     if(ip.collapsed == false && $scope.ip.id === ip.id) {
                         inChildren = true;
                         parent = ip;
@@ -321,7 +321,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
                 if($scope.ip.id === ip.id) {
                     index = idx-1;
                 }
-                if(ip.information_packages && ip.package_type == 1) {
+                if(ip.information_packages) {
                     if(idx > 0 && array[idx-1].collapsed == false && $scope.ip.id === ip.id) {
                         parent = array[idx-1];
                         index = parent.information_packages.length-1;

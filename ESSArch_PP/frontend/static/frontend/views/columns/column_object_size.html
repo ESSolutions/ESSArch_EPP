@@ -1,2 +1,2 @@
-<div ng-if="!subrow && row.package_type != 1" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(row)" context-menu="menuOptions('row')">{{row.object_size | filesize}}</div>
-<div ng-if="subrow" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow)" context-menu="menuOptions('subrow')">{{subrow.object_size | filesize}}</div>
+<div ng-if="!subrow && row.package_type != 1" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row')">{{row.object_size | filesize}}</div>
+<div ng-if="subrow" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow')">{{subrow.object_size | filesize}}</div>

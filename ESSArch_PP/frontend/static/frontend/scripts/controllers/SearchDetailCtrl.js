@@ -226,25 +226,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             }
         },
         version : 1,
-        contextmenu: {
-            items: function (o, cb) {
-                var archiveManagement = {
-                    label: "Arkivvård",
-                    submenu: {
-                        appraisal: {
-                            label: "Gallring",
-                            action: function (o) {
-                                vm.appraisal(vm.record);
-                            },
-                        }
-                    }
-                };
-                var actions = { archiveManagement: archiveManagement };
-                cb(actions);
-                return actions;
-            }
-        },
-        plugins : ['types', 'contextmenu']
+        plugins : ['types']
     };
 
     vm.setType = function() {

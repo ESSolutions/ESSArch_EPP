@@ -2,8 +2,37 @@ angular.module('myApp').controller('AppCtrl', function($rootScope, $scope, $uibM
     var vm = this;
     var questionMark = 187;
     vm.questionMarkListener = function(e) {
-        if(e.keyCode == questionMark && e.shiftKey) {
-            $scope.keyboardShortcutModal();
+        if(e.keyCode == 16) {
+            $('#list-view *').attr('UNSELECTABLE', 'on');
+            $("#list-view").css(
+                {
+                    '-moz-user-select': 'none',
+                    '-o-user-select': 'none',
+                    '-khtml-user-select': 'none',
+                    '-webkit-user-select': 'none',
+                    '-ms-user-select': 'none',
+                    'user-select': 'none'
+                }
+            );
+            if(e.keyCode == questionMark) {
+                $scope.keyboardShortcutModal();
+            }
+        }
+    }
+
+    vm.keyUpListener = function(e) {
+        if(e.keyCode == 16) {
+            $('#list-view *').attr('UNSELECTABLE', 'off');
+            $("#list-view").css(
+                {
+                    '-moz-user-select': 'auto',
+                    '-o-user-select': 'auto',
+                    '-khtml-user-select': 'auto',
+                    '-webkit-user-select': 'auto',
+                    '-ms-user-select': 'auto',
+                    'user-select': 'auto'
+                }
+            );
         }
     }
 

@@ -28,8 +28,9 @@
                             <th>{{'FILTER' | translate}}</th>
                             <th>{{'NAME' | translate}}</th>
                             <th>{{'FREQUENCY' | translate}}</th>
-                            <th>{{'TYPE' | translate}}</th>
+                            <th>{{'SPECIFICATION' | translate}}</th>
                             <th>{{'RUN_NOW' | translate}}</th>
+                            <th>{{'REMOVE' | translate}}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,8 +40,9 @@
                             </td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.name}}</td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
-                            <td class="clickable" ng-click="vm.ruleModal(x)">{{x.type}}</td>
+                            <td class="clickable" ng-click="vm.ruleModal(x)">{{x.specification}}</td>
                             <td><button class="btn btn-success lock-button" ng-click="vm.runNow(x)"><i class="fa fa-play"></i>&nbsp;{{'RUN_NOW' | translate}}</button></td>
+                            <td><button class="btn btn-danger lock-button" ng-click="vm.removeAppraisalRuleModal(x)"><i class="fa fa-trash-o"></i>&nbsp;{{'REMOVE' | translate}}</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -69,7 +71,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="x in vm.ongoing" class="clickable" ng-click="vm.ongoingModal(x)">
+                            <tr ng-repeat="x in vm.ongoing" class="clickable">
                                 <td>{{x.id}}</td>
                                 <td>{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td>{{x.rule.name}}</td>
@@ -101,7 +103,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="x in vm.next" class="clickable" ng-click="vm.nextModal(x)">
+                        <tr ng-repeat="x in vm.next" class="clickable">
                             <td>{{x.id}}</td>
                             <td>{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                             <td>{{x.rule.name}}</td>
@@ -136,11 +138,11 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="x in vm.finished">
-                                <td class="clickable" ng-click="vm.finishedModal(x)">{{x.id}}</td>
-                                <td class="clickable" ng-click="vm.finishedModal(x)">{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                                <td class="clickable" ng-click="vm.finishedModal(x)">{{x.end | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                                <td class="clickable">{{x.id}}</td>
+                                <td class="clickable">{{x.start | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                                <td class="clickable">{{x.end | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td><a ng-click="vm.showReport(x)">{{x.report}}</a></td>
-                                <td class="clickable" ng-click="vm.finishedModal(x)">{{x.rule.name}}</td>
+                                <td class="clickable">{{x.rule.name}}</td>
                             </tr>
                         </tbody>
                     </table>

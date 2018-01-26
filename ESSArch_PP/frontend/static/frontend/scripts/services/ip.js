@@ -104,6 +104,10 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         moveToApproval: {
             method: 'POST',
             params: { action: "receive", id: "@id" }
-        }
+        },
+        appraisalRules: {
+            method: "GET",
+            params: { action: "appraisal-rules", id: "@id"},
+        },
     });
 });

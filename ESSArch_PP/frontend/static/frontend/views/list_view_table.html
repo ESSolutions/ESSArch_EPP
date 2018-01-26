@@ -50,7 +50,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat-start="row in vm.displayedIps" ng-class="{'selected': ip.object_identifier_value == row.object_identifier_value}" class="table-item">
+            <tr ng-repeat-start="row in vm.displayedIps" ng-class="{'selected': ip.object_identifier_value == row.object_identifier_value || selectedAmongOthers(row.id)}" class="table-item">
                 <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row')">
                     <div class="checkbox table-col">
                         <label>
@@ -64,7 +64,7 @@
                     <div ng-include src="col.template"></div>
                 </td>
             </tr>
-            <tr ng-if="!row.collapsed" ng-repeat="subrow in row.information_packages"  ng-repeat-end class="table-item" ng-class="{'selected': ip.object_identifier_value == subrow.object_identifier_value}" style="background-color:rgba(50,120,255,.1);">
+            <tr ng-if="!row.collapsed" ng-repeat="subrow in row.information_packages"  ng-repeat-end class="table-item" ng-class="{'selected': ip.object_identifier_value == subrow.object_identifier_value || selectedAmongOthers(subrow.id)}" style="background-color:rgba(50,120,255,.1);">
                 <td context-menu="menuOptions('subrow')"></td>
                 <td ng-repeat="col in listViewColumns" ng-if="!((('home.access.createDip' | isState) && col.label == 'filebrowser') || (('home.access.accessIp' | isState) && col.label =='delete'))">
                     <div ng-include src="col.template"></div>

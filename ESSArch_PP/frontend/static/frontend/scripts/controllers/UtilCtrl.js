@@ -75,7 +75,6 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
                     } else if(state == "home.administration.profileManager") {
                         $scope.focusProfileManagerSubmenu();
                     } else if (state.match(/home\.administration\.profileManager/)) {
-                        console.log("should focus profile manager route")
                         $scope.focusProfileManagerRouterView();
                     } else {
                         $scope.focusRouterView();
