@@ -138,12 +138,8 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * @param {Object} appraisal
      */
     vm.showReport = function(appraisal) {
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/"+appraisal.id+"/report").then(function(response) {
-            var file = $sce.trustAsResourceUrl(response.data);
-            $window.open(file, '_blank');
-        }).catch(function(response) {
-            TopAlert.add("Failed to get appraisal report", "error");
-        })
+        var file = $sce.trustAsResourceUrl(appConfig.djangoUrl+"appraisal-jobs/"+appraisal.id+"/report/");
+        $window.open(file, '_blank');
     }
 
     /**
