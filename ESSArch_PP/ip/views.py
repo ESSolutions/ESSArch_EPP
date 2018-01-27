@@ -27,6 +27,7 @@ import datetime
 import errno
 import glob
 import logging
+import math
 import mimetypes
 import os
 import re
@@ -43,7 +44,8 @@ from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from elasticsearch_dsl import Search
+from elasticsearch.exceptions import TransportError
+from elasticsearch_dsl import Index, Search, Q as ElasticQ
 
 from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
@@ -73,6 +75,7 @@ from ESSArch_Core.pagination import LinkHeaderPagination
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
 from ESSArch_Core.profiles.utils import fill_specification_data
+from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Document
 from ESSArch_Core.util import (find_destination, generate_file_response,
                                get_files_and_dirs, get_tree_size_and_count,
@@ -1114,14 +1117,70 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         ip = self.get_object()
 
         if ip.archived:
+            # check if path exists
             path = request.query_params.get('path', '').rstrip('/')
             s = Search(index=['directory', 'document'])
-            s = s.filter('term', ip=str(ip.pk)).query('term', href=path)
-            #s = Document.search()
-            #s = s.filter('term', ip=str(ip.pk))
+            s = s.filter('term', ip=str(ip.pk))
 
-            results = []
-            for hit in s.execute():
+            if path != '':
+                dirname = os.path.dirname(path)
+                basename = os.path.basename(path)
+                q = ElasticQ('bool', must=[ElasticQ('term', href=dirname), ElasticQ('term', name=basename)])
+
+                s = s.query(q)
+                hits = s.execute()
+
+                try:
+                    hit = hits[0]
+                except IndexError:
+                    raise exceptions.NotFound
+
+                if hit.meta.index == 'document':
+                    cache_dir = ip.policy.cache_storage.value
+
+                    path = os.path.join(cache_dir, ip.object_identifier_value, path)
+                    return list_files(path, request=request)
+
+            # a directory with the path exists, get the content of it
+            s = Search(index=['directory', 'document'])
+            s = s.filter('term', ip=str(ip.pk)).query('term', href=path)
+
+            if self.paginator is not None:
+                # Paginate in search engine
+                params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
+
+                number = params.get(self.paginator.pager.page_query_param, 1)
+                size = params.get(self.paginator.pager.page_size_query_param, 10)
+
+                try:
+                    number = int(number)
+                except (TypeError, ValueError):
+                    raise exceptions.NotFound('Invalid page.')
+                if number < 1:
+                    raise exceptions.NotFound('Invalid page.')
+
+                size = int(size)
+                offset = (number-1)*size
+                max_results = int(Index('document').get_settings()['document']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+                s = s[offset:offset+size]
+
+            try:
+                results = s.execute()
+            except TransportError:
+                if self.paginator is not None:
+                    if offset+size > max_results:
+                        raise exceptions.ParseError("Can't show more than {max} results".format(max=max_results))
+
+                raise
+
+            if self.paginator is not None:
+                ceil = math.ceil(results.hits.total/size)
+                ceil = 1 if ceil < 1 else ceil
+                if results.hits.total > 0 and number > ceil:
+                    raise exceptions.NotFound('Invalid page.')
+
+            l = []
+            for hit in results:
                 if hit.meta.index == 'directory':
                     d = {
                         'type': 'dir',
@@ -1135,9 +1194,12 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                         'size': hit.size,
                     }
 
-                results.append(d)
+                l.append(d)
 
-            return Response(results)
+            if self.paginator is not None:
+                return Response(l, headers={'Count': results.hits.total})
+
+            return Response(l)
 
         if request.method == 'DELETE':
             if ip.package_type != InformationPackage.DIP:
