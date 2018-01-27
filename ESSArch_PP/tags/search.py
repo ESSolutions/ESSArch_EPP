@@ -179,8 +179,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
         s = Search(index=self.index).query("match", _id=id)
-        res = s.execute()
         try:
+            res = s.execute()
             serialized = res.hits[0].to_dict()
             meta = res.hits[0].meta
             serialized['_type'] = meta.doc_type
@@ -189,15 +189,19 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             return serialized
         except (IndexError, KeyError):
             raise exceptions.NotFound
+        except TransportError as e:
+            if e.status_code == 404:
+                raise exceptions.NotFound
+            raise
 
-    def list(self, request):
+    def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
         if query:
             query = '%s' % query
 
         filters = {
-            'index': params.pop('index', None),
+            'index': params.pop('index', index),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
@@ -269,7 +273,12 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(r)
 
-    def retrieve(self, request, pk=None):
+
+    def retrieve(self, request, index=None, pk=None):
+        if index is None:
+            return self.list(request, index=pk)
+
+        self.index = index
         return Response(self.get_object())
 
     @detail_route(methods=['get'])
