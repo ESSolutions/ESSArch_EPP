@@ -487,5 +487,6 @@
     "NO_PATHS_CHOSEN": "No paths chosen",
     "SPECIFICATION": "Specification",
     "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Do you want to remove appraisal rule: {{name}}",
-    "AVAILABLE": "Available"
+    "AVAILABLE": "Available",
+    "APPRAISAL_DATE": "Appraisal date"
 }

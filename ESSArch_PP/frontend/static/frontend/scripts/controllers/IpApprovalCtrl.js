@@ -3,6 +3,20 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
 	var ipSortString = "Received,Preserving";
 	$controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
 
+    //Request form data
+    $scope.initRequestData = function () {
+        vm.request = {
+            type: "",
+            purpose: "",
+            storageMedium: {
+                value: "",
+                options: ["Disk", "Tape(type1)", "Tape(type2)"]
+            },
+            appraisal_date: null
+        };
+    }
+    $scope.initRequestData();
+
 	$scope.menuOptions = function(rowType) {
 		return [];
 	};

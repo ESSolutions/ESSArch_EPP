@@ -486,5 +486,6 @@
     "NO_PATHS_CHOSEN": "Inga sökvägar valda",
     "SPECIFICATION": "Specifikation",
     "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Vill du ta bort gallringsregeln: {{name}}",
-    "AVAILABLE": "Tillgänglig"
+    "AVAILABLE": "Tillgänglig",
+    "APPRAISAL_DATE": "Gallringsfrist"
 }
