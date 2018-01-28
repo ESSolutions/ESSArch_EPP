@@ -11,7 +11,10 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             {
                 text: $translate.instant("APPRAISAL"),
                 click: function ($itemScope, $event, modelValue, text, $li) {
-                    vm.openAppraisalModal($scope.ips);
+                    if($scope.ips.length == 0 && $scope.ip == null) {
+                    } else {
+                        vm.openAppraisalModal($scope.ips);
+                    }
                 }
             },
         ];
