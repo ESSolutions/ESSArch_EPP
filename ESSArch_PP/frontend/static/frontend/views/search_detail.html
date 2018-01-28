@@ -40,6 +40,7 @@
                 </div>-->
             </div>
             <br/>
+            <button ng-if="vm.record._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
             <h4>{{'CONTENTS' | translate}}</h4>
             <div st-table="vm.record_children" style="width:100%;" class="table-x-overflow">
                 <table class="table table-striped">

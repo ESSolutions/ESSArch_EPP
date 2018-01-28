@@ -290,9 +290,15 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         return runner(null, node);
     }
 
-    vm.viewFile = function(name) {
-        var file = $sce.trustAsResourceUrl("/static/frontend/"+name);
-        $window.open(file, '_blank');
+    vm.viewFile = function(file) {
+        var params = {};
+        if(file.href != "") {
+            params.path = file.href+"/"+file.name;
+        } else {
+            params.path = file.name;
+        }
+        var showFile = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/"+file.ip+"/files/?path="+params.path);
+        $window.open(showFile, '_blank');
     }
 
     vm.editField = function(key, value) {
