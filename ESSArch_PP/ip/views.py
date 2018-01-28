@@ -804,7 +804,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             self.queryset = self.queryset.exclude(workareas__read_only=False)
             inner = InformationPackage.objects.visible_to_user(user).filter(
                 Q(Q(workareas=None) | Q(workareas__read_only=True)),
-            )
+            ).exclude(active=False)
 
             if view_type == 'ip':
                 inner = inner.filter(aic=OuterRef('aic')).order_by('generation')

@@ -78,6 +78,8 @@ class InformationPackageFilter(filters.FilterSet):
         else:
             information_packages = ips
 
+        information_packages = information_packages.filter(active=True)
+
         if self.recursive:
             information_packages = self.__class__(recursive=False, data=self.form.cleaned_data, queryset=information_packages, request=self.request).qs
 
@@ -93,7 +95,7 @@ class InformationPackageFilter(filters.FilterSet):
 
         information_packages = information_packages.select_related('responsible').prefetch_related('workareas', 'steps')
 
-        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
+        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(active=True, aic=OuterRef('aic')).order_by('generation')
         information_packages = information_packages.annotate(
             first_generation=Case(
                When(generation=Subquery(inner.values('min_gen')[:1]),
