@@ -134,11 +134,19 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
     new_version_in_progress = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
 
     search_filter = filters.SearchFilter()
 
     def get_package_type_display(self, obj):
         return obj.get_package_type_display()
+
+    def get_permissions(self, obj):
+        request = self.context.get('request')
+        if hasattr(request, 'user'):
+            return get_perms(request.user, obj)
+
+        return []
 
     def get_information_packages(self, obj):
         request = self.context['request']
@@ -232,7 +240,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea', 'object_size',
             'first_generation', 'last_generation', 'start_date', 'end_date',
-            'new_version_in_progress', 'appraisal_date',
+            'new_version_in_progress', 'appraisal_date', 'permissions',
         )
         extra_kwargs = {
             'id': {
