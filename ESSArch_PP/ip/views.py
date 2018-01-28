@@ -771,7 +771,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     )
     ordering_fields = (
         'label', 'responsible', 'create_date', 'state',
-        'id', 'object_identifier_value',
+        'id', 'object_identifier_value', 'start_date', 'end_date',
     )
     search_fields = get_ip_search_fields()
 
