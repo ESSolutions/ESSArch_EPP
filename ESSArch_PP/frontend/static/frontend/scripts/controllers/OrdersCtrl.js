@@ -1,4 +1,4 @@
-angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService) {
+angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService, $q) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
 
@@ -52,6 +52,50 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
         $scope.eventShow = false;
         $scope.statusShow = false;
     };
+    vm.ips = [];
+    vm.getIpsForOrder = function(order) {
+        var ips = [];
+        order.information_packages.forEach(function(ipUrl) {
+            ips.push($http.get(ipUrl).then(function(response) {
+                return response.data;
+            }));
+        })
+        $q.all(ips).then(function(response) {
+            console.log(response);
+            vm.ips = response;
+        })
+    }
+
+    vm.ip = null;
+    vm.openFilebrowser = function(ip) {
+        if(vm.ip && vm.ip.id === ip.id) {
+            vm.ip = null;
+            $rootScope.ip = null;
+        } else {
+            vm.ip = ip;
+            $rootScope.ip = ip;
+        }
+    }
+
+    vm.ipPipe = function(tableState) {
+        $scope.ipsLoading = true;
+        if(vm.ips.length == 0) {
+            $scope.initLoad = true;
+        }
+        if(!angular.isUndefined(tableState)) {
+            var ips = [];
+            $scope.ipTableState = tableState;
+            $scope.ip.information_packages.forEach(function(ipUrl) {
+                ips.push($http.get(ipUrl).then(function(response) {
+                    return response.data;
+                }));
+            })
+            $q.all(ips).then(function(response) {
+                vm.ips = response;
+                $scope.ipsLoading = false;
+            })
+        }
+    }
     $scope.colspan = 9;
     $scope.stepTaskInfoShow = false;
     $scope.statusShow = false;
