@@ -491,5 +491,6 @@
     "UNSPECIFIED": "Ospecificerad",
     "PACKAGE_TYPE_NAME_EXCLUDE": "Exkludera paket-typ",
     "OVERVIEW": "Översikt",
-    "PREPAREAPPRAISALDESC": "Skapa ny gallringsregel"
+    "PREPAREAPPRAISALDESC": "Skapa ny gallringsregel",
+    "ADD_APPRAISAL_RULE_TO_IP": "Lägg till/ta bort gallringsregler till IPn"
 }

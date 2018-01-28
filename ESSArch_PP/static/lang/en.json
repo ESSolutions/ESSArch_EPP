@@ -492,5 +492,6 @@
     "UNSPECIFIED": "Unspecified",
     "PACKAGE_TYPE_NAME_EXCLUDE": "Exclude package type",
     "OVERVIEW": "Overview",
-    "PREPAREAPPRAISALDESC": "Create new appraisal rule"
+    "PREPAREAPPRAISALDESC": "Create new appraisal rule",
+    "ADD_APPRAISAL_RULE_TO_IP": "Add/remove appraisal rules to IPs"
 }
