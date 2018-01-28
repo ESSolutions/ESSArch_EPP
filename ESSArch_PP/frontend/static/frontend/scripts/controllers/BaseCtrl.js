@@ -55,7 +55,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             purpose: "",
             storageMedium: {
                 value: "",
-                options: ["Disk", "Tape(type1)", "Tape(type2)"]
+                options: ["Disk", "Tape(type1)", "Tape(type2)"],
+                appraisal_date: null
             }
         };
     }
