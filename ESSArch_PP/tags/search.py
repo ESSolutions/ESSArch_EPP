@@ -282,7 +282,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(self.get_object())
 
     @detail_route(methods=['get'])
-    def children(self, request, pk=None):
+    def children(self, request, index=None, pk=None):
         s = Search(index=self.index).sort('reference_code')
 
         p = {'parent': {'query': pk, 'operator': 'and'}}
