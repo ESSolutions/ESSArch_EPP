@@ -945,6 +945,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             ip.save(update_fields=['policy'])
 
+        ip.appraisal_date = request.data.get('appraisal_date', None)
+        ip.save()
+
         main_step = ProcessStep.objects.create(
             name='Preserve AIP',
             information_package_id=pk,
