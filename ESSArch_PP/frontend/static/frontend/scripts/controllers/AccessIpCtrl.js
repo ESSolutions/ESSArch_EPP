@@ -165,7 +165,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
     }
 
     // Requests
-    $scope.submitRequest = function(request) {
+    $scope.submitRequest = function(ips, request) {
         switch (request.type) {
             case "get":
             case "get_tar":
@@ -174,7 +174,7 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
                     ips.forEach(function (ip) {
                         $scope.accessIp(ip, request);
                     })
-                } else {
+                } else if($scope.ip != null) {
                     $scope.accessIp($scope.ip, request);
                 }
                 break;
