@@ -109,7 +109,7 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'archivist_organization', 'archival_type', 'archival_location',
             'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
             'first_generation', 'last_generation', 'start_date', 'end_date',
-            'permissions',
+            'permissions', 'appraisal_date',
         )
         extra_kwargs = {
             'id': {
@@ -232,7 +232,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea', 'object_size',
             'first_generation', 'last_generation', 'start_date', 'end_date',
-            'new_version_in_progress',
+            'new_version_in_progress', 'appraisal_date',
         )
         extra_kwargs = {
             'id': {
@@ -255,7 +255,7 @@ class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
         fields = (
             'id', 'label', 'object_identifier_value',
             'package_type', 'responsible', 'create_date',
-            'entry_date', 'information_packages',
+            'entry_date', 'information_packages', 'appraisal_date',
         )
         extra_kwargs = {
             'id': {
