@@ -489,5 +489,6 @@
     "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Do you want to remove appraisal rule: {{name}}",
     "AVAILABLE": "Available",
     "APPRAISAL_DATE": "Appraisal date",
-    "UNSPECIFIED": "Unspecified"
+    "UNSPECIFIED": "Unspecified",
+    "PACKAGE_TYPE_NAME_EXCLUDE": "Exclude package type"
 }
