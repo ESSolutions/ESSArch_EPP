@@ -194,14 +194,14 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 raise exceptions.NotFound
             raise
 
-    def list(self, request, index=None):
+    def list(self, request):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
         if query:
             query = '%s' % query
 
         filters = {
-            'index': params.pop('index', index),
+            'index': params.pop('index', None),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
@@ -274,15 +274,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(r)
 
 
-    def retrieve(self, request, index=None, pk=None):
-        if index is None:
-            return self.list(request, index=pk)
-
-        self.index = index
+    def retrieve(self, request, pk=None):
         return Response(self.get_object())
 
     @detail_route(methods=['get'])
-    def children(self, request, index=None, pk=None):
+    def children(self, request, pk=None):
         s = Search(index=self.index).sort('reference_code')
 
         p = {'parent': {'query': pk, 'operator': 'and'}}
