@@ -52,16 +52,16 @@
             },
             "archiveMaintenance": {
                 "start": {
-                    "_permissions": []
+                    "_permissions": ["maintenance.add_appraisalrule"]
                 },
                 "appraisal": {
-                    "_permissions": []
+                    "_permissions": ["maintenance.add_appraisalrule"]
                 },
                 "conversion": {
-                    "_permissions": []
+                    "_permissions": ["maintenance.add_conversionrule"]
                 },
                 "mediaMigration": {
-                    "_permissions": []
+                    "_permissions": ["maintenance.add_conversionrule"]
                 }
             },
             "administration": {
