@@ -488,5 +488,6 @@
     "DO_YOU_WANT_TO_REMOVE_APPRAISAL": "Vill du ta bort gallringsregeln: {{name}}",
     "AVAILABLE": "Tillgänglig",
     "APPRAISAL_DATE": "Gallringsfrist",
-    "UNSPECIFIED": "Ospecificerad"
+    "UNSPECIFIED": "Ospecificerad",
+    "PACKAGE_TYPE_NAME_EXCLUDE": "Exkludera paket-typ"
 }

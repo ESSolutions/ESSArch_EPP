@@ -23,41 +23,6 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             }
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
-                if (vm.record.type == "volym" && vm.record_children.length == 0) {
-                    vm.record_children = [
-                        {
-                            _source: {
-                                name: "bild.jpg",
-                                reference_code: "101",
-                                unit_dates: {
-                                    date: "1100 - 1200"
-                                }
-                            },
-                            _index: "document",
-                        },
-                        {
-
-                            _source: {
-                                name: "faktura.doc",
-                                reference_code: "102",
-                                unit_dates: {
-                                    date: "1200 - 1300"
-                                }
-                            },
-                            _index: "document"
-                        },
-                        {
-                            _source: {
-                                name: "faktura.pdf",
-                                reference_code: "103",
-                                unit_dates: {
-                                    date: "1300 - 1400"
-                                }
-                            },
-                            _index: "document"
-                        }
-                    ];
-                }
             })
         });
     }
@@ -284,41 +249,6 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
             getChildren(vm.record).then(function(response) {
                 vm.record_children = response.data;
-                if(vm.record.type == "volym" && vm.record_children.length == 0) {
-                    vm.record_children = [
-                        {
-                            _source: {
-                                name: "bild.jpg",
-                                reference_code: "101",
-                                unit_dates: {
-                                    date: "1100 - 1200"
-                                }
-                            },
-                            _index: "document",
-                        },
-                        {
-
-                            _source: {
-                                name: "faktura.doc",
-                                reference_code: "102",
-                                unit_dates: {
-                                    date: "1200 - 1300"
-                                }
-                            },
-                            _index: "document"
-                        },
-                        {
-                            _source: {
-                                name: "faktura.pdf",
-                                reference_code: "103",
-                                unit_dates: {
-                                    date: "1300 - 1400"
-                                }
-                            },
-                            _index: "document"
-                        }
-                    ];
-                }
             })
         }
     }
