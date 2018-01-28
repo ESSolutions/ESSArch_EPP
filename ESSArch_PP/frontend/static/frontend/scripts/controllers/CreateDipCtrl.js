@@ -143,7 +143,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     //Click function for Ip table
     $scope.ipTableClick = function (row) {
         if (row.state == "Created") {
-            $scope.openRequestForm(row);
+            //$scope.openRequestForm(row);
         } else {
 
             if (row.state === "Creating" || (($scope.select || $scope.requestForm) && $scope.ip.id == row.id)) {
