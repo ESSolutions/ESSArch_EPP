@@ -291,8 +291,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.archiveMaintenance', {
         url: 'archive-maintenance',
         templateUrl: '/static/frontend/views/archive_maintenance.html',
-        controller: 'ArchiveMaintenanceCtrl as vm',
-        redirectTo: 'home.archiveMaintenance.start',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -300,7 +298,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     })
     .state('home.archiveMaintenance.start', {
-        url: '',
+        url: '/start',
         templateUrl: '/static/frontend/views/archive_maintenance_start.html',
         controller: 'AppraisalCtrl as vm',
         resolve: {
@@ -774,7 +772,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         }
 
-        if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration" || to.name == "home.administration.profileManager") {
+        if(to.name == "home.ingest" || to.name == "home.access" || to.name == "home.administration" || to.name == "home.administration.profileManager" || to.name == "home.archiveMaintenance") {
             evt.preventDefault();
             var resolved = Object.resolve(to.name, permissionConfig);
             for( var key in resolved) {

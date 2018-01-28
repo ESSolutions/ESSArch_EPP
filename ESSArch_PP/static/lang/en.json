@@ -490,5 +490,7 @@
     "AVAILABLE": "Available",
     "APPRAISAL_DATE": "Appraisal date",
     "UNSPECIFIED": "Unspecified",
-    "PACKAGE_TYPE_NAME_EXCLUDE": "Exclude package type"
+    "PACKAGE_TYPE_NAME_EXCLUDE": "Exclude package type",
+    "OVERVIEW": "Overview",
+    "PREPAREAPPRAISALDESC": "Create new appraisal rule"
 }

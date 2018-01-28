@@ -489,5 +489,7 @@
     "AVAILABLE": "Tillgänglig",
     "APPRAISAL_DATE": "Gallringsfrist",
     "UNSPECIFIED": "Ospecificerad",
-    "PACKAGE_TYPE_NAME_EXCLUDE": "Exkludera paket-typ"
+    "PACKAGE_TYPE_NAME_EXCLUDE": "Exkludera paket-typ",
+    "OVERVIEW": "Översikt",
+    "PREPAREAPPRAISALDESC": "Skapa ny gallringsregel"
 }

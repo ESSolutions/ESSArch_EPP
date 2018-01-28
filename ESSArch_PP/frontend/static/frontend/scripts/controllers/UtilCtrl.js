@@ -70,7 +70,7 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
                 e.preventDefault();
                 stateChangeListeners.push($scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
                     event.preventDefault();
-                    if(state == "home.ingest" || state == "home.access" || state == "home.administration" || state == "home.storageMaintenance") {
+                    if(state == "home.ingest" || state == "home.access" || state == "home.administration" || state == "home.archiveMaintenance") {
                         $scope.focusSubmenu();
                     } else if(state == "home.administration.profileManager") {
                         $scope.focusProfileManagerSubmenu();
