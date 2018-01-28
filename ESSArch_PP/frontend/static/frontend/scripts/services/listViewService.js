@@ -648,7 +648,7 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
                 path: pathStr,
             };
         }
-        if (ip.state == "At reception" || ip.state == "Prepared") {
+        if ($state.is('home.ingest.reception') && (ip.state == "At reception" || ip.state == "Prepared")) {
             sendData.id = ip.object_identifier_value;
             return IPReception.files(sendData).$promise.then(function(data) {
                 var count = data.$httpHeaders('Count');
