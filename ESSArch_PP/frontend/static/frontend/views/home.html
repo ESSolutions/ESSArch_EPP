@@ -54,7 +54,7 @@
                 <div ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
                 <div ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
             </div>
-            <div ng-controller="OrganizationCtrl">
+            <div class="organization-select" ng-controller="OrganizationCtrl">
                 <select tabindex="-1" style="width: auto; margin-left: 10px;" class="form-control" ng-model="currentOrganization" ng-change="changeOrganization(); updateListView()" ng-options="x as x.name for x in availableOrganizations track by x.id"></select>
             </div>
             <div ng-controller="LanguageCtrl" class="language-select" style="width: 100px; margin-left: 10px;">
