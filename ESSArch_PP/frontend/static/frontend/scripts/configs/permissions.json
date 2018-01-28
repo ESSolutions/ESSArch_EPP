@@ -51,9 +51,6 @@
                 "_permissions": []
             },
             "archiveMaintenance": {
-                "start": {
-                    "_permissions": ["maintenance.add_appraisalrule"]
-                },
                 "appraisal": {
                     "_permissions": ["maintenance.add_appraisalrule"]
                 },
@@ -62,6 +59,9 @@
                 },
                 "mediaMigration": {
                     "_permissions": ["maintenance.add_conversionrule"]
+                },
+                "start": {
+                    "_permissions": ["maintenance.add_appraisalrule"]
                 }
             },
             "administration": {
