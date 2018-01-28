@@ -107,7 +107,7 @@
                         ]
                     },
                     "export": {
-                        "_permissions": []
+                        "_permissions": ["profiles.export_sa", "profiles.export_profile"]
                     }
                 }
             },
