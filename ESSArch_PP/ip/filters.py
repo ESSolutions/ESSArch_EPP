@@ -61,8 +61,8 @@ class InformationPackageFilter(filters.FilterSet):
     responsible = ListFilter(name='responsible__username', method='filter_fields')
     create_date = ListFilter(name='create_date', method='filter_fields')
     object_size = ListFilter(name='object_size', method='filter_fields')
-    start_date = ListFilter(name='Startdate', method='filter_fields')
-    end_date = ListFilter(name='Enddate', method='filter_fields')
+    start_date = ListFilter(name='start_date', method='filter_fields')
+    end_date = ListFilter(name='end_date', method='filter_fields')
     archived = filters.BooleanFilter(method='filter_boolean_fields')
     cached = filters.BooleanFilter(method='filter_boolean_fields')
 
