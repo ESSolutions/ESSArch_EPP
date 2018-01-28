@@ -36,6 +36,7 @@ class ComponentSearch(FacetedSearch):
         'archive': TermsFacet(field='archive', min_doc_count=0),
         'institution': TermsFacet(field='institution', min_doc_count=0),
         'organization': TermsFacet(field='organization', min_doc_count=0),
+        'extension': TermsFacet(field='extension', min_doc_count=0),
     }
 
     def __init__(self, *args, **kwargs):
@@ -201,6 +202,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             query = '%s' % query
 
         filters = {
+            'extension': params.pop('extension', None),
             'index': params.pop('index', None),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
