@@ -173,7 +173,9 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.getFile = function(file) {
         if($state.includes("**.workarea.**")) {
             file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=" + vm.workarea + "&path=" + $scope.previousGridArraysString() + file.name);
-        } else {
+        } else if ($scope.ip.state == "At reception") {
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/files/?path=" + $scope.previousGridArraysString() + file.name);
+        } else{
             file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/" + $scope.ip.id + "/files/?path=" + $scope.previousGridArraysString() + file.name);
         }
         $window.open(file.content, '_blank');
