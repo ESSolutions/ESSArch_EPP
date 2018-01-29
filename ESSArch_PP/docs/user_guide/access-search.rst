@@ -3,59 +3,61 @@
 Search
 *******
 
-Access is where all **preserved** AIPs are listed.
-We can see information like events and steps/tasks of the preserved AIP.
+Access innehåller alla **arkiverade** AIPer.
+Vi kan information som vanligt i de olika vyerna.
 
-When clicking a row in the Access list view the user may make request from
-a request form. The available requests in Access are explained below.
+När man klickar ett IP i denna vy så får man se ett request-formulär.
+Tillgängliga request förklaras nedan
 
 .. image:: images/access_request_form.png
 
 .. _access-requests:
 
-Requests
-========
+Request
+=======
 
-To make a request click the desired request type, fill in the
-required information, check the **Request approved** checkbox and click the **Submit** button.
+För att göra ett request/förfrågan välj vilken typ av förfrågan,
+fyll i nödvändig information, markera **Förfrågan godkänd** och
+klicka **Skicka**.
 
-Get
----
-Access AIP in archival storage to the Access Workspace with
-content extracted as read only.
+Hämta
+-----
 
-Choose the option **Get**, enter a value in the
-**purpose** field and click **Submit**. The AIP generation should
-appear in the Access workspace shortly, the progress can be followed
-in the status bar of the IP and in the
-:ref:`State view <user-interface-state-view>` for more detailed information.
+Hämta AIP extraherad som read_only till Åtkomst/arbetsyta
+
+Välj alternativet **Hämta** Fyll i önskad information, markera
+**Förfrågan godkänd** och klicka på **Skicka**.
+Progressen kan följas i status-fältet flr IPt eller i större detalj
+om man klickar på **Tillstånd**-fältet. Se
+:ref:`State-vyn <user-interface-state-view>` för mer information.
 
 .. image:: images/access_request_form_get.png
 
-Get as container
-----------------
+Hämta som container
+-------------------
 Access AIP in archival storage to the Access Workspace as
 a tar or zip file.
+Hämta AIP som tar eller zip-fil till Åtkomst/arbetsyta
 
-Choose the option **Get as container**, enter a value in the
-**purpose** field and click **Submit**. The AIP generation should
-appear in the Access workspace shortly, the progress can be followed
-in the status bar of the IP and in the
-:ref:`State view <user-interface-state-view>` for more detailed information.
+
+Välj alternativet **Hämta som container** Fyll i önskad information, markera
+**Förfrågan godkänd** och klicka på **Skicka**.
+Progressen kan följas i status-fältet flr IPt eller i större detalj
+om man klickar på **Tillstånd**-fältet. Se
+:ref:`State-vyn <user-interface-state-view>` för mer information.
 
 .. image:: images/access_request_form_get_as_container.png
 
-Get as new generation
+Hämta som ny generation
 ---------------------
-Access AIP in archival storage to the Access Workspace as a
-new generation of the AIP.
-The new IP is basically a whole new IP but it is still related to the
-family of IPs that are related to the same AIC.
+Hämta ip till Åtkomst/arbetsyta som en ny generation.
+Den nya generationen är i princip ett helt eget IP, den är
+bara relaterad till sina tidigare och senare generationen genom samma AIC.
 
-Choose the option **Get as new generation**, enter a value in the
-**purpose** field and click **Submit**. The AIP generation should
-appear in the Access workspace shortly, the progress can be followed
-in the status bar of the IP and in the
-:ref:`State view <user-interface-state-view>` for more detailed information.
+Välj alternativet **Hämta som ny generation** Fyll i önskad information, markera
+**Förfrågan godkänd** och klicka på **Skicka**.
+Progressen kan följas i status-fältet flr IPt eller i större detalj
+om man klickar på **Tillstånd**-fältet. Se
+:ref:`State-vyn <user-interface-state-view>` för mer information.
 
 .. image:: images/access_request_form_get_as_new.png
