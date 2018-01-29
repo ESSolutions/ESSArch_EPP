@@ -2,7 +2,7 @@
     <div ng-click="ipRowClick(row)" context-menu="menuOptions('row')">
         <button tabindex="-1"
                 type="button"
-                ng-if="row.permissions.includes('delete_informationpackage')"
+                ng-if="('home.ingest.workarea' | isState) || ('home.access.workarea' | isState) || row.permissions.includes('delete_informationpackage')"
                 ng-click="removeIpModal(row)"
                 class="fa fa-trash"
                 uib-popover="{{'REMOVEIP' | translate}}: {{row.label}}"
@@ -15,7 +15,7 @@
     <div ng-click="ipRowClick(subrow)" context-menu="menuOptions('subrow')">
         <button tabindex="-1"
                 type="button"
-                ng-if="subrow.permissions.includes('delete_informationpackage')"
+                ng-if="('home.ingest.workarea' | isState) || ('home.access.workarea' | isState) || subrow.permissions.includes('delete_informationpackage')"
                 ng-click="removeIpModal(subrow)"
                 class="fa fa-trash"
                 uib-popover="{{'REMOVEIP' | translate}}: {{subrow.label}}"
