@@ -72,7 +72,7 @@ from ESSArch_Core.ip.models import (
     InformationPackage,
     Workarea,
 )
-from ESSArch_Core.maintenance.models import AppraisalRule, AppraisalJob, AppraisalJobEntry
+from ESSArch_Core.maintenance.models import AppraisalRule, AppraisalJob, AppraisalJobEntry, ConversionRule, ConversionJob, ConversionJobEntry
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.search.ingest import index_path
 from ESSArch_Core.storage.exceptions import (
@@ -1586,6 +1586,57 @@ class ScheduleAppraisalJobs(DBTask):
 
 
 class PollAppraisalJobs(DBTask):
+    track = False
+
+    def run(self):
+        now = timezone.now()
+        jobs = AppraisalJob.objects.select_related('rule').filter(status=celery_states.PENDING, start_date__lte=now)
+
+        for job in jobs.iterator():
+            job.run()
+
+    def undo(self):
+        pass
+
+    def event_outcome_success(self):
+        pass
+
+
+class ScheduleConversionJobs(DBTask):
+    track = False
+
+    def run(self):
+        now = timezone.now()
+
+        # get rules without future jobs scheduled
+        rules = ConversionRule.objects.filter(
+            information_packages__isnull=False, information_packages__active=True,
+        ).exclude(jobs__start_date__gte=now)
+
+        for rule in rules.iterator():
+            cron_entry = CronTab(rule.frequency)
+
+            try:
+                latest_job = rule.jobs.latest()
+                delay = cron_entry.next(latest_job.start_date)
+                last = latest_job.start_date
+            except ConversionJob.DoesNotExist:
+                # no job has been created yet
+                delay = cron_entry.next(now)
+                last = now
+
+            next_date = last + datetime.timedelta(seconds=delay)
+            ConversionJob.objects.create(rule=rule, start_date=next_date)
+
+
+    def undo(self):
+        pass
+
+    def event_outcome_success(self):
+        pass
+
+
+class PollConversionJobs(DBTask):
     track = False
 
     def run(self):
