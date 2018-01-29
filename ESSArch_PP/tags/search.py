@@ -245,7 +245,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             raise
 
         if self.paginator is not None:
-            if results.hits.total > 0 and number > math.ceil(results.hits.total/size):
+            if size > 0 and results.hits.total > 0 and number > math.ceil(results.hits.total/size):
                 raise exceptions.NotFound('Invalid page.')
 
         results_dict = results.to_dict()
