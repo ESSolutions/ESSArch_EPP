@@ -340,6 +340,14 @@ CELERYBEAT_SCHEDULE = {
         'task': 'workflow.tasks.ScheduleAppraisalJobs',
         'schedule': timedelta(seconds=10),
     },
+    'PollConversionJobs-every-10-seconds': {
+        'task': 'workflow.tasks.PollConversionJobs',
+        'schedule': timedelta(seconds=10),
+    },
+    'ScheduleConversionJobs-every-10-seconds': {
+        'task': 'workflow.tasks.ScheduleConversionJobs',
+        'schedule': timedelta(seconds=10),
+    },
 }
 
 # Rest auth settings
