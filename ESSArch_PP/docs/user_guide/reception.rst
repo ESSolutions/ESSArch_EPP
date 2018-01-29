@@ -8,19 +8,16 @@ Reception
 
 Receive sip
 ===========
-
-To receive an IP, check the checkbox at the start of the table row of the
-IP to include it for receive. Many IPs can be selected at the same time.
+För att ta emot ett IP, kryssa i kryssrutan för respektive IP som ska tas emot.
+Flera IP:n kan valjas samtidigt.
 
 .. image:: images/reception_checkbox.png
-
-When desired IPs are included click the **Receive**-button in the
-bottom right corner.
+När IP:n har valts klicka på knappen **Ta emot** längst ner i högra hörnet.
 
 .. image:: images/reception_receive_button.png
 
-Clicking the **Receive**-button will open a window to receive the first
-included IP.
+När knappen väl klickats kommer ett nytt fönster att öppnas för att ta emot det
+första valda IP:t.
 
 .. image:: images/receive_modal1.png
 
@@ -28,47 +25,45 @@ included IP.
 
 Profile Editor
 --------------
-
-Use the select dropdown to choose what submission agreement to use,
-then click **Prepare**.
-If the dropdown is disabled, the IP already has a related Submission agreement.
+Använd rullistan för att välja vilken leveransöverenskommelse som ska användas,
+klicka sedan på **Förbered**.
+Om rullistan är inaktiverad, har IPt redan en koppling till
+leveransöverenskommelsen.
 
 .. image:: images/profile_editor_select_sa.png
 
-The profile editor is where the user can edit data of a profile for a specific IP.
-The Submission agreements data fields can only be viewed by clicking
-the **view** button next to the SA dropdown.
+I profileditorn kan en användare editera data i en profil för ett specifikt IP.
+Data-fälten för en leveransöverenskommelse kan bara läsas genom
+att klicka på **Visa**-knappen bredvid rullistan.
 
 .. image:: images/profile_editor_view_sa.png
 
-Underneath the Submission agreement row, all relevant profiles are listed.
-Click **edit** next to a profile to edit the data of the profile for the
-IP to be received.
-When satisfied with the edit click **Save**.
+Under raden för leveransöverenskommelse finns alla relevanta profiler listade.
+Klicka på **Redigera** för att redigera profil-data för IPt
+som ska tas emot. Klicka sedan **Spara** när editeringen är färdig.
 
 .. image:: images/profile_editor_save.png
 
-When saving profile data, the previous versions are still available in the
-version dropdown. Choose between data versions and click save to apply.
+När man sparar profil-data så sparas alla tidigare versioner av datat
+och kan väljas i version-rullistan. Völj mellan versioner och klicka
+**Spara** för att spara.
 
 .. image:: images/profile_editor_version_select.png
 
-This can be done on each profile type, remember to save the data before
-closing the profile form.
+Detta kan göras på alla profiltyper. Kom ihåg att spara datat så
+det inte går förlorat.
 
 Receive
 -------
 
-When satisfied with submission agreement and profiles,
-Enter a value in the **purpose** field, select an **Archive policy**,
-check the **Approved to receive**-checkbox and click **Receive SIP**.
-The process of receiving the IP is started and if more IPs are included a
-receive window for the next IP will appear.
-An IP can be skipped by clicking the **Skip**-button,
-then the receive window for the next included IP will appear,
-if there is one.
+När leveransöverenskommelse och profiler är klara.
+Fyll i alla obligatoriska fält, markera **Godkänd för att ta emot** och
+klicka **Ta emot SIP**.
+IPt börjar tas emot och om fler IPn valts kommer ett fönster för
+nästa IP att dyka upp. Man kan skippa att ta emot ett IP genom att
+klicka på **Hoppa över**.
 
 .. image:: images/receive.png
 
-When IP is received it is no longer visible in the reception list view and
-can be found in the :ref:`Approval <ingest-ip-approval>` section
+När ett IP har tagits emot kan det inte längre hittas i receptionen,
+den ligger istället under :ref:`Godkännande <ingest-ip-approval>`.
