@@ -105,6 +105,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
             formatFilters();
+            if(vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
+                delete vm.filterObject.extension;
+            }
             Search.query(vm.filterObject, pageNumber, number).then(function (response) {
                 angular.copy(response.data, vm.searchResult);
                 vm.numberOfResults = response.count;
