@@ -1,5 +1,5 @@
 =============
-Access
+Åtkomst
 =============
 
 :Release: |version|

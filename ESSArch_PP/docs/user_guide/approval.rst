@@ -1,7 +1,7 @@
 .. _approval:
 
 **********
-Approval
+Godkännande
 **********
 
 Godkännande är där AIPer hamnar innan dom ska arkiveras.

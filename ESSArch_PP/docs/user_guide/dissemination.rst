@@ -1,27 +1,29 @@
 .. _dissemination:
 
 *************
-Dissemination
+Utlämnande
 *************
 
-The purpose of the Dissemination page is creating disseminations(or DIP).
-The content of every IP that is present in Access workspace is available
-in the dissemination page and can be used to create a dissemination.
-A dissemination package is an IP for handing to a customer, also called DIP.
+Syftet med utlämnande-sidan är att skapa utlämnanden(disseminations eller DIP).
+Allt material som ligger under Åtkomst/arbetstya är tillgängligt
+för ett utlämnande.
 
-First step is to prepare dissemination, so click **Prepare dissemination**.
-Enter the only required field label, optionally enter a custom
-identification value and connect dissemination to order.
-Then click **ok** and the dissemination package has been prepared.
+Första steget är att förbereda ett utlämnande.
+Klicka på **Förbered utlämnande**. Fyll i label och resterande
+fält om så önskas(ej obligatoriska). Man kan även koppla utlämnande
+till en beställning, då kan vi se utlämnandet och dess filer
+när vi klickar på en beställning. Klicka **ok** när
+utlämnande-paket är klart.
 
 .. image:: images/prepare_dip.png
 
-Click the DIP row in the list view and two filebrowsers will appear.
-The first represents data in workspace which can be marked and added to
-the second filebrowser window by clicking **Add**.
-The user can also add new folders in the DIP and remove added files/folders.
+Klicka ett utlämnande för att få upp två filhanterare.
+den första innehåller all data från åtkomst/arbetsyta och den nedre
+är själva utlämnandet.
+Markera en fil eller mapp i den övre och klicka **lägg till**.
+En användare kan även ta bort filer från utlämnandet och skapa nya mappar.
 
-When satisfied with dissemination check the **Approved to create** checkbox
-and click **Create dissemination**.
+När man är klar med ett utlämnande klickar man i **Godkänd för att skapa**
+och klickar på **Skapa utlämnande**.
 
 .. image:: images/create_dip.png

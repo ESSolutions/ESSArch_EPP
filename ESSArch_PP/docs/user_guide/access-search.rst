@@ -1,6 +1,6 @@
-.. _access-search:
+.. _åtkomst-sök:
 *******
-Search
+Sök
 *******
 
 Access innehåller alla **arkiverade** AIPer.
@@ -54,7 +54,7 @@ Hämta ip till Åtkomst/arbetsyta som en ny generation.
 Den nya generationen är i princip ett helt eget IP, den är
 bara relaterad till sina tidigare och senare generationen genom samma AIC.
 
-Välj alternativet **Hämta som ny generation** Fyll i önskad information, markera
+Välj alternativet **Hämta som   ny generation** Fyll i önskad information, markera
 **Förfrågan godkänd** och klicka på **Skicka**.
 Progressen kan följas i status-fältet flr IPt eller i större detalj
 om man klickar på **Tillstånd**-fältet. Se

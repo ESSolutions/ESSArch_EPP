@@ -6,7 +6,7 @@ Reception
 
 .. _receive-sip:
 
-Receive sip
+Ta emot SIP
 ===========
 För att ta emot ett IP, kryssa i kryssrutan för respektive IP som ska tas emot.
 Flera IP:n kan valjas samtidigt.
@@ -23,7 +23,7 @@ första valda IP:t.
 
 
 
-Profile Editor
+Profileditor
 --------------
 Använd rullistan för att välja vilken leveransöverenskommelse som ska användas,
 klicka sedan på **Förbered**.
@@ -53,7 +53,7 @@ och kan väljas i version-rullistan. Völj mellan versioner och klicka
 Detta kan göras på alla profiltyper. Kom ihåg att spara datat så
 det inte går förlorat.
 
-Receive
+Ta emot
 -------
 
 När leveransöverenskommelse och profiler är klara.

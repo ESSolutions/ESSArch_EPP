@@ -1,5 +1,5 @@
 =============
-Ingest
+Mottagande
 =============
 
 :Release: |version|

@@ -1,14 +1,14 @@
 .. _access-workspace:
 
 ****************
-Access Workspace
+Åtkomst/arbetsyta
 ****************
 Åtkomst/arbetsyta
 En arbetsyta där man kan modifera ett IP genom gränssnitt eller
 tredjepartsverktyg. Arbetsytor är privata och olika för olika användare.
 
 IPn i Åtkomst/arbetsyta är tillgängliga under :ref:`utlämnande <dissemination>`
- som en del av ett utlämnande.
+som en del av ett utlämnande.
 
 När ett IP har blivit hämtat till Åtkomst/arbetsyta kan man
 arkivera det direkt eller **flytta till Mottagande/godkännande**

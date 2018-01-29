@@ -1,7 +1,7 @@
 .. _ingest-workspace:
 
 ****************
-Ingest Workspace
+Mottagande/arbetsyta
 ****************
 
 Mottagande/arbetsyta
