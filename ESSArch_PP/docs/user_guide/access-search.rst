@@ -35,8 +35,6 @@ om man klickar på **Tillstånd**-fältet. Se
 
 Hämta som container
 -------------------
-Access AIP in archival storage to the Access Workspace as
-a tar or zip file.
 Hämta AIP som tar eller zip-fil till Åtkomst/arbetsyta
 
 
