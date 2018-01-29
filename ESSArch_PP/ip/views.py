@@ -70,7 +70,7 @@ from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
 from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
                                          IsOrderResponsibleOrAdmin,
                                          IsResponsibleOrReadOnly)
-from ESSArch_Core.maintenance.models import AppraisalRule
+from ESSArch_Core.maintenance.models import AppraisalRule, ConversionRule
 from ESSArch_Core.pagination import LinkHeaderPagination
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
@@ -1346,6 +1346,40 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         try:
             rule = AppraisalRule.objects.get(pk=rule_id)
         except AppraisalRule.DoesNotExist:
+            raise exceptions.ParseError('No rule with id "%s"' % rule_id)
+
+        rule.information_packages.remove(ip)
+        return Response()
+
+    @detail_route(methods=['post'], url_path='add-conversion-rule')
+    def add_conversion_rule(self, request, pk=None):
+        ip = self.get_object()
+
+        try:
+            rule_id = request.data['id']
+        except KeyError:
+            raise exceptions.ParseError('Missing id parameter')
+
+        try:
+            rule = ConversionRule.objects.get(pk=rule_id)
+        except ConversionRule.DoesNotExist:
+            raise exceptions.ParseError('No rule with id "%s"' % rule_id)
+
+        rule.information_packages.add(ip)
+        return Response()
+
+    @detail_route(methods=['post'], url_path='remove-conversion-rule')
+    def remove_conversion_rule(self, request, pk=None):
+        ip = self.get_object()
+
+        try:
+            rule_id = request.data['id']
+        except KeyError:
+            raise exceptions.ParseError('Missing id parameter')
+
+        try:
+            rule = ConversionRule.objects.get(pk=rule_id)
+        except ConversionRule.DoesNotExist:
             raise exceptions.ParseError('No rule with id "%s"' % rule_id)
 
         rule.information_packages.remove(ip)
