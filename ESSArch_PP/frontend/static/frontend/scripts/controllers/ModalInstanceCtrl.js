@@ -405,6 +405,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         if(path.length > 0) {
             $ctrl.pathList.push(path);
         }
+        $ctrl.path = "";
     }
     $ctrl.removePath = function(path) {
         $ctrl.pathList.splice($ctrl.pathList.indexOf(path), 1);
@@ -487,6 +488,8 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             target: $ctrl.target,
             tool: $ctrl.tool
         }
+        $ctrl.path = "";
+        $ctrl.target = "";
     }
 
     $ctrl.removeRule = function(ip, rule) {
