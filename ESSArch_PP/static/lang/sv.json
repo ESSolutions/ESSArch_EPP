@@ -500,5 +500,8 @@
     "CREATE_CONVERSION_RULE": "Skapa konverteringsregel",
     "CONVERSION_RULES": "Konverteringsregler",
     "TOOL": "Verktyg",
-    "FILE_EXTENSIONS": "Filformat"
+    "FILE_EXTENSIONS": "Filformat",
+    "FILES_TO_BE_REMOVED": "Filer som kommer att tas bort",
+    "APPRAISAL_PREVIEW": "Gallring förhandsgranskning",
+    "PREVIEW": "Förhandsgranska"
 }

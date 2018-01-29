@@ -351,7 +351,11 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             TopAlert.add(response.data.detail, "error");
         })
     }
-
+    if(data.preview && data.job) {
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/"+data.job.id+"/preview").then(function(response) {
+            $ctrl.jobPreview = response.data;
+        })
+    }
     $ctrl.expandIp = function(ip) {
         if(ip.expanded) {
             ip.expanded = false;

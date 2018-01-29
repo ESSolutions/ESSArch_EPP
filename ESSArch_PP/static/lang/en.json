@@ -501,5 +501,8 @@
     "CREATE_CONVERSION_RULE": "Create conversion rules",
     "CONVERSION_RULES": "Conversion rules",
     "TOOL": "Tool",
-    "FILE_EXTENSIONS": "File format"
+    "FILE_EXTENSIONS": "File format",
+    "FILES_TO_BE_REMOVED": "Files to be removed",
+    "APPRAISAL_PREVIEW": "Appraisal preview",
+    "PREVIEW": "Preview"
 }

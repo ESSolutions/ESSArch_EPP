@@ -116,17 +116,12 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * Run appraisal rule now
      * @param {Object} appraisal
      */
-    vm.runNow = function(appraisal) {
-        var object = {
-            id: guid(),
-            start: new Date(),
-            rule: appraisal
-        };
+    vm.runJob = function(job) {
         $http({
-            url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id+"/run",
+            url: appConfig.djangoUrl+"appraisal-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            TopAlert.add(response.data, "success");
+            TopAlert.add("Running appraisal job", "success");
             vm.rulePipe(vm.ruleTableState);
             vm.ongoingPipe(vm.ongoingTableState);
         }).catch(function(response) {
@@ -166,6 +161,32 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     /**
      * MODALS
      */
+
+    vm.previewModal = function(job) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/preview_appraisal_modal.html',
+            controller: 'AppraisalModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {
+                    preview: true,
+                    job: job
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.runJob(job);
+            vm.rulePipe(vm.ruleTableState);
+            vm.nextPipe(vm.nextTableState);
+            vm.ongoingPipe(vm.ongoingTableState);
+            vm.finishedPipe(vm.finishedTableState);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
 
     vm.createRuleModal = function() {
         var modalInstance = $uibModal.open({
