@@ -8,7 +8,6 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.viewResult = true;
     vm.numberOfResults = 0;
     vm.resultsPerPage = 25;
-
     vm.resultViewType = "list";
 
     var auth = window.btoa("user:user");
@@ -17,11 +16,16 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.$onInit = function() {
         if($state.is('home.search.detail') || $state.is('home.search.ipDetail')) {
             vm.activeTab = 1;
-            vm.showResults = true;
+            vm.showTree = true;
         } else {
             vm.activeTab = 0;
             vm.showResults = false;
         }
+        $http.get(appConfig.djangoUrl+"search/", {params: {page_size: 0}}).then(function(response) {
+            vm.loadTags(response.data.aggregations);
+            vm.fileExtensions = response.data.aggregations._filter_extension.extension.buckets;
+            vm.showTree = true;
+        })
     }
 
     $scope.checkPermission = function(permissionName) {
@@ -32,6 +36,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         type: null,
         indices: null
     }
+
+    vm.extensionFilter = {};
 
     vm.includedTypes = {
         archive: true,
@@ -71,13 +77,20 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     }
 
     function formatFilters() {
-        var included = [];
+        var includedTypes = [];
         for(var key in vm.includedTypes) {
             if(vm.includedTypes[key]) {
-                included.push(key);
+                includedTypes.push(key);
             }
         }
-        vm.filterObject.indices = included.join(',');
+        vm.filterObject.indices = includedTypes.join(',');
+        var includedExtension = [];
+        for(var key in vm.extensionFilter) {
+            if(vm.extensionFilter[key]) {
+                includedExtension.push(key);
+            }
+        }
+        vm.filterObject.extension = includedExtension.join(',');
     }
 
     /**

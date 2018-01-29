@@ -499,5 +499,6 @@
     "CONVERSION_RULE": "Konverteringsregel",
     "CREATE_CONVERSION_RULE": "Skapa konverteringsregel",
     "CONVERSION_RULES": "Konverteringsregler",
-    "TOOL": "Verktyg"
+    "TOOL": "Verktyg",
+    "FILE_EXTENSIONS": "Filformat"
 }

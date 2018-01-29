@@ -9,7 +9,7 @@
             <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <div ng-if="vm.showFilters" class="filters">
-                <label>
+                <!--<label>
                     {{'START_DATE' | translate}}
                     <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.start_date">
                 </label>
@@ -17,7 +17,17 @@
                     {{'END_DATE' | translate}}
                     <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.end_date">
                 </label>
-                <br/>
+                <br/>-->
+                <label>
+                    {{'FILE_EXTENSIONS' | translate}}
+                </label>
+                <div ng-repeat="x in vm.fileExtensions">
+                    <label>
+                        <input type="checkbox" ng-model="vm.extensionFilter[x.key]">
+                        {{x.key}}
+                    </label>
+                </div>
+                <!--<br/>
                 <span ng-click="vm.showIncludedTypes = !vm.showIncludedTypes" class="clickable no-select">{{'INCLUDED_TYPES' | translate}}
                     <i ng-if="!vm.showIncludedTypes" class="fa fa-caret-right"></i>
                     <i ng-if="vm.showIncludedTypes"class="fa fa-caret-down"></i>
@@ -39,17 +49,17 @@
                         <input type="checkbox" ng-model="vm.includedTypes.file">
                         {{'FILE' | translate}}
                     </label>
-                </div>
+                </div>-->
             </div>
         </div>
         <div class="search-detail-wrapper">
-            <uib-tabset ng-if="vm.searchResult.length || vm.showResults" active="vm.activeTab" class="tabs">
+            <uib-tabset ng-if="vm.searchResult.length || vm.showResults || vm.showTree" active="vm.activeTab" class="tabs">
                 <uib-tab index="0" heading="{{'HITS' | translate}}">
                     <div class="tree-result-wrapper" ng-if="vm.activeTab == 0">
-                        <div class="filter-tree">
+                        <div ng-if="vm.showTree"class="filter-tree">
                             <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
                         </div>
-                        <div class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                        <div ng-if="vm.showResults" class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
                             <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                             <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container search-result-table">
                                 <table class="table table-striped">

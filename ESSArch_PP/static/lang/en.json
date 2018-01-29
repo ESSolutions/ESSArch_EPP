@@ -500,5 +500,6 @@
     "CONVERSION_RULE": "Conversion rule",
     "CREATE_CONVERSION_RULE": "Create conversion rules",
     "CONVERSION_RULES": "Conversion rules",
-    "TOOL": "Tool"
+    "TOOL": "Tool",
+    "FILE_EXTENSIONS": "File format"
 }
