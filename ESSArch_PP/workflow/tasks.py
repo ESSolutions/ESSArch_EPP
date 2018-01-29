@@ -1558,7 +1558,8 @@ class ScheduleAppraisalJobs(DBTask):
 
         # get rules without future jobs scheduled
         rules = AppraisalRule.objects.filter(
-            information_packages__isnull=False, information_packages__active=True
+            information_packages__isnull=False, information_packages__active=True,
+            information_packages__appraisal_date__lte=now
         ).exclude(jobs__start_date__gte=now)
 
         for rule in rules.iterator():
