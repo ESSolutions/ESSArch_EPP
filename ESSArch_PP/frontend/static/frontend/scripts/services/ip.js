@@ -110,5 +110,10 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
             params: { action: "appraisal-rules", id: "@id"},
             isArray: true
         },
+        conversionRules: {
+            method: "GET",
+            params: { action: "conversion-rules", id: "@id"},
+            isArray: true
+        },
     });
 });

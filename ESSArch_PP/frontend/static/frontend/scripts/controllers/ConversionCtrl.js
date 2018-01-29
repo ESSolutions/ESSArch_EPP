@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval) {
+angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -11,9 +11,9 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
 
         //Cancel update intervals on state change
         $scope.$on('$stateChangeStart', function() {
-            $interval.cancel(appraisalInterval);
+            $interval.cancel(conversionInterval);
         });
-    var appraisalInterval = $interval(function() {
+    var conversionInterval = $interval(function() {
         vm.rulePipe(vm.ruleTableState);
         vm.nextPipe(vm.nextTableState);
         vm.ongoingPipe(vm.ongoingTableState);
@@ -28,7 +28,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     });
 
     /**
-     * Smart table pipe function for appraisal rules
+     * Smart table pipe function for conversion rules
      * @param {*} tableState
      */
     vm.rulePipe = function(tableState) {
@@ -36,7 +36,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             var search = tableState.search.predicateObject["$"];
         }
         $scope.ruleLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {search: search}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {search: search}}).then(function(response) {
             vm.ruleTableState = tableState;
             vm.ruleFilters.forEach(function(x) {
                 response.data.forEach(function(rule) {
@@ -48,58 +48,58 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             vm.rules = response.data;
             $scope.ruleLoading = false;
         }).catch(function(response) {
-            TopAlert.add("Failed to get appraisal rules", "error");
+            TopAlert.add("Failed to get conversion rules", "error");
             $scope.ruleLoading = false;
         })
     }
 
     /**
-     * Smart table pipe function for ongoing appraisals
+     * Smart table pipe function for ongoing conversions
      * @param {*} tableState
      */
     vm.ongoingPipe = function(tableState) {
         $scope.ongoingLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {params: {status: "STARTED"}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"conversion-jobs/", {params: {status: "STARTED"}}).then(function(response) {
             vm.ongoingTableState = tableState;
             vm.ongoing = response.data;
             $scope.ongoingLoading = false;
 
         }).catch(function(response) {
-            TopAlert.add("Failed to get ongoing appraisal jobs", "error");
+            TopAlert.add("Failed to get ongoing conversion jobs", "error");
             $scope.ongoingLoading = false;
         })
     }
 
     /**
-     * Smart table pipe function for next appraisals
+     * Smart table pipe function for next conversions
      * @param {*} tableState
      */
     vm.nextPipe = function(tableState) {
         $scope.nextLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {status: "PENDING"}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"conversion-jobs/", { params: {status: "PENDING"}}).then(function(response) {
             vm.nextTableState = tableState;
             vm.next = response.data;
             $scope.nextLoading = false;
 
         }).catch(function(response) {
-            TopAlert.add("Failed to get next appraisal jobs", "error");
+            TopAlert.add("Failed to get next conversion jobs", "error");
             $scope.nextLoading = false;
         });
     }
 
     /**
-     * Smart table pipe function for finished appraisals
+     * Smart table pipe function for finished conversions
      * @param {*} tableState
      */
     vm.finishedPipe = function(tableState) {
         $scope.finishedLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {end_date__isnull: false}}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"conversion-jobs/", { params: {end_date__isnull: false}}).then(function(response) {
             vm.finishedTableState = tableState;
             vm.finished = response.data;
             $scope.finishedLoading = false;
 
         }).catch(function(response) {
-            TopAlert.add("Failed to get finished appraisal jobs", "error");
+            TopAlert.add("Failed to get finished conversion jobs", "error");
             $scope.finishedLoading = false;
         })
     }
@@ -113,17 +113,17 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
           s4() + '-' + s4() + s4() + s4();
       }
     /**
-     * Run appraisal rule now
-     * @param {Object} appraisal
+     * Run conversion rule now
+     * @param {Object} conversion
      */
-    vm.runNow = function(appraisal) {
+    vm.runNow = function(conversion) {
         var object = {
             id: guid(),
             start: new Date(),
-            rule: appraisal
+            rule: conversion
         };
         $http({
-            url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id+"/run",
+            url: appConfig.djangoUrl+"conversion-rules/"+conversion.id+"/run",
             method: "POST",
         }).then(function(response) {
             TopAlert.add(response.data, "success");
@@ -135,13 +135,13 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     }
 
     /*
-     * Array containing chosen(checked) appraisal rules to use
-     * as filter for the other appraisal tables
+     * Array containing chosen(checked) conversion rules to use
+     * as filter for the other conversion tables
      */
     vm.ruleFilters = [];
 
     /**
-     * Add chosen appraisal rule to list of filters or remove it.
+     * Add chosen conversion rule to list of filters or remove it.
      * Connected to apprailsal rule table checkbox
      * @param {Object} rule
      */
@@ -155,11 +155,11 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
         }
     }
     /**
-     * Show appraisal report
-     * @param {Object} appraisal
+     * Show conversion report
+     * @param {Object} conversion
      */
-    vm.showReport = function(appraisal) {
-        var file = $sce.trustAsResourceUrl(appConfig.djangoUrl+"appraisal-jobs/"+appraisal.id+"/report/");
+    vm.showReport = function(conversion) {
+        var file = $sce.trustAsResourceUrl(appConfig.djangoUrl+"conversion-jobs/"+conversion.id+"/report/");
         $window.open(file, '_blank');
     }
 
@@ -172,8 +172,8 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/create_appraisal_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/create_conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {}
@@ -191,8 +191,8 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/appraisal_rule_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/conversion_rule_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {
@@ -206,17 +206,17 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
         });
     }
 
-    vm.ongoingModal = function(appraisal) {
+    vm.ongoingModal = function(conversion) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/appraisal_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {
-                    appraisal: appraisal,
+                    conversion: conversion,
                     state: "Ongoing"
                 }
             }
@@ -227,17 +227,17 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
         });
     }
 
-    vm.nextModal = function(appraisal) {
+    vm.nextModal = function(conversion) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/appraisal_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {
-                    appraisal: appraisal,
+                    conversion: conversion,
                     state: "Next"
                 }
             }
@@ -248,17 +248,17 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
         });
     }
 
-    vm.finishedModal = function(appraisal) {
+    vm.finishedModal = function(conversion) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/appraisal_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {
-                    appraisal: appraisal,
+                    conversion: conversion,
                     state: "Finished"
                 }
             }
@@ -268,29 +268,29 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
-    vm.removeAppraisalRuleModal = function(appraisal) {
+    vm.removeConversionRuleModal = function(conversion) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/remove_appraisal_rule_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/remove_conversion_rule_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {
-                    appraisal: appraisal,
+                    conversion: conversion,
                 }
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
             $http({
-                url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id,
+                url: appConfig.djangoUrl+"conversion-rules/"+conversion.id,
                 method: "DELETE"
             }).then(function(response) {
                 vm.rulePipe(vm.ruleTableState);
-                TopAlert.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
+                TopAlert.add("conversion rule: "+conversion.name+" has been removed", "success");
             }).catch(function(response) {
-                TopAlert.add("Appraisal rule could not be removed", "errorepp");
+                TopAlert.add("conversion rule could not be removed", "errorepp");
             })
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

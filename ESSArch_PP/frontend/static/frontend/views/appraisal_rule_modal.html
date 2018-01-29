@@ -2,9 +2,18 @@
         <h3 class="modal-title" id="modal-title">{{'APPRAISAL_RULE' | translate}}</h3>
     </div>
     <div class="modal-body" id="modal-body">
+        <label>
+            {{'NAME' | translate}}
+        </label>
         <p>{{$ctrl.data.rule.name}}</p>
-        <p>{{$ctrl.data.rule.type}}</p>
+        <label>
+            {{'FREQUENCY' | translate}}
+        </label>
         <p>{{$ctrl.data.rule.frequency}}</p>
+        <label>
+            {{'SPECIFICATION' | translate}}
+        </label>
+            <p>{{$ctrl.data.rule.specification.join(', ')}}</p>
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()" focused="true">{{'OK' | translate}}</button>

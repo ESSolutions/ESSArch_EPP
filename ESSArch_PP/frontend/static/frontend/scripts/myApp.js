@@ -329,6 +329,22 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         },
     })
+    .state('home.archiveMaintenance.conversion', {
+        url: '/conversion',
+        templateUrl: '/static/frontend/views/conversion.html',
+        controller: 'ConversionCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.archiveMaintenance.appraisal", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
     .state('home.administration', {
         url: 'administration',
         templateUrl: '/static/frontend/views/administration.html',

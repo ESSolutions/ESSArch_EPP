@@ -1,0 +1,63 @@
+<div class="enter-profile-name">
+        <h3 class="modal-title" id="modal-title">{{'CREATE_CONVERSION_RULE' | translate}}</h3>
+    </div>
+    <form ng-submit="$ctrl.create()">
+        <div class="modal-body" id="modal-body">
+            <label>
+                {{'NAME' | translate}}
+                <input class="form-control" required ng-model="$ctrl.name">
+            </label>
+            <br/>
+            <label>
+                {{'FREQUENCY' | translate}}
+                <input class="form-control" required ng-model="$ctrl.frequency">
+            </label>
+            <br/>
+            <h4>{{'SPECIFICATION' | translate}}</h4>
+            <div class="specification">
+                <label>
+                    {{'PATH' | translate}}
+                    <input class="form-control"  ng-model="$ctrl.path"></input>
+                </label>
+                <label>
+                    {{'TARGET' | translate}}
+                    <input class="form-control" ng-model="$ctrl.target"></input>
+                </label>
+                <label>
+                    {{'TOOL' | translate}}
+                    <select class="form-control" ng-enter="$ctrl.addSpecification()" ng-model="$ctrl.tool" ng-init="$ctrl.tool = 'libreoffice'" ng-options="x for x in ['libreoffice']">{{x}}</select>
+                </label>
+                <button type="button" class="btn btn-success btn-sm" ng-disabled="!$ctrl.path || !$ctrl.target || !$ctrl.tool" ng-click="$ctrl.addSpecification()"><i class="fa fa-plus"></i></button>
+                <table class="table" style="margin-top: 20px;">
+                    <thead>
+                        <th>
+                            {{'PATH' | translate}}
+                        </th>
+                        <th>
+                            {{'TARGET' | translate}}
+                        </th>
+                        <th>
+                            {{'TOOL' | translate}}
+                        </th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(key, value) in $ctrl.specifications">
+                            <td>
+                                {{key}}
+                            </td>
+                            <td>
+                                {{value.target}}
+                            </td>
+                            <td>
+                                {{value.tool}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="submit" focused="true">{{'CREATE' | translate}}</button>
+            <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+        </div>
+    </form>

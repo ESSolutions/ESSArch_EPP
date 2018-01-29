@@ -421,7 +421,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             method: "POST",
             data: $ctrl.data
         }).then(function(response) {
-            TopAlert.add(response.data.detail, "success")
+            TopAlert.add("Rule created!", "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error")
@@ -436,5 +436,116 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.submitAppraisal = function(appraisal) {
         TopAlert.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
         $uibModalInstance.close(appraisal);
+    }
+}).controller('ConversionModalInstanceCtrl', function (IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.angular = angular;
+    $ctrl.data = data;
+    $ctrl.requestTypes = data.types;
+    $ctrl.request = data.request;
+    $ctrl.conversionRules = [];
+    $ctrl.ip = null;
+    $ctrl.showRulesTable = function(ip) {
+        $ctrl.ip = ip;
+        return $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
+            $ctrl.conversionRules = response.data;
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        })
+    }
+
+    $ctrl.expandIp = function(ip) {
+        if(ip.expanded) {
+            ip.expanded = false;
+        } else {
+            ip.expanded = true;
+            IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
+                ip.rules = resource;
+            }).catch(function(response) {
+                TopAlert.add(response.data.detail, "error");
+            })
+        }
+    }
+
+    $ctrl.addRule = function(ip, rule) {
+        $http({
+            url: appConfig.djangoUrl+"information-packages/"+ip.id+"/add-conversion-rule/",
+            method: "POST",
+            data: {
+                id: rule.id
+            }
+        }).then(function(response) {
+            ip.rules.push(rule);
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        });
+    }
+
+    $ctrl.specifications = {};
+    $ctrl.addSpecification = function() {
+        $ctrl.specifications[$ctrl.path] = {
+            target: $ctrl.target,
+            tool: $ctrl.tool
+        }
+    }
+
+    $ctrl.removeRule = function(ip, rule) {
+        $http({
+            url: appConfig.djangoUrl+"information-packages/"+ip.id+"/remove-conversion-rule/",
+            method: "POST",
+            data: {
+                id: rule.id
+            }
+        }).then(function(response) {
+            ip.rules.forEach(function(x, index, array) {
+                if(x.id == rule.id) {
+                    array.splice(index, 1);
+                }
+            })
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        });
+    }
+    $ctrl.closeRulesTable = function(){
+        $ctrl.conversionRules = [];
+        $ctrl.ip = null;
+    }
+    $ctrl.path = "";
+    $ctrl.pathList = [];
+    $ctrl.addPath = function(path) {
+        if(path.length > 0) {
+            $ctrl.pathList.push(path);
+        }
+    }
+    $ctrl.removePath = function(path) {
+        $ctrl.pathList.splice($ctrl.pathList.indexOf(path), 1);
+    }
+    $ctrl.conversionRule = null;
+    $ctrl.create = function() {
+        $ctrl.data = {
+            name: $ctrl.name,
+            frequency: $ctrl.frequency,
+            specification: $ctrl.specifications
+        };
+        $http({
+            url: appConfig.djangoUrl+"conversion-rules/",
+            method: "POST",
+            data: $ctrl.data
+        }).then(function(response) {
+            TopAlert.add("Rule created!", "success")
+            $uibModalInstance.close($ctrl.data);
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error")
+        })
+    }
+    $ctrl.ok = function() {
+        $uibModalInstance.close();
+    }
+    $ctrl.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+    $ctrl.submitConversion = function(conversion) {
+        TopAlert.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
+        $uibModalInstance.close(conversion);
     }
 })

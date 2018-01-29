@@ -492,5 +492,12 @@
     "PACKAGE_TYPE_NAME_EXCLUDE": "Exkludera paket-typ",
     "OVERVIEW": "Översikt",
     "PREPAREAPPRAISALDESC": "Skapa ny gallringsregel",
-    "ADD_APPRAISAL_RULE_TO_IP": "Lägg till/ta bort gallringsregler till IPn"
+    "ADD_APPRAISAL_RULE_TO_IP": "Lägg till/ta bort gallringsregler till IPn",
+    "CONVERSION": "Konvertering",
+    "PREPARECONVERSIONDESC": "Skapa ny konverteringsregel",
+    "ADD_CONVERSION_RULE_TO_IP": "Lägg till/ta bort konverteringsregler till IPn",
+    "CONVERSION_RULE": "Konverteringsregel",
+    "CREATE_CONVERSION_RULE": "Skapa konverteringsregel",
+    "CONVERSION_RULES": "Konverteringsregler",
+    "TOOL": "Verktyg"
 }

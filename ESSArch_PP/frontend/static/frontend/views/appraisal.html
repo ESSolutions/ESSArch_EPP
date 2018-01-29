@@ -27,8 +27,6 @@
                         <tr>
                             <th>{{'NAME' | translate}}</th>
                             <th>{{'FREQUENCY' | translate}}</th>
-                            <th>{{'SPECIFICATION' | translate}}</th>
-                            <th>{{'RUN' | translate}}</th>
                             <th>{{'REMOVE' | translate}}</th>
                         </tr>
                     </thead>
@@ -36,15 +34,13 @@
                         <tr ng-repeat="x in vm.rules">
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.name}}</td>
                             <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
-                            <td class="clickable" ng-click="vm.ruleModal(x)">{{x.specification}}</td>
-                            <td><button class="btn btn-success lock-button" ng-click="vm.runNow(x)">{{'RUN' | translate}}</button></td>
                             <td><button class="fa fa-trash" ng-click="vm.removeAppraisalRuleModal(x)"></button></td>
                         </tr>
                         <tr ng-if="!vm.rules.length && !ruleLoading" class="empty-table-indicator">
-                            <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                            <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
                         </tr>
                         <tr ng-if="!vm.rules.length && ruleLoading" class="empty-table-indicator">
-                            <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
+                            <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                         </tr>
                     </tbody>
                 </table>

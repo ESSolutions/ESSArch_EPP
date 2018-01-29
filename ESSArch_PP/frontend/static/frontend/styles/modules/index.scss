@@ -914,6 +914,11 @@ padding: 0 12px;
     @include container(10px);
 }
 
+.conversion-page {
+    margin-top: 10px;
+    @include container(10px);
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;

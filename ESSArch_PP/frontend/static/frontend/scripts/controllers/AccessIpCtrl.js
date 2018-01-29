@@ -17,6 +17,15 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
                     }
                 }
             },
+            {
+                text: $translate.instant("CONVERSION"),
+                click: function ($itemScope, $event, modelValue, text, $li) {
+                    if($scope.ips.length == 0 && $scope.ip == null) {
+                    } else {
+                        vm.openConversionModal($scope.ips);
+                    }
+                }
+            },
         ];
     };
 
@@ -194,6 +203,32 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             ariaDescribedBy: 'modal-body',
             templateUrl: 'static/frontend/views/appraisal_modal.html',
             controller: 'AppraisalModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: function () {
+                    return {
+                        ips: ips,
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.openConversionModal = function (ips) {
+        if(ips.length == 0 && $scope.ip != null) {
+            ips.push($scope.ip);
+        }
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
             controllerAs: '$ctrl',
             size: "lg",
             resolve: {
