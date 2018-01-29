@@ -504,5 +504,8 @@
     "FILE_EXTENSIONS": "File format",
     "FILES_TO_BE_REMOVED": "Files to be removed",
     "APPRAISAL_PREVIEW": "Appraisal preview",
-    "PREVIEW": "Preview"
+    "PREVIEW": "Preview",
+    "CONVERSION_PREVIEW": "Conversion preview",
+    "FILES_TO_BE_CONVERTED": "Files to be converted",
+    "DO_YOU_WANT_TO_REMOVE_ĆONVERSION": "Do you want to remove conversion rule: {{name}}"
 }

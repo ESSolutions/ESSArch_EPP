@@ -503,5 +503,8 @@
     "FILE_EXTENSIONS": "Filformat",
     "FILES_TO_BE_REMOVED": "Filer som kommer att tas bort",
     "APPRAISAL_PREVIEW": "Gallring förhandsgranskning",
-    "PREVIEW": "Förhandsgranska"
+    "PREVIEW": "Förhandsgranska",
+    "CONVERSION_PREVIEW": "Konvertering förhandsgranskning",
+    "FILES_TO_BE_CONVERTED": "Filer som kommer konverteras",
+    "DO_YOU_WANT_TO_REMOVE_CONVERSION": "Vill du ta bort konverteringsregeln: {{name}}"
 }

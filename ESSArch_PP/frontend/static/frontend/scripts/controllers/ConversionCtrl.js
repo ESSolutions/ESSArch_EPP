@@ -116,19 +116,12 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
      * Run conversion rule now
      * @param {Object} conversion
      */
-    vm.runNow = function(conversion) {
-        var object = {
-            id: guid(),
-            start: new Date(),
-            rule: conversion
-        };
+    vm.runJob = function(job) {
         $http({
-            url: appConfig.djangoUrl+"conversion-rules/"+conversion.id+"/run",
+            url: appConfig.djangoUrl+"conversion-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            TopAlert.add(response.data, "success");
-            vm.rulePipe(vm.ruleTableState);
-            vm.ongoingPipe(vm.ongoingTableState);
+            TopAlert.add("Running conversion job", "success");
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         })
@@ -166,6 +159,32 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
     /**
      * MODALS
      */
+
+    vm.previewModal = function(job) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/preview_conversion_modal.html',
+            controller: 'ConversionModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {
+                    preview: true,
+                    job: job
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.runJob(job);
+            vm.rulePipe(vm.ruleTableState);
+            vm.nextPipe(vm.nextTableState);
+            vm.ongoingPipe(vm.ongoingTableState);
+            vm.finishedPipe(vm.finishedTableState);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
 
     vm.createRuleModal = function() {
         var modalInstance = $uibModal.open({

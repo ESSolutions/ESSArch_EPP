@@ -352,7 +352,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         })
     }
     if(data.preview && data.job) {
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/"+data.job.id+"/preview").then(function(response) {
+        $http.get(appConfig.djangoUrl+"appraisal-jobs/"+data.job.id+"/preview/").then(function(response) {
             $ctrl.jobPreview = response.data;
         })
     }
@@ -378,6 +378,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             }
         }).then(function(response) {
             ip.rules.push(rule);
+            $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         });
@@ -395,6 +396,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                     array.splice(index, 1);
                 }
             })
+            $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         });
@@ -471,7 +473,18 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             })
         }
     }
-
+    function getRules() {
+        IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
+            ip.rules = resource;
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, "error");
+        })
+    }
+    if(data.preview && data.job) {
+        $http.get(appConfig.djangoUrl+"conversion-jobs/"+data.job.id+"/preview/").then(function(response) {
+            $ctrl.jobPreview = response.data;
+        })
+    }
     $ctrl.addRule = function(ip, rule) {
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/add-conversion-rule/",
@@ -481,6 +494,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             }
         }).then(function(response) {
             ip.rules.push(rule);
+            $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         });
@@ -509,6 +523,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                     array.splice(index, 1);
                 }
             })
+            $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         });

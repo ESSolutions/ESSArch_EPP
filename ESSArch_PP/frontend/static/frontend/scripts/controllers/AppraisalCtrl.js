@@ -122,8 +122,6 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             method: "POST",
         }).then(function(response) {
             TopAlert.add("Running appraisal job", "success");
-            vm.rulePipe(vm.ruleTableState);
-            vm.ongoingPipe(vm.ongoingTableState);
         }).catch(function(response) {
             TopAlert.add(response.data.detail, "error");
         })
