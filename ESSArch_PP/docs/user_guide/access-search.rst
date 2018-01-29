@@ -1,4 +1,4 @@
-.. _åtkomst-sök:
+.. _access-search:
 *******
 Sök
 *******
