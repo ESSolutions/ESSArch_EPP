@@ -1567,11 +1567,11 @@ class ScheduleAppraisalJobs(DBTask):
 
             try:
                 latest_job = rule.jobs.latest()
-                delay = cron_entry.next(latest_job.start_date)
+                delay = cron_entry.next(timezone.localtime(latest_job.start_date))
                 last = latest_job.start_date
             except AppraisalJob.DoesNotExist:
                 # no job has been created yet
-                delay = cron_entry.next(now)
+                delay = cron_entry.next(timezone.localtime(now))
                 last = now
 
             next_date = last + datetime.timedelta(seconds=delay)
@@ -1618,11 +1618,11 @@ class ScheduleConversionJobs(DBTask):
 
             try:
                 latest_job = rule.jobs.latest()
-                delay = cron_entry.next(latest_job.start_date)
+                delay = cron_entry.next(timezone.localtime(latest_job.start_date))
                 last = latest_job.start_date
             except ConversionJob.DoesNotExist:
                 # no job has been created yet
-                delay = cron_entry.next(now)
+                delay = cron_entry.next(timezone.localtime(now))
                 last = now
 
             next_date = last + datetime.timedelta(seconds=delay)
