@@ -1,7 +1,8 @@
 import os
 
-from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Subquery,
-                              Value, When)
+from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Prefetch,
+                              Subquery, Value, When)
+from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
@@ -86,6 +87,11 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return obj.is_last_generation()
 
     def get_permissions(self, obj):
+        checker = self.context.get('perm_checker')
+
+        if checker is not None:
+            return checker.get_perms(obj)
+
         request = self.context.get('request')
         if hasattr(request, 'user'):
             return get_perms(request.user, obj)
@@ -93,7 +99,12 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return []
 
     def get_workarea(self, obj):
-        workarea = obj.workareas.first()
+        try:
+            workarea = obj.prefetched_workareas[0]
+        except AttributeError:
+            workarea = obj.workareas.first()
+        except IndexError:
+            workarea = None
 
         if workarea is not None:
             return WorkareaSerializer(workarea, context=self.context).data
@@ -161,7 +172,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         else:
             related = obj.information_packages
 
-        related = related.order_by('generation')
+        related = related.select_related('archivist_organization').prefetch_related(Prefetch('workareas', to_attr="prefetched_workareas")).order_by('generation')
 
         if view is not None or not getattr(view, 'search_fields', ''):
             view.search_fields = ip_search_fields
@@ -186,7 +197,10 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             )
         )
 
-        return InformationPackageSerializer(related, many=True, context={'request': request}).data
+        checker = ObjectPermissionChecker(request.user)
+        checker.prefetch_perms(related)
+
+        return InformationPackageSerializer(related, many=True, context={'request': request, 'perm_checker': checker}).data
 
     def get_workarea(self, obj):
         workarea = obj.workareas.first()
