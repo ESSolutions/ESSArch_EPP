@@ -50,6 +50,7 @@ from elasticsearch_dsl import Index, Search, Q as ElasticQ
 from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
 
+from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm
 
 from lxml import etree
