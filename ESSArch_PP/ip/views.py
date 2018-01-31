@@ -39,7 +39,7 @@ from operator import itemgetter
 from celery import states as celery_states
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Q,
+from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -779,26 +779,17 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
 
+        lower_higher_gen = InformationPackage.objects.exclude(workareas__read_only=False)
 
-        min_max_gen = InformationPackage.objects.annotate(
-            min_gen=Min('generation'), max_gen=Max('generation')
-        ).filter(aic=OuterRef('aic')).exclude(workareas__read_only=False).order_by('generation')
+        lower_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__lt=OuterRef('generation'))
+        higher_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__gt=OuterRef('generation'))
+
+        self.queryset = self.queryset.select_related('archivist_organization')
+        self.queryset = self.queryset.prefetch_related(Prefetch('workareas', to_attr='prefetched_workareas'))
 
         if self.action == 'retrieve' or view_type == 'ip':
-            self.queryset = self.queryset.annotate(
-                first_generation=Case(
-                    When(generation=Subquery(min_max_gen.values('min_gen')[:1]),
-                         then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField()
-                ),
-                last_generation=Case(
-                    When(generation=Subquery(min_max_gen.reverse().values('max_gen')[:1]),
-                         then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField()
-                )
-            )
+            self.queryset = self.queryset.annotate(first_generation=~Exists(lower_gen))
+            self.queryset = self.queryset.annotate(last_generation=~Exists(higher_gen))
 
         if self.action == 'list':
             self.queryset = self.queryset.exclude(workareas__read_only=False)
@@ -809,7 +800,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             if view_type == 'ip':
                 inner = inner.filter(aic=OuterRef('aic')).order_by('generation')
 
-                return self.queryset.annotate(has_ip=Exists(inner)).exclude(
+                self.queryset = self.queryset.annotate(has_ip=Exists(inner)).exclude(
                     package_type=InformationPackage.AIC,
                 ).filter(
                     Q(
@@ -817,9 +808,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                         Q(package_type=InformationPackage.DIP)
                     ),
                 ).distinct()
+                return self.queryset
 
             inner = inner.filter(aic=OuterRef('pk'))
-            return self.queryset.annotate(has_ip=Exists(inner)).filter(
+            self.queryset = self.queryset.annotate(has_ip=Exists(inner)).filter(
                 Q(package_type=InformationPackage.AIC, has_ip=True) |
                 ~Q(package_type__in=[InformationPackage.AIC, InformationPackage.AIP])
             ).distinct()
@@ -835,6 +827,11 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     def get_serializer_context(self):
         context = super(InformationPackageViewSet, self).get_serializer_context()
         context['view'] = self
+
+        checker = ObjectPermissionChecker(self.request.user)
+        checker.prefetch_perms(self.queryset)
+        context['perm_checker'] = checker
+
         return context
 
     def get_permissions(self):

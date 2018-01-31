@@ -1,6 +1,6 @@
 import os
 
-from django.db.models import (BooleanField, Case, Max, Min, OuterRef, Prefetch,
+from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch,
                               Subquery, Value, When)
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_perms
@@ -153,6 +153,11 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return obj.get_package_type_display()
 
     def get_permissions(self, obj):
+        checker = self.context.get('perm_checker')
+
+        if checker is not None:
+            return checker.get_perms(obj)
+
         request = self.context.get('request')
         if hasattr(request, 'user'):
             return get_perms(request.user, obj)
@@ -178,24 +183,13 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             view.search_fields = ip_search_fields
             related = self.search_filter.filter_queryset(request, related, view)
 
-        inner = InformationPackage.objects.annotate(
-            min_gen=Min('generation'), max_gen=Max('generation')
-        ).filter(aic=OuterRef('aic')).exclude(workareas__read_only=False).order_by('generation')
+        lower_higher_gen = InformationPackage.objects.exclude(workareas__read_only=False)
 
-        related = related.annotate(
-            first_generation=Case(
-                When(generation=Subquery(inner.values('min_gen')[:1]),
-                     then=Value(1)),
-                default=Value(0),
-                output_field=BooleanField()
-            ),
-            last_generation=Case(
-                When(generation=Subquery(inner.reverse().values('max_gen')[:1]),
-                     then=Value(1)),
-                default=Value(0),
-                output_field=BooleanField()
-            )
-        )
+        lower_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__lt=OuterRef('generation'))
+        higher_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__gt=OuterRef('generation'))
+
+        related = related.annotate(first_generation=~Exists(lower_gen))
+        related = related.annotate(last_generation=~Exists(higher_gen))
 
         checker = ObjectPermissionChecker(request.user)
         checker.prefetch_perms(related)
@@ -203,7 +197,12 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return InformationPackageSerializer(related, many=True, context={'request': request, 'perm_checker': checker}).data
 
     def get_workarea(self, obj):
-        workarea = obj.workareas.first()
+        try:
+            workarea = obj.prefetched_workareas[0]
+        except AttributeError:
+            workarea = obj.workareas.first()
+        except IndexError:
+            workarea = None
 
         if workarea is not None:
             return WorkareaSerializer(workarea, context=self.context).data
