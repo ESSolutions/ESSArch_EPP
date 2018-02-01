@@ -418,6 +418,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.appraisalRule = null;
     $ctrl.create = function() {
+        if($ctrl.pathList.length == 0) {
+            $ctrl.showRequired = true;
+            return;
+        }
         $ctrl.data = {
             name: $ctrl.name,
             frequency: $ctrl.frequency,

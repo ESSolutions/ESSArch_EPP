@@ -508,5 +508,6 @@
     "CONVERSION_PREVIEW": "Conversion preview",
     "FILES_TO_BE_CONVERTED": "Files to be converted",
     "DO_YOU_WANT_TO_REMOVE_CONVERSION": "Do you want to remove conversion rule: {{name}}",
-    "ADD_RULE": "Add rule"
+    "ADD_RULE": "Add rule",
+    "CHOOSE_AT_LEAST_ONE": "Choose at least one path"
 }

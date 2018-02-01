@@ -1,31 +1,32 @@
 <div class="enter-profile-name">
     <h3 class="modal-title" id="modal-title">{{'CREATE_APPRAISAL_RULE' | translate}}</h3>
 </div>
-<form ng-submit="$ctrl.create()">
+<form name="$ctrl.createForm" ng-submit="$ctrl.create()">
     <div class="modal-body" id="modal-body">
-        <label>
-            {{'NAME' | translate}}
-            <input class="form-control" required ng-model="$ctrl.name">
-        </label>
-        <br/>
-        <label>
-            {{'FREQUENCY' | translate}}
-            <input class="form-control" required ng-model="$ctrl.frequency">
-        </label>
-        <br/>
-        <label>
-            {{'PATHS' | translate}}
-            <input class="form-control" ng-enter="$ctrl.addPath($ctrl.path)" ng-model="$ctrl.path"></input>
-        </label>
-        <button type="button" class="btn btn-success btn-sm" ng-click="$ctrl.addPath($ctrl.path)"><i class="fa fa-plus"></i></button>
-        <div class="path-row">
-            <div ng-repeat="path in $ctrl.pathList track by $index" class="path-item">
-                {{path}}&nbsp;<i ng-click="$ctrl.removePath(path)" class="fa fa-times clickable"></i>
+            <label>
+                {{'NAME' | translate}}
+                <input class="form-control" required ng-model="$ctrl.name">
+            </label>
+            <br/>
+            <label>
+                {{'FREQUENCY' | translate}}
+                <input class="form-control" required ng-model="$ctrl.frequency">
+            </label>
+            <br/>
+            <label>
+                {{'PATHS' | translate}}
+                <input class="form-control" ng-enter="$ctrl.addPath($ctrl.path)" ng-model="$ctrl.path">
+            </label>
+            <button type="button" class="btn btn-success btn-sm" ng-click="$ctrl.addPath($ctrl.path)"><i class="fa fa-plus"></i></button>
+            <div class="path-row">
+                <div ng-repeat="path in $ctrl.pathList track by $index" class="path-item">
+                    {{path}}&nbsp;<i ng-click="$ctrl.removePath(path)" class="fa fa-times clickable"></i>
+                </div>
+                <div ng-if="$ctrl.pathList.length == 0">
+                    <span ng-if="!$ctrl.showRequired">{{'NO_PATHS_CHOSEN' | translate}}</span>
+                    <span ng-if="$ctrl.showRequired" style="color: rgb(255, 0, 0);">{{'CHOOSE_AT_LEAST_ONE' | translate}} *</span>
+                </div>
             </div>
-            <div ng-if="$ctrl.pathList.length == 0">
-                No paths chosen
-            </div>
-        </div>
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" type="submit" focused="true">{{'CREATE' | translate}}</button>
