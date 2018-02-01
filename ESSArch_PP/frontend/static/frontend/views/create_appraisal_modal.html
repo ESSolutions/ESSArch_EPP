@@ -24,7 +24,7 @@
                 </div>
                 <div ng-if="$ctrl.pathList.length == 0">
                     <span ng-if="!$ctrl.showRequired">{{'NO_PATHS_CHOSEN' | translate}}</span>
-                    <span ng-if="$ctrl.showRequired" style="color: rgb(255, 0, 0);">{{'CHOOSE_AT_LEAST_ONE' | translate}} *</span>
+                    <span ng-if="$ctrl.showRequired" style="color: red;">{{'CHOOSE_AT_LEAST_ONE_PATH' | translate}} *</span>
                 </div>
             </div>
     </div>

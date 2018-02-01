@@ -509,5 +509,7 @@
     "FILES_TO_BE_CONVERTED": "Files to be converted",
     "DO_YOU_WANT_TO_REMOVE_CONVERSION": "Do you want to remove conversion rule: {{name}}",
     "ADD_RULE": "Add rule",
-    "CHOOSE_AT_LEAST_ONE": "Choose at least one path"
+    "CHOOSE_AT_LEAST_ONE_PATH": "Choose at least one path",
+    "CHOOSE_AT_LEAST_ONE_SPECIFICATION": "Choose at least one specification",
+    "NO_SPECIFICATIONS_CHOSEN": "No specifications chosen"
 }

@@ -514,6 +514,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.target = "";
     }
 
+    $ctrl.deleteSpecification = function(key) {
+        delete $ctrl.specifications[key];
+    }
+
     $ctrl.removeRule = function(ip, rule) {
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/remove-conversion-rule/",
@@ -548,6 +552,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.conversionRule = null;
     $ctrl.create = function() {
+        if(angular.equals($ctrl.specifications, {})) {
+            $ctrl.showRequired = true;
+            return;
+        }
         $ctrl.data = {
             name: $ctrl.name,
             frequency: $ctrl.frequency,
