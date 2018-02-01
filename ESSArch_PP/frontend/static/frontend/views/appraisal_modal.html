@@ -29,7 +29,7 @@
                             </td>
                         </tr>
                         <tr ng-if="ip.expanded" ng-repeat-end>
-                            <td colspan="4" ng-click="$ctrl.showRulesTable(ip)" class="clickable add-rule-row">Add rule</td>
+                            <td colspan="4" ng-click="$ctrl.showRulesTable(ip)" class="clickable add-rule-row">{{'ADD_RULE' | translate}}</td>
                         </tr>
                     </tr>
                     <tr ng-if="!$ctrl.data.ips.length" class="empty-table-indicator">

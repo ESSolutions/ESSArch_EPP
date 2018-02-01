@@ -506,5 +506,6 @@
     "PREVIEW": "Förhandsgranska",
     "CONVERSION_PREVIEW": "Konvertering förhandsgranskning",
     "FILES_TO_BE_CONVERTED": "Filer som kommer konverteras",
-    "DO_YOU_WANT_TO_REMOVE_CONVERSION": "Vill du ta bort konverteringsregeln: {{name}}"
+    "DO_YOU_WANT_TO_REMOVE_CONVERSION": "Vill du ta bort konverteringsregeln: {{name}}",
+    "ADD_RULE": "Lägg till regel"
 }
