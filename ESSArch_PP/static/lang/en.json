@@ -496,7 +496,7 @@
     "ADD_APPRAISAL_RULE_TO_IP": "Add/remove appraisal rules to IPs",
     "CONVERSION": "Conversion",
     "PREPARECONVERSIONDESC": "Create new conversion rule",
-    "ADD_CONVERSION_RULE_TO_IP": "Add/remove appraisal rules to IPs",
+    "ADD_CONVERSION_RULE_TO_IP": "Add/remove converison rules to IPs",
     "CONVERSION_RULE": "Conversion rule",
     "CREATE_CONVERSION_RULE": "Create conversion rules",
     "CONVERSION_RULES": "Conversion rules",
