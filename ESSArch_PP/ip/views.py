@@ -39,7 +39,7 @@ from operator import itemgetter
 from celery import states as celery_states
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch, Q,
+from django.db.models import (BooleanField, Case, Exists, F, Max, Min, OuterRef, Prefetch, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -780,7 +780,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
 
-        lower_higher_gen = InformationPackage.objects.exclude(workareas__read_only=False)
+        lower_higher_gen = InformationPackage.objects.only('pk').exclude(workareas__read_only=False)
 
         lower_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__lt=OuterRef('generation'))
         higher_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__gt=OuterRef('generation'))
@@ -794,7 +794,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         if self.action == 'list':
             self.queryset = self.queryset.exclude(workareas__read_only=False)
-            inner = InformationPackage.objects.visible_to_user(user).filter(
+            inner = InformationPackage.objects.visible_to_user(user).only('pk').filter(
                 Q(Q(workareas=None) | Q(workareas__read_only=True)),
             ).exclude(active=False)
 
@@ -805,7 +805,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     package_type=InformationPackage.AIC,
                 ).filter(
                     Q(
-                        Q(generation=Subquery(inner.values('generation')[:1]), has_ip=True) |
+                        Q(first_generation=True, has_ip=True) |
                         Q(package_type=InformationPackage.DIP)
                     ),
                 ).distinct()

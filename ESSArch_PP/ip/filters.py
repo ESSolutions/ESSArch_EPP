@@ -87,29 +87,19 @@ class InformationPackageFilter(filters.FilterSet):
                 nested_exists_query = information_packages.filter(aic_id=OuterRef('id'))
 
         if self.form.data.get('view_type', 'aic') == 'ip':
+            lower_higher_gen = InformationPackage.objects.only('pk').filter(aic=OuterRef('aic')).exclude(workareas__read_only=False)
+
+            lower_gen = lower_higher_gen.filter(generation__lt=OuterRef('generation'))
+            higher_gen = lower_higher_gen.filter(generation__gt=OuterRef('generation'))
+            information_packages = information_packages.annotate(first_generation=~Exists(lower_gen))
+            information_packages = information_packages.annotate(last_generation=~Exists(higher_gen))
+
             field = 'aic__information_packages'
-            inner = InformationPackage.objects.filter(aic=OuterRef('aic')).order_by('generation')
-            information_packages = information_packages.exclude(generation=Subquery(inner.values('generation')[:1]))
+            information_packages = information_packages.exclude(first_generation=True)
         else:
             field = 'information_packages'
 
         information_packages = information_packages.select_related('responsible').prefetch_related('workareas', 'steps')
-
-        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(active=True, aic=OuterRef('aic')).order_by('generation')
-        information_packages = information_packages.annotate(
-            first_generation=Case(
-               When(generation=Subquery(inner.values('min_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
-            ),
-            last_generation=Case(
-               When(generation=Subquery(inner.values('max_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
-            )
-        )
 
         prefetched = qs.prefetch_related(Prefetch(field, information_packages))
 
