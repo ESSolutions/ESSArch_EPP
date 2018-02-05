@@ -247,7 +247,7 @@ class IOQueueWriteSerializer(IOQueueSerializer):
                 storage_medium = StorageMedium.objects.get(id=storage_medium_data)
             else:
                 storage_medium = None
-        except KeyError, StorageMedium.DoesNotExist:
+        except (KeyError, StorageMedium.DoesNotExist):
             storage_medium = None
 
         return IOQueue.objects.create(ip=ip, storage_method_target=storage_method_target,

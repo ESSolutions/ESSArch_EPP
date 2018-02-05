@@ -355,5 +355,5 @@ OLD_PASSWORD_FIELD_ENABLED = True
 
 try:
     from local_epp_settings import *
-except ImportError, exp:
+except ImportError as exp:
     pass

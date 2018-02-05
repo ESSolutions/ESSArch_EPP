@@ -36,7 +36,6 @@ import uuid
 import zipfile
 
 from copy import deepcopy
-from urlparse import urljoin
 
 from celery import states as celery_states
 from celery.exceptions import Ignore
@@ -57,6 +56,8 @@ from rest_framework.test import APIRequestFactory
 import requests
 
 from scandir import walk
+
+from six.moves import urllib
 
 from ESSArch_Core import tasks
 from ESSArch_Core.auth.models import Notification
@@ -948,7 +949,7 @@ class PollIOQueue(DBTask):
     def transfer_to_master(self, entry):
         master_server = entry.storage_method_target.storage_target.master_server
         host, user, passw = master_server.split(',')
-        dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+        dst = urllib.parse.urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
         session = requests.Session()
         session.verify = False
@@ -960,7 +961,7 @@ class PollIOQueue(DBTask):
 
         copy_file(cache_tar_obj, dst, session)
 
-        dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+        dst = urllib.parse.urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
         response = session.post(dst)
         response.raise_for_status()
 
@@ -1013,7 +1014,7 @@ class PollIOQueue(DBTask):
                 entry.save(update_fields=['status'])
 
                 host, user, passw = storage_target.remote_server.split(',')
-                dst = urljoin(host, 'api/io-queue/')
+                dst = urllib.parse.urljoin(host, 'api/io-queue/')
                 session = requests.Session()
                 session.verify = False
                 session.auth = (user, passw)
@@ -1051,7 +1052,7 @@ class PollIOQueue(DBTask):
                 finally:
                     entry.save(update_fields=['status'])
 
-                dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+                dst = urllib.parse.urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
                 # copy files if write request and not already copied
                 if entry.req_type in [10, 15] and entry.remote_status != 20:
@@ -1072,7 +1073,7 @@ class PollIOQueue(DBTask):
 
                         t.run().get()
 
-                        dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                        dst = urllib.parse.urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                         response = session.post(dst)
                         response.raise_for_status()
                     except:
@@ -1198,7 +1199,7 @@ class IO(DBTask):
                 if entry.remote_io:
                     master_server = entry.storage_method_target.storage_target.master_server
                     host, user, passw = master_server.split(',')
-                    dst = urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
+                    dst = urllib.parse.urljoin(host, 'api/io-queue/%s/add-file/' % entry.pk)
 
                     session = requests.Session()
                     session.verify = False
@@ -1206,7 +1207,7 @@ class IO(DBTask):
 
                     copy_file(cache_obj, dst, requests_session=session)
 
-                    dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
+                    dst = urllib.parse.urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                     response = session.post(dst)
                     response.raise_for_status()
             else:

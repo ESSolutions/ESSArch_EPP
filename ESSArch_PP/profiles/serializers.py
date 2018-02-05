@@ -16,7 +16,7 @@ class ProfileMakerExtensionSerializer(serializers.ModelSerializer):
 
         schemadoc = etree.fromstring(schema_request.content)
 
-        print schemadoc.nsmap
+        print(schemadoc.nsmap)
         nsmap = {k: v for k, v in schemadoc.nsmap.iteritems() if k and v != "http://www.w3.org/2001/XMLSchema"}
         targetNamespace = schemadoc.get('targetNamespace')
 

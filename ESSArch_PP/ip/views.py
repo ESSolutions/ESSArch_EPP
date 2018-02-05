@@ -1621,7 +1621,6 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
     @list_route(methods=['post'], url_path='merge-uploaded-chunks')
     def merge_uploaded_chunks(self, request):
-        print request.data
         try:
             workarea = self.request.query_params['type'].lower()
         except KeyError:
