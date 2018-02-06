@@ -27,6 +27,7 @@ from django.db.models import (BooleanField, Case, Count, Exists, F,
                               Subquery, Value, When)
 from django_filters import rest_framework as filters
 from rest_framework import exceptions
+from rest_framework.filters import SearchFilter
 
 from ESSArch_Core.filters import ListFilter
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
@@ -39,7 +40,10 @@ ip_search_fields = (
     'submission_agreement__name', 'start_date', 'end_date',
 )
 
-def get_ip_search_fields():
+def get_ip_search_fields(nested=True):
+    if not nested:
+        return ip_search_fields
+
     with_extra_fields = ip_search_fields
 
     for field in ip_search_fields:
@@ -49,6 +53,8 @@ def get_ip_search_fields():
 
 
 class InformationPackageFilter(filters.FilterSet):
+    search_filter = SearchFilter()
+
     archival_institution = ListFilter(name="archival_institution__name", method='filter_fields')
     archivist_organization = ListFilter(name='archivist_organization__name', method='filter_fields')
     archival_type = ListFilter(name='archival_type__name', method='filter_fields')
@@ -65,60 +71,12 @@ class InformationPackageFilter(filters.FilterSet):
     end_date = ListFilter(name='end_date', method='filter_fields')
     archived = filters.BooleanFilter(method='filter_boolean_fields')
     cached = filters.BooleanFilter(method='filter_boolean_fields')
+    search = filters.CharFilter(method='filter_search')
 
-    def __init__(self, *args, **kwargs):
-        self.recursive = kwargs.pop('recursive', True)
-        super(InformationPackageFilter, self).__init__(*args, **kwargs)
-
-    def prefetch_information_packages(self, qs, ips=None):
-        if ips is None:
-            information_packages = InformationPackage.objects.filter(
-                Q(workareas=None) | Q(workareas__read_only=True)
-            )
-        else:
-            information_packages = ips
-
-        information_packages = information_packages.filter(active=True)
-
-        if self.recursive:
-            information_packages = self.__class__(recursive=False, data=self.form.cleaned_data, queryset=information_packages, request=self.request).qs
-
-            if self.form.data.get('view_type', 'aic') == 'aic':
-                nested_exists_query = information_packages.filter(aic_id=OuterRef('id'))
-
-        if self.form.data.get('view_type', 'aic') == 'ip':
-            lower_higher_gen = InformationPackage.objects.only('pk').filter(aic=OuterRef('aic')).exclude(workareas__read_only=False)
-
-            lower_gen = lower_higher_gen.filter(generation__lt=OuterRef('generation'))
-            higher_gen = lower_higher_gen.filter(generation__gt=OuterRef('generation'))
-            information_packages = information_packages.annotate(first_generation=~Exists(lower_gen))
-            information_packages = information_packages.annotate(last_generation=~Exists(higher_gen))
-
-            field = 'aic__information_packages'
-            information_packages = information_packages.exclude(first_generation=True)
-        else:
-            field = 'information_packages'
-
-        information_packages = information_packages.select_related('responsible').prefetch_related('workareas', 'steps')
-
-        prefetched = qs.prefetch_related(Prefetch(field, information_packages))
-
-        if self.form.data.get('view_type', 'aic') == 'aic':
-            return prefetched.annotate(nested_exists=Exists(nested_exists_query)).filter(
-                Q(nested_exists=True) | ~Q(package_type=InformationPackage.AIC)
-            )
-
-        return prefetched
-
-    @property
-    def qs(self):
-        already_prefetched = hasattr(self, '_qs')
-        super(InformationPackageFilter, self).qs
-
-        if self.recursive and self.is_bound and not already_prefetched:
-            self._qs = self.prefetch_information_packages(self._qs)
-
-        return self._qs
+    def filter_search(self, queryset, name, value):
+        class DummyView(object):
+            search_fields = get_ip_search_fields(nested=False)
+        return self.search_filter.filter_queryset(self.request, queryset, DummyView)
 
     def filter_package_type_name(self, queryset, name, value):
         for package_type_id, package_type_name in InformationPackage.PACKAGE_TYPE_CHOICES:
@@ -138,8 +96,7 @@ class InformationPackageFilter(filters.FilterSet):
             related_field = 'information_packages'
 
         return queryset.filter(
-            Q(**{'%s%s' % (name, lookup): value}) |
-            Q(**{'%s__%s%s' % (related_field, name, lookup): value})
+            Q(**{'%s%s' % (name, lookup): value})
         ).distinct()
 
     def filter_boolean_fields(self, queryset, name, value):
