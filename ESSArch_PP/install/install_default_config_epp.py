@@ -165,6 +165,10 @@ def installDefaultUsers():
         ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
         ['storage_management','storage','storageobject'],   # Storage management (Administration)
+        ## ---- app: maintenance ---- model: AppraisalRule
+        ['add_appraisalrule','maintenance','AppraisalRule'],   # Can add appraisal rule (Administration)
+        ## ---- app: maintenance ---- model: ConversionRule
+        ['add_conversionrule','maintenance','ConversionRule'],   # Can add conversion rule (Administration)
     ]
 
     for p in permission_list_admin:
