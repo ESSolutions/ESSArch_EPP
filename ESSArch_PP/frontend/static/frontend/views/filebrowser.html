@@ -1,33 +1,33 @@
 <div class="file-explorer" st-table="deckGridData" st-pipe="dirPipe">
     <div class="nav-refresh-wrapper">
         <div class="file-explorer-nav">
-            <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
-            <b ng-if="!('**.workarea.**' | includedByState)" class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString()}}</b>
-            <b ng-if="('**.workarea.**' | includedByState)" class="dir-path">{{previousGridArraysString()}}</b>
+        <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
+        <b ng-if="!('**.workarea.**' | includedByState)" class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString()}}</b>
+        <b ng-if="('**.workarea.**' | includedByState)" class="dir-path">{{previousGridArraysString()}}</b>
         </div>
-        <div class="file-view-options btn-group">
+        <div class="button-refresh-wrapper">
             <div>
                 <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
                     uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                     {{x}}
                 </select>
             </div>
-            <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()"
-                uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()" uib-popover="{{'LIST_VIEW' | translate}}"
+                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-th-list fa-lg"></i>
             </button>
-            <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()"
-                uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()" uib-popover="{{'GRID_VIEW' | translate}}"
+                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-th fa-lg"></i>
             </button>
-        </div>
-        <div class="refresh-icon">
-            <span ng-click="updateGridArray(ip)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': deckGridLoading }"
+        <div class="refresh-filebrowser">
+            <span ng-click="updateGridArray(ip)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
                 uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
         </div>
-    </div>
-    <div ng-show="gridView">
-        <div class="deckgrid">
+        </div>
+        </div>
+        <div ng-show="gridView">
+            <div class="deckgrid">
             <div class="flex-grid">
                 <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
             </div>

@@ -4,27 +4,27 @@
             <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
             <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
         </div>
-        <div class="file-view-options btn-group">
-            <div>
-                <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                    {{x}}
-                </select>
-            </div>
-            <button class="btn btn-default btn-sm" ng-class="{'active': workareaListView}" ng-click="useListView(1)"
-                uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th-list fa-lg"></i>
-            </button>
-            <button class="btn btn-default btn-sm" ng-class="{'active': workareaGridView}" ng-click="useGridView(1)"
-                uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th fa-lg"></i>
-            </button>
+        <div class="button-refresh-wrapper">
+        <div>
+            <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
+            uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                {{x}}
+            </select>
         </div>
-        <div class="refresh-icon">
+        <button class="btn btn-default btn-sm" ng-class="{'active': workareaListView}" ng-click="useListView(1)"
+            uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <i class="fa fa-th-list fa-lg"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active': workareaGridView}" ng-click="useGridView(1)"
+            uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <i class="fa fa-th fa-lg"></i>
+        </button>
+        <div class="refresh-filebrowser">
             <span ng-click="updateWorkareaFiles()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': workArrayLoading }"
             uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500"
             popover-append-to-body="true"></span>
         </div>
+    </div>
     </div>
     <div ng-show="workareaGridView">
         <div class="deckgrid">
@@ -73,7 +73,7 @@
             <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
             <b class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString(2)}}</b>
         </div>
-        <div class="file-view-options btn-group">
+        <div class="button-refresh-wrapper">
             <div>
                 <select class="form-control items-per-page" ng-change="changeFilesPerPage(dipFilesPerPage)" ng-model="dipFilesPerPage" ng-options="x for x in [5, 10, 25, 50]"
                 uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
@@ -88,10 +88,10 @@
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                 <i class="fa fa-th fa-lg"></i>
             </button>
-        </div>
-        <div class="refresh-icon">
-            <span ng-click="updateDipFiles()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
-            uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            <div class="refresh-filebrowser">
+                <span ng-click="updateDipFiles()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+                uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            </div>
         </div>
     </div>
     <div ng-show="dipGridView">
