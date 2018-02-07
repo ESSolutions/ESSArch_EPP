@@ -26,7 +26,8 @@
 import django
 django.setup()
 
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Permission
+from groups_manager.models import Group, Member, GroupType
 
 from elasticsearch import Elasticsearch
 from elasticsearch.client.ingest import IngestClient
@@ -92,41 +93,12 @@ def installDefaultParameters():
 
 
 def installDefaultUsers():
-    user_system, created = User.objects.get_or_create(
-        username='system', email='system@essolutions.se',
-        is_staff=True, is_superuser=True
-    )
-    if created:
-        user_system.set_password('system')
-        user_system.save()
+    #####################################
+    # Groups and permissions
+    organization, _ = GroupType.objects.get_or_create(label="organization")
+    default_org, _ = Group.objects.get_or_create(name='Default', group_type=organization)
 
-    user_user, created = User.objects.get_or_create(
-        username='user', email='usr1@essolutions.se'
-    )
-    if created:
-        user_user.set_password('user')
-        user_user.save()
-
-    user_admin, created = User.objects.get_or_create(
-        username='admin', email='admin@essolutions.se',
-        is_staff=True
-    )
-    if created:
-        user_admin.set_password('admin')
-        user_admin.save()
-
-    user_sysadmin, created = User.objects.get_or_create(
-        username='sysadmin', email='sysadmin@essolutions.se',
-        is_staff=True
-    )
-    if created:
-        user_sysadmin.set_password('sysadmin')
-        user_sysadmin.save()
-
-    group_user, _ = Group.objects.get_or_create(name='user')
-    group_admin, _ = Group.objects.get_or_create(name='admin')
-    group_sysadmin, _ = Group.objects.get_or_create(name='sysadmin')
-
+    group_user, _ = Group.objects.get_or_create(name='user', parent=default_org)
     permission_list_user = [
         ## ---- app: ip ---- model: informationpackage
         ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
@@ -158,8 +130,9 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_user.permissions.add(p_obj)
+        group_user.django_group.permissions.add(p_obj)
 
+    group_admin, _ = Group.objects.get_or_create(name='admin', parent=default_org)
     permission_list_admin = [
         ## ---- app: ip ---- model: informationpackage
         ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
@@ -199,8 +172,9 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_admin.permissions.add(p_obj)
+        group_admin.django_group.permissions.add(p_obj)
 
+    group_sysadmin, _ = Group.objects.get_or_create(name='sysadmin', parent=default_org)
     permission_list_sysadmin = [
         ## ---- app: auth ---- model: group
         ['add_group','auth','group'],                    # Can add group
@@ -257,11 +231,48 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_sysadmin.permissions.add(p_obj)
+        group_sysadmin.django_group.permissions.add(p_obj)
 
-    group_user.user_set.add(user_user)
-    group_admin.user_set.add(user_admin)
-    group_sysadmin.user_set.add(user_sysadmin)
+    #####################################
+    # Users
+    user_superuser, created = Member.objects.get_or_create(
+        first_name='superuser', last_name='Lastname',
+        username='superuser', email='superuser@essolutions.se',
+    )
+    if created:
+        user_superuser.django_user.set_password('superuser')
+        user_superuser.django_user.is_staff=True
+        user_superuser.django_user.is_superuser=True
+        user_superuser.django_user.save()
+
+    user_user, created = Member.objects.get_or_create(
+        first_name='user', last_name='Lastname',
+        username='user', email='user@essolutions.se'
+    )
+    if created:
+        user_user.django_user.set_password('user')
+        user_user.django_user.save()
+        group_user.add_member(user_user)
+
+    user_admin, created = Member.objects.get_or_create(
+        first_name='admin', last_name='Lastname',
+        username='admin', email='admin@essolutions.se',
+    )
+    if created:
+        user_admin.django_user.set_password('admin')
+        user_admin.django_user.is_staff=True
+        user_admin.django_user.save()
+        group_admin.add_member(user_admin)
+
+    user_sysadmin, created = Member.objects.get_or_create(
+        first_name='sysadmin', last_name='Lastname',
+        username='sysadmin', email='sysadmin@essolutions.se',
+    )
+    if created:
+        user_sysadmin.django_user.set_password('sysadmin')
+        user_sysadmin.django_user.is_staff=True
+        user_sysadmin.django_user.save()
+        group_sysadmin.add_member(user_sysadmin)
 
     return 0
 
