@@ -628,7 +628,6 @@ padding: 0 12px;
 }
 .file-explorer {
     margin-top: 10px;
-    width: 100%;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -637,7 +636,6 @@ padding: 0 12px;
     display: flex;
     flex-direction: row;
     vertical-align: middle;
-    width: 100%;
     align-items: center;
 }
 .file-list-view {
@@ -658,11 +656,7 @@ padding: 0 12px;
         margin-bottom: 5px;
     }
 }
-.file-view-options {
-    display: flex;
-    flex-direction: row;
-    margin-right: 15px;
-}
+
 .files-per-page-pagination-wrapper {
     width: 100%;
     display: flex;
@@ -693,6 +687,22 @@ padding: 0 12px;
     align-items: center;
     justify-content: space-between;
     overflow-x: auto;
+    .file-view-options {
+        display: flex;
+        flex-direction: row;
+    }
+    .button-refresh-wrapper {
+        display:flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .refresh-filebrowser {
+        overflow: hidden;
+        padding: 3px 0;
+        min-width: 20px;
+        min-height: 18px;
+        margin-left: 10px;
+    }
 }
 .dir-path {
     margin-left: 10px;
