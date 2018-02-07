@@ -42,7 +42,7 @@ from ESSArch_Core.storage.models import (
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Archive, Component, Document
+from ESSArch_Core.tags.documents import Archive, Component, Directory, Document, InformationPackage
 
 
 def installDefaultConfiguration():
@@ -372,20 +372,24 @@ def installPipelines():
 def installSearchIndices():
     get_connection()
     client = Elasticsearch()
-    doc_types = [Archive, Component, Document]
+
+    indices = ['archive', 'component', 'directory', 'document', 'information_package']
+
+    for index in indices:
+        Index(index).delete(ignore=404)
+
+    doc_types = [Archive, Component, Directory, Document, InformationPackage]
 
     for doc_type in doc_types:
         name = doc_type().meta.index
-        print '-> %s...' % name,
 
         if Index(name).exists():
-            print 'already exists'
-            client.indices.open(index=name)
-            continue
+            client.indices.close(index=name)
 
         doc_type.init()
         client.indices.open(index=name)
-        print 'done'
+
+    print 'done'
 
 if __name__ == '__main__':
     installDefaultConfiguration()
