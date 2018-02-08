@@ -228,7 +228,7 @@ LOGGING = {
             'class': 'ESSArch_Core.log.dbhandler.DBHandler',
             'application': 'ESSArch Preservation Platform',
             'agent_role': 'Archivist',
-        }
+        },
         'file_epp': {
             'level': 'DEBUG',
             'formatter': 'verbose',
