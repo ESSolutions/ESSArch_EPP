@@ -217,6 +217,11 @@ ELASTICSEARCH_DSL={
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'core': {
             'level': 'DEBUG',
@@ -224,10 +229,26 @@ LOGGING = {
             'application': 'ESSArch Preservation Platform',
             'agent_role': 'Archivist',
         }
+        'file_epp': {
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'filename': '/ESSArch/log/epp.log',
+            'maxBytes': 1024*1024*100, # 100MB
+            'backupCount': 5,
+        },
+        'log_file_auth': {
+            'level': 'DEBUG',
+            'class' : 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/ESSArch/log/auth_epp.log',
+            'maxBytes': 1024*1024*100, # 100MB
+            'backupCount': 5,
+        },
     },
     'loggers': {
         'essarch': {
-            'handlers': ['core'],
+            'handlers': ['core', 'file_epp'],
             'level': 'DEBUG',
         },
     },
