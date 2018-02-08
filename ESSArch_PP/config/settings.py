@@ -254,7 +254,7 @@ LOGGING = {
         'essarch.auth': {
             'level': 'DEBUG',
             'handlers': ['log_file_auth'],
-            'propagate': True,
+            'propagate': False,
         },
     },
 }
