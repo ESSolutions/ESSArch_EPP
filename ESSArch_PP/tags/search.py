@@ -23,6 +23,8 @@ from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive
 
+from tags.permissions import SearchPermissions
+
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
@@ -154,6 +156,7 @@ def get_organization(id):
     }
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
+    permission_classes = (SearchPermissions,)
     index = ComponentSearch.index
     lookup_field = 'pk'
     lookup_url_kwarg = None

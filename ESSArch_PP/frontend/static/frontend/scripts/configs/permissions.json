@@ -112,7 +112,7 @@
                 }
             },
             "search": {
-                "_permissions": []
+                "_permissions": ["tags.search"]
             }
         }
     }
