@@ -25,10 +25,12 @@
 angular.module('myApp').controller('LanguageCtrl', function($scope, $rootScope, $cookies, $cookieStore, $cookies, $translate) {
     $scope.changeLanguage = function(lang) {
         $translate.use(lang);
+        moment.locale(lang);
     }
     $scope.getCurrentLanguage = function() {
         var lang = $cookies.get('NG_TRANSLATE_LANG_KEY');
         $scope.currentLanguage = lang;
+        moment.locale(lang);
         return lang;
     }
     $scope.getCurrentLanguage();

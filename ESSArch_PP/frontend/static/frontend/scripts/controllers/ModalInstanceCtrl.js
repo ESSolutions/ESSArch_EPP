@@ -335,8 +335,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
-}).controller('AppraisalModalInstanceCtrl', function (IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('AppraisalModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
     var $ctrl = this;
+    // Set later to use local time for next job
+    later.date.localTime();
     $ctrl.angular = angular;
     $ctrl.data = data;
     $ctrl.requestTypes = data.types;
@@ -366,6 +368,53 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             }).catch(function(response) {
                 TopAlert.add(response.data.detail, "error");
             })
+        }
+    }
+    $ctrl.cronConfig = {
+        allowMultiple: true
+    }
+    $ctrl.frequency = "* * * * *";
+    $ctrl.myFrequency = null;
+
+    $ctrl.validCron = function(frequency) {
+        var months = [
+            {name: "jan", days: 31},
+            {name: "feb", days: 29},
+            {name: "mar", days: 31},
+            {name: "apr", days: 30},
+            {name: "may", days: 31},
+            {name: "jun", days: 30},
+            {name: "jul", days: 31},
+            {name: "aug", days: 31},
+            {name: "sep", days: 30},
+            {name: "okt", days: 31},
+            {name: "nov", days: 30},
+            {name: "dec", days: 31}
+        ];
+        var cron = cronService.fromCron(frequency, true);
+        if(cron.monthValues && cron.dayOfMonthValues) {
+            return !cron.monthValues.map(function(month) {
+                return !cron.dayOfMonthValues.map(function(day) {
+                    return months[month-1].days >= day;
+                }).includes(false);
+            }).includes(false);
+        } else {
+            return true;
+        }
+    }
+
+    $ctrl.prettyFrequency = function(frequency) {
+        if($ctrl.validCron(frequency)) {
+            return prettyCron.toString(frequency);
+        } else {
+            return $translate.instant("INVALID_FREQUENCY")
+        }
+    }
+    $ctrl.nextPretty = function(frequency) {
+        if($ctrl.validCron(frequency)) {
+            return $filter('date')(prettyCron.getNextDate(frequency), "yyyy-MM-dd HH:mm:ss");
+        } else {
+            return "...";
         }
     }
 
@@ -448,8 +497,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         TopAlert.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
         $uibModalInstance.close(appraisal);
     }
-}).controller('ConversionModalInstanceCtrl', function (IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('ConversionModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
     var $ctrl = this;
+    // Set later to use local time for next job
+    later.date.localTime();
     $ctrl.angular = angular;
     $ctrl.data = data;
     $ctrl.requestTypes = data.types;
@@ -477,6 +528,55 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             })
         }
     }
+
+    $ctrl.cronConfig = {
+        allowMultiple: true
+    }
+    $ctrl.frequency = "* * * * *";
+    $ctrl.myFrequency = null;
+
+    $ctrl.validCron = function(frequency) {
+        var months = [
+            {name: "jan", days: 31},
+            {name: "feb", days: 29},
+            {name: "mar", days: 31},
+            {name: "apr", days: 30},
+            {name: "may", days: 31},
+            {name: "jun", days: 30},
+            {name: "jul", days: 31},
+            {name: "aug", days: 31},
+            {name: "sep", days: 30},
+            {name: "okt", days: 31},
+            {name: "nov", days: 30},
+            {name: "dec", days: 31}
+        ];
+        var cron = cronService.fromCron(frequency, true);
+        if(cron.monthValues && cron.dayOfMonthValues) {
+            return !cron.monthValues.map(function(month) {
+                return !cron.dayOfMonthValues.map(function(day) {
+                    return months[month-1].days >= day;
+                }).includes(false);
+            }).includes(false);
+        } else {
+            return true;
+        }
+    }
+
+    $ctrl.prettyFrequency = function(frequency) {
+        if($ctrl.validCron(frequency)) {
+            return prettyCron.toString(frequency);
+        } else {
+            return $translate.instant("INVALID_FREQUENCY")
+        }
+    }
+    $ctrl.nextPretty = function(frequency) {
+        if($ctrl.validCron(frequency)) {
+            return $filter('date')(prettyCron.getNextDate(frequency), "yyyy-MM-dd HH:mm:ss");
+        } else {
+            return "...";
+        }
+    }
+
     function getRules() {
         IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
             ip.rules = resource;

@@ -10,12 +10,17 @@
             <br/>
             <label>
                 {{'FREQUENCY' | translate}}
-                <input class="form-control" required ng-model="$ctrl.frequency">
             </label>
-            <br/>
-            <label>
-                {{'PATHS' | translate}}
-                <input class="form-control" ng-enter="$ctrl.addPath($ctrl.path)" ng-model="$ctrl.path">
+            <div class="cron-form">
+                <cron-selection ng-model="$ctrl.frequency" my-frequency="$ctrl.myFrequency" template="static/frontend/views/cron_form.html" config="$ctrl.cronConfig"></cron-selection>
+                <b>{{'FREQUENCY' | translate}}: <span ng-class="{'color-red': !$ctrl.validCron($ctrl.frequency)}">{{$ctrl.prettyFrequency($ctrl.frequency)}}</span></b>
+                <br/>
+                <b>{{'NEXT' | translate}}: {{$ctrl.nextPretty($ctrl.frequency)}}</b>
+            </div>
+                <br/>
+                <label>
+                    {{'PATHS' | translate}}
+                    <input class="form-control" ng-enter="$ctrl.addPath($ctrl.path)" ng-model="$ctrl.path">
             </label>
             <button type="button" class="btn btn-success btn-sm" ng-click="$ctrl.addPath($ctrl.path)"><i class="fa fa-plus"></i></button>
             <div class="path-row">
@@ -29,7 +34,7 @@
             </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="submit" focused="true">{{'CREATE' | translate}}</button>
+        <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency)" focused="true">{{'CREATE' | translate}}</button>
         <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </form>

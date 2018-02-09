@@ -55,6 +55,7 @@ var jsVendorFiles = [
         'node_modules/angular/angular.js',
         'scripts/angular-locale_sv.js',
         'node_modules/angular-animate/angular-animate.js',
+        'node_modules/angular-cron-jobs/dist/angular-cron-jobs.js',
         'node_modules/angular-messages/angular-messages.js',
         'node_modules/angular-route/angular-route.js',
         'node_modules/angular-mocks/angular-mocks.js',
@@ -92,6 +93,8 @@ var jsVendorFiles = [
         'node_modules/angular-resource/angular-resource.js',
         'node_modules/jstree/dist/jstree.js',
         'node_modules/ng-js-tree/dist/ngJsTree.js',
+        'node_modules/later/later.js',
+        'node_modules/prettycron/prettycron.js',
     ],
     jsFiles = [
         'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',

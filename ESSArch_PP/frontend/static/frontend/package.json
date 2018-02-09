@@ -66,10 +66,13 @@
   },
   "dependencies": {
     "angular-clipboard": "^1.5.0",
+    "angular-cron-jobs": "^3.2.0",
     "angular-relative-date": "^2.1.1",
     "angular-resource": "^1.6.5",
     "angular-websocket": "^2.0.1",
+    "later": "^1.2.0",
     "ng-js-tree": "^0.0.10",
+    "prettycron": "^0.10.0",
     "string.prototype.endswith": "^0.2.0",
     "string.prototype.includes": "^1.0.0",
     "string.prototype.startswith": "^0.2.0"

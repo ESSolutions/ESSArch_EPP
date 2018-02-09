@@ -10,8 +10,13 @@
             <br/>
             <label>
                 {{'FREQUENCY' | translate}}
-                <input class="form-control" required ng-model="$ctrl.frequency">
             </label>
+            <div class="cron-form">
+                <cron-selection ng-model="$ctrl.frequency" my-frequency="$ctrl.myFrequency" template="static/frontend/views/cron_form.html" config="$ctrl.cronConfig"></cron-selection>
+                <b>{{'FREQUENCY' | translate}}: <span ng-class="{'color-red': !$ctrl.validCron($ctrl.frequency)}">{{$ctrl.prettyFrequency($ctrl.frequency)}}</span></b>
+                <br/>
+                <b>{{'NEXT' | translate}}: {{$ctrl.nextPretty($ctrl.frequency)}}</b>
+            </div>
             <br/>
             <h4>{{'SPECIFICATION' | translate}}</h4>
             <div class="specification">
@@ -23,11 +28,13 @@
                     {{'TARGET' | translate}}
                     <input class="form-control" ng-model="$ctrl.target"></input>
                 </label>
-                <label>
-                    {{'TOOL' | translate}}
-                    <select class="form-control" ng-enter="$ctrl.addSpecification()" ng-model="$ctrl.tool" ng-init="$ctrl.tool = 'libreoffice'" ng-options="x for x in ['libreoffice']">{{x}}</select>
-                </label>
-                <button type="button" class="btn btn-success btn-sm" ng-disabled="!$ctrl.path || !$ctrl.target || !$ctrl.tool" ng-click="$ctrl.addSpecification()"><i class="fa fa-plus"></i></button>
+                <div>
+                    <label>
+                        {{'TOOL' | translate}}
+                        <select class="form-control" ng-enter="$ctrl.addSpecification()" ng-model="$ctrl.tool" ng-init="$ctrl.tool = 'libreoffice'" ng-options="x for x in ['libreoffice']">{{x}}</select>
+                    </label>
+                    <button type="button" class="btn btn-success btn-sm" ng-disabled="!$ctrl.path || !$ctrl.target || !$ctrl.tool" ng-click="$ctrl.addSpecification()"><i class="fa fa-plus"></i></button>
+                </div>
                 <table class="table" style="margin-top: 20px;">
                     <thead>
                         <th>
@@ -69,7 +76,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="submit" focused="true">{{'CREATE' | translate}}</button>
+            <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency)" focused="true">{{'CREATE' | translate}}</button>
             <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
         </div>
     </form>

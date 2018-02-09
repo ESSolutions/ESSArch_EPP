@@ -511,5 +511,12 @@
     "ADD_RULE": "Add rule",
     "CHOOSE_AT_LEAST_ONE_PATH": "Choose at least one path",
     "CHOOSE_AT_LEAST_ONE_SPECIFICATION": "Choose at least one specification",
-    "NO_SPECIFICATIONS_CHOSEN": "No specifications chosen"
+    "NO_SPECIFICATIONS_CHOSEN": "No specifications chosen",
+    "CRON_EVERY": "Every",
+    "CRON_ON": "On",
+    "CRON_ON_THE": "On the",
+    "CRON_OF": "Of",
+    "CRON_AT": "At",
+    "CRON_PAST_THE_HOUR": "Past the hour",
+    "INVALID_FREQUENCY": "Invalid frequency"
 }
