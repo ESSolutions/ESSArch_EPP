@@ -1498,55 +1498,167 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
 class WorkareaViewSet(InformationPackageViewSet):
     queryset = InformationPackage.objects.select_related('responsible').all()
-    filter_class = WorkareaFilter
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
-        inner = InformationPackage.objects.annotate(min_gen=Min('generation'), max_gen=Max('generation')).filter(aic=OuterRef('aic')).order_by('generation')
-
-        self.queryset = self.queryset.annotate(
-            first_generation=Case(
-               When(generation=Subquery(inner.values('min_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
-            ),
-            last_generation=Case(
-               When(generation=Subquery(inner.values('max_gen')[:1]),
-                    then=Value(1)),
-               default=Value(0),
-               output_field=BooleanField()
-            )
-        )
-
+        user = self.request.user
         see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
 
-        if self.action == 'list':
-            if view_type == 'ip':
-                queryset = self.queryset.exclude(
-                    package_type=InformationPackage.AIC
-                ).filter(
-                    generation=Subquery(inner.values('generation')[:1]),
-                )
-
-                if not see_all:
-                    queryset = queryset.filter(
-                        Q(workareas__user=self.request.user) |
-                        Q(aic__information_packages__workareas__user=self.request.user)
-                    )
-
-                return queryset.distinct()
-
-            queryset = self.queryset.filter(aic__isnull=True)
+        if self.action == 'list' and view_type == 'aic':
+            simple_inner = InformationPackage.objects.visible_to_user(user).filter(
+                active=True,
+            ).exclude(workareas=None)
+            simple_inner = WorkareaFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
 
             if not see_all:
-                inner = InformationPackage.objects.filter(workareas__user=self.request.user)
-                queryset = queryset.annotate(has_ip=Exists(inner)).filter(has_ip=True)
+                simple_inner = simple_inner.filter(workareas__user=self.request.user)
 
-            return queryset.distinct()
+            inner = simple_inner.select_related(
+                'responsible', 'archivist_organization'
+            ).prefetch_related('steps',Prefetch('workareas', to_attr='prefetched_workareas'))
+            dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
-        if not see_all:
-            return self.queryset.filter(workareas__user=self.request.user)
+            lower_higher = InformationPackage.objects.filter(
+                Q(aic=OuterRef('aic')), Q(Q(workareas=None) | Q(workareas__read_only=True))
+            ).order_by().values('aic')
+            lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
+
+            inner = inner.annotate(
+                first_generation=Case(
+                    When(aic__isnull=True, then=Value(1)),
+                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
+                        then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField(),
+                ),
+                last_generation=Case(
+                    When(aic__isnull=True, then=Value(1)),
+                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
+                        then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField(),
+                ),
+            )
+
+            simple_outer = InformationPackage.objects.annotate(has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))).filter(
+                package_type=InformationPackage.AIC, has_ip=True,
+            )
+            aics = simple_outer.prefetch_related(Prefetch('information_packages', queryset=inner)).distinct()
+
+            self.queryset = aics | dips
+            self.outer_queryset = simple_outer.distinct() | dips.distinct()
+            self.inner_queryset = simple_inner
+            return self.queryset
+        elif self.action == 'list' and view_type == 'ip':
+            filtered = InformationPackage.objects.visible_to_user(user).filter(active=True).exclude(
+                workareas=None, package_type=InformationPackage.AIC
+            )
+
+            simple = WorkareaFilter(data=self.request.query_params, queryset=filtered, request=self.request).qs
+
+            if not see_all:
+                simple = simple.filter(workareas__user=self.request.user)
+
+            def annotate_generations(qs):
+                lower_higher = InformationPackage.objects.filter(
+                    Q(aic=OuterRef('aic')), Q(Q(workareas=None) | Q(workareas__read_only=True))
+                ).order_by().values('aic')
+                lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
+
+                return qs.annotate(
+                    first_generation=Case(
+                        When(aic__isnull=True, then=Value(1)),
+                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
+                            then=Value(1)),
+                        default=Value(0),
+                        output_field=BooleanField(),
+                    ),
+                    last_generation=Case(
+                        When(aic__isnull=True, then=Value(1)),
+                        When(generation=Subquery(lower_higher.values('max_gen')[:1]),
+                            then=Value(1)),
+                        default=Value(0),
+                        output_field=BooleanField(),
+                    ),
+                 )
+
+            def annotate_filtered_first_generation(qs):
+                lower_higher = InformationPackage.objects.visible_to_user(user).filter(
+                    active=True, aic=OuterRef('aic'),
+                ).exclude(
+                    workareas=None, package_type=InformationPackage.AIC,
+                ).order_by().values('aic')
+
+                if not see_all:
+                    lower_higher = lower_higher.filter(workareas__user=self.request.user)
+
+                lower_higher = WorkareaFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
+
+                lower_higher = lower_higher.annotate(min_gen=Min('generation'))
+
+                return qs.annotate(
+                    filtered_first_generation=Case(
+                        When(aic__isnull=True, then=Value(1)),
+                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
+                            then=Value(1)),
+                        default=Value(0),
+                        output_field=BooleanField(),
+                    )
+                 )
+
+            def get_related(qs):
+                qs = qs.select_related('responsible', 'archivist_organization')
+                return qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+
+            inner = annotate_generations(simple)
+            inner = annotate_filtered_first_generation(inner)
+            inner = get_related(inner)
+
+            outer = annotate_generations(simple)
+            outer = annotate_filtered_first_generation(outer)
+            outer = get_related(outer)
+
+            inner = inner.filter(filtered_first_generation=False)
+            outer = outer.filter(filtered_first_generation=True).prefetch_related(Prefetch('aic__information_packages', queryset=inner)).distinct()
+
+            self.inner_queryset = simple
+            self.outer_queryset = simple
+            self.queryset = outer
+            return self.queryset
+
+        if self.action == 'retrieve':
+            lower_higher = InformationPackage.objects.filter(
+                Q(aic=OuterRef('aic')), Q(Q(workareas=None) | Q(workareas__read_only=True))
+            ).order_by().values('aic')
+            lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
+
+            qs = InformationPackage.objects.visible_to_user(user).filter(
+                Q(Q(workareas=None) | Q(workareas__read_only=True)),
+                active=True,
+            )
+
+            qs = WorkareaFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
+
+            qs = qs.annotate(
+                first_generation=Case(
+                    When(aic__isnull=True, then=Value(1)),
+                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
+                        then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField(),
+                ),
+                last_generation=Case(
+                    When(aic__isnull=True, then=Value(1)),
+                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
+                        then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField(),
+                ),
+             )
+
+            qs = qs.select_related('responsible', 'archivist_organization')
+            self.queryset = qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+            return self.queryset
 
         return self.queryset
 

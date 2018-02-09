@@ -166,7 +166,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
     def get_information_packages(self, obj):
         request = self.context['request']
-        return InformationPackageSerializer(obj.related_ips, many=True, context={'request': request, 'perm_checker': self.context.get('perm_checker')}).data
+        return InformationPackageSerializer(obj.related_ips(), many=True, context={'request': request, 'perm_checker': self.context.get('perm_checker')}).data
 
     def get_workarea(self, obj):
         try:
