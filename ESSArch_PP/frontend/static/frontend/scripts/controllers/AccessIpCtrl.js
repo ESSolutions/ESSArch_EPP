@@ -6,27 +6,41 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
 
     $scope.ips = [];
 
-    $scope.menuOptions = function(rowType) {
-        return [
-            {
-                text: $translate.instant("APPRAISAL"),
-                click: function ($itemScope, $event, modelValue, text, $li) {
-                    if($scope.ips.length == 0 && $scope.ip == null) {
-                    } else {
-                        vm.openAppraisalModal($scope.ips);
+    $scope.menuOptions = function (rowType, row) {
+        var methods = [];
+        if (true) { // CHANGE TO REAL PERMISSION NAME
+            methods.push(
+                {
+                    text: $translate.instant("APPRAISAL"),
+                    click: function ($itemScope, $event, modelValue, text, $li) {
+                        if ($scope.ips.length == 0) {
+                            $scope.ip = row;
+                            $rootScope.ip = row;
+                            vm.openAppraisalModal($scope.ips);
+                        } else {
+                            vm.openAppraisalModal($scope.ips);
+                        }
                     }
                 }
-            },
-            {
-                text: $translate.instant("CONVERSION"),
-                click: function ($itemScope, $event, modelValue, text, $li) {
-                    if($scope.ips.length == 0 && $scope.ip == null) {
-                    } else {
-                        vm.openConversionModal($scope.ips);
+            );
+        }
+        if (true) { // CHANGE TO REAL PERMISSION NAME
+            methods.push(
+                {
+                    text: $translate.instant("CONVERSION"),
+                    click: function ($itemScope, $event, modelValue, text, $li) {
+                        if ($scope.ips.length == 0) {
+                            $scope.ip = row;
+                            $rootScope.ip = row;
+                            vm.openConversionModal($scope.ips);
+                        } else {
+                            vm.openConversionModal($scope.ips);
+                        }
                     }
                 }
-            },
-        ];
+            );
+        }
+        return methods;
     };
 
     var watchers = [];

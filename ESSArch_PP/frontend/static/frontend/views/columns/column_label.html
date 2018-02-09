@@ -1,4 +1,4 @@
-<div ng-if="!subrow" class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row')">{{row.label}}</div>
+<div ng-if="!subrow" class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row', row)">{{row.label}}</div>
 <div ng-if="subrow">
-    <div class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow')">{{subrow.label}}</div>
+    <div class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow', subrow)">{{subrow.label}}</div>
 </div>
