@@ -1175,4 +1175,40 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.submitRequest($scope.ip, vm.request);
         }
     }
+
+
+    vm.canDeleteIP = function (row) {
+        // IPs in workareas can always be deleted, including AICs
+        if ($state.is('home.ingest.workarea') || $state.is('home.access.workarea')){
+            return true;
+        }
+
+        // Archived IPs cannot be deleted
+        if (row.archived) {
+            return false;
+        }
+
+        // AICs cannot be deleted
+        if (row.package_type_display == 'AIC' || row.package_type === undefined) {
+            return false;
+        }
+
+        // Does the current user have permission to delete this IP?
+        if (!row.permissions.includes('delete_informationpackage')){
+            return false;
+        }
+
+        // A special permission is required to delete first or last generation of an AIP
+        if (row.package_type_display == 'AIP'){
+            if (row.first_generation && !$scope.checkPermission('ip.delete_first_generation')) {
+                return false;
+            }
+
+            if (row.last_generation && !$scope.checkPermission('ip.delete_last_generation')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 });
