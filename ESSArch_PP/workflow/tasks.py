@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import
 
+import copy
 import datetime
 import errno
 import logging
@@ -43,12 +44,19 @@ from celery.result import allow_join_result, AsyncResult
 
 from crontab import CronTab
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
+
+from groups_manager.models import Member
+from groups_manager.utils import get_permission_name
+
+from guardian.shortcuts import assign_perm
 
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
@@ -511,8 +519,17 @@ class AccessAIP(DBTask):
 
 
 class PrepareDIP(DBTask):
+    logger = logging.getLogger('essarch.epp.tasks.PrepareDIP')
+
     def run(self, label, object_identifier_value=None, orders=[]):
         disseminations = Path.objects.get(entity='disseminations').value
+
+        try:
+            perms = copy.deepcopy(settings.IP_CREATION_PERMS_MAP)
+        except AttributeError:
+            msg = 'IP_CREATION_PERMS_MAP not defined in settings'
+            self.logger.error(msg)
+            raise ImproperlyConfigured(msg)
 
         ip = InformationPackage.objects.create(
             object_identifier_value=object_identifier_value,
@@ -524,6 +541,15 @@ class PrepareDIP(DBTask):
 
         self.ip = ip.pk
         ip.orders.add(*orders)
+
+        member = Member.objects.get(django_user__id=self.responsible)
+        user_perms = perms.pop('owner', [])
+        organization = member.django_user.user_profile.current_organization
+        organization.assign_object(ip, custom_permissions=perms)
+
+        for perm in user_perms:
+            perm_name = get_permission_name(perm, ip)
+            assign_perm(perm_name, member.django_user, ip)
 
         ProcessTask.objects.filter(pk=self.request.id).update(
             information_package=ip,
