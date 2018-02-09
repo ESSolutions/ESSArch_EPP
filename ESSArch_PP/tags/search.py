@@ -327,3 +327,27 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             return Response(r, headers={'Count': results.hits.total})
 
         return Response(r)
+
+    def create(self, request, index=None):
+        request.data.setdefault('index', index)
+        serializer = SearchSerializer(data=request.data)
+
+        if serializer.is_valid():
+            data = serializer.data
+            index = data.pop('index')
+            parent = Parent(id=data.pop('parent'), index=data.pop('parent_index'))
+            d = DocType(_index=index, parent=parent, **data)
+            d.save()
+
+            self.kwargs = {'pk': d._id}
+            obj = self.get_object(d._index)
+            return Response(self.serialize(obj),
+                         status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, index=None, pk=None):
+        obj = self.get_object(index)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
