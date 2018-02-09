@@ -8,8 +8,8 @@ from django.core.cache import cache
 
 from django_filters.constants import EMPTY_VALUES
 
-from elasticsearch.exceptions import TransportError
-from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet, Search
+from elasticsearch.exceptions import NotFoundError, TransportError
+from elasticsearch_dsl import DocType, Index, Q, FacetedSearch, TermsFacet, Search
 
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
@@ -21,7 +21,9 @@ from six import iteritems
 from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive
+from ESSArch_Core.tags.documents import Archive, Parent
+
+from tags.serializers import SearchSerializer
 
 
 class ComponentSearch(FacetedSearch):
@@ -162,10 +164,12 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         get_connection('default')
         super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
-    def get_object(self):
+    def get_object(self, index=None):
         """
         Returns the object the view is displaying.
         """
+
+        index = index or self.index
 
         # Perform the lookup filtering.
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
@@ -179,23 +183,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
-        s = Search(index=self.index).query("match", _id=id)
-        try:
-            res = s.execute()
-            serialized = res.hits[0].to_dict()
-            meta = res.hits[0].meta
-            serialized['_type'] = meta.doc_type
-            serialized['_id'] = meta.id
-            serialized['_index'] = meta.index
-            return serialized
-        except (IndexError, KeyError):
-            raise exceptions.NotFound
-        except TransportError as e:
-            if e.status_code == 404:
-                raise exceptions.NotFound
-            raise
 
-    def list(self, request):
+        try:
+            return DocType.get(id, index=index)
+        except NotFoundError:
+            raise exceptions.NotFound
+
+    def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
         if query:
@@ -203,7 +197,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         filters = {
             'extension': params.pop('extension', None),
-            'index': params.pop('index', None),
+            'index': params.pop('index', index),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
@@ -275,16 +269,26 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(r)
 
+    def serialize(self, obj):
+        return obj.to_dict(include_meta=True)
 
-    def retrieve(self, request, pk=None):
-        return Response(self.get_object())
+    def retrieve(self, request, index=None, pk=None):
+        if index is None:
+            return self.list(request, index=pk)
+
+        self.index = index
+
+        obj = self.get_object()
+        return Response(self.serialize(obj))
 
     @detail_route(methods=['get'])
-    def children(self, request, pk=None):
-        s = Search(index=self.index).sort('reference_code')
+    def children(self, request, index=None, pk=None):
+        # check if the parent exist
+        self.get_object(index=index)
 
-        p = {'parent': {'query': pk, 'operator': 'and'}}
-        s = s.query('match', **p)
+        # get the children
+        s = Search().sort('reference_code')
+        s = s.query('term', **{'parent.id': pk})
 
         if self.paginator is not None:
             # Paginate in search engine
