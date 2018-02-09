@@ -123,6 +123,8 @@ def installDefaultUsers():
         ## ---- app: WorkflowEngine ---- model: processtask
         #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
         #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
+        ## ---- app: tags ---- model: Tag
+        ['search','tags','Tag'],   # Can search
     ]
 
     for p in permission_list_user:
@@ -169,6 +171,8 @@ def installDefaultUsers():
         ['add_appraisalrule','maintenance','AppraisalRule'],   # Can add appraisal rule (Administration)
         ## ---- app: maintenance ---- model: ConversionRule
         ['add_conversionrule','maintenance','ConversionRule'],   # Can add conversion rule (Administration)
+        ## ---- app: tags ---- model: Tag
+        ['search','tags','Tag'],   # Can search
     ]
 
     for p in permission_list_admin:
