@@ -113,7 +113,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
             $scope.filebrowser = false;
             return;
         }
-        if (row.package_type == 1) {
+        if (row.package_type == 1 || row.workarea == null) {
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
