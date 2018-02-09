@@ -166,35 +166,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
     def get_information_packages(self, obj):
         request = self.context['request']
-        view = self.context.get('view')
-        view_type = request.query_params.get('view_type', 'aic')
-
-        if view_type == 'ip':
-            if obj.aic is not None:
-                related = obj.aic.information_packages
-            else:
-                related = InformationPackage.objects.none()
-        else:
-            related = obj.information_packages
-
-        related = related.select_related('archivist_organization').prefetch_related(Prefetch('workareas', to_attr="prefetched_workareas")).order_by('generation')
-
-        if view is not None or not getattr(view, 'search_fields', ''):
-            view.search_fields = ip_search_fields
-            related = self.search_filter.filter_queryset(request, related, view)
-
-        lower_higher_gen = InformationPackage.objects.exclude(workareas__read_only=False)
-
-        lower_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__lt=OuterRef('generation'))
-        higher_gen = lower_higher_gen.filter(aic=OuterRef('aic'), generation__gt=OuterRef('generation'))
-
-        related = related.annotate(first_generation=~Exists(lower_gen))
-        related = related.annotate(last_generation=~Exists(higher_gen))
-
-        checker = ObjectPermissionChecker(request.user)
-        checker.prefetch_perms(related)
-
-        return InformationPackageSerializer(related, many=True, context={'request': request, 'perm_checker': checker}).data
+        return InformationPackageSerializer(obj.related_ips(), many=True, context={'request': request, 'perm_checker': self.context.get('perm_checker')}).data
 
     def get_workarea(self, obj):
         try:
