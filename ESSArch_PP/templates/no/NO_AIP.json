@@ -38,7 +38,7 @@
         },
         {
             "-name": "TYPE",
-            "#content": [{"text": "SIP"}],
+            "#content": [{"text": "AIP"}],
             "-req": 1
         },
         {
