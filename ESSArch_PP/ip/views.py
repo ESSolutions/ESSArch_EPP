@@ -51,7 +51,7 @@ from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
 
 from guardian.core import ObjectPermissionChecker
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, get_perms
 
 from lxml import etree
 from natsort import natsorted
@@ -958,23 +958,26 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         ip = self.get_object()
 
+        if 'delete_informationpackage' not in get_perms(request.user, ip):
+            raise exceptions.PermissionDenied('You do not have permission to delete this IP')
+
         logger.info('Request issued to delete %s %s' % (ip.get_package_type_display(), pk), extra={'user': request.user.pk})
 
         if ip.package_type == InformationPackage.AIC:
             raise exceptions.ParseError(detail='AICs cannot be deleted')
 
-        if ip.is_first_generation():
-            if not request.user.has_perm('ip.delete_first_generation'):
-                raise exceptions.PermissionDenied('You do not have permission to delete the first generation of an IP')
+        if ip.package_type == InformationPackage.AIP:
+            if ip.is_first_generation():
+                if not request.user.has_perm('ip.delete_first_generation'):
+                    raise exceptions.PermissionDenied('You do not have permission to delete the first generation of an IP')
 
-        if ip.is_last_generation():
-            if not request.user.has_perm('ip.delete_last_generation'):
-                raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
+            if ip.is_last_generation():
+                if not request.user.has_perm('ip.delete_last_generation'):
+                    raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
 
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
 
-        self.check_object_permissions(request, ip)
         path = ip.object_path
 
         if os.path.isdir(path):
