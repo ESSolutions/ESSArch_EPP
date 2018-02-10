@@ -14,7 +14,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     var headers = { "Authorization": "Basic " + auth };
 
     vm.$onInit = function() {
-        if($state.is('home.search.detail') || $state.is('home.search.ipDetail')) {
+        if($state.is('home.search.detail') || $state.is('home.search.information_package') || $state.is('home.search.component') || $state.is('home.search.archive') || $state.is('home.search.directory') || $state.is('home.search.document')) {
             vm.activeTab = 1;
             vm.showTree = true;
         } else {
@@ -210,7 +210,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if(!result.id && result._id) {
             result.id = result._id;
         }
-        $state.go("home.search.detail", {id: result.id});
+        $state.go("home.search."+result._index, {id: result.id});
         vm.activeTab = 1;
     }
 

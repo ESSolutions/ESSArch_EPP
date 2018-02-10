@@ -119,10 +119,50 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.search.ipDetail', {
-        url: '/ip/:id',
+    .state('home.search.information_package', {
+        url: '/information_package/:id',
         templateUrl: '/static/frontend/views/search_ip_detail.html',
-        controller: 'SearchIpDetailCtrl as vm',
+        controller: 'SearchIpCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.component', {
+        url: '/component/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.directory', {
+        url: '/directory/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.document', {
+        url: '/document/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.archive', {
+        url: '/archive/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchArchiveCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();

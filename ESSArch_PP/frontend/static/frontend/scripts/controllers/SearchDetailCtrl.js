@@ -5,21 +5,18 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
     vm.$onInit = function() {
-        vm.item = {
-            id: $stateParams.id,
-        }
         vm.viewContent = true;
-        $http.get(vm.url+"search/"+vm.item.id+"/", {headers: headers}).then(function(response) {
+        $http.get(vm.url+"search/"+$state.current.name.split(".").pop()+"/"+$stateParams.id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
             vm.activeTab = 1;
             vm.buildRecordTree(response.data).then(function(node) {
                 var treeData = [node];
                 vm.recreateRecordTree(treeData);
             })
             vm.record.children = [];//[{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
-            if (angular.isUndefined(vm.record.terms_and_condition)) {
-                vm.record.terms_and_condition = null;
+            if (angular.isUndefined(vm.record._source.terms_and_condition)) {
+                vm.record._source.terms_and_condition = null;
             }
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
@@ -40,7 +37,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     }
 
     vm.getTag = function(tag) {
-        return $http.get(vm.url+"search/"+tag.id+"/").then(function(response) {
+        return $http.get(vm.url+"search/"+tag._index+"/"+tag._id+"/").then(function(response) {
             return response.data;
         });
     }
@@ -49,23 +46,19 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (angular.isUndefined(child._source.name)) {
             child._source.name = "";
         }
-        child._source._index = child._index;
-        child._source.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.name;
-        if (!child._source.children) {
-            child._source.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
+        child.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.name;
+        if (!child.children) {
+            child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
-        child._source.state = { opened: false };
-        child._source._id = child._id;
+        child.state = { opened: false };
         return child;
     }
 
-    vm.treeIds = ["Allmänna arkivschemat", "Verksamhetsbaserad"]
-    vm.treeId = "Allmänna arkivschemat";
     vm.buildRecordTree = function(startNode) {
-        if(angular.isUndefined(startNode.name)) {
-            startNode.name = "";
+        if(angular.isUndefined(startNode._source.name)) {
+            startNode._source.name = "";
         }
-        startNode.text = "<b>" + (startNode.reference_code ? startNode.reference_code : "") + "</b> " + startNode.name;
+        startNode.text = "<b>" + (startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode._source.name;
         startNode.state = {opened: true};
         if(startNode._id == vm.record._id) {
             startNode.state.selected = true;
@@ -75,7 +68,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
 
                 start_node_children.data.forEach(function (child) {
                     child = createChild(child);
-                    startNode.children.push(child._source);
+                    startNode.children.push(child);
                 });
 
                 if (start_node_children.data.length < start_node_children.count) {
@@ -92,8 +85,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 }
             });
         }
-        if (startNode.parent) {
-            var parentPromise = $http.get(vm.url + "search/" + startNode.parent + "/", { headers: headers }).then(function (response) {
+        if (startNode._source.parent) {
+            var parentPromise = $http.get(vm.url + "search/"+startNode._source.parent.index + "/" + startNode._source.parent.id + "/", { headers: headers }).then(function (response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function (children) {
@@ -102,7 +95,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                             p.children.push(startNode);
                         } else {
                             child = createChild(child);
-                            p.children.push(child._source);
+                            p.children.push(child);
                         }
                     });
                     if (children.data.length < children.count) {
@@ -130,10 +123,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         })
     }
     function getChildren(node) {
-        if (!node._id && node.id) {
-            node._id = node.id;
-        }
-        return $http.get(vm.url+"search/"+node._id+"/children/", {headers: headers, params: {page_size: 10, page: 1}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {headers: headers, params: {page_size: 10, page: 1}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
@@ -190,8 +180,23 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 icon: "fa fa-plus"
             }
         },
-        version : 1,
-        plugins : ['types']
+        contextmenu: {
+            items: function (node, callback) {
+                var rename = {
+                    label: $translate.instant('UPDATE'),
+                    action: function (node) {
+                        vm.recordTreeInstance.edit(node);
+                    },
+                    shortcut: '113',
+                    shortcut_label: "F2"
+                };
+                var actions = { rename: rename };
+                callback(actions);
+                return actions;
+            }
+        },
+        version: 1,
+        plugins : ['types', 'contextmenu']
     };
 
     vm.setType = function() {
@@ -209,7 +214,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original.parent+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._source.parent.index+"/"+e.node.original._source.parent.id+"/children/", {headers: headers, params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var selectedElement = null;
                 var see_more = null;
@@ -220,8 +225,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     see_more = children.pop();
                 }
                 response.data.forEach(function(child) {
-                    createChild(child);
-                    children.push(child._source);
+                    child = createChild(child);
+                    children.push(child);
                 });
                 if(children.length < count) {
                     children.push(see_more);
@@ -241,12 +246,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         if (e.action == "select_node") {
             vm.record = e.node.original;
-            $state.go(".", {id: vm.record._id}, {notify: false});
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
-            if(angular.isUndefined(vm.record.terms_and_condition)) {
-                vm.record.terms_and_condition = null;
+            $state.go("home.search."+vm.record._index, {id: vm.record._id}, {notify: false});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
+            if(angular.isUndefined(vm.record._source.terms_and_condition)) {
+                vm.record._source.terms_and_condition = null;
             }
-            vm.record.children = [{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
+            vm.record.children = [{text: "", parent: vm.record._id, placeholder: true, icon: false, state: {disabled: true}}];
             getChildren(vm.record).then(function(response) {
                 vm.record_children = response.data;
             })
@@ -258,12 +263,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
         var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
         if(e.node.children.length < 2) {
-            $http.get(vm.url+"search/"+e.node.original._id+"/children/", {headers: headers, params: {tree_id: vm.treeId, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {headers: headers, params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
-                    createChild(child);
-                    children.push(child._source);
+                    child = createChild(child);
+                    children.push(child);
                 });
                 if(children.length < count) {
                     children.push({

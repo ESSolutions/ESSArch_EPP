@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchIpDetailCtrl', function($scope, $rootScope, $http, IP, $stateParams, TopAlert, $state) {
+angular.module('myApp').controller('SearchIpCtrl', function(appConfig, $scope, $rootScope, $http, IP, $stateParams, TopAlert, $state) {
     var vm = this;
     vm.$onInit = function() {
         vm.getIpObject($stateParams.id).then(function(ip) {
@@ -17,8 +17,10 @@ angular.module('myApp').controller('SearchIpDetailCtrl', function($scope, $rootS
     }
 
     vm.getIpObject = function(id) {
-        return IP.get({id: id}).$promise.then(function(resource) {
-            return resource;
+        return $http.get(appConfig.djangoUrl + "search/information_package/"+id+"/").then(function(response) {
+            return IP.get({id: response.data._source.id}).$promise.then(function(resource) {
+                return resource;
+            })
         });
     }
 });
