@@ -1460,6 +1460,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     def add_appraisal_rule(self, request, pk=None):
         ip = self.get_object()
 
+        if ip.package_type == InformationPackage.AIC:
+            raise exceptions.ParseError('Cannot add appraisal rule to AIC')
+
         try:
             rule_id = request.data['id']
         except KeyError:
@@ -1493,6 +1496,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['post'], url_path='add-conversion-rule')
     def add_conversion_rule(self, request, pk=None):
         ip = self.get_object()
+
+        if ip.package_type == InformationPackage.AIC:
+            raise exceptions.ParseError('Cannot add conversion rule to AIC')
 
         try:
             rule_id = request.data['id']
