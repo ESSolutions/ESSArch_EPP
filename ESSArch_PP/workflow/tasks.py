@@ -952,7 +952,7 @@ class PollIOQueue(DBTask):
             agent = entries.first().user.username
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
-            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=entries.first().user)
+            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=entries.first().user, refresh=True)
 
             recipient = entries.first().user.email
             if recipient:
