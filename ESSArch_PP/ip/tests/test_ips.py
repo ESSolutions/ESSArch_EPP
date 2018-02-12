@@ -89,6 +89,9 @@ class AccessTestCase(TestCase):
 
 class WorkareaViewSetTestCase(TestCase):
     def setUp(self):
+        Path.objects.create(entity="access_workarea", value="")
+        Path.objects.create(entity="ingest_workarea", value="")
+
         self.url = reverse('workarea-list')
 
         self.user = User.objects.create(username="admin")
