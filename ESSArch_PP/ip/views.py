@@ -305,6 +305,18 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except (ValueError, SubmissionAgreement.DoesNotExist) as e:
             raise exceptions.ParseError(detail=e.message)
 
+        if sa.profile_aic_description is None:
+            raise exceptions.ParseError('Submission agreement missing AIC Description profile')
+
+        if sa.profile_aip is None:
+            raise exceptions.ParseError('Submission agreement missing AIP profile')
+
+        if sa.profile_aip_description is None:
+            raise exceptions.ParseError('Submission agreement missing AIP Description profile')
+
+        if sa.profile_dip is None:
+            raise exceptions.ParseError('Submission agreement missing DIP profile')
+
         parsed_policy = parsed.get('altrecordids', {}).get('POLICYID', [None])[0]
 
         try:
@@ -401,18 +413,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
         profile_ip_aip_description = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip_description).first()
         profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
-
-        if profile_ip_aic_description is None:
-            raise exceptions.ParseError('Information package missing AIC Description profile')
-
-        if profile_ip_aip is None:
-            raise exceptions.ParseError('Information package missing AIP profile')
-
-        if profile_ip_aip_description is None:
-            raise exceptions.ParseError('Information package missing AIP Description profile')
-
-        if profile_ip_dip is None:
-            raise exceptions.ParseError('Information package missing DIP profile')
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
