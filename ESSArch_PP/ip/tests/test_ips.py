@@ -531,11 +531,11 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip2.pk))
 
     def test_aic_view_type_multiple_aic_two_aips_first_inactive_with_filter(self):
-        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aic = InformationPackage.objects.create(label="0", package_type=InformationPackage.AIC)
         aip = InformationPackage.objects.create(aic=aic, generation=0, active=False, package_type=InformationPackage.AIP)
         aip2 = InformationPackage.objects.create(aic=aic, generation=1, active=True, package_type=InformationPackage.AIP)
 
-        aic2 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aic2 = InformationPackage.objects.create(label="1", package_type=InformationPackage.AIC)
         aip3 = InformationPackage.objects.create(aic=aic2, generation=0, active=False, package_type=InformationPackage.AIP)
         aip4 = InformationPackage.objects.create(aic=aic2, generation=1, active=True, package_type=InformationPackage.AIP)
 
@@ -545,7 +545,7 @@ class InformationPackageViewSetTestCase(TestCase):
         self.member.assign_object(self.group, aip3, custom_permissions=perms)
         self.member.assign_object(self.group, aip4, custom_permissions=perms)
 
-        res = self.client.get(self.url, data={'view_type': 'aic', 'archived': 'false', 'ordering': 'create_date'})
+        res = self.client.get(self.url, data={'view_type': 'aic', 'archived': 'false', 'ordering': 'label'})
         self.assertEqual(len(res.data), 2)
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip2.pk))
