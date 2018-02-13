@@ -116,15 +116,6 @@ class InformationPackageFilter(filters.FilterSet):
 class WorkareaFilter(InformationPackageFilter):
     type = ListFilter(name='workareas__type', method='filter_workarea')
 
-    def prefetch_information_packages(self, qs):
-        user = getattr(self.request, 'user', None)
-        information_packages = InformationPackage.objects.select_related('responsible').prefetch_related('steps').all()
-
-        if user is not None and not user.has_perm('ip.see_all_in_workspaces'):
-            information_packages = information_packages.filter(workareas__user=user)
-
-        return super(WorkareaFilter, self).prefetch_information_packages(qs, ips=information_packages)
-
     def filter_workarea(self, queryset, name, value):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
 
