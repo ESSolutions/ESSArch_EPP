@@ -979,34 +979,35 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if ip.archived:
             raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
 
-        path = ip.object_path
-
-        if os.path.isdir(path):
-            t = ProcessTask.objects.create(
-                name='ESSArch_Core.tasks.DeleteFiles',
-                params={'path': path},
-                eager=False,
-                responsible=request.user,
-                information_package=ip,
-            )
-            t.run()
-        else:
-            no_ext = os.path.splitext(path)[0]
-            step = ProcessStep.objects.create(
-                name="Delete files",
-                eager=False,
-            )
-
-            for fl in [no_ext + '.' + ext for ext in ['xml', 'tar', 'zip']]:
+        # delete files if IP is not at reception
+        if ip.state not in ('Prepared', 'Receiving'):
+            path = ip.object_path
+            if os.path.isdir(path):
                 t = ProcessTask.objects.create(
                     name='ESSArch_Core.tasks.DeleteFiles',
-                    params={'path': fl},
-                    processstep=step,
+                    params={'path': path},
+                    eager=False,
                     responsible=request.user,
+                    information_package=ip,
                 )
                 t.run()
+            else:
+                no_ext = os.path.splitext(path)[0]
+                step = ProcessStep.objects.create(
+                    name="Delete files",
+                    eager=False,
+                )
 
-            step.run()
+                for fl in [no_ext + '.' + ext for ext in ['xml', 'tar', 'zip']]:
+                    t = ProcessTask.objects.create(
+                        name='ESSArch_Core.tasks.DeleteFiles',
+                        params={'path': fl},
+                        processstep=step,
+                        responsible=request.user,
+                    )
+                    t.run()
+
+                step.run()
 
         return super(InformationPackageViewSet, self).destroy(request, pk=pk)
 
