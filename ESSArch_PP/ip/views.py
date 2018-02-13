@@ -923,6 +923,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             qs = qs.select_related('responsible', 'archivist_organization')
             self.queryset = qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+            self.queryset = self.queryset.distinct()
             return self.queryset
 
         return self.queryset
