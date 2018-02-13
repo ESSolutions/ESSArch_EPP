@@ -59,11 +59,14 @@ from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
+import six
+
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.mixins import PaginatedViewMixin
+from ESSArch_Core.ip.filters import WorkareaEntryFilter
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
                                     ArchivalType, ArchivistOrganization,
                                     EventIP, InformationPackage, Order,
@@ -81,7 +84,7 @@ from ESSArch_Core.tags.documents import Document
 from ESSArch_Core.util import (find_destination, generate_file_response,
                                get_files_and_dirs, get_tree_size_and_count,
                                in_directory, list_files, mkdir_p,
-                               parse_content_range_header,
+                               parse_content_range_header, remove_prefix,
                                timestamp_to_datetime)
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
@@ -777,6 +780,18 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
+        see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
+
+        workarea_params = {}
+        for key, val in six.iteritems(self.request.query_params):
+            if key.startswith('workspace_'):
+                key_suffix = remove_prefix(key, 'workspace_')
+                workarea_params[key_suffix] = val
+
+        workareas = Workarea.objects.all()
+        workareas = WorkareaEntryFilter(data=workarea_params, queryset=workareas, request=self.request).qs
+        if not see_all:
+            workareas = workareas.filter(user=self.request.user)
 
         if self.action == 'list' and view_type == 'aic':
             simple_inner = InformationPackage.objects.visible_to_user(user).filter(
@@ -787,7 +802,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             inner = simple_inner.select_related(
                 'responsible', 'archivist_organization'
-            ).prefetch_related('steps',Prefetch('workareas', to_attr='prefetched_workareas'))
+            ).prefetch_related('steps',Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -873,7 +888,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             def get_related(qs):
                 qs = qs.select_related('responsible', 'archivist_organization')
-                return qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+                return qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
@@ -1540,18 +1555,27 @@ class WorkareaViewSet(InformationPackageViewSet):
         user = self.request.user
         see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
 
-        if self.action == 'list' and view_type == 'aic':
-            simple_inner = InformationPackage.objects.visible_to_user(user).filter(
-                active=True,
-            ).exclude(workareas=None)
-            simple_inner = WorkareaFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
+        workarea_params = {}
+        for key, val in six.iteritems(self.request.query_params):
+            if key.startswith('workspace_'):
+                key_suffix = remove_prefix(key, 'workspace_')
+                workarea_params[key_suffix] = val
 
-            if not see_all:
-                simple_inner = simple_inner.filter(workareas__user=self.request.user)
+        workareas = Workarea.objects.all()
+        workareas = WorkareaEntryFilter(data=workarea_params, queryset=workareas, request=self.request).qs
+        if not see_all:
+            workareas = workareas.filter(user=self.request.user)
+
+        if self.action == 'list' and view_type == 'aic':
+            simple_inner = InformationPackage.objects.visible_to_user(user).annotate(
+                workarea_exists=Exists(workareas.filter(ip=OuterRef('pk')))
+            ).filter(workarea_exists=True, active=True)
+
+            simple_inner = InformationPackageFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
 
             inner = simple_inner.select_related(
                 'responsible', 'archivist_organization'
-            ).prefetch_related('steps',Prefetch('workareas', to_attr='prefetched_workareas'))
+            ).prefetch_related('steps',Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -1586,14 +1610,13 @@ class WorkareaViewSet(InformationPackageViewSet):
             self.inner_queryset = simple_inner
             return self.queryset
         elif self.action == 'list' and view_type == 'ip':
-            filtered = InformationPackage.objects.visible_to_user(user).filter(active=True).exclude(
-                workareas=None, package_type=InformationPackage.AIC
+            filtered = InformationPackage.objects.visible_to_user(user).annotate(
+                workarea_exists=Exists(workareas.filter(ip=OuterRef('pk')))
+            ).filter(workarea_exists=True, active=True).exclude(
+                package_type=InformationPackage.AIC
             )
 
-            simple = WorkareaFilter(data=self.request.query_params, queryset=filtered, request=self.request).qs
-
-            if not see_all:
-                simple = simple.filter(workareas__user=self.request.user)
+            simple = InformationPackageFilter(data=self.request.query_params, queryset=filtered, request=self.request).qs
 
             def annotate_generations(qs):
                 lower_higher = InformationPackage.objects.filter(
@@ -1619,16 +1642,16 @@ class WorkareaViewSet(InformationPackageViewSet):
                  )
 
             def annotate_filtered_first_generation(qs):
-                lower_higher = InformationPackage.objects.visible_to_user(user).filter(
-                    active=True, aic=OuterRef('aic'),
-                ).exclude(
-                    workareas=None, package_type=InformationPackage.AIC,
+                lower_higher = InformationPackage.objects.visible_to_user(user).annotate(
+                    workarea_exists=Exists(workareas.filter(ip=OuterRef('pk')))
+                ).filter(workarea_exists=True, active=True, aic=OuterRef('aic')).exclude(
+                    package_type=InformationPackage.AIC
                 ).order_by().values('aic')
 
                 if not see_all:
                     lower_higher = lower_higher.filter(workareas__user=self.request.user)
 
-                lower_higher = WorkareaFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
+                lower_higher = InformationPackageFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
 
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
 
@@ -1644,7 +1667,7 @@ class WorkareaViewSet(InformationPackageViewSet):
 
             def get_related(qs):
                 qs = qs.select_related('responsible', 'archivist_organization')
-                return qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+                return qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
@@ -1673,7 +1696,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 active=True,
             )
 
-            qs = WorkareaFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
+            qs = InformationPakcageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
 
             qs = qs.annotate(
                 first_generation=Case(
@@ -1693,7 +1716,7 @@ class WorkareaViewSet(InformationPackageViewSet):
              )
 
             qs = qs.select_related('responsible', 'archivist_organization')
-            self.queryset = qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+            self.queryset = qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
             return self.queryset
 
         return self.queryset

@@ -100,14 +100,16 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
     def get_workarea(self, obj):
         try:
-            workarea = obj.prefetched_workareas[0]
+            workareas = obj.prefetched_workareas
         except AttributeError:
-            workarea = obj.workareas.first()
-        except IndexError:
-            workarea = None
+            request = self.context.get('request')
+            see_all = request.user.has_perm('ip.see_all_in_workspaces')
+            workareas = obj.workareas.all()
 
-        if workarea is not None:
-            return WorkareaSerializer(workarea, context=self.context).data
+            if not see_all:
+                workareas = workareas.filter(user=request.user)
+
+        return WorkareaSerializer(workareas, many=True, context=self.context).data
 
 
     class Meta:
@@ -170,14 +172,16 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
     def get_workarea(self, obj):
         try:
-            workarea = obj.prefetched_workareas[0]
+            workareas = obj.prefetched_workareas
         except AttributeError:
-            workarea = obj.workareas.first()
-        except IndexError:
-            workarea = None
+            request = self.context.get('request')
+            see_all = request.user.has_perm('ip.see_all_in_workspaces')
+            workareas = obj.workareas.all()
 
-        if workarea is not None:
-            return WorkareaSerializer(workarea, context=self.context).data
+            if not see_all:
+                workareas = workareas.filter(user=request.user)
+
+        return WorkareaSerializer(workareas, many=True, context=self.context).data
 
     archival_institution = ArchivalInstitutionSerializer(
         fields=['url', 'id', 'name'],

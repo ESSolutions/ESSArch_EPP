@@ -113,7 +113,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_invalid_workarea(self):
-        res = self.client.get(self.url, {'type': 'non-existing-workarea'})
+        res = self.client.get(self.url, {'workspace_type': 'non-existing-workarea'})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_aip_in_workarea_without_permission_to_view_it_and_aic_view_type(self):
@@ -145,6 +145,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aic.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 1)
 
     def test_aip_in_workarea_using_ip_view_type(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -158,6 +159,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 0)
+        self.assertEqual(len(res.data[0]['workarea']), 1)
 
     def test_aip_in_other_users_workarea_without_permission_to_view_specific_ip_using_aic_view_type(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -193,8 +195,8 @@ class WorkareaViewSetTestCase(TestCase):
         aip2 = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=1)
 
         other_user = User.objects.create(username="other")
-        Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
-        Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
@@ -205,6 +207,8 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1,
                 'user must not see IPs in other users workarea if they do not have "see_all_in_workspaces" permission')
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip.pk))
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['workarea'][0]['id'], str(workarea.pk))
 
     def test_aip_in_own_and_other_users_workarea_with_permission_using_ip_view_type(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -212,8 +216,8 @@ class WorkareaViewSetTestCase(TestCase):
         aip2 = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=1)
 
         other_user = User.objects.create(username="other")
-        Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
-        Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
@@ -223,6 +227,8 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 0,
                 'user must not see IPs in other users workarea if they do not have "see_all_in_workspaces" permission')
+        self.assertEqual(len(res.data[0]['workarea']), 1)
+        self.assertEqual(res.data[0]['workarea'][0]['id'], str(workarea.pk))
 
     def test_aip_in_own_and_other_users_workarea_with_permission_to_only_see_own_using_aic_view_type_and_permission_to_see_all_in_workspaces(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -230,8 +236,8 @@ class WorkareaViewSetTestCase(TestCase):
         aip2 = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=1)
 
         other_user = User.objects.create(username="other")
-        Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
-        Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
@@ -243,6 +249,8 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(len(res.data[0]['information_packages']), 1,
                 'user must not see IPs in other users workarea if they do not have permission to view the IP')
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['workarea'][0]['id'], str(workarea.pk))
 
     def test_aip_in_own_and_other_users_workarea_with_permission_to_only_see_own_using_ip_view_type_and_permission_to_see_all_in_workspaces(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -250,8 +258,8 @@ class WorkareaViewSetTestCase(TestCase):
         aip2 = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=1)
 
         other_user = User.objects.create(username="other")
-        Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
-        Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip2, type=Workarea.ACCESS)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
@@ -263,6 +271,8 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 0,
                 'user must not see IPs in other users workarea if they do not have permission to view the IP')
+        self.assertEqual(len(res.data[0]['workarea']), 1)
+        self.assertEqual(res.data[0]['workarea'][0]['id'], str(workarea.pk))
 
     def test_aip_in_own_and_other_users_workarea_with_permission_to_see_both_using_aic_view_type_and_permission_to_see_all_in_workspaces(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -284,6 +294,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(len(res.data[0]['information_packages']), 2,
                 'user must see other users workarea if they have "see_all_in_workspaces" permission')
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 1)
 
     def test_aip_in_own_and_other_users_workarea_with_permission_to_see_both_using_ip_view_type_and_permission_to_see_all_in_workspaces(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -306,6 +317,71 @@ class WorkareaViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1,
                 'user must see other users workarea if they have "see_all_in_workspaces" permission')
         self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip2.pk))
+        self.assertEqual(len(res.data[0]['workarea']), 1)
+
+    def test_same_aip_in_own_and_other_users_workarea_using_aic_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=0)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        res = self.client.get(self.url, data={'view_type': 'aic'})
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 1)
+        self.assertEqual(res.data[0]['information_packages'][0]['workarea'][0]['id'], str(workarea.pk))
+
+    def test_same_aip_in_own_and_other_users_workarea_using_ip_view_type(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=0)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        res = self.client.get(self.url, data={'view_type': 'ip'})
+        self.assertEqual(len(res.data[0]['workarea']), 1)
+        self.assertEqual(res.data[0]['workarea'][0]['id'], str(workarea.pk))
+
+    def test_same_aip_in_own_and_other_users_workarea_using_aic_view_type_and_permission_to_see_all_in_workspaces(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=0)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        permission = Permission.objects.get(codename='see_all_in_workspaces')
+        self.user.user_permissions.add(permission)
+
+        res = self.client.get(self.url, data={'view_type': 'aic'})
+        self.assertEqual(len(res.data[0]['information_packages'][0]['workarea']), 2)
+
+    def test_same_aip_in_own_and_other_users_workarea_using_ip_view_type_and_permission_to_see_all_in_workspaces(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(aic=aic, package_type=InformationPackage.AIP, generation=0)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        permission = Permission.objects.get(codename='see_all_in_workspaces')
+        self.user.user_permissions.add(permission)
+
+        res = self.client.get(self.url, data={'view_type': 'ip'})
+        self.assertEqual(len(res.data[0]['workarea']), 2)
 
 
 class WorkareaFilesViewTestCase(TestCase):
@@ -938,6 +1014,34 @@ class InformationPackageViewSetTestCase(TestCase):
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        url = reverse('informationpackage-detail', args=(str(aip.pk),))
+        res = self.client.get(url, {'view_type': 'ip'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_aic_view_type_detail_aip_multiple_workarea_entries(self):
+        aip = InformationPackage.objects.create(package_type=InformationPackage.AIP)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
+
+        url = reverse('informationpackage-detail', args=(str(aip.pk),))
+        res = self.client.get(url, {'view_type': 'aic'})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_ip_view_type_detail_aip_multiple_workarea_entries(self):
+        aip = InformationPackage.objects.create(package_type=InformationPackage.AIP)
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+
+        other_user = User.objects.create(username="other")
+        workarea = Workarea.objects.create(user=self.user, ip=aip, type=Workarea.ACCESS)
+        workarea2 = Workarea.objects.create(user=other_user, ip=aip, type=Workarea.ACCESS)
 
         url = reverse('informationpackage-detail', args=(str(aip.pk),))
         res = self.client.get(url, {'view_type': 'ip'})
