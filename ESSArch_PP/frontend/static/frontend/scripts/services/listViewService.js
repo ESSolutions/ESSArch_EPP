@@ -130,16 +130,17 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     }
 
     //Fetches IP's for given workarea (ingest or access)
-    function getWorkareaData(workarea, pageNumber, pageSize, filters, sortString, searchString, viewType, columnFilters) {
+    function getWorkareaData(workarea, pageNumber, pageSize, filters, sortString, searchString, viewType, columnFilters, user) {
         return Workarea.query(
             angular.extend({
-                type: workarea,
+                workspace_type: workarea,
                 page: pageNumber,
                 page_size: pageSize,
                 ordering: sortString,
                 search: searchString,
                 view_type: viewType,
                 tag: $rootScope.selectedTag != null ? $rootScope.selectedTag.id : null,
+                workspace_user: user.id,
             }, columnFilters)
         ).$promise.then(function (resource) {
             count = resource.$httpHeaders('Count');

@@ -91,7 +91,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         });
     }
 
-    function getWorkareaIps(workarea, start, number, pageNumber, params, sort, search, expandedAics, columnFilters) {
+    function getWorkareaIps(workarea, start, number, pageNumber, params, sort, search, expandedAics, columnFilters, user) {
         if($rootScope.auth.ip_list_view_type) {
             var viewType = $rootScope.auth.ip_list_view_type;
         } else {
@@ -101,7 +101,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
-        return listViewService.getWorkareaData(workarea, pageNumber, number, $rootScope.navigationFilter, sortString, search, viewType, columnFilters).then(function(value) {
+        return listViewService.getWorkareaData(workarea, pageNumber, number, $rootScope.navigationFilter, sortString, search, viewType, columnFilters, user).then(function(value) {
             var ipCollection = value.data;
             ipCollection.forEach(function(ip) {
                 ip.collapsed = true;
