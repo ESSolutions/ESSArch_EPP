@@ -123,6 +123,8 @@ def installDefaultUsers():
         ## ---- app: WorkflowEngine ---- model: processtask
         #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
         #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
+        ## ---- app: tags ---- model: Tag
+        ['search','tags','Tag'],   # Can search
     ]
 
     for p in permission_list_user:
@@ -169,6 +171,8 @@ def installDefaultUsers():
         ['add_appraisalrule','maintenance','AppraisalRule'],   # Can add appraisal rule (Administration)
         ## ---- app: maintenance ---- model: ConversionRule
         ['add_conversionrule','maintenance','ConversionRule'],   # Can add conversion rule (Administration)
+        ## ---- app: tags ---- model: Tag
+        ['search','tags','Tag'],   # Can search
     ]
 
     for p in permission_list_admin:
@@ -228,6 +232,20 @@ def installDefaultUsers():
         ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
         ['storage_management','storage','storageobject'],   # Storage management (Administration)
+        ## ---- app: storage ---- model: ioqueue
+        ['change_ioqueue','storage','ioqueue'],          # Can change ioqueue
+        ['delete_ioqueue','storage','ioqueue'],    # Can delete ioqueue
+        ## ---- app: storage ---- model: robot
+        ['add_robot','storage','robot'],          # Can add robot
+        ['change_robot','storage','robot'],          # Can change robot
+        ['delete_robot','storage','robot'],    # Can delete robot
+        ## ---- app: storage ---- model: robotqueue
+        ['change_robotqueue','storage','robotqueue'],          # Can change robotqueue
+        ['delete_robotqueue','storage','robotqueue'],    # Can delete robotqueue
+        ## ---- app: storage ---- model: tapedrive
+        ['add_tapedrive','storage','tapedrive'],          # Can add tapedrive
+        ['change_tapedrive','storage','tapedrive'],          # Can change tapedrive
+        ['delete_tapedrive','storage','tapedrive'],    # Can delete tapedrive
         ## ---- app: groups_manager ---- model: member
         ['add_member','groups_manager','member'],                    # Can add member
         ['change_member','groups_manager','member'],                    # Can change member

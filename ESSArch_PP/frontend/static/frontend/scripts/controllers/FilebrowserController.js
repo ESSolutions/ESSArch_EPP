@@ -35,7 +35,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         var retString = "";
         if($state.includes("**.workarea.**")) {
             retString = $scope.ip.object_identifier_value;
-            if ($scope.ip.workarea.packaged && !$scope.ip.workarea.extracted) {
+            if ($scope.ip.workarea[0].packaged && !$scope.ip.workarea[0].extracted) {
                 retString += '.tar';
             }
             retString += '/';

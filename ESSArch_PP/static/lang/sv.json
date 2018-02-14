@@ -324,7 +324,9 @@
     "IMPORT": "Import",
     "COLLAPSE_ALL": "Kollapsa alla",
     "EXPAND_ALL": "Expandera alla",
+    "MISSING_AIC_DESCRIPTION": "AIC Description-profil saknas i leveransöverenskommelse",
     "MISSING_AIP": "AIP-profil saknas i leveransöverenskommelse",
+    "MISSING_AIP_DESCRIPTION": "AIP Description-profil saknas i leveransöverenskommelse",
     "MISSING_DIP": "DIP-profil saknas i leveransöverenskommelse",
     "GENERATE_TEMPLATE": "Generera template",
     "ADD_ATTRIBUTE": "Lägg till Attribut",
@@ -510,5 +512,12 @@
     "ADD_RULE": "Lägg till regel",
     "CHOOSE_AT_LEAST_ONE_PATH": "Välj minst en sökväg",
     "CHOOSE_AT_LEAST_ONE_SPECIFICATION": "Välj minst en specifikation",
-    "NO_SPECIFICATIONS_CHOSEN": "Inga specifikationer valda"
+    "NO_SPECIFICATIONS_CHOSEN": "Inga specifikationer valda",
+    "CRON_EVERY": "varje",
+    "CRON_ON": "Dag",
+    "CRON_OF": "Månad",
+    "CRON_ON_THE": "Den",
+    "CRON_AT": "Klockan",
+    "CRON_PAST_THE_HOUR": "Över",
+    "INVALID_FREQUENCY": "Ogiltig frekvens"
 }

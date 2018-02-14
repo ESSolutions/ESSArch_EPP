@@ -25,6 +25,8 @@ from ESSArch_Core.tags.documents import Archive, Parent
 
 from tags.serializers import SearchSerializer
 
+from tags.permissions import SearchPermissions
+
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
@@ -156,6 +158,7 @@ def get_organization(id):
     }
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
+    permission_classes = (SearchPermissions,)
     index = ComponentSearch.index
     lookup_field = 'pk'
     lookup_url_kwarg = None

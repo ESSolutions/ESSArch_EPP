@@ -123,6 +123,10 @@ angular-clipboard@^1.5.0:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular-cookies/-/angular-cookies-1.6.4.tgz#c28f3f6aac7a9826c1e45f1d6807240036e5b26d"
 
+angular-cron-jobs@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/angular-cron-jobs/-/angular-cron-jobs-3.2.0.tgz#26827168dac10dff3a993456de4f2f9558ec10ce"
+
 angular-date-time-input@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/angular-date-time-input/-/angular-date-time-input-1.2.1.tgz#6d7b7eb47fb2cf6198ca564c5dd5bc5156279d76"
@@ -2068,6 +2072,10 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
+later@^1.1.6, later@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/later/-/later-1.2.0.tgz#f2cf6c4dd7956dd2f520adf0329836e9876bad0f"
+
 lazy-cache@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-1.0.4.tgz#a1d78fc3a50474cb80845d3b3b6e1da49a446e8e"
@@ -2436,6 +2444,10 @@ mkdirp@0.5.0:
 moment@^2.15.x, moment@^2.17.1, moment@^2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
+
+moment@^2.8.4:
+  version "2.20.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
 
 ms@0.7.1:
   version "0.7.1"
@@ -2826,6 +2838,13 @@ preserve@^0.2.0:
 pretty-hrtime@^1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz#b7e3ea42435a4c9b2759d99e0f201eb195802ee1"
+
+prettycron@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/prettycron/-/prettycron-0.10.0.tgz#10af0dfa20bbd9f6596d7fb5bb8b8546cac527bb"
+  dependencies:
+    later "^1.1.6"
+    moment "^2.8.4"
 
 process-nextick-args@^1.0.6, process-nextick-args@~1.0.6:
   version "1.0.7"

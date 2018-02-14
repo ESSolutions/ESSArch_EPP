@@ -4,7 +4,18 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
     vm.browserstate = {
         path: ""
     };
-
+    vm.organizationMember = {
+        current: null,
+        options: [],
+    }
+    vm.$onInit = function() {
+        vm.organizationMember.current = $rootScope.auth;
+        if($scope.checkPermission('ip.see_all_in_workspaces')) {
+            $http.get(appConfig.djangoUrl+"organizations/"+$rootScope.auth.current_organization.id+"/").then(function(response) {
+                vm.organizationMember.options = response.data.group_members;
+            })
+        }
+    }
     vm.archived = null;
     $scope.menuOptions = function () {
         return [];
@@ -26,7 +37,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number || vm.itemsPerPage;  // Number of entries showed per page.
             var pageNumber = start/number+1;
-            Resource.getWorkareaIps(vm.workarea, start, number, pageNumber, tableState, sorting, search, $scope.expandedAics, $scope.columnFilters).then(function (result) {
+            Resource.getWorkareaIps(vm.workarea, start, number, pageNumber, tableState, sorting, search, $scope.expandedAics, $scope.columnFilters, vm.organizationMember.current).then(function (result) {
                 vm.displayedIps = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
                 $scope.ipLoading = false;
@@ -83,7 +94,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
                 $scope.removeIp(ip);
             });
         } else {
-            $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea.id + "/")
+            $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea[0].id + "/")
                 .then(function () {
                     $scope.edit = false;
                     $scope.select = false;
@@ -102,7 +113,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
 
     //Click function for Ip table
     $scope.ipTableClick = function (row) {
-        if (row.workarea && row.workarea.read_only) {
+        if (row.workarea && row.workarea[0].read_only) {
             $scope.ip = row;
             $rootScope.ip = row;
             $scope.select = false;
@@ -113,7 +124,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
             $scope.filebrowser = false;
             return;
         }
-        if (row.package_type == 1) {
+        if (row.package_type == 1 || row.workarea == null) {
             $scope.select = false;
             $scope.eventlog = false;
             $scope.edit = false;
@@ -160,7 +171,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
                 $rootScope.ip = null;
             }
         } else {
-            if ($rootScope.auth.id == ip.workarea.user.id || !ip.workarea.user) {
+            if ($rootScope.auth.id == ip.workarea[0].user.id || !ip.workarea[0].user) {
                 $scope.ip = ip;
                 $rootScope.ip = ip;
                 $scope.previousGridArrays = [];
