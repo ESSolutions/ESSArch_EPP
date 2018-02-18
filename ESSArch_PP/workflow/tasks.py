@@ -961,7 +961,10 @@ class PollIOQueue(DBTask):
             if recipient:
                 subject = 'Preserved "%s"' % ip.object_identifier_value
                 body = '"%s" is now preserved' % ip.object_identifier_value
-                send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
+                try:
+                    send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
+                except Exception:
+                    logger.exception("Failed to send mail to notify user about preserved IP")
 
     def is_cached(self, entry):
         cache_dir = entry.ip.policy.cache_storage.value
