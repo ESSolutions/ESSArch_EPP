@@ -948,6 +948,9 @@ class PollIOQueue(DBTask):
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
 
+            # if we preserved directly from workarea then we need to delete that workarea object
+            ip.workareas.all().delete()
+
             msg = '%s preserved to %s' % (ip.object_identifier_value, ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True)))
             agent = entries.first().user.username
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
@@ -959,9 +962,6 @@ class PollIOQueue(DBTask):
                 subject = 'Preserved "%s"' % ip.object_identifier_value
                 body = '"%s" is now preserved' % ip.object_identifier_value
                 send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
-
-            # if we preserved directly from workarea then we need to delete that workarea object
-            ip.workareas.all().delete()
 
     def is_cached(self, entry):
         cache_dir = entry.ip.policy.cache_storage.value
