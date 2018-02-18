@@ -38,10 +38,12 @@ from operator import itemgetter
 
 from celery import states as celery_states
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import (BooleanField, Case, Exists, F, Max, Min, OuterRef, Prefetch, Q,
                               Subquery, Value, When)
 from django.shortcuts import get_object_or_404
+from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import DjangoFilterBackend
 
 from elasticsearch.exceptions import TransportError
@@ -100,6 +102,7 @@ from ip.serializers import (ArchivalInstitutionSerializer,
                             NestedInformationPackageSerializer,
                             OrderSerializer)
 
+User = get_user_model()
 
 class ArchivalInstitutionViewSet(viewsets.ModelViewSet):
     """
@@ -1724,6 +1727,22 @@ class WorkareaViewSet(InformationPackageViewSet):
 
 
 class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
+    def get_user(self, request):
+        if self.request.query_params.get('user') in EMPTY_VALUES:
+            return request.user
+
+        if not self.request.user.has_perm('ip.see_all_in_workspaces'):
+            raise exceptions.PermissionDenied('No permission to see files in other users workspaces')
+
+        try:
+            user_id = self.request.query_params['user']
+            organization = self.request.user.user_profile.current_organization
+            organization_users = organization.get_members(subgroups=True)
+            user = User.objects.get(pk=user_id, groups_manager_member_set__in=organization_users)
+            return user
+        except User.DoesNotExist:
+            raise exceptions.NotFound('User not found in organization')
+
     def validate_workarea(self, area_type):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
 
@@ -1747,8 +1766,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
 
         path = request.query_params.get('path', '').strip('/ ')
         force_download = request.query_params.get('download', False)
@@ -1774,8 +1795,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
 
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root, existence=False)
@@ -1807,8 +1830,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
 
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root)
@@ -1841,8 +1866,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
 
         if request.method == 'GET':
             path = os.path.join(root, request.query_params.get('destination', ''))
@@ -1910,8 +1937,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, request.user.username)
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
         relative_path = request.data.get('path', '')
 
         if len(relative_path) == 0:
@@ -1950,8 +1979,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing type parameter')
 
+        user = self.get_user(request)
+
         self.validate_workarea(workarea)
-        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, str(request.user.username))
+        root = os.path.join(Path.objects.get(entity=workarea + '_workarea').value, user.username)
 
         try:
             dip = self.request.data['dip']
