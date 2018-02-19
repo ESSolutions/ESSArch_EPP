@@ -1,0 +1,12 @@
+<div class="enter-profile-name">
+        <h3 class="modal-title" id="modal-title">{{'ADD_NODE' | translate}}</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <form name="$ctrl.form">
+            <formly-form model="$ctrl.newNode" fields="$ctrl.nodeFields" options="$ctrl.options"></formly-form>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-disabled="!$ctrl.changed()" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>

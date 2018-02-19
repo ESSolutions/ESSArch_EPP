@@ -109,16 +109,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.search.detail', {
-        url: '/:id',
-        templateUrl: '/static/frontend/views/search_detail.html',
-        controller: 'SearchDetailCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        }
-    })
     .state('home.search.information_package', {
         url: '/information_package/:id',
         templateUrl: '/static/frontend/views/search_ip_detail.html',
@@ -162,7 +152,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     .state('home.search.archive', {
         url: '/archive/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
-        controller: 'SearchArchiveCtrl as vm',
+        controller: 'SearchDetailCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();

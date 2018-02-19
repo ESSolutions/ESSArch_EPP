@@ -519,5 +519,11 @@
     "CRON_ON_THE": "Den",
     "CRON_AT": "Klockan",
     "CRON_PAST_THE_HOUR": "Över",
-    "INVALID_FREQUENCY": "Ogiltig frekvens"
+    "INVALID_FREQUENCY": "Ogiltig frekvens",
+    "NODE_ADDED": "Tillagd!",
+    "NODE_EDITED": "Uppdaterad!",
+    "NODE_REMOVED": "Borttagen!",
+    "ADD_NODE": "Lägg till nod",
+    "REMOVE_NODE": "Ta bort",
+    "DO_YOU_WANT_TO_REMOVE_NODE": "Vill du ta bort nod?"
 }

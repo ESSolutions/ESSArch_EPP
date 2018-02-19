@@ -1,13 +1,10 @@
 angular.module('myApp').factory('Search', function($http, $sce, appConfig, $translate) {
     var service = {};
-    var auth = window.btoa("user:user");
-    var headers = { "Authorization": "Basic " + auth };
     var url = appConfig.djangoUrl;
     service.query = function (filters, pageNumber, pageSize) {
         return $http({
             method: 'GET',
             url: url+"search/",
-            headers: headers,
             params: angular.extend(
                 {
                     page: pageNumber,
@@ -42,7 +39,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     }
 
     service.getChildrenForTag = function(tag){
-        return $http.get(url+"search/"+tag.id+"/children/", {headers: headers}).then(function(response) {
+        return $http.get(url+"search/"+tag.id+"/children/").then(function(response) {
             var temp  = response.data.map(function(item) {
                 item._source.id = item._id;
                 item._source.text = item._source.reference_code + " - "+item._source.name;
@@ -55,5 +52,48 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
 
     }
 
+    service.updateNode = function(node, data) {
+        return $http({
+            method: 'PATCH',
+            url: url+"search/"+node._index + "/" + node._id + "/",
+            data: data
+        }).then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response;
+        });
+    }
+    service.addNode = function(node) {
+        return $http({
+            method: 'POST',
+            url: url+"search/",
+            data: node
+        }).then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response;
+        });
+    }
+    service.createNewVersion = function(node, data) {
+        return $http({
+            method: 'POST',
+            url: url+"search/"+node._index + "/" + node._id + "/new-version/",
+            data: data
+        }).then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response;
+        });
+    }
+    service.removeNode = function(node) {
+        return $http({
+            method: 'DELETE',
+            url: url+"search/"+node._index + "/" + node._id + "/",
+        }).then(function(response) {
+            return response;
+        }).catch(function(response) {
+            return response;
+        });
+    }
     return service;
 })

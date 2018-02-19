@@ -5,8 +5,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
     vm.$onInit = function() {
+        vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id);
+    }
+
+    vm.loadRecordAndTree = function(index, id) {
         vm.viewContent = true;
-        $http.get(vm.url+"search/"+$state.current.name.split(".").pop()+"/"+$stateParams.id+"/", {headers: headers}).then(function(response) {
+        $http.get(vm.url+"search/"+ index +"/"+id+"/", {headers: headers}).then(function(response) {
             vm.record = response.data;
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
             vm.activeTab = 1;
@@ -184,13 +188,23 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             items: function (node, callback) {
                 var rename = {
                     label: $translate.instant('UPDATE'),
-                    action: function (node) {
-                        vm.recordTreeInstance.edit(node);
+                    action: function () {
+                        vm.editNodeModal(node);
                     },
-                    shortcut: '113',
-                    shortcut_label: "F2"
                 };
-                var actions = { rename: rename };
+                var add = {
+                    label: $translate.instant('ADD'),
+                    action: function () {
+                        vm.addNodeModal(node);
+                    },
+                };
+                var remove = {
+                    label: $translate.instant('REMOVE'),
+                    action: function () {
+                        vm.removeNodeModal(node);
+                    },
+                };
+                var actions = { rename: rename, add: add, remove: remove };
                 callback(actions);
                 return actions;
             }
@@ -258,11 +272,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
     }
 
-    vm.expandChildren = function (jqueryobj, e) {
+    vm.expandChildren = function (jqueryobj, e, reload) {
         var tree = vm.recordTreeData;
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
         var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
-        if(e.node.children.length < 2) {
+        if(e.node.children.length < 2 || reload) {
             $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {headers: headers, params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 children.pop();
@@ -405,22 +419,66 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
     }
 
-    vm.appraisal = function(record) {
+    vm.editNodeModal = function(node) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/search_appraisal_modal.html',
-            controller: 'AppraisalModalInstanceCtrl',
+            templateUrl: 'static/frontend/views/edit_node_modal.html',
+            controller: 'EditNodeModalInstanceCtrl',
             controllerAs: '$ctrl',
             size: "lg",
             resolve: {
                 data: {
-                    record: record
+                    node: node
                 }
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
+            vm.loadRecordAndTree(node.original._index, node.original._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.addNodeModal = function(node) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/add_node_modal.html',
+            controller: 'AddNodeModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.loadRecordAndTree(node.original._index, node.original._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.removeNodeModal = function(node) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/remove_node_modal.html',
+            controller: 'RemoveNodeModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
+            vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
