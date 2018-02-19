@@ -324,6 +324,7 @@ def installDefaultPaths():
         'orders': '/ESSArch/data/epp/orders',
         'verify': '/ESSArch/data/epp/verify',
         'appraisal_reports': '/ESSArch/data/epp/reports/appraisal',
+        'conversion_reports': '/ESSArch/data/epp/reports/conversion',
     }
 
     for key in dct:
