@@ -59,8 +59,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             data: data
         }).then(function(response) {
             return response;
-        }).catch(function(response) {
-            return response;
         });
     }
     service.addNode = function(node) {
@@ -69,8 +67,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             url: url+"search/",
             data: node
         }).then(function(response) {
-            return response;
-        }).catch(function(response) {
             return response;
         });
     }
@@ -81,8 +77,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             data: data
         }).then(function(response) {
             return response;
-        }).catch(function(response) {
-            return response;
         });
     }
     service.removeNode = function(node) {
@@ -90,8 +84,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             method: 'DELETE',
             url: url+"search/"+node._index + "/" + node._id + "/",
         }).then(function(response) {
-            return response;
-        }).catch(function(response) {
             return response;
         });
     }
