@@ -21,7 +21,7 @@ from six import iteritems
 from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive, Parent
+from ESSArch_Core.tags.documents import Archive, Node
 
 from tags.serializers import SearchSerializer
 
@@ -338,7 +338,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if serializer.is_valid():
             data = serializer.data
             index = data.pop('index')
-            parent = Parent(id=data.pop('parent'), index=data.pop('parent_index'))
+            parent = Node(id=data.pop('parent'), index=data.pop('parent_index'))
             d = DocType(_index=index, parent=parent, **data)
             d.save()
 
