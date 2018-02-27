@@ -290,8 +290,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self.get_object(index=index)
 
         # get the children
-        s = Search().sort('reference_code')
-        s = s.query('term', **{'parent.id': pk})
+        s = Search().query('bool', must=[Q('term', **{'parent.id': pk}), Q('term', **{'parent.index': index})])
 
         if self.paginator is not None:
             # Paginate in search engine
