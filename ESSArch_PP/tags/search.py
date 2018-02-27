@@ -349,6 +349,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
 
+    def partial_update(self, request, index=None, pk=None):
+        obj = self.get_object(index)
+        obj.update(**request.data)
+        return Response(self.serialize(obj))
+
     def destroy(self, request, index=None, pk=None):
         obj = self.get_object(index)
         obj.delete()
