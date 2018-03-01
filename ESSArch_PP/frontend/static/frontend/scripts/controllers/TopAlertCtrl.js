@@ -162,9 +162,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
      * @param time - Adds a duration to the alert
      */
 
-    vm.addAlert = function (id, message, level, time, seen) {
+    vm.addAlert = function (id, message, level, time, seen, options) {
         var timer = null;
-        var alert = {message: message, level: level, time_created: new Date(), seen: false};
+        var alert = {message: message, level: level, time_created: new Date(), seen: false, options: options};
         if(id) {
             alert.id = id;
             alert.seen = seen
@@ -200,7 +200,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
     // Listen for show/hide events
     $scope.$on('add_top_alert', function (event, data) {
-        vm.addAlert(data.id, data.message, data.level, data.time, true);
+        vm.addAlert(data.id, data.message, data.level, data.time, true, data.options);
     });
     $scope.$on('add_unseen_top_alert', function (event, data) {
         vm.updateUnseen(data.count);

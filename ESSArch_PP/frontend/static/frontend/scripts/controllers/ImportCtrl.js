@@ -71,7 +71,7 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                 }
             }
             SA.new(sa).$promise.then(function (resource) {
-                TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. ID: " + resource.id , "success", 5000);
+                TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
                 vm.select = false;
             }).catch(function(response) {
                 if(response.status == 409) {
@@ -97,7 +97,7 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             return;
         }
         SA.new(parsedSa).$promise.then(function (resource) {
-            TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. ID: " + resource.id , "success", 5000);
+            TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             vm.select = false;
         }).catch(function(response) {
             if(response.status == 409) {
@@ -118,7 +118,7 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
             return;
         }
         Profile.new(parsedProfile).$promise.then(function(resource) {
-            TopAlert.add("Profile: \"" + resource.name + "\" has been imported. ID: " + resource.id , "success", 5000);
+            TopAlert.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             return resource;
         }).catch(function(response) {
             if(response.status == 409) {
