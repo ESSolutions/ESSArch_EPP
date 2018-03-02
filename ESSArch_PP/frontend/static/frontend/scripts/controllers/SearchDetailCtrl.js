@@ -64,7 +64,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         startNode.text = "<b>" + (startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode._source.name;
         startNode.state = {opened: true};
-        if(startNode._id == vm.record._id) {
+        if(startNode._source.link_id == vm.record._source.link_id) {
             startNode.state.selected = true;
         }
         if (!startNode.children || startNode.children.length <= 0) {
@@ -95,7 +95,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 p.children = [];
                 return getChildren(p).then(function (children) {
                     children.data.forEach(function (child) {
-                        if (child._id == startNode._id) {
+                        if (child._source.link_id == startNode._source.link_id) {
                             p.children.push(startNode);
                         } else {
                             child = createChild(child);

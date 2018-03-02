@@ -3,13 +3,14 @@ from __future__ import division
 import copy
 import datetime
 import math
+import uuid
 
 from django.core.cache import cache
 
 from django_filters.constants import EMPTY_VALUES
 
 from elasticsearch.exceptions import NotFoundError, TransportError
-from elasticsearch_dsl import DocType, Index, Q, FacetedSearch, TermsFacet, Search
+from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet, Search
 
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
@@ -21,7 +22,7 @@ from six import iteritems
 from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive, Node
+from ESSArch_Core.tags.documents import Archive, Node, VersionedDocType
 
 from tags.serializers import SearchSerializer
 
@@ -188,7 +189,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         id = self.kwargs[lookup_url_kwarg]
 
         try:
-            return DocType.get(id, index=index)
+            return VersionedDocType.get(id, index=index)
         except NotFoundError:
             raise exceptions.NotFound
 
@@ -282,7 +283,14 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self.index = index
 
         obj = self.get_object()
-        return Response(self.serialize(obj))
+        versions = Search(index=obj.meta.index)\
+            .source(['create_date', 'archive', 'current_version', 'start_date', 'end_date'])\
+            .filter('term', link_id=obj.link_id) \
+            .sort('create_date').execute()['hits'].to_dict()['hits']
+
+        serialized = self.serialize(obj)
+        serialized['_source']['versions'] = versions
+        return Response(serialized)
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
@@ -290,7 +298,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self.get_object(index=index)
 
         # get the children
-        s = Search().query('bool', must=[Q('term', **{'parent.id': pk}), Q('term', **{'parent.index': index})])
+        s = Search().query('bool', must=[
+            Q('term', current_version=True),
+            Q('term', **{'parent.id': pk}),
+            Q('term', **{'parent.index': index})])
 
         if self.paginator is not None:
             # Paginate in search engine
@@ -330,6 +341,19 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(r)
 
+    @detail_route(methods=['post'], url_path='new-version')
+    def new_version(self, request, index=None, pk=None):
+        old_obj = self.get_object(index=index)
+        new_obj = old_obj.create_new_version()
+
+        return Response(self.serialize(new_obj), status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['patch'], url_path='set-as-current-version')
+    def set_as_current_version(self, request, index=None, pk=None):
+        obj = self.get_object(index=index)
+        obj.set_as_current_version()
+        return Response()
+
     def create(self, request, index=None):
         request.data.setdefault('index', index)
         refresh = request.query_params.get('refresh', False)
@@ -339,8 +363,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             data = serializer.data
             index = data.pop('index')
             parent = Node(id=data.pop('parent'), index=data.pop('parent_index'))
-            d = DocType(_index=index, parent=parent, **data)
-            d.save(refresh=refresh)
+            new_id = uuid.uuid4().hex
+            d = VersionedDocType(_id=new_id, _index=index, link_id=new_id, parent=parent, **data)
+            d.current_version = True
+            d.save(pipeline='add_timestamp', refresh=refresh)
 
             self.kwargs = {'pk': d._id}
             obj = self.get_object(d._index)
