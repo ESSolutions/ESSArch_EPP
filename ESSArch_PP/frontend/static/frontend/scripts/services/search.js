@@ -52,10 +52,16 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
 
     }
 
-    service.updateNode = function(node, data) {
+    service.updateNode = function(node, data, refresh) {
+        if(angular.isUndefined(refresh)) {
+            refresh = false;
+        }
         return $http({
             method: 'PATCH',
             url: url+"search/"+node._index + "/" + node._id + "/",
+            params: {
+                refresh: refresh
+            },
             data: data
         }).then(function(response) {
             return response;
@@ -65,16 +71,17 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         return $http({
             method: 'POST',
             url: url+"search/",
+            params: { refresh: true },
             data: node
         }).then(function(response) {
             return response;
         });
     }
-    service.createNewVersion = function(node, data) {
+    service.createNewVersion = function(node) {
         return $http({
             method: 'POST',
             url: url+"search/"+node._index + "/" + node._id + "/new-version/",
-            data: data
+            params: { refresh: true },
         }).then(function(response) {
             return response;
         });
@@ -83,6 +90,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         return $http({
             method: 'DELETE',
             url: url+"search/"+node._index + "/" + node._id + "/",
+            params: { refresh: true },
         }).then(function(response) {
             return response;
         });

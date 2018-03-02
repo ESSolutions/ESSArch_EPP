@@ -526,5 +526,7 @@
     "NODE_REMOVED": "Node removed!",
     "ADD_NODE": "Add node",
     "REMOVE_NODE": "Remove node",
-    "DO_YOU_WANT_TO_REMOVE_NODE": "Do you want to remove node?"
+    "DO_YOU_WANT_TO_REMOVE_NODE": "Do you want to remove node?",
+    "NEW_VERSION": "New version",
+    "CREATE_NEW_VERSION": "Create new version"
 }

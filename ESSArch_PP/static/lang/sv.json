@@ -525,5 +525,7 @@
     "NODE_REMOVED": "Borttagen!",
     "ADD_NODE": "Lägg till nod",
     "REMOVE_NODE": "Ta bort",
-    "DO_YOU_WANT_TO_REMOVE_NODE": "Vill du ta bort nod?"
+    "DO_YOU_WANT_TO_REMOVE_NODE": "Vill du ta bort nod?",
+    "NEW_VERSION": "Ny version",
+    "CREATE_NEW_VERSION": "Skapa ny version"
 }

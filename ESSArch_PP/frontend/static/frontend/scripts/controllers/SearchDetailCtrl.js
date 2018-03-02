@@ -2,15 +2,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
-    var auth = window.btoa("user:user");
-    var headers = { "Authorization": "Basic " + auth };
     vm.$onInit = function() {
         vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id);
     }
 
     vm.loadRecordAndTree = function(index, id) {
         vm.viewContent = true;
-        $http.get(vm.url+"search/"+ index +"/"+id+"/", {headers: headers}).then(function(response) {
+        $http.get(vm.url+"search/"+ index +"/"+id+"/").then(function(response) {
             vm.record = response.data;
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
             vm.activeTab = 1;
@@ -80,7 +78,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         text: $translate.instant("SEE_MORE"),
                         see_more: true,
                         type: "plus",
-                        parent: startNode._id,
+                        _source: {
+                            parent: {id: startNode._id, index: startNode._index},
+                        }
                     });
                     if (!getNodeById(startNode, startNode._id)) {
                         startNode.state.opened = false;
@@ -90,7 +90,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             });
         }
         if (startNode._source.parent) {
-            var parentPromise = $http.get(vm.url + "search/"+startNode._source.parent.index + "/" + startNode._source.parent.id + "/", { headers: headers }).then(function (response) {
+            var parentPromise = $http.get(vm.url + "search/"+startNode._source.parent.index + "/" + startNode._source.parent.id + "/").then(function (response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function (children) {
@@ -107,7 +107,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                             text: $translate.instant("SEE_MORE"),
                             see_more: true,
                             type: "plus",
-                            parent: p._id,
+                            _source: {
+                                parent: {id: p._id, index: p._index},
+                            }
                         });
                         if (!getNodeById(p, startNode._id)) {
                             startNode.state.opened = false;
@@ -127,7 +129,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         })
     }
     function getChildren(node) {
-        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {headers: headers, params: {page_size: 10, page: 1}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {params: {page_size: 10, page: 1}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
@@ -186,7 +188,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         },
         contextmenu: {
             items: function (node, callback) {
-                var rename = {
+                var update = {
                     label: $translate.instant('UPDATE'),
                     action: function () {
                         vm.editNodeModal(node);
@@ -204,14 +206,30 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         vm.removeNodeModal(node);
                     },
                 };
-                var actions = { rename: rename, add: add, remove: remove };
+                var newVersion = {
+                    label: $translate.instant('NEW_VERSION'),
+                    action: function() {
+                        vm.newVersionNodeModal(node);
+                    }
+                }
+                var actions = { update: update, add: add, remove: remove, newVersion: newVersion };
                 callback(actions);
                 return actions;
             }
         },
         version: 1,
-        plugins : ['types', 'contextmenu']
+        plugins : ['types', 'contextmenu', 'dnd']
     };
+
+    vm.dropNode = function(jqueryObj, data) {
+        var node = data.node.original;
+        var parent = vm.recordTreeInstance.jstree(true).get_node(data.parent);
+        Search.updateNode(node,{"parent.id": parent.original._id, "parent.index": parent.original._index}, true).then(function(response) {
+            vm.loadRecordAndTree(parent.original._index, parent.original._id);
+        }).catch(function(response) {
+            TopAlert.add("Could not be moved", "error");
+        })
+    }
 
     vm.setType = function() {
         var array = vm.recordTreeInstance.jstree(true).get_json("#", {flat: true}).forEach(function(item) {
@@ -228,7 +246,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original._source.parent.index+"/"+e.node.original._source.parent.id+"/children/", {headers: headers, params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._source.parent.index+"/"+e.node.original._source.parent.id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var selectedElement = null;
                 var see_more = null;
@@ -277,7 +295,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
         var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
         if(e.node.children.length < 2 || reload) {
-            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {headers: headers, params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
@@ -289,7 +307,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         text: $translate.instant("SEE_MORE"),
                         see_more: true,
                         type: "plus",
-                        parent: parent._id,
+                        _source: {
+                            parent: {id: parent._id, index: parent._index}
+                        }
                     });
                 }
                 parent.state = {opened: true}
@@ -456,6 +476,27 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
+            vm.loadRecordAndTree(data._index, data._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.newVersionNodeModal = function(node) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/create_new_node_version_modal.html',
+            controller: 'VersionModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
             vm.loadRecordAndTree(node.original._index, node.original._id);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
@@ -478,6 +519,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data, $ctrl) {
             var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
+            vm.selectRecord(null, {node: parent});
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

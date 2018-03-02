@@ -753,19 +753,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 name: "component",
             }
         ];
-        $ctrl.types = [
-            {
-                name: "series",
-            },
-            {
 
-                name: "volym",
-            },
-            {
-
-                name: "fonds"
-            }
-        ];
         $ctrl.nodeFields = [
             {
                 "templateOptions": {
@@ -790,12 +778,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             {
                 "templateOptions": {
                     "label": $translate.instant("TYPE"),
-                    "options": $ctrl.types,
-                    "labelProp": "name",
-                    "valueProp": "name",
+                    "type": "text",
                     "required": true
                 },
-                "type": "select",
+                "type": "input",
                 "key": "type",
             },
         ];
@@ -809,7 +795,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         if($ctrl.changed()) {
             Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index})).then(function(response) {
                 TopAlert.add($translate.instant('NODE_ADDED'), 'success');
-                $uibModalInstance.close("added");
+                $uibModalInstance.close(response.data);
             }).catch(function(response) {
                 TopAlert.add(response.data.detail, 'error');
             })
@@ -818,7 +804,26 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
-}).controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+})
+.controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node.original;
+
+    $ctrl.$onInit = function () {}
+
+    $ctrl.createNewVersion = function(node) {
+        Search.createNewVersion(node).then(function(response) {
+            TopAlert.add($translate.instant('NEW_VERSION_CREATED') + response.data._id, 'success');
+            $uibModalInstance.close("added");
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, 'error');
+        })
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
+})
+.controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
 

@@ -1,6 +1,6 @@
 <div class="tree-result-wrapper search-detail" id="view-record">
         <div class="record-tree" ng-if="vm.recordTreeData">
-            <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;"></div>
+            <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
         </div>
         <div ng-switch="vm.record._index" class="view-content">
             <div ng-switch-when="component">
