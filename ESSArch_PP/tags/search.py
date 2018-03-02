@@ -378,7 +378,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def partial_update(self, request, index=None, pk=None):
         obj = self.get_object(index)
+        refresh = request.query_params.get('refresh', False)
         obj.update(**request.data)
+        if refresh:
+            Index.refresh(index=index)
         return Response(self.serialize(obj))
 
     def destroy(self, request, index=None, pk=None):
