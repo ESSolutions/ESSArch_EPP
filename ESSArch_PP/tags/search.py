@@ -343,8 +343,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, index=None, pk=None):
+        refresh = request.query_params.get('refresh', False)
         old_obj = self.get_object(index=index)
-        new_obj = old_obj.create_new_version()
+        new_obj = old_obj.create_new_version(refresh=refresh)
 
         return Response(self.serialize(new_obj), status=status.HTTP_201_CREATED)
 
