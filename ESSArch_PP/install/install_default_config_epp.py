@@ -398,6 +398,17 @@ def installPipelines():
             }
         ]
     })
+    client.put_pipeline(id='add_timestamp', body={
+        'description': "Adds a create_date timestamp",
+        'processors': [
+            {
+                "set": {
+                    "field": "create_date",
+                    "value": "{{_ingest.timestamp}}",
+                },
+            },
+        ]
+    })
 
 
 def installSearchIndices():
