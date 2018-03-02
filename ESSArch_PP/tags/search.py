@@ -332,6 +332,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def create(self, request, index=None):
         request.data.setdefault('index', index)
+        refresh = request.query_params.get('refresh', False)
         serializer = SearchSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -339,7 +340,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             index = data.pop('index')
             parent = Node(id=data.pop('parent'), index=data.pop('parent_index'))
             d = DocType(_index=index, parent=parent, **data)
-            d.save()
+            d.save(refresh=refresh)
 
             self.kwargs = {'pk': d._id}
             obj = self.get_object(d._index)
@@ -356,5 +357,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def destroy(self, request, index=None, pk=None):
         obj = self.get_object(index)
-        obj.delete()
+        refresh = request.query_params.get('refresh', False)
+        obj.delete(refresh=refresh)
         return Response(status=status.HTTP_204_NO_CONTENT)
