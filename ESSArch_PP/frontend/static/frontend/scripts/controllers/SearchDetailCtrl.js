@@ -289,8 +289,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 vm.record._source.terms_and_condition = null;
             }
             vm.record.children = [{text: "", parent: vm.record._id, placeholder: true, icon: false, state: {disabled: true}}];
-            getChildren(vm.record).then(function(response) {
-                vm.record_children = response.data;
+            $http.get(appConfig.djangoUrl + "search/"+vm.record._index+"/"+vm.record._id+"/").then(function(response) {
+                vm.record = response.data;
+                getChildren(vm.record).then(function(response) {
+                    vm.record_children = response.data;
+                })
             })
         }
     }
