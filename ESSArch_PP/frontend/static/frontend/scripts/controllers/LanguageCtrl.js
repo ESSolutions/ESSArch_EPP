@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('LanguageCtrl', function($scope, $rootScope, $cookies, $cookieStore, $cookies, $translate) {
+angular.module('myApp').controller('LanguageCtrl', function($scope, $rootScope, $cookies, $cookieStore, $translate) {
     $scope.changeLanguage = function(lang) {
         $translate.use(lang);
         moment.locale(lang);
