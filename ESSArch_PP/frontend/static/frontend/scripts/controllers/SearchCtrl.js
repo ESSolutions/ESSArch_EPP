@@ -13,10 +13,13 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     var auth = window.btoa("user:user");
     var headers = { "Authorization": "Basic " + auth };
 
+    // Change tab from outside this scope, used in search detail
     $scope.$on('CHANGE_TAB', function(event, data) {
         vm.activeTab = data.tab;
     });
 
+    // When state is changed to search active tab is set to the first tab.
+    // Fixing issues when backing from search detail state and no tab would be active
     $scope.$on("$stateChangeSuccess", function() {
         if ($state.is('home.search')) {
             vm.activeTab = 0;
