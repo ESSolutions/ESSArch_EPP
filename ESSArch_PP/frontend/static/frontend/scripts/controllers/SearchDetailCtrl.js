@@ -11,7 +11,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+ index +"/"+id+"/").then(function(response) {
             vm.record = response.data;
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             vm.activeTab = 1;
             vm.buildRecordTree(response.data).then(function(node) {
                 var treeData = [node];
@@ -50,10 +50,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     }
 
     createChild = function(child) {
-        if (angular.isUndefined(child._source.name)) {
-            child._source.name = "";
+        if (angular.isUndefined(child.name)) {
+            child.name = "";
         }
-        child.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child._source.name;
+        child.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
         if (!child.children) {
             child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
@@ -62,12 +62,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     }
 
     vm.buildRecordTree = function(startNode) {
-        if(angular.isUndefined(startNode._source.name)) {
-            startNode._source.name = "";
+        if(angular.isUndefined(startNode.name)) {
+            startNode.name = "";
         }
-        startNode.text = "<b>" + (startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode._source.name;
+        startNode.text = "<b>" + (startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode.name;
         startNode.state = {opened: true};
-        if(startNode._source.link_id == vm.record._source.link_id) {
+        if(startNode.link_id == vm.record.link_id) {
             startNode.state.selected = true;
         }
         if (!startNode.children || startNode.children.length <= 0) {
@@ -94,13 +94,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 }
             });
         }
-        if (startNode._source.parent) {
-            var parentPromise = $http.get(vm.url + "search/"+startNode._source.parent.index + "/" + startNode._source.parent.id + "/").then(function (response) {
+        if (startNode.parent) {
+            var parentPromise = $http.get(vm.url + "search/"+startNode.parent.index + "/" + startNode.parent.id + "/").then(function (response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function (children) {
                     children.data.forEach(function (child) {
-                        if (child._source.link_id == startNode._source.link_id) {
+                        if (child.link_id == startNode.link_id) {
                             p.children.push(startNode);
                         } else {
                             child = createChild(child);
@@ -251,7 +251,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original._source.parent.index+"/"+e.node.original._source.parent.id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original.parent.index+"/"+e.node.original.parent.id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var selectedElement = null;
                 var see_more = null;
@@ -284,7 +284,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (e.action == "select_node") {
             vm.record = e.node.original;
             $state.go("home.search."+vm.record._index, {id: vm.record._id}, {notify: false});
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record._source.name});
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             if(angular.isUndefined(vm.record._source.terms_and_condition)) {
                 vm.record._source.terms_and_condition = null;
             }

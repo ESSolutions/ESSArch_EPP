@@ -6,6 +6,7 @@ import math
 import uuid
 
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 from django_filters.constants import EMPTY_VALUES
 
@@ -23,6 +24,8 @@ from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, Node, VersionedDocType
+from ESSArch_Core.tags.models import Tag
+from ESSArch_Core.tags.serializers import TagSerializer, TagSerializerWithVersions, TagWriteSerializer
 
 from tags.serializers import SearchSerializer
 
@@ -193,6 +196,24 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except NotFoundError:
             raise exceptions.NotFound
 
+    def get_tag_object(self):
+        # Perform the lookup filtering.
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+                'Expected view %s to be called with a URL keyword argument '
+                'named "%s". Fix your URL conf, or set the `.lookup_field` '
+                'attribute on the view correctly.' %
+                (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        # Search for object in index by id
+        id = self.kwargs[lookup_url_kwarg]
+
+        tag = Tag.objects.select_related('parent')
+
+        return get_object_or_404(tag, pk=id)
+
     def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
@@ -280,79 +301,33 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if index is None:
             return self.list(request, index=pk)
 
-        self.index = index
+        tag = self.get_tag_object()
+        serialized = TagSerializerWithVersions(tag).data
 
-        obj = self.get_object()
-        versions = Search(index=obj.meta.index)\
-            .source(['create_date', 'archive', 'current_version', 'start_date', 'end_date'])\
-            .filter('term', link_id=obj.link_id) \
-            .sort('create_date').execute()['hits'].to_dict()['hits']
-
-        serialized = self.serialize(obj)
-        serialized['_source']['versions'] = versions
         return Response(serialized)
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
-        # check if the parent exist
-        self.get_object(index=index)
-
-        # get the children
-        s = Search().query('bool', must=[
-            Q('term', current_version=True),
-            Q('term', **{'parent.id': pk}),
-            Q('term', **{'parent.index': index})])
+        parent = self.get_tag_object()
+        children = parent.get_children().filter(current_version=True)
 
         if self.paginator is not None:
-            # Paginate in search engine
-            number = request.query_params.get(self.paginator.pager.page_query_param, 1)
-            size = request.query_params.get(self.paginator.pager.page_size_query_param, 10)
+            paginated = self.paginator.paginate_queryset(children, request)
+            serialized = TagSerializer(instance=paginated, many=True).data
+            return self.paginator.get_paginated_response(serialized)
 
-            try:
-                number = int(number)
-            except (TypeError, ValueError):
-                raise exceptions.NotFound('Invalid page.')
-            if number < 1:
-                raise exceptions.NotFound('Invalid page.')
-
-            size = int(size)
-            offset = (number-1)*size
-            max_results = int(Index('archive').get_settings()['archive']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
-            s = s[offset:offset+size]
-
-        try:
-            results = s.execute()
-        except TransportError:
-            if self.paginator is not None:
-                if offset+size > max_results:
-                    raise exceptions.ParseError("Can't show more than {max} results".format(max=max_results))
-
-            raise
-
-        if self.paginator is not None:
-            if results.hits.total > 0 and number > math.ceil(results.hits.total/size):
-                raise exceptions.NotFound('Invalid page.')
-
-        results_dict = results.to_dict()
-        r = results_dict['hits']['hits']
-
-        if self.paginator is not None:
-            return Response(r, headers={'Count': results.hits.total})
-
-        return Response(r)
+        return Response(serialized = TagSerializer(children, many=True).data)
 
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, index=None, pk=None):
-        refresh = request.query_params.get('refresh', False)
-        old_obj = self.get_object(index=index)
-        new_obj = old_obj.create_new_version(refresh=refresh)
-
-        return Response(self.serialize(new_obj), status=status.HTTP_201_CREATED)
+        tag = self.get_tag_object()
+        new_tag = tag.create_new_version()
+        return Response()
 
     @detail_route(methods=['patch'], url_path='set-as-current-version')
     def set_as_current_version(self, request, index=None, pk=None):
-        obj = self.get_object(index=index)
-        obj.set_as_current_version()
+        tag = self.get_tag_object()
+        tag.set_as_current_version()
         return Response()
 
     def create(self, request, index=None):
@@ -360,33 +335,33 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         refresh = request.query_params.get('refresh', False)
         serializer = SearchSerializer(data=request.data)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             data = serializer.data
-            index = data.pop('index')
-            parent = Node(id=data.pop('parent'), index=data.pop('parent_index'))
-            new_id = uuid.uuid4().hex
-            d = VersionedDocType(_id=new_id, _index=index, link_id=new_id, parent=parent, **data)
-            d.current_version = True
-            d.save(pipeline='add_timestamp', refresh=refresh)
 
-            self.kwargs = {'pk': d._id}
-            obj = self.get_object(d._index)
-            return Response(self.serialize(obj),
-                         status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+            tag = Tag.objects.create(index=data['index'], name=data['name'],
+                                     type=data['type'], parent_id=data.get('parent'))
+            return Response(self.serialize(tag.to_search()))
 
     def partial_update(self, request, index=None, pk=None):
-        obj = self.get_object(index)
-        refresh = request.query_params.get('refresh', False)
-        obj.update(**request.data)
-        if refresh:
-            Index(index).refresh()
-        return Response(self.serialize(obj))
+        tag = self.get_tag_object()
+
+        db_fields = [f.name for f in Tag._meta.get_fields()]
+        db_fields_request_data = {}
+
+        for f in db_fields:
+            if f in request.data:
+                db_fields_request_data[f] = request.data.pop(f)
+
+        serializer = TagWriteSerializer(tag, data=db_fields_request_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if request.data:
+            tag.update_search(request.data)
+
+        return Response(serializer.data)
 
     def destroy(self, request, index=None, pk=None):
-        obj = self.get_object(index)
-        refresh = request.query_params.get('refresh', False)
-        obj.delete(refresh=refresh)
+        obj = self.get_tag_object()
+        obj.get_descendants(include_self=True).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -381,6 +381,18 @@ CELERYBEAT_SCHEDULE = {
         'task': 'workflow.tasks.ScheduleConversionJobs',
         'schedule': timedelta(seconds=10),
     },
+    'IndexTags': {
+        'task': 'ESSArch_Core.tasks.IndexTags',
+        'schedule': timedelta(seconds=10),
+    },
+    'UpdateTags': {
+        'task': 'ESSArch_Core.tasks.UpdateTags',
+        'schedule': timedelta(seconds=10),
+    },
+    'DeleteTags': {
+        'task': 'ESSArch_Core.tasks.DeleteTags',
+        'schedule': timedelta(seconds=10),
+    },
 }
 
 # Rest auth settings
