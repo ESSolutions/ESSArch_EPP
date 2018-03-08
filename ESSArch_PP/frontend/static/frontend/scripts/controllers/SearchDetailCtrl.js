@@ -1,7 +1,8 @@
-angular.module('myApp').controller('SearchDetailCtrl', function($scope, $stateParams,Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchDetailCtrl', function($scope, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
+    vm.unavailable = false;
     vm.$onInit = function() {
         vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id);
     }
@@ -23,7 +24,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
             })
-        });
+        }).catch(function(response) {
+            if (response.status == 403 || response.status == 404) {
+                vm.unavailable = true;
+            }
+        })
     }
 
     vm.currentItem = null;
@@ -338,6 +343,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         var showFile = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/"+file.ip+"/files/?path="+params.path);
         $window.open(showFile, '_blank');
+    }
+
+    vm.gotoSearch = function() {
+        $rootScope.$broadcast('CHANGE_TAB', {tab: 0});
+        $state.go("home.search");
     }
 
     vm.editField = function(key, value) {

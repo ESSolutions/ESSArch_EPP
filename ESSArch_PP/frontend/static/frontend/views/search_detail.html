@@ -1,8 +1,13 @@
 <div class="tree-result-wrapper search-detail" id="view-record">
-        <div class="record-tree" ng-if="vm.recordTreeData">
-            <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
-        </div>
-        <div ng-switch="vm.record._index" class="view-content">
+    <div ng-if="vm.unavailable" class="view-content text-center">
+        <h4>{{'PAGE_DOES_NOT_EXIST' | translate}}</h4>
+        <button class="btn btn-success" ng-click="vm.gotoSearch()">{{'GO_TO_SEARCH' | translate}}</button>
+    </div>
+    <div class="record-tree" ng-if="vm.recordTreeData">
+        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
+    </div>
+    <div ng-if="!vm.unavailable" class="view-content">
+        <div ng-switch="vm.record._index">
             <div ng-switch-when="component">
                 <div ng-include="'static/frontend/views/search_component_detail.html'"></div>
             </div>
@@ -15,7 +20,6 @@
             <div ng-switch-when="directory">
                 <div ng-include="'static/frontend/views/search_directory_detail.html'"></div>
             </div>
-            <!--<select ng-model="vm.currentVersion" ng-options="x as x.version_number for x in vm.record.versions">
-            </select>-->
         </div>
     </div>
+</div>

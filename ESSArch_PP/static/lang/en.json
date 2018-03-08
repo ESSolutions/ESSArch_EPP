@@ -528,5 +528,7 @@
     "REMOVE_NODE": "Remove node",
     "DO_YOU_WANT_TO_REMOVE_NODE": "Do you want to remove node?",
     "NEW_VERSION": "New version",
-    "CREATE_NEW_VERSION": "Create new version"
+    "CREATE_NEW_VERSION": "Create new version",
+    "PAGE_DOES_NOT_EXIST": "Page does not exist",
+    "GO_TO_SEARCH": "Go to Search"
 }
