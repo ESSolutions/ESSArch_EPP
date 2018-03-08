@@ -741,7 +741,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 }).controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
-    $ctrl.newNode = {};
+    $ctrl.newNode = {
+        reference_code: data.node.children.length+1,
+    };
     $ctrl.options = {};
     $ctrl.nodeFields = [];
     $ctrl.indexes = [];
@@ -792,13 +794,6 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 },
                 "type": "input",
                 "key": "reference_code",
-                validators: {
-                    reference_code: {
-                        expression: function(viewValue, modelValue, scope) {
-                            return typeof modelValue == 'number';
-                        }
-                    }
-                }
             },
         ];
     }
