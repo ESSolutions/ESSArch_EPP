@@ -17,6 +17,12 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         vm.activeTab = data.tab;
     });
 
+    $scope.$on("$stateChangeSuccess", function() {
+        if ($state.is('home.search')) {
+            vm.activeTab = 0;
+        }
+    });
+
     vm.$onInit = function() {
         if($state.is('home.search.detail') || $state.is('home.search.information_package') || $state.is('home.search.component') || $state.is('home.search.archive') || $state.is('home.search.directory') || $state.is('home.search.document')) {
             vm.activeTab = 1;
