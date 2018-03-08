@@ -784,6 +784,22 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 "type": "input",
                 "key": "type",
             },
+            {
+                "templateOptions": {
+                    "label": $translate.instant("REFERENCE_CODE"),
+                    "type": "number",
+                    "required": true
+                },
+                "type": "input",
+                "key": "reference_code",
+                validators: {
+                    reference_code: {
+                        expression: function(viewValue, modelValue, scope) {
+                            return typeof modelValue == 'number';
+                        }
+                    }
+                }
+            },
         ];
     }
 
