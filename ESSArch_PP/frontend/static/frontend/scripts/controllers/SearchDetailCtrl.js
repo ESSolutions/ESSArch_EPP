@@ -54,7 +54,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             child.name = "";
         }
         child.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
-        if (!child.children) {
+        if (!child.is_leaf_node) {
             child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
         child.state = { opened: false };
@@ -83,8 +83,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         text: $translate.instant("SEE_MORE"),
                         see_more: true,
                         type: "plus",
+                        parent: {id: startNode._id, index: startNode._index},
                         _source: {
-                            parent: {id: startNode._id, index: startNode._index},
                         }
                     });
                     if (!getNodeById(startNode, startNode._id)) {
@@ -112,8 +112,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                             text: $translate.instant("SEE_MORE"),
                             see_more: true,
                             type: "plus",
+                            parent: {id: p._id, index: p._index},
                             _source: {
-                                parent: {id: p._id, index: p._index},
                             }
                         });
                         if (!getNodeById(p, startNode._id)) {
@@ -229,7 +229,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.dropNode = function(jqueryObj, data) {
         var node = data.node.original;
         var parent = vm.recordTreeInstance.jstree(true).get_node(data.parent);
-        Search.updateNode(node,{"parent.id": parent.original._id, "parent.index": parent.original._index}, true).then(function(response) {
+        Search.updateNode(node,{parent: parent.original._id}, true).then(function(response) {
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }).catch(function(response) {
             TopAlert.add("Could not be moved", "error");
@@ -288,7 +288,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             if(angular.isUndefined(vm.record._source.terms_and_condition)) {
                 vm.record._source.terms_and_condition = null;
             }
-            vm.record.children = [{text: "", parent: vm.record._id, placeholder: true, icon: false, state: {disabled: true}}];
+            if(!vm.record.is_leaf_node) {
+                vm.record.children = [{text: "", parent: vm.record._id, placeholder: true, icon: false, state: {disabled: true}}];
+            }
             $http.get(appConfig.djangoUrl + "search/"+vm.record._index+"/"+vm.record._id+"/").then(function(response) {
                 vm.record = response.data;
                 getChildren(vm.record).then(function(response) {
@@ -315,8 +317,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         text: $translate.instant("SEE_MORE"),
                         see_more: true,
                         type: "plus",
+                        parent: {id: parent._id, index: parent._index},
                         _source: {
-                            parent: {id: parent._id, index: parent._index}
                         }
                     });
                 }
