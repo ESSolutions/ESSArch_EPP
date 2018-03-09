@@ -7,6 +7,19 @@
         <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
     </div>
     <div ng-if="!vm.unavailable" class="view-content">
+        <div class="float-right">
+            <label class="">
+                {{'VERSION' | translate}}
+            </label>
+            <div class="flex-row">
+                <select class="form-control version-select" ng-model="vm.currentVersion" ng-change="vm.showVersion(vm.currentVersion)">
+                    <option ng-repeat="version in vm.record.versions" value="{{version._id}}">
+                        {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
+                    </option>
+                </select>
+                <button type="button" ng-disabled="vm.record.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+            </div>
+        </div>
         <div ng-switch="vm.record._index">
             <div ng-switch-when="component">
                 <div ng-include="'static/frontend/views/search_component_detail.html'"></div>

@@ -95,5 +95,16 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             return response;
         });
     }
+    service.setAsCurrentVersion = function (node, refresh) {
+        return $http({
+            method: 'PATCH',
+            url: url + "search/" + node._index + "/" + node._id + "/set-as-current-version/",
+            params: {
+                refresh: refresh
+            },
+        }).then(function (response) {
+            return response;
+        });
+    }
     return service;
 })

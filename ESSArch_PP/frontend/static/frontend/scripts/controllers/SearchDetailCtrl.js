@@ -11,6 +11,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+ index +"/"+id+"/").then(function(response) {
             vm.record = response.data;
+            getVersionSelectData();
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             vm.activeTab = 1;
             vm.buildRecordTree(response.data).then(function(node) {
@@ -293,11 +294,25 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             }
             $http.get(appConfig.djangoUrl + "search/"+vm.record._index+"/"+vm.record._id+"/").then(function(response) {
                 vm.record = response.data;
-                getChildren(vm.record).then(function(response) {
+                vm.currentVersion = vm.record._id;
+                getVersionSelectData();
+                getChildren(vm.record).then(function (response) {
                     vm.record_children = response.data;
                 })
             })
         }
+    }
+
+    function getVersionSelectData() {
+        vm.currentVersion = vm.record._id;
+        vm.record.versions.push(angular.copy(vm.record));
+        vm.record.versions.sort(function (a, b) {
+            var a_date = new Date(a.create_date),
+                b_date = new Date(b.create_date);
+            if (a_date < b_date) return -1;
+            if (a_date > b_date) return 1;
+            return 0;
+        })
     }
 
     vm.expandChildren = function (jqueryobj, e, reload) {
@@ -353,6 +368,39 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.gotoSearch = function() {
         $rootScope.$broadcast('CHANGE_TAB', {tab: 0});
         $state.go("home.search");
+    }
+
+    vm.setCurrentVersion = function(node_id) {
+        var node = null;
+        vm.record.versions.forEach(function(version) {
+            if(version._id == node_id) {
+                node = version;
+            }
+        })
+        if(node) {
+            return Search.setAsCurrentVersion(node, true).then(function(response){
+                vm.loadRecordAndTree(node._index, node._id);
+            })
+        }
+    }
+
+    vm.showVersion = function (node_id) {
+        var node = null;
+        if (vm.record.versions) {
+            vm.record.versions.forEach(function (version) {
+                if (version._id == node_id) {
+                    node = version;
+                }
+            })
+            var versions = angular.copy(vm.record.versions);
+        }
+        if (node) {
+            vm.selectRecord(null, {node: {original: node},  action: "select_node"});
+            /*$http.get(vm.url + "search/" + node._index + "/" + node._id + "/").then(function (response) {
+                vm.record = response.data;
+                getVersionSelectData();
+            })*/
+        }
     }
 
     vm.editField = function(key, value) {
@@ -534,7 +582,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data, $ctrl) {
             var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
-            vm.selectRecord(null, {node: parent});
+            vm.selectRecord(null, {node: parent, action: "select_node"});
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

@@ -529,5 +529,7 @@
     "NEW_VERSION": "Ny version",
     "CREATE_NEW_VERSION": "Skapa ny version",
     "PAGE_DOES_NOT_EXIST": "Sidan finns inte",
-    "GO_TO_SEARCH": "Gå till Sök"
+    "GO_TO_SEARCH": "Gå till Sök",
+    "VERSION": "Version",
+    "SET_CURRENT_VERSION": "Sätt som nuvarande"
 }

@@ -137,6 +137,10 @@
             width: 100%;
             margin-left: 0;
         }
+        .version-select {
+            min-width: 100px;
+            max-width: 150px;
+        }
     }
     .filter-tree {
         width: auto;
@@ -178,4 +182,8 @@
     .metadata-tables-wrapper {
         width: 100%;
     }
+}
+
+.float-right {
+    float: right;
 }
