@@ -54,7 +54,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (angular.isUndefined(child.name)) {
             child.name = "";
         }
-        child.text = "<b>" + (child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
+        child.text = "<b>" + (child._source && child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
         if (!child.is_leaf_node) {
             child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
@@ -66,7 +66,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if(angular.isUndefined(startNode.name)) {
             startNode.name = "";
         }
-        startNode.text = "<b>" + (startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode.name;
+        startNode.text = "<b>" + (startNode._source && startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode.name;
         startNode.state = {opened: true};
         if(startNode.link_id == vm.record.link_id) {
             startNode.state.selected = true;
@@ -286,7 +286,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             vm.record = e.node.original;
             $state.go("home.search."+vm.record._index, {id: vm.record._id}, {notify: false});
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
-            if(angular.isUndefined(vm.record._source.terms_and_condition)) {
+            if(vm.record._source && angular.isUndefined(vm.record._source.terms_and_condition)) {
                 vm.record._source.terms_and_condition = null;
             }
             if(!vm.record.is_leaf_node) {
