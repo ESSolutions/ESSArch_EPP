@@ -3,33 +3,29 @@ from __future__ import division
 import copy
 import datetime
 import math
-import uuid
 
 from django.core.cache import cache
+from django.db import transaction
 from django.shortcuts import get_object_or_404
-
 from django_filters.constants import EMPTY_VALUES
-
 from elasticsearch.exceptions import NotFoundError, TransportError
-from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet, Search
-
+from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-
 from six import iteritems
 
 from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive, Node, VersionedDocType
-from ESSArch_Core.tags.models import Tag
-from ESSArch_Core.tags.serializers import TagSerializer, TagSerializerWithVersions, TagWriteSerializer
-
-from tags.serializers import SearchSerializer
-
+from ESSArch_Core.tags.documents import Archive, VersionedDocType
+from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
+from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
+    TagVersionSerializerWithVersions, \
+    TagVersionWriteSerializer
 from tags.permissions import SearchPermissions
+from tags.serializers import SearchSerializer
 
 
 class ComponentSearch(FacetedSearch):
@@ -210,9 +206,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
 
-        tag = Tag.objects.select_related('parent')
+        tag_version = TagVersion.objects.select_related('tag').prefetch_related('tag__structures')
 
-        return get_object_or_404(tag, pk=id)
+        return get_object_or_404(tag_version, pk=id)
 
     def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
@@ -302,26 +298,29 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             return self.list(request, index=pk)
 
         tag = self.get_tag_object()
-        serialized = TagSerializerWithVersions(tag).data
+        context = {'structure': self.request.query_params.get('structure')}
+        serialized = TagVersionSerializerWithVersions(tag, context=context).data
 
         return Response(serialized)
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
         parent = self.get_tag_object()
-        children = parent.get_children().filter(current_version=True)
+        context = {'structure': self.request.query_params.get('structure')}
+
+        children = parent.get_children()
 
         if self.paginator is not None:
             paginated = self.paginator.paginate_queryset(children, request)
-            serialized = TagSerializer(instance=paginated, many=True).data
+            serialized = TagVersionNestedSerializer(instance=paginated, many=True, context=context).data
             return self.paginator.get_paginated_response(serialized)
 
-        return Response(serialized = TagSerializer(children, many=True).data)
+        return Response(serialized = TagVersionSerializer(children, many=True).data)
 
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, index=None, pk=None):
         tag = self.get_tag_object()
-        new_tag = tag.create_new_version()
+        new_tag = tag.create_new()
         return Response()
 
     @detail_route(methods=['patch'], url_path='set-as-current-version')
@@ -338,21 +337,44 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
 
-            tag = Tag.objects.create(index=data['index'], name=data['name'],
-                                     type=data['type'], parent_id=data.get('parent'))
-            return Response(self.serialize(tag.to_search()))
+            with transaction.atomic():
+                tag = Tag.objects.create()
+                tag_version = TagVersion.objects.create(
+                    tag=tag, elastic_index=data['index'], name=data['name'],
+                    type=data['type'])
+                tag.current_version = tag_version
+                tag.save()
+                tag_structure = TagStructure(tag=tag)
+
+                if data.get('parent') is not None:
+                    parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
+                    parent_structure = parent_version.get_active_structure()
+                    tag_structure.parent = parent_structure
+                    tag_structure.structure = parent_structure.structure
+
+                tag_structure.save()
+
+            return Response(self.serialize(tag_version.to_search()))
 
     def partial_update(self, request, index=None, pk=None):
         tag = self.get_tag_object()
 
-        db_fields = [f.name for f in Tag._meta.get_fields()]
+        if 'parent' in request.data:
+            parent = request.data.pop('parent')
+            parent_tag_version = TagVersion.objects.get(pk=parent)
+            rep = tag.get_active_structure()
+            parent_rep = parent_tag_version.tag.structures.get(structure=rep.structure)
+            rep.parent = parent_rep
+            rep.save()
+
+        db_fields = [f.name for f in TagVersion._meta.get_fields()]
         db_fields_request_data = {}
 
         for f in db_fields:
             if f in request.data:
                 db_fields_request_data[f] = request.data.pop(f)
 
-        serializer = TagWriteSerializer(tag, data=db_fields_request_data, partial=True)
+        serializer = TagVersionWriteSerializer(tag, data=db_fields_request_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
