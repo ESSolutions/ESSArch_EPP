@@ -3,13 +3,14 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
     vm.unavailable = false;
+    vm.structure = null;
     vm.$onInit = function() {
         vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id);
     }
 
     vm.loadRecordAndTree = function(index, id) {
         vm.viewContent = true;
-        $http.get(vm.url+"search/"+ index +"/"+id+"/").then(function(response) {
+        $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
             getVersionSelectData();
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
@@ -38,6 +39,18 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
     };
 
+    vm.existsForRecord = function(classification) {
+        if(vm.record) {
+            var temp = false;
+            vm.record.structures.forEach(function(structure) {
+                if(structure.id == classification) {
+                    temp = true;
+                }
+            })
+            return temp;
+        }
+    }
+
     vm.getPathFromParents = function(tag) {
         if(tag.parents.length > 0) {
             vm.getTag(tag.parents[0]);
@@ -45,7 +58,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     }
 
     vm.getTag = function(tag) {
-        return $http.get(vm.url+"search/"+tag._index+"/"+tag._id+"/").then(function(response) {
+        return $http.get(vm.url+"search/"+tag._index+"/"+tag._id+"/", {params: {structure: vm.structure}}).then(function(response) {
             return response.data;
         });
     }
@@ -96,7 +109,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             });
         }
         if (startNode.parent) {
-            var parentPromise = $http.get(vm.url + "search/"+startNode.parent.index + "/" + startNode.parent.id + "/").then(function (response) {
+            var parentPromise = $http.get(vm.url + "search/"+startNode.parent.index + "/" + startNode.parent.id + "/", {params: {structure: vm.structure}}).then(function (response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function (children) {
@@ -135,7 +148,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         })
     }
     function getChildren(node) {
-        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {params: {page_size: 10, page: 1}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {params: {page_size: 10, page: 1, structure: vm.structure}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
@@ -159,6 +172,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
      * a change in the configuration object, desroy and rebuild with data from vm.tags
      */
     vm.recreateRecordTree = function(tags) {
+        vm.archiveStructures = angular.copy(tags[0].structures);
+        if(!vm.structure) {
+            vm.structure = vm.archiveStructures[vm.archiveStructures.length-1].id;
+        }
         vm.ignoreRecordChanges = true;
         if(angular.equals(tags, vm.recordTreeData)) {
             vm.recordTreeConfig.version++;
@@ -252,7 +269,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original.parent.index+"/"+e.node.original.parent.id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original.parent.index+"/"+e.node.original.parent.id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var selectedElement = null;
                 var see_more = null;
@@ -283,17 +300,14 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             return;
         }
         if (e.action == "select_node") {
-            vm.record = e.node.original;
-            $state.go("home.search."+vm.record._index, {id: vm.record._id}, {notify: false});
-            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
-            if(vm.record._source && angular.isUndefined(vm.record._source.terms_and_condition)) {
-                vm.record._source.terms_and_condition = null;
-            }
-            if(!vm.record.is_leaf_node) {
-                vm.record.children = [{text: "", parent: vm.record._id, placeholder: true, icon: false, state: {disabled: true}}];
-            }
-            $http.get(appConfig.djangoUrl + "search/"+vm.record._index+"/"+vm.record._id+"/").then(function(response) {
+            $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
                 vm.record = response.data;
+                $state.go("home.search." + vm.record._index, { id: vm.record._id }, { notify: false });
+                $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
+
+                if (!vm.record.is_leaf_node) {
+                    vm.record.children = [{ text: "", parent: vm.record._id, placeholder: true, icon: false, state: { disabled: true } }];
+                }
                 vm.currentVersion = vm.record._id;
                 getVersionSelectData();
                 getChildren(vm.record).then(function (response) {
@@ -320,7 +334,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
         var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
         if(e.node.children.length < 2 || reload) {
-            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {params: {page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
@@ -396,10 +410,6 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
         if (node) {
             vm.selectRecord(null, {node: {original: node},  action: "select_node"});
-            /*$http.get(vm.url + "search/" + node._index + "/" + node._id + "/").then(function (response) {
-                vm.record = response.data;
-                getVersionSelectData();
-            })*/
         }
     }
 

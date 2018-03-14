@@ -148,6 +148,10 @@
     }
     .record-tree {
         margin-top: 10px;
+        .classification-select {
+            padding-bottom: 15px;
+            max-width: 150px;
+        }
         @include medium-screen {
             overflow-x: auto;
         }

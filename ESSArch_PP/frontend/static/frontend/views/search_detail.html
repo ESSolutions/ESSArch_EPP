@@ -4,6 +4,18 @@
         <button class="btn btn-success" ng-click="vm.gotoSearch()">{{'GO_TO_SEARCH' | translate}}</button>
     </div>
     <div class="record-tree" ng-if="vm.recordTreeData">
+        <div class="classification-select">
+            <label class="">
+                {{'CLASSIFICATION_STRUCTURE' | translate}}
+            </label>
+            <div class="flex-row">
+                <select class="form-control version-select" ng-model="vm.structure" ng-change="vm.loadRecordAndTree(vm.record._index, vm.record._id)">
+                    <option ng-repeat="classification in vm.archiveStructures" value="{{classification.id}}" ng-disabled="!vm.existsForRecord(classification.id)">
+                        {{classification.name}}
+                    </option>
+                </select>
+            </div>
+        </div>
         <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
     </div>
     <div ng-if="!vm.unavailable" class="view-content">
