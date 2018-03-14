@@ -5,6 +5,7 @@ import datetime
 import math
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
@@ -298,7 +299,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             return self.list(request, index=pk)
 
         tag = self.get_tag_object()
-        context = {'structure': self.request.query_params.get('structure')}
+        structure = self.request.query_params.get('structure')
+        context = {'structure': structure}
+
+        try:
+            if not tag.get_structures().filter(structure=structure).exists():
+                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
+        except ValidationError:
+            raise exceptions.ParseError('Invalid structure id')
+
         serialized = TagVersionSerializerWithVersions(tag, context=context).data
 
         return Response(serialized)
@@ -307,6 +316,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def children(self, request, index=None, pk=None):
         parent = self.get_tag_object()
         structure = self.request.query_params.get('structure')
+
+        try:
+            if not parent.get_structures().filter(structure=structure).exists():
+                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
+        except ValidationError:
+            raise exceptions.ParseError('Invalid structure id')
+
         context = {'structure': structure}
 
         children = parent.get_children(structure)
