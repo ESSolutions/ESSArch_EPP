@@ -404,5 +404,5 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def destroy(self, request, index=None, pk=None):
         obj = self.get_tag_object()
-        obj.get_descendants(include_self=True).delete()
+        obj.get_active_structure().get_descendants(include_self=True).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
