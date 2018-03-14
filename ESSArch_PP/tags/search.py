@@ -306,9 +306,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
         parent = self.get_tag_object()
-        context = {'structure': self.request.query_params.get('structure')}
+        structure = self.request.query_params.get('structure')
+        context = {'structure': structure}
 
-        children = parent.get_children()
+        children = parent.get_children(structure)
 
         if self.paginator is not None:
             paginated = self.paginator.paginate_queryset(children, request)
