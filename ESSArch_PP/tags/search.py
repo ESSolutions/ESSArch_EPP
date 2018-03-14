@@ -294,20 +294,29 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def serialize(self, obj):
         return obj.to_dict(include_meta=True)
 
+    def verify_structure(self, tag_version, structure):
+        query_filter = {}
+
+        if structure is not None:
+            query_filter['structure'] = structure
+
+        try:
+            if not tag_version.get_structures().filter(**query_filter).exists():
+                if structure is None:
+                    raise exceptions.NotFound('Node does not exist in any structure')
+
+                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
+        except ValidationError:
+            raise exceptions.ParseError('Invalid structure id')
+
     def retrieve(self, request, index=None, pk=None):
         if index is None:
             return self.list(request, index=pk)
 
         tag = self.get_tag_object()
         structure = self.request.query_params.get('structure')
+        self.verify_structure(tag, structure)
         context = {'structure': structure}
-
-        try:
-            if not tag.get_structures().filter(structure=structure).exists():
-                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
-        except ValidationError:
-            raise exceptions.ParseError('Invalid structure id')
-
         serialized = TagVersionSerializerWithVersions(tag, context=context).data
 
         return Response(serialized)
@@ -316,15 +325,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def children(self, request, index=None, pk=None):
         parent = self.get_tag_object()
         structure = self.request.query_params.get('structure')
-
-        try:
-            if not parent.get_structures().filter(structure=structure).exists():
-                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
-        except ValidationError:
-            raise exceptions.ParseError('Invalid structure id')
-
+        self.verify_structure(parent, structure)
         context = {'structure': structure}
-
         children = parent.get_children(structure)
 
         if self.paginator is not None:
