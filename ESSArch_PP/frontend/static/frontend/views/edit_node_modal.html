@@ -1,0 +1,17 @@
+<div class="enter-profile-name">
+    <h3 class="modal-title" id="modal-title">{{'EDIT' | translate}} <b>{{$ctrl.node._source.name}}</b></h3>
+    <h3 class="modal-title" id="modal-title"></h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <select class="form-control" ng-model="$ctrl.selected" ng-change="$ctrl.editField($ctrl.selected, $ctrl.fieldOptions[$ctrl.selected])" ng-options="key as key for (key, value) in $ctrl.fieldOptions"></select>
+    <div ng-if="$ctrl.selected">
+        <form name="$ctrl.form">
+            <formly-form model="$ctrl.editData" fields="$ctrl.editFields" options="$ctrl.options"></formly-form>
+        </form>
+    </div>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-disabled="!$ctrl.changed()" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}}</button>
+    <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+</div>

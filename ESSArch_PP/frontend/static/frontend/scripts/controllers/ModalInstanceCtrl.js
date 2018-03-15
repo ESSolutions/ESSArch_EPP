@@ -682,4 +682,173 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         TopAlert.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
         $uibModalInstance.close(conversion);
     }
+}).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node.original;
+    $ctrl.editData = {};
+    $ctrl.editFields = [];
+    $ctrl.options = {};
+    $ctrl.fieldOptions = {};
+    $ctrl.$onInit = function() {
+        $ctrl.fieldOptions = getEditableFields($ctrl.node);
+    }
+    function getEditableFields(node) {
+        return node._source;
+    }
+    $ctrl.selected = null;
+
+    $ctrl.changed = function() {
+        return !angular.equals(getEditedFields($ctrl.editData), {});
+    }
+
+    function getEditedFields(data) {
+        var edited = {};
+        angular.forEach(data, function(value, key) {
+            if($ctrl.node._source[key] != value) {
+                edited[key] = value;
+            }
+        })
+        return edited;
+    }
+
+    $ctrl.editField = function(field, value) {
+        $ctrl.editData[field] = value;
+        $ctrl.editFields.push(
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": $translate.instant(field.toUpperCase()),
+                },
+                "type": "input",
+                "key": field,
+            }
+        )
+    }
+
+    $ctrl.submit = function() {
+        if($ctrl.changed()) {
+            Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function(response) {
+                TopAlert.add($translate.instant('NODE_EDITED'), 'success');
+                $uibModalInstance.close("edited");
+            }).catch(function(response) {
+                TopAlert.add(response.data, 'error');
+            })
+        }
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
+}).controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node.original;
+    $ctrl.newNode = {
+        reference_code: data.node.children.length+1,
+    };
+    $ctrl.options = {};
+    $ctrl.nodeFields = [];
+    $ctrl.indexes = [];
+    $ctrl.types = [];
+
+    $ctrl.$onInit = function () {
+        $ctrl.indexes = [
+            {
+                name: "component",
+            }
+        ];
+
+        $ctrl.nodeFields = [
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": $translate.instant("NAME"),
+                    "required": true
+                },
+                "type": "input",
+                "key": "name",
+            },
+            {
+                "templateOptions": {
+                    "label": $translate.instant("INDEX"),
+                    "options": $ctrl.indexes,
+                    "required": true,
+                    "labelProp": "name",
+                    "valueProp": "name"
+                },
+                "type": "select",
+                "key": "index",
+            },
+            {
+                "templateOptions": {
+                    "label": $translate.instant("TYPE"),
+                    "type": "text",
+                    "required": true
+                },
+                "type": "input",
+                "key": "type",
+            },
+            {
+                "templateOptions": {
+                    "label": $translate.instant("REFERENCE_CODE"),
+                    "type": "number",
+                    "required": true
+                },
+                "type": "input",
+                "key": "reference_code",
+            },
+        ];
+    }
+
+    $ctrl.changed = function() {
+        return !angular.equals($ctrl.newNode, {});
+    }
+
+    $ctrl.submit = function() {
+        if($ctrl.changed()) {
+            Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index})).then(function(response) {
+                TopAlert.add($translate.instant('NODE_ADDED'), 'success');
+                $uibModalInstance.close(response.data);
+            }).catch(function(response) {
+                TopAlert.add(response.data.detail, 'error');
+            })
+        }
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
+})
+.controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node.original;
+
+    $ctrl.$onInit = function () {}
+
+    $ctrl.createNewVersion = function(node) {
+        Search.createNewVersion(node).then(function(response) {
+            TopAlert.add($translate.instant('NEW_VERSION_CREATED') + response.data._id, 'success');
+            $uibModalInstance.close("added");
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, 'error');
+        })
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
+})
+.controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node.original;
+
+    $ctrl.$onInit = function () {}
+
+    $ctrl.remove = function() {
+        Search.removeNode($ctrl.node).then(function(response) {
+            TopAlert.add($translate.instant('NODE_REMOVED'), 'success');
+            $uibModalInstance.close("added");
+        }).catch(function(response) {
+            TopAlert.add(response.data.detail, 'error');
+        })
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
 })

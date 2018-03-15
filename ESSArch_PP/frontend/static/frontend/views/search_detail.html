@@ -1,69 +1,50 @@
 <div class="tree-result-wrapper search-detail" id="view-record">
-        <div class="record-tree" ng-if="vm.recordTreeData">
-            <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;"></div>
-        </div>
-        <div class="view-content">
-            <h4>{{vm.record.type}}</h4>
-            <h4><span ng-bind-html="vm.record.text"></span> <span ng-if="vm.record.unit_dates.date">({{vm.record.unit_dates.date}})</span></h4>
-            <p ng-if="vm.record.start_date">{{vm.record.start_date | date:"yyyy-MM-dd"}} - {{vm.record.end_date | date:"yyyy-MM-dd"}}</p>
-            <p class="result-description">{{vm.record.desc}}</p>
-            <br/>
-            <button ng-if="vm.record.type == 'document' && (vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-            <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
-            <div class="metadata-tables-wrapper">
-                <h4>{{'METADATA' | translate}}</h4>
-                <div class="table-x-overflow metadata-table">
-                    <table>
-                        <tr ng-repeat="(key, value) in vm.record" ng-if="key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
-                            <td ng-if="key != 'terms_and_condition'" style="padding-right: 10px;"><b>{{key}}</b></td>
-                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                        </tr>
-                    </table>
-                </div>
-                <!--<h4>{{'IDS' | translate}}</h4>
-                <div class="table-x-overflow ids-table">
-                    <table>
-                        <tr ng-repeat="(key, value) in vm.record.unit_ids">
-                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
-                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                        </tr>
-                    </table>
-                </div>
-                <h4>{{'DATES' | translate}}</h4>
-                <div class="table-x-overflow dates-table">
-                    <table>
-                        <tr ng-repeat="(key, value) in vm.record.unit_dates">
-                            <td style="padding-right: 10px;"><b>{{key}}</b></td>
-                            <td ng-if="key != 'terms_and_condition'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
-                        </tr>
-                    </table>
-                </div>-->
+    <div ng-if="vm.unavailable" class="view-content text-center">
+        <h4>{{'PAGE_DOES_NOT_EXIST' | translate}}</h4>
+        <button class="btn btn-success" ng-click="vm.gotoSearch()">{{'GO_TO_SEARCH' | translate}}</button>
+    </div>
+    <div class="record-tree" ng-if="vm.recordTreeData">
+        <div class="classification-select">
+            <label class="">
+                {{'CLASSIFICATION_STRUCTURE' | translate}}
+            </label>
+            <div class="flex-row">
+                <select class="form-control version-select" ng-model="vm.structure" ng-change="vm.loadRecordAndTree(vm.record._index, vm.record._id)">
+                    <option ng-repeat="classification in vm.archiveStructures" value="{{classification.id}}" ng-disabled="!vm.existsForRecord(classification.id)">
+                        {{classification.name}}
+                    </option>
+                </select>
             </div>
-            <br/>
-            <button ng-if="vm.record._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-            <h4>{{'CONTENTS' | translate}}</h4>
-            <div st-table="vm.record_children" style="width:100%;" class="table-x-overflow">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>{{'REFERENCE_CODE' | translate}}</th>
-                            <th>{{'TITLE' | translate}}</th>
-                            <th>{{'TIME' | translate}}</th>
-                            <th ng-if="x._type == 'document'"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="x in vm.record_children">
-                            <td><b>{{x._source.reference_code}}</b></td>
-                            <td>{{x._source.name}}</td>
-                            <td>{{x._source.unit_dates.date}}</td>
-                            <td>
-                                <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source.name)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+        </div>
+        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
+    </div>
+    <div ng-if="!vm.unavailable" class="view-content">
+        <div class="float-right">
+            <label class="">
+                {{'VERSION' | translate}}
+            </label>
+            <div class="flex-row">
+                <select class="form-control version-select" ng-model="vm.currentVersion" ng-change="vm.showVersion(vm.currentVersion)">
+                    <option ng-repeat="version in vm.record.versions" value="{{version._id}}">
+                        {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
+                    </option>
+                </select>
+                <button type="button" ng-disabled="vm.record.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+            </div>
+        </div>
+        <div ng-switch="vm.record._index">
+            <div ng-switch-when="component">
+                <div ng-include="'static/frontend/views/search_component_detail.html'"></div>
+            </div>
+            <div ng-switch-when="archive">
+                <div ng-include="'static/frontend/views/search_archive_detail.html'"></div>
+            </div>
+            <div ng-switch-when="document">
+                <div ng-include="'static/frontend/views/search_document_detail.html'"></div>
+            </div>
+            <div ng-switch-when="directory">
+                <div ng-include="'static/frontend/views/search_directory_detail.html'"></div>
             </div>
         </div>
     </div>
+</div>

@@ -137,6 +137,10 @@
             width: 100%;
             margin-left: 0;
         }
+        .version-select {
+            min-width: 100px;
+            max-width: 150px;
+        }
     }
     .filter-tree {
         width: auto;
@@ -144,6 +148,10 @@
     }
     .record-tree {
         margin-top: 10px;
+        .classification-select {
+            padding-bottom: 15px;
+            max-width: 150px;
+        }
         @include medium-screen {
             overflow-x: auto;
         }
@@ -178,4 +186,8 @@
     .metadata-tables-wrapper {
         width: 100%;
     }
+}
+
+.float-right {
+    float: right;
 }

@@ -519,5 +519,17 @@
     "CRON_ON_THE": "Den",
     "CRON_AT": "Klockan",
     "CRON_PAST_THE_HOUR": "Över",
-    "INVALID_FREQUENCY": "Ogiltig frekvens"
+    "INVALID_FREQUENCY": "Ogiltig frekvens",
+    "NODE_ADDED": "Tillagd!",
+    "NODE_EDITED": "Uppdaterad!",
+    "NODE_REMOVED": "Borttagen!",
+    "ADD_NODE": "Lägg till nod",
+    "REMOVE_NODE": "Ta bort",
+    "DO_YOU_WANT_TO_REMOVE_NODE": "Vill du ta bort nod?",
+    "NEW_VERSION": "Ny version",
+    "CREATE_NEW_VERSION": "Skapa ny version",
+    "PAGE_DOES_NOT_EXIST": "Sidan finns inte",
+    "GO_TO_SEARCH": "Gå till Sök",
+    "VERSION": "Version",
+    "SET_CURRENT_VERSION": "Sätt som nuvarande"
 }
