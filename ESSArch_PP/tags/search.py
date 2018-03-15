@@ -21,7 +21,7 @@ from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
-from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
+from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
     TagVersionSerializerWithVersions, \
     TagVersionWriteSerializer
@@ -340,6 +340,20 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def new_version(self, request, index=None, pk=None):
         tag = self.get_tag_object()
         new_tag = tag.create_new()
+        return Response()
+
+    @detail_route(methods=['post'], url_path='new-structure')
+    def new_structure(self, request, index=None, pk=None):
+        try:
+            name = request.data['name']
+        except KeyError:
+            raise exceptions.ParseError('Missing "name" parameter')
+
+        with transaction.atomic():
+            structure = Structure.objects.create(name=name)
+            tag = self.get_tag_object()
+            tag.get_active_structure().create_new(structure)
+
         return Response()
 
     @detail_route(methods=['patch'], url_path='set-as-current-version')
