@@ -172,7 +172,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
      * a change in the configuration object, desroy and rebuild with data from vm.tags
      */
     vm.recreateRecordTree = function(tags) {
-        vm.archiveStructures = angular.copy(tags[0].structures);
+        if(!angular.equals(vm.archiveStructures, tags[0].structures)) {
+            vm.archiveStructures = angular.copy(tags[0].structures);
+        }
         if(!vm.structure) {
             vm.structure = vm.archiveStructures[vm.archiveStructures.length-1].id;
         }
