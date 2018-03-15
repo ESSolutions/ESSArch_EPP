@@ -393,6 +393,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'ESSArch_Core.tasks.DeleteTags',
         'schedule': timedelta(seconds=10),
     },
+    'ClearTagProcessQueue': {
+        'task': 'ESSArch_Core.tasks.ClearTagProcessQueue',
+        'schedule': timedelta(seconds=10),
+    },
 }
 
 # Rest auth settings
