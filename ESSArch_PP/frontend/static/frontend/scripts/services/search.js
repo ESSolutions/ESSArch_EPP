@@ -87,7 +87,6 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         });
     }
     service.createNewStructure = function(node, data) {
-        console.log(node)
         return $http({
             method: 'POST',
             url: url + "search/" + node._index + "/" + node._id + "/new-structure/",
