@@ -535,5 +535,6 @@
     "SET_CURRENT_VERSION": "Set as current",
     "CREATE_NEW_STRUCTURE": "Create new classification structure",
     "NEW_STRUCTURE_CREATED": "New classification structure created",
-    "CREATING": "Creating"
+    "CREATING": "Creating",
+    "NEW_VERSION_CREATED": "New version created"
 }

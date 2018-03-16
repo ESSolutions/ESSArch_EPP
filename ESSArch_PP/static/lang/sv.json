@@ -534,5 +534,6 @@
     "SET_CURRENT_VERSION": "Sätt som nuvarande",
     "CREATE_NEW_STRUCTURE": "Skapa ny klassificeringsstruktur",
     "NEW_STRUCTURE_CREATED": "Ny klassificeringsstruktur skapad",
-    "CREATING": "Skapas"
+    "CREATING": "Skapas",
+    "NEW_VERSION_CREATED": "Ny version skapad"
 }
