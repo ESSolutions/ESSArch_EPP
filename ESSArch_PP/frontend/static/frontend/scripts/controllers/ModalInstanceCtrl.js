@@ -824,7 +824,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.createNewVersion = function(node) {
         Search.createNewVersion(node).then(function(response) {
-            TopAlert.add($translate.instant('NEW_VERSION_CREATED') + response.data._id, 'success');
+            TopAlert.add($translate.instant('NEW_VERSION_CREATED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
             TopAlert.add(response.data.detail, 'error');
