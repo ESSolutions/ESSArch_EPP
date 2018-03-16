@@ -613,6 +613,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     }
                     $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
                 }
+                if(response.status = 503) {
+                    var msg = "Request failed, try again";
+                    if(response.data.detail) {
+                        msg = response.data.detail;
+                    }
+                    $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
+                }
                 if((response.status === 401 || response.status === 403) && !response.config.noAuth) {
                     if ($location.path() != '/login' && $location.path() != ''){
                         $window.location.assign('/');
