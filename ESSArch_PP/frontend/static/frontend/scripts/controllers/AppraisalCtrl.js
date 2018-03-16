@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval) {
+angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval, Appraisal) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -31,60 +31,94 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      * Smart table pipe function for appraisal rules
      * @param {*} tableState
      */
-    vm.rulePipe = function(tableState) {
-        if(tableState && tableState.search.predicateObject) {
-            var search = tableState.search.predicateObject["$"];
-        }
+    vm.rulePipe = function (tableState) {
         $scope.ruleLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {search: search}}).then(function(response) {
-            vm.ruleTableState = tableState;
-            vm.ruleFilters.forEach(function(x) {
-                response.data.forEach(function(rule) {
-                    if(x == rule.id) {
-                        rule.usedAsFilter = true;
-                    }
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.rulesPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Appraisal.getRules(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.ruleTableState = tableState;
+                vm.ruleFilters.forEach(function (x) {
+                    response.data.forEach(function (rule) {
+                        if (x == rule.id) {
+                            rule.usedAsFilter = true;
+                        }
+                    });
                 });
-            });
-            vm.rules = response.data;
-            $scope.ruleLoading = false;
-        }).catch(function(response) {
-            TopAlert.add("Failed to get appraisal rules", "error");
-            $scope.ruleLoading = false;
-        })
+                vm.rules = response.data;
+                $scope.ruleLoading = false;
+            })
+        }
     }
 
     /**
      * Smart table pipe function for ongoing appraisals
      * @param {*} tableState
      */
-    vm.ongoingPipe = function(tableState) {
+    vm.ongoingPipe = function (tableState) {
         $scope.ongoingLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", {params: {status: "STARTED"}}).then(function(response) {
-            vm.ongoingTableState = tableState;
-            vm.ongoing = response.data;
-            $scope.ongoingLoading = false;
-
-        }).catch(function(response) {
-            TopAlert.add("Failed to get ongoing appraisal jobs", "error");
-            $scope.ongoingLoading = false;
-        })
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.ongoingPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Appraisal.getOngoing(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.ongoingTableState = tableState;
+                vm.ongoing = response.data;
+                $scope.ongoingLoading = false;
+            })
+        }
     }
 
     /**
      * Smart table pipe function for next appraisals
      * @param {*} tableState
      */
-    vm.nextPipe = function(tableState) {
+    vm.nextPipe = function (tableState) {
         $scope.nextLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {status: "PENDING"}}).then(function(response) {
-            vm.nextTableState = tableState;
-            vm.next = response.data;
-            $scope.nextLoading = false;
-
-        }).catch(function(response) {
-            TopAlert.add("Failed to get next appraisal jobs", "error");
-            $scope.nextLoading = false;
-        });
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.nextPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Appraisal.getNext(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.nextTableState = tableState;
+                vm.next = response.data;
+                $scope.nextLoading = false;
+            });
+        }
     }
 
     /**
@@ -93,15 +127,27 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
      */
     vm.finishedPipe = function(tableState) {
         $scope.finishedLoading = true;
-        $http.get(appConfig.djangoUrl+"appraisal-jobs/", { params: {end_date__isnull: false}}).then(function(response) {
-            vm.finishedTableState = tableState;
-            vm.finished = response.data;
-            $scope.finishedLoading = false;
-
-        }).catch(function(response) {
-            TopAlert.add("Failed to get finished appraisal jobs", "error");
-            $scope.finishedLoading = false;
-        })
+        if(!angular.isUndefined(tableState)) {
+            var search = "";
+            if(tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if(sorting.reverse) {
+                sortString = "-"+sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.finishedPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Appraisal.getFinished(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count/number);//set the number of pages so the pagination can update
+                vm.finishedTableState = tableState;
+                vm.finished = response.data;
+                $scope.finishedLoading = false;
+            });
+        }
     }
     function guid() {
         function s4() {
