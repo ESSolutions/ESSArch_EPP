@@ -383,15 +383,15 @@ CELERYBEAT_SCHEDULE = {
     },
     'IndexTags': {
         'task': 'ESSArch_Core.tasks.IndexTags',
-        'schedule': timedelta(seconds=10),
+        'schedule': timedelta(seconds=1),
     },
     'UpdateTags': {
         'task': 'ESSArch_Core.tasks.UpdateTags',
-        'schedule': timedelta(seconds=10),
+        'schedule': timedelta(seconds=1),
     },
     'DeleteTags': {
         'task': 'ESSArch_Core.tasks.DeleteTags',
-        'schedule': timedelta(seconds=10),
+        'schedule': timedelta(seconds=1),
     },
     'ClearTagProcessQueue': {
         'task': 'ESSArch_Core.tasks.ClearTagProcessQueue',
