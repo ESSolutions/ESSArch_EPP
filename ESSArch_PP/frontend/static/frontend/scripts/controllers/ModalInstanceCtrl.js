@@ -852,3 +852,24 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     }
 })
+.controller('StructureModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+    var $ctrl = this;
+    $ctrl.node = data.node;
+    $ctrl.creating = false;
+    $ctrl.$onInit = function () {}
+
+    $ctrl.createNewStructure = function(node) {
+        $ctrl.creating = true;
+        Search.createNewStructure(node, { name: $ctrl.structureName }).then(function (response) {
+            TopAlert.add($translate.instant('NEW_STRUCTURE_CREATED'), 'success');
+            $uibModalInstance.close("added");
+            $ctrl.creating = false;
+        }).catch(function (response) {
+            $ctrl.creating = false;
+            TopAlert.add('Error creating new structure', 'error');
+        })
+    }
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
+})

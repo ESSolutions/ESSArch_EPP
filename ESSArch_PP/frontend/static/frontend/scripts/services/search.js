@@ -86,6 +86,17 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             return response;
         });
     }
+    service.createNewStructure = function(node, data) {
+        console.log(node)
+        return $http({
+            method: 'POST',
+            url: url + "search/" + node._index + "/" + node._id + "/new-structure/",
+            params: { refresh: true },
+            data: data
+        }).then(function(response) {
+            return response;
+        })
+    }
     service.removeNode = function(node) {
         return $http({
             method: 'DELETE',

@@ -14,6 +14,7 @@
                         {{classification.name}}
                     </option>
                 </select>
+                <button ng-click="vm.newStructureModal(vm.recordTreeData[0])" class="btn btn-success lock-button">+</button>
             </div>
         </div>
         <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>

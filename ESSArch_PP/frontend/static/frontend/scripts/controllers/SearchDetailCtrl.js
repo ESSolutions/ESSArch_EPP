@@ -577,6 +577,27 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
+    vm.newStructureModal = function(node) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/create_new_structure_modal.html',
+            controller: 'StructureModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.loadRecordAndTree(node._index, node._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
     vm.removeNodeModal = function(node) {
         var modalInstance = $uibModal.open({
             animation: true,

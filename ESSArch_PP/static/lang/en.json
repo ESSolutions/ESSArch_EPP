@@ -532,5 +532,8 @@
     "PAGE_DOES_NOT_EXIST": "Page does not exist",
     "GO_TO_SEARCH": "Go to Search",
     "VERSION": "Version",
-    "SET_CURRENT_VERSION": "Set as current"
+    "SET_CURRENT_VERSION": "Set as current",
+    "CREATE_NEW_STRUCTURE": "Create new classification structure",
+    "NEW_STRUCTURE_CREATED": "New classification structure created",
+    "CREATING": "Creating"
 }

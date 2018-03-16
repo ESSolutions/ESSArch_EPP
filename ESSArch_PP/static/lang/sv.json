@@ -531,5 +531,8 @@
     "PAGE_DOES_NOT_EXIST": "Sidan finns inte",
     "GO_TO_SEARCH": "Gå till Sök",
     "VERSION": "Version",
-    "SET_CURRENT_VERSION": "Sätt som nuvarande"
+    "SET_CURRENT_VERSION": "Sätt som nuvarande",
+    "CREATE_NEW_STRUCTURE": "Skapa ny klassificeringsstruktur",
+    "NEW_STRUCTURE_CREATED": "Ny klassificeringsstruktur skapad",
+    "CREATING": "Skapas"
 }
