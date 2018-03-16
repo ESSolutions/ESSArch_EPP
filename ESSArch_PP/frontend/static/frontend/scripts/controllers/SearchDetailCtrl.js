@@ -102,7 +102,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         }
                     });
                     if (!getNodeById(startNode, startNode._id)) {
-                        startNode.state.opened = false;
+                        startNode.state.opened = true;
                         startNode.children.push(startNode);
                     }
                 }
@@ -131,7 +131,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                             }
                         });
                         if (!getNodeById(p, startNode._id)) {
-                            startNode.state.opened = false;
+                            startNode.state.opened = true;
                             p.children.push(startNode);
                         }
                     }
@@ -290,7 +290,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                     if(selectedElement) {
                         var resultInChildren = getNodeById(children, selectedElement._id);
                         if(!resultInChildren) {
-                            selectedElement.state.opened = false;
+                            selectedElement.state.opened = true;
                             children.push(selectedElement);
                         } else {
                             resultInChildren.state.selected = true;
