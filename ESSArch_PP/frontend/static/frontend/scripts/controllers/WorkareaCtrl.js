@@ -171,23 +171,21 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
                 $rootScope.ip = null;
             }
         } else {
-            if ($rootScope.auth.id == ip.workarea[0].user.id || !ip.workarea[0].user) {
-                $scope.ip = ip;
-                $rootScope.ip = ip;
-                $scope.previousGridArrays = [];
-                $scope.filebrowser = true;
-                if(!$rootScope.flowObjects[$scope.ip.id]) {
-                    $scope.createNewFlow($scope.ip);
-                }
-                $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.id];
-                if($scope.filebrowser) {
-                    $scope.showFileUpload = false;
-                    $timeout(function() {
-                        $scope.showFileUpload = true;
-                    });
-                }
-                $scope.previousGridArrays = [];
+            $scope.ip = ip;
+            $rootScope.ip = ip;
+            $scope.previousGridArrays = [];
+            $scope.filebrowser = true;
+            if(!$rootScope.flowObjects[$scope.ip.id]) {
+                $scope.createNewFlow($scope.ip);
             }
+            $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.id];
+            if($scope.filebrowser) {
+                $scope.showFileUpload = false;
+                $timeout(function() {
+                    $scope.showFileUpload = true;
+                });
+            }
+            $scope.previousGridArrays = [];
         }
     }
 
