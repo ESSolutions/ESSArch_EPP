@@ -86,6 +86,7 @@ class ComponentSearch(FacetedSearch):
         """
 
         s = super(ComponentSearch, self).search()
+        s = s.filter('term', current_version=True)
 
         if self.start_date not in EMPTY_VALUES:
             s = s.filter('range', end_date={'gte': self.start_date})
