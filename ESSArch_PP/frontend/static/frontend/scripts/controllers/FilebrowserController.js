@@ -63,7 +63,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
             if($state.includes("**.workarea.**")) {
-                listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString(), pageNumber, number).then(function(dir) {
+                listViewService.getWorkareaDir(vm.workarea, $scope.previousGridArraysString(), pageNumber, number, vm.user?vm.user.id:null).then(function(dir) {
                     $scope.deckGridData = dir.data;
                     tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
                     $scope.gridArrayLoading = false;
@@ -157,7 +157,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         });
         if (!fileExists) {
             if($state.includes("**.workarea.**")) {
-                listViewService.addNewWorkareaFolder(vm.workarea, $scope.previousGridArraysString(), folder)
+                listViewService.addNewWorkareaFolder(vm.workarea, $scope.previousGridArraysString(), folder, vm.user?vm.user.id:null)
                     .then(function (response) {
                         $scope.updateGridArray();
                     });
@@ -172,7 +172,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
 
     $scope.getFile = function(file) {
         if($state.includes("**.workarea.**")) {
-            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=" + vm.workarea + "&path=" + $scope.previousGridArraysString() + file.name);
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=" + vm.workarea + "&path=" + $scope.previousGridArraysString() + file.name + (vm.user?"&user="+vm.user.id:""));
         } else if ($scope.ip.state == "At reception") {
             file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "ip-reception/" + $scope.ip.id + "/files/?path=" + $scope.previousGridArraysString() + file.name);
         } else{
@@ -200,7 +200,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         })
         modalInstance.result.then(function (data) {
             if($state.includes("**.workarea.**")) {
-                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), fileToOverwrite)
+                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), fileToOverwrite, vm.user?vm.user.id:null)
                     .then(function () {
                         listViewService.addNewFolder($scope.ip, $scope.previousGridArraysString(), folder)
                             .then(function () {
@@ -238,7 +238,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     $scope.removeFiles = function () {
         $scope.selectedCards.forEach(function (file) {
             if($state.includes("**.workarea.**")) {
-                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), file)
+                listViewService.deleteWorkareaFile(vm.workarea, $scope.previousGridArraysString(), file, vm.user?vm.user.id:null)
                     .then(function () {
                         $scope.updateGridArray();
                     });

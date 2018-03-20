@@ -5,6 +5,7 @@ angular.module('myApp').component('filebrowser', {
     bindings: {
         ip: "<",
         workarea: "<",
+        user: "<",
         browserstate: "=",
     }
   });
