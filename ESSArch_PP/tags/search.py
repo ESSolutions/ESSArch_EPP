@@ -2,10 +2,11 @@ from __future__ import division
 
 import copy
 import datetime
+import logging
 import math
 
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
@@ -28,6 +29,7 @@ from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersion
 from tags.permissions import SearchPermissions
 from tags.serializers import SearchSerializer
 
+logger = logging.getLogger('essarch.epp.search')
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
@@ -268,16 +270,25 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         results_dict = results.to_dict()
 
         for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
-            archive_data = get_archive(archive['key'])
-            archive['name'] = archive_data['name']
+            try:
+                archive_data = get_archive(archive['key'])
+                archive['name'] = archive_data['name']
+            except NotFoundError:
+                logger.warn('Archive "%s" not found in search index, it might be queued for indexing' % archive['key'])
 
         for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
-            institution_data = get_institution(institution['key'])
-            institution['name'] = institution_data['name']
+            try:
+                institution_data = get_institution(institution['key'])
+                institution['name'] = institution_data['name']
+            except ObjectDoesNotExist:
+                logger.error('Archival institution "%s" not found' % institution['key'])
 
         for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
-            organization_data = get_organization(organization['key'])
-            organization['name'] = organization_data['name']
+            try:
+                organization_data = get_organization(organization['key'])
+                organization['name'] = organization_data['name']
+            except ObjectDoesNotExist:
+                logger.error('Archivist organization "%s" not found' % organization['key'])
 
         if len(results_dict['_shards'].get('failures', [])):
             return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
