@@ -90,8 +90,13 @@ class WorkingThread:
                         logging.info('Try to remove IngestObjectPath: ' + self.dirpath)
                         try:
                             shutil.rmtree(self.dirpath)
-                            if self.metatype == 1:
+                            if os.path.exists(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '.tar')):
                                 os.remove(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '.tar'))
+                            if os.path.exists(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '.xml')):
+                                os.remove(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '.xml'))
+                            if os.path.exists(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '_ipevents.xml')):
+                                os.remove(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '_ipevents.xml'))                               
+                            if self.metatype == 1:
                                 os.remove(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '_Content_METS.xml'))
                                 os.remove(os.path.join(self.IngestPath,self.ObjectIdentifierValue + '_Package_METS.xml'))
                         except (IOError,os.error), why:

@@ -409,11 +409,18 @@ class WorkingThread:
                 #############################################################################
                 # It's a file
                 #############################################################################
-                if self.fileitem[-17:] == '_Package_METS.xml':
+                if self.fileitem.endswith('.xml'):
                     ###############################################################
                     # Try to access ingestpath
                     ###############################################################
-                    self.ObjectIdentifierValue = self.fileitem[:-17]
+                    if self.fileitem.endswith('ipevents.xml'):
+                        continue
+
+                    if self.fileitem.endswith('_Package_METS.xml'):
+                        self.ObjectIdentifierValue = self.fileitem[:-17]
+                    else:
+                        self.ObjectIdentifierValue = os.path.splitext(self.fileitem)[0]
+
                     self.SIPinfo,errno,error_list = Functions().GetSIPinfo_container(ArchivePolicy_obj.IngestPath,self.fileitem)
 
                     self.dbget = ESSDB.DB().action(self.IngestTable,'GET',('DataObjectSize','StatusActivity','StatusProcess'),('ObjectIdentifierValue',self.ObjectIdentifierValue))
@@ -429,7 +436,11 @@ class WorkingThread:
                             continue
 
                     if not errno and not self.objectstatus == 100:
-                        self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
+                        if self.SIPinfo[3][0][1][:5] == 'UUID:' or self.SIPinfo[3][0][1][:5] == 'RAID:':
+                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1][5:]
+                        else:
+                            self.ObjectIdentifierValue = self.SIPinfo[3][0][1]
+
                         if self.SIPinfo[0][1] is not None:
                             self.SIPsize += int(self.SIPinfo[0][1])
                         if self.SIPinfo[1][1] is not None:
@@ -987,10 +998,7 @@ class Functions:
                 ################################################
                 # Check for POLICYID
                 if 'POLICYID' in self.altRecordID_dict.keys():
-                    try:
-                        self.altRecordID_dict['POLICYID'] = int(self.altRecordID_dict['POLICYID'])
-                    except:
-                        self.altRecordID_dict['POLICYID'] = None
+                    self.altRecordID_dict['POLICYID'] = self.altRecordID_dict['POLICYID']
                 else:
                     self.altRecordID_dict['POLICYID'] = None
 
@@ -1005,10 +1013,7 @@ class Functions:
                                 note = csv.reader(agent[5], delimiter='=')
                                 for i in note:
                                     if i[0] == 'POLICYID':
-                                        try:
-                                            self.altRecordID_dict['POLICYID'] = int(i[1])
-                                        except:
-                                            self.altRecordID_dict['POLICYID'] = None
+                                        self.altRecordID_dict['POLICYID'] = i[1]
                         if self.altRecordID_dict['POLICYID'] is None:
                             error_list.append('METS ESSArch agent with POLICYID is missing')
                             self.SIP_OK = 0

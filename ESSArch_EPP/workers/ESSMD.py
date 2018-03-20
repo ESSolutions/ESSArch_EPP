@@ -1967,11 +1967,12 @@ def getPremisObjects(DOC=None,FILENAME=None,NS='http://xml.ra.se/PREMIS',PREFIX=
 
     EL_root = DOC.getroot()
     premis_NS = "{%s}" % EL_root.nsmap['premis']
+    xsi_NS = "{%s}" % EL_root.nsmap['xsi']
     #mets_NS = "{%s}" % EL_root.nsmap['mets']
     #premis_NS = "{%s}" % PREMIS_NAMESPACE
     #mets_NS = "{%s}" % METS_NAMESPACE
 
-    ELs_object = DOC.findall("%sobject" % (premis_NS))
+    ELs_object = DOC.findall("%sobject[@%stype='premis:file']" % (premis_NS, xsi_NS))
     #####################################################################
     # if no objects found try to find PREMIS objects in METS layout
     if len(ELs_object) == 0:

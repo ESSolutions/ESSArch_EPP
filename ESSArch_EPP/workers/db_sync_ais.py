@@ -520,18 +520,30 @@ class work:
                                     ArchivePolicy_obj = ArchivePolicy.objects.get(PolicyID = ip_obj_ext[0])
                                     #ip_obj = ArchiveObject.objects.get(ObjectIdentifierValue = ip_obj_ext[1])
                                     ip_obj.PolicyId = ArchivePolicy_obj
-                                    ip_obj.ObjectPackageName = ip_obj_ext[2]
+                                    if ip_obj_ext[2] is None:
+                                        ip_obj.ObjectPackageName = ''
+                                    else:
+                                        ip_obj.ObjectPackageName = ip_obj_ext[2]
                                     ip_obj.ObjectSize = ip_obj_ext[3]
                                     ip_obj.ObjectNumItems = ip_obj_ext[4]
                                     ip_obj.ObjectMessageDigestAlgorithm = ip_obj_ext[5]
                                     ip_obj.ObjectMessageDigest = ip_obj_ext[6]
                                     ip_obj.ObjectPath = ip_obj_ext[7]
-                                    ip_obj.MetaObjectIdentifier = ip_obj_ext[8]
+                                    if ip_obj_ext[8] is None:
+                                        ip_obj.MetaObjectIdentifier = ''
+                                    else:
+                                        ip_obj.MetaObjectIdentifier = ip_obj_ext[8]
                                     ip_obj.MetaObjectSize = ip_obj_ext[9]
                                     ip_obj.CMetaMessageDigestAlgorithm = ip_obj_ext[10]
-                                    ip_obj.CMetaMessageDigest = ip_obj_ext[11]
+                                    if ip_obj_ext[11] is None:
+                                        ip_obj.CMetaMessageDigest = ''
+                                    else:
+                                        ip_obj.CMetaMessageDigest = ip_obj_ext[11]
                                     ip_obj.PMetaMessageDigestAlgorithm = ip_obj_ext[12]
-                                    ip_obj.PMetaMessageDigest = ip_obj_ext[13]
+                                    if ip_obj_ext[13] is None:
+                                        ip_obj.PMetaMessageDigest = ''
+                                    else:
+                                        ip_obj.PMetaMessageDigest = ip_obj_ext[13]
                                     ip_obj.DataObjectSize = ip_obj_ext[14]
                                     ip_obj.DataObjectNumItems = ip_obj_ext[15]
                                     ip_obj.Status = ip_obj_ext[16]
@@ -540,7 +552,10 @@ class work:
                                     ip_obj.LastEventDate = LastEventDate_utc
                                     ip_obj.linkingAgentIdentifierValue = ip_obj_ext[20]
                                     ip_obj.CreateDate = CreateDate_utc
-                                    ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
+                                    if ip_obj_ext[22] is None:
+                                        ip_obj.CreateAgentIdentifierValue = ''
+                                    else:
+                                        ip_obj.CreateAgentIdentifierValue = ip_obj_ext[22]
                                     #ip_obj.ObjectUUID = uuid.UUID(bytes_le=ip_obj_ext[23])
                                     ip_obj.ObjectUUID = uuid.UUID(ip_obj_ext[23])
                                     ip_obj.EntryDate = EntryDate_utc
