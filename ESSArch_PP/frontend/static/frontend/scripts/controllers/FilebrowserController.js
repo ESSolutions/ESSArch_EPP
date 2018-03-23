@@ -8,6 +8,16 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         $scope.listView = false;
         $scope.gridView = true;
     }
+
+    vm.$onChanges = function(changes) {
+        if(changes.user) {
+            $scope.previousGridArrays = [];
+            $scope.dirPipe($scope.tableState);
+        }
+        if(changes.ip) {
+            $scope.ip = $rootScope.ip;
+        }
+    }
     var watchers = [];
     vm.$onDestroy = function() {
         watchers.forEach(function(watcher) {
@@ -32,19 +42,21 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
     }
 
     $scope.previousGridArraysString = function () {
-        var retString = "";
-        if($state.includes("**.workarea.**")) {
-            retString = $scope.ip.object_identifier_value;
-            if ($scope.ip.workarea[0].packaged && !$scope.ip.workarea[0].extracted) {
-                retString += '.tar';
+        if($scope.ip) {
+            var retString = "";
+            if($state.includes("**.workarea.**")) {
+                retString = $scope.ip.object_identifier_value;
+                if ($scope.ip.workarea[0].packaged && !$scope.ip.workarea[0].extracted) {
+                    retString += '.tar';
+                }
+                retString += '/';
             }
-            retString += '/';
-        }
 
-        $scope.previousGridArrays.forEach(function (card) {
-            retString = retString.concat(card.name, "/");
-        });
-        return retString;
+            $scope.previousGridArrays.forEach(function (card) {
+                retString = retString.concat(card.name, "/");
+            });
+            return retString;
+        }
     }
 
     $scope.deckGridData = [];
