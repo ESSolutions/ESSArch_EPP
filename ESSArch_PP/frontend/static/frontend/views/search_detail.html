@@ -3,7 +3,7 @@
         <h4>{{'PAGE_DOES_NOT_EXIST' | translate}}</h4>
         <button class="btn btn-success" ng-click="vm.gotoSearch()">{{'GO_TO_SEARCH' | translate}}</button>
     </div>
-    <div class="record-tree" ng-if="vm.recordTreeData">
+    <div class="record-tree" ng-if="vm.recordTreeData && !vm.unavailable">
         <div class="classification-select">
             <label class="">
                 {{'CLASSIFICATION_STRUCTURE' | translate}}
