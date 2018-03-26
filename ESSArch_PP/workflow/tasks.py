@@ -53,7 +53,6 @@ from django.db.models import F, IntegerField, Max
 from django.db.models.functions import Cast
 from django.utils import timezone
 
-from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
 
 from guardian.shortcuts import assign_perm
@@ -68,7 +67,7 @@ from scandir import walk
 from six.moves import urllib
 
 from ESSArch_Core import tasks
-from ESSArch_Core.auth.models import Notification
+from ESSArch_Core.auth.models import Member, Notification
 from ESSArch_Core.configuration.models import ArchivePolicy, Path, Parameter
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.fixity.checksum import calculate_checksum

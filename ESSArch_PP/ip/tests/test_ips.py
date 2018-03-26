@@ -32,13 +32,14 @@ from django.http.response import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from groups_manager.models import Group, GroupMember, GroupType, Member
+from groups_manager.models import GroupType
 
 import mock
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from ESSArch_Core.auth.models import Group, GroupMember, Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
 from ESSArch_Core.profiles.models import Profile, ProfileSA, SubmissionAgreement

@@ -47,7 +47,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from elasticsearch.exceptions import TransportError
 from elasticsearch_dsl import Index, Search, Q as ElasticQ
 
-from groups_manager.models import Member
 from groups_manager.utils import get_permission_name
 
 from guardian.core import ObjectPermissionChecker
@@ -61,6 +60,7 @@ from rest_framework.response import Response
 
 import six
 
+from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict

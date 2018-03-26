@@ -27,12 +27,13 @@ import django
 django.setup()
 
 from django.contrib.auth.models import Permission
-from groups_manager.models import Group, Member, GroupType
+from groups_manager.models import GroupType
 
 from elasticsearch import Elasticsearch
 from elasticsearch.client.ingest import IngestClient
 from elasticsearch_dsl import Index, exceptions as elastic_exceptions
 
+from ESSArch_Core.auth.models import Group, Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
 from ESSArch_Core.search import get_connection
 from ESSArch_Core.storage.models import (
