@@ -125,7 +125,7 @@ def installDefaultUsers():
         #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
         #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
         ## ---- app: tags ---- model: Tag
-        ['search','tags','Tag'],   # Can search
+        ['search','tags','tag'],   # Can search
     ]
 
     for p in permission_list_user:
@@ -169,11 +169,11 @@ def installDefaultUsers():
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
         ['storage_management','storage','storageobject'],   # Storage management (Administration)
         ## ---- app: maintenance ---- model: AppraisalRule
-        ['add_appraisalrule','maintenance','AppraisalRule'],   # Can add appraisal rule (Administration)
+        ['add_appraisalrule','maintenance','appraisalrule'],   # Can add appraisal rule (Administration)
         ## ---- app: maintenance ---- model: ConversionRule
-        ['add_conversionrule','maintenance','ConversionRule'],   # Can add conversion rule (Administration)
+        ['add_conversionrule','maintenance','conversionrule'],   # Can add conversion rule (Administration)
         ## ---- app: tags ---- model: Tag
-        ['search','tags','Tag'],   # Can search
+        ['search','tags','tag'],   # Can search
     ]
 
     for p in permission_list_admin:
