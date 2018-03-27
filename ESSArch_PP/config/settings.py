@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.sites',
     'django_filters',
+    'groups_manager',
     'nested_inline',
     'rest_auth',
     'rest_auth.registration',
@@ -89,6 +90,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'mptt',
     'frontend',
+    'ESSArch_Core.admin',
     'ESSArch_Core.auth',
     'ESSArch_Core.config',
     'ESSArch_Core.configuration',
@@ -105,7 +107,6 @@ INSTALLED_APPS = [
     'configuration',
     'storage',
     'guardian',
-    'groups_manager',
 ]
 
 AUTHENTICATION_BACKENDS = (
