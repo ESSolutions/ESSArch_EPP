@@ -59,7 +59,7 @@ def installProfiles():
 def installSubmissionAgreement():
 
     dct = {
-        'name': 'SA National Archive and Government 1',
+        'name': 'SA National Archive and Government SE',
         'type': 'Standard',
         'status': 'Agreed',
         'label': 'Submission Agreement National Archive x and Government x',
@@ -119,7 +119,7 @@ def installSubmissionAgreement():
 def installProfileTransferProject(sa):
 
     dct = {
-        'name': 'Transfer Project Profile 1',
+        'name': 'Transfer Project Profile SE',
         'profile_type': 'transfer_project',
         'type': 'Implementation',
         'status': 'Agreed',
@@ -234,7 +234,8 @@ def installProfileTransferProject(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_transfer_project = profile
+    sa.save()
 
     print 'Installed profile transfer project'
 
@@ -244,7 +245,7 @@ def installProfileTransferProject(sa):
 def installProfileSubmitDescription(sa):
 
     dct = {
-        'name': 'Submit description of a single SIP',
+        'name': 'Submit description of a single SIP SE',
         'profile_type': 'submit_description',
         'type': 'Implementation',
         'status': 'Draft',
@@ -372,7 +373,8 @@ def installProfileSubmitDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_submit_description = profile
+    sa.save()
 
     print 'Installed profile submit description'
 
@@ -604,7 +606,8 @@ def installProfileSIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_sip = profile
+    sa.save()
 
     print 'Installed profile SIP'
 
@@ -633,7 +636,8 @@ def installProfileAICDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aic_description = profile
+    sa.save()
 
     print 'Installed profile AIC Description'
 
@@ -963,7 +967,8 @@ def installProfileAIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aip = profile
+    sa.save()
 
     print 'Installed profile AIP'
 
@@ -1114,7 +1119,8 @@ def installProfileAIPDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aip_description = profile
+    sa.save()
 
     print 'Installed profile AIP Description'
 
@@ -1305,7 +1311,8 @@ def installProfileDIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_dip = profile
+    sa.save()
 
     print 'Installed profile DIP'
 
@@ -1314,7 +1321,7 @@ def installProfileDIP(sa):
 def installProfilePreservationMetadata(sa):
 
     dct = {
-        'name': 'Preservation profile xx',
+        'name': 'Preservation profile SE',
         'profile_type': 'preservation_metadata',
         'type': 'Implementation',
         'status': 'Draft',
@@ -1353,7 +1360,8 @@ def installProfilePreservationMetadata(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_preservation_metadata = profile
+    sa.save()
 
     print 'Installed profile preservation metadata'
 
