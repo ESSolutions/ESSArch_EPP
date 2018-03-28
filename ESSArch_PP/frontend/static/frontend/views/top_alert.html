@@ -23,7 +23,7 @@
                         <div class="alert-date" tooltip-placement="left" uib-tooltip="{{x.time_created | date:'yyyy-MM-dd HH:mm:ss'}}">{{x.time_created | relativeDate}}</div>
                     </td>
                     <td>
-                        <span ng-click="vm.removeAlert(x)">&#10005;</span>
+                        <span ng-click="vm.removeAlert(x)" class="cursor-pointer">&#10005;</span>
                     </td>
                 </tr>
             </body>
