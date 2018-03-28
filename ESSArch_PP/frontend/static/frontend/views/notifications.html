@@ -1,0 +1,55 @@
+<div class="notification-page">
+    <div class="table-container" st-table="vm.alerts" st-pipe="vm.alertPipe">
+        <div class="search-prepare-wrapper">
+            <label for items-per-page></label>
+            <select class="form-control items-per-page" ng-model="vm.alertsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
+                popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+            <div style="width: 50%;" class="input-group margin-bottom-sm">
+                <input id="search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
+                    uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
+                />
+                <span ng-if="vm.alertTableState.search.predicateObject && vm.alertTableState.search.predicateObject['$']" class="input-group-addon clickable"
+                    ng-click="clearSearch(); getListViewData();">
+                    <i class="fa fa-lg fa-times" style="color: red;"></i>
+                </span>
+            </div>
+            <div class="refresh-icon">
+                <span ng-click="vm.alertPipe(vm.alertTableState)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': alertLoading }"
+                    uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            </div>
+        </div>
+        <div class="table-x-overflow">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{{'TYPE' | translate}}</th>
+                        <th>{{'MESSAGE' | translate}}</th>
+                        <th>{{'REMOVE' | translate}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="x in vm.alerts">
+                        <td class="position-relative">
+                            <div>
+                                <span class="alert-indicator" ng-class="x.level"
+                                    uib-popover="{{x.level}}" popover-placement="right" popover-popup-delay="500" popover-append-to-body="true">
+                                </span>
+                            </div>
+                        </td>
+                        <td class="alert-text">{{x.message}}</td>
+                        <td>
+                            <span ng-click="vm.removeNotification(x)" class="cursor-pointer">&#10005;</span>
+                        </td>
+                    </tr>
+                    <tr ng-if="!vm.alerts.length && !alertLoading" class="empty-table-indicator">
+                        <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    </tr>
+                    <tr ng-if="!vm.alerts.length && alertLoading" class="empty-table-indicator">
+                        <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.alertsPerPage" st-displayed-pages="7"></div>
+        </div>
+    </div>
+</div>

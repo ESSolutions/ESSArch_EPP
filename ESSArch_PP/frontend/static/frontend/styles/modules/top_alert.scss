@@ -1,95 +1,94 @@
 .top-alert-container {
-    position: fixed;
+    position: absolute;
     z-index: 1150;
-    top: 0;
-    left: 0;
-    right: 0;
-}
-.top-alert {
-    text-align: center;
-    padding: 5px;
-    box-shadow: 0 0 5px black;
-    font-size: 16px;
-    color: white;
-    padding-right: 10px;
-    padding-left: 10px;
-    .icon-row {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        span {
-            margin-left: 10px;
-        }
-        width: 90px;
-        min-width: 90px;
-        max-width: 90px;
-    }
-    .alert-text {
-        width:100%;
-        overflow-x: hidden;
-        text-overflow: ellipsis;
-        border-right-style: solid;
-        border-right-width: 2px;
-        .error, .info, .success, .critical {
-            border-right-color: white;
-        }
-        .warning {
-            border-right-color: black !important;
-        }
-    }
-    .alert-date {
-        font-size: 10px;
-        text-align: left;
-        white-space: nowrap;
-        width: 100px;
-        min-width: 100px;
-        max-width: 100px;
-        overflow-x: visible;
+    top: 9.5rem;
+    right: 1rem;
+    width: 430px;
+    min-width: 100px;
+    @include small-screen {
+        display: none;
     }
 }
-.top-alert-expand {
-    cursor: pointer;
+
+.alert-indicator-container {
+    padding: 1rem;
 }
-.top-alert-expand.error:hover {
-    background: lighten($step-fail, 10%);
-}
-.top-alert-expand.success:hover {
-    background: lighten($step-success, 10%);
-}
-.top-alert-expand.info:hover {
-    background: lighten($step-in-progress, 10%);
-}
-.top-alert-expand.warning:hover {
-    background: lighten(#F3D464, 10%);
-}
-.top-alert-expand.critical:hover {
-    background: lighten($step-fail, 10%);
-}
-.top-alert-close {
-    float: right;
-    cursor: pointer;
-}
-.error {
-    background: $step-fail;
-}
-.success {
-    background: $step-success;
-}
-.info {
-    background: $step-in-progress;
-}
-.warning {
-    background: #fde073;
-    color: black !important;
-}
-.critical {
-    background: $step-fail;
+.alert-indicator {
+    width: 1rem;
+    height: 1rem;
+    border-radius: .5rem;
+    display: inline-block;
+
+    &.error {
+        background-color: $step-fail;
+    }
+    &.success {
+        background-color: $step-success;
+    }
+    &.info {
+        background-color: $step-in-progress;
+    }
+    &.warning {
+        background-color: #fde073;
+        color: black !important;
+    }
+    &.critical {
+        background-color: $step-fail;
+    }
 }
 
 .top-alert.ng-enter, .top-alert.ng-leave {
     -webkit-transition: .1s linear all;
     transition: .1s linear all;
 }
+
+.alert-list {
+    background-color: $light-blue;
+    color: black;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
+    padding-left: .5rem;
+    padding-right: .5rem;
+    .alert-text {
+        margin-left: 36px;
+        padding: 5px;
+        font-size: 14px;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+
+        .alert-message {
+            padding-bottom: .3rem;
+        }
+    }
+}
+
+.alert-list-item {
+    &:hover {
+        background-color: lighten($light-blue, 3%);
+    }
+    background-color: $light-blue;
+    overflow: hidden;
+}
+
+.alert-text-icons-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.alert-date {
+    text-align: left;
+    font-size: 1rem;
+}
+
+.notification-page {
+    @include container(5px);
+    margin-top: 10px;
+}
+
+/* Transitions */
+
 .top-alert.ng-enter {
     opacity: 0;
 }
@@ -101,50 +100,6 @@
 }
 .top-alert.ng-leave.ng-leave-active {
     opacity: 0;
-}
-.alert-list {
-    text-align: center;
-    box-shadow: 0 0 5px black;
-    font-size: 16px;
-    color: white;
-    width: 100%;
-    .alert-text {
-        width: 100%;
-        overflow-x: hidden;
-        text-overflow: ellipsis;
-    }
-    .alert-date {
-        font-size: 10px;
-        text-align: left;
-        white-space: nowrap;
-        width: 100px;
-        min-width: 100px;
-        max-width: 100px;
-        overflow-x: visible;
-    }
-    .icon-row {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        span {
-            margin-left: 10px;
-        }
-        width: 92px;
-        min-width: 92px;
-        max-width: 92px;
-    }
-}
-
-.alert-list-item {
-    padding: 5px;
-    padding-right: 10px;
-    padding-left: 10px;
-}
-
-.alert-text-icons-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
 }
 .alert-list.ng-enter, .alert-list.ng-leave {
     -webkit-transition: .3s linear all;

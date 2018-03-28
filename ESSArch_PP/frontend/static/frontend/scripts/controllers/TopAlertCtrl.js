@@ -1,10 +1,9 @@
-angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http) {
+angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window) {
     var vm = this;
     vm.visible = false;
     vm.alerts = [];
     vm.frontendAlerts = [];
     vm.backendAlerts = [];
-    vm.showAlerts = false;
     var interval;
     var updateInterval;
     vm.$onInit = function () {
@@ -37,9 +36,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
         return TopAlert.getNotifications().then(function(data) {
             vm.backendAlerts = data;
-            vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
-                return new Date(b.time_created) - new Date(a.time_created);
-            })
+            vm.alerts = vm.backendAlerts;
             if(vm.alerts.length > 0 && !vm.alerts[0].seen && show) {
                 vm.showAlert();
             }
@@ -172,30 +169,12 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         } else {
             vm.frontendAlerts.unshift(alert);
         }
-        if (time) {
-            timer = vm.setTimer(alert, time);
-        } else {
-            timer = vm.setTimer(alert, 5000);
-        }
-        vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
-            return new Date(b.time_created) - new Date(a.time_created);
+        Messenger().post({
+            message: message,
+            type: level,
+            hideAfter: time?time/1000:10,
+            showCloseButton: true
         });
-        vm.showAlert();
-    }
-
-    /**
-     * Set timer for alert
-     * @param time - Timer duration
-     */
-    vm.setTimer = function (alert, time) {
-        return $timeout(function () {
-            if (vm.visible && !vm.showAlerts && vm.alerts[0] == alert) {
-                vm.hideAlert();
-            }
-            if(vm.showAlerts) {
-                vm.setSeen(vm.alerts.slice(0,5));
-            }
-        }, time)
     }
 
     // Listen for show/hide events
@@ -216,6 +195,27 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 vm.showAlerts = true;
                 vm.setSeen(vm.alerts.slice(0, 5));
             }, 300);
+        }
+    });
+    $scope.$on('toggle_top_alert', function (event, data) {
+        if(vm.visible) {
+            vm.hideAlert();
+        } else {
+            vm.showAlert();
+            vm.setSeen(vm.alerts.slice(0, 5));
+            $window.onclick = function(event) {
+                var clickedElement = $(event.target);
+                if (!clickedElement) return;
+                var elementClasses = event.target.classList;
+                var clickedOnAlertIcon = elementClasses.contains('fa-bell') ||
+                elementClasses.contains('top-alert-container') ||
+                clickedElement.parents('.top-alert-container').length
+                if (!clickedOnAlertIcon) {
+                    vm.hideAlert();
+                    $window.onclick = null;
+                    $scope.$apply();
+                }
+            }
         }
     });
     $scope.$on('hide_top_alert', function (event, data) {

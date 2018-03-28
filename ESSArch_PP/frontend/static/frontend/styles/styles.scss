@@ -32,6 +32,8 @@
 @import '../node_modules/angular-tree-control/css/tree-control';
 @import '../node_modules/jstree/dist/themes/default/style';
 @import '../node_modules/angular-cron-jobs/dist/angular-cron-jobs';
+@import '../node_modules/messenger-hubspot/build/css/messenger';
+@import '../node_modules/messenger-hubspot/build/css/messenger-theme-flat';
 @import 'modules/index';
 @import 'modules/login';
 @import 'modules/reception';
@@ -42,3 +44,5 @@
 @import 'modules/top_alert';
 @import 'modules/search';
 @import 'modules/profile_editor';
+@import 'modules/positions';
+@import 'modules/utils';

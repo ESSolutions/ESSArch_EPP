@@ -2359,6 +2359,10 @@ merge@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/merge/-/merge-1.2.0.tgz#7531e39d4949c281a66b8c5a6e0265e8b05894da"
 
+messenger-hubspot@^1.5.0-b2:
+  version "1.5.0-b2"
+  resolved "https://registry.yarnpkg.com/messenger-hubspot/-/messenger-hubspot-1.5.0-b2.tgz#5859e0ded00d6f7d2595791e4590195611a20cca"
+
 micromatch@^2.1.5, micromatch@^2.3.7:
   version "2.3.11"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-2.3.11.tgz#86677c97d1720b363431d04d0d15293bd38c1565"

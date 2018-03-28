@@ -42,7 +42,7 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
         return myService.checkPermissions(permissions);
     }
     $scope.showAlert = function() {
-        TopAlert.show();
+        TopAlert.toggle();
     }
 
     $scope.navigateToState = function(state) {
