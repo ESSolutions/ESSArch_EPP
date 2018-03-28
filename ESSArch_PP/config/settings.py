@@ -400,15 +400,6 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
-# Sets permissions on IP creation
-
-IP_CREATION_PERMS_MAP = {
-    'owner': ['delete'],
-    'group': ['view_informationpackage'],
-    'groups_upstream': ['view_informationpackage'],
-    'groups_downstream': {'access': ['view_informationpackage']}
-}
-
 # Rest auth settings
 OLD_PASSWORD_FIELD_ENABLED = True
 
