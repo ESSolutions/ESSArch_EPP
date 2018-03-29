@@ -1739,7 +1739,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
             user_id = self.request.query_params['user']
             organization = self.request.user.user_profile.current_organization
             organization_users = organization.get_members(subgroups=True)
-            user = User.objects.get(pk=user_id, groups_manager_member_set__in=organization_users)
+            user = User.objects.get(pk=user_id, essauth_member__in=organization_users)
             return user
         except User.DoesNotExist:
             raise exceptions.NotFound('User not found in organization')
