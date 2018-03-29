@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.sites',
     'django_filters',
+    'groups_manager',
     'nested_inline',
     'rest_auth',
     'rest_auth.registration',
@@ -89,6 +90,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'mptt',
     'frontend',
+    'ESSArch_Core.admin',
     'ESSArch_Core.auth',
     'ESSArch_Core.config',
     'ESSArch_Core.configuration',
@@ -105,7 +107,6 @@ INSTALLED_APPS = [
     'configuration',
     'storage',
     'guardian',
-    'groups_manager',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -333,7 +334,7 @@ STATICFILES_DIRS = (
 )
 
 # Documentation
-DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/html')
+DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/{lang}/html')
 
 # Add epp vhost to rabbitmq:
 # rabbitmqctl add_user guest guest
@@ -379,6 +380,22 @@ CELERYBEAT_SCHEDULE = {
     },
     'ScheduleConversionJobs-every-10-seconds': {
         'task': 'workflow.tasks.ScheduleConversionJobs',
+        'schedule': timedelta(seconds=10),
+    },
+    'IndexTags': {
+        'task': 'ESSArch_Core.tasks.IndexTags',
+        'schedule': timedelta(seconds=1),
+    },
+    'UpdateTags': {
+        'task': 'ESSArch_Core.tasks.UpdateTags',
+        'schedule': timedelta(seconds=1),
+    },
+    'DeleteTags': {
+        'task': 'ESSArch_Core.tasks.DeleteTags',
+        'schedule': timedelta(seconds=1),
+    },
+    'ClearTagProcessQueue': {
+        'task': 'ESSArch_Core.tasks.ClearTagProcessQueue',
         'schedule': timedelta(seconds=10),
     },
 }

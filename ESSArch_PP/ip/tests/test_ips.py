@@ -32,13 +32,14 @@ from django.http.response import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from groups_manager.models import Group, GroupMember, GroupType, Member
+from groups_manager.models import GroupType
 
 import mock
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from ESSArch_Core.auth.models import Group, GroupMember, Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
 from ESSArch_Core.profiles.models import Profile, ProfileSA, SubmissionAgreement
@@ -95,7 +96,7 @@ class WorkareaViewSetTestCase(TestCase):
         self.url = reverse('workarea-list')
 
         self.user = User.objects.create(username="admin")
-        self.member = Member.objects.create(username=self.user.username, django_user=self.user)
+        self.member = self.user.essauth_member
         self.org_group_type = GroupType.objects.create(label='organization')
         self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
         self.group.add_member(self.member)
@@ -548,7 +549,7 @@ class WorkareaFilesViewTestCase(TestCase):
 class InformationPackageViewSetTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="admin", password='admin')
-        self.member = Member.objects.create(username=self.user.username, django_user=self.user)
+        self.member = self.user.essauth_member
         self.org_group_type = GroupType.objects.create(label='organization')
         self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
         self.group.add_member(self.member)
@@ -1048,7 +1049,7 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_aic_view_type_aip_other_user_same_organization(self):
-        member2 = Member.objects.create(username="another")
+        member2 = User.objects.create(username="another").essauth_member
         self.group.add_member(member2)
 
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -1064,7 +1065,7 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data[0]['information_packages']), 1)
 
     def test_aic_view_type_aip_other_user_other_organization(self):
-        member2 = Member.objects.create(username="another")
+        member2 = User.objects.create(username="another").essauth_member
         group2 = Group.objects.create(name='organization2', group_type=self.org_group_type)
         group2.add_member(member2)
 
@@ -1079,7 +1080,7 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(len(res.data), 0)
 
     def test_ip_view_type_aip_other_user_same_organization(self):
-        member2 = Member.objects.create(username="another")
+        member2 = User.objects.create(username="another").essauth_member
         self.group.add_member(member2)
 
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
@@ -1094,7 +1095,7 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.data[0]['id'], str(aip.pk))
 
     def test_ip_view_type_aip_other_user_other_organization(self):
-        member2 = Member.objects.create(username="another")
+        member2 = User.objects.create(username="another").essauth_member
         group2 = Group.objects.create(name='organization2', group_type=self.org_group_type)
         group2.add_member(member2)
 

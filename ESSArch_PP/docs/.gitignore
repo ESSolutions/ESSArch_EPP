@@ -1,2 +1,3 @@
 _build
-source
+core
+locale/**/LC_MESSAGES/core

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval) {
+angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval, Conversion) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -31,77 +31,127 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
      * Smart table pipe function for conversion rules
      * @param {*} tableState
      */
-    vm.rulePipe = function(tableState) {
-        if(tableState && tableState.search.predicateObject) {
+    vm.rulePipe = function (tableState) {
+        if (tableState && tableState.search.predicateObject) {
             var search = tableState.search.predicateObject["$"];
         }
         $scope.ruleLoading = true;
-        $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {search: search}}).then(function(response) {
-            vm.ruleTableState = tableState;
-            vm.ruleFilters.forEach(function(x) {
-                response.data.forEach(function(rule) {
-                    if(x == rule.id) {
-                        rule.usedAsFilter = true;
-                    }
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.rulesPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Conversion.getRules(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.ruleTableState = tableState;
+                vm.ruleFilters.forEach(function (x) {
+                    response.data.forEach(function (rule) {
+                        if (x == rule.id) {
+                            rule.usedAsFilter = true;
+                        }
+                    });
                 });
-            });
-            vm.rules = response.data;
-            $scope.ruleLoading = false;
-        }).catch(function(response) {
-            TopAlert.add("Failed to get conversion rules", "error");
-            $scope.ruleLoading = false;
-        })
+                vm.rules = response.data;
+                $scope.ruleLoading = false;
+            })
+        }
     }
 
     /**
      * Smart table pipe function for ongoing conversions
      * @param {*} tableState
      */
-    vm.ongoingPipe = function(tableState) {
+    vm.ongoingPipe = function (tableState) {
         $scope.ongoingLoading = true;
-        $http.get(appConfig.djangoUrl+"conversion-jobs/", {params: {status: "STARTED"}}).then(function(response) {
-            vm.ongoingTableState = tableState;
-            vm.ongoing = response.data;
-            $scope.ongoingLoading = false;
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.ongoingPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Conversion.getOngoing(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.ongoingTableState = tableState;
+                vm.ongoing = response.data;
+                $scope.ongoingLoading = false;
 
-        }).catch(function(response) {
-            TopAlert.add("Failed to get ongoing conversion jobs", "error");
-            $scope.ongoingLoading = false;
-        })
+            })
+        }
     }
 
     /**
      * Smart table pipe function for next conversions
      * @param {*} tableState
      */
-    vm.nextPipe = function(tableState) {
+    vm.nextPipe = function (tableState) {
         $scope.nextLoading = true;
-        $http.get(appConfig.djangoUrl+"conversion-jobs/", { params: {status: "PENDING"}}).then(function(response) {
-            vm.nextTableState = tableState;
-            vm.next = response.data;
-            $scope.nextLoading = false;
-
-        }).catch(function(response) {
-            TopAlert.add("Failed to get next conversion jobs", "error");
-            $scope.nextLoading = false;
-        });
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.nextPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Conversion.getNext(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.nextTableState = tableState;
+                vm.next = response.data;
+                $scope.nextLoading = false;
+            })
+        }
     }
 
     /**
      * Smart table pipe function for finished conversions
      * @param {*} tableState
      */
-    vm.finishedPipe = function(tableState) {
+    vm.finishedPipe = function (tableState) {
         $scope.finishedLoading = true;
-        $http.get(appConfig.djangoUrl+"conversion-jobs/", { params: {end_date__isnull: false}}).then(function(response) {
-            vm.finishedTableState = tableState;
-            vm.finished = response.data;
-            $scope.finishedLoading = false;
-
-        }).catch(function(response) {
-            TopAlert.add("Failed to get finished conversion jobs", "error");
-            $scope.finishedLoading = false;
-        })
+        if (!angular.isUndefined(tableState)) {
+            var search = "";
+            if (tableState.search.predicateObject) {
+                var search = tableState.search.predicateObject["$"];
+            }
+            var sorting = tableState.sort;
+            var sortString = sorting.predicate;
+            if (sorting.reverse) {
+                sortString = "-" + sortString;
+            }
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number || vm.finishedPerPage;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            Conversion.getFinished(pageNumber, number, sortString, search).then(function (response) {
+                tableState.pagination.numberOfPages = Math.ceil(response.count / number);//set the number of pages so the pagination can update
+                vm.finishedTableState = tableState;
+                vm.finished = response.data;
+                $scope.finishedLoading = false;
+            })
+        }
     }
     function guid() {
         function s4() {

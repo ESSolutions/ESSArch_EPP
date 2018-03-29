@@ -35,8 +35,7 @@ angular.module('myApp').controller('VersionCtrl', function($scope, myService, $w
     }
 
     $scope.gotoDocs = function() {
-        $window.open("/docs/user_guide/index.html", '_blank');
-
+        $window.open("/docs/"+$translate.use()+"/user_guide/index.html", '_blank');
     }
 
     $scope.docs = $translate.instant('DOCS');

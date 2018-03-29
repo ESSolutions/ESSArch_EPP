@@ -109,8 +109,18 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.search.detail', {
-        url: '/:id',
+    .state('home.search.information_package', {
+        url: '/information_package/:id',
+        templateUrl: '/static/frontend/views/search_ip_detail.html',
+        controller: 'SearchIpCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.component', {
+        url: '/component/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
         controller: 'SearchDetailCtrl as vm',
         resolve: {
@@ -119,10 +129,30 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.search.ipDetail', {
-        url: '/ip/:id',
-        templateUrl: '/static/frontend/views/search_ip_detail.html',
-        controller: 'SearchIpDetailCtrl as vm',
+    .state('home.search.directory', {
+        url: '/directory/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.document', {
+        url: '/document/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        }
+    })
+    .state('home.search.archive', {
+        url: '/archive/:id',
+        templateUrl: '/static/frontend/views/search_detail.html',
+        controller: 'SearchDetailCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
@@ -578,6 +608,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             'responseError': function(response) {
                 if(response.status == 500) {
                     var msg = "Internal server error";
+                    if(response.data.detail) {
+                        msg = response.data.detail;
+                    }
+                    $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
+                }
+                if(response.status === 503) {
+                    var msg = "Request failed, try again";
                     if(response.data.detail) {
                         msg = response.data.detail;
                     }

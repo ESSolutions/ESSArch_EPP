@@ -2,29 +2,34 @@ from __future__ import division
 
 import copy
 import datetime
+import logging
 import math
 
 from django.core.cache import cache
-
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
-
-from elasticsearch.exceptions import TransportError
-from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet, Search
-
+from elasticsearch.exceptions import NotFoundError, TransportError
+from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-
 from six import iteritems
 
 from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive
-
+from ESSArch_Core.tags.documents import Archive, VersionedDocType
+from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
+from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
+    TagVersionSerializerWithVersions, \
+    TagVersionWriteSerializer
 from tags.permissions import SearchPermissions
+from tags.serializers import SearchSerializer
 
+logger = logging.getLogger('essarch.epp.search')
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
@@ -83,6 +88,7 @@ class ComponentSearch(FacetedSearch):
         """
 
         s = super(ComponentSearch, self).search()
+        s = s.filter('term', current_version=True)
 
         if self.start_date not in EMPTY_VALUES:
             s = s.filter('range', end_date={'gte': self.start_date})
@@ -165,10 +171,12 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         get_connection('default')
         super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
-    def get_object(self):
+    def get_object(self, index=None):
         """
         Returns the object the view is displaying.
         """
+
+        index = index or self.index
 
         # Perform the lookup filtering.
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
@@ -182,23 +190,31 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
-        s = Search(index=self.index).query("match", _id=id)
-        try:
-            res = s.execute()
-            serialized = res.hits[0].to_dict()
-            meta = res.hits[0].meta
-            serialized['_type'] = meta.doc_type
-            serialized['_id'] = meta.id
-            serialized['_index'] = meta.index
-            return serialized
-        except (IndexError, KeyError):
-            raise exceptions.NotFound
-        except TransportError as e:
-            if e.status_code == 404:
-                raise exceptions.NotFound
-            raise
 
-    def list(self, request):
+        try:
+            return VersionedDocType.get(id, index=index)
+        except NotFoundError:
+            raise exceptions.NotFound
+
+    def get_tag_object(self):
+        # Perform the lookup filtering.
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+                'Expected view %s to be called with a URL keyword argument '
+                'named "%s". Fix your URL conf, or set the `.lookup_field` '
+                'attribute on the view correctly.' %
+                (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        # Search for object in index by id
+        id = self.kwargs[lookup_url_kwarg]
+
+        tag_version = TagVersion.objects.select_related('tag').prefetch_related('tag__structures')
+
+        return get_object_or_404(tag_version, pk=id)
+
+    def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
         if query:
@@ -206,7 +222,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         filters = {
             'extension': params.pop('extension', None),
-            'index': params.pop('index', None),
+            'index': params.pop('index', index),
             'type': params.pop('type', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
@@ -254,16 +270,25 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         results_dict = results.to_dict()
 
         for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
-            archive_data = get_archive(archive['key'])
-            archive['name'] = archive_data['name']
+            try:
+                archive_data = get_archive(archive['key'])
+                archive['name'] = archive_data['name']
+            except NotFoundError:
+                logger.warn('Archive "%s" not found in search index, it might be queued for indexing' % archive['key'])
 
         for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
-            institution_data = get_institution(institution['key'])
-            institution['name'] = institution_data['name']
+            try:
+                institution_data = get_institution(institution['key'])
+                institution['name'] = institution_data['name']
+            except ObjectDoesNotExist:
+                logger.error('Archival institution "%s" not found' % institution['key'])
 
         for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
-            organization_data = get_organization(organization['key'])
-            organization['name'] = organization_data['name']
+            try:
+                organization_data = get_organization(organization['key'])
+                organization['name'] = organization_data['name']
+            except ObjectDoesNotExist:
+                logger.error('Archivist organization "%s" not found' % organization['key'])
 
         if len(results_dict['_shards'].get('failures', [])):
             return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -278,51 +303,132 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(r)
 
+    def serialize(self, obj):
+        return obj.to_dict(include_meta=True)
 
-    def retrieve(self, request, pk=None):
-        return Response(self.get_object())
+    def verify_structure(self, tag_version, structure):
+        query_filter = {}
 
-    @detail_route(methods=['get'])
-    def children(self, request, pk=None):
-        s = Search(index=self.index).sort('reference_code')
-
-        p = {'parent': {'query': pk, 'operator': 'and'}}
-        s = s.query('match', **p)
-
-        if self.paginator is not None:
-            # Paginate in search engine
-            number = request.query_params.get(self.paginator.pager.page_query_param, 1)
-            size = request.query_params.get(self.paginator.pager.page_size_query_param, 10)
-
-            try:
-                number = int(number)
-            except (TypeError, ValueError):
-                raise exceptions.NotFound('Invalid page.')
-            if number < 1:
-                raise exceptions.NotFound('Invalid page.')
-
-            size = int(size)
-            offset = (number-1)*size
-            max_results = int(Index('archive').get_settings()['archive']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
-            s = s[offset:offset+size]
+        if structure is not None:
+            query_filter['structure'] = structure
 
         try:
-            results = s.execute()
-        except TransportError:
-            if self.paginator is not None:
-                if offset+size > max_results:
-                    raise exceptions.ParseError("Can't show more than {max} results".format(max=max_results))
+            if not tag_version.get_structures().filter(**query_filter).exists():
+                if structure is None:
+                    raise exceptions.NotFound('Node does not exist in any structure')
 
-            raise
+                raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
+        except ValidationError:
+            raise exceptions.ParseError('Invalid structure id')
+
+    def retrieve(self, request, index=None, pk=None):
+        if index is None:
+            return self.list(request, index=pk)
+
+        tag = self.get_tag_object()
+        structure = self.request.query_params.get('structure')
+        self.verify_structure(tag, structure)
+        context = {'structure': structure}
+        serialized = TagVersionSerializerWithVersions(tag, context=context).data
+
+        return Response(serialized)
+
+    @detail_route(methods=['get'])
+    def children(self, request, index=None, pk=None):
+        parent = self.get_tag_object()
+        structure = self.request.query_params.get('structure')
+        self.verify_structure(parent, structure)
+        context = {'structure': structure}
+        children = parent.get_children(structure)
 
         if self.paginator is not None:
-            if results.hits.total > 0 and number > math.ceil(results.hits.total/size):
-                raise exceptions.NotFound('Invalid page.')
+            paginated = self.paginator.paginate_queryset(children, request)
+            serialized = TagVersionNestedSerializer(instance=paginated, many=True, context=context).data
+            return self.paginator.get_paginated_response(serialized)
 
-        results_dict = results.to_dict()
-        r = results_dict['hits']['hits']
+        return Response(serialized = TagVersionSerializer(children, many=True).data)
 
-        if self.paginator is not None:
-            return Response(r, headers={'Count': results.hits.total})
+    @detail_route(methods=['post'], url_path='new-version')
+    def new_version(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        new_tag = tag.create_new()
+        return Response()
 
-        return Response(r)
+    @detail_route(methods=['post'], url_path='new-structure')
+    def new_structure(self, request, index=None, pk=None):
+        try:
+            name = request.data['name']
+        except KeyError:
+            raise exceptions.ParseError('Missing "name" parameter')
+
+        with transaction.atomic():
+            structure = Structure.objects.create(name=name)
+            tag = self.get_tag_object()
+            tag.get_active_structure().create_new(structure)
+
+        return Response()
+
+    @detail_route(methods=['patch'], url_path='set-as-current-version')
+    def set_as_current_version(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        tag.set_as_current_version()
+        return Response()
+
+    def create(self, request, index=None):
+        request.data.setdefault('index', index)
+        refresh = request.query_params.get('refresh', False)
+        serializer = SearchSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+
+            with transaction.atomic():
+                tag = Tag.objects.create()
+                tag_version = TagVersion.objects.create(
+                    tag=tag, elastic_index=data['index'], name=data['name'],
+                    type=data['type'])
+                tag.current_version = tag_version
+                tag.save()
+                tag_structure = TagStructure(tag=tag)
+
+                if data.get('parent') is not None:
+                    parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
+                    parent_structure = parent_version.get_active_structure()
+                    tag_structure.parent = parent_structure
+                    tag_structure.structure = parent_structure.structure
+
+                tag_structure.save()
+
+            return Response(self.serialize(tag_version.to_search()))
+
+    def partial_update(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+
+        if 'parent' in request.data:
+            parent = request.data.pop('parent')
+            parent_tag_version = TagVersion.objects.get(pk=parent)
+            rep = tag.get_active_structure()
+            parent_rep = parent_tag_version.tag.structures.get(structure=rep.structure)
+            rep.parent = parent_rep
+            rep.save()
+
+        db_fields = [f.name for f in TagVersion._meta.get_fields()]
+        db_fields_request_data = {}
+
+        for f in db_fields:
+            if f in request.data:
+                db_fields_request_data[f] = request.data.pop(f)
+
+        serializer = TagVersionWriteSerializer(tag, data=db_fields_request_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if request.data:
+            tag.update_search(request.data)
+
+        return Response(serializer.data)
+
+    def destroy(self, request, index=None, pk=None):
+        obj = self.get_tag_object()
+        obj.get_active_structure().get_descendants(include_self=True).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

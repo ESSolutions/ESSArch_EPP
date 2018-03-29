@@ -520,5 +520,21 @@
     "CRON_OF": "Of",
     "CRON_AT": "At",
     "CRON_PAST_THE_HOUR": "Past the hour",
-    "INVALID_FREQUENCY": "Invalid frequency"
+    "INVALID_FREQUENCY": "Invalid frequency",
+    "NODE_ADDED": "Node added!",
+    "NODE_EDITED": "Node edited!",
+    "NODE_REMOVED": "Node removed!",
+    "ADD_NODE": "Add node",
+    "REMOVE_NODE": "Remove node",
+    "DO_YOU_WANT_TO_REMOVE_NODE": "Do you want to remove node?",
+    "NEW_VERSION": "New version",
+    "CREATE_NEW_VERSION": "Create new version",
+    "PAGE_DOES_NOT_EXIST": "Page does not exist",
+    "GO_TO_SEARCH": "Go to Search",
+    "VERSION": "Version",
+    "SET_CURRENT_VERSION": "Set as current",
+    "CREATE_NEW_STRUCTURE": "Create new classification structure",
+    "NEW_STRUCTURE_CREATED": "New classification structure created",
+    "CREATING": "Creating",
+    "NEW_VERSION_CREATED": "New version created"
 }

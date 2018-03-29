@@ -234,7 +234,8 @@ def installProfileTransferProject(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_transfer_project = profile
+    sa.save()
 
     print 'Installed profile transfer project'
 
@@ -372,7 +373,8 @@ def installProfileSubmitDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_submit_description = profile
+    sa.save()
 
     print 'Installed profile submit description'
 
@@ -737,7 +739,8 @@ def installProfileSIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_sip = profile
+    sa.save()
 
     print 'Installed profile SIP'
 
@@ -766,7 +769,8 @@ def installProfileAICDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aic_description = profile
+    sa.save()
 
     print 'Installed profile AIC Description'
 
@@ -1096,7 +1100,8 @@ def installProfileAIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aip = profile
+    sa.save()
 
     print 'Installed profile AIP'
 
@@ -1247,7 +1252,8 @@ def installProfileAIPDescription(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_aip_description = profile
+    sa.save()
 
     print 'Installed profile AIP Description'
 
@@ -1438,7 +1444,8 @@ def installProfileDIP(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_dip = profile
+    sa.save()
 
     print 'Installed profile DIP'
 
@@ -1486,7 +1493,8 @@ def installProfilePreservationMetadata(sa):
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    ProfileSA.objects.get_or_create(profile=profile, submission_agreement=sa)
+    sa.profile_preservation_metadata = profile
+    sa.save()
 
     print 'Installed profile preservation metadata'
 
