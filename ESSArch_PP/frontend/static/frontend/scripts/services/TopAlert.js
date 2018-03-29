@@ -66,15 +66,24 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
          */
         hide: function() {
             $rootScope.$broadcast('hide_top_alert', {});
-
         },
         toggle: function() {
             $rootScope.$broadcast('toggle_top_alert', {});
 
         },
         getNotifications: function() {
-            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: 7}}).then(function(response) {
+            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: 10}}).then(function(response) {
                 return response.data;
+            })
+        },
+        getNextPage: function(pageSize, id) {
+            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: pageSize, after: id}}).then(function(response) {
+                return {
+                    data: response.data,
+                    count: response.headers('Count')
+                };
+            }).catch(function(response) {
+                return [];
             })
         },
         getNextNotification: function() {

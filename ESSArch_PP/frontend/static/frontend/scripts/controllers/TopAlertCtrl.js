@@ -7,6 +7,10 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     var interval;
     var updateInterval;
     vm.$onInit = function () {
+        Messenger.options = {
+            extraClasses: 'messenger-fixed messenger-on-bottom messenger-on-right',
+            theme: 'flat'
+        }
         vm.getNotifications(false);
         vm.updateUnseen();
         if(!$rootScope.useWebsocket) {
@@ -81,52 +85,26 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
     vm.hideAlert = function() {
         vm.visible = false;
-        vm.showAlerts = false;
+        $window.onclick = null;
     }
 
-    vm.removeAlert = function (alert) {
-        if (alert.id) {
-            TopAlert.delete(alert.id).then(function (response) {
-                vm.backendAlerts.splice(vm.backendAlerts.indexOf(alert), 1);
-                vm.alerts.splice(vm.alerts.indexOf(alert), 1);
-                if (vm.alerts.length == 0) {
-                    vm.updateUnseen(0);
-                }
-                if (vm.alerts.length == 0 && vm.showAlerts) {
-                    vm.showAlerts = false;
-                } else {
-                if(vm.alerts.length < 7) {
-                    getNext();
-                }
-                    vm.setSeen(vm.alerts.slice(0,5))
-                }
-            });
-        } else {
-            vm.frontendAlerts.splice(vm.frontendAlerts.indexOf(alert), 1);
-            vm.alerts.splice(vm.alerts.indexOf(alert), 1);
-            if (vm.alerts.length == 0 && vm.showAlerts) {
-                vm.showAlerts = false;
-            } else {
-                if(vm.alerts.length < 7) {
-                    getNext();
-                }
-                vm.setSeen(vm.alerts.slice(0,5))
-            }
-        }
+    vm.removeAlert = function (alert, index) {
+        TopAlert.delete(alert.id).then(function (response) {
+            vm.backendAlerts.splice(index, 1);
+            vm.alerts.splice(index, 1);
+        });
     }
 
     function getNext() {
         return TopAlert.getNextNotification().then(function(data) {
             vm.backendAlerts.push(data[0]);
-            vm.alerts = vm.frontendAlerts.concat(vm.backendAlerts).sort(function(a, b) {
-                return new Date(b.time_created) - new Date(a.time_created);
-            });
-            if(!vm.showAlerts) {
+            vm.alerts = vm.backendAlerts;
+            if(!vm.alerts.length == 0) {
                 vm.visible = false;
             }
             return vm.alerts;
         }).catch(function(response) {
-            if(!vm.showAlerts) {
+            if(!vm.alerts.length == 0) {
                 vm.visible = false;
             }
             return vm.alerts;
@@ -135,20 +113,22 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.clearAll = function() {
         TopAlert.deleteAll().then(function(response) {
             vm.visible = false;
-            vm.showAlerts = false;
             vm.alerts = [];
             vm.backendAlerts = [];
             vm.frontendAlerts = [];
             vm.updateUnseen();
         })
     }
-
-    vm.toggleAlerts = function() {
-        if(vm.alerts.length > 0) {
-            vm.showAlerts = !vm.showAlerts;
-            if(vm.showAlerts) {
-                vm.setSeen(vm.alerts.slice(0, 5));
-            }
+    vm.nextPage = function () {
+        if(!vm.nextPageLoading) {
+            vm.nextPageLoading = true;
+            TopAlert.getNextPage(10, vm.alerts[vm.alerts.length-1].id).then(function(response) {
+                vm.nextPageLoading = false;
+                response.data.forEach(function(x) {
+                    vm.backendAlerts.push(x);
+                });
+                vm.alerts = vm.backendAlerts;
+            })
         }
     }
 
@@ -209,10 +189,10 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 var elementClasses = event.target.classList;
                 var clickedOnAlertIcon = elementClasses.contains('fa-bell') ||
                 elementClasses.contains('top-alert-container') ||
+                elementClasses.contains('top-alert-container') ||
                 clickedElement.parents('.top-alert-container').length
                 if (!clickedOnAlertIcon) {
                     vm.hideAlert();
-                    $window.onclick = null;
                     $scope.$apply();
                 }
             }

@@ -1,5 +1,4 @@
 <div class="body-wrapper">
-    <top-alert></top-alert>
     <div ng-if="disconnected" ng-controller="UtilCtrl" class="top-alert-container">
         <div class="top-alert error">
             <div class="alert-text-icons-row">
@@ -49,10 +48,11 @@
             <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-            <div ng-click="showAlert()" class="notification-icon info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-bell"></i>
-                <div ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
-                <div ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
+            <div class="notification-icon position-relative">
+                <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></i>
+                <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
+                <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
+                <top-alert></top-alert>
             </div>
             <div class="organization-select" ng-controller="OrganizationCtrl">
                 <select tabindex="-1" style="width: auto; margin-left: 10px;" class="form-control" ng-model="currentOrganization" ng-change="changeOrganization(); updateListView()" ng-options="x as x.name for x in availableOrganizations track by x.id"></select>

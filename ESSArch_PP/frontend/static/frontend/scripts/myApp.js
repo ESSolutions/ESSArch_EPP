@@ -541,16 +541,6 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         },
     })
-    .state('home.notifications', {
-        url: 'notifications',
-        templateUrl: '/static/frontend/views/notifications.html',
-        controller: 'NotificationCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        }
-    })
     .state('home.restricted', {
         url: 'restricted',
         templateUrl: '/static/frontend/views/restricted.html',
@@ -848,8 +838,4 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
 
     });
-    Messenger.options = {
-        extraClasses: 'messenger-fixed messenger-on-bottom messenger-on-right',
-        theme: 'flat'
-    }
 });
