@@ -1700,7 +1700,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 active=True,
             )
 
-            qs = InformationPakcageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
+            qs = InformationPackageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
 
             qs = qs.annotate(
                 first_generation=Case(
