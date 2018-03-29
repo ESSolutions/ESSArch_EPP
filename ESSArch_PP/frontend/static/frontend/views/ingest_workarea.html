@@ -58,7 +58,7 @@
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
-            <filebrowser ip="ip" workarea="vm.workarea" browserstate="vm.browserstate"></filebrowser>
+            <filebrowser ip="ip" workarea="vm.workarea" user="vm.organizationMember.current" browserstate="vm.browserstate"></filebrowser>
             <div id="file-upload" ng-if="!ip.workarea[0].read_only && (ip.responsible.id == auth.id || checkPermission('ip.can_upload')) && showFileUpload" ng-include
             src="'static/frontend/views/file_upload.html'"></div>
         </div>

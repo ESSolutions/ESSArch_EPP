@@ -522,20 +522,22 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
             return response;
         })
     }
-    function getWorkareaDir(workareaType, pathStr, pageNumber, pageSize) {
+    function getWorkareaDir(workareaType, pathStr, pageNumber, pageSize, user) {
         var sendData;
         if (pathStr == "") {
             sendData = {
                 page: pageNumber,
                 page_size: pageSize,
-                type: workareaType
+                type: workareaType,
+                user: user,
             };
         } else {
             sendData = {
                 page: pageNumber,
                 page_size: pageSize,
                 path: pathStr,
-                type: workareaType
+                type: workareaType,
+                user: user,
             };
         }
 
@@ -607,10 +609,11 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
 
-    function addNewWorkareaFolder(workareaType, path, file) {
+    function addNewWorkareaFolder(workareaType, path, file, user) {
         return WorkareaFiles.addDirectory({
             type: workareaType,
             path: path + file.name,
+            user: user,
         }).$promise.then(function(response) {
             return response;
         });
@@ -625,10 +628,11 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
 
-    function deleteWorkareaFile(workareaType, path, file) {
+    function deleteWorkareaFile(workareaType, path, file, user) {
         return WorkareaFiles.removeFile({
             type: workareaType,
             path: path + file.name,
+            user: user,
         }).$promise.then(function(response) {
             return response;
         });
@@ -684,10 +688,11 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
         });
     }
 
-    function getWorkareaFile(workareaType, path, file) {
+    function getWorkareaFile(workareaType, path, file, user) {
         return WorkareaFiles.files({
             type: workareaType,
             path: path + file.name,
+            user: user,
         }).then(function(response) {
             return response;
         });

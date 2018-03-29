@@ -7,10 +7,10 @@
     </div>
 </div>
 <div ng-if="('home.ingest.workarea' | isState) || ('home.access.workarea' | isState)">
-    <div ng-if="!subrow && (row.workarea[0].user.id == auth.id || row.workarea[0].user == null) && row.package_type != 1 && row.state !== 'Receiving'">
+    <div ng-if="!subrow && row.package_type != 1 && row.state !== 'Receiving'">
         <a tabindex="-1" class="no-select" ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
     </div>
-    <div ng-if="subrow && (subrow.workarea[0].user.id == auth.id || subrow.workarea[0].user == null)  && row.state !== 'Receiving'">
+    <div ng-if="subrow && row.state !== 'Receiving'">
         <a tabindex="-1" class="no-select" ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
     </div>
 </div>
