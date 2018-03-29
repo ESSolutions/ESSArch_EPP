@@ -1728,7 +1728,8 @@ class WorkareaViewSet(InformationPackageViewSet):
 
 class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
     def get_user(self, request):
-        if self.request.query_params.get('user') in EMPTY_VALUES:
+        requested_user = self.request.query_params.get('user')
+        if requested_user in EMPTY_VALUES or requested_user == str(request.user.pk):
             return request.user
 
         if not self.request.user.has_perm('ip.see_all_in_workspaces'):
