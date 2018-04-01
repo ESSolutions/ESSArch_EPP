@@ -127,3 +127,22 @@
     min-height: 0;
     opacity: .7;
 }
+
+// Override Alert colors
+
+ul.messenger-theme-flat .messenger-message.alert-success .messenger-message-inner:before {
+    background: $step-success !important;
+}
+ul.messenger-theme-flat .messenger-message.alert-info .messenger-message-inner:before {
+    background: $step-in-progress !important;
+}
+ul.messenger-theme-flat .messenger-message.alert-warning .messenger-message-inner:before {
+    background: #fde073 !important;
+}
+ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
+    background: $step-fail !important;
+}
+
+ul.messenger-theme-flat .messenger-message.alert-error.messenger-retry-soon .messenger-spinner .messenger-spinner-side .messenger-spinner-fill {
+    background: #dd6a45 !important;
+}
