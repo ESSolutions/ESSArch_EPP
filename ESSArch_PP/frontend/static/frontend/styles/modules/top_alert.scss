@@ -142,6 +142,9 @@ ul.messenger-theme-flat .messenger-message.alert-warning .messenger-message-inne
 ul.messenger-theme-flat .messenger-message.alert-error .messenger-message-inner:before {
     background: $step-fail !important;
 }
+ul.messenger-theme-flat .messenger-message.alert-critical .messenger-message-inner:before {
+    background: $step-fail !important;
+}
 
 ul.messenger-theme-flat .messenger-message.alert-error.messenger-retry-soon .messenger-spinner .messenger-spinner-side .messenger-spinner-fill {
     background: #dd6a45 !important;
