@@ -72,7 +72,6 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
 
         },
         getNotifications: function(pageSize) {
-            console.log(pageSize);
             return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: pageSize}}).then(function(response) {
                 return response.data;
             })

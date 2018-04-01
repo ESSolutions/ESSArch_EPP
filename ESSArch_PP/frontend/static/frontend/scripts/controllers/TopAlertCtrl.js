@@ -60,6 +60,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.showAlert = function() {
         vm.visible = true;
         vm.getNotifications();
+        vm.setAllSeen();
     }
 
     vm.setSeen = function(alerts) {
@@ -79,6 +80,15 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 alert.seen = true;
             }
         });
+    }
+
+    vm.setAllSeen = function() {
+        $http({
+            method: 'POST',
+            url: appConfig.djangoUrl + 'notifications/set-all-seen/',
+        }).then(function(response) {
+            vm.updateUnseen(0);
+        }).catch(function(response) {});
     }
 
     vm.hideAlert = function() {
