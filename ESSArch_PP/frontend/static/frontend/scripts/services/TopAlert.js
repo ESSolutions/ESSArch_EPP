@@ -71,8 +71,9 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
             $rootScope.$broadcast('toggle_top_alert', {});
 
         },
-        getNotifications: function() {
-            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: 10}}).then(function(response) {
+        getNotifications: function(pageSize) {
+            console.log(pageSize);
+            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: pageSize}}).then(function(response) {
                 return response.data;
             })
         },

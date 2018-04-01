@@ -11,7 +11,6 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             extraClasses: 'messenger-fixed messenger-on-bottom messenger-on-right',
             theme: 'flat'
         }
-        vm.getNotifications(false);
         vm.updateUnseen();
         if(!$rootScope.useWebsocket) {
             interval = $interval(function() {
@@ -38,12 +37,12 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         if(angular.isUndefined(show)) {
             show = true;
         }
-        return TopAlert.getNotifications().then(function(data) {
+        vm.nextPageLoading = true;
+        var pageSize = Math.ceil(($(window).height() * 0.6) / 38)+2;
+        return TopAlert.getNotifications(pageSize).then(function(data) {
+            vm.nextPageLoading = false;
             vm.backendAlerts = data;
             vm.alerts = vm.backendAlerts;
-            if(vm.alerts.length > 0 && !vm.alerts[0].seen && show) {
-                vm.showAlert();
-            }
             return vm.alerts;
         });
     }
@@ -59,9 +58,8 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     }
 
     vm.showAlert = function() {
-        if(vm.alerts.length >0) {
-            vm.visible = true;
-        }
+        vm.visible = true;
+        vm.getNotifications();
     }
 
     vm.setSeen = function(alerts) {

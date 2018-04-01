@@ -4,7 +4,7 @@
     top: 4rem;
     right: 0;
     width: 430px;
-    max-height: 70vh;
+    max-height: 60vh;
     min-width: 100px;
     @include small-screen {
         display: none;
@@ -14,7 +14,7 @@
     padding: .5rem;
 }
 .notification-table-wrapper {
-    max-height: 70vh;
+    max-height: 60vh;
     overflow-y: scroll;
 }
 
