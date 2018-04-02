@@ -77,7 +77,7 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
             })
         },
         getNextPage: function(pageSize, id) {
-            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: pageSize, after: id}}).then(function(response) {
+            return $http.get(appConfig.djangoUrl + "notifications/", {params: {page_size: pageSize, after: id, after_field: 'id'}}).then(function(response) {
                 return {
                     data: response.data,
                     count: response.headers('Count')
