@@ -107,7 +107,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.search.information_package', {
         url: '/information_package/:id',
@@ -117,7 +123,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.search.component', {
         url: '/component/:id',
@@ -127,7 +139,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.search.directory', {
         url: '/directory/:id',
@@ -137,7 +155,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.search.document', {
         url: '/document/:id',
@@ -147,7 +171,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.search.archive', {
         url: '/archive/:id',
@@ -157,7 +187,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             authenticated: ['djangoAuth', function(djangoAuth){
                 return djangoAuth.authenticationStatus();
             }],
-        }
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.versionInfo', {
         url: 'version',
