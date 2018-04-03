@@ -1,7 +1,15 @@
-.position-relative {
-    position: relative;
-}
-
-.position-absolute {
-    position: absolute;
+.position- {
+    &relative {
+        position: relative;
+    }
+    &absolute {
+        position: absolute;
+    }
+    &lg- {
+        &relative {
+            @include large-screen {
+                position: relative !important;
+            }
+        }
+    }
 }

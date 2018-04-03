@@ -164,7 +164,26 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             showCloseButton: true
         });
     }
-
+    vm.toggleAlert = function () {
+        if (vm.visible) {
+            vm.hideAlert();
+        } else {
+            vm.showAlert();
+            $window.onclick = function (event) {
+                var clickedElement = $(event.target);
+                if (!clickedElement) return;
+                var elementClasses = event.target.classList;
+                var clickedOnAlertIcon = elementClasses.contains('fa-bell') ||
+                elementClasses.contains('top-alert-container') ||
+                elementClasses.contains('top-alert-container') ||
+                clickedElement.parents('.top-alert-container').length
+                if (!clickedOnAlertIcon) {
+                    vm.hideAlert();
+                    $scope.$apply();
+                }
+            }
+        }
+    }
     // Listen for show/hide events
     $scope.$on('add_top_alert', function (event, data) {
         vm.addAlert(data.id, data.message, data.level, data.time, true, data.options);
@@ -186,25 +205,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
     });
     $scope.$on('toggle_top_alert', function (event, data) {
-        if(vm.visible) {
-            vm.hideAlert();
-        } else {
-            vm.showAlert();
-            vm.setSeen(vm.alerts.slice(0, 5));
-            $window.onclick = function(event) {
-                var clickedElement = $(event.target);
-                if (!clickedElement) return;
-                var elementClasses = event.target.classList;
-                var clickedOnAlertIcon = elementClasses.contains('fa-bell') ||
-                elementClasses.contains('top-alert-container') ||
-                elementClasses.contains('top-alert-container') ||
-                clickedElement.parents('.top-alert-container').length
-                if (!clickedOnAlertIcon) {
-                    vm.hideAlert();
-                    $scope.$apply();
-                }
-            }
-        }
+        vm.toggleAlert();
     });
     $scope.$on('hide_top_alert', function (event, data) {
         vm.hideAlert();

@@ -2,6 +2,9 @@
     <div class="angular-animate alert-list">
         <div class="text-center notification-title">
             {{'NOTIFICATIONS' | translate}}
+            <a class="float-right show-sm" ng-click="vm.toggleAlert()">
+                {{'CLOSE' | translate}}
+            </a>
         </div>
         <div on-scroll="vm.nextPage()" class="notification-table-wrapper">
             <table class="table">

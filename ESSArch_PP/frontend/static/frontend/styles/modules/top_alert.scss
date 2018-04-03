@@ -3,11 +3,14 @@
     z-index: 1150;
     top: 4rem;
     right: 0;
-    width: 430px;
+    width: 320px;
     max-height: 60vh;
     min-width: 100px;
     @include small-screen {
-        display: none;
+        width: 100%;
+        top: 0;
+        right: 0;
+        left: 0;
     }
 }
 .notification-title {
@@ -16,6 +19,10 @@
 .notification-table-wrapper {
     max-height: 60vh;
     overflow-y: scroll;
+}
+
+.mobile-notification {
+    margin-right: 5px;
 }
 
 .alert-indicator {
@@ -60,10 +67,17 @@
         font-size: 14px;
         overflow-x: hidden;
         text-overflow: ellipsis;
-
+        width: 90%;
         .alert-message {
             padding-bottom: .3rem;
         }
+    }
+}
+
+.show-sm {
+    display: none;
+    @include small-screen {
+        display: inline;
     }
 }
 

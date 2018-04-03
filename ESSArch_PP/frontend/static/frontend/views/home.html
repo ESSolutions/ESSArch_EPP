@@ -20,6 +20,13 @@
             <h3 class="page-title-small" ng-click="infoPage()">EPP</h3>
         </div>
         <div class="user-admin">
+        <div ng-controller="UtilCtrl" class="mobile-notification">
+            <div class="notification-icon show-sm">
+                <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></i>
+                <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
+                <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
+            </div>
+        </div>
             <div class="edit-user" ng-controller="DropdownCtrl">
                 <div class="btn-group" uib-dropdown is-open="status.isopen">
                     <div class="user-dropdown" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
@@ -48,7 +55,7 @@
             <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
             <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></span>
-            <div class="notification-icon position-relative">
+            <div class="notification-icon">
                 <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></i>
                 <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
                 <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
