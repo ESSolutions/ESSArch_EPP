@@ -44,7 +44,6 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
         }
         return currentCallbackId;
     }
-
     var service = {
         /**
          * Add top alert and show it

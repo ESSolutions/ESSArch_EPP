@@ -1,4 +1,4 @@
-angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window) {
+angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window, Messenger) {
     var vm = this;
     vm.visible = false;
     vm.alerts = [];
