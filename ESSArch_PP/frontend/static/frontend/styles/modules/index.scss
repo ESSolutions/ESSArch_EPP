@@ -153,6 +153,12 @@ body.modal-open[style] {
     height: 100%;
     float: right;
     margin-right: 15px;
+    @include small-screen {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        height: 0;
+    }
 }
 .user-dropdown {
     display: flex;
