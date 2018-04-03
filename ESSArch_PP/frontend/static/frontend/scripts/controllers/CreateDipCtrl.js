@@ -416,9 +416,11 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     $scope.previousGridArray = function(whichArray) {
         if (whichArray == 1) {
             $scope.previousGridArrays1.pop();
+            $scope.workarea_tableState.pagination.start = 0;
             $scope.workareaPipe($scope.workarea_tableState);
         } else {
             $scope.previousGridArrays2.pop();
+            $scope.dip_tableState.pagination.start = 0;
             $scope.dipPipe($scope.dip_tableState);
         }
     };
