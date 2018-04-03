@@ -21,8 +21,8 @@
         </div>
         <div class="user-admin">
         <div ng-controller="UtilCtrl" class="mobile-notification">
-            <div class="notification-icon show-sm">
-                <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></i>
+            <div class="notification-icon position-relative show-sm">
+                <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
                 <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
                 <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
             </div>
