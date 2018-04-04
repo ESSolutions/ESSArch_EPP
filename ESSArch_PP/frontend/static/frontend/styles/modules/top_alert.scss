@@ -29,7 +29,7 @@
 }
 
 .alert-indicator-container {
-    background-color: #f9f9f9;
+    background-color: #f7f7f7;
     width: 38px;
     padding-left: 14px !important;
     padding-right: 14px !important;
@@ -90,7 +90,7 @@
 
 .alert-list-item {
     &:hover {
-        background-color: darken(white, 3%);
+        background-color: #f7f7f7;
     }
     background-color: white;
     overflow: hidden;
