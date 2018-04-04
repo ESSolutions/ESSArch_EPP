@@ -177,6 +177,9 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
                 type: level,
                 hideAfter: time?time/1000:null,
                 showCloseButton: true,
+                onClickClose: function() {
+                    vm.setSeen([{id}]);
+                },
                 actions: actions?actions:null
             };
             Messenger().post(post);
