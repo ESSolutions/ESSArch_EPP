@@ -231,20 +231,20 @@ body.modal-open[style] {
         position: relative;
     }
     cursor: pointer;
-}
-.unseen-text {
-    width: auto;
-    position: absolute;
-    color: white;
-    height: 12px;
-    top: -5px;
-    right: -3px;
-    border-radius: 2px;
-    padding-right: 10%;
-    padding-left: 10%;
-    background-color: $step-fail;
-    font-size: 10px;
-    margin-left: 10px;
+    .unseen-text {
+        width: auto;
+        position: absolute;
+        color: white;
+        height: 12px;
+        top: -5px;
+        right: -3px;
+        border-radius: 2px;
+        padding-right: 10%;
+        padding-left: 10%;
+        background-color: $step-fail;
+        font-size: 10px;
+        margin-left: 10px;
+    }
 }
 
 .shortcut-nav-calendar-wrapper {
