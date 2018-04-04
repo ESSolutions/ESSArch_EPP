@@ -74,6 +74,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
 
     vm.showAlert = function() {
         vm.visible = true;
+        Messenger().hideAll();
         vm.getNotifications();
         vm.setAllSeen();
     }
