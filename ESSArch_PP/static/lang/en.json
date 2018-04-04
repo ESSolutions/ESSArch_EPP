@@ -538,5 +538,7 @@
     "CREATING": "Creating",
     "NEW_VERSION_CREATED": "New version created",
     "SEE_ALL": "See all",
-    "MESSAGE": "Message"
+    "MESSAGE": "Message",
+    "NOTIFICATIONS_ENABLED": "Notifications enabled",
+    "NOTIFICATIONS_DISABLED": "Notifications disabled"
 }

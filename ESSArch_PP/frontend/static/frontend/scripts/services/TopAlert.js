@@ -24,6 +24,7 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
             id: messageObj.id,
             message: messageObj.message,
             level: messageObj.level,
+            time: 10000,
             count: messageObj.unseen_count
         });
         if(messageObj.refresh) {
@@ -51,8 +52,8 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
          * @param level - level of alert, applies a class to the alert
          * @param time - Adds a duration to the alert
          */
-        add: function(message, level, time, options) {
-            $rootScope.$broadcast('add_top_alert', { message: message, level: level, time: time, options: options});
+        add: function(message, level, time, actions) {
+            $rootScope.$broadcast('add_top_alert', { message: message, level: level, time: time, actions: actions});
         },
         /**
          * Show alert

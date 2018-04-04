@@ -1,4 +1,4 @@
-angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window, Messenger) {
+angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window, Messenger, $state) {
     var vm = this;
     vm.visible = false;
     vm.alerts = [];
@@ -7,6 +7,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     var interval;
     var updateInterval;
     vm.$onInit = function () {
+        vm.notificationsEnabled = $rootScope.auth.notifications_enabled;
         Messenger.options = {
             extraClasses: 'messenger-fixed messenger-on-bottom messenger-on-right',
             theme: 'flat'
@@ -45,6 +46,20 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             vm.alerts = vm.backendAlerts;
             return vm.alerts;
         });
+    }
+
+    vm.updateEnabledStatus = function(val) {
+        return $http({
+            method: 'PATCH',
+            url: appConfig.djangoUrl+"me/",
+            data: {
+                notifications_enabled: val
+            }
+        }).then(function(response) {
+            $rootScope.auth = response.data;
+            vm.notificationsEnabled = response.data.notifications_enabled;
+            return response;
+        })
     }
 
     vm.updateUnseen = function(count) {
@@ -147,22 +162,25 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
      * @param time - Adds a duration to the alert
      */
 
-    vm.addAlert = function (id, message, level, time, seen, options) {
+    vm.addAlert = function (id, message, level, time, actions) {
         var timer = null;
-        var alert = {message: message, level: level, time_created: new Date(), seen: false, options: options};
+        var alert = {message: message, level: level, time_created: new Date()};
         if(id) {
             alert.id = id;
-            alert.seen = seen
             vm.backendAlerts.unshift(alert);
         } else {
             vm.frontendAlerts.unshift(alert);
         }
-        Messenger().post({
-            message: message,
-            type: level,
-            hideAfter: time?time/1000:10,
-            showCloseButton: true
-        });
+        if(vm.notificationsEnabled) {
+            var post = {
+                message: message,
+                type: level,
+                hideAfter: time?time/1000:null,
+                showCloseButton: true,
+                actions: actions?actions:null
+            };
+            Messenger().post(post);
+        }
     }
     vm.toggleAlert = function () {
         if (vm.visible) {
@@ -184,9 +202,44 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             }
         }
     }
+
+    $rootScope.disconnectedAlert = null;
+    $rootScope.$on('disconnected', function (event, data) {
+        if(!$rootScope.disconnected) {
+            $rootScope.disconnected = true;
+            $rootScope.disconnectedAlert = Messenger().post({
+                message: data.detail,
+                type: "error",
+                hideAfter: null,
+                actions: {
+                    retry: {
+                        label: 'Retry',
+                        action: function() {
+                            $http.head(appConfig.djangoUrl+"me/").then(function(response) {
+                                $rootScope.disconnected = null;
+                                $rootScope.$broadcast('reconnected');
+                            }).catch(function() {
+                            })
+                        }
+                    }
+                }
+            })
+        }
+    });
+    $rootScope.$on('reconnected', function (event, data) {
+        $rootScope.disconnected = false;
+        $rootScope.disconnectedAlert.update({
+            message: data.detail,
+            type: "success",
+            showCloseButton: true,
+            hideAfter: 10,
+            actions: null
+        })
+    })
+
     // Listen for show/hide events
-    $scope.$on('add_top_alert', function (event, data) {
-        vm.addAlert(data.id, data.message, data.level, data.time, true, data.options);
+    $scope.$on('add_top_alert', function (event, data, actions) {
+        vm.addAlert(data.id, data.message, data.level, data.time, actions);
     });
     $scope.$on('add_unseen_top_alert', function (event, data) {
         vm.updateUnseen(data.count);

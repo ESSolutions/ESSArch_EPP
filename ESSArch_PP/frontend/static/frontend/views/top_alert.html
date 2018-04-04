@@ -1,6 +1,9 @@
 <div class="top-alert-container" ng-if="vm.visible">
     <div class="angular-animate alert-list">
         <div class="text-center notification-title">
+            <span class="float-left text-center" tooltip-placement="right" uib-tooltip="{{vm.notificationsEnabled?'NOTIFICATIONS_ENABLED':'NOTIFICATIONS_DISABLED' | translate}}">
+                <input type="checkbox" ng-change="vm.updateEnabledStatus(vm.notificationsEnabled)" ng-model="vm.notificationsEnabled"/>
+            </span>
             {{'NOTIFICATIONS' | translate}}
             <a class="float-right show-sm" ng-click="vm.toggleAlert()">
                 {{'CLOSE' | translate}}
@@ -10,8 +13,8 @@
             <table class="table">
                 <tbody>
                     <tr ng-repeat="x in vm.alerts" class="top-alert-expand alert-list-item angular-animate">
-                        <td>
-                            <div class="alert-indicator-container">
+                        <td class="alert-indicator-container">
+                            <div>
                                 <span class="alert-indicator" ng-class="x.level"></span>
                             </div>
                         </td>
@@ -23,7 +26,7 @@
                             <div class="alert-date" tooltip-placement="left" uib-tooltip="{{x.time_created | date:'yyyy-MM-dd HH:mm:ss'}}">{{x.time_created | relativeDate}}</div>
                         </td>
                         <td>
-                            <span ng-click="vm.removeAlert(x, $index)" class="cursor-pointer">&#10005;</span>
+                            <span ng-click="vm.removeAlert(x, $index)" class="cursor-pointer float-right">&#10005;</span>
                         </td>
                     </tr>
                     <tr ng-if="vm.nextPageLoading" class="text-center">
