@@ -110,6 +110,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.hideAlert = function() {
         vm.visible = false;
         $window.onclick = null;
+        vm.setAllSeen();
     }
 
     vm.removeAlert = function (alert, index) {
