@@ -538,6 +538,5 @@
     "NEW_VERSION_CREATED": "Ny version skapad",
     "SEE_ALL": "Se alla",
     "MESSAGE": "Meddelande",
-    "NOTIFICATIONS_ENABLED": "Notifikationer aktiverade",
-    "NOTIFICATIONS_DISABLED": "Notifikationer inaktiverade"
+    "POPUP_ENABLED": "Popup aktiverad"
 }

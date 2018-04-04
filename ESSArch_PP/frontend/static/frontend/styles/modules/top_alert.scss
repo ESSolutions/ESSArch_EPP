@@ -81,6 +81,29 @@
     }
 }
 
+.popup-enabled {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 29px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    input {
+        margin: 0 5px 0 0;
+    }
+}
+.close-notifications {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 29px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
 .show-sm {
     display: none;
     @include small-screen {

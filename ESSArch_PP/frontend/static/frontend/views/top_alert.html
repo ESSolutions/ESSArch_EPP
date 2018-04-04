@@ -1,14 +1,17 @@
 <div class="top-alert-container" ng-if="vm.visible">
     <div class="angular-animate alert-list">
+        <span class="popup-enabled">
+            <input type="checkbox" ng-change="vm.updateEnabledStatus(vm.notificationsEnabled)" ng-model="vm.notificationsEnabled"/>
+            {{'POPUP_ENABLED' | translate}}
+        </span>
         <div class="text-center notification-title">
-            <span class="float-left text-center" tooltip-placement="right" uib-tooltip="{{vm.notificationsEnabled?'NOTIFICATIONS_ENABLED':'NOTIFICATIONS_DISABLED' | translate}}">
-                <input type="checkbox" ng-change="vm.updateEnabledStatus(vm.notificationsEnabled)" ng-model="vm.notificationsEnabled"/>
-            </span>
             {{'NOTIFICATIONS' | translate}}
-            <a class="float-right show-sm" ng-click="vm.toggleAlert()">
+        </div>
+        <span class="show-sm close-notifications">
+            <a ng-click="vm.toggleAlert()">
                 {{'CLOSE' | translate}}
             </a>
-        </div>
+        </span>
         <div on-scroll="vm.nextPage()" class="notification-table-wrapper">
             <table class="table">
                 <tbody>
