@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, $http, appConfig) {
+angular.module('myApp').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
     function receive(ip, request, validators) {
         return IPReception.receive({
                 id: ip.id,
@@ -32,11 +32,11 @@ angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, 
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
         }).$promise.then(function(response) {
-            TopAlert.add(response.detail, "success", 3000);
+            Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
             if(response.status != 500 && response.data.detail) {
-                TopAlert.add(response.data.detail, "error");
+                Notifications.add(response.data.detail, "error");
             }
         })
     };
@@ -44,26 +44,26 @@ angular.module('myApp').factory('Requests', function(TopAlert, IPReception, IP, 
         return IP.preserve(
             angular.extend(request, { id: ip.id })
         ).$promise.then(function (response) {
-            TopAlert.add(response.detail, "success", 3000);
+            Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
     function access(ip, data) {
         return IP.access(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            TopAlert.add(response.detail, "success", 3000);
+            Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
     function moveToApproval(ip, data) {
         return IP.moveToApproval(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            TopAlert.add(response.detail, "success", 3000);
+            Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
     return {

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', 'TopAlert', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http, TopAlert) {
+angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', 'Notifications', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http, Notifications) {
     var vm = this;
     vm.itemsPerPage = $cookies.get('epp-events-per-page') || 10;
     $scope.updateEventsPerPage = function(items) {
@@ -111,9 +111,9 @@ angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootSco
                 eventOutcome: "",
                 comment: ""
             };
-            TopAlert.add($translate.instant('EVENT_ADDED'), "success");
+            Notifications.add($translate.instant('EVENT_ADDED'), "success");
         }).catch(function error() {
-            TopAlert.add($translate.instant('ERROR_MESSAGE'), "error");
+            Notifications.add($translate.instant('ERROR_MESSAGE'), "error");
         });
     }
     var eventInterval;

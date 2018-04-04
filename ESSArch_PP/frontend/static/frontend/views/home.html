@@ -48,7 +48,7 @@
                     <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
                     <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
                     <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
-                    <top-alert></top-alert>
+                    <notifications></notifications>
                 </div>
                 <div class="organization-select" ng-controller="OrganizationCtrl">
                     <select tabindex="-1" style="width: auto; margin-left: 10px;" class="form-control" ng-model="currentOrganization" ng-change="changeOrganization(); updateListView()" ng-options="x as x.name for x in availableOrganizations track by x.id"></select>

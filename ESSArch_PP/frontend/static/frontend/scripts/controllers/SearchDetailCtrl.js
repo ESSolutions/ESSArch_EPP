@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchDetailCtrl', function($scope, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchDetailCtrl', function($scope, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -252,7 +252,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         Search.updateNode(node,{parent: parent.original._id}, true).then(function(response) {
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }).catch(function(response) {
-            TopAlert.add("Could not be moved", "error");
+            Notifications.add("Could not be moved", "error");
         })
     }
 
@@ -437,7 +437,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         modalInstance.result.then(function (data) {
             delete vm.record[key]
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.name, "success");
+            Notifications.add( "Fältet: " + data.key + ", har ändrats i: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -464,7 +464,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data) {
             vm.record[data.key] = data.value;
-            TopAlert.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.name, "success");
+            Notifications.add( "Fältet: " + data.key + ", har lagts till i: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -487,7 +487,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         });
         modalInstance.result.then(function (data, $ctrl) {
             delete vm.record[field];
-            TopAlert.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
+            Notifications.add( "Fältet: " + field + ", har tagits bort från: " + vm.record.name, "success");
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

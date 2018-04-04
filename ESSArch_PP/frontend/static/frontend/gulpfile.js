@@ -113,7 +113,7 @@ var jsVendorFiles = [
         'styles/modules/tree_control.scss',
         'styles/modules/profile_maker.scss',
         'styles/modules/profile_editor.scss',
-        'styles/modules/top_alert.scss',
+        'styles/modules/notifications.scss',
         'styles/modules/search.scss',
         'styles/modules/positions.scss',
         'styles/modules/utils.scss',

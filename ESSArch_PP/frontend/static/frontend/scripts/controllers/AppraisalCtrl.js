@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval, Appraisal) {
+angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Appraisal) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -167,9 +167,9 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             url: appConfig.djangoUrl+"appraisal-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            TopAlert.add("Running appraisal job", "success");
+            Notifications.add("Running appraisal job", "success");
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
 
@@ -353,9 +353,9 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
                 method: "DELETE"
             }).then(function(response) {
                 vm.rulePipe(vm.ruleTableState);
-                TopAlert.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
+                Notifications.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
             }).catch(function(response) {
-                TopAlert.add("Appraisal rule could not be removed", "errorepp");
+                Notifications.add("Appraisal rule could not be removed", "errorepp");
             })
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

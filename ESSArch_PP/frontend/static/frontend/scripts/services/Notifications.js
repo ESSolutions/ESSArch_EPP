@@ -1,4 +1,4 @@
-angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig, $http, $window, $websocket) {
+angular.module('myApp').factory('Notifications', function ($rootScope, $q, appConfig, $http, $window, $websocket) {
     // Keep all pending requests here until they get responses
     var callbacks = {};
     // Create a unique callback ID to map requests to responses
@@ -20,7 +20,7 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
 
     function listener(data) {
         var messageObj = JSON.parse(data);
-        $rootScope.$broadcast('add_unseen_top_alert', {
+        $rootScope.$broadcast('add_unseen_notification', {
             id: messageObj.id,
             message: messageObj.message,
             level: messageObj.level,
@@ -47,28 +47,28 @@ angular.module('myApp').factory('TopAlert', function ($rootScope, $q, appConfig,
     }
     var service = {
         /**
-         * Add top alert and show it
+         * Add notification
          * @param message - Message to show on the the alert
          * @param level - level of alert, applies a class to the alert
          * @param time - Adds a duration to the alert
          */
         add: function(message, level, time, actions) {
-            $rootScope.$broadcast('add_top_alert', { message: message, level: level, time: time, actions: actions});
+            $rootScope.$broadcast('add_notification', { message: message, level: level, time: time, actions: actions});
         },
         /**
          * Show alert
          */
         show: function() {
-            $rootScope.$broadcast('show_top_alert', {});
+            $rootScope.$broadcast('show_notifications', {});
         },
         /**
-         * Hide top alert
+         * Hide notifications
          */
         hide: function() {
-            $rootScope.$broadcast('hide_top_alert', {});
+            $rootScope.$broadcast('hide_notifications', {});
         },
         toggle: function() {
-            $rootScope.$broadcast('toggle_top_alert', {});
+            $rootScope.$broadcast('toggle_notifications', {});
 
         },
         getNotifications: function(pageSize) {

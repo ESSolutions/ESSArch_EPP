@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, TopAlert, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;

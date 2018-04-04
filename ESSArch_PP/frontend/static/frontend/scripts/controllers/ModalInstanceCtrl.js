@@ -143,7 +143,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, Profile, SA, TopAlert) {
+.controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, Profile, SA, Notifications) {
     var $ctrl = this;
     if(data.file) {
         $ctrl.file = data.file;
@@ -156,26 +156,26 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.overwriteProfile = function() {
         return Profile.update($ctrl.profile).$promise.then(function(resource) {
-            TopAlert.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+            Notifications.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             $ctrl.data = {
                 status: "overwritten"
             }
             $uibModalInstance.close($ctrl.data);
             return resource;
         }).catch(function(repsonse) {
-            TopAlert.add(response.detail, "error");
+            Notifications.add(response.detail, "error");
         })
     }
     $ctrl.overwriteSa = function() {
         return SA.update($ctrl.profile).$promise.then(function(resource) {
-            TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+            Notifications.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             $ctrl.data = {
                 status: "overwritten"
             }
             $uibModalInstance.close($ctrl.data);
             return resource;
         }).catch(function(response) {
-            TopAlert.add("Submission Agreement " + $ctrl.profile.name + " is Published and can not be overwritten", "error");
+            Notifications.add("Submission Agreement " + $ctrl.profile.name + " is Published and can not be overwritten", "error");
         })
     }
     $ctrl.overwrite = function () {
@@ -188,7 +188,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('ReceiveModalInstanceCtrl', function (TopAlert, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
+.controller('ReceiveModalInstanceCtrl', function (Notifications, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
     var vm = data.vm;
     $scope.saAlert = null;
     $scope.alerts = {
@@ -335,7 +335,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
-}).controller('AppraisalModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('AppraisalModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     // Set later to use local time for next job
     later.date.localTime();
@@ -350,7 +350,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         return $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.appraisalRules = response.data;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
     if(data.preview && data.job) {
@@ -366,7 +366,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             IP.appraisalRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
             }).catch(function(response) {
-                TopAlert.add(response.data.detail, "error");
+                Notifications.add(response.data.detail, "error");
             })
         }
     }
@@ -429,7 +429,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             ip.rules.push(rule);
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         });
     }
     $ctrl.removeRule = function(ip, rule) {
@@ -447,7 +447,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             })
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -481,10 +481,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             method: "POST",
             data: $ctrl.data
         }).then(function(response) {
-            TopAlert.add("Rule created!", "success")
+            Notifications.add("Rule created!", "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error")
+            Notifications.add(response.data.detail, "error")
         })
     }
     $ctrl.ok = function() {
@@ -494,10 +494,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
     $ctrl.submitAppraisal = function(appraisal) {
-        TopAlert.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
+        Notifications.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
         $uibModalInstance.close(appraisal);
     }
-}).controller('ConversionModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('ConversionModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     // Set later to use local time for next job
     later.date.localTime();
@@ -512,7 +512,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         return $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.conversionRules = response.data;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
 
@@ -524,7 +524,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
             }).catch(function(response) {
-                TopAlert.add(response.data.detail, "error");
+                Notifications.add(response.data.detail, "error");
             })
         }
     }
@@ -581,7 +581,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
             ip.rules = resource;
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
     if(data.preview && data.job) {
@@ -600,7 +600,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             ip.rules.push(rule);
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         });
     }
 
@@ -633,7 +633,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             })
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -666,10 +666,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             method: "POST",
             data: $ctrl.data
         }).then(function(response) {
-            TopAlert.add("Rule created!", "success")
+            Notifications.add("Rule created!", "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error")
+            Notifications.add(response.data.detail, "error")
         })
     }
     $ctrl.ok = function() {
@@ -679,10 +679,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
     $ctrl.submitConversion = function(conversion) {
-        TopAlert.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
+        Notifications.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
         $uibModalInstance.close(conversion);
     }
-}).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
     $ctrl.editData = {};
@@ -728,17 +728,17 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.submit = function() {
         if($ctrl.changed()) {
             Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function(response) {
-                TopAlert.add($translate.instant('NODE_EDITED'), 'success');
+                Notifications.add($translate.instant('NODE_EDITED'), 'success');
                 $uibModalInstance.close("edited");
             }).catch(function(response) {
-                TopAlert.add(response.data, 'error');
+                Notifications.add(response.data, 'error');
             })
         }
     }
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
-}).controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+}).controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
     $ctrl.newNode = {
@@ -805,10 +805,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.submit = function() {
         if($ctrl.changed()) {
             Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index})).then(function(response) {
-                TopAlert.add($translate.instant('NODE_ADDED'), 'success');
+                Notifications.add($translate.instant('NODE_ADDED'), 'success');
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {
-                TopAlert.add(response.data.detail, 'error');
+                Notifications.add(response.data.detail, 'error');
             })
         }
     }
@@ -816,7 +816,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     }
 })
-.controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+.controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
 
@@ -824,17 +824,17 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.createNewVersion = function(node) {
         Search.createNewVersion(node).then(function(response) {
-            TopAlert.add($translate.instant('NEW_VERSION_CREATED'), 'success');
+            Notifications.add($translate.instant('NEW_VERSION_CREATED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, 'error');
+            Notifications.add(response.data.detail, 'error');
         })
     }
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
 })
-.controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+.controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
 
@@ -842,17 +842,17 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.remove = function() {
         Search.removeNode($ctrl.node).then(function(response) {
-            TopAlert.add($translate.instant('NODE_REMOVED'), 'success');
+            Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, 'error');
+            Notifications.add(response.data.detail, 'error');
         })
     }
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
 })
-.controller('StructureModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, TopAlert, $timeout) {
+.controller('StructureModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node;
     $ctrl.creating = false;
@@ -861,12 +861,12 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.createNewStructure = function(node) {
         $ctrl.creating = true;
         Search.createNewStructure(node, { name: $ctrl.structureName }).then(function (response) {
-            TopAlert.add($translate.instant('NEW_STRUCTURE_CREATED'), 'success');
+            Notifications.add($translate.instant('NEW_STRUCTURE_CREATED'), 'success');
             $uibModalInstance.close("added");
             $ctrl.creating = false;
         }).catch(function (response) {
             $ctrl.creating = false;
-            TopAlert.add('Error creating new structure', 'error');
+            Notifications.add('Error creating new structure', 'error');
         })
     }
     $ctrl.cancel = function() {

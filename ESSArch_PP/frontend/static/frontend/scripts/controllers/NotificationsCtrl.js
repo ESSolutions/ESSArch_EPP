@@ -1,4 +1,4 @@
-angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert, $timeout, $interval, $scope, $rootScope, $http, $window, Messenger, $state) {
+angular.module('myApp').controller('NotificationsCtrl', function(appConfig, Notifications, $timeout, $interval, $scope, $rootScope, $http, $window, Messenger, $state) {
     var vm = this;
     vm.visible = false;
     vm.alerts = [];
@@ -40,7 +40,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         }
         vm.nextPageLoading = true;
         var pageSize = Math.ceil(($(window).height() * 0.6) / 38)+2;
-        return TopAlert.getNotifications(pageSize).then(function(data) {
+        return Notifications.getNotifications(pageSize).then(function(data) {
             vm.nextPageLoading = false;
             vm.backendAlerts = data;
             vm.alerts = vm.backendAlerts;
@@ -114,14 +114,14 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     }
 
     vm.removeAlert = function (alert, index) {
-        TopAlert.delete(alert.id).then(function (response) {
+        Notifications.delete(alert.id).then(function (response) {
             vm.backendAlerts.splice(index, 1);
-            vm.alerts.splice(index, 1);
+            vm.alerts = vm.backendAlerts;
         });
     }
 
     function getNext() {
-        return TopAlert.getNextNotification().then(function(data) {
+        return Notifications.getNextNotification().then(function(data) {
             vm.backendAlerts.push(data[0]);
             vm.alerts = vm.backendAlerts;
             if(!vm.alerts.length == 0) {
@@ -136,7 +136,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
         })
     }
     vm.clearAll = function() {
-        TopAlert.deleteAll().then(function(response) {
+        Notifications.deleteAll().then(function(response) {
             vm.visible = false;
             vm.alerts = [];
             vm.backendAlerts = [];
@@ -147,7 +147,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     vm.nextPage = function () {
         if(!vm.nextPageLoading) {
             vm.nextPageLoading = true;
-            TopAlert.getNextPage(10, vm.alerts[vm.alerts.length-1].id).then(function(response) {
+            Notifications.getNextPage(10, vm.alerts[vm.alerts.length-1].id).then(function(response) {
                 vm.nextPageLoading = false;
                 response.data.forEach(function(x) {
                     vm.backendAlerts.push(x);
@@ -158,7 +158,7 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     }
 
     /**
-     * Show top alert
+     * Add notifications
      * @param message - Message to show on the the alert
      * @param level - level of alert, applies a class to the alert
      * @param time - Adds a duration to the alert
@@ -243,17 +243,17 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
     })
 
     // Listen for show/hide events
-    $scope.$on('add_top_alert', function (event, data, actions) {
+    $scope.$on('add_notification', function (event, data, actions) {
         vm.addAlert(data.id, data.message, data.level, data.time, actions);
     });
-    $scope.$on('add_unseen_top_alert', function (event, data) {
+    $scope.$on('add_unseen_notification', function (event, data) {
         vm.updateUnseen(data.count);
         vm.addAlert(data.id, data.message, data.level, data.time, false);
         if(vm.showAlerts) {
             vm.setSeen(vm.alerts.slice(0,5));
         }
     });
-    $scope.$on('show_top_alert', function (event, data) {
+    $scope.$on('show_notification', function (event, data) {
         if(vm.alerts.length > 0) {
             vm.showAlert();
             $timeout(function() {
@@ -262,13 +262,13 @@ angular.module('myApp').controller('TopAlertCtrl', function(appConfig, TopAlert,
             }, 300);
         }
     });
-    $scope.$on('toggle_top_alert', function (event, data) {
+    $scope.$on('toggle_notifications', function (event, data) {
         vm.toggleAlert();
     });
-    $scope.$on('hide_top_alert', function (event, data) {
+    $scope.$on('hide_notifications', function (event, data) {
         vm.hideAlert();
     });
-    $scope.$on('get_top_alerts', function (event, data) {
+    $scope.$on('get_notifications', function (event, data) {
         vm.getNotifications();
     });
 });
