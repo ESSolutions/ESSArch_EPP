@@ -7,7 +7,7 @@
     }
     &lg- {
         &relative {
-            @include large-screen {
+            @include large-screen-up {
                 position: relative !important;
             }
         }

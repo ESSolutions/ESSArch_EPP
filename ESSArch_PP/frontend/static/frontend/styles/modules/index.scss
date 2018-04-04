@@ -224,7 +224,7 @@ body.modal-open[style] {
 }
 
 .notification-icon {
-    @include large-screen {
+    @include large-screen-up {
         position: relative;
     }
     @include medium-screen {
