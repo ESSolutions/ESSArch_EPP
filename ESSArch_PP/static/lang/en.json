@@ -536,5 +536,8 @@
     "CREATE_NEW_STRUCTURE": "Create new classification structure",
     "NEW_STRUCTURE_CREATED": "New classification structure created",
     "CREATING": "Creating",
-    "NEW_VERSION_CREATED": "New version created"
+    "NEW_VERSION_CREATED": "New version created",
+    "SEE_ALL": "See all",
+    "MESSAGE": "Message",
+    "POPUP_ENABLED": "Popup enabled"
 }

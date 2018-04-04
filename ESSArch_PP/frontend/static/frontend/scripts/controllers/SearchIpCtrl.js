@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchIpCtrl', function(appConfig, $scope, $rootScope, $http, IP, $stateParams, TopAlert, $state) {
+angular.module('myApp').controller('SearchIpCtrl', function(appConfig, $scope, $rootScope, $http, IP, $stateParams, Notifications, $state) {
     var vm = this;
     vm.$onInit = function() {
         vm.getIpObject($stateParams.id).then(function(ip) {
@@ -7,11 +7,11 @@ angular.module('myApp').controller('SearchIpCtrl', function(appConfig, $scope, $
                 $rootScope.ip = ip;
                 $rootScope.$broadcast('UPDATE_TITLE', {title: vm.ip.label});
             } else {
-                TopAlert.add("IP not found in archival storage", "error");
+                Notifications.add("IP not found in archival storage", "error");
                 $state.go('home.search')
             }
         }).catch(function() {
-            TopAlert.add("IP not found in archival storage", "error");
+            Notifications.add("IP not found in archival storage", "error");
             $state.go('home.search');
         });
     }

@@ -153,6 +153,12 @@ body.modal-open[style] {
     height: 100%;
     float: right;
     margin-right: 15px;
+    @include small-screen {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        height: 0;
+    }
 }
 .user-dropdown {
     display: flex;
@@ -218,22 +224,27 @@ body.modal-open[style] {
 }
 
 .notification-icon {
-    position: relative;
+    @include large-screen-up {
+        position: relative;
+    }
+    @include medium-screen {
+        position: relative;
+    }
     cursor: pointer;
-}
-.unseen-text {
-    width: auto;
-    position: absolute;
-    color: white;
-    height: 12px;
-    top: -5px;
-    right: -3px;
-    border-radius: 2px;
-    padding-right: 10%;
-    padding-left: 10%;
-    background-color: $step-fail;
-    font-size: 10px;
-    margin-left: 10px;
+    .unseen-text {
+        width: auto;
+        position: absolute;
+        color: white;
+        height: 12px;
+        top: -5px;
+        right: -3px;
+        border-radius: 2px;
+        padding-right: 10%;
+        padding-left: 10%;
+        background-color: $step-fail;
+        font-size: 10px;
+        margin-left: 10px;
+    }
 }
 
 .shortcut-nav-calendar-wrapper {

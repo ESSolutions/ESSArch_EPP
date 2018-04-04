@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, TopAlert, $filter, $interval, Conversion) {
+angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -171,9 +171,9 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
             url: appConfig.djangoUrl+"conversion-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            TopAlert.add("Running conversion job", "success");
+            Notifications.add("Running conversion job", "success");
         }).catch(function(response) {
-            TopAlert.add(response.data.detail, "error");
+            Notifications.add(response.data.detail, "error");
         })
     }
 
@@ -357,9 +357,9 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
                 method: "DELETE"
             }).then(function(response) {
                 vm.rulePipe(vm.ruleTableState);
-                TopAlert.add("conversion rule: "+conversion.name+" has been removed", "success");
+                Notifications.add("conversion rule: "+conversion.name+" has been removed", "success");
             }).catch(function(response) {
-                TopAlert.add("conversion rule could not be removed", "errorepp");
+                Notifications.add("conversion rule could not be removed", "errorepp");
             })
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

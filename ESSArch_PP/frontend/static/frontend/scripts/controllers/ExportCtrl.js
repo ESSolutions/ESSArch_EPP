@@ -1,4 +1,4 @@
-angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $http, TopAlert, $translate, $window, SA, Profile) {
+angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile) {
     var vm = this;
     vm.$onInit = function() {
         $http.get(appConfig.djangoUrl + "submission-agreements/", { params: { pager: "none", published: true } })
@@ -6,7 +6,7 @@ angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $h
                 vm.sas = response.data;
                 vm.sa = null;
             }).catch(function(response) {
-                TopAlert.add(response.data.detail, "error");
+                Notifications.add(response.data.detail, "error");
             });
 
         $http.get(appConfig.djangoUrl+"profiles/", {params: { pager: "none"}})
@@ -14,7 +14,7 @@ angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $h
                 vm.profiles = response.data;
                 vm.profile = null;
             }).catch(function(response) {
-                TopAlert.add(response.data.detail, "error");
+                Notifications.add(response.data.detail, "error");
             });
     }
 

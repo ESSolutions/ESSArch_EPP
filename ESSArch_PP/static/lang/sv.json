@@ -535,5 +535,8 @@
     "CREATE_NEW_STRUCTURE": "Skapa ny klassificeringsstruktur",
     "NEW_STRUCTURE_CREATED": "Ny klassificeringsstruktur skapad",
     "CREATING": "Skapas",
-    "NEW_VERSION_CREATED": "Ny version skapad"
+    "NEW_VERSION_CREATED": "Ny version skapad",
+    "SEE_ALL": "Se alla",
+    "MESSAGE": "Meddelande",
+    "POPUP_ENABLED": "Popup aktiverad"
 }

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
+angular.module('myApp').controller('SaEditorCtrl', function(Notifications, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;
@@ -146,7 +146,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(TopAlert, $timeout, 
                     vm.chooseSa(vm.saProfile);
                     vm.getProfiles();
                     $scope.edit = false;
-                    TopAlert.add("Submission agreement: " + vm.saProfile.name + " has been published!", "success", 5000);
+                    Notifications.add("Submission agreement: " + vm.saProfile.name + " has been published!", "success", 5000);
                 });
                 return resource;
             });

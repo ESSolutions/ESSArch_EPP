@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
+angular.module('myApp').controller('UtilCtrl', function(Notifications, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
     $scope.$state = $state;
     $scope.reloadPage = function (){
         $state.reload();
@@ -42,7 +42,7 @@ angular.module('myApp').controller('UtilCtrl', function(TopAlert, $scope, $state
         return myService.checkPermissions(permissions);
     }
     $scope.showAlert = function() {
-        TopAlert.show();
+        Notifications.toggle();
     }
 
     $scope.navigateToState = function(state) {

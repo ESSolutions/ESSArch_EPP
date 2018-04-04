@@ -636,7 +636,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         return {
             'response': function(response) {
                 if($rootScope.disconnected) {
-                    $rootScope.disconnected = null;
+                    $rootScope.disconnected = false;
                     $rootScope.$broadcast("reconnected", {detail: "Connection has been restored"});
                 }
                 return response;
@@ -647,14 +647,14 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                     if(response.data.detail) {
                         msg = response.data.detail;
                     }
-                    $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
+                    $rootScope.$broadcast('add_notification', { message: msg, level: "error", time: null});
                 }
                 if(response.status === 503) {
                     var msg = "Request failed, try again";
                     if(response.data.detail) {
                         msg = response.data.detail;
                     }
-                    $rootScope.$broadcast('add_top_alert', { message: msg, level: "error", time: null});
+                    $rootScope.$broadcast('add_notification', { message: msg, level: "error", time: null});
                 }
                 if((response.status === 401 || response.status === 403) && !response.config.noAuth) {
                     if ($location.path() != '/login' && $location.path() != ''){
@@ -815,7 +815,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     };
 })
-.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages, $urlRouter, permissionConfig){
+.run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages, $urlRouter, permissionConfig, Messenger){
     formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
     formlyValidationMessages.addStringMessage('required', 'This field is required');
     $rootScope.flowObjects = {};
@@ -839,12 +839,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     }).catch(function(status) {
         $state.go('login');
     });
-    $rootScope.$on('disconnected', function (event, data) {
-        $rootScope.disconnected = {message: data.detail, time: new Date()};
-    });
-    $rootScope.$on('reconnected', function (event, data) {
-        $rootScope.disconnected = null;
-    });
+
     $rootScope.$on('$stateChangeStart', function(evt, to, params, from) {
         if (to.redirectTo) {
             evt.preventDefault();

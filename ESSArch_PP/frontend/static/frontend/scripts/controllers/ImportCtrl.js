@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, TopAlert, $uibModal) {
+angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, Notifications, $uibModal) {
     var vm = this;
     $scope.angular = angular;
     vm.saProfile = {
@@ -53,9 +53,9 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                         if(response.status == 409) {
                             profileExistsModal(data);
                         } else if(response.status == 400) {
-                            TopAlert.add("Invalid profile", "error");
+                            Notifications.add("Invalid profile", "error");
                         } else if(response.status >= 500) {
-                            TopAlert.add("Server error", "error");
+                            Notifications.add("Server error", "error");
                         }
                         return response;
                     });
@@ -71,15 +71,15 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
                 }
             }
             SA.new(sa).$promise.then(function (resource) {
-                TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+                Notifications.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
                 vm.select = false;
             }).catch(function(response) {
                 if(response.status == 409) {
                     saProfileExistsModal(sa);
                 } else if(response.status == 400) {
-                    TopAlert.add("Invalid submission agreement", "error");
+                    Notifications.add("Invalid submission agreement", "error");
                 } else if(response.status >= 500) {
-                    TopAlert.add("Server error", "error");
+                    Notifications.add("Server error", "error");
                 }
             })
         })
@@ -93,19 +93,19 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         try {
             parsedSa = JSON.parse(sa);
         } catch(e) {
-            TopAlert.add(e, "error");
+            Notifications.add(e, "error");
             return;
         }
         SA.new(parsedSa).$promise.then(function (resource) {
-            TopAlert.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+            Notifications.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             vm.select = false;
         }).catch(function(response) {
             if(response.status == 409) {
                 saProfileExistsModal(parsedSa);
             } else if(response.status == 400) {
-                TopAlert.add("Invalid submission agreement", "error");
+                Notifications.add("Invalid submission agreement", "error");
             } else if(response.status >= 500) {
-                TopAlert.add("Server error", "error");
+                Notifications.add("Server error", "error");
             }
         });
     }
@@ -114,19 +114,19 @@ angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope
         try {
             parsedProfile = JSON.parse(profile);
         } catch(e) {
-            TopAlert.add(e, "error");
+            Notifications.add(e, "error");
             return;
         }
         Profile.new(parsedProfile).$promise.then(function(resource) {
-            TopAlert.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+            Notifications.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
             return resource;
         }).catch(function(response) {
             if(response.status == 409) {
                 profileExistsModal(parsedProfile);
             } else if(response.status == 400) {
-                TopAlert.add("Invalid profile", "error");
+                Notifications.add("Invalid profile", "error");
             } else if(response.status >= 500) {
-                TopAlert.add("Server error", "error");
+                Notifications.add("Server error", "error");
             }
             return response;
         });
