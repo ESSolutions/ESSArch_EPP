@@ -180,7 +180,7 @@ angular.module('myApp').controller('NotificationsCtrl', function(appConfig, Noti
                 hideAfter: time?time/1000:null,
                 showCloseButton: true,
                 onClickClose: function() {
-                    vm.setSeen([{id}]);
+                    vm.setSeen([{id: id}]);
                 },
                 actions: actions?actions:null
             };
