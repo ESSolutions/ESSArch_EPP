@@ -42,6 +42,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import (BooleanField, Case, Exists, F, Max, Min, OuterRef, Prefetch, Q,
                               Subquery, Value, When)
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import DjangoFilterBackend
@@ -255,6 +256,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return Response(parse_submit_description(fullpath, srcdir=path))
 
+    @transaction.atomic
     @detail_route(methods=['post'])
     def prepare(self, request, pk=None):
         logger = logging.getLogger('essarch.epp.ingest')
