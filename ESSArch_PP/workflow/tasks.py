@@ -30,6 +30,7 @@ import errno
 import logging
 import os
 import shutil
+import smtplib
 import tarfile
 import tempfile
 import time
@@ -205,18 +206,26 @@ class ReceiveSIP(DBTask):
             'archival_type', 'archival_location', 'object_path',
         ])
 
+        recipient = User.objects.get(pk=self.responsible).email
+        if recipient:
+            try:
+                logger.debug("Sending mail")
+                subject = 'Received "%s"' % aip.object_identifier_value
+                body = '"%s" is now received and ready for archiving' % aip.object_identifier_value
+                send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
+            except smtplib.SMTPException:
+                logger.exception("Failed to send mail")
+            except smtplib.socket.error:
+                logger.exception("SMTP connection failed")
+            else:
+                logger.debug("Mail sent")
+
         return ip
 
     def undo(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
         pass
 
     def event_outcome_success(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
-        recipient = User.objects.get(pk=self.responsible).email
-        ip = InformationPackage.objects.get(pk=ip)
-        if recipient:
-            subject = 'Received "%s"' % ip.object_identifier_value
-            body = '"%s" is now received and ready for archiving' % ip.object_identifier_value
-            send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
         return "Received IP '%s'" % str(ip)
 
 
