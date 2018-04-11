@@ -249,19 +249,10 @@ def installDefaultUsers():
         ['add_tapedrive','storage','tapedrive'],          # Can add tapedrive
         ['change_tapedrive','storage','tapedrive'],          # Can change tapedrive
         ['delete_tapedrive','storage','tapedrive'],    # Can delete tapedrive
-        ## ---- app: groups_manager ---- model: member
-        ['add_member','groups_manager','member'],                    # Can add member
-        ['change_member','groups_manager','member'],                    # Can change member
-        ['delete_member','groups_manager','member'],                    # Can delete member
-        ## ---- app: groups_manager ---- model: group
-        ['add_group','groups_manager','group'],                    # Can add group
-        ['change_group','groups_manager','group'],                    # Can change group
-        ['delete_group','groups_manager','group'],                    # Can delete group
-        ## ---- app: groups_manager ---- model: groupmember
-        ['add_groupmember','groups_manager','groupmember'],                    # Can add groupmember
-        ['change_groupmember','groups_manager','groupmember'],                    # Can change groupmember
-        ['delete_groupmember','groups_manager','groupmember'],                    # Can delete groupmember
-
+        ## ---- app: groups_manager ---- model: grouptype
+        ['add_grouptype','groups_manager','grouptype'],                    # Can add grouptype
+        ['change_grouptype','groups_manager','grouptype'],                    # Can change grouptype
+        ['delete_grouptype','groups_manager','grouptype'],                    # Can delete grouptype
     ]
 
     for p in permission_list_sysadmin:
