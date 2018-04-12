@@ -222,7 +222,7 @@ angular.module('myApp').controller('NotificationsCtrl', function(appConfig, Noti
                         action: function() {
                             $http.head(appConfig.djangoUrl+"me/").then(function(response) {
                                 $rootScope.disconnected = null;
-                                $rootScope.$broadcast('reconnected');
+                                $rootScope.$broadcast('reconnected', {detail: "Connection has been restored"});
                             }).catch(function() {
                             })
                         }
