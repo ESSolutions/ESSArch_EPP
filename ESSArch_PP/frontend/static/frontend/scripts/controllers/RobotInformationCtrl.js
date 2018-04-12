@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('RobotInformationCtrl', function(StorageMedium, $scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage, $uibModal){
+angular.module('myApp').controller('RobotInformationCtrl', function(StorageMedium, $scope, $controller, $interval, $rootScope, $http, Resource, appConfig, $timeout, $anchorScroll, $translate, Storage, $uibModal, listViewService){
     var vm = this;
     $scope.translate = $translate;
     vm.slotsPerPage = 10;
