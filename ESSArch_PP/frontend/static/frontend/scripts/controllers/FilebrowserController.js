@@ -7,6 +7,7 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
         }
         $scope.listView = false;
         $scope.gridView = true;
+        $scope.gridArrayLoading = true;
     }
 
     vm.$onChanges = function(changes) {
@@ -119,7 +120,6 @@ angular.module('myApp').controller('FilebrowserController', function ($scope, $r
             $scope.selectedCards = [];
         }
     };
-    $scope.gridArrayLoading = false;
     $scope.updateGridArray = function (ip) {
         if($scope.tableState) {
             $scope.dirPipe($scope.tableState);

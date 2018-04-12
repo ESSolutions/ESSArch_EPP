@@ -28,7 +28,13 @@
         </div>
         <div ng-show="gridView">
             <div class="deckgrid">
-            <div class="flex-grid">
+                <div ng-if="!deckGridData.length && gridArrayLoading" class="text-center">
+                    <div class="loading-column">{{'LOADING' | translate}}</div>
+                </div>
+                <div ng-if="!deckGridData.length && !gridArrayLoading" class="text-center">
+                    <div>{{'NO_RESULTS_FOUND' | translate}}</div>
+                </div>
+                <div class="flex-grid">
                 <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
             </div>
         </div>
@@ -56,10 +62,10 @@
                     <td>{{card.size | filesize}}</td>
                     <td>{{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
                 </tr>
-                <tr ng-if="!deckGridData.length && !deckGridLoading" class="empty-table-indicator">
+                <tr ng-if="!deckGridData.length && !gridArrayLoading" class="empty-table-indicator">
                     <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
                 </tr>
-                <tr ng-if="!deckGridData.length && deckGridLoading" class="empty-table-indicator">
+                <tr ng-if="!deckGridData.length && gridArrayLoading" class="empty-table-indicator">
                     <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                 </tr>
             </tbody>
