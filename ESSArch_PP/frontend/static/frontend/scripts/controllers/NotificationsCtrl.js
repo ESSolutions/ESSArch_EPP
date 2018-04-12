@@ -177,7 +177,7 @@ angular.module('myApp').controller('NotificationsCtrl', function(appConfig, Noti
             var post = {
                 message: message,
                 type: level,
-                hideAfter: time?time/1000:null,
+                hideAfter: time?time/1000:10000,
                 showCloseButton: true,
                 onClickClose: function() {
                     vm.setSeen([{id: id}]);
