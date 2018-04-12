@@ -75,6 +75,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     $scope.getDrives = function(tableState) {
         if (!angular.isUndefined(tableState)) {
             vm.driveTableState = tableState;
+            $scope.tapeDrivesLoading = true;
             var search = "";
 			if(tableState.search.predicateObject) {
 				var search = tableState.search.predicateObject["$"];
@@ -87,7 +88,9 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getTapeDrives(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.tapeDrives = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                $scope.tapeDrivesLoading = false;
             }).catch(function(response) {
+                $scope.tapeDrivesLoading = false;
                 if(response.status == 404) {
                     var filters = {
                         search: search
@@ -106,6 +109,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     $scope.getSlots = function (tableState) {
         if (!angular.isUndefined(tableState)) {
             vm.slotTableState = tableState;
+            $scope.tapeSlotsLoading = true;
             var search = "";
 			if(tableState.search.predicateObject) {
 				var search = tableState.search.predicateObject["$"];
@@ -118,8 +122,10 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getTapeSlots(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.tapeSlots = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                $scope.tapeSlotsLoading = false;
             }).catch(function(response) {
-                if(response.status == 404) {
+                $scope.tapeSlotsLoading = false;
+            if(response.status == 404) {
                     var filters = {
                         search: search
                     };
@@ -137,6 +143,7 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
     $scope.getRobotQueue = function (tableState) {
         if (!angular.isUndefined(tableState)) {
             vm.robotQueueTableState = tableState;
+            $scope.robotQueueLoading = true;
             var search = "";
 			if(tableState.search.predicateObject) {
 				var search = tableState.search.predicateObject["$"];
@@ -149,7 +156,9 @@ angular.module('myApp').controller('RobotInformationCtrl', function(StorageMediu
             Resource.getRobotQueueForRobot(start, number, pageNumber, tableState, sorting, search, vm.selectedRobot).then(function (result) {
                 vm.robotQueue = result.data;
                 tableState.pagination.numberOfPages = result.numberOfPages;//set the number of pages so the pagination can update
+                $scope.robotQueueLoading = false;
             }).catch(function(response) {
+                $scope.robotQueueLoading = false;
                 if(response.status == 404) {
                     var filters = {
                         search: search

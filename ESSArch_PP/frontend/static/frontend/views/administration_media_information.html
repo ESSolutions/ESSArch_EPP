@@ -33,6 +33,12 @@
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.used_capacity | filesize}}</td>
                         <td class="clickable" ng-click="storageMediumTableClick(row)">{{row.storage_target.max_capacity | filesize}}</td>
                     </tr>
+                    <tr ng-if="!vm.displayedMediums.length && !ipLoading" class="empty-table-indicator">
+                        <td colspan="8">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    </tr>
+                    <tr ng-if="!vm.displayedMediums.length && ipLoading" class="empty-table-indicator">
+                        <td class="loading-column" colspan="8">{{'LOADING' | translate}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -116,6 +122,12 @@
                                 <td>{{row.ip.object_identifier_value}}</td>
                                 <td>{{row.content_location_value}}</td>
                                 <td>{{row.last_changed_local | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                            </tr>
+                            <tr ng-if="!vm.storageObjects.length && !objectLoading" class="empty-table-indicator">
+                                <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                            </tr>
+                            <tr ng-if="!vm.storageObjects.length && objectLoading" class="empty-table-indicator">
+                                <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                             </tr>
                     </table>
                 </div>
