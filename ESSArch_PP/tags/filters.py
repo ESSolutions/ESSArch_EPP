@@ -1,14 +1,15 @@
 from django.db.models import F
 
-import django_filters
+from django_filters import rest_framework as filters
 from django_filters.widgets import BooleanWidget
 
-from ESSArch_Core.tags.models import Tag
+from ESSArch_Core.tags.models import TagVersion
 
 
-class TagFilter(django_filters.FilterSet):
-    include_leaves = django_filters.BooleanFilter(method='filter_leaves', widget=BooleanWidget())
-    only_roots = django_filters.BooleanFilter(method='filter_roots', widget=BooleanWidget())
+class TagFilter(filters.FilterSet):
+    include_leaves = filters.BooleanFilter(method='filter_leaves', widget=BooleanWidget())
+    only_roots = filters.BooleanFilter(method='filter_roots', widget=BooleanWidget())
+    all_versions = filters.BooleanFilter(method='filter_all_versions', widget=BooleanWidget())
 
     def filter_leaves(self, queryset, name, value):
         if not value:
@@ -22,6 +23,12 @@ class TagFilter(django_filters.FilterSet):
 
         return queryset
 
+    def filter_all_versions(self, queryset, name, value):
+        if not value:
+            return queryset.filter(tag__current_version=F('pk'))
+
+        return queryset
+
     class Meta:
-        model = Tag
-        fields = ['include_leaves']
+        model = TagVersion
+        fields = ['include_leaves', 'elastic_index', 'all_versions']

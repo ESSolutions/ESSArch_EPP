@@ -9,23 +9,34 @@ from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.ip.models import InformationPackage
-from ESSArch_Core.tags.models import Tag
+from ESSArch_Core.tags.models import TagVersion
+from ESSArch_Core.tags.serializers import TagVersionSerializerWithoutSource
 
 from ip.serializers import InformationPackageSerializer
 from ip.views import InformationPackageViewSet
 from tags.filters import TagFilter
-from tags.serializers import TagSerializer
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class TagViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint that allows tags to be viewed or edited.
     """
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
+    queryset = TagVersion.objects.all()
+    serializer_class = TagVersionSerializerWithoutSource
 
     filter_backends = (DjangoFilterBackend,)
     filter_class = TagFilter
+
+    def get_queryset(self):
+        qs = self.queryset
+        ancestor = self.kwargs.get('parent_lookup_tag')
+
+        if ancestor is not None:
+            ancestor = TagVersion.objects.get(pk=ancestor)
+            structure = self.request.query_params.get('structure')
+            qs = ancestor.get_descendants(structure)
+
+        return qs
 
 
 class TagInformationPackagesViewSet(NestedViewSetMixin, InformationPackageViewSet):

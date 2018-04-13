@@ -176,6 +176,12 @@ router.register(r'tags', TagViewSet, base_name='tags').register(
     base_name='tags-informationpackages',
     parents_query_lookups=['tag']
 )
+router.register(r'tags', TagViewSet, base_name='tags').register(
+    r'descendants',
+    TagViewSet,
+    base_name='tags-descendants',
+    parents_query_lookups=['tag']
+)
 
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'users', UserViewSet)
