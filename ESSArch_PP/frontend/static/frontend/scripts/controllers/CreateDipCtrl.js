@@ -197,6 +197,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     }
 
     $scope.createDip = function(ip) {
+        vm.creating = true;
         listViewService.createDip(ip).then(function(response) {
             $scope.select = false;
             $scope.edit = false;
@@ -205,13 +206,14 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             $scope.selectedCards2 = [];
             $scope.chosenFiles = [];
             $scope.deckGridData = [];
+            vm.creating = false;
             $timeout(function() {
                 $scope.getListViewData();
                 $anchorScroll();
             });
         })
-        }
-        //Deckgrid
+    }
+    //Deckgrid
     $scope.chosenFiles = [];
     $scope.chooseFiles = function(files) {
         var fileExists = false;
@@ -529,12 +531,6 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             }
         })
         modalInstance.result.then(function(data) {
-            $scope.prepareDip(data.label, data.objectIdentifierValue, data.orders);
-        });
-    }
-
-    $scope.prepareDip = function(label, objectIdentifierValue, orders) {
-        listViewService.prepareDip(label, objectIdentifierValue, orders).then(function(response) {
             $timeout(function() {
                 $scope.getListViewData();
             });

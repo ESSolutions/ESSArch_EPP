@@ -136,11 +136,6 @@ angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $
             }
         })
         modalInstance.result.then(function (data) {
-            $scope.prepareOrder(data.label);
-        });
-    }
-    $scope.prepareOrder = function(label) {
-        listViewService.prepareOrder(label).then(function(result) {
             $timeout(function() {
                 $scope.getListViewData();
             });

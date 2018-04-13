@@ -62,7 +62,7 @@
                 <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
             </label>
         </div>
-        <button ng-disabled="!approvedToReceive" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}}</button>
-        <button class="btn btn-warning" type="button" ng-click="vm.cancel()">{{'CANCEL' | translate}}</button>
+        <button ng-disabled="!approvedToReceive || vm.receiving" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}} <i ng-if="vm.receiving" class="fa fa-spinner fa-spin"/></button>
+        <button class="btn btn-warning" type="button" ng-click="vm.cancel()" ng-disabled="vm.receiving">{{'CANCEL' | translate}}</button>
     </div>
 </div>

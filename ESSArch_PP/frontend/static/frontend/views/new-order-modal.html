@@ -1,13 +1,13 @@
 <div class="enter-profile-name">
     <h3 class="modal-title" id="modal-title">{{'ENTERORDERLABEL' | translate}}</h3>
 </div>
-<form ng-submit="$ctrl.newOrder()">
+<form ng-submit="$ctrl.newOrder($ctrl.label)">
     <div class="modal-body" id="modal-body">
         <label for="label">{{'LABEL' | translate}}</label>
         <input required focused="true" id="label" class="form-control" ng-model="$ctrl.label"></input>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="submit">{{'OK' | translate}}</button>
-        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+        <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.creatingOrder">{{'OK' | translate}} <i ng-if="$ctrl.creatingOrder" class="fa fa-spinner fa-spin"/></button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creatingOrder">{{'CANCEL' | translate}}</button>
     </div>
 </form>

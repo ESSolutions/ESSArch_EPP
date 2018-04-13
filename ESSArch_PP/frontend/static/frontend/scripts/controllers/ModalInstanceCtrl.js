@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data) {
+angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService) {
     var $ctrl = this;
     if(data) {
         $ctrl.data = data;
@@ -56,11 +56,15 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.updateField = function() {
         $uibModalInstance.close($ctrl.field);
     }
-    $ctrl.newOrder = function() {
-        $ctrl.data = {
-            label: $ctrl.label
-        }
-        $uibModalInstance.close($ctrl.data);
+    $ctrl.newOrder = function(label) {
+        $ctrl.creatingOrder = true;
+        listViewService.prepareOrder(label).then(function(result) {
+            $ctrl.creatingOrder = false;
+            $uibModalInstance.close();
+        }).catch(function(response) {
+            $ctrl.creatingOrder = false;
+            Notifications.add(response.data.detail, 'error');
+        });
     };
     $ctrl.save = function () {
         $ctrl.data = {
@@ -81,14 +85,17 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         }
         $uibModalInstance.close($ctrl.data);
     }
-    $ctrl.prepare = function () {
-        $ctrl.data = {
-            label: $ctrl.label,
-            objectIdentifierValue: $ctrl.objectIdentifierValue,
-            orders: $ctrl.orders
-        };
-        $uibModalInstance.close($ctrl.data);
+    $ctrl.prepare = function (label, objectIdentifierValue, orders) {
+        $ctrl.preparing = true;
+        listViewService.prepareDip(label, objectIdentifierValue, orders).then(function(response) {
+            $ctrl.preparing = false;
+            $uibModalInstance.close();
+        }).catch(function(response) {
+            $ctrl.preparing = false;
+            Notifications.add(response.data.detail, 'error');
+        })
     };
+
     $ctrl.addTag = function () {
         $ctrl.data = {
             name: $ctrl.name,
@@ -108,11 +115,42 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         }
         $uibModalInstance.close($ctrl.data);
     };
-    $ctrl.remove = function () {
-        $ctrl.data = {
-            status: "removed"
+    $ctrl.remove = function (ipObject) {
+        $ctrl.removing = true;
+        if(data.workarea) {
+            if(ipObject.package_type == 1) {
+                ipObject.information_packages.forEach(function(ip) {
+                    $ctrl.remove(ip, true);
+                });
+            } else {
+                $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea[0].id + "/")
+                    .then(function (response) {
+                        $ctrl.removing = false;
+                        $uibModalInstance.close();
+                    }).catch(function (response) {
+                        $ctrl.removing = false;
+                        if (response.status == 404) {
+                            Notifications.add('IP could not be found', 'error');
+                        } else {
+                            Notifications.add(response.data.detail, 'error');
+                        }
+                    })
+            }
+        } else {
+            IP.delete({
+                id: ipObject.id
+            }).$promise.then(function() {
+                $ctrl.removing = false;
+                $uibModalInstance.close();
+            }).catch(function (response) {
+                $ctrl.removing = false;
+                if (response.status == 404) {
+                    Notifications.add('IP could not be found', 'error');
+                } else {
+                    Notifications.add(response.data.detail, 'error');
+                }
+            })
         }
-        $uibModalInstance.close($ctrl.data);
     };
     $ctrl.submit = function () {
         $ctrl.data = {
@@ -227,13 +265,19 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $scope.approvedToReceive = true;
     }
     vm.receive = function (ip) {
-        vm.data = {
-            status: "received"
-        }
+        vm.receiving = true;
         Requests.receive(ip, vm.request, vm.validatorModel)
             .then(function(response){
+                vm.receiving = false;
                 $uibModalInstance.close(vm.data);
-            });
+            }).catch(function(response) {
+                vm.receiving = false;
+                if(response.status == 404) {
+                    Notifications.add('IP could not be found', 'error');
+                } else {
+                    Notifications.add(response.data.detail, 'error');
+                }
+            })
     };
     vm.fetchProfileData = function() {
         if($scope.approvedToReceive) {

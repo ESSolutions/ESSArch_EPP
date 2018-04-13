@@ -88,27 +88,18 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
         }
     }
     // Remove ip
-    $scope.removeIp = function (ipObject) {
-        if(ipObject.package_type == 1) {
-            ipObject.information_packages.forEach(function(ip) {
-                $scope.removeIp(ip);
-            });
-        } else {
-            $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea[0].id + "/")
-                .then(function () {
-                    $scope.edit = false;
-                    $scope.select = false;
-                    $scope.eventlog = false;
-                    $scope.eventShow = false;
-                    $scope.statusShow = false;
-                    $scope.filebrowser = false;
-                    $scope.requestForm = false;
-                    if (vm.displayedIps.length == 0) {
-                        $state.reload();
-                    }
-                    $scope.getListViewData();
-                });
+    $scope.ipRemoved = function (ipObject) {
+        $scope.edit = false;
+        $scope.select = false;
+        $scope.eventlog = false;
+        $scope.eventShow = false;
+        $scope.statusShow = false;
+        $scope.filebrowser = false;
+        $scope.requestForm = false;
+        if (vm.displayedIps.length == 0) {
+            $state.reload();
         }
+        $scope.getListViewData();
     }
 
     //Click function for Ip table

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests){
+angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications){
     // Initialize variables
 
     $scope.$window = $window;
@@ -553,6 +553,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
 
     // Preserve IP
     $scope.preserveIp = function(ip, request) {
+        vm.submittingRequest = true;
         var params = { purpose: request.purpose };
         params.policy =  request.archivePolicy && request.archivePolicy.value != "" ? request.archivePolicy.value.id : null;
         if(request.appraisal_date != null) {
@@ -565,12 +566,20 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.filebrowser = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            vm.submittingRequest = false;
             $scope.initRequestData();
             $scope.getListViewData();
-        });
+        }).catch(function(response) {
+            if(response.status == 404) {
+                Notifications.add('IP could not be found', 'error');
+            } else {
+                Notifications.add(response.data.detail, 'error');
+            }
+        })
     }
 
     $scope.accessIp = function(ip, request) {
+        vm.submittingRequest = true;
         var data = { purpose: request.purpose, tar: request.type === "get_tar", extracted: request.type === "get", new: request.type === "get_as_new", package_xml: request.package_xml, aic_xml: request.aic_xml};
         Requests.access(ip, data).then(function(response) {
             $scope.requestForm = false;
@@ -581,16 +590,24 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.select = false;
             $scope.eventShow = false;
             $scope.statusShow = false;
+            vm.submittingRequest = false;
             $scope.initRequestData();
             $timeout(function() {
                 $scope.ip = null;
                 $rootScope.ip = null;
                 $scope.getListViewData();
-            });
+            }).catch(function(response) {
+                if(response.status == 404) {
+                    Notifications.add('IP could not be found', 'error');
+                } else {
+                    Notifications.add(response.data.detail, 'error');
+                }
+            })
         });
     }
 
     $scope.moveToApproval = function(ip, request) {
+        vm.submittingRequest = true;
         var data = { purpose: request.purpose };
         Requests.moveToApproval(ip, data).then(function(response) {
             $scope.requestForm = false;
@@ -604,11 +621,18 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.statusShow = false;
             $scope.initRequestData();
             $timeout(function() {
+                vm.submittingRequest = false;
                 $scope.ip = null;
                 $rootScope.ip = null;
                 $scope.getListViewData();
             });
-        });
+        }).catch(function(response) {
+            if(response.status == 404) {
+                Notifications.add('IP could not be found', 'error');
+            } else {
+                Notifications.add(response.data.detail, 'error');
+            }
+        })
     }
 
     // Basic functions
@@ -685,22 +709,18 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         return visible;
     }
     // Remove ip
-	$scope.removeIp = function (ipObject) {
-		IP.delete({
-			id: ipObject.id
-		}).$promise.then(function() {
-			$scope.edit = false;
-			$scope.select = false;
-			$scope.eventlog = false;
-			$scope.eventShow = false;
-			$scope.statusShow = false;
-            $scope.filebrowser = false;
-            $scope.requestForm = false;
-            if(vm.displayedIps.length == 0) {
-                $state.reload();
-            }
-			$scope.getListViewData();
-		});
+	$scope.ipRemoved = function (ipObject) {
+        $scope.edit = false;
+        $scope.select = false;
+        $scope.eventlog = false;
+        $scope.eventShow = false;
+        $scope.statusShow = false;
+        $scope.filebrowser = false;
+        $scope.requestForm = false;
+        if(vm.displayedIps.length == 0) {
+            $state.reload();
+        }
+        $scope.getListViewData();
 	}
 
     //Get data for eventlog view
@@ -1014,12 +1034,13 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
                 data: function () {
                     return {
                         ip: ipObject,
+                        workarea: $state.includes("**.workarea.**")
                     };
                 }
             },
         })
         modalInstance.result.then(function (data) {
-            $scope.removeIp(ipObject);
+            $scope.ipRemoved(ipObject);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
