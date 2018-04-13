@@ -38,6 +38,7 @@
         flex-wrap: wrap;
         width: 100%;
         margin-bottom: 5px;
+        align-items: center;
     }
     .search-result-table {
         width: 100%;
@@ -54,6 +55,7 @@
         flex-direction: row;
         margin-bottom: 5px;
         flex-wrap: wrap;
+        align-items: center;
     }
     .search-pagination {
         margin-bottom: 5px;
@@ -145,6 +147,9 @@
     .filter-tree {
         width: auto;
         margin-top: 10px;
+        .jstree {
+            min-width: 230px;
+        }
     }
     .record-tree {
         margin-top: 10px;
