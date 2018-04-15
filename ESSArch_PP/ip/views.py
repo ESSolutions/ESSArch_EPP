@@ -1279,6 +1279,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['delete', 'get', 'post'])
     def files(self, request, pk=None):
         ip = self.get_object()
+        download = request.query_params.get('download', False)
+        path = request.query_params.get('path', '').rstrip('/')
 
         if ip.archived:
             # check if path exists
@@ -1300,10 +1302,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     raise exceptions.NotFound
 
                 if hit.meta.index == 'document':
-                    cache_dir = ip.policy.cache_storage.value
-
-                    path = os.path.join(cache_dir, ip.object_identifier_value, path)
-                    return list_files(path, request=request)
+                    return ip.files(path, force_download=download, paginator=self.paginator, request=request)
 
             # a directory with the path exists, get the content of it
             s = Search(index=['directory', 'document'])
@@ -1412,9 +1411,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 raise exceptions.ParseError('Type must be either "file" or "dir"')
 
             return Response('%s created' % path)
-
-        download = request.query_params.get('download', False)
-        path = request.query_params.get('path', '').rstrip('/')
 
         if os.path.isfile(ip.object_path):
             fullpath = os.path.join(os.path.dirname(ip.object_path), path)

@@ -444,7 +444,7 @@ class StoreAIP(DBTask):
         )
 
         with transaction.atomic():
-            for method in storage_methods:
+            for method in storage_methods.secure_storage():
                 for method_target in method.storage_method_target_relations.filter(status=1):
                     req_type = 10 if method_target.storage_method.type == TAPE else 15
 
@@ -948,7 +948,7 @@ class PollIOQueue(DBTask):
             if not entries.exists() or entries.exclude(status=20).exists():
                 continue  # unfinished IO entry exists for IP, skip
 
-            for storage_method in ip.policy.storage_methods.filter(status=True).iterator():
+            for storage_method in ip.policy.storage_methods.secure_storage().filter(status=True).iterator():
                 if not entries.filter(storage_method_target__storage_method=storage_method).exists():
                     raise Exception("No entry for storage method '%s' for IP '%s'" % (storage_method.pk, ip.pk))
 
@@ -1200,10 +1200,22 @@ class IO(DBTask):
     abstract = True
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        raise NotImplementedError()
+        medium_obj = StorageMedium.objects.get(pk=storage_medium)
+        storage_backend = storage_target.get_storage_backend()
+        storage_object = storage_backend.write(cache_obj, entry.ip, storage_method, medium_obj)
+        storage_backend.write(cache_obj_xml, entry.ip, storage_method, medium_obj, create_obj=False, update_obj=storage_object)
+        storage_backend.write(cache_obj_aic_xml, entry.ip, storage_method, medium_obj, create_obj=False, update_obj=storage_object)
+
+        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
+
+        entry.storage_object = storage_object
+        entry.save(update_fields=['storage_object'])
+
+        return storage_object
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        raise NotImplementedError()
+        storage_backend = storage_target.get_storage_backend()
+        return storage_backend.read(entry.storage_object, cache)
 
     def io_success(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
         pass
@@ -1277,110 +1289,17 @@ class IOTape(IO):
     read_types = (20,)
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        step = ProcessStep(name="Write to tape")
-        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+        super(IOTape, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
-        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
-            step.parent_step = task.processstep
-        else:
-            step.information_package = entry.ip
-
-        step.save()
-
-        last_written_obj = StorageObject.objects.filter(
-            storage_medium=storage_medium
-        ).annotate(
-            content_location_value_int=Cast('content_location_value', IntegerField())
-        ).order_by('content_location_value_int').only('content_location_value').last()
-
-        if last_written_obj is None:
-            content_location_value = 1
-        else:
-            content_location_value = last_written_obj.content_location_value_int + 1
-
-        medium = StorageMedium.objects.get(pk=storage_medium)
-
-        try:
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.SetTapeFileNumber",
-                params={
-                    'medium': storage_medium,
-                    'num': content_location_value,
-                },
-                processstep=step,
-                processstep_pos=1,
-            ).run().get()
-
-            paths = [cache_obj_xml, cache_obj_aic_xml, cache_obj]
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.WriteToTape",
-                args=[storage_medium, paths],
-                params={'block_size': medium.block_size * 512},
-                processstep=step,
-                processstep_pos=2,
-            ).run().get()
-
-            msg = 'IP written to %s' % medium.medium_id
-            agent = entry.user.username
-            extra = {'event_type': 40700, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
-            logger.info(msg, extra=extra)
-        except OSError as e:
-            if e.errno == errno.ENOSPC:
-                medium.mark_as_full()
-                entry.status = 0
-                entry.storage_medium = None
-                entry.save(update_fields=['status', 'storage_medium'])
-                return
-            else:
-                raise
-
-        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
-
-        storage_object = StorageObject.objects.create(
-            content_location_type=storage_method.type,
-            content_location_value=content_location_value,
-            ip=entry.ip, storage_medium_id=storage_medium
-        )
-
-        entry.storage_object = storage_object
-        entry.save(update_fields=['storage_object'])
+        msg = 'IP written to %s' % entry.storage_medium.medium_id
+        agent = entry.user.username
+        extra = {'event_type': 40700, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        step = ProcessStep(name="Read from tape")
-        task = ProcessTask.objects.filter(pk=entry.task_id).first()
+        super(IOTape, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
-        if task is not None and hasattr(task, 'processstep') and task.processstep is not None:
-            step.parent_step = task.processstep
-        else:
-            step.information_package = entry.ip
-
-        step.save()
-        tape_pos = int(entry.storage_object.content_location_value)
-
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.SetTapeFileNumber",
-            params={
-                'medium': storage_medium,
-                'num': tape_pos,
-            },
-            processstep=step,
-            processstep_pos=1,
-        ).run().get()
-
-        medium = StorageMedium.objects.get(pk=storage_medium)
-
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.ReadTape",
-            params={
-                'medium': storage_medium,
-                'path': cache,
-                'block_size': medium.block_size * 512,
-            },
-            processstep=step,
-            processstep_pos=2,
-        ).run().get()
-
-        msg = 'IP read from %s' % medium.medium_id
+        msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
         extra = {'event_type': 40710, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
         logger.info(msg, extra=extra)
@@ -1398,20 +1317,7 @@ class IODisk(IO):
     read_types = (25,)
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        copy_file(cache_obj, storage_target.target)
-        copy_file(cache_obj_xml, storage_target.target)
-        copy_file(cache_obj_aic_xml, storage_target.target)
-
-        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
-
-        storage_object = StorageObject.objects.create(
-            content_location_type=storage_method.type,
-            ip=entry.ip, storage_medium_id=storage_medium
-        )
-
-        entry.storage_medium_id = storage_medium
-        entry.storage_object = storage_object
-        entry.save(update_fields=['storage_medium_id', 'storage_object'])
+        super(IODisk, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         agent = entry.user.username
@@ -1419,13 +1325,7 @@ class IODisk(IO):
         logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        src = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.tar')
-        src_xml = os.path.join(storage_target.target, entry.ip.object_identifier_value + '.xml')
-        src_aic_xml = os.path.join(storage_target.target, str(entry.ip.aic.pk) + '.xml')
-
-        copy_file(src, cache)
-        copy_file(src_xml, cache)
-        copy_file(src_aic_xml, cache)
+        super(IODisk, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
