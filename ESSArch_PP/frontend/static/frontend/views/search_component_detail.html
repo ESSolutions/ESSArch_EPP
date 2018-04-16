@@ -37,7 +37,7 @@
                     <td>{{x._source.name}}</td>
                     <td>{{x._source.unit_dates.date}}</td>
                     <td>
-                        <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                        <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                     </td>
                 </tr>
             </tbody>
