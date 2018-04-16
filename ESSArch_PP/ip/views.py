@@ -473,6 +473,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             'validate_logical_physical_representation',
         ]
 
+        val_format = validators.get("validate_file_format", False)
+        val_integrity = validators.get("validate_integrity", False)
+
         if any(v is True and k in available_validators for k,v in validators.iteritems()):
             validation_step = ProcessStep.objects.create(
                 name="Validate SIP",
@@ -491,9 +494,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
                     responsible=self.request.user,
                     processstep=validation_step
                 )
-
-            val_format = validators.get("validate_file_format", False)
-            val_integrity = validators.get("validate_integrity", False)
 
             if val_format or val_integrity:
                 ProcessTask.objects.create(
