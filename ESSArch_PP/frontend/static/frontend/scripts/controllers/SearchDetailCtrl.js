@@ -207,6 +207,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             archive : {
                 icon : 'fa fa-archive'
             },
+            document : {
+                icon : 'fa fa-file-o'
+            },
             plus: {
                 icon: "fa fa-plus"
             }
