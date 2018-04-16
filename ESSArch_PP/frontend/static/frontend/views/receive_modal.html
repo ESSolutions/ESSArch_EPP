@@ -7,30 +7,22 @@
         <form id="request-form" name="vm.form" class="request-form" ng-submit="vm.receive(includedIps[0])">
             <div class="request-type">
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                    <label>
-                {{'PURPOSE' | translate}}
-            </label>
+                    <label>{{'PURPOSE' | translate}}</label>
                     <input class="form-control" ng-model="vm.request.purpose">
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                    <label>
-                {{'ARCHIVE_POLICY' | translate}}
-            </label>
+                    <label>{{'ARCHIVE_POLICY' | translate}}</label>
                     <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
                         ng-options="x.policy_name for x in vm.request.archivePolicy.options track by x.policy_id" required></select>
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                    <label>
-                {{'INFORMATION_CLASS' | translate}}
-            </label>
+                    <label>{{'INFORMATION_CLASS' | translate}}</label>
                     <input class="form-control" disabled="true" ng-model="vm.request.informationClass">
                 </div>
                 <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <div class="tags-row">
-                        <label>
-                    {{'TAGS' | translate}}
-                </label>
+                        <label>{{'TAGS' | translate}}</label>
                         <span ng-click="updateTags()" class="clickable angular-animate fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
                             popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
@@ -43,9 +35,7 @@
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
-                    <label>
-                {{'ALLOW_UNKNOWN_FILES' | translate}}
-            </label>
+                    <label>{{'ALLOW_UNKNOWN_FILES' | translate}}</label>
                 </div>
             </div>
             <div class="request-params modal-validators">
