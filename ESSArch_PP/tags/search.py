@@ -315,8 +315,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         try:
             if not tag_version.get_structures().filter(**query_filter).exists():
                 if structure is None:
-                    raise exceptions.NotFound('Node does not exist in any structure')
-
+                    return None
                 raise exceptions.ParseError('Structure "%s" does not exist for node' % structure)
         except ValidationError:
             raise exceptions.ParseError('Invalid structure id')
