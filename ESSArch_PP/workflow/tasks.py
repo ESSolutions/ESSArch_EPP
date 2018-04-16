@@ -108,6 +108,7 @@ from ESSArch_Core.storage.models import (
     StorageMethodTargetRelation,
     StorageObject,
 )
+from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
 from ESSArch_Core.util import (
     creation_date,
     find_destination,
@@ -282,6 +283,16 @@ class CacheAIP(DBTask):
             if e.errno != errno.EEXIST:
                 raise
 
+        if aip_obj.tag is not None:
+            with transaction.atomic():
+                tag = Tag.objects.create()
+                tag_structure = TagStructure.objects.create(tag=tag, parent=aip_obj.tag,
+                                                            structure=aip_obj.tag.structure)
+                tag_version = TagVersion.objects.create(tag=tag, name=objid, type='Information Package',
+                                                        elastic_index='component')
+        else:
+            tag_structure = None
+
         with tarfile.open(dsttar, 'w') as tar:
             for root, dirs, files in walk(srcdir):
                 rel = os.path.relpath(root, srcdir)
@@ -305,7 +316,7 @@ class CacheAIP(DBTask):
                     dst = os.path.join(dstdir, rel, f)
                     dst = os.path.normpath(dst)
 
-                    index_path(aip_obj, src)
+                    index_path(aip_obj, src, parent=tag_structure)
 
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
