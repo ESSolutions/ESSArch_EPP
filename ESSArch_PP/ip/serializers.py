@@ -274,7 +274,7 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
-            'tags', 'submission_agreement', 'submission_agreement_locked',
+            'submission_agreement', 'submission_agreement_locked',
         )
         extra_kwargs = {
             'id': {
