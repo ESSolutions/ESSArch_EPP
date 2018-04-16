@@ -83,7 +83,7 @@ from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Document
+from ESSArch_Core.tags.models import TagStructure
 from ESSArch_Core.util import (find_destination, generate_file_response,
                                get_files_and_dirs, get_tree_size_and_count,
                                in_directory, list_files, mkdir_p,
@@ -455,6 +455,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         information_class = parsed.get('information_class', policy.information_class)
         if information_class != policy.information_class:
             raise ValueError('Information class of IP and policy does not match')
+
+        tag_id = request.data.get('tag')
+        try:
+            ip.tag = TagStructure.objects.get(pk=tag_id)
+        except TagStructure.DoesNotExist:
+            if tag_id is not None:
+                raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
 
         ip.object_path=os.path.join(policy.ingest_path.value, objid)
         ip.policy=policy
