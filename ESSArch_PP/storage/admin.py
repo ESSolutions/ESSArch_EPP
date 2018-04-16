@@ -62,6 +62,7 @@ class StorageMethodInline(NestedStackedInline):
                 'name',
                 'status',
                 'type',
+                'containers',
                 )}),
     )
     inlines = [StorageTargetInline]
