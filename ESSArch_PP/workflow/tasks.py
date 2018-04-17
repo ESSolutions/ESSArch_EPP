@@ -94,6 +94,7 @@ class ReceiveSIP(DBTask):
         aip = InformationPackage.objects.get(pk=ip)
         policy = ArchivePolicy.objects.get(pk=policy)
         objid, container_type = os.path.splitext(os.path.basename(container))
+        container_type = container_type.lower()
 
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC, responsible=aip.responsible,
                                                 label=aip.label, start_date=aip.start_date, end_date=aip.end_date,
@@ -150,10 +151,9 @@ class ReceiveSIP(DBTask):
             responsible_id=self.responsible,
         ).run().get()
 
+        dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
+        dst = os.path.join(dst[0], dst[1])
         if policy.receive_extract_sip:
-            dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
-            dst = os.path.join(dst[0], dst[1])
-
             if container_type.lower() == '.tar':
                 with tarfile.open(container) as tar:
                     tar.extractall(dst.encode('utf-8'))
@@ -161,8 +161,7 @@ class ReceiveSIP(DBTask):
                 with zipfile.ZipFile(container) as zipf:
                     zipf.extractall(dst.encode('utf-8'))
         else:
-            dst = os.path.join(aip_dir, 'content', objid + container_type)
-            shutil.copy(container, dst)
+            shutil.copy2(container, dst)
 
         aip.save(update_fields=[
             'aic', 'archival_institution', 'archivist_organization',
