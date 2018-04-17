@@ -53,6 +53,8 @@ from guardian.shortcuts import assign_perm
 from scandir import walk
 from six.moves import urllib
 
+# noinspection PyUnresolvedReferences
+from ESSArch_Core import tasks
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
