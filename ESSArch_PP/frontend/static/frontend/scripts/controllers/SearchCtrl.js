@@ -198,7 +198,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 branch: 'institution',
             },
             {
-                text: "Arkivorganisation",
+                text: $translate.instant("ARCHIVISTORGANIZATION"),
                 state: {opened: true, disabled: true},
                 children: organizationChildren,
                 branch: 'organization',
