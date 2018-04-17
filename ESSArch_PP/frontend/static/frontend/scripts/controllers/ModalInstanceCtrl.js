@@ -250,7 +250,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         vm.request.archivePolicy.value = $scope.ip.policy;
         vm.request.informationClass = $scope.ip.policy ? $scope.ip.policy.information_class : null;
         $scope.getTags().then(function (result) {
-            vm.request.tags.options = result;
+            vm.tags.archive.options = result;
             $scope.requestForm = true;
         });
     });
@@ -266,8 +266,9 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     vm.receive = function (ip) {
         vm.receiving = true;
-        Requests.receive(ip, vm.request, vm.validatorModel)
+        Requests.receive(ip, angular.extend(vm.request, {tag: $scope.getDescendantId()}), vm.validatorModel)
             .then(function(response){
+                vm.data = {status: "received"};
                 vm.receiving = false;
                 $uibModalInstance.close(vm.data);
             }).catch(function(response) {

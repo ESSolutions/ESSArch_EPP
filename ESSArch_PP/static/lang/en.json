@@ -539,5 +539,6 @@
     "NEW_VERSION_CREATED": "New version created",
     "SEE_ALL": "See all",
     "MESSAGE": "Message",
-    "POPUP_ENABLED": "Popup enabled"
+    "POPUP_ENABLED": "Popup enabled",
+    "STRUCTURE_UNIT": "Structure unit"
 }

@@ -28,7 +28,7 @@ angular.module('myApp').factory('Requests', function(Notifications, IPReception,
                 id: ip.id,
                 archive_policy: request.archivePolicy.value.id,
                 purpose: request.purpose,
-                tags: request.tags.value.map(function(tag){return tag.id}),
+                tag: request.tag,
                 allow_unknown_files: request.allowUnknownFiles,
                 validators: validators,
         }).$promise.then(function(response) {

@@ -24,6 +24,11 @@ body.modal-open[style] {
 .ui-select-dropdown {
     opacity: 1 !important;
 }
+.ui-select-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 .st-sort-ascent:before {
     content: '\25B2';
     position: relative;
@@ -1312,4 +1317,8 @@ body.modal-open {
             }
         }
     }
+}
+
+.margin-top-5 {
+    margin-top: 5px;
 }

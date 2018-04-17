@@ -22,18 +22,34 @@
                 <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <div class="tags-row">
-                        <label>{{'TAGS' | translate}}</label>
-                        <span ng-click="updateTags()" class="clickable angular-animate fa fa-refresh fa-sm" ng-class="{'fa-refresh-animate': tagsLoading }" uib-popover="{{'REFRESH' | translate}}"
-                            popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                        <label>{{'ARCHIVE' | translate}}</label>
                     </div>
-                    <ui-select multiple ng-model="vm.request.tags.value" theme="bootstrap" sortable="true" close-on-select="false" append-to-body="false">
-                        <ui-select-match ng-attr-placeholder="{{tagsPlaceholder() | translate}}">{{$item.name}}</ui-select-match>
-                        <ui-select-choices ng-hide="!$select.open" repeat="x in vm.request.tags.options | propsFilter: {name: $select.search}">
+                    <ui-select ng-model="vm.tags.archive.value" ng-change="getStructures(vm.tags.archive.value)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
+                        <ui-select-match ng-attr-placeholder="{{tagsPlaceholder() | translate}}">{{vm.tags.archive.value.name}}</ui-select-match>
+                        <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getTags($select.search)" repeat="x in vm.tags.archive.options | propsFilter: {name: $select.search}">
                             <div ng-bind-html="x.name | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
+                    <div ng-if="vm.tags.archive.value || vm.tags.structure.options.length" class="margin-top-5">
+                        <label>{{'CLASSIFICATION_STRUCTURE' | translate}}</label>
+                        <ui-select ng-model="vm.tags.structure.value" ng-change="getTagDescendants(vm.tags.archive.value.parent_id, vm.tags.structure.value.id)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
+                            <ui-select-match ng-attr-placeholder="{{tagsPlaceholder() | translate}}">{{vm.tags.structure.value.name}}</ui-select-match>
+                            <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getStructures(vm.tags.archive.value)" repeat="x in vm.tags.structure.options | propsFilter: {name: $select.search}">
+                                <div ng-bind-html="x.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div ng-if="vm.tags.structure.value || vm.tags.descendants.opyions.length" class="margin-top-5">
+                        <label>{{'STRUCTURE_UNIT' | translate}}</label>
+                        <ui-select ng-model="vm.tags.descendants.value" ng-change="getDescendantId()" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
+                            <ui-select-match ng-attr-placeholder="{{tagsPlaceholder() | translate}}">{{vm.tags.descendants.value.name}}</ui-select-match>
+                            <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getTagDescendants(vm.tags.archive.value.parent_id, vm.tags.structure.value.id, $select.search)" repeat="x in vm.tags.descendants.options | propsFilter: {name: $select.search}">
+                                <div ng-bind-html="x.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
                 </div>
-                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
+                <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')" class="margin-top-5">
                     <input type="checkbox" ng-model="vm.request.allowUnknownFiles">
                     <label>{{'ALLOW_UNKNOWN_FILES' | translate}}</label>
                 </div>

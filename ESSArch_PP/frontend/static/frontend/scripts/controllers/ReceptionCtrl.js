@@ -43,17 +43,26 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                 options: [],
                 disabled: false
             },
-            tags: {
-                value: [],
-                options: []
-            },
             informationClass: null,
             allowUnknownFiles: false
         };
+        vm.tags = {
+            archive: {
+                options: [],
+                value: null
+            },
+            structure: {
+                options: [],
+                value: null
+            },
+            descendants: {
+                options: [],
+                value: null
+            }
+        }
     }
     $scope.initRequestData();
     $scope.$on('$stateChangeStart', function() {
-        $interval.cancel(tagsInterval);
         watchers.forEach(function(watcher) {
             watcher();
         });
@@ -83,7 +92,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
     $scope.updateTags = function() {
         $scope.tagsLoading = true;
         $scope.getTags().then(function(result) {
-            vm.request.tags.options = result;
+            vm.tags.archive.options = result;
             $scope.requestForm = true;
             $scope.tagsLoading = false;
         });
@@ -93,16 +102,6 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
         vm.request.informationClass = vm.request.archivePolicy.value.information_class;
     }
 
-    //If status view is visible, start update interval
-    var tagsInterval;
-    watchers.push($scope.$watch(function(){return $scope.requestForm}, function(newValue, oldValue) {
-        if(newValue) {
-            $interval.cancel(tagsInterval);
-            tagsInterval = $interval(function(){$scope.updateTags()}, appConfig.tagsInterval);
-        } else {
-            $interval.cancel(tagsInterval);
-        }
-    }));
     //Get data for status view
 
     /*******************************************/
@@ -149,7 +148,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
         }
     };
     $scope.tagsPlaceholder = function() {
-        if (vm.request.tags.options.length == 0) {
+        if (vm.tags.archive.options.length == 0) {
             return "NO_TAGS";
         } else {
             return "SELECT_TAGS";
@@ -357,11 +356,69 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                 return data;
             });
     }
-    $scope.getTags = function() {
-        return Tag.query().$promise.then(function(data) {
-            return data;
+    $scope.getTags = function (search) {
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'tags/',
+            params: {index: 'archive', search: search?search:null}
+        }).then(function(response) {
+            var mapped = response.data.map(function(item){
+                var obj = item.current_version;
+                obj.parent_id = item.id;
+                obj.structures = item.structures
+                return obj;
+            });
+            vm.tags.archive.options = mapped;
+            return mapped;
+        }).catch(function(response) {
+            Notifications.add(response.data.detail, 'error');
         });
     }
+
+    $scope.getStructures = function(archive) {
+        $scope.structuresLoading = true;
+        var mapped = archive.structures.map(function(item) {
+            var obj = item.structure;
+            obj.parent_id = item.id;
+            return obj;
+        })
+        $scope.structuresLoading = false;
+        vm.tags.structure.options = mapped;
+    }
+
+    $scope.getTagDescendants = function(id1, id2, search) {
+        $scope.descendantsLoading = true;
+        return $http({
+            method: 'GET',
+            url: appConfig.djangoUrl + 'tags/' + id1 + '/descendants/',
+            params: {structure: id2, search: search?search:null}
+        }).then(function(response) {
+            var mapped = response.data.map(function(item){
+                var obj = item.current_version;
+                obj.parent_id = item.id;
+                obj.structures = item.structures
+                return obj;
+            });
+            $scope.descendantsLoading = false;
+            vm.tags.descendants.options = mapped;
+            return mapped;
+        })
+    }
+
+    $scope.getDescendantId = function() {
+        if(vm.tags.structure.value && vm.tags.descendants.value) {
+            var id = null;
+            vm.tags.descendants.value.structures.forEach(function(item) {
+                if(item.structure.id == vm.tags.structure.value.id) {
+                    id = item.id;
+                }
+            })
+            return id;
+        } else {
+            return null;
+        }
+    }
+
     $scope.receive = function(ips) {
         ips.forEach(function(ip) {
             Requests.receive(ip, vm.request, vm.validatorModel)
@@ -454,7 +511,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                                 $scope.getArchivePolicies().then(function (result) {
                                     vm.request.archivePolicy.options = result;
                                     $scope.getTags().then(function (result) {
-                                        vm.request.tags.options = result;
+                                        vm.tags.archive.options = result;
                                         $scope.requestForm = true;
                                         $scope.receiveModal($scope.includedIps[0]);
                                     });
@@ -498,7 +555,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                                 $scope.getArchivePolicies().then(function (result) {
                                     vm.request.archivePolicy.options = result;
                                     $scope.getTags().then(function (result) {
-                                        vm.request.tags.options = result;
+                                        vm.tags.archive.options = result;
                                         $scope.requestForm = true;
                                         $scope.receiveModal($scope.includedIps[0]);
                                     });
@@ -542,7 +599,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                             $scope.getArchivePolicies().then(function (result) {
                                 vm.request.archivePolicy.options = result;
                                 $scope.getTags().then(function (result) {
-                                    vm.request.tags.options = result;
+                                    vm.tags.archive.options = result;
                                     $scope.requestForm = true;
                                     $scope.receiveModal($scope.includedIps[0]);
                                 });
@@ -588,7 +645,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                         $scope.getArchivePolicies().then(function (result) {
                             vm.request.archivePolicy.options = result;
                             $scope.getTags().then(function (result) {
-                                vm.request.tags.options = result;
+                                vm.tags.archive.options = result;
                                 $scope.requestForm = true;
                                 $scope.receiveModal($scope.includedIps[0]);
                             });

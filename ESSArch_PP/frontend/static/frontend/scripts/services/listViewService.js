@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser) {
+angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser, Notifications) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -305,12 +305,16 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
                         promises.push(Profile.get({ id: saProfile.profile.profile_aip })
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_aip = resource;
+                            }).catch(function (response) {
+                                Notifications.add(response.data.detail, 'error');
                             }));
                     }
                     if (saProfile.profile.profile_dip) {
                         promises.push(Profile.get({ id: saProfile.profile.profile_dip })
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_dip = resource;
+                            }).catch(function (response) {
+                                Notifications.add(response.data.detail, 'error');
                             }));
                     }
                 }
@@ -318,7 +322,9 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
             return $q.all(promises).then(function() {
                 return saProfile;
             })
-        });
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
+        })
     }
 
     function getProfileByTypeFromSA(sa, type){
