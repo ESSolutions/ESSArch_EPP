@@ -1287,7 +1287,11 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             if path != '':
                 dirname = os.path.dirname(path)
                 basename = os.path.basename(path)
-                q = ElasticQ('bool', must=[ElasticQ('term', href=dirname), ElasticQ('match', filename=basename)])
+                q = ElasticQ('bool',
+                             should=[ElasticQ('bool', must=[ElasticQ('term', href=dirname),
+                                                            ElasticQ('term', name=basename)]),
+                                     ElasticQ('bool', must=[ElasticQ('term', href=dirname),
+                                                            ElasticQ('match', filename=basename)])])
 
                 s = s.query(q)
                 hits = s.execute()
