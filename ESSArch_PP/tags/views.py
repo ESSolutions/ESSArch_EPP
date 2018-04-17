@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.filters import SearchFilter
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import TagFilter
@@ -13,8 +14,9 @@ class TagViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
     filter_class = TagFilter
+    search_fields = ('current_version__name',)
 
     http_method_names = ('get', 'head', 'options')
 
