@@ -473,11 +473,13 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
 
     //Create and show modal for remove ip
     $scope.receiveModal = function (ip) {
+        vm.receiveModalLoading = true;
         if (ip.at_reception) {
             IPReception.get({ id: ip.id }).$promise.then(function (resource) {
                 if(resource.altrecordids.SUBMISSIONAGREEMENT) {
                     IPReception.prepare({ id: resource.id, submission_agreement: resource.altrecordids.SUBMISSIONAGREEMENT[0] }).$promise.then(function(prepared) {
                         vm.updateCheckedIp(ip, prepared);
+                        vm.receiveModalLoading = false;
                         var modalInstance = $uibModal.open({
                             animation: true,
                             ariaLabelledBy: 'modal-title',
@@ -522,6 +524,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                         });
                     })
                     .catch(function(response) {
+                        vm.receiveModalLoading = false;
                         var modalInstance = $uibModal.open({
                             animation: true,
                             ariaLabelledBy: 'modal-title',
@@ -566,6 +569,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                         });
                     })
                 } else {
+                    vm.receiveModalLoading = false;
                     var modalInstance = $uibModal.open({
                         animation: true,
                         ariaLabelledBy: 'modal-title',
@@ -612,6 +616,7 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
             })
         } else {
             IP.get({ id: ip.id }).$promise.then(function (resource) {
+                vm.receiveModalLoading = false;
                 var modalInstance = $uibModal.open({
                     animation: true,
                     ariaLabelledBy: 'modal-title',

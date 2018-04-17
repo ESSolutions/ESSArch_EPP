@@ -40,7 +40,7 @@
         </div>
         <div ng-if="includedIps.length>0" class="receive-button-wrapper">
             <div id="request-form" class="request-form receive-modal-button">
-                <button class="btn btn-info" ng-click="receiveModal(includedIps[0])">{{'RECEIVE' | translate}}</button>
+                <button class="btn btn-info" ng-click="receiveModal(includedIps[0])" ng-disabled="vm.receiveModalLoading">{{'RECEIVE' | translate}} <i ng-if="vm.receiveModalLoading" class="fa fa-spinner fa-spin"/></button>
                 <p style="margin-left: 5px; margin-bottom: 0;">{{includedIps.length}} {{'SELECTED' | translate}}</p>
             </div>
         </div>
