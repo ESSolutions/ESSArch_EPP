@@ -91,9 +91,14 @@ class StorageTargetsAdmin( admin.ModelAdmin ):
                 )}),
     )
 
+
+class StorageMediumAdmin(admin.ModelAdmin):
+    exclude = ('last_changed_local', 'last_changed_external')
+
+
 admin.site.register(StorageTarget, StorageTargetsAdmin)
 admin.site.register(Robot)
 admin.site.register(TapeDrive)
 admin.site.register(IOQueue)
-admin.site.register(StorageMedium)
+admin.site.register(StorageMedium, StorageMediumAdmin)
 admin.site.register(StorageObject)
