@@ -1,22 +1,15 @@
-import os
-
-from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch,
-                              Subquery, Value, When)
-from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
-from _version import get_versions
-from configuration.serializers import ArchivePolicySerializer
 from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
                                     ArchivalType, ArchivistOrganization,
-                                    EventIP, InformationPackage, Order,
-                                    Workarea)
+                                    InformationPackage, Order)
 from ESSArch_Core.ip.serializers import WorkareaSerializer
 from ESSArch_Core.profiles.models import SubmissionAgreement
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
-from ip.filters import ip_search_fields
+from _version import get_versions
+from configuration.serializers import ArchivePolicySerializer
 
 VERSION = get_versions()['version']
 

@@ -33,92 +33,52 @@ import shutil
 import smtplib
 import tarfile
 import tempfile
-import time
 import uuid
 import zipfile
 
-from copy import deepcopy
-
+import requests
 from celery import states as celery_states
 from celery.exceptions import Ignore
-from celery.result import allow_join_result, AsyncResult
-
+from celery.result import AsyncResult, allow_join_result
 from crontab import CronTab
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail
 from django.db import transaction
-from django.db.models import F, IntegerField, Max
-from django.db.models.functions import Cast
+from django.db.models import F
 from django.utils import timezone
-
 from groups_manager.utils import get_permission_name
-
 from guardian.shortcuts import assign_perm
-
-from rest_framework.request import Request
-from rest_framework.test import APIRequestFactory
-
-import requests
-
 from scandir import walk
-
 from six.moves import urllib
 
-from ESSArch_Core import tasks
+from ESSArch_Core.WorkflowEngine.dbtask import DBTask
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
-from ESSArch_Core.configuration.models import ArchivePolicy, Path, Parameter
+from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.fixity.checksum import calculate_checksum
-from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
-    ArchivistOrganization,
-    ArchivalLocation,
-    ArchivalType,
-    EventIP,
-    InformationPackage,
-    Workarea,
-)
-from ESSArch_Core.maintenance.models import AppraisalRule, AppraisalJob, AppraisalJobEntry, ConversionRule, ConversionJob, ConversionJobEntry
+from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
+                                    ArchivalType, ArchivistOrganization,
+                                    EventIP, InformationPackage, Workarea)
+from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
+                                             ConversionJob, ConversionRule)
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.search.ingest import index_path
-from ESSArch_Core.storage.exceptions import (
-    TapeDriveLockedError,
-    TapeMountedError,
-    TapeMountedAndLockedByOtherError,
-    TapeUnmountedError,
-)
 from ESSArch_Core.storage.copy import copy_file
-from ESSArch_Core.storage.models import (
-    DISK,
-    TAPE,
-
-    AccessQueue,
-    IOQueue,
-
-    Robot,
-    RobotQueue,
-    TapeDrive,
-    TapeSlot,
-
-    StorageMedium,
-    StorageMethod,
-    StorageMethodTargetRelation,
-    StorageObject,
-)
+from ESSArch_Core.storage.exceptions import (TapeDriveLockedError,
+                                             TapeMountedAndLockedByOtherError,
+                                             TapeMountedError,
+                                             TapeUnmountedError)
+from ESSArch_Core.storage.models import (DISK, TAPE, AccessQueue, IOQueue,
+                                         Robot, RobotQueue, StorageMedium,
+                                         StorageMethod,
+                                         StorageMethodTargetRelation,
+                                         StorageObject, TapeDrive, TapeSlot)
 from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
-from ESSArch_Core.util import (
-    creation_date,
-    find_destination,
-    timestamp_to_datetime,
-)
-from ESSArch_Core.WorkflowEngine.dbtask import DBTask
-from ESSArch_Core.WorkflowEngine.models import ProcessTask, ProcessStep
-
-from ip.serializers import InformationPackageDetailSerializer
-
+from ESSArch_Core.util import (creation_date, find_destination,
+                               timestamp_to_datetime)
 from storage.serializers import IOQueueSerializer
 
 User = get_user_model()

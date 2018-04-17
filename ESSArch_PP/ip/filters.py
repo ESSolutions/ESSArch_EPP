@@ -22,9 +22,7 @@
     Email - essarch@essolutions.se
 """
 
-from django.db.models import (BooleanField, Case, Count, Exists, F,
-                              IntegerField, Max, Min, OuterRef, Prefetch, Q,
-                              Subquery, Value, When)
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import exceptions
 from rest_framework.filters import SearchFilter

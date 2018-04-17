@@ -26,59 +26,33 @@ import os
 import uuid
 
 from django.contrib.auth.models import User
-
 from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import exceptions, viewsets, filters, permissions, status
+from rest_framework import exceptions, filters, permissions, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
-
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
-from ESSArch_Core.exceptions import Conflict
-
-from ESSArch_Core.configuration.models import ArchivePolicy, Path
-
-from ESSArch_Core.ip.models import InformationPackage
-
-from ESSArch_Core.storage.models import (
-    AccessQueue,
-    IOQueue,
-    Robot,
-    RobotQueue,
-    StorageMedium,
-    StorageMethod,
-    StorageMethodTargetRelation,
-    StorageObject,
-    StorageTarget,
-    TapeDrive,
-    TapeSlot,
-)
-
-from ESSArch_Core.util import parse_content_range_header
-
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
-
-from configuration.serializers import (
-    StorageMethodSerializer,
-    StorageMethodTargetRelationSerializer,
-    StorageTargetSerializer,
-)
-
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
+from ESSArch_Core.exceptions import Conflict
+from ESSArch_Core.ip.models import InformationPackage
+from ESSArch_Core.storage.models import (AccessQueue, IOQueue, Robot,
+                                         RobotQueue, StorageMedium,
+                                         StorageMethod,
+                                         StorageMethodTargetRelation,
+                                         StorageObject, StorageTarget,
+                                         TapeDrive, TapeSlot)
+from ESSArch_Core.util import parse_content_range_header
+from configuration.serializers import (StorageMethodSerializer,
+                                       StorageMethodTargetRelationSerializer,
+                                       StorageTargetSerializer)
 from storage.filters import StorageMediumFilter
+from storage.serializers import (AccessQueueSerializer, IOQueueSerializer,
+                                 IOQueueWriteSerializer, RobotQueueSerializer,
+                                 RobotSerializer, StorageMediumSerializer,
+                                 StorageObjectWithIPSerializer,
+                                 TapeDriveSerializer, TapeSlotSerializer)
 
-from storage.serializers import (
-    AccessQueueSerializer,
-    IOQueueSerializer,
-    IOQueueWriteSerializer,
-    RobotSerializer,
-    RobotQueueSerializer,
-    StorageObjectSerializer,
-    StorageObjectWithIPSerializer,
-    StorageMediumSerializer,
-    TapeDriveSerializer,
-    TapeSlotSerializer,
-)
 
 class IOQueueViewSet(viewsets.ModelViewSet):
     """

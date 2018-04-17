@@ -22,17 +22,11 @@
     Email - essarch@essolutions.se
 """
 
-from django.db.models import Q
-
 from django_filters import rest_framework as filters
 
 from ESSArch_Core.filters import ListFilter
+from ESSArch_Core.storage.models import StorageMedium
 
-from ESSArch_Core.storage.models import (
-    StorageMedium,
-    TapeDrive,
-    TapeSlot
-)
 
 class StorageMediumFilter(filters.FilterSet):
     status = ListFilter(name='status', distinct='true')

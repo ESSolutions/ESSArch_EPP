@@ -1,35 +1,21 @@
 import os
 
 from django.contrib.auth import get_user_model
-
 from rest_framework import serializers, validators
 
 from ESSArch_Core.auth.serializers import UserSerializer
-
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
-
 from ESSArch_Core.ip.models import InformationPackage
-
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
+from ESSArch_Core.storage.models import (DISK, AccessQueue, IOQueue, Robot,
+                                         RobotQueue, StorageMedium,
+                                         StorageMethod,
+                                         StorageMethodTargetRelation,
+                                         StorageObject, StorageTarget,
+                                         TapeDrive, TapeSlot)
+from ip.serializers import (InformationPackageDetailSerializer,
+                            InformationPackageSerializer)
 
-from ESSArch_Core.storage.models import medium_status_CHOICES
-
-from ESSArch_Core.storage.models import (
-    AccessQueue,
-    DISK,
-    IOQueue,
-    Robot,
-    RobotQueue,
-    StorageMedium,
-    StorageMethod,
-    StorageMethodTargetRelation,
-    StorageObject,
-    StorageTarget,
-    TapeDrive,
-    TapeSlot,
-)
-
-from ip.serializers import InformationPackageSerializer, InformationPackageDetailSerializer
 
 class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
     agent = UserSerializer()

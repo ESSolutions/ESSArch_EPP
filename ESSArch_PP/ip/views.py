@@ -23,52 +23,46 @@
 """
 
 import copy
-import datetime
 import errno
 import glob
 import logging
 import math
-import mimetypes
 import os
 import re
 import shutil
 import uuid
 from collections import OrderedDict
-from operator import itemgetter
 
+import six
 from celery import states as celery_states
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db.models import (BooleanField, Case, Exists, F, Max, Min, OuterRef, Prefetch, Q,
-                              Subquery, Value, When)
 from django.db import transaction
+from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef,
+                              Prefetch, Q, Subquery, Value, When)
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import DjangoFilterBackend
-
 from elasticsearch.exceptions import TransportError
-from elasticsearch_dsl import Index, Search, Q as ElasticQ
-
+from elasticsearch_dsl import Index, Search
+from elasticsearch_dsl import Q as ElasticQ
 from groups_manager.utils import get_permission_name
-
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm, get_perms
-
 from lxml import etree
 from natsort import natsorted
 from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-import six
-
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
+from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
 from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
-from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
                                     ArchivalType, ArchivistOrganization,
@@ -78,23 +72,18 @@ from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
                                          IsOrderResponsibleOrAdmin,
                                          IsResponsibleOrReadOnly)
 from ESSArch_Core.maintenance.models import AppraisalRule, ConversionRule
-from ESSArch_Core.pagination import LinkHeaderPagination
+from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
                                           SubmissionAgreement)
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import (find_destination, generate_file_response,
-                               get_files_and_dirs, get_tree_size_and_count,
-                               in_directory, list_files, mkdir_p,
-                               parse_content_range_header, remove_prefix,
-                               timestamp_to_datetime)
-from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
+from ESSArch_Core.util import (find_destination, in_directory, list_files,
+                               mkdir_p, parse_content_range_header,
+                               remove_prefix, timestamp_to_datetime)
 from ip.filters import (ArchivalInstitutionFilter, ArchivalLocationFilter,
                         ArchivalTypeFilter, ArchivistOrganizationFilter,
-                        InformationPackageFilter, WorkareaFilter,
-                        get_ip_search_fields)
+                        InformationPackageFilter)
 from ip.serializers import (ArchivalInstitutionSerializer,
                             ArchivalLocationSerializer, ArchivalTypeSerializer,
                             ArchivistOrganizationSerializer,
