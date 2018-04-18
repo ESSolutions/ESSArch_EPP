@@ -100,7 +100,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         }
     })
     .state('home.access.search', {
-        url: 'search',
+        url: '/search',
         templateUrl: '/static/frontend/views/search.html',
         controller: 'SearchCtrl as vm',
         resolve: {
