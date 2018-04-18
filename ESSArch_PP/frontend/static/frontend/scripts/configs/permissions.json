@@ -23,6 +23,9 @@
                 }
             },
             "access": {
+                "search": {
+                    "_permissions": ["tags.search"]
+                },
                 "accessIp": {
                     "_permissions": [
                         "ip.get_from_storage",
@@ -40,9 +43,6 @@
                     "_permissions": [
                         "ip.preserve_dip"
                     ]
-                },
-                "search": {
-                    "_permissions": ["tags.search"]
                 }
             },
             "orders": {
