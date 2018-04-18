@@ -147,11 +147,19 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
             });
         }
     };
-    $scope.tagsPlaceholder = function() {
-        if (vm.tags.archive.options.length == 0) {
-            return "NO_TAGS";
+    $scope.tagsPlaceholder = function(type) {
+        if ((!$scope.tagsLoading && type.toUpperCase() == "ARCHIVE" && vm.tags.archive.options.length == 0) || (!$scope.structuresLoading && type.toUpperCase() == "CLASSIFICATION_STRUCTURE" && vm.tags.structure.options.length == 0) || (!$scope.descendantsLoading && type.toUpperCase() == "STRUCTURE_UNIT" && vm.tags.descendants.options.length == 0)) {
+            if(type) {
+                return "NO_"+type.toUpperCase()+"S";
+            } else {
+                return "NO_TAGS";
+            }
         } else {
-            return "SELECT_TAGS";
+            if(type) {
+                return "SELECT_"+type.toUpperCase()+"_TAG";
+            } else {
+                return "SELECT_TAGS";
+            }
         }
     }
     //Click function for Ip table

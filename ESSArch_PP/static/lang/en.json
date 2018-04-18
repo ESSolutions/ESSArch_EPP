@@ -541,5 +541,11 @@
     "MESSAGE": "Message",
     "POPUP_ENABLED": "Popup enabled",
     "STRUCTURE_UNIT": "Structure unit",
-    "STORAGE_UNITS": "Storage units"
+    "STORAGE_UNITS": "Storage units",
+    "SELECT_ARCHIVE_TAG": "Select archive ...",
+    "SELECT_CLASSIFICATION_STRUCTURE_TAG": "Select classification structure ...",
+    "SELECT_STRUCTURE_UNIT_TAG": "Select structure unit ...",
+    "NO_ARCHIVES": "There are no archives ...",
+    "NO_CLASSIFICATION_STRUCTURES": "There are no classification structures ...",
+    "NO_STRUCTURE_UNITS": "There are no structure units ..."
 }

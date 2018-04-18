@@ -25,7 +25,7 @@ body.modal-open[style] {
     opacity: 1 !important;
 }
 .ui-select-toggle {
-    display: flex;
+    display: flex !important;
     flex-direction: row;
     align-items: center;
 }
@@ -625,6 +625,13 @@ body.modal-open[style] {
 }
 .input-group-addon {
 padding: 0 12px;
+}
+.input-group-btn {
+    .btn-default {
+        height: 26px;
+        display: flex;
+        align-items: center;
+    }
 }
 .sender-receiver-wrapper {
     input {

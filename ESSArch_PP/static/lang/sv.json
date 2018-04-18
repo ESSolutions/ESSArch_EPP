@@ -540,5 +540,11 @@
     "MESSAGE": "Meddelande",
     "POPUP_ENABLED": "Popup aktiverad",
     "STRUCTURE_UNIT": "Strukturenhet",
-    "STORAGE_UNITS": "Förvaringsenheter"
+    "STORAGE_UNITS": "Förvaringsenheter",
+    "SELECT_ARCHIVE_TAG": "Välj arkiv ...",
+    "SELECT_CLASSIFICATION_STRUCTURE_TAG": "Välj klassificeringsstruktur ...",
+    "SELECT_STRUCTURE_UNIT_TAG": "Välj strukturenhet ...",
+    "NO_ARCHIVES": "Det finns inga arkiv ...",
+    "NO_CLASSICIFATION_STRUCTURES": "Det finns inga klassificeringsstrukturer ...",
+    "NO_STRUCTURE_UNITS": "Det finns inga strukturenheter ..."
 }
