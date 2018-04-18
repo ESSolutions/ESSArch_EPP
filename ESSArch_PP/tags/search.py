@@ -430,8 +430,22 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(serializer.data)
 
+    @detail_route(methods=['post'], url_path='remove-from-structure')
+    def remove_from_structure(self, request, index=None, pk=None):
+        obj = self.get_tag_object()
+        try:
+            structure = request.data['structure']
+        except KeyError:
+            raise exceptions.ParseError('Missing "structure" parameter')
+        self.verify_structure(obj, structure)
+        obj.tag.structures.get(structure=structure).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def destroy(self, request, index=None, pk=None):
         obj = self.get_tag_object()
-        structure = request.query_params.get('structure')
-        obj.get_descendants(structure=structure, include_self=True).delete()
+        if request.query_params.get('delete_descendants', False):
+            structure = request.query_params.get('structure')
+            obj.get_descendants(structure=structure, include_self=True).delete()
+        else:
+            obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
