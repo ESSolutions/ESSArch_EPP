@@ -129,6 +129,25 @@
                 <uib-tab ng-show="('home.access.search.detail' | isState) || ('home.access.search.information_package' | isState) || ('home.access.search.component' | isState)|| ('home.access.search.archive' | isState) || ('home.access.search.document' | isState) || ('home.access.search.directory' | isState)" index="1" heading="{{'RECORD' | translate}}">
                     <div ui-view></div>
                 </uib-tab>
+                <uib-tab index="2" heading="{{'NEW_ARCHIVE' | translate}}">
+                    <div class="new-archive-container">
+                        <form ng-submit="vm.createArchive(vm.archiveName, vm.structureName, vm.nodeType)">
+                            <label>
+                                {{'NAME' | translate}}
+                            </label>
+                            <input type="text" class="form-control" ng-model="vm.archiveName"/>
+                            <label class="margin-top-5">
+                                {{'CLASSIFICATION_STRUCTURE_NAME' | translate}}
+                            </label>
+                            <input type="text" class="form-control" ng-model="vm.structureName"/>
+                            <label class="margin-top-5">
+                                {{'TYPE' | translate}}
+                            </label>
+                            <input type="text" class="form-control" ng-model="vm.nodeType"/>
+                            <button type="submit" class="btn btn-success margin-top-5">{{'SAVE' | translate}}</button>
+                        </form>
+                    </div>
+                </uib-tab>
             </uib-tabset>
         </div>
     </div>

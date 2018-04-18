@@ -66,6 +66,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         file: true
     }
 
+    vm.createArchive = function(archiveName, structureName, type) {
+        Search.addNode({name: archiveName, structure: structureName, index: 'archive', type: type}).then(function(response) {
+            vm.archiveName = null;
+            vm.structureName = null;
+            vm.nodeType = null;
+            Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
+        }).catch(function(response) {
+            Notifications.add(response.data.detail, 'error');
+        })
+    }
+
     vm.changeClassificationStructure = function() {
         vm.searchSubmit(vm.filterObject.q);
         vm.openResult(vm.record);
