@@ -48,6 +48,8 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search, Q as ElasticQ
 from groups_manager.utils import get_permission_name
 from guardian.shortcuts import assign_perm
 from scandir import walk
@@ -59,6 +61,7 @@ from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
+from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
@@ -67,6 +70,7 @@ from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
 from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
                                              ConversionJob, ConversionRule)
 from ESSArch_Core.profiles.utils import fill_specification_data
+from ESSArch_Core.search.importers import get_content_type_importer
 from ESSArch_Core.search.ingest import index_path
 from ESSArch_Core.storage.copy import copy_file
 from ESSArch_Core.storage.exceptions import (TapeDriveLockedError,
@@ -84,7 +88,7 @@ from ESSArch_Core.util import (creation_date, find_destination,
 from storage.serializers import IOQueueSerializer
 
 User = get_user_model()
-
+es = Elasticsearch()
 logger = logging.getLogger('essarch')
 
 class ReceiveSIP(DBTask):
@@ -244,15 +248,37 @@ class CacheAIP(DBTask):
             if e.errno != errno.EEXIST:
                 raise
 
-        if aip_obj.tag is not None:
+        tag_structure = None
+        ct_importer = None
+
+        data = fill_specification_data(aip_obj.get_profile_data('aip'), ip=aip_obj, sa=aip_obj.submission_agreement)
+        ctsdir, ctsfile = find_destination('content_type_specification', aip_obj.get_profile('aip').structure, srcdir)
+        ct_profile = aip_obj.get_profile('content_type')
+
+        if ct_profile is not None:
+            cts = parseContent(os.path.join(ctsdir, ctsfile), data)
+            if os.path.isfile(cts):
+                logger.info('Found content type specification: {path}'.format(path=cts))
+                try:
+                    ct_importer_name = ct_profile.specification['name']
+                except KeyError:
+                    logger.exception('No content type importer specified in profile')
+                    raise
+                ct_importer = get_content_type_importer(ct_importer_name)()
+                ct_importer.import_content(srcdir, cts, aip_obj)
+                es.indices.refresh(index="document")
+            else:
+                err = "Content type specification not found"
+                logger.error('{err}: {path}'.format(err=err, path=cts))
+                raise OSError(errno.ENOENT, err, cts)
+
+        elif aip_obj.tag is not None:
             with transaction.atomic():
                 tag = Tag.objects.create()
                 tag_structure = TagStructure.objects.create(tag=tag, parent=aip_obj.tag,
                                                             structure=aip_obj.tag.structure)
                 tag_version = TagVersion.objects.create(tag=tag, name=objid, type='Information Package',
                                                         elastic_index='component')
-        else:
-            tag_structure = None
 
         with tarfile.open(dsttar, 'w') as tar:
             for root, dirs, files in walk(srcdir):
@@ -277,7 +303,25 @@ class CacheAIP(DBTask):
                     dst = os.path.join(dstdir, rel, f)
                     dst = os.path.normpath(dst)
 
-                    index_path(aip_obj, src, parent=tag_structure)
+                    if ct_importer is None:
+                        index_path(aip_obj, src, parent=tag_structure)
+                    else:
+                        # we have a content type importer,
+                        # index this file if it hasn't already been indexed
+                        s = Search(index=['document'])
+                        s = s.filter('term', ip=str(aip_obj.pk))
+
+                        dirname = os.path.dirname(src)
+                        basename = os.path.basename(src)
+                        href = os.path.relpath(dirname, aip_obj.object_path)
+                        href = '' if href == '.' else href
+
+                        q = ElasticQ('bool', must=[ElasticQ('term', href=href), ElasticQ('match', filename=basename)])
+                        s = s.query(q)
+                        response = s.execute()
+
+                        if response.hits.total == 0:
+                            index_path(aip_obj, src, parent=tag_structure)
 
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
