@@ -395,6 +395,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     parent_structure = parent_version.get_active_structure()
                     tag_structure.parent = parent_structure
                     tag_structure.structure = parent_structure.structure
+                elif data.get('structure') is not None:
+                    structure = Structure.objects.create(name=data.get("structure"))
+                    tag_structure.structure = structure
+                else:
+                    raise exceptions.ParseError('parent or structure is required')
 
                 tag_structure.save()
 
