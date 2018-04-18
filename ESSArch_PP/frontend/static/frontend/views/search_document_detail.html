@@ -1,4 +1,31 @@
 <div class="document-result">
-    document result
-    <button class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+    <h4>{{vm.record.type}}</h4>
+    <h4>{{vm.record._source.name}}</h4>
+    <p ng-if="vm.record._source.start_date">{{vm.record._source.start_date | date:"yyyy-MM-dd"}} - {{vm.record._source.end_date | date:"yyyy-MM-dd"}}</p>
+    <p class="result-description">{{vm.record._source.desc}}</p>
+    <br/>
+    <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
+    <div class="metadata-tables-wrapper">
+        <div class="table-x-overflow metadata-table">
+            <table>
+                <tr>
+                    <td style="padding-right: 10px;"><b>{{'PATH' | translate}}</b></td>
+                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.href +'/'+ vm.record._source.filename}}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>{{'CHANGED' | translate}}</b></td>
+                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.modified | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>{{'CONTENT_TYPE' | translate}}</b></td>
+                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.attachment.content_type | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>{{'SIZE' | translate}}</b></td>
+                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.size | filesize}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <button class="btn btn-success lock-button margin-top-5" ng-click="vm.viewFile(vm.record._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
 </div>

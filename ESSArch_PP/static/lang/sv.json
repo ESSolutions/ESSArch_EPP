@@ -546,5 +546,9 @@
     "SELECT_STRUCTURE_UNIT_TAG": "Välj strukturenhet ...",
     "NO_ARCHIVES": "Det finns inga arkiv ...",
     "NO_CLASSICIFATION_STRUCTURES": "Det finns inga klassificeringsstrukturer ...",
-    "NO_STRUCTURE_UNITS": "Det finns inga strukturenheter ..."
+    "NO_STRUCTURE_UNITS": "Det finns inga strukturenheter ...",
+    "CLASSIFICATION_STRUCTURE_NAME": "Klassificeringsstrukturs namn",
+    "NEW_ARCHIVE": "Nytt arkiv",
+    "NEW_ARCHIVE_CREATED": "Nytt arkiv skapat!",
+    "CONTENT_TYPE": "Content type"
 }

@@ -547,5 +547,9 @@
     "SELECT_STRUCTURE_UNIT_TAG": "Select structure unit ...",
     "NO_ARCHIVES": "There are no archives ...",
     "NO_CLASSIFICATION_STRUCTURES": "There are no classification structures ...",
-    "NO_STRUCTURE_UNITS": "There are no structure units ..."
+    "NO_STRUCTURE_UNITS": "There are no structure units ...",
+    "CLASSIFICATION_STRUCTURE_NAME": "Classification structure name",
+    "NEW_ARCHIVE": "New archive",
+    "NEW_ARCHIVE_CREATED": "New archive created!",
+    "CONTENT_TYPE": "Content type"
 }
