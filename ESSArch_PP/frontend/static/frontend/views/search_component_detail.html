@@ -33,9 +33,9 @@
             </thead>
             <tbody>
                 <tr ng-repeat="x in vm.record_children">
-                    <td><b>{{x._source.reference_code}}</b></td>
-                    <td>{{x._source.name}}</td>
-                    <td>{{x._source.unit_dates.date}}</td>
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer"><b>{{x._source.reference_code}}</b></td>
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>
                     <td>
                         <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                     </td>

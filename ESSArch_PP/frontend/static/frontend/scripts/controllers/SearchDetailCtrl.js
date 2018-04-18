@@ -249,6 +249,10 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         plugins : ['types', 'contextmenu', 'dnd']
     };
 
+    vm.gotoNode = function(node) {
+        $state.go("home.access.search." + node._index, { id: node._id });
+    }
+
     vm.dropNode = function(jqueryObj, data) {
         var node = data.node.original;
         var parent = vm.recordTreeInstance.jstree(true).get_node(data.parent);
