@@ -51,7 +51,7 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-if="vm.tags.structure.value" class="margin-top-5">
+                    <div ng-if="vm.tags.structure.value && vm.tags.archive.value" class="margin-top-5">
                         <label>{{'STRUCTURE_UNIT' | translate}}</label>
                         <div class="input-group">
                             <ui-select allow-clear ng-model="vm.tags.descendants.value" ng-change="getDescendantId()" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
