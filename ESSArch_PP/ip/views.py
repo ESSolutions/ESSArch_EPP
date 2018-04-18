@@ -353,7 +353,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         extra_data = fill_specification_data(ip=ip, sa=sa)
 
-        for profile_type in ['aic_description', 'aip', 'aip_description', 'dip', 'preservation_metadata']:
+        for profile_type in ['aic_description', 'aip', 'aip_description', 'content_type', 'dip', 'preservation_metadata']:
             profile = getattr(sa, 'profile_%s' % profile_type, None)
 
             if profile is None:
