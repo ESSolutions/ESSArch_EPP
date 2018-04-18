@@ -49,15 +49,18 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
         vm.tags = {
             archive: {
                 options: [],
-                value: null
+                value: null,
+                previous: null
             },
             structure: {
                 options: [],
-                value: null
+                value: null,
+                previous: null
             },
             descendants: {
                 options: [],
-                value: null
+                value: null,
+                previous: null
             }
         }
     }
@@ -424,6 +427,21 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
             return id;
         } else {
             return null;
+        }
+    }
+
+    $scope.archiveChanged = function(item) {
+        if(vm.tags.archive.previous = null || item.id != vm.tags.archive.previous) {
+            $scope.getStructures(vm.tags.archive.value);
+            vm.tags.structure.value = null;
+            vm.tags.archive.previous = item.id;
+        }
+    }
+    $scope.structureChanged = function(item) {
+        if(vm.tags.structure.previous == null || item.id != vm.tags.structure.previous) {
+            $scope.getTagDescendants(vm.tags.archive.value.parent_id, vm.tags.structure.value.id);
+            vm.tags.descendants.value = null;
+            vm.tags.structure.previous = item.id;
         }
     }
 
