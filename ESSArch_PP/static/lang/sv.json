@@ -539,5 +539,6 @@
     "SEE_ALL": "Se alla",
     "MESSAGE": "Meddelande",
     "POPUP_ENABLED": "Popup aktiverad",
-    "STRUCTURE_UNIT": "Strukturenhet"
+    "STRUCTURE_UNIT": "Strukturenhet",
+    "STORAGE_UNITS": "Förvaringsenheter"
 }

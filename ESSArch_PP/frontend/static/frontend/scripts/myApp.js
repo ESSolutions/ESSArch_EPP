@@ -99,7 +99,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.search', {
+    .state('home.access.search', {
         url: 'search',
         templateUrl: '/static/frontend/views/search.html',
         controller: 'SearchCtrl as vm',
@@ -110,12 +110,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
     })
-    .state('home.search.information_package', {
+    .state('home.access.search.information_package', {
         url: '/information_package/:id',
         templateUrl: '/static/frontend/views/search_ip_detail.html',
         controller: 'SearchIpCtrl as vm',
@@ -126,12 +126,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
     })
-    .state('home.search.component', {
+    .state('home.access.search.component', {
         url: '/component/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
         controller: 'SearchDetailCtrl as vm',
@@ -142,12 +142,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
     })
-    .state('home.search.directory', {
+    .state('home.access.search.directory', {
         url: '/directory/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
         controller: 'SearchDetailCtrl as vm',
@@ -158,12 +158,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
     })
-    .state('home.search.document', {
+    .state('home.access.search.document', {
         url: '/document/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
         controller: 'SearchDetailCtrl as vm',
@@ -174,12 +174,12 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
     })
-    .state('home.search.archive', {
+    .state('home.access.search.archive', {
         url: '/archive/:id',
         templateUrl: '/static/frontend/views/search_detail.html',
         controller: 'SearchDetailCtrl as vm',
@@ -190,7 +190,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         },
         data: {
             permissions: {
-                only: nestedPermissions(Object.resolve("home.search", permissionConfig)),
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },

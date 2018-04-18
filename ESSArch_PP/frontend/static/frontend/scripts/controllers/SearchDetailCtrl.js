@@ -307,7 +307,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         if (e.action == "select_node") {
             $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
                 vm.record = response.data;
-                $state.go("home.search." + vm.record._index, { id: vm.record._id }, { notify: false });
+                $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
                 $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
 
                 if (!vm.record.is_leaf_node) {
@@ -386,7 +386,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
 
     vm.gotoSearch = function() {
         $rootScope.$broadcast('CHANGE_TAB', {tab: 0});
-        $state.go("home.search");
+        $state.go("home.access.search");
     }
 
     vm.setCurrentVersion = function(node_id) {

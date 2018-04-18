@@ -17,17 +17,24 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     $scope.$on('CHANGE_TAB', function(event, data) {
         vm.activeTab = data.tab;
     });
+    $rootScope.$on('$translateChangeSuccess', function(event, current, previous) {
+        $http.get(appConfig.djangoUrl+"search/", {params: {page_size: 0}}).then(function(response) {
+            vm.loadTags(response.data.aggregations);
+            vm.fileExtensions = response.data.aggregations._filter_extension.extension.buckets;
+            vm.showTree = true;
+        })
+    });
 
     // When state is changed to search active tab is set to the first tab.
     // Fixing issues when backing from search detail state and no tab would be active
     $scope.$on("$stateChangeSuccess", function() {
-        if ($state.is('home.search')) {
+        if ($state.is('home.access.search')) {
             vm.activeTab = 0;
         }
     });
 
     vm.$onInit = function() {
-        if($state.is('home.search.detail') || $state.is('home.search.information_package') || $state.is('home.search.component') || $state.is('home.search.archive') || $state.is('home.search.directory') || $state.is('home.search.document')) {
+        if($state.is('home.access.search.detail') || $state.is('home.access.search.information_package') || $state.is('home.access.search.component') || $state.is('home.access.search.archive') || $state.is('home.access.search.directory') || $state.is('home.access.search.document')) {
             vm.activeTab = 1;
             vm.showTree = true;
         } else {
@@ -223,7 +230,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if(!result.id && result._id) {
             result.id = result._id;
         }
-        $state.go("home.search."+result._index, {id: result.id});
+        $state.go("home.access.search."+result._index, {id: result.id});
         vm.activeTab = 1;
     }
 

@@ -8,11 +8,11 @@ angular.module('myApp').controller('SearchIpCtrl', function(appConfig, $scope, $
                 $rootScope.$broadcast('UPDATE_TITLE', {title: vm.ip.label});
             } else {
                 Notifications.add("IP not found in archival storage", "error");
-                $state.go('home.search')
+                $state.go('home.access.search')
             }
         }).catch(function() {
             Notifications.add("IP not found in archival storage", "error");
-            $state.go('home.search');
+            $state.go('home.access.search');
         });
     }
 

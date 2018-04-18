@@ -40,6 +40,9 @@
                     "_permissions": [
                         "ip.preserve_dip"
                     ]
+                },
+                "search": {
+                    "_permissions": ["tags.search"]
                 }
             },
             "orders": {
@@ -110,9 +113,6 @@
                         "_permissions": ["profiles.export_sa", "profiles.export_profile"]
                     }
                 }
-            },
-            "search": {
-                "_permissions": ["tags.search"]
             }
         }
     }
