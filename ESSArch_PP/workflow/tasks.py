@@ -49,7 +49,6 @@ from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Q as ElasticQ
 from groups_manager.utils import get_permission_name
 from guardian.shortcuts import assign_perm
 from scandir import walk
@@ -249,7 +248,7 @@ class CacheAIP(DBTask):
                 raise
 
         tag_structure = None
-        ct_importer = None
+        indexed_files = []
 
         data = fill_specification_data(aip_obj.get_profile_data('aip'), ip=aip_obj, sa=aip_obj.submission_agreement)
         ctsdir, ctsfile = find_destination('content_type_specification', aip_obj.get_profile('aip').structure, srcdir)
@@ -265,8 +264,7 @@ class CacheAIP(DBTask):
                     logger.exception('No content type importer specified in profile')
                     raise
                 ct_importer = get_content_type_importer(ct_importer_name)()
-                ct_importer.import_content(srcdir, cts, aip_obj)
-                es.indices.refresh(index="document")
+                indexed_files = ct_importer.import_content(srcdir, cts, aip_obj)
             else:
                 err = "Content type specification not found"
                 logger.error('{err}: {path}'.format(err=err, path=cts))
@@ -303,25 +301,12 @@ class CacheAIP(DBTask):
                     dst = os.path.join(dstdir, rel, f)
                     dst = os.path.normpath(dst)
 
-                    if ct_importer is None:
+                    try:
+                        # check if file has already been indexed
+                        indexed_files.remove(src)
+                    except ValueError:
+                        # file has not been indexed, index it
                         index_path(aip_obj, src, parent=tag_structure)
-                    else:
-                        # we have a content type importer,
-                        # index this file if it hasn't already been indexed
-                        s = Search(index=['document'])
-                        s = s.filter('term', ip=str(aip_obj.pk))
-
-                        dirname = os.path.dirname(src)
-                        basename = os.path.basename(src)
-                        href = os.path.relpath(dirname, aip_obj.object_path)
-                        href = '' if href == '.' else href
-
-                        q = ElasticQ('bool', must=[ElasticQ('term', href=href), ElasticQ('match', filename=basename)])
-                        s = s.query(q)
-                        response = s.execute()
-
-                        if response.hits.total == 0:
-                            index_path(aip_obj, src, parent=tag_structure)
 
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
