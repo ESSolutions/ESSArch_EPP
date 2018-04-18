@@ -53,6 +53,14 @@ def installProfiles():
     installProfileDIP(sa)
     installProfilePreservationMetadata(sa)
 
+    # create ERMS SA
+    erms_sa = sa
+    erms_sa.pk = None
+    erms_sa.name = "SA National Archive and Government SE (ERMS)"
+    erms_sa.save()
+
+    installProfileContentType(erms_sa)
+
     return 0
 
 
@@ -1381,6 +1389,28 @@ def installProfilePreservationMetadata(sa):
     sa.save()
 
     print 'Installed profile preservation metadata'
+
+    return 0
+
+
+def installProfileContentType(sa):
+
+    dct = {
+        'name': 'Content Type profile SE (ERMS)',
+        'profile_type': 'content_type',
+        'type': 'content_type',
+        'status': 'Draft',
+        'label': 'Content Type profile SE (ERMS)',
+        'specification': {
+            'name': 'eard_erms'
+        }
+    }
+
+    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
+    sa.profile_content_type = profile
+    sa.save()
+
+    print 'Installed profile content type'
 
     return 0
 
