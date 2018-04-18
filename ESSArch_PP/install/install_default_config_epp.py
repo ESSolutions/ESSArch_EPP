@@ -350,6 +350,15 @@ def installDefaultStorageMethods():
         archive_policy=ArchivePolicy.objects.get(policy_name='default'),
         status=True,
         type=DISK,
+        containers=False,
+    )
+
+    StorageMethod.objects.get_or_create(
+        name='Default Long-term Storage Method 1',
+        archive_policy=ArchivePolicy.objects.get(policy_name='default'),
+        status=True,
+        type=DISK,
+        containers=True,
     )
 
     return 0
@@ -363,6 +372,13 @@ def installDefaultStorageTargets():
         target=u'/ESSArch/data/store/disk1',
     )
 
+    StorageTarget.objects.get_or_create(
+        name='Default Long-term Storage Target 1',
+        status=True,
+        type=DISK,
+        target=u'/ESSArch/data/store/disk2',
+    )
+
     return 0
 
 
@@ -372,6 +388,13 @@ def installDefaultStorageMethodTargetRelations():
         status=True,
         storage_method=StorageMethod.objects.get(name='Default Storage Method 1'),
         storage_target=StorageTarget.objects.get(name='Default Storage Target 1'),
+    )
+
+    StorageMethodTargetRelation.objects.get_or_create(
+        name='Default Long-term Storage Method Target Relation 1',
+        status=True,
+        storage_method=StorageMethod.objects.get(name='Default Long-term Storage Method 1'),
+        storage_target=StorageTarget.objects.get(name='Default Long-term Storage Target 1'),
     )
 
     return 0
