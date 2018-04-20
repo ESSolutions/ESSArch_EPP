@@ -172,6 +172,14 @@
     opacity: .7;
 }
 
+// Override field validation message class
+
+.messenger-message {
+    &.message {
+        margin-top: 0px !important;
+    }
+}
+
 // Override Alert colors
 
 ul.messenger-theme-flat .messenger-message.alert-success .messenger-message-inner:before {
