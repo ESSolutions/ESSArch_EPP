@@ -392,7 +392,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
                 if data.get('parent') is not None:
                     parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
-                    parent_structure = parent_version.get_active_structure()
+                    structure = data.get('structure')
+                    if structure is None:
+                        raise exceptions.ParseError('Missing "structure" parameter')
+                    parent_structure = parent_version.get_structures(structure).get()
                     tag_structure.parent = parent_structure
                     tag_structure.structure = parent_structure.structure
                 elif data.get('structure') is not None:
