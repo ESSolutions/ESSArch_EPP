@@ -417,11 +417,11 @@ def installPipelines():
         ]
     })
     client.put_pipeline(id='add_timestamp', body={
-        'description': "Adds a create_date timestamp",
+        'description': "Adds an index_date timestamp",
         'processors': [
             {
                 "set": {
-                    "field": "create_date",
+                    "field": "index_date",
                     "value": "{{_ingest.timestamp}}",
                 },
             },
