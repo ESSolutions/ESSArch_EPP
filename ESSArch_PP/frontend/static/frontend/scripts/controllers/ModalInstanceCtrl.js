@@ -849,7 +849,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.submit = function() {
         if($ctrl.changed()) {
-            Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index})).then(function(response) {
+            Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index, structure: data.structure})).then(function(response) {
                 Notifications.add($translate.instant('NODE_ADDED'), 'success');
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {

@@ -225,7 +225,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                 var add = {
                     label: $translate.instant('ADD'),
                     action: function () {
-                        vm.addNodeModal(node);
+                        vm.addNodeModal(node, vm.structure);
                     },
                 };
                 var remove = {
@@ -554,7 +554,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
-    vm.addNodeModal = function(node) {
+    vm.addNodeModal = function(node, structure) {
         var modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
@@ -565,7 +565,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             size: "lg",
             resolve: {
                 data: {
-                    node: node
+                    node: node,
+                    structure: structure
                 }
             }
         });
