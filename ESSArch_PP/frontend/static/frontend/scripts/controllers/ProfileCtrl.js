@@ -47,6 +47,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
                     $scope.$emit('disable_receive', {});
                 }
             }
+            vm.shareData({$event: {approved: false, aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id, saObject: $scope.saProfile.profile}});
         });
     };
 
@@ -108,7 +109,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     }
 
     $scope.pushData = function() {
-        vm.shareData({$event: {aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id}});
+        vm.shareData({$event: {approved: true, aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id}});
     }
     $scope.$on('get_profile_data', function() {
         $scope.pushData();

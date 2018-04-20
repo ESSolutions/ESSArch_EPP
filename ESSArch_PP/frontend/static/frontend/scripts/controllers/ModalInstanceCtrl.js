@@ -262,7 +262,12 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         if($event.dipProfileId) {
             vm.request.profileData[$event.dipProfileId] = $event.dipModel;
         }
-        $scope.approvedToReceive = true;
+        if($event.saObject) {
+            vm.sa = $event.saObject;
+        }
+        if($event.approved) {
+            $scope.approvedToReceive = $event.approved;
+        }
     }
     vm.receive = function (ip) {
         vm.receiving = true;
