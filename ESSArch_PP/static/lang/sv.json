@@ -550,5 +550,9 @@
     "CLASSIFICATION_STRUCTURE_NAME": "Klassificeringsstrukturs namn",
     "NEW_ARCHIVE": "Nytt arkiv",
     "NEW_ARCHIVE_CREATED": "Nytt arkiv skapat!",
-    "CONTENT_TYPE": "Content type"
+    "CONTENT_TYPE": "Content type",
+    "NODE_REMOVED_FROM_STRUCTURE": "Nod borttagen från klassificeringsstruktur",
+    "FROM": "från",
+    "DO_YOU_WANT_TO_REMOVE_NODE_FROM_CLASSIFICATION_STRUCTURE": "Vill du ta bort nod från klassificeringsstruktur?",
+    "REMOVE_FROM_CLASSIFICATION_STRUCTURE": "Ta bort från klassificeringsstruktur"
 }

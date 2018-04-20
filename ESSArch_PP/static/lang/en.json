@@ -551,5 +551,9 @@
     "CLASSIFICATION_STRUCTURE_NAME": "Classification structure name",
     "NEW_ARCHIVE": "New archive",
     "NEW_ARCHIVE_CREATED": "New archive created!",
-    "CONTENT_TYPE": "Content type"
+    "CONTENT_TYPE": "Content type",
+    "NODE_REMOVED_FROM_STRUCTURE": "Node removed from classification structure",
+    "FROM": "from",
+    "DO_YOU_WANT_TO_REMOVE_NODE_FROM_CLASSIFICATION_STRUCTURE": "Do you want to remove node from classification structure?",
+    "REMOVE_FROM_CLASSIFICATION_STRUCTURE": "Remove from classification structure"
 }

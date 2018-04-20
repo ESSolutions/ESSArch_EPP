@@ -105,6 +105,16 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             return response;
         });
     }
+    service.removeNodeFromStructure = function(node, structure) {
+        return $http({
+            method: 'POST',
+            url: url+"search/"+node._index + "/" + node._id + "/remove-from-structure/",
+            params: { refresh: true },
+            data: {structure: structure}
+        }).then(function(response) {
+            return response;
+        });
+    }
     service.setAsCurrentVersion = function (node, refresh) {
         return $http({
             method: 'PATCH',

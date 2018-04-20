@@ -234,13 +234,25 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
                         vm.removeNodeModal(node);
                     },
                 };
+                var removeFromStructure = {
+                    label: $translate.instant('REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
+                    action: function () {
+                        var struct;
+                        vm.archiveStructures.forEach(function(item) {
+                            if(item.id == vm.structure) {
+                                struct = item;
+                            }
+                        })
+                        vm.removeNodeFromStructureModal(node, struct);
+                    },
+                };
                 var newVersion = {
                     label: $translate.instant('NEW_VERSION'),
                     action: function() {
                         vm.newVersionNodeModal(node);
                     }
                 }
-                var actions = { update: update, add: add, remove: remove, newVersion: newVersion };
+                var actions = { update: update, add: add, remove: remove, removeFromStructure: removeFromStructure, newVersion: newVersion };
                 callback(actions);
                 return actions;
             }
@@ -617,6 +629,30 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             resolve: {
                 data: {
                     node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
+            vm.selectRecord(null, {node: parent, action: "select_node"});
+            vm.loadRecordAndTree(parent.original._index, parent.original._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.removeNodeFromStructureModal = function(node, structure) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/remove_node_from_structure_modal.html',
+            controller: 'RemoveNodeModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node,
+                    structure: structure
                 }
             }
         });
