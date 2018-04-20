@@ -179,7 +179,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
             vm.archiveStructures = angular.copy(tags[0].structures);
         }
         if(!vm.structure) {
-            vm.structure = vm.archiveStructures[vm.archiveStructures.length-1].id;
+            for(i=vm.archiveStructures.length-1; i>=0; i--) {
+                if(vm.existsForRecord(vm.archiveStructures[i].id)) {
+                    vm.structure = vm.archiveStructures[i].id;
+                    break;
+                }
+            }
         }
         vm.ignoreRecordChanges = true;
         if(angular.equals(tags, vm.recordTreeData)) {
