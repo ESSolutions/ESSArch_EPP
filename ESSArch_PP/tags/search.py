@@ -88,6 +88,7 @@ class ComponentSearch(FacetedSearch):
         """
 
         s = super(ComponentSearch, self).search()
+        s = s.source(exclude=["attachment.content"])
         s = s.filter('term', current_version=True)
 
         if self.start_date not in EMPTY_VALUES:
