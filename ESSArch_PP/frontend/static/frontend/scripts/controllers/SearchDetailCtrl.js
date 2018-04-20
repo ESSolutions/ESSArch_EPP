@@ -12,6 +12,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
+            if(!vm.structure) {
+                vm.structure = vm.record.structures[vm.record.structures.length-1].id;
+            }
             getVersionSelectData();
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
             vm.activeTab = 1;
