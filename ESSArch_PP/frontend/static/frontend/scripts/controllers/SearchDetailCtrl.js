@@ -276,7 +276,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     vm.dropNode = function(jqueryObj, data) {
         var node = data.node.original;
         var parent = vm.recordTreeInstance.jstree(true).get_node(data.parent);
-        Search.updateNode(node,{parent: parent.original._id}, true).then(function(response) {
+        Search.updateNode(node,{parent: parent.original._id, structure: vm.structure}, true).then(function(response) {
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
         }).catch(function(response) {
             Notifications.add("Could not be moved", "error");

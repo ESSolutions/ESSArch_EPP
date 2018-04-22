@@ -411,12 +411,16 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         tag = self.get_tag_object()
 
         if 'parent' in request.data:
+            try:
+                structure = request.data.pop('structure')
+            except KeyError:
+                raise exceptions.ParseError('Missing "structure" parameter')
+
             parent = request.data.pop('parent')
             parent_tag_version = TagVersion.objects.get(pk=parent)
-            rep = tag.get_active_structure()
-            parent_rep = parent_tag_version.tag.structures.get(structure=rep.structure)
-            rep.parent = parent_rep
-            rep.save()
+            parent_tag_structure = parent_tag_version.tag.structures.get(structure=structure)
+            tag_structure, _ = TagStructure.objects.update_or_create(tag=tag.tag, structure=structure,
+                                                                     defaults={'parent': parent_tag_structure})
 
         db_fields = [f.name for f in TagVersion._meta.get_fields()]
         db_fields_request_data = {}
