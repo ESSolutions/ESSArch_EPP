@@ -426,10 +426,10 @@ class StoreAIP(DBTask):
         if not policy:
             raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % aip)
 
-        storage_methods = policy.storage_methods.filter(status=True)
+        storage_methods = policy.storage_methods.secure_storage().filter(status=True)
 
         if not storage_methods.exists():
-            raise StorageMethod.DoesNotExist("No storage methods found in policy: '%s'" % policy)
+            raise StorageMethod.DoesNotExist("No available longterm storage methods found in policy: '%s'" % policy)
 
         objid, aic, size = InformationPackage.objects.values_list('object_identifier_value', 'aic_id', 'object_size').get(pk=aip)
         aic = str(aic)
@@ -445,7 +445,7 @@ class StoreAIP(DBTask):
         )
 
         with transaction.atomic():
-            for method in storage_methods.secure_storage():
+            for method in storage_methods:
                 for method_target in method.storage_method_target_relations.filter(status=1):
                     req_type = 10 if method_target.storage_method.type == TAPE else 15
 
