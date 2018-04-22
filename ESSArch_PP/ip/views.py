@@ -1279,6 +1279,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         path = request.query_params.get('path', '').rstrip('/')
 
         if ip.archived:
+            if request.method in ['DELETE', 'POST']:
+                raise exceptions.ParseError('You cannot modify preserved content')
             # check if path exists
             path = request.query_params.get('path', '').rstrip('/')
             s = Search(index=['directory', 'document'])
