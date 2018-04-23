@@ -322,8 +322,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }
         },
     })
-    .state('home.orders', {
-        url: 'orders',
+    .state('home.access.orders', {
+        url: '/orders',
         templateUrl: '/static/frontend/views/orders.html',
         controller: 'OrdersCtrl as vm',
         resolve: {

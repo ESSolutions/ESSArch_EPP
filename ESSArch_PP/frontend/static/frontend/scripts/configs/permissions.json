@@ -43,12 +43,12 @@
                     "_permissions": [
                         "ip.preserve_dip"
                     ]
+                },
+                "orders": {
+                    "_permissions": [
+                        "ip.prepare_order"
+                    ]
                 }
-            },
-            "orders": {
-                "_permissions": [
-                    "ip.prepare_order"
-                ]
             },
             "management": {
                 "_permissions": []
