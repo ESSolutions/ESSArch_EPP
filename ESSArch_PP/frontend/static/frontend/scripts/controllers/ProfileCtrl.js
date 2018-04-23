@@ -635,11 +635,14 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     };
 
     $scope.prepare = function(ip) {
+        vm.preparingIp = true;
         return IPReception.prepare({ id: ip.id, submission_agreement: $scope.saProfile.profile.id }).$promise.then(function(resource) {
+            vm.preparingIp = false;
             vm.ip = resource;
             $scope.$emit('update_ip', {ip: resource});
             return resource;
         }).catch(function (response) {
+            vm.preparingIp = false;
             Notifications.add(response.data.detail, 'error');
         })
     }
