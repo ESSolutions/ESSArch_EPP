@@ -469,6 +469,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
 
     $ctrl.addRule = function(ip, rule) {
+        $ctrl.addingRule = true;
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/add-appraisal-rule/",
             method: "POST",
@@ -476,13 +477,16 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 id: rule.id
             }
         }).then(function(response) {
+            $ctrl.addingRule = false;
             ip.rules.push(rule);
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add(response.data.detail, "error");
         });
     }
     $ctrl.removeRule = function(ip, rule) {
+        $ctrl.removingRule = true;
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/remove-appraisal-rule/",
             method: "POST",
@@ -490,6 +494,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 id: rule.id
             }
         }).then(function(response) {
+            $ctrl.removingRule = false;
             ip.rules.forEach(function(x, index, array) {
                 if(x.id == rule.id) {
                     array.splice(index, 1);
@@ -497,6 +502,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             })
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
+            $ctrl.removingRule = false;
             Notifications.add(response.data.detail, "error");
         });
     }
@@ -517,8 +523,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.appraisalRule = null;
     $ctrl.create = function() {
+        $ctrl.addingRule = true;
         if($ctrl.pathList.length == 0) {
             $ctrl.showRequired = true;
+            $ctrl.addingRule = false;
             return;
         }
         $ctrl.data = {
@@ -531,12 +539,30 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             method: "POST",
             data: $ctrl.data
         }).then(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add("Rule created!", "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add(response.data.detail, "error")
         })
     }
+    $ctrl.removeAppraisal = function() {
+        $ctrl.removingRule = true;
+        var appraisal = data.appraisal;
+        $http({
+            url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id,
+            method: "DELETE"
+        }).then(function(response) {
+            $ctrl.removingRule = false;
+            Notifications.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
+            $uibModalInstance.close();
+        }).catch(function(response) {
+            $ctrl.removingRule = false;
+            Notifications.add("Appraisal rule could not be removed", "error");
+        })
+    }
+
     $ctrl.ok = function() {
         $uibModalInstance.close();
     }
@@ -640,6 +666,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         })
     }
     $ctrl.addRule = function(ip, rule) {
+        $ctrl.addingRule = true;
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/add-conversion-rule/",
             method: "POST",
@@ -647,9 +674,11 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 id: rule.id
             }
         }).then(function(response) {
+            $ctrl.addingRule = false;
             ip.rules.push(rule);
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add(response.data.detail, "error");
         });
     }
@@ -669,6 +698,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
 
     $ctrl.removeRule = function(ip, rule) {
+        $ctrl.removingRule = true;
         $http({
             url: appConfig.djangoUrl+"information-packages/"+ip.id+"/remove-conversion-rule/",
             method: "POST",
@@ -681,8 +711,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                     array.splice(index, 1);
                 }
             })
+            $ctrl.removingRule = false;
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
+            $ctrl.removingRule = false;
             Notifications.add(response.data.detail, "error");
         });
     }
@@ -702,8 +734,10 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     $ctrl.conversionRule = null;
     $ctrl.create = function() {
+        $ctrl.addingRule = true;
         if(angular.equals($ctrl.specifications, {})) {
             $ctrl.showRequired = true;
+            $ctrl.addingRule = false;
             return;
         }
         $ctrl.data = {
@@ -716,12 +750,31 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             method: "POST",
             data: $ctrl.data
         }).then(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add("Rule created!", "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
+            $ctrl.addingRule = false;
             Notifications.add(response.data.detail, "error")
         })
     }
+
+    $ctrl.removeConversion = function() {
+        $ctrl.removingRule = true;
+        var conversion = data.conversion;
+        $http({
+            url: appConfig.djangoUrl+"conversion-rules/"+conversion.id,
+            method: "DELETE"
+        }).then(function(response) {
+            $ctrl.removingRule = false;
+            Notifications.add("conversion rule: "+conversion.name+" has been removed", "success");
+            $uibModalInstance.close();
+        }).catch(function(response) {
+            $ctrl.removingRule = false;
+            Notifications.add("conversion rule could not be removed", "errorepp");
+        })
+    }
+
     $ctrl.ok = function() {
         $uibModalInstance.close();
     }

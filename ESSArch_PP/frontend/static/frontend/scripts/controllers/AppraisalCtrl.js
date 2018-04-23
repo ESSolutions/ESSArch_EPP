@@ -348,15 +348,7 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            $http({
-                url: appConfig.djangoUrl+"appraisal-rules/"+appraisal.id,
-                method: "DELETE"
-            }).then(function(response) {
-                vm.rulePipe(vm.ruleTableState);
-                Notifications.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
-            }).catch(function(response) {
-                Notifications.add("Appraisal rule could not be removed", "errorepp");
-            })
+            vm.rulePipe(vm.ruleTableState);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

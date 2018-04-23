@@ -352,15 +352,7 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            $http({
-                url: appConfig.djangoUrl+"conversion-rules/"+conversion.id,
-                method: "DELETE"
-            }).then(function(response) {
-                vm.rulePipe(vm.ruleTableState);
-                Notifications.add("conversion rule: "+conversion.name+" has been removed", "success");
-            }).catch(function(response) {
-                Notifications.add("conversion rule could not be removed", "errorepp");
-            })
+            vm.rulePipe(vm.ruleTableState);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
