@@ -74,6 +74,6 @@
     <div class="files-per-page-pagination-wrapper">
         <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
     </div>
-    <button ng-if="ip.workarea && !ip.workarea[0].read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
-    <button ng-if="ip.workarea && !ip.workarea[0].read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
+    <button ng-if="ip.workarea && !ip.workarea[0].read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception' && ip.state !== 'Preserved'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
+    <button ng-if="ip.workarea && !ip.workarea[0].read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception' && ip.state !== 'Preserved'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
 </div>
