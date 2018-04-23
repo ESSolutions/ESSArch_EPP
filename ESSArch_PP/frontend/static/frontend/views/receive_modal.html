@@ -12,7 +12,7 @@
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <label>{{'ARCHIVE_POLICY' | translate}}</label>
-                    <select type="select" required="true" class="form-control" on-select="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
+                    <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
                         ng-options="x.policy_name for x in vm.request.archivePolicy.options track by x.policy_id" required></select>
                 </div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">

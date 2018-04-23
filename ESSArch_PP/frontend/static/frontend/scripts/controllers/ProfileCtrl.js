@@ -25,7 +25,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             disabled: false
         };
         $scope.ip = vm.ip;
+        vm.gettingSas = true;
         listViewService.getSaProfiles($scope.ip).then(function (result) {
+            vm.gettingSas = false;
             $scope.saProfile.profiles = result.profiles;
             var chosen_sa_id = null;
             if($scope.ip.submission_agreement) {
@@ -60,7 +62,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         $scope.ip = vm.ip;
         vm.cancel();
         vm.saCancel();
+        vm.gettingSas = true;
         listViewService.getSaProfiles($scope.ip).then(function (result) {
+            vm.gettingSas = false;
             $scope.saProfile.profiles = result.profiles;
             var chosen_sa_id = null;
             if($scope.ip.submission_agreement) {
@@ -92,10 +96,12 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         return ProfileIp.query({ip: ip.id}).$promise.then(function(resource) {
             resource.forEach(function(profileIp) {
                 $scope.selectRowCollapse.push(profileIp);
-            });
+            })
             $scope.selectRowCollection = $scope.selectRowCollapse;
             return $scope.selectRowCollection;
-        });
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
+        })
     }
 
     vm.changeDataVersion = function(profileIp, data) {
@@ -105,6 +111,8 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
                 vm.loadProfiles($scope.ip);
                 vm.getAndShowProfile(vm.profileIp, {});
             })
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
         })
     }
 
@@ -116,15 +124,23 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     });
 
     vm.saveProfileModel = function (type, model) {
+        vm.savingProfileModel = true;
         ProfileIpData.post({
             relation: vm.profileIp.id,
             version: vm.profileIp.data_versions.length,
             data: vm.profileModel
         }).$promise.then(function (resource) {
             ProfileIp.patch({id: vm.profileIp.id}, {data: resource.id}).$promise.then(function(response) {
+                vm.savingProfileModel = false;
                 vm.cancel();
                 vm.loadProfiles($scope.ip);
+            }).catch(function (response) {
+                vm.savingProfileModel = false;
+                Notifications.add(response.data.detail, 'error');
             })
+        }).catch(function (response) {
+            vm.savingProfileModel = false;
+            Notifications.add(response.data.detail, 'error');
         })
     }
 
@@ -144,7 +160,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     vm.options = {};
     //Click funciton for sa view
     $scope.saClick = function(row){
+        vm.loadingSa = true;
         if ($scope.selectedSa == row && $scope.editSA){
+            vm.loadingSa = false;
             vm.saCancel();
             $scope.editSA = false;
         } else {
@@ -185,6 +203,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             toDelete.forEach(function(field) {
                 vm.saFields.splice(vm.saFields.indexOf(field), 1);
             });
+            vm.loadingSa = false;
             $scope.editSA = true;
         }
     };
@@ -207,7 +226,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
 
     vm.profileIp = null;
     vm.selectedProfile = null;
+    vm.loadingProfileData = {};
     vm.getAndShowProfile = function (profileIp, row) {
+        vm.loadingProfileData[profileIp.profile_type] = true;
         vm.selectedProfile = profileIp;
         vm.profileIp = profileIp;
         Profile.get({
@@ -228,13 +249,20 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             vm.profileFields = row.active.template;
             $scope.edit = true;
             $scope.eventlog = true;
-        });
+            vm.loadingProfileData[profileIp.profile_type] = false;
+        }).catch(function(response) {
+            vm.loadingProfileData[profileIp.profile_type] = false;
+            vm.cancel();
+            Notifications.add(response.data.detail, 'error');
+        })
     };
 
     vm.getProfileData = function(id) {
         ProfileIpData.get({id: id}).$promise.then(function(resource) {
             vm.profileModel = angular.copy(resource.data);
-        });
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
+        })
     }
     //Gets all submission agreement profiles
     $scope.getSaProfiles = function(ip) {
@@ -329,7 +357,9 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             }
             $scope.edit = true;
             $scope.eventlog = true;
-        });
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
+        })
     }
 
     // Map for profile types
@@ -609,6 +639,8 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             vm.ip = resource;
             $scope.$emit('update_ip', {ip: resource});
             return resource;
-        });
+        }).catch(function (response) {
+            Notifications.add(response.data.detail, 'error');
+        })
     }
 });
