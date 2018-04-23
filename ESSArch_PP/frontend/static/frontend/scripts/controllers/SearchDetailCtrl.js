@@ -1,5 +1,6 @@
-angular.module('myApp').controller('SearchDetailCtrl', function($scope, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
     var vm = this;
+    $controller('TagsCtrl', { $scope: $scope, vm: vm });
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
     vm.unavailable = false;
@@ -12,6 +13,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         vm.viewContent = true;
         $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
+            if(vm.record.structures.length == 0) {
+                $scope.getArchives().then(function (result) {
+                    vm.tags.archive.options = result;
+                });
+            }
             if(!vm.structure) {
                 vm.structure = vm.record.structures[vm.record.structures.length-1].id;
             }
@@ -172,7 +178,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
     /**
      * Recreates record tree with given tags.
      * Version variable is updated so that the tree will detect
-     * a change in the configuration object, desroy and rebuild with data from vm.tags
+     * a change in the configuration object, desroy and rebuild with data from vm.recordTreeData
      */
     vm.recreateRecordTree = function(tags) {
         if(!angular.equals(vm.archiveStructures, tags[0].structures)) {
@@ -442,6 +448,14 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $statePa
         }
     }
 
+    vm.addToStructure = function(record) {
+        Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
+            $state.reload();
+        }).catch(function(response) {
+            console.log(response);
+            Notifications.add("Could not be added to structure unit", "error");
+        })
+    }
     vm.editField = function(key, value) {
         var modalInstance = $uibModal.open({
             animation: true,

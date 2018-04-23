@@ -25,9 +25,12 @@
                     <div class="input-group">
                         <ui-select ng-disabled="vm.sa.profile_content_type" allow-clear ng-model="vm.tags.archive.value" on-select="archiveChanged($item)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
                             <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ARCHIVE') | translate}}">{{vm.tags.archive.value.name}}</ui-select-match>
-                            <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getTags($select.search)" repeat="x in vm.tags.archive.options | propsFilter: {name: $select.search}">
+                            <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getArchives($select.search)" repeat="x in vm.tags.archive.options | propsFilter: {name: $select.search}">
                                 <div ng-bind-html="x.name | highlight: $select.search"></div>
                             </ui-select-choices>
+                            <ui-select-no-choice>
+                                <div class="text-center">{{'NO_RESULTS_FOUND' | translate}}</div>
+                            </ui-select-no-choice>
                         </ui-select>
                         <span class="input-group-btn">
                             <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.archive.value = null" class="btn btn-sm btn-default">
@@ -43,6 +46,9 @@
                                 <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getStructures(vm.tags.archive.value)" repeat="x in vm.tags.structure.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>
+                                <ui-select-no-choice>
+                                    <div class="text-center">{{'NO_RESULTS_FOUND' | translate}}</div>
+                                </ui-select-no-choice>
                             </ui-select>
                             <span class="input-group-btn">
                                 <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.structure.value = null" class="btn btn-sm btn-default">
@@ -59,6 +65,9 @@
                                 <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getTagDescendants(vm.tags.archive.value.parent_id, vm.tags.structure.value.id, $select.search)" repeat="x in vm.tags.descendants.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>
+                                <ui-select-no-choice>
+                                    <div class="text-center">{{'NO_RESULTS_FOUND' | translate}}</div>
+                                </ui-select-no-choice>
                             </ui-select>
                             <span class="input-group-btn">
                                 <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.descendants.value = null" class="btn btn-sm btn-default">

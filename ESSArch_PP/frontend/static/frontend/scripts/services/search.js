@@ -60,7 +60,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             method: 'PATCH',
             url: url+"search/"+node._index + "/" + node._id + "/",
             params: {
-                refresh: refresh
+                refresh: refresh,
             },
             data: data
         }).then(function(response) {
