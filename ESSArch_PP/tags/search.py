@@ -415,7 +415,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 structure = request.data.pop('structure')
             except KeyError:
                 raise exceptions.ParseError('Missing "structure" parameter')
-
+            structure = Structure.objects.get(pk=structure)
             parent = request.data.pop('parent')
             parent_tag_version = TagVersion.objects.get(pk=parent)
             parent_tag_structure = parent_tag_version.tag.structures.get(structure=structure)
