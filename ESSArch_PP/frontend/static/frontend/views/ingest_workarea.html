@@ -24,17 +24,29 @@
                     </div>
                 </div>
                 <div class="request-params">
-                    <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'move_to_approval'">
+                    <div class="form-group" ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve' || vm.request.type == 'move_to_approval'">
                         <label>
                             {{'PURPOSE' | translate}}
                         </label>
                         <input class="form-control" ng-model="vm.request.purpose">
                     </div>
-                    <div ng-if="vm.request.type == 'preserve'">
+                    <div class="form-group" ng-if="vm.request.type == 'preserve'">
                         <label>
                             {{'APPRAISAL_DATE' | translate}}
                         </label>
-                        <input type="date" class="form-control" ng-model="vm.request.appraisal_date">
+
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" data-toggle="dropdown">
+                                <div class="input-group">
+                                    <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="vm.request.appraisal_date"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                <datetimepicker
+                                    data-ng-model="vm.request.appraisal_date"
+                                    data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </form>
