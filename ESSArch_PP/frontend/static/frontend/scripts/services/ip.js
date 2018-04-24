@@ -115,5 +115,14 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
             params: { action: "conversion-rules", id: "@id"},
             isArray: true
         },
+        storageObjects: {
+            method: "GET",
+            params: { action: "storage-objects", id: "@id"},
+            isArray: true
+        },
+        update: {
+            method: "PATCH",
+            params: { id: "@id"},
+        },
     });
 });

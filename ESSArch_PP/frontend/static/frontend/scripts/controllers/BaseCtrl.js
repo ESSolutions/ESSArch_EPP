@@ -733,7 +733,9 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
     $scope.updateIpsPerPage = function(items) {
         $cookies.put('epp-ips-per-page', items);
     };
+
     $scope.menuOptions = [];
+
     //Status tree view structure
     $scope.tree_data = [];
     $scope.angular = angular;
@@ -1041,6 +1043,28 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         })
         modalInstance.result.then(function (data) {
             $scope.ipRemoved(ipObject);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.ipInformationModal = function (ip) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/ip_information_modal.html',
+            controller: 'IpInformationModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

@@ -17,9 +17,20 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
     }
     $scope.initRequestData();
 
-	$scope.menuOptions = function(rowType) {
-		return [];
-	};
+    $scope.menuOptions = function(rowType, row) {
+        var methods = [];
+        methods.push(
+            {
+                text: $translate.instant("INFORMATION_PACKAGE_INFORMATION"),
+                click: function ($itemScope, $event, modelValue, text, $li) {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.ipInformationModal($scope.ip);
+                }
+            }
+        );
+        return methods;
+    }
 
 	//Click function for Ip table
 	$scope.ipTableClick = function(row) {

@@ -40,6 +40,16 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
                 }
             );
         }
+        methods.push(
+            {
+                text: $translate.instant("INFORMATION_PACKAGE_INFORMATION"),
+                click: function ($itemScope, $event, modelValue, text, $li) {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.ipInformationModal($scope.ip);
+                }
+            }
+        );
         return methods;
     };
 
@@ -249,6 +259,28 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
                 data: function () {
                     return {
                         ips: ips,
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.ipInformationModal = function (ip) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/ip_information_modal.html',
+            controller: 'IpInformationModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
                     };
                 }
             },

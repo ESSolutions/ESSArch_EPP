@@ -1334,3 +1334,14 @@ body.modal-open {
     max-width: 25%;
     min-width: 150px;
 }
+
+.edit-field-row {
+    display: inline-flex;
+    .dropdown {
+        padding-right: 3px;
+    }
+    .btn, input {
+        margin-right: 3px;
+    }
+    align-items: center;
+}

@@ -558,5 +558,9 @@
     "REMOVE_FROM_CLASSIFICATION_STRUCTURE": "Remove from classification structure",
     "DOCUMENT": "Document",
     "ADD_TO_STRUCTURE": "Add to structure unit",
-    "USER_SETTINGS": "User settings"
+    "USER_SETTINGS": "User settings",
+    "INFORMATION_PACKAGE_INFORMATION": "Package information",
+    "STORAGE": "Storage",
+    "ARCHIVAL_STORAGE": "Archival storage",
+    "LONG_ARCHIVAL_STORAGE": "Long archival storage"
 }
