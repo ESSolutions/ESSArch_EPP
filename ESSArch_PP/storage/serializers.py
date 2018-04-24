@@ -49,6 +49,9 @@ class StorageMediumSerializer(serializers.ModelSerializer):
 
 
 class StorageObjectSerializer(serializers.ModelSerializer):
+    medium_id = serializers.CharField(source='storage_medium.medium_id')
+    target_name = serializers.CharField(source='storage_medium.storage_target.name')
+    target_target = serializers.CharField(source='storage_medium.storage_target.target')
     content_location_value = serializers.SerializerMethodField()
 
     def get_content_location_value(self, obj):
@@ -61,7 +64,7 @@ class StorageObjectSerializer(serializers.ModelSerializer):
         model = StorageObject
         fields = (
             'url', 'id', 'content_location_type', 'content_location_value', 'last_changed_local',
-            'last_changed_external', 'ip', 'storage_medium'
+            'last_changed_external', 'ip', 'medium_id', 'target_name', 'target_target', 'storage_medium'
         )
         extra_kwargs = {
             'id': {
