@@ -263,6 +263,7 @@ class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
     aic = InformationPackageAICSerializer(omit=['information_packages'])
+    policy = ArchivePolicySerializer()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     class Meta:

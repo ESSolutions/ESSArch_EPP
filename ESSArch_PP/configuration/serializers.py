@@ -90,8 +90,6 @@ class StorageMethodSerializer(DynamicHyperlinkedModelSerializer):
 
 
 class ArchivePolicySerializer(CoreArchivePolicySerializer):
-    storage_methods = StorageMethodSerializer(many=True)
-
     class Meta:
         model = ArchivePolicy
         fields = CoreArchivePolicySerializer.Meta.fields
