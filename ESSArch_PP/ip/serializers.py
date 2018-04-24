@@ -37,7 +37,7 @@ class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
         fields = ('url', 'id', 'name', 'information_packages',)
 
 
-class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
+class InformationPackageSerializer(serializers.ModelSerializer):
     responsible = UserSerializer(read_only=True)
     package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
     package_type_display = serializers.SerializerMethodField()
@@ -113,8 +113,10 @@ class InformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'entry_date', 'state', 'status', 'step_state',
             'archived', 'cached', 'aic', 'generation', 'archival_institution',
             'archivist_organization', 'archival_type', 'archival_location',
-            'policy', 'message_digest', 'message_digest_algorithm', 'workarea',
-            'first_generation', 'last_generation', 'start_date', 'end_date',
+            'policy', 'message_digest', 'message_digest_algorithm',
+            'content_mets_create_date', 'content_mets_size', 'content_mets_digest_algorithm', 'content_mets_digest',
+            'package_mets_create_date', 'package_mets_size', 'package_mets_digest_algorithm', 'package_mets_digest',
+            'workarea', 'first_generation', 'last_generation', 'start_date', 'end_date',
             'permissions', 'appraisal_date',
         )
         extra_kwargs = {
@@ -261,7 +263,6 @@ class InformationPackageAICSerializer(DynamicHyperlinkedModelSerializer):
 
 class InformationPackageDetailSerializer(InformationPackageSerializer):
     aic = InformationPackageAICSerializer(omit=['information_packages'])
-    policy = ArchivePolicySerializer()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
 
     class Meta:

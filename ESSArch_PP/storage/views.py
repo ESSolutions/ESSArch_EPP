@@ -50,7 +50,7 @@ from storage.filters import StorageMediumFilter
 from storage.serializers import (AccessQueueSerializer, IOQueueSerializer,
                                  IOQueueWriteSerializer, RobotQueueSerializer,
                                  RobotSerializer, StorageMediumSerializer,
-                                 StorageObjectWithIPSerializer,
+                                 StorageObjectSerializer,
                                  TapeDriveSerializer, TapeSlotSerializer)
 
 
@@ -315,7 +315,7 @@ class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     API endpoint for storage object
     """
     queryset = StorageObject.objects.all()
-    serializer_class = StorageObjectWithIPSerializer
+    serializer_class = StorageObjectSerializer
 
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,

@@ -17,7 +17,7 @@ from ip.serializers import (InformationPackageDetailSerializer,
                             InformationPackageSerializer)
 
 
-class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
+class StorageMediumSerializer(serializers.ModelSerializer):
     agent = UserSerializer()
     storage_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=StorageTarget.objects.all())
     tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, required=False, queryset=TapeDrive.objects.all())
@@ -48,8 +48,7 @@ class StorageMediumSerializer(DynamicHyperlinkedModelSerializer):
         }
 
 
-class StorageObjectSerializer(serializers.HyperlinkedModelSerializer):
-    ip = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=InformationPackage.objects.all())
+class StorageObjectSerializer(serializers.ModelSerializer):
     content_location_value = serializers.SerializerMethodField()
 
     def get_content_location_value(self, obj):
@@ -88,10 +87,7 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
-    storage_medium = StorageMediumSerializer(fields=[
-        'url', 'id', 'tape_drive', 'status', 'used_capacity',
-        'num_of_mounts', 'create_date',
-    ])
+    storage_medium = StorageMediumSerializer()
     locked = serializers.SerializerMethodField()
     mounted = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
