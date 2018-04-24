@@ -133,6 +133,12 @@ router.register(r'information-packages', InformationPackageViewSet).register(
     base_name='ip-events',
     parents_query_lookups=['linkingObjectIdentifierValue']
 )
+router.register(r'information-packages', StorageObjectViewSet).register(
+    r'storage-objects',
+    StorageObjectViewSet,
+    base_name='ip-storage-objects',
+    parents_query_lookups=['ip']
+)
 router.register(r'io-queue', IOQueueViewSet)
 router.register(r'ip-reception', InformationPackageReceptionViewSet, base_name="ip-reception")
 router.register(r'notifications', NotificationViewSet)
