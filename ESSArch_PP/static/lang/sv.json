@@ -556,5 +556,6 @@
     "DO_YOU_WANT_TO_REMOVE_NODE_FROM_CLASSIFICATION_STRUCTURE": "Vill du ta bort nod från klassificeringsstruktur?",
     "REMOVE_FROM_CLASSIFICATION_STRUCTURE": "Ta bort från klassificeringsstruktur",
     "DOCUMENT": "Document",
-    "ADD_TO_STRUCTURE": "Lägg till under strukturenhet"
+    "ADD_TO_STRUCTURE": "Lägg till under strukturenhet",
+    "USER_SETTINGS": "Användarinställningar"
 }
