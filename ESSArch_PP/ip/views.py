@@ -583,11 +583,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             'data': aip_profile_data
         }
 
+        algorithm = policy.get_checksum_algorithm_display().upper()
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.GenerateXML',
             params={
                 'filesToCreate': filesToCreate,
                 'folderToParse': ip.object_path,
+                'algorithm': algorithm,
             },
             responsible=request.user,
             information_package=ip,

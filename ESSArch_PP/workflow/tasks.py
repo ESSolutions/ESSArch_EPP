@@ -311,7 +311,7 @@ class CacheAIP(DBTask):
                     shutil.copy2(src, dst)
                     tar.add(src, os.path.normpath(os.path.join(objid, rel, f)))
 
-        algorithm = policy.get_checksum_algorithm_display()
+        algorithm = policy.get_checksum_algorithm_display().upper()
         checksum = calculate_checksum(dsttar, algorithm=algorithm)
 
         info = fill_specification_data(aip_obj.get_profile_data('aip_description'), ip=aip_obj, sa=aip_obj.submission_agreement)
