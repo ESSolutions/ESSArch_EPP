@@ -130,12 +130,16 @@
                 <thead>
                     <tr>
                         <th class="column-label">{{'MEDIUM' | translate}}</th>
+                        <th class="column-label">{{'TARGET_NAME' | translate}}</th>
+                        <th class="column-label">{{'TARGET' | translate}}</th>
                         <th class="column-label">{{'LOCATION' | translate}}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="object in $ctrl.storageObjects"  ng-attr-context-menu="menuOptions" class="table-item">
-                        <td>{{object.storage_medium}}</td>
+                        <td>{{object.medium_id}}</td>
+                        <td>{{object.target_name}}</td>
+                        <td>{{object.target_target}}</td>
                         <td>{{object.content_location_value}}</td>
                     </tr>
                     <tr ng-if="!$ctrl.storageObjects.length && !ipLoading" class="empty-table-indicator">

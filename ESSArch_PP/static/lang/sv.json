@@ -561,5 +561,6 @@
     "INFORMATION_PACKAGE_INFORMATION": "Paketinformation",
     "STORAGE": "Lagring",
     "ARCHIVAL_STORAGE": "Archival storage",
-    "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage"
+    "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
+    "TARGET_NAME": "Target name"
 }

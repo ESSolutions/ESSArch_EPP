@@ -562,5 +562,6 @@
     "INFORMATION_PACKAGE_INFORMATION": "Package information",
     "STORAGE": "Storage",
     "ARCHIVAL_STORAGE": "Archival storage",
-    "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage"
+    "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
+    "TARGET_NAME": "Target name"
 }
