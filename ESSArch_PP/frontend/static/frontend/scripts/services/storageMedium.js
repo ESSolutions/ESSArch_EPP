@@ -15,6 +15,17 @@ angular.module('myApp').factory('StorageMedium', function ($resource, appConfig)
                 }
             },
         },
+        objects: {
+            method: "GET",
+            params: { action: "storage-objects", id: "@id" },
+            isArray: true,
+            interceptor: {
+                response: function (response) {
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            },
+        },
         mount: {
             method: "POST",
             params: { action: "mount", id: "@id" }

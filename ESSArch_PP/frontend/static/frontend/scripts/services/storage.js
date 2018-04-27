@@ -20,6 +20,26 @@ angular.module('myApp').factory('Storage', function(StorageMedium, StorageObject
     }
 
     // Get storage objects given storage medium
+    function getStorageObjectsForMedium(mediumId, pageNumber, pageSize, medium, sortString, searchString) {
+        return StorageMedium.objects({
+            id: mediumId,
+            page: pageNumber,
+            page_size: pageSize,
+            ordering: sortString,
+            search: searchString
+        }).$promise.then(function (resource) {
+            count = resource.$httpHeaders('Count');
+            if (count == null) {
+                count = resource.length;
+            }
+            return {
+                count: count,
+                data: resource
+            };
+        });
+    }
+
+    // Get storage objects given storage medium
     function getStorageObjects(pageNumber, pageSize, medium, sortString, searchString) {
         return StorageObject.query({
                 page: pageNumber,
@@ -186,6 +206,7 @@ angular.module('myApp').factory('Storage', function(StorageMedium, StorageObject
     }
     return {
         getStorageMediums: getStorageMediums,
+        getStorageObjectsForMedium: getStorageObjectsForMedium,
         getStorageObjects: getStorageObjects,
         getTapeSlots: getTapeSlots,
         getTapeDrives: getTapeDrives,

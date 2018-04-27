@@ -190,6 +190,19 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
             };
         });
     }
+    function getStorageObjectsForMedium(mediumId, start, number, pageNumber, params, medium, sort, search) {
+        var sortString = sort.predicate;
+        if(sort.reverse) {
+            sortString = "-"+sortString;
+        }
+        return Storage.getStorageObjectsForMedium(mediumId, pageNumber, number, medium, sortString, search).then(function(value) {
+            var storageObjectCollection = value.data;
+            return {
+                data: storageObjectCollection,
+                numberOfPages: Math.ceil(value.count / number)
+            };
+        });
+    }
     function getStorageObjects(start, number, pageNumber, params, medium, sort, search) {
         var sortString = sort.predicate;
         if(sort.reverse) {
@@ -292,6 +305,7 @@ angular.module('myApp').factory('Resource', function ($q, $filter, $timeout, lis
         getIpPage: getIpPage,
         getReceptionPage: getReceptionPage,
         getStorageMediums: getStorageMediums,
+        getStorageObjectsForMedium: getStorageObjectsForMedium,
         getStorageObjects: getStorageObjects,
         getWorkareaIps: getWorkareaIps,
         getDips: getDips,
