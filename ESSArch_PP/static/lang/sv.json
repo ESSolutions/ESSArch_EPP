@@ -564,5 +564,6 @@
     "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
     "TARGET_NAME": "Target name",
     "STEP_STATE_DESC": "Step-tillstånd, Slutförd/Fel",
-    "APPRAISAL_DATE_DESC": "Gallringsfrist"
+    "APPRAISAL_DATE_DESC": "Gallringsfrist",
+    "PLACE_IN_CLASSIFICATION_STRUCTURE": "Placera i klassificeringsstruktur"
 }

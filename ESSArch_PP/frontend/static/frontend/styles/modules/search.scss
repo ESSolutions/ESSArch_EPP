@@ -166,6 +166,7 @@
     }
     .place-in-structure-wrapper {
         max-width: 300px;
+        padding-bottom: 5px;
     }
     .tabs {
         @include container(10px);

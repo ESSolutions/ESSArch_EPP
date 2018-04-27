@@ -18,6 +18,7 @@
             </div>
         </div>
         <div ng-if="vm.record.structures.length == 0" class="place-in-structure-wrapper">
+            <p>{{'PLACE_IN_CLASSIFICATION_STRUCTURE' | translate}}</p>
             <label>{{'ARCHIVE' | translate}}</label>
             <div class="input-group">
                 <ui-select allow-clear ng-model="vm.tags.archive.value" on-select="archiveChanged($item)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
@@ -88,7 +89,7 @@
                         {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
                     </option>
                 </select>
-                <button type="button" ng-disabled="vm.record.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+                <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
             </div>
         </div>
         <div ng-switch="vm.record._index">

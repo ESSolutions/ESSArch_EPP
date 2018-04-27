@@ -565,5 +565,6 @@
     "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
     "TARGET_NAME": "Target name",
     "STEP_STATE_DESC": "Step state, Success/Failure",
-    "APPRAISAL_DATE_DESC": "Appraisal date"
+    "APPRAISAL_DATE_DESC": "Appraisal date",
+    "PLACE_IN_CLASSIFICATION_STRUCTURE": "Place in classification structure"
 }

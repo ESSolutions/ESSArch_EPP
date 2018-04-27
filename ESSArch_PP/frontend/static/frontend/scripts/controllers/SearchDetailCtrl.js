@@ -18,7 +18,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                     vm.tags.archive.options = result;
                 });
             }
-            if(!vm.structure) {
+            if(!vm.structure && vm.record.structures.length > 0) {
                 vm.structure = vm.record.structures[vm.record.structures.length-1].id;
             }
             getVersionSelectData();
