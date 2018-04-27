@@ -404,7 +404,7 @@
     "ARCHIVIST_ORGANIZATION_DESC": "Archivist organization",
     "START_DATE_DESC": "Start date",
     "END_DATE_DESC": "End date",
-    "STORAGE_STATUS_DESC": "Storage status, cached or archived",
+    "STORAGE_STATUS_DESC": "Storage status, Archival storage or Long-term archival storage",
     "FILEBROWSER_DESC": "Browse files in IP",
     "AIC_DESC": "AIC for IP",
     "ENTRY_DATE_DESC": "Date of creation of original SIP",
@@ -563,5 +563,7 @@
     "STORAGE": "Storage",
     "ARCHIVAL_STORAGE": "Archival storage",
     "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
-    "TARGET_NAME": "Target name"
+    "TARGET_NAME": "Target name",
+    "STEP_STATE_DESC": "Step state, Success/Failure",
+    "APPRAISAL_DATE_DESC": "Appraisal date"
 }

@@ -404,7 +404,7 @@
     "ARCHIVIST_ORGANIZATION_DESC": "Arkivorganisation",
     "START_DATE_DESC": "Startdatum",
     "END_DATE_DESC": "Slutdatum",
-    "STORAGE_STATUS_DESC": "Lagringsstatus, cachad eller arkiverad",
+    "STORAGE_STATUS_DESC": "Lagringsstatus, Archival storage eller Long-term archival storage",
     "FILEBROWSER_DESC": "Bläddra i filer för IP",
     "AIC_DESC": "AIC för IP",
     "ENTRY_DATE_DESC": "Datum för skapande av original-SIP",
@@ -562,5 +562,7 @@
     "STORAGE": "Lagring",
     "ARCHIVAL_STORAGE": "Archival storage",
     "LONGTERM_ARCHIVAL_STORAGE": "Long-term archival storage",
-    "TARGET_NAME": "Target name"
+    "TARGET_NAME": "Target name",
+    "STEP_STATE_DESC": "Step-tillstånd, Slutförd/Fel",
+    "APPRAISAL_DATE_DESC": "Gallringsfrist"
 }
