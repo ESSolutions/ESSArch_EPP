@@ -850,63 +850,19 @@ class PollAccessQueue(DBTask):
 
 class PollIOQueue(DBTask):
     track = False
+
     def get_storage_medium(self, entry, storage_target, storage_type):
         if entry.req_type in [20, 25]:
             return entry.storage_object.storage_medium
 
-        storage_medium = storage_target.storagemedium_set.filter(
-            status=20, location_status=50
-        ).order_by('last_changed_local').first()
+        qs = StorageMedium.objects.secure_storage().writeable().order_by('last_changed_local')
+        storage_medium, created = storage_target.get_or_create_storage_medium(qs=qs)
 
-        if storage_type == TAPE:
-            if storage_medium is not None:
-                new_size = storage_medium.used_capacity + entry.write_size
-
-                if storage_target.max_capacity > 0 and new_size > storage_target.max_capacity:
-                    try:
-                        storage_medium.mark_as_full()
-                    except AssertionError:
-                        pass
-
-                    storage_medium = None
-                else:
-                    return storage_medium
-
-            # Could not find any storage medium, create one
-
-            slot = TapeSlot.objects.filter(
-                status=20, storage_medium__isnull=True,
-                medium_id__startswith=storage_target.target
-            ).exclude(medium_id__exact='').first()
-
-            if slot is None:
-                raise ValueError("No tape available for allocation")
-
-            storage_medium = StorageMedium.objects.create(
-                medium_id=slot.medium_id,
-                storage_target=storage_target, status=20,
-                location=Parameter.objects.get(entity='medium_location').value,
-                location_status=50,
-                block_size=storage_target.default_block_size,
-                format=storage_target.default_format, agent=entry.user,
-                tape_slot=slot,
-            )
-
-            return storage_medium
-
-        elif storage_type == DISK:
-            if storage_medium is None:
-                return StorageMedium.objects.create(
-                    medium_id=storage_target.name,
-                    storage_target=storage_target, status=20,
-                    location=Parameter.objects.get(entity='medium_location').value,
-                    location_status=50,
-                    block_size=storage_target.default_block_size,
-                    format=storage_target.default_format, agent=entry.user,
-                )
-
-            return storage_medium
-
+        new_size = storage_medium.used_capacity + entry.write_size
+        if new_size > storage_target.max_capacity > 0:
+            storage_medium.mark_as_full()
+            raise ValueError("Storage medium is full")
+        return storage_medium
 
     def cleanup(self):
         entries = IOQueue.objects.filter(status=5, storage_method_target__storage_target__remote_server='').exclude(task_id='')
@@ -1203,15 +1159,10 @@ class IO(DBTask):
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
         medium_obj = StorageMedium.objects.get(pk=storage_medium)
         storage_backend = storage_target.get_storage_backend()
-        storage_object = storage_backend.write(cache_obj, entry.ip, storage_method, medium_obj)
-        storage_backend.write(cache_obj_xml, entry.ip, storage_method, medium_obj, create_obj=False, update_obj=storage_object)
-        storage_backend.write(cache_obj_aic_xml, entry.ip, storage_method, medium_obj, create_obj=False, update_obj=storage_object)
-
-        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
-
+        storage_object = storage_backend.write([cache_obj, cache_obj_xml, cache_obj_aic_xml], entry.ip, storage_method, medium_obj)
         entry.storage_object = storage_object
         entry.save(update_fields=['storage_object'])
-
+        StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
         return storage_object
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
