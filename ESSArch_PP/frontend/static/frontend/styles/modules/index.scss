@@ -882,17 +882,19 @@ padding: 0 12px;
         overflow-x: auto;
     }
 }
-.nav-item {
-    cursor: pointer;
-    user-select: none;
-    margin: 0 15px 0 0 !important;
-    white-space: nowrap;
+.menu, .sub-menu {
+    .nav-item {
+        cursor: pointer;
+        user-select: none;
+        margin: 0 15px 0 0 !important;
+        white-space: nowrap;
 
-    &:focus {
-        outline: 0;
-        color: #b4caf8;
-        &:after {
+        &:focus {
+            outline: 0;
             color: #b4caf8;
+            &:after {
+                color: #b4caf8;
+            }
         }
     }
 }
