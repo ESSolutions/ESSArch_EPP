@@ -377,7 +377,7 @@ def installDefaultStorageTargets():
         name='Default Long-term Storage Target 1',
         status=True,
         type=DISK,
-        target=u'/ESSArch/data/store/disk2',
+        target=u'/ESSArch/data/store/longterm_disk1',
     )
 
     return 0
