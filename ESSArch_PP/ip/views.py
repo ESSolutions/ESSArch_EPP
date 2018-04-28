@@ -477,6 +477,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             validation_step = ProcessStep.objects.create(
                 name="Validate SIP",
                 parent_step_pos=0,
+                information_package=ip,
             )
             step.add_child_steps(validation_step)
 
@@ -520,6 +521,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         generate_aip_step = ProcessStep.objects.create(
             name="Generate AIP",
             parent_step_pos=10,
+            information_package=ip,
         )
         pos = 0
 
@@ -595,6 +597,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         validate_aip_step = ProcessStep.objects.create(
             name="Validate AIP",
             parent_step_pos=20,
+            information_package=ip,
         )
         pos = 0
 
@@ -640,6 +643,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         finalize_aip_step = ProcessStep.objects.create(
             name="Finalize AIP",
             parent_step_pos=30,
+            information_package=ip,
         )
         pos = 0
 
@@ -1080,30 +1084,25 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             information_package_id=pk,
             eager=False,
         )
-        tasks = []
 
-        tasks.append(ProcessTask(
+        ProcessTask.objects.create(
             name='workflow.tasks.CacheAIP',
             params={'aip': pk},
             information_package_id=pk,
             processstep=main_step,
             processstep_pos=10,
             responsible=self.request.user,
-        ))
+        )
 
-        tasks.append(ProcessTask(
+        ProcessTask.objects.create(
             name='workflow.tasks.StoreAIP',
             params={'aip': pk},
             information_package_id=pk,
             processstep=main_step,
             processstep_pos=20,
             responsible=self.request.user,
-        ))
-
-        ProcessTask.objects.bulk_create(tasks)
-
+        )
         main_step.run()
-
         return Response({'detail': 'Preserving IP %s...' % pk})
 
     @detail_route(methods=['post'])

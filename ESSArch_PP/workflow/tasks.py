@@ -152,6 +152,8 @@ class ReceiveSIP(DBTask):
             log=EventIP,
             information_package=aip,
             responsible_id=self.responsible,
+            processstep_id=self.step,
+            processstep_pos=self.step_pos,
         ).run().get()
 
         dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
@@ -350,6 +352,8 @@ class CacheAIP(DBTask):
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
             params={'ip': aip},
+            processstep_id=self.step,
+            processstep_pos=self.step_pos,
             information_package_id=aip,
             responsible_id=self.responsible,
         ).run().get()
@@ -442,6 +446,7 @@ class StoreAIP(DBTask):
         step = ProcessStep.objects.create(
             name='Write to storage',
             parent_step_id=self.step,
+            information_package_id=self.ip,
         )
 
         with transaction.atomic():
