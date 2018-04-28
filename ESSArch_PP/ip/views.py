@@ -1052,7 +1052,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         ip = self.get_object()
 
         if ip.archived:
-            raise exceptions.ParseError('IP already archived')
+            raise exceptions.ParseError('IP already preserved')
+        if ip.state == "Preserving":
+            raise exceptions.ParseError('IP already being preserved')
 
         if ip.package_type == InformationPackage.DIP:
             policy = request.data.get('policy')
@@ -1069,6 +1071,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             ip.save(update_fields=['policy'])
 
+        ip.state = "Preserving"
         ip.appraisal_date = request.data.get('appraisal_date', None)
         ip.save()
 
