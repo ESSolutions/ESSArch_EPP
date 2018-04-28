@@ -220,14 +220,15 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
 
     //Get data for status view. child steps and tasks
     function getStatusViewData(ip, expandedNodes) {
-        return IP.steps({ id: ip.id }).$promise.then(function (data) {
-            var steps = data;
-            steps.forEach(function (step) {
-                step.time_started = $filter('date')(step.time_created, "yyyy-MM-dd HH:mm:ss");
-                step.children = [{ val: -1 }];
-                step.childrenFetched = false;
+        return IP.workflow({
+            id: ip.id
+        }).$promise.then(function (workflow) {
+            workflow.forEach(function (flow_node) {
+                flow_node.time_started = $filter('date')(flow_node.time_started, "yyyy-MM-dd HH:mm:ss");
+                flow_node.children = flow_node.flow_type == 'step' ? [{val: -1}] : [];
+                flow_node.childrenFetched = false;
             });
-            return expandAndGetChildren(steps, expandedNodes);
+            return expandAndGetChildren(workflow, expandedNodes);
         })
     }
     //Prepare the data for tree view in status view
@@ -763,16 +764,12 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
             link.next ? step.next = link.next : step.next = null;
             link.prev ? step.prev = link.prev : step.prev = null;
             step.page_number = page_number || 1;
-            var placeholder_removed = false;
             if (resource.length > 0) {
                 // Delete placeholder
                 step.children.pop();
-                placeholder_removed = true;
             }
             var tempChildArray = [];
             resource.forEach(function (child) {
-                child.label = child.name;
-                child.user = child.responsible;
                 if (child.flow_type == "step") {
                     child.isCollapsed = false;
                     child.tasksCollapsed = true;

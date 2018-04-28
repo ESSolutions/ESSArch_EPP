@@ -25,6 +25,7 @@
 import copy
 import errno
 import glob
+import itertools
 import logging
 import math
 import os
@@ -57,7 +58,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.WorkflowEngine.serializers import ProcessStepSerializer
+from ESSArch_Core.WorkflowEngine.serializers import ProcessStepChildrenSerializer
 from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
@@ -1255,12 +1256,14 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         return obj
 
     @detail_route()
-    def steps(self, request, pk=None):
+    def workflow(self, request, pk=None):
         ip = self.get_object()
-        steps = ip.steps.all()
-        serializer = ProcessStepSerializer(
-            data=steps, many=True, context={'request': request}
-        )
+
+        steps = ip.steps.filter(parent_step__information_package__isnull=True)
+        tasks = ip.processtask_set.filter(processstep__information_package__isnull=True)
+        flow = sorted(itertools.chain(steps, tasks), key=lambda x: (x.get_pos(), x.time_created))
+
+        serializer = ProcessStepChildrenSerializer(data=flow, many=True, context={'request': request})
         serializer.is_valid()
         return Response(serializer.data)
 

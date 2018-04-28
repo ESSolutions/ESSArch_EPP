@@ -47,19 +47,10 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
                 }
             },
         },
-        steps: {
+        workflow: {
             method: "GET",
-            params: { action: "steps", id: "@id" },
-            isArray: true,
-            interceptor: {
-                response: function (response) {
-                    response.resource.forEach(function(res, idx, array) {
-                        array[idx] = new Step(res);
-                    });
-                    response.resource.$httpHeaders = response.headers;
-                    return response.resource;
-                }
-            },
+            params: { action: "workflow", id: "@id" },
+            isArray: true
         },
         checkProfile: {
             method: "PUT",
