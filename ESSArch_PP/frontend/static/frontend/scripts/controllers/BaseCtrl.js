@@ -1228,8 +1228,8 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             return true;
         }
 
-        // Archived IPs cannot be deleted
-        if (row.archived) {
+        // Archived IPs requires a special permission to be deleted
+        if (row.archived && !$scope.checkPermission('ip.delete_archived')) {
             return false;
         }
 

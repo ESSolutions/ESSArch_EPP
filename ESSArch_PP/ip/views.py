@@ -990,7 +990,16 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
 
         if ip.archived:
-            raise exceptions.ParseError(detail='Archived IPs cannot be deleted')
+            if not request.user.has_perm('ip.delete_archived'):
+                raise exceptions.PermissionDenied('You do not have permission to delete archived IPs')
+
+            if request.query_params.get('delete-files', True):
+                for storage_obj in ip.storage.all():
+                    storage_obj.delete_files()
+                    storage_obj.delete()
+
+            ip.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         # delete files if IP is not at reception
         if ip.state not in ('Prepared', 'Receiving'):
