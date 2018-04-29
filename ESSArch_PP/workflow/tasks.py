@@ -411,7 +411,18 @@ class CacheAIP(DBTask):
         InformationPackage.objects.filter(pk=aip).update(
             object_path=dstdir, cached=True
         )
-
+        shutil.rmtree(srcdir)
+        if policy.ingest_delete:
+            reception = Path.objects.values_list('value', flat=True).get(entity="reception")
+            reception_tar = os.path.join(reception, objid + '.tar')
+            reception_xml = os.path.join(reception, objid + '.xml')
+            reception_events_xml = os.path.join(reception, objid + '_ipevents.xml')
+            for f in [reception_tar, reception_xml, reception_events_xml]:
+                try:
+                    os.remove(f)
+                except OSError as e:
+                    if e.errno != errno.ENOENT:
+                        raise
         return aip
 
     def undo(self, aip):
