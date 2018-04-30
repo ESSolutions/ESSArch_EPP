@@ -1329,8 +1329,7 @@ class PollRobotQueue(DBTask):
                         if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
                             raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
 
-                        entry.status = 20
-                        entry.save(update_fields=['status'])
+                        entry.delete()
 
                     raise TapeMountedError("Tape already mounted")
 
@@ -1366,7 +1365,7 @@ class PollRobotQueue(DBTask):
                             }
                         ).run().get()
                     except TapeMountedError:
-                        entry.status = 20
+                        entry.delete()
                         raise
                     except:
                         entry.status = 100
@@ -1374,16 +1373,14 @@ class PollRobotQueue(DBTask):
                     else:
                         medium.tape_drive = drive
                         medium.save(update_fields=['tape_drive'])
-                        entry.status = 20
+                        entry.delete()
                     finally:
                         entry.robot = None
                         entry.save(update_fields=['robot', 'status'])
 
             elif entry.req_type in [20, 30]:  # unmount
                 if medium.tape_drive is None:  # already unmounted
-                    entry.status = 20
-                    entry.save(update_fields=['status'])
-
+                    entry.delete()
                     raise TapeUnmountedError("Tape already unmounted")
 
                 if medium.tape_drive.locked:
@@ -1408,7 +1405,7 @@ class PollRobotQueue(DBTask):
                             }
                         ).run().get()
                     except TapeUnmountedError:
-                        entry.status = 20
+                        entry.delete()
                         raise
                     except:
                         entry.status = 100
@@ -1416,7 +1413,7 @@ class PollRobotQueue(DBTask):
                     else:
                         medium.tape_drive = None
                         medium.save(update_fields=['tape_drive'])
-                        entry.status = 20
+                        entry.delete()
                     finally:
                         entry.robot = None
                         entry.save(update_fields=['robot', 'status'])
