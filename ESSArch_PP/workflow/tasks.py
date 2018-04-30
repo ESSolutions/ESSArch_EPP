@@ -925,25 +925,28 @@ class PollIOQueue(DBTask):
                 if not entries.filter(storage_method_target__storage_method=storage_method).exists():
                     raise Exception("No entry for storage method '%s' for IP '%s'" % (storage_method.pk, ip.pk))
 
+            user = entries.first().user
+
             ip.archived = True
             ip.state = 'Preserved'
             ip.save(update_fields=['archived', 'state'])
+
+            # delete all queue entries related to IP
+            ip.ioqueue_set.all().delete()
 
             # if we preserved directly from workarea then we need to delete that workarea object
             ip.workareas.all().delete()
 
             msg = '%s preserved to %s' % (ip.object_identifier_value, ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True)))
-            agent = entries.first().user.username
-            extra = {'event_type': 30300, 'object': ip.pk, 'agent': agent, 'outcome': EventIP.SUCCESS}
+            extra = {'event_type': 30300, 'object': ip.pk, 'agent': user.username, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
-            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=entries.first().user, refresh=True)
+            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=user, refresh=True)
 
-            recipient = entries.first().user.email
-            if recipient:
+            if user.email:
                 subject = 'Preserved "%s"' % ip.object_identifier_value
                 body = '"%s" is now preserved' % ip.object_identifier_value
                 try:
-                    send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
+                    send_mail(subject, body, 'e-archive@essarch.org', [user.email], fail_silently=False)
                 except Exception:
                     logger.exception("Failed to send mail to notify user about preserved IP")
 
