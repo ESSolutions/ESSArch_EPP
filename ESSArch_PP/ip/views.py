@@ -661,11 +661,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.UpdateIPStatus',
-            args=[ip.pk],
-            params={
-                'status': 'Received',
-                'prev': 'Receiving'
-            },
+            args=['Received'],
             log=EventIP,
             information_package=ip,
             responsible=self.request.user,
