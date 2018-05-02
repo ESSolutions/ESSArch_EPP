@@ -3,7 +3,7 @@
         <div class="search-prepare-wrapper">
             <label for items-per-page></label>
             <select tabindex="-1" id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-            <input st-search="" style="width: 50%;" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+            <input st-search="" style="width: 50%;" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_ORDER' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
             <button type="button" ng-click="newOrderModal()" class="btn btn-info">{{'NEWORDER' | translate}}</button>
             <div class="refresh-icon">
                 <span ng-click="getListViewData()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
