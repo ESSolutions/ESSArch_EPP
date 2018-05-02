@@ -164,7 +164,7 @@
     "GLOBALSEARCHDESC_IP":"Lista alla IPn som associeras med söktermen",
     "GLOBALSEARCHDESC_RULE":"Lista alla regler som associeras med söktermen",
     "GLOBALSEARCHDESC_MEDIUM":"Lista alla lagringsmedium som associeras med söktermen",
-    "GLOBALSEARCHDESC_MEDIUM_CONTENT":"Lista alla Lagringsenheter för medium som associeras med söktermen",
+    "GLOBALSEARCHDESC_MEDIUM_CONTENT":"Lista allt innehåll i lagringsmedium som associeras med söktermen",
     "GLOBALSEARCHDESC_ROBOT":"Lista alla robotar som associeras med söktermen",
     "GLOBALSEARCHDESC_QUEUE":"Lista alla kö-objekt som associeras med söktermen",
     "GLOBALSEARCHDESC_TAPE_SLOT":"Lista alla bandplatser som associeras med söktermen",
