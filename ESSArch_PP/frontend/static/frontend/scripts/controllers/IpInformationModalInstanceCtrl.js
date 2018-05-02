@@ -30,7 +30,7 @@ angular.module('myApp').controller('IpInformationModalInstanceCtrl', function (I
         $ctrl.editMode[field] = false;
     }
     $ctrl.saveIpModifications = function(field) {
-        IP.update({id: $ctrl.ip.id}, $ctrl.ipModifications).then(function(response) {
+        IP.update({id: $ctrl.ip.id}, $ctrl.ipModifications).$promise.then(function(response) {
             Notifications.add('Updated!', 'error');
             $ctrl.editMode[field] = false;
         })
