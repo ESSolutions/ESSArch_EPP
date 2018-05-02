@@ -1341,6 +1341,7 @@ body.modal-open {
     display: inline-flex;
     .dropdown {
         padding-right: 3px;
+        min-width: 128px;
     }
     .btn, input {
         margin-right: 3px;
