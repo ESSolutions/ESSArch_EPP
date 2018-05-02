@@ -19,41 +19,16 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
     vm.dataVersion = null;
     // On init
     vm.$onInit = function() {
-        $scope.saProfile = {
-            profile: null,
-            profiles: [],
-            disabled: false
-        };
-        $scope.ip = vm.ip;
-        vm.gettingSas = true;
-        listViewService.getSaProfiles($scope.ip).then(function (result) {
-            vm.gettingSas = false;
-            $scope.saProfile.profiles = result.profiles;
-            var chosen_sa_id = null;
-            if($scope.ip.submission_agreement) {
-                chosen_sa_id = $scope.ip.submission_agreement;
-            } else if ($scope.ip.altrecordids && $scope.ip.altrecordids.SUBMISSIONAGREEMENT) {
-                chosen_sa_id = $scope.ip.altrecordids.SUBMISSIONAGREEMENT[0];
-            }
-            if(result.profiles.length <= 0) {
-                $scope.saAlert = $scope.alerts.noSas;
-            } else
-            if (chosen_sa_id) {
-                var found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
-                if (found.length) {
-                    $scope.saProfile.profile = found[0];
-                    $scope.saProfile.disabled = true;
-                } else {
-                    $scope.saAlert = $scope.alerts.receiveError;
-                    $scope.saProfile.disabled = true;
-                    $scope.$emit('disable_receive', {});
-                }
-            }
-            vm.shareData({$event: {approved: false, aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id, saObject: $scope.saProfile.profile}});
-        });
+        init();
     };
 
-    vm.$onChanges = function($event) {
+    vm.$onChanges = function(changes) {
+        if(!changes.ip.isFirstChange()) {
+            init();
+        }
+    };
+
+    function init () {
         $scope.saProfile = {
             profile: null,
             profiles: [],
@@ -74,8 +49,7 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
             }
             if(result.profiles.length <= 0) {
                 $scope.saAlert = $scope.alerts.noSas;
-            } else
-            if (chosen_sa_id) {
+            } else if (chosen_sa_id) {
                 var found = $filter('filter')(result.profiles, { id: chosen_sa_id }, true);
                 if (found.length) {
                     $scope.saProfile.profile = found[0];
@@ -85,11 +59,11 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
                     $scope.saProfile.disabled = true;
                     $scope.$emit('disable_receive', {});
                 }
-;
             }
+            vm.shareData({$event: {approved: false, aipProfileId: $scope.saProfile.profile.profile_aip.id, dipProfileId: $scope.saProfile.profile.profile_dip.id, aipModel: vm.savedAip, dipModel: vm.savedDip, submissionAgreement: $scope.saProfile.profile.id, saObject: $scope.saProfile.profile}});
             vm.loadProfiles($scope.ip);
         });
-    };
+    }
 
     vm.loadProfiles = function(ip) {
         $scope.selectRowCollapse = [];
