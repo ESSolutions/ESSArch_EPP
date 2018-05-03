@@ -998,8 +998,12 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         # delete files if IP is not at reception
-        if ip.state not in ('Prepared', 'Receiving'):
-            path = ip.object_path
+        if ip.state != 'Prepared':
+            if ip.state in 'Receiving':
+                path = os.path.join(ip.policy.ingest_path.value, ip.object_identifier_value)
+            else:
+                path = ip.object_path
+
             if os.path.isdir(path):
                 t = ProcessTask.objects.create(
                     name='ESSArch_Core.tasks.DeleteFiles',
