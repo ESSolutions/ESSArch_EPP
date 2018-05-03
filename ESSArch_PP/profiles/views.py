@@ -81,6 +81,8 @@ from ESSArch_Core.profiles.models import (
     ProfileIPData,
 )
 
+from ESSArch_Core.profiles.views import SubmissionAgreementViewSet as SAViewSetCore
+
 from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
 
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
@@ -94,18 +96,7 @@ def get_sa_template():
         return json.load(json_file)
 
 
-class SubmissionAgreementViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows submission agreements to be viewed or edited.
-    """
-    queryset = SubmissionAgreement.objects.all().prefetch_related(
-        Prefetch('profilesa_set', to_attr='profiles')
-    )
-    serializer_class = SubmissionAgreementSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('published',)
-
+class SubmissionAgreementViewSet(SAViewSetCore):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
@@ -191,53 +182,6 @@ class SubmissionAgreementViewSet(viewsets.ModelViewSet):
             new_sa, context={'request': request}
         )
         return Response(serializer.data)
-
-    @detail_route(methods=["post"])
-    def lock(self, request, pk=None):
-        sa = self.get_object()
-        ip_id = request.data.get("ip")
-
-        try:
-            ip = InformationPackage.objects.get(
-                pk=ip_id
-            )
-        except InformationPackage.DoesNotExist:
-            return Response(
-                {'status': 'Information Package with id %s does not exist' % ip_id},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        permission = CanLockSA()
-        if not permission.has_object_permission(request, self, ip):
-            self.permission_denied(
-                request, message=getattr(permission, 'message', None)
-            )
-
-        if ip.submission_agreement_locked:
-            raise exceptions.ParseError('IP already has a locked SA')
-
-        if ip.submission_agreement == sa:
-            ip.submission_agreement_locked = True
-
-            if sa.archivist_organization:
-                arch, _ = ArchivistOrganization.objects.get_or_create(
-                    name=sa.archivist_organization
-                )
-                ip.archivist_organization = arch
-
-            ip.save()
-
-            return Response({'status': 'locking submission_agreement'})
-        elif ip.submission_agreement is None:
-            return Response(
-                {'status': 'No SA connected to IP'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        else:
-            return Response(
-                {'status': 'This SA is not connected to the selected IP'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
 
 class SubmissionAgreementTemplateView(APIView):
