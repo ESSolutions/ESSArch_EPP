@@ -626,7 +626,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.UpdateIPSizeAndCount",
-            args=[ip.pk],
             log=EventIP,
             information_package=ip,
             responsible=self.request.user,

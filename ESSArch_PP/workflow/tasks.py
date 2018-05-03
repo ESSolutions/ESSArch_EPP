@@ -351,7 +351,6 @@ class CacheAIP(DBTask):
 
         ProcessTask.objects.create(
             name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
-            params={'ip': aip},
             processstep_id=self.step,
             processstep_pos=self.step_pos,
             information_package_id=aip,
