@@ -11,7 +11,7 @@
             <div class="flex-row">
                 <select class="form-control version-select" ng-model="vm.structure" ng-change="vm.loadRecordAndTree(vm.record._index, vm.record._id)">
                     <option ng-repeat="classification in vm.archiveStructures" value="{{classification.id}}" ng-disabled="!vm.existsForRecord(classification.id)">
-                        {{classification.name}}
+                        {{classification.name}}&nbsp;{{!vm.existsForRecord(classification.id) ? '('+('UNAVAILABLE' | translate)+')':''}}
                     </option>
                 </select>
                 <button ng-click="vm.newStructureModal(vm.recordTreeData[0])" class="btn btn-success lock-button">+</button>
