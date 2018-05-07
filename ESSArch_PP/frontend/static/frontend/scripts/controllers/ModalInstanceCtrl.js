@@ -794,7 +794,63 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.fieldOptions = {};
     $ctrl.$onInit = function() {
         $ctrl.fieldOptions = getEditableFields($ctrl.node);
+        var discludedFields = ["archive", "current_version"];
+        angular.forEach($ctrl.fieldOptions, function(value, field) {
+            if(!discludedFields.includes(field)) {
+                switch(field) {
+                    case "unit_ids":
+                        addNestedField(field, value)
+                        break;
+                    case "unit_dates":
+                        addNestedField(field, value)
+                        break;
+                    default:
+                        addStandardField(field, value);
+                        break;
+                }
+            }
+        })
     }
+
+    function addNestedField(field, value) {
+        var model = {};
+        var group = {
+            "templateOptions": {
+                "label": $translate.instant(field.toUpperCase()),
+            },
+            "fieldGroup": []
+        };
+        angular.forEach(value, function(val, key) {
+            model[key] = val;
+            $ctrl.editFields.push(
+                {
+                    "templateOptions": {
+                        "type": "text",
+                        "label": $translate.instant(key.toUpperCase()),
+                    },
+                    "type": "input",
+                    "model": 'model.'+field,
+                    "key": key,
+                }
+            )
+        })
+        $ctrl.editData[field] = model;
+    }
+
+    function addStandardField(field, value) {
+        $ctrl.editData[field] = value;
+        $ctrl.editFields.push(
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": $translate.instant(field.toUpperCase()),
+                },
+                "type": "input",
+                "key": field,
+            }
+        )
+    }
+
     function getEditableFields(node) {
         return node._source;
     }

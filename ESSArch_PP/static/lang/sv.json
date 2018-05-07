@@ -574,5 +574,8 @@
     "TARGET_NAME": "Target name",
     "STEP_STATE_DESC": "Step-tillstånd, Slutförd/Fel",
     "APPRAISAL_DATE_DESC": "Gallringsfrist",
-    "PLACE_IN_CLASSIFICATION_STRUCTURE": "Placera i klassificeringsstruktur"
+    "PLACE_IN_CLASSIFICATION_STRUCTURE": "Placera i klassificeringsstruktur",
+    "UNAVAILABLE": "Inte tillgänglig",
+    "TERMS_AND_CONDITION": "Villkor",
+    "DESC": "Beskrivning"
 }
