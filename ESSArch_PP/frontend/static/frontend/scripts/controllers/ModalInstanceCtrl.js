@@ -830,10 +830,13 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.submit = function() {
         if($ctrl.changed()) {
+            $ctrl.submitting = true;
             Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function(response) {
+                $ctrl.submitting = false;
                 Notifications.add($translate.instant('NODE_EDITED'), 'success');
                 $uibModalInstance.close("edited");
             }).catch(function(response) {
+                $ctrl.submitting = false;
                 Notifications.add(response.data, 'error');
             })
         }
@@ -908,10 +911,13 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.submit = function() {
         if($ctrl.changed()) {
+            $ctrl.submitting = true;
             Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index, structure: data.structure})).then(function(response) {
+                $ctrl.submitting = false;
                 Notifications.add($translate.instant('NODE_ADDED'), 'success');
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {
+                $ctrl.submitting = false;
                 Notifications.add(response.data.detail, 'error');
             })
         }
