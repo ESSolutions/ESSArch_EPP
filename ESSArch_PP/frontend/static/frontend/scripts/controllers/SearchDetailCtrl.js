@@ -452,7 +452,6 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
             $state.reload();
         }).catch(function(response) {
-            console.log(response);
             Notifications.add("Could not be added to structure unit", "error");
         })
     }
