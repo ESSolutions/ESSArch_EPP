@@ -1,10 +1,9 @@
 <div class="search">
     <div class="content-wrapper">
         <div class="search-page">
-            <h4>{{'SEARCH' | translate}}</h4>
             <form ng-submit="vm.searchSubmit(vm.searchString)">
-                <input class="form-control search-field" placeholder="Search" ng-model="vm.searchString">
-                <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}}</button>
+                <input class="form-control search-field" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.searchString">
+                <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}} <i class="fa fa-search"></i></button>
             </form>
             <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
