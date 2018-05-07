@@ -864,7 +864,8 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 "templateOptions": {
                     "type": "text",
                     "label": $translate.instant("NAME"),
-                    "required": true
+                    "required": true,
+                    "focus": true
                 },
                 "type": "input",
                 "key": "name",
