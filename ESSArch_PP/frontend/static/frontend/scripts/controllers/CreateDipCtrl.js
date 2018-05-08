@@ -35,46 +35,37 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     }
     $scope.requestForm = false;
     $scope.openRequestForm = function(row) {
+        $scope.select = false;
+        $scope.eventlog = false;
+        $scope.edit = false;
+        $scope.eventShow = false;
         if(row.package_type == 1) {
-			$scope.select = false;
-			$scope.eventlog = false;
-			$scope.edit = false;
-			$scope.eventShow = false;
-			$scope.requestForm = false;
+            $scope.requestForm = false;
             $scope.requestEventlog = false;
             if ($scope.ip != null && $scope.ip.object_identifier_value== row.object_identifier_value) {
-				$scope.ip = null;
-				$rootScope.ip = null;
-			} else {
-				$scope.ip = row;
-				$rootScope.ip = $scope.ip;
-			}
-			return;
-		}
-		if($scope.requestForm && $scope.ip.id== row.id){
-			$scope.select = false;
-			$scope.eventlog = false;
-			$scope.edit = false;
-			$scope.eventShow = false;
-			$scope.requestForm = false;
+                $scope.ip = null;
+                $rootScope.ip = null;
+            } else {
+                $scope.ip = row;
+                $rootScope.ip = $scope.ip;
+            }
+            return;
+        }
+        if($scope.requestForm && $scope.ip.id== row.id){
+            $scope.requestForm = false;
             $scope.requestEventlog = false;
             $scope.ip = null;
-			$rootScope.ip = null;
-		} else {
-			$scope.select = false;
-			$scope.eventlog = false;
-			$scope.edit = false;
-            $scope.eventShow = false;
+            $rootScope.ip = null;
+        } else {
             $scope.requestForm = true;
             $scope.requestEventlog = true;
-            $scope.eventShow = false;
-			$scope.ip = row;
+            $scope.ip = row;
             $rootScope.ip = $scope.ip;
             $scope.getArchivePolicies().then(function(data) {
                 vm.request.archivePolicy.options = data;
             })
-		}
-		$scope.statusShow = false;
+        }
+        $scope.statusShow = false;
     }
 
     //Cancel update intervals on state change
