@@ -21,7 +21,7 @@
     <br/>
     <button ng-if="vm.record._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
     <h4>{{'CONTENTS' | translate}}</h4>
-    <div st-table="vm.record_children" style="width:100%;" class="table-x-overflow">
+    <div st-table="children" st-safe-src="vm.record_children" style="width:100%;" class="table-x-overflow">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -32,7 +32,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="x in vm.record_children">
+                <tr ng-repeat="x in children">
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer"><b>{{x._source.reference_code}}</b></td>
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>

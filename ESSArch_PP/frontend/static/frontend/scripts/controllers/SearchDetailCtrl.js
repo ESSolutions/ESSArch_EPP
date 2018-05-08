@@ -1,17 +1,41 @@
-angular.module('myApp').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval) {
     var vm = this;
     $controller('TagsCtrl', { $scope: $scope, vm: vm });
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
     vm.unavailable = false;
     vm.structure = null;
+
+    // Record update interval
+    var recordInterval;
+
+    // Destroy intervals on state change
+    $scope.$on('$stateChangeStart', function() {
+        $interval.cancel(recordInterval);
+    });
+
     vm.$onInit = function() {
-        vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id);
+        vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id).then(function() {
+            $interval.cancel(recordInterval);
+            recordInterval = $interval(function(){vm.updateRecord()}, appConfig.recordInterval);
+        });
+    }
+
+    vm.updateRecord = function() {
+        $http.get(appConfig.djangoUrl + "search/" + vm.record._index + "/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
+            vm.record = response.data;
+            getVersionSelectData();
+            getChildren(vm.record).then(function (response) {
+                vm.record_children = response.data;
+            })
+        }).catch(function(response) {
+            Notifications.add("Could not update record", "error");
+        })
     }
 
     vm.loadRecordAndTree = function(index, id) {
         vm.viewContent = true;
-        $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
+        return $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
             if(vm.record.structures.length == 0) {
                 $scope.getArchives().then(function (result) {
@@ -35,10 +59,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
             })
+            return vm.record;
         }).catch(function(response) {
             if (response.status == 403 || response.status == 404) {
                 vm.unavailable = true;
             }
+            return vm.record;
         })
     }
 
