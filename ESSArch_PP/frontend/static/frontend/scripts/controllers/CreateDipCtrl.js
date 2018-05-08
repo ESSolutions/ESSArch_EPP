@@ -3,7 +3,18 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     var ipSortString = "";
     var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
-    vm.user = $rootScope.auth;
+    vm.organizationMember = {
+        current: null,
+        options: [],
+    }
+    vm.$onInit = function() {
+        vm.organizationMember.current = $rootScope.auth;
+        if($scope.checkPermission('ip.see_all_in_workspaces') && $rootScope.auth.current_organization) {
+            $http.get(appConfig.djangoUrl+"organizations/"+$rootScope.auth.current_organization.id+"/").then(function(response) {
+                vm.organizationMember.options = response.data.group_members;
+            })
+        }
+    }
     $scope.orderObjects = [];
     listViewService.getOrderPage().then(function(response) {
         $scope.orderObjects = response.data;
@@ -371,11 +382,19 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
-            listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1), pageNumber, number).then(function(dir) {
+            listViewService.getWorkareaDir("access", $scope.previousGridArraysString(1), pageNumber, number, vm.organizationMember.current.id).then(function(dir) {
                 $scope.deckGridData = dir.data;
                 $scope.workarea_tableState.pagination.numberOfPages = dir.numberOfPages;//set the number of pages so the pagination can update
                 $scope.workArrayLoading = false;
                 $scope.initLoad = false;
+            }).catch(function(response) {
+                if(response.status === 404) {
+                    $scope.deckGridData = [];
+                    $scope.workarea_tableState.pagination.numberOfPages = 0;//set the number of pages so the pagination can update
+                    $scope.workarea_tableState.pagination.start = 0;//set the number of pages so the pagination can update
+                    $scope.workArrayLoading = false;
+                    $scope.initLoad = false;
+                }
             })
         }
     }
@@ -406,6 +425,10 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
             $scope.dipPipe($scope.dip_tableState);
         }
     };
+
+    $scope.resetWorkareaGridArrays = function() {
+        $scope.previousGridArrays1 = [];
+    }
 
     $scope.previousGridArray = function(whichArray) {
         if (whichArray == 1) {
@@ -459,7 +482,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     };
     $scope.getFile = function (whichArray, file) {
         if (whichArray == 1) {
-            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=access&path=" + $scope.previousGridArraysString(1) + file.name + (vm.user?"&user="+vm.user.id:""));
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=access&path=" + $scope.previousGridArraysString(1) + file.name + (vm.organizationMember.current?"&user="+vm.organizationMember.current.id:""));
         } else {
             file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString(2) + file.name);
         }

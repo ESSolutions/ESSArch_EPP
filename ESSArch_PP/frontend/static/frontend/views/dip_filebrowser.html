@@ -5,6 +5,10 @@
             <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
         </div>
         <div class="button-refresh-wrapper">
+        <select ng-if="checkPermission('ip.see_all_in_workspaces') && auth.current_organization" class="form-control organization-member-select"
+            style="margin-right: 10px;"
+            ng-model="vm.organizationMember.current" ng-options="x as x.username for x in vm.organizationMember.options track by x.id"
+            ng-change="resetWorkareaGridArrays(); workareaPipe(workarea_tableState);"></select>
         <div>
             <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
             uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
