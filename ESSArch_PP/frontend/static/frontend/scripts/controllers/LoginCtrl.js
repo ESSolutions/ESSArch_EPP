@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myService, $state, $stateParams, $rootScope, djangoAuth, Validate, $http, PermRoleStore, PermPermissionStore){
+angular.module('myApp').controller('LoginCtrl', function ($scope, $location, $window, myService, $state, $stateParams, $rootScope, djangoAuth, Validate, $http, PermRoleStore, PermPermissionStore){
     $scope.redirectAdmin = function () {
         $window.location.href="/admin/";
     }
@@ -40,7 +40,12 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
                     PermPermissionStore.clearStore();
                     PermRoleStore.clearStore();
                     myService.getPermissions(data.permissions);
-                    $state.go('home.myPage');
+                    if($stateParams.requestedPage !== '/login') {
+                        $location.path($stateParams.requestedPage);
+                        $window.location.reload();
+                    } else {
+                        $state.go('home.myPage');
+                    }
                 }).catch(function(data){
                     // error case
                     $scope.error = data.data.non_field_errors[0];
@@ -48,4 +53,3 @@ angular.module('myApp').controller('LoginCtrl', function ($scope, $location, myS
         }
     }
 });
-
