@@ -10,7 +10,7 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
     }
     vm.$onInit = function() {
         vm.organizationMember.current = $rootScope.auth;
-        if($scope.checkPermission('ip.see_all_in_workspaces')) {
+        if($scope.checkPermission('ip.see_all_in_workspaces') && $rootScope.auth.current_organization) {
             $http.get(appConfig.djangoUrl+"organizations/"+$rootScope.auth.current_organization.id+"/").then(function(response) {
                 vm.organizationMember.options = response.data.group_members;
             })

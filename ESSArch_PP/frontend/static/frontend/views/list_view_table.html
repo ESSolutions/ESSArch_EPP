@@ -24,7 +24,7 @@
         />
         <span ng-if="tableState.search.predicateObject && tableState.search.predicateObject['$']" class="input-group-addon clickable" ng-click="clearSearch(); getListViewData();"><i class="fa fa-lg fa-times" style="color: red;"></i></span>
     </div>
-    <select ng-if="checkPermission('ip.see_all_in_workspaces') && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))" class="form-control organization-member-select"
+    <select ng-if="checkPermission('ip.see_all_in_workspaces') && auth.current_organization && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))" class="form-control organization-member-select"
         ng-model="vm.organizationMember.current" ng-options="x as x.username for x in vm.organizationMember.options track by x.id"
         ng-change="getListViewData()"></select>
     <button ng-if="'home.access.createDip' | isState" type="button" ng-click="prepareDipModal()" class="btn btn-info" uib-popover="{{'PREPAREDIPDESC' | translate}}"
