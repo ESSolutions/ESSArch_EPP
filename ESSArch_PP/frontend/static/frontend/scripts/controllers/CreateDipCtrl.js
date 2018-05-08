@@ -3,6 +3,7 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
     var ipSortString = "";
     var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
+    vm.user = $rootScope.auth;
     $scope.orderObjects = [];
     listViewService.getOrderPage().then(function(response) {
         $scope.orderObjects = response.data;
@@ -462,11 +463,15 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
                 }
             }
         } else {
-            $scope.getFile(card);
+            $scope.getFile(whichArray, card);
         }
     };
-    $scope.getFile = function (file) {
-        file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString() + file.name);
+    $scope.getFile = function (whichArray, file) {
+        if (whichArray == 1) {
+            file.content = $sce.trustAsResourceUrl(appConfig.djangoUrl + "workarea-files/?type=access&path=" + $scope.previousGridArraysString(1) + file.name + (vm.user?"&user="+vm.user.id:""));
+        } else {
+            file.content = $sce.trustAsResourceUrl($scope.ip.url + "files/?path=" + $scope.previousGridArraysString(2) + file.name);
+        }
         $window.open(file.content, '_blank');
     }
     $scope.selectedCards1 = [];
