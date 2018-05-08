@@ -787,7 +787,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
 }).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
-    $ctrl.node = data.node.original;
+    $ctrl.node = data.node;
     $ctrl.editData = {};
     $ctrl.editFields = [];
     $ctrl.options = {};

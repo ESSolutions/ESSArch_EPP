@@ -258,8 +258,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             items: function (node, callback) {
                 var update = {
                     label: $translate.instant('UPDATE'),
-                    action: function () {
-                        vm.editNodeModal(node);
+                    _disabled: function(){
+                        return vm.record._source == null
+                    },
+                    action: function update() {
+                        if(vm.record._source) {
+                            vm.editNodeModal(vm.record);
+                        }
                     },
                 };
                 var add = {
@@ -596,8 +601,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(node.original._index, node.original._id);
+            vm.loadRecordAndTree(node._index, node._id);
         }, function () {
+            vm.loadRecordAndTree(node._index, node._id);
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
