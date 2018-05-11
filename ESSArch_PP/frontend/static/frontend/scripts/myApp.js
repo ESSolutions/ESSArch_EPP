@@ -835,11 +835,13 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
                 return;
             }
             if (djangoAuth.authenticated !== true) {
+                console.log('Not authenticated, redirecting to login');
                 event.preventDefault();
                 $state.go('login'); // go to login
             }
         });
     }).catch(function(status) {
+        console.log('Got error response from auth api, redirecting to login with requested page:', $location.path());
         $state.go('login', {requestedPage: $location.path()});
     });
 
