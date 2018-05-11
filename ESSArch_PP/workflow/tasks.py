@@ -63,9 +63,7 @@ from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
 from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent
 from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.fixity.checksum import calculate_checksum
-from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
-                                    ArchivalType, ArchivistOrganization,
-                                    EventIP, InformationPackage, Workarea)
+from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea
 from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
                                              ConversionJob, ConversionRule)
 from ESSArch_Core.profiles.utils import fill_specification_data
@@ -93,54 +91,20 @@ logger = logging.getLogger('essarch')
 class ReceiveSIP(DBTask):
     event_type = 20100
 
-    def run(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=[]):
-        aip = InformationPackage.objects.get(pk=ip)
-        policy = ArchivePolicy.objects.get(pk=policy)
+    def run(self, purpose=None, allow_unknown_files=False):
+        aip = InformationPackage.objects.get(pk=self.ip)
+        policy = aip.policy
+        container = aip.object_path
+        xml = aip.package_mets_path
         objid, container_type = os.path.splitext(os.path.basename(container))
         container_type = container_type.lower()
 
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC, responsible=aip.responsible,
-                                                label=aip.label, start_date=aip.start_date, end_date=aip.end_date,
-                                                archival_institution=aip.archival_institution,
-                                                archivist_organization=aip.archivist_organization,
-                                                archival_type=aip.archival_type,
-                                                archival_location=aip.archival_location,)
+                                                label=aip.label, start_date=aip.start_date, end_date=aip.end_date)
         aip.aic = aic
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
-
-        archival_institution = parsed.get('archival_institution')
-        archivist_organization = parsed.get('archivist_organization')
-        archival_type = parsed.get('archival_type')
-        archival_location = parsed.get('archival_location')
-
-        if archival_institution:
-            arch, _ = ArchivalInstitution.objects.get_or_create(
-                name=archival_institution
-            )
-            aip.archival_institution = arch
-
-        if archivist_organization:
-            arch, _ = ArchivistOrganization.objects.get_or_create(
-                name=archivist_organization
-            )
-            aip.archivist_organization = arch
-
-        if archival_type:
-            arch, _ = ArchivalType.objects.get_or_create(
-                name=archival_type
-            )
-            aip.archival_type = arch
-
-        if archival_location:
-            arch, _ = ArchivalLocation.objects.get_or_create(
-                name=archival_location
-            )
-            aip.archival_location = arch
-
-        aip.tags = tags
-
-        aip_dir = aip.object_path
+        aip_dir = os.path.join(policy.ingest_path.value, objid)
         os.makedirs(aip_dir)
 
         ProcessTask.objects.create(
@@ -159,19 +123,17 @@ class ReceiveSIP(DBTask):
         dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
         dst = os.path.join(dst[0], dst[1])
         if policy.receive_extract_sip:
-            if container_type.lower() == '.tar':
+            if container_type == '.tar':
                 with tarfile.open(container) as tar:
                     tar.extractall(dst.encode('utf-8'))
-            elif container_type.lower() == '.zip':
+            elif container_type == '.zip':
                 with zipfile.ZipFile(container) as zipf:
                     zipf.extractall(dst.encode('utf-8'))
         else:
             shutil.copy2(container, dst)
 
-        aip.save(update_fields=[
-            'aic', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location', 'object_path',
-        ])
+        aip.object_path = aip_dir
+        aip.save(update_fields=['aic', 'object_path'])
 
         recipient = User.objects.get(pk=self.responsible).email
         if recipient:
@@ -187,13 +149,11 @@ class ReceiveSIP(DBTask):
             else:
                 logger.debug("Mail sent")
 
-        return ip
-
-    def undo(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
+    def undo(self, purpose=None, allow_unknown_files=False):
         pass
 
-    def event_outcome_success(self, ip, xml, container, policy, purpose=None, allow_unknown_files=False, tags=None):
-        return "Received IP '%s'" % str(ip)
+    def event_outcome_success(self, purpose=None, allow_unknown_files=False):
+        return "Received SIP"
 
 
 class ReceiveAIP(DBTask):

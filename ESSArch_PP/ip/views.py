@@ -59,15 +59,15 @@ from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepChildrenSerializer
+from ESSArch_Core.WorkflowEngine.util import create_workflow
 from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
-from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
+from ESSArch_Core.essxml.util import get_agents, get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
+from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
-from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
-                                    ArchivalType, ArchivistOrganization,
-                                    EventIP, InformationPackage, Order,
+from ESSArch_Core.ip.models import (Agent, EventIP, InformationPackage, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT, Order,
                                     Workarea)
 from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
                                          IsOrderResponsibleOrAdmin,
@@ -79,64 +79,16 @@ from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
 from ESSArch_Core.profiles.utils import fill_specification_data
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import (find_destination, in_directory, list_files,
+from ESSArch_Core.util import (creation_date, find_destination, in_directory, list_files,
                                mkdir_p, parse_content_range_header,
                                remove_prefix, timestamp_to_datetime)
-from ip.filters import (ArchivalInstitutionFilter, ArchivalLocationFilter,
-                        ArchivalTypeFilter, ArchivistOrganizationFilter,
-                        InformationPackageFilter)
-from ip.serializers import (ArchivalInstitutionSerializer,
-                            ArchivalLocationSerializer, ArchivalTypeSerializer,
-                            ArchivistOrganizationSerializer,
-                            InformationPackageDetailSerializer,
+from ip.filters import InformationPackageFilter
+from ip.serializers import (InformationPackageDetailSerializer,
                             InformationPackageSerializer,
                             NestedInformationPackageSerializer,
                             OrderSerializer)
 
 User = get_user_model()
-
-class ArchivalInstitutionViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows archival institutions to be viewed or edited.
-    """
-    queryset = ArchivalInstitution.objects.all()
-    serializer_class = ArchivalInstitutionSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = ArchivalInstitutionFilter
-
-
-class ArchivistOrganizationViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows archivist organizations to be viewed or edited.
-    """
-    queryset = ArchivistOrganization.objects.all()
-    serializer_class = ArchivistOrganizationSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = ArchivistOrganizationFilter
-
-
-class ArchivalTypeViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows archival types to be viewed or edited.
-    """
-    queryset = ArchivalType.objects.all()
-    serializer_class = ArchivalTypeSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = ArchivalTypeFilter
-
-
-class ArchivalLocationViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows archival locations to be viewed or edited.
-    """
-    queryset = ArchivalLocation.objects.all()
-    serializer_class = ArchivalLocationSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_class = ArchivalLocationFilter
 
 
 class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
@@ -207,8 +159,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
     def list(self, request):
         filter_fields = ["label", "object_identifier_value", "responsible",
-                         "create_date", "object_size", "archival_institution",
-                         "archivist_organization", "start_date", "end_date"]
+                         "create_date", "object_size", "start_date", "end_date"]
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
@@ -337,10 +288,21 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             end_date=parsed.get('end_date'),
             object_path=container,
         )
+        algorithm = ip.get_checksum_algorithm()
+        ip.package_mets_path = xmlfile
+        ip.package_mets_create_date = timestamp_to_datetime(creation_date(xmlfile)).isoformat()
+        ip.package_mets_size = os.path.getsize(xmlfile)
+        ip.package_mets_digest_algorithm = MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT[algorithm.upper()]
+        ip.package_mets_digest = calculate_checksum(xmlfile, algorithm=algorithm)
+        ip.save()
 
         # refresh date fields to convert them to datetime instances instead of
         # strings to allow further datetime manipulation
         ip.refresh_from_db(fields=['entry_date', 'start_date', 'end_date'])
+
+        for agent_el in get_agents(etree.parse(xmlfile)):
+            agent = Agent.objects.from_mets_element(agent_el)
+            ip.agents.add(agent)
 
         member = Member.objects.get(django_user=request.user)
         user_perms = perms.pop('owner', [])
@@ -373,8 +335,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             logger.warn('Tried to receive IP %s from reception which is in state "%s"' % (pk, ip.state), extra={'user': request.user.pk})
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
-        sa = ip.submission_agreement
-
         for profile_ip in ProfileIP.objects.filter(ip=ip).iterator():
             try:
                 profile_ip.clean()
@@ -383,11 +343,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
             profile_ip.LockedBy = request.user
             profile_ip.save()
-
-        profile_ip_aic_description = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aic_description).first()
-        profile_ip_aip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip).first()
-        profile_ip_aip_description = ProfileIP.objects.filter(ip=ip, profile=sa.profile_aip_description).first()
-        profile_ip_dip = ProfileIP.objects.filter(ip=ip, profile=sa.profile_dip).first()
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
@@ -405,9 +360,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % container)
 
-        os.path.splitext(os.path.basename(container))[1]
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
-
         policy_id = request.data.get('archive_policy')
 
         try:
@@ -430,228 +383,128 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             if tag_id is not None:
                 raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
 
-        ip.object_path=os.path.join(policy.ingest_path.value, objid)
         ip.policy=policy
         ip.state='Receiving'
         ip.information_class=information_class
         ip.save()
 
-        step = ProcessStep.objects.create(
-            name="Receive SIP", eager=False,
-            information_package=ip,
-        )
+        generate_premis = ip.profile_locked('preservation_metadata')
 
         validators = request.data.get('validators', {})
-        available_validators = [
-            'validate_xml_file', 'validate_file_format', 'validate_integrity',
-            'validate_logical_physical_representation',
+        validate_xml_file = validators.get('validate_xml_file', False)
+        validate_logical_physical_representation = validators.get('validate_logical_physical_representation', False)
+
+        workflow_spec = [
+            {
+                "name": "ESSArch_Core.tasks.UpdateIPStatus",
+                "label": "Set status to receiving",
+                "args": ["Receiving"],
+            },
+            {
+                "step": True,
+                "name": "Receive SIP",
+                "children": [
+                    {
+                        "step": True,
+                        "name": "Validation",
+                        "if": any([validate_xml_file, validate_logical_physical_representation]),
+                        "children": [
+                            {
+                                "name": "ESSArch_Core.tasks.ValidateXMLFile",
+                                "if": validate_xml_file,
+                                "label": "Validate package-mets",
+                                "params": {
+                                    "xml_filename": "{{_PACKAGE_METS_PATH}}",
+                                }
+                            },
+                            {
+                                "name": "ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
+                                "if": validate_logical_physical_representation,
+                                "label": "Diff-check against package-mets",
+                                "args": ["{{_OBJPATH}}", "{{_PACKAGE_METS_PATH}}"],
+                            },
+                        ]
+                    },
+                    {
+                        "step": True,
+                        "name": "Generate AIP",
+                        "children": [
+                            {
+                                "name": "workflow.tasks.ReceiveSIP",
+                                "label": "Receive SIP",
+                                "params": {
+                                    'purpose': request.data.get('purpose'),
+                                    'allow_unknown_files': request.data.get('allow_unknown_files', False),
+                                }
+                            },
+                            {
+                                "name": "ESSArch_Core.tasks.ParseEvents",
+                                "if": os.path.isfile(events_xmlfile),
+                                "label": "Parse events",
+                                "args": [events_xmlfile],
+                            },
+                            {
+                                "name": "ESSArch_Core.ip.tasks.GeneratePremis",
+                                "if": generate_premis,
+                                "label": "Generate premis",
+                            },
+                            {
+                                "name": "ESSArch_Core.ip.tasks.GenerateContentMets",
+                                "label": "Generate content-mets",
+                            },
+                        ]
+                    },
+                    {
+                        "step": True,
+                        "name": "Validate AIP",
+                        "children": [
+                            {
+                                "name": "ESSArch_Core.tasks.ValidateXMLFile",
+                                "label": "Validate content-mets",
+                                "params": {
+                                    "xml_filename": "{{_CONTENT_METS_PATH}}",
+                                }
+                            },
+                            {
+                                "name": "ESSArch_Core.tasks.ValidateXMLFile",
+                                "if": generate_premis,
+                                "label": "Validate premis",
+                                "params": {
+                                    "xml_filename": "{{_PREMIS_PATH}}",
+                                }
+                            },
+                            {
+                                "name": "ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
+                                "label": "Diff-check against content-mets",
+                                "args": ["{{_OBJPATH}}", "{{_CONTENT_METS_PATH}}"],
+                            },
+                            {
+                                "name": "ESSArch_Core.tasks.CompareXMLFiles",
+                                "if": generate_premis,
+                                "label": "Compare premis and content-mets",
+                                "args": ["{{_PREMIS_PATH}}", "{{_CONTENT_METS_PATH}}"],
+                            }
+                        ]
+                    },
+                    {
+                        "name": "ESSArch_Core.tasks.UpdateIPSizeAndCount",
+                        "label": "Update IP size and file count",
+                    },
+                    {
+                        "name": "ESSArch_Core.tasks.UpdateIPStatus",
+                        "label": "Set status to received",
+                        "args": ["Received"],
+                    },
+                ]
+            },
         ]
-
-        val_format = validators.get("validate_file_format", False)
-        val_integrity = validators.get("validate_integrity", False)
-
-        if any(v is True and k in available_validators for k,v in validators.iteritems()):
-            validation_step = ProcessStep.objects.create(
-                name="Validate SIP",
-                parent_step_pos=0,
-                information_package=ip,
-            )
-            step.add_child_steps(validation_step)
-
-            if validators.get('validate_xml_file', False):
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.ValidateXMLFile",
-                    params={
-                        "xml_filename": xmlfile
-                    },
-                    log=EventIP,
-                    information_package=ip,
-                    responsible=self.request.user,
-                    processstep=validation_step
-                )
-
-            if val_format or val_integrity:
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.ValidateFiles",
-                    params={
-                        "rootdir": reception,
-                        "xmlfile": xmlfile,
-                        "validate_fileformat": val_format,
-                        "validate_integrity": val_integrity
-                    },
-                    log=EventIP,
-                    information_package=ip,
-                    responsible=self.request.user,
-                    processstep=validation_step
-                )
-
-            if validators.get('validate_logical_physical_representation'):
-                ProcessTask.objects.create(
-                    name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
-                    args=[container, xmlfile],
-                    log=EventIP,
-                    information_package=ip,
-                    responsible=self.request.user,
-                    processstep=validation_step
-                )
-
-        generate_aip_step = ProcessStep.objects.create(
-            name="Generate AIP",
-            parent_step_pos=10,
-            information_package=ip,
-        )
-        pos = 0
-
-        ProcessTask.objects.create(
-            name='workflow.tasks.ReceiveSIP',
-            args=[ip.pk, xmlfile, container, policy_id],
-            params={
-                'purpose': request.data.get('purpose'),
-                'allow_unknown_files': request.data.get('allow_unknown_files', False),
-                'tags': request.data.get('tags', [])
-            },
-            log=EventIP,
-            information_package=ip,
-            responsible=self.request.user,
-            processstep=generate_aip_step,
-            processstep_pos=pos
-        )
-
-        pos += 10
-
-        if os.path.isfile(events_xmlfile):
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.ParseEvents",
-                args=[events_xmlfile],
-                information_package=ip,
-                responsible=self.request.user,
-                processstep=generate_aip_step,
-                processstep_pos=pos
-            )
-            pos += 10
-
-        aip_profile = profile_ip_aip.profile
-        aip_profile_data = ip.get_profile_data('aip')
-        aip_profile_data['_AGENTS'] = parsed['_AGENTS']
-        mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
-        mets_path = os.path.join(ip.object_path, mets_dir, mets_name)
-
-        filesToCreate = OrderedDict()
-
-        try:
-            profile_ip_premis = ProfileIP.objects.get(ip=ip, profile=sa.profile_preservation_metadata)
-            premis_profile = profile_ip_premis.profile
-            premis_profile_data = ip.get_profile_data('preservation_metadata')
-        except ProfileIP.DoesNotExist as e:
-            pass
-        else:
-            premis_dir, premis_name = find_destination("preservation_description_file", aip_profile.structure)
-            premis_path = os.path.join(ip.object_path, premis_dir, premis_name)
-            filesToCreate[premis_path] = {
-                'spec': premis_profile.specification,
-                'data': premis_profile_data
-            }
-
-        filesToCreate[mets_path] = {
-            'spec': aip_profile.specification,
-            'data': aip_profile_data
-        }
-
-        algorithm = policy.get_checksum_algorithm_display().upper()
-        ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.GenerateXML',
-            params={
-                'filesToCreate': filesToCreate,
-                'folderToParse': ip.object_path,
-                'algorithm': algorithm,
-            },
-            responsible=request.user,
-            information_package=ip,
-            processstep=generate_aip_step,
-            processstep_pos=pos,
-        )
-
-        validate_aip_step = ProcessStep.objects.create(
-            name="Validate AIP",
-            parent_step_pos=20,
-            information_package=ip,
-        )
-        pos = 0
-
-        for generated_xmlfile in filesToCreate.keys():
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.ValidateXMLFile",
-                params={
-                    "xml_filename": generated_xmlfile,
-                    "rootdir": ip.object_path,
-                },
-                processstep=validate_aip_step,
-                processstep_pos=pos,
-                information_package=ip,
-                responsible=self.request.user,
-            )
-            pos += 10
-
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.ValidateLogicalPhysicalRepresentation",
-            args=[ip.object_path, mets_path],
-            processstep=validate_aip_step,
-            processstep_pos=pos,
-            information_package=ip,
-            responsible=self.request.user,
-        )
-        pos += 10
-
-        if ip.profile_locked('preservation_metadata'):
-            ProcessTask.objects.create(
-                name="ESSArch_Core.tasks.CompareXMLFiles",
-                args=[mets_path, premis_path],
-                params={
-                    "rootdir": ip.object_path,
-                    "compare_checksum": val_integrity,
-                    },
-                processstep=validate_aip_step,
-                processstep_pos=pos,
-                information_package=ip,
-                responsible=self.request.user,
-            )
-            pos += 10
-
-        finalize_aip_step = ProcessStep.objects.create(
-            name="Finalize AIP",
-            parent_step_pos=30,
-            information_package=ip,
-        )
-        pos = 0
-
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.UpdateIPSizeAndCount",
-            log=EventIP,
-            information_package=ip,
-            responsible=self.request.user,
-            processstep=finalize_aip_step,
-            processstep_pos=pos,
-        )
-
-        pos += 10
-
-        ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.UpdateIPStatus',
-            args=['Received'],
-            log=EventIP,
-            information_package=ip,
-            responsible=self.request.user,
-            processstep=finalize_aip_step,
-            processstep_pos=pos
-        )
-
-        step.add_child_steps(generate_aip_step, validate_aip_step, finalize_aip_step)
-
-        step.run()
-
-        logger.info('Started receiving IP %s from reception in step %s' % (pk, str(step.pk)), extra={'user': request.user.pk})
-
-        return Response({'detail': 'Receiving %s...' % container})
+        workflow = create_workflow(workflow_spec, ip)
+        workflow.name = "Receive SIP"
+        workflow.information_package = ip
+        workflow.save()
+        workflow.run()
+        logger.info('Started receiving {objid} from reception'.format(objid=objid), extra={'user': request.user.pk})
+        return Response({'detail': 'Receiving %s...' % objid})
 
     @detail_route(methods=['get'])
     def files(self, request, pk=None):
@@ -738,7 +591,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     """
     API endpoint that allows information packages to be viewed or edited.
     """
-    queryset = InformationPackage.objects.select_related('responsible').prefetch_related('steps')
+    queryset = InformationPackage.objects.select_related('responsible').prefetch_related('agents', 'steps')
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
@@ -770,9 +623,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             )
             simple_inner = InformationPackageFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
 
-            inner = simple_inner.select_related(
-                'responsible', 'archivist_organization'
-            ).prefetch_related('steps',Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+            inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
+                                                                                                  queryset=workareas,
+                                                                                                  to_attr='prefetched_workareas'))
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -857,8 +710,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                  )
 
             def get_related(qs):
-                qs = qs.select_related('responsible', 'archivist_organization')
-                return qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+                qs = qs.select_related('responsible')
+                return qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
@@ -906,8 +759,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 ),
              )
 
-            qs = qs.select_related('responsible', 'archivist_organization')
-            self.queryset = qs.prefetch_related('steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+            qs = qs.select_related('responsible')
+            self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', to_attr='prefetched_workareas'))
             self.queryset = self.queryset.distinct()
             return self.queryset
 
@@ -1559,9 +1412,9 @@ class WorkareaViewSet(InformationPackageViewSet):
 
             simple_inner = InformationPackageFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
 
-            inner = simple_inner.select_related(
-                'responsible', 'archivist_organization'
-            ).prefetch_related('steps',Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+            inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
+                                                                                                  queryset=workareas,
+                                                                                                  to_attr='prefetched_workareas'))
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -1652,8 +1505,8 @@ class WorkareaViewSet(InformationPackageViewSet):
                  )
 
             def get_related(qs):
-                qs = qs.select_related('responsible', 'archivist_organization')
-                return qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+                qs = qs.select_related('responsible')
+                return qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
@@ -1701,8 +1554,8 @@ class WorkareaViewSet(InformationPackageViewSet):
                 ),
              )
 
-            qs = qs.select_related('responsible', 'archivist_organization')
-            self.queryset = qs.prefetch_related('steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+            qs = qs.select_related('responsible')
+            self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
             return self.queryset
 
         return self.queryset

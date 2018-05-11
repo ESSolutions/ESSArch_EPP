@@ -109,32 +109,6 @@
                     "-replaceExisting": ["ROLE", "TYPE"],
                     "-attr": [{
                         "-name": "ROLE",
-                        "-req": 1,
-                        "#content": [{"text":"ARCHIVIST"}]
-                    },{
-                        "-name": "TYPE",
-                        "-req": 1,
-                        "#content": [{"text":"ORGANIZATION"}]
-                    }],
-                    "-children": [
-                        {
-                            "-name": "name",
-                            "-namespace": "mets",
-                            "#content": [{"var":"_IP_ARCHIVIST_ORGANIZATION"}]
-                        },
-                        {
-                            "-name": "note",
-                            "-namespace": "mets",
-                            "#content": [{"var":"archivist_organization_note"}]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agent",
-                    "-namespace": "mets",
-                    "-replaceExisting": ["ROLE", "TYPE"],
-                    "-attr": [{
-                        "-name": "ROLE",
                         "#content": [{"text":"CREATOR"}]
                     },{
                         "-name": "TYPE",

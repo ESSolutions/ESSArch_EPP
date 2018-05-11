@@ -2,39 +2,14 @@ from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
 from ESSArch_Core.auth.serializers import UserSerializer
-from ESSArch_Core.ip.models import (ArchivalInstitution, ArchivalLocation,
-                                    ArchivalType, ArchivistOrganization,
-                                    InformationPackage, Order)
-from ESSArch_Core.ip.serializers import WorkareaSerializer
+from ESSArch_Core.ip.models import InformationPackage, Order
+from ESSArch_Core.ip.serializers import AgentSerializer, WorkareaSerializer
 from ESSArch_Core.profiles.models import SubmissionAgreement
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 from _version import get_versions
 from configuration.serializers import ArchivePolicySerializer
 
 VERSION = get_versions()['version']
-
-class ArchivalInstitutionSerializer(DynamicHyperlinkedModelSerializer):
-    class Meta:
-        model = ArchivalInstitution
-        fields = ('url', 'id', 'name', 'information_packages',)
-
-
-class ArchivistOrganizationSerializer(DynamicHyperlinkedModelSerializer):
-    class Meta:
-        model = ArchivistOrganization
-        fields = ('url', 'id', 'name', 'information_packages',)
-
-
-class ArchivalTypeSerializer(DynamicHyperlinkedModelSerializer):
-    class Meta:
-        model = ArchivalType
-        fields = ('url', 'id', 'name', 'information_packages',)
-
-
-class ArchivalLocationSerializer(DynamicHyperlinkedModelSerializer):
-    class Meta:
-        model = ArchivalLocation
-        fields = ('url', 'id', 'name', 'information_packages',)
 
 
 class InformationPackageSerializer(serializers.ModelSerializer):
@@ -46,23 +21,7 @@ class InformationPackageSerializer(serializers.ModelSerializer):
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
-
-    archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
+    agents = serializers.SerializerMethodField()
 
     def get_package_type_display(self, obj):
         return obj.get_package_type_display()
@@ -91,6 +50,10 @@ class InformationPackageSerializer(serializers.ModelSerializer):
 
         return []
 
+    def get_agents(self, obj):
+        agents = AgentSerializer(obj.agents.all(), many=True).data
+        return {'{role}_{type}'.format(role=a['role'], type=a['type']): a for a in agents}
+
     def get_workarea(self, obj):
         try:
             workareas = obj.prefetched_workareas
@@ -111,8 +74,7 @@ class InformationPackageSerializer(serializers.ModelSerializer):
             'url', 'id', 'label', 'object_identifier_value', 'object_size',
             'package_type', 'package_type_display', 'responsible', 'create_date',
             'entry_date', 'state', 'status', 'step_state',
-            'archived', 'cached', 'aic', 'generation', 'archival_institution',
-            'archivist_organization', 'archival_type', 'archival_location',
+            'archived', 'cached', 'aic', 'generation', 'agents',
             'policy', 'message_digest', 'message_digest_algorithm',
             'content_mets_create_date', 'content_mets_size', 'content_mets_digest_algorithm', 'content_mets_digest',
             'package_mets_create_date', 'package_mets_size', 'package_mets_digest_algorithm', 'package_mets_digest',
@@ -143,6 +105,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
     last_generation = serializers.SerializerMethodField()
     new_version_in_progress = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
+    agents = serializers.SerializerMethodField()
 
     search_filter = filters.SearchFilter()
 
@@ -161,6 +124,10 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
         return []
 
+    def get_agents(self, obj):
+        agents = AgentSerializer(obj.agents.all(), many=True).data
+        return {'{role}_{type}'.format(role=a['role'], type=a['type']): a for a in agents}
+
     def get_information_packages(self, obj):
         request = self.context['request']
         return InformationPackageSerializer(obj.related_ips(), many=True, context={'request': request, 'perm_checker': self.context.get('perm_checker')}).data
@@ -177,23 +144,6 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
                 workareas = workareas.filter(user=request.user)
 
         return WorkareaSerializer(workareas, many=True, context=self.context).data
-
-    archival_institution = ArchivalInstitutionSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archivist_organization = ArchivistOrganizationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_type = ArchivalTypeSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
-    archival_location = ArchivalLocationSerializer(
-        fields=['url', 'id', 'name'],
-        read_only=True,
-    )
 
     def get_first_generation(self, obj):
         if hasattr(obj, 'first_generation'):
@@ -219,8 +169,7 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
             'url', 'id', 'label', 'object_identifier_value', 'package_type', 'package_type_display',
             'responsible', 'create_date', 'entry_date', 'state', 'status',
             'step_state', 'archived', 'cached', 'aic', 'information_packages',
-            'generation', 'archival_institution', 'archivist_organization',
-            'archival_type', 'archival_location', 'policy', 'message_digest',
+            'generation', 'policy', 'message_digest', 'agents',
             'message_digest_algorithm', 'submission_agreement',
             'submission_agreement_locked', 'workarea', 'object_size',
             'first_generation', 'last_generation', 'start_date', 'end_date',

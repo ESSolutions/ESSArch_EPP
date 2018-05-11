@@ -29,65 +29,21 @@ import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.db.models import Prefetch
-
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import exceptions, permissions, serializers, status
+from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ESSArch_Core.configuration.models import (
-    Path,
-)
-
+from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
+from ESSArch_Core.configuration.models import Path
 from ESSArch_Core.essxml.ProfileMaker.models import extensionPackage, templatePackage
-
-from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
-    ArchivistOrganization,
-    ArchivalLocation,
-    ArchivalType,
-    EventIP,
-    InformationPackage,
-)
-
-from ESSArch_Core.ip.permissions import (
-    CanLockSA,
-)
-
-from ESSArch_Core.WorkflowEngine.models import (
-    ProcessStep,
-    ProcessTask,
-)
-
-from ESSArch_Core.profiles.serializers import (
-    ProfileSerializer,
-    ProfileDetailSerializer,
-    ProfileSASerializer,
-    ProfileIPSerializer,
-    ProfileIPWriteSerializer,
-    ProfileIPDataSerializer,
-    SubmissionAgreementSerializer
-)
-
-from ESSArch_Core.profiles.models import (
-    SubmissionAgreement,
-    Profile,
-    ProfileSA,
-    ProfileIP,
-    ProfileIPData,
-)
-
-from ESSArch_Core.profiles.views import SubmissionAgreementViewSet as SAViewSetCore
-
 from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
-
+from ESSArch_Core.ip.models import EventIP, InformationPackage
+from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA, ProfileIP
+from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileDetailSerializer, ProfileSASerializer, \
+    SubmissionAgreementSerializer
+from ESSArch_Core.profiles.views import SubmissionAgreementViewSet as SAViewSetCore
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
-
-from rest_framework import viewsets
 
 
 def get_sa_template():
@@ -305,46 +261,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
             )
 
             step.run().get()
-
-        if profile.profile_type == "transfer_project":
-            archival_institution = profile.specification_data.get("archival_institution")
-            archival_type = profile.specification_data.get("archival_type")
-            archival_location = profile.specification_data.get("archival_location")
-
-            if archival_institution:
-                try:
-                    (arch, _) = ArchivalInstitution.objects.get_or_create(
-                        name=archival_institution
-                    )
-                except IntegrityError:
-                    arch = ArchivalInstitution.objects.get(
-                        name=archival_institution
-                    )
-                ip.archival_institution = arch
-
-            if archival_type:
-                try:
-                    (arch, _) = ArchivalType.objects.get_or_create(
-                        name=archival_type
-                    )
-                except IntegrityError:
-                    arch = ArchivalType.objects.get(
-                        name=archival_type
-                    )
-                ip.archival_type = arch
-
-            if archival_location:
-                try:
-                    (arch, _) = ArchivalLocation.objects.get_or_create(
-                        name=archival_location
-                    )
-                except IntegrityError:
-                    arch = ArchivalLocation.objects.get(
-                        name=archival_location
-                    )
-                ip.archival_location = arch
-
-            ip.save()
 
         non_locked_sa_profiles = ProfileSA.objects.filter(
             submission_agreement=ip.submission_agreement,

@@ -26,73 +26,26 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-
 from rest_framework_extensions.routers import ExtendedDefaultRouter
 
-from ESSArch_Core.auth.views import (
-    GroupViewSet,
-    OrganizationViewSet,
-    PermissionViewSet,
-    MeView,
-    NotificationViewSet,
-    UserViewSet,
-)
-
-from ESSArch_Core.configuration.views import (
-    AgentViewSet,
-    ArchivePolicyViewSet,
-    ParameterViewSet,
-    PathViewSet,
-    SysInfoView,
-)
-
-from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
-
-from ESSArch_Core.maintenance.views import AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet, ConversionJobViewSet
-from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
-
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
-
+from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
+                                     UserViewSet)
+from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SysInfoView
+from ESSArch_Core.ip.views import AgentViewSet, EventIPViewSet, WorkareaEntryViewSet
+from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
+                                            ConversionJobViewSet)
+from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 from configuration.views import EventTypeViewSet
-
-from ip.views import (
-    ArchivalInstitutionViewSet,
-    ArchivistOrganizationViewSet,
-    ArchivalTypeViewSet,
-    ArchivalLocationViewSet,
-    InformationPackageViewSet,
-    InformationPackageReceptionViewSet,
-    OrderViewSet,
-    WorkareaViewSet,
-    WorkareaFilesViewSet,
-)
-
-from profiles.views import (
-    ProfileViewSet,
-    ProfileSAViewSet,
-    ProfileMakerExtensionViewSet,
-    ProfileMakerTemplateViewSet,
-    SubmissionAgreementViewSet,
-    SubmissionAgreementTemplateView,
-)
-
-from storage.views import (
-    AccessQueueViewSet,
-    IOQueueViewSet,
-    RobotViewSet,
-    RobotQueueViewSet,
-    StorageObjectViewSet,
-    StorageMediumViewSet,
-    StorageMethodViewSet,
-    StorageMethodTargetRelationViewSet,
-    StorageTargetViewSet,
-    TapeDriveViewSet,
-    TapeSlotViewSet,
-)
-
+from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
+                      WorkareaFilesViewSet)
+from profiles.views import (ProfileViewSet, ProfileSAViewSet, ProfileMakerExtensionViewSet, ProfileMakerTemplateViewSet,
+                            SubmissionAgreementViewSet, SubmissionAgreementTemplateView)
+from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, RobotQueueViewSet, StorageObjectViewSet,
+                           StorageMediumViewSet, StorageMethodViewSet, StorageMethodTargetRelationViewSet,
+                           StorageTargetViewSet, TapeDriveViewSet, TapeSlotViewSet)
 from tags.search import ComponentSearchViewSet
 from tags.views import TagViewSet, TagInformationPackagesViewSet
-
 
 router = ExtendedDefaultRouter()
 
@@ -110,10 +63,6 @@ router.register(r'appraisal-jobs', AppraisalJobViewSet)
 router.register(r'appraisal-rules', AppraisalRuleViewSet)
 router.register(r'conversion-jobs', ConversionJobViewSet)
 router.register(r'conversion-rules', ConversionRuleViewSet)
-router.register(r'archival-institutions', ArchivalInstitutionViewSet)
-router.register(r'archivist-organizations', ArchivistOrganizationViewSet)
-router.register(r'archival-types', ArchivalTypeViewSet)
-router.register(r'archival-locations', ArchivalLocationViewSet)
 router.register(r'information-packages', InformationPackageViewSet)
 router.register(r'information-packages', InformationPackageViewSet).register(
     r'appraisal-rules',
