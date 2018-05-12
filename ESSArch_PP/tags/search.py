@@ -384,11 +384,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             with transaction.atomic():
                 tag = Tag.objects.create()
-                tag_version = TagVersion.objects.create(
-                    tag=tag, elastic_index=data['index'], name=data['name'],
-                    type=data['type'])
-                tag.current_version = tag_version
-                tag.save()
                 tag_structure = TagStructure(tag=tag)
 
                 if data.get('parent') is not None:
@@ -402,8 +397,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 elif data.get('structure') is not None:
                     structure = Structure.objects.create(name=data.get("structure"))
                     tag_structure.structure = structure
-
                 tag_structure.save()
+
+                tag_version = TagVersion.objects.create(
+                    tag=tag, elastic_index=data['index'], name=data['name'],
+                    type=data['type'])
+                tag.current_version = tag_version
+                tag.save()
 
             return Response(self.serialize(tag_version.to_search()))
 
