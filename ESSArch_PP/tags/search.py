@@ -8,6 +8,7 @@ import math
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
 from elasticsearch.exceptions import NotFoundError, TransportError
@@ -205,7 +206,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
 
-        tag_version = TagVersion.objects.select_related('tag').prefetch_related('tag__structures')
+        prefetched_structures = TagStructure.objects.select_related('tag__current_version', 'parent__tag__current_version')
+        tag_version = TagVersion.objects.select_related('tag').prefetch_related(Prefetch('tag__structures', prefetched_structures))
 
         return get_object_or_404(tag_version, pk=id)
 
