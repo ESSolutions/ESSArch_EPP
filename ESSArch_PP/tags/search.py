@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from six import iteritems
 
-from ESSArch_Core.ip.models import ArchivalInstitution, ArchivistOrganization
+from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
@@ -150,14 +150,8 @@ def get_archive(id):
     cache.set(cache_key, archive_data)
     return archive_data
 
-def get_institution(id):
-    inst = ArchivalInstitution.objects.get(pk=id)
-    return {
-        'name': inst.name
-    }
-
 def get_organization(id):
-    org = ArchivistOrganization.objects.get(pk=id)
+    org = Agent.objects.get(pk=id)
     return {
         'name': org.name,
     }
@@ -276,13 +270,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 archive['name'] = archive_data['name']
             except NotFoundError:
                 logger.warn('Archive "%s" not found in search index, it might be queued for indexing' % archive['key'])
-
-        for institution in results_dict['aggregations']['_filter_institution']['institution']['buckets']:
-            try:
-                institution_data = get_institution(institution['key'])
-                institution['name'] = institution_data['name']
-            except ObjectDoesNotExist:
-                logger.error('Archival institution "%s" not found' % institution['key'])
 
         for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
             try:
