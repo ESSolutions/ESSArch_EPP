@@ -534,7 +534,13 @@ def installProfileSIP(sa):
                     {
                         "type": "folder",
                         "name": "other",
-                        "children": []
+                        "children": [
+                            {
+                                "use": "events_file",
+                                "type": "file",
+                                "name": "{{_OBJID}}_ipevents.xml"
+                            }
+                        ]
                     }
                 ]
             },
