@@ -364,7 +364,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Creator"
+                    "label": "Creator",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "creator"
@@ -372,7 +373,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Submitter Organization"
+                    "label": "Submitter Organization",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "submitter_organization"
@@ -380,7 +382,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Submitter Individual"
+                    "label": "Submitter Individual",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "submitter_individual"
@@ -388,7 +391,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Producer Organization"
+                    "label": "Producer Organization",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "producer_organization"
@@ -396,7 +400,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Producer Individual"
+                    "label": "Producer Individual",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "producer_individual"
@@ -404,7 +409,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "IP Owner"
+                    "label": "IP Owner",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "ipowner"
@@ -412,7 +418,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "Preservation Organization"
+                    "label": "Preservation Organization",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "preservation_organization"
@@ -420,7 +427,8 @@ def installProfileSubmitDescription(sa):
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": "System Name"
+                    "label": "System Name",
+                    "required": True,
                 },
                 "type": "input",
                 "key": "systemname"
@@ -567,6 +575,7 @@ def installProfileSIP(sa):
             {
                 "key": "mets_type",
                 "type": "select",
+                "defaultValue": "Personnel",
                 "templateOptions": {
                     "label": "Content Type",
                     "options": [
@@ -1104,6 +1113,36 @@ def installProfilePreservationMetadata(sa):
         'type': 'Implementation',
         'status': 'Draft',
         'label': 'Preservation profile for AIP xxyy',
+        'template': [
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Agent Identifier Value"
+                },
+                "type": "input",
+                "defaultValue": "ESSArch_Preservation_Platform",
+                "key": "agent_identifier_value"
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": "Agent Name"
+                },
+                "type": "input",
+                "defaultValue": "ESSArch Preservation Platform",
+                "key": "agent_name"
+            },
+            {
+                "templateOptions": {
+                    "disabled": True,
+                    "type": "text",
+                    "label": "Container Format"
+                },
+                "hidden": True,
+                "type": "input",
+                "key": "$transfer_project__container_format",
+            }
+        ],
         'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/eark/EARK_PREMIS.json')).read()),
     }
 

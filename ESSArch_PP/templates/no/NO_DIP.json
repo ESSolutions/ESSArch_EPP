@@ -76,28 +76,42 @@
                 {
                     "-name": "agent",
                     "-namespace": "mets",
-                    "-attr": [{
-                        "-name": "ROLE",
-                        "-req": 1,
-                        "#content": [{"text":"ARCHIVIST"}]
-                    },{
-                        "-name": "TYPE",
-                        "-req": 1,
-                        "#content": [{"text":"ORGANIZATION"}]
-                    }],
+                    "-foreach": "_AGENTS",
+                    "-attr": [
+                        {
+                            "-name": "ROLE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_ROLE"}]
+                        },
+                        {
+                            "-name": "TYPE",
+                            "-req": 1,
+                            "#content": [{"var": "_AGENTS_TYPE"}]
+                        },
+                        {
+                            "-name": "OTHERROLE",
+                            "#content": [{"var": "_AGENTS_OTHERROLE"}]
+                        },
+                        {
+                            "-name": "OTHERTYPE",
+                            "#content": [{"var": "_AGENTS_OTHERTYPE"}]
+                        }
+                    ],
                     "-children": [
                         {
                             "-name": "name",
                             "-namespace": "mets",
-                            "#content": [{"var":"_IP_ARCHIVIST_ORGANIZATION"}]
+                            "#content": [{"var": "_AGENTS_NAME"}]
                         },
                         {
                             "-name": "note",
                             "-namespace": "mets",
-                            "#content": [{"var":"archivist_organization_note"}]
+                            "-foreach": "_AGENTS_NOTES",
+                            "#content": [{"var": "_AGENTS_NOTE"}]
                         }
                     ]
-                },{
+                },
+                {
                     "-name": "agent",
                     "-namespace": "mets",
                     "-attr": [{

@@ -47,12 +47,12 @@
                         {
                             "-name": "objectIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"var":"FIDType"}]
+                            "#content": [{"var":"_PARAMETER_OBJECT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "objectIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"text":"ID"},{"var":"FID"}]
+                            "#content": [{"var":"_OBJID"},{"text": "/"},{"var":"href"}]
                         }
                     ]
                 },
@@ -140,103 +140,24 @@
                         {
                             "-name": "agentIdentifierType",
                             "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
+                            "#content": [{"var":"_PARAMETER_AGENT_IDENTIFIER_TYPE"}]
                         },
                         {
                             "-name": "agentIdentifierValue",
                             "-namespace": "premis",
-                            "#content": [{"var":"agentnote1"}]
+                            "#content": [{"var":"agent_identifier_value"}]
                         }
                     ]
                 },
                 {
                     "-name": "agentName",
                     "-namespace": "premis",
-                    "#content": [{"var": "_IP_ARCHIVIST_ORGANIZATION"}]
+                    "#content": [{"var": "agent_name"}]
                 },
                 {
                     "-name": "agentType",
                     "-namespace": "premis",
-                    "#content": [{"text": "ORGANIZATION"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ARCHIVIST"}]
-                }
-            ]
-        },
-        {
-            "-name": "agent",
-            "-namespace": "premis",
-            "-children": [
-                {
-                    "-name": "agentIdentifier",
-                    "-namespace": "premis",
-                    "-children": [
-                        {
-                            "-name": "agentIdentifierType",
-                            "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
-                        },
-                        {
-                            "-name": "agentIdentifierValue",
-                            "-namespace": "premis",
-                            "#content": [{"var":"agentnote2"}]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agentName",
-                    "-namespace": "premis",
-                    "#content": [{"var": "agentname2"}]
-                },
-                {
-                    "-name": "agentType",
-                    "-namespace": "premis",
-                    "#content": [{"text": "SOFTWARE"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ARCHIVIST"}]
-                }
-            ]
-        },
-        {
-            "-name": "agent",
-            "-namespace": "premis",
-            "-children": [
-                {
-                    "-name": "agentIdentifier",
-                    "-namespace": "premis",
-                    "-children": [
-                        {
-                            "-name": "agentIdentifierType",
-                            "-namespace": "premis",
-                            "#content": [{"text":"URI"}]
-                        },
-                        {
-                            "-name": "agentIdentifierValue",
-                            "-namespace": "premis",
-                            "#content": [{"var":"agentnote3"}]
-                        }
-                    ]
-                },
-                {
-                    "-name": "agentName",
-                    "-namespace": "premis",
-                    "#content": [{"var": "agentname3"}]
-                },
-                {
-                    "-name": "agentType",
-                    "-namespace": "premis",
-                    "#content": [{"text": "ORGANIZATION"}]
-                },
-                {
-                    "-name": "agentNote",
-                    "-namespace": "premis",
-                    "#content": [{"text": "CREATOR"}]
+                    "#content": [{"text": "software"}]
                 }
             ]
         }
