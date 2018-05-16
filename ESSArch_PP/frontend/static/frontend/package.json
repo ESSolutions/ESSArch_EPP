@@ -33,6 +33,7 @@
     "console-polyfill": "^0.3.0",
     "font-awesome": "~4.7.0",
     "gulp": "^3.9.1",
+    "gulp-angular-templatecache": "^2.2.0",
     "gulp-clean-css": "^2.3.2",
     "gulp-concat": "^2.6.1",
     "gulp-concat-css": "^2.3.0",

@@ -30,6 +30,7 @@ var concat = require('gulp-concat');
 var concatCss = require('gulp-concat-css');
 var gulpif = require('gulp-if');
 var ngAnnotate = require('gulp-ng-annotate');
+var templateCache = require('gulp-angular-templatecache');
 var plumber = require('gulp-plumber');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
@@ -38,8 +39,14 @@ var cleanCSS = require('gulp-clean-css');
 var gutil = require('gulp-util');
 var license = require('gulp-header-license');
 var fs = require('fs');
+var path = require('path');
 var argv = require('yargs').argv;
 var isProduction = (argv.production === undefined) ? false : true;
+
+var core = process.env.EC_FRONTEND;
+var coreHtmlFiles = [path.join(core, 'views/**/*.html')];
+var coreJsFiles = [path.join(core, 'scripts/**/*.js')];
+var coreCssFiles = path.join(core, 'styles');
 
 var jsPolyfillFiles = [
     'node_modules/string.prototype.startswith/startswith.js',
@@ -100,11 +107,12 @@ var jsVendorFiles = [
         'node_modules/prettycron/prettycron.js',
     ],
     jsFiles = [
-        'scripts/myApp.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
+        'scripts/myApp.js', 'scripts/core/*.js', 'scripts/profile_maker/*.js', 'scripts/controllers/*.js', 'scripts/components/*.js',
         'scripts/services/*.js', 'scripts/directives/*.js', 'scripts/configs/*.js'
     ],
     jsDest = 'scripts',
     cssFiles = [
+        coreCssFiles + "/**/*.scss",
         'styles/modules/reception.scss',
         'styles/modules/index.scss',
         'styles/modules/login.scss',
@@ -140,6 +148,18 @@ var buildPolyfills= function() {
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(jsDest));
 };
+
+var buildCoreTemplates = function() {
+    return gulp.src(coreHtmlFiles)
+        .pipe(templateCache({standalone: true}))
+        .pipe(gulp.dest('scripts/core'));
+}
+
+var buildCoreScripts = function() {
+    return gulp.src(coreJsFiles)
+        .pipe(concat('scripts.js'))
+        .pipe(gulp.dest('scripts/core'));
+}
 
 var buildScripts = function() {
     return gulp.src(jsFiles)
@@ -181,7 +201,7 @@ var buildVendors = function() {
 var compileSass = function() {
  return gulp.src('styles/styles.scss')
     .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
+    .pipe(sass({includePaths: coreCssFiles}).on('error', sass.logError))
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(cleanCSS({
       cleanupCharsets: true, // controls `@charset` moving to the front of a stylesheet; defaults to `true`
@@ -249,7 +269,7 @@ var permissionConfig = function() {
     .pipe(gulp.dest('./scripts/configs'));
 };
 
-gulp.task('default', function() {
+gulp.task('default', ['core_templates', 'core_scripts'], function() {
     configConstants();
     permissionConfig();
     compileSass();
@@ -264,12 +284,16 @@ gulp.task('default', function() {
 gulp.task('icons', copyIcons);
 gulp.task('images', copyImages);
 gulp.task('polyfills', buildPolyfills);
+gulp.task('core_templates', buildCoreTemplates);
+gulp.task('core_scripts', buildCoreScripts);
 gulp.task('scripts', buildScripts);
 gulp.task('vendors', buildVendors);
 gulp.task('sass', compileSass);
 gulp.task('config', configConstants);
 
 gulp.task('watch', function(){
+    gulp.watch(coreHtmlFiles, ['core_templates']);
+    gulp.watch(coreJsFiles, ['core_scripts']);
     gulp.watch(jsFiles, ['scripts']);
     gulp.watch(jsPolyfillFiles, ['polyfills']);
     gulp.watch(jsVendorFiles, ['vendors']);

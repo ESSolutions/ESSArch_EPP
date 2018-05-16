@@ -1,5 +1,6 @@
 node_modules
 bower_components
+scripts/core
 scripts/scripts.js
 scripts/scripts.min.js
 scripts/polyfills.min.js

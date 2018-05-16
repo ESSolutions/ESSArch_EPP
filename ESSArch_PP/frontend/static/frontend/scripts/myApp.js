@@ -59,7 +59,7 @@ function nestedEmptyPermissions(page) {
     }
 }
 
-angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource", 'relativeDate', 'ngWebSocket', 'ngJsTree', 'angular-cron-jobs'])
+angular.module('myApp', ['templates', 'ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'formlyBootstrap', 'smart-table', 'treeGrid', 'ui.router', 'ngCookies', 'permission', 'permission.ui', 'pascalprecht.translate', 'ngSanitize', 'ui.bootstrap.contextMenu', 'ui.select', 'flow', 'ui.bootstrap.datetimepicker', 'ui.dateTimeInput', 'ngAnimate', 'ngMessages', 'myApp.config', 'permission.config', 'ig.linkHeaderParser', 'hc.marked', 'ngFilesizeFilter', 'angular-clipboard', "ngResource", 'relativeDate', 'ngWebSocket', 'ngJsTree', 'angular-cron-jobs'])
 .config(function($routeProvider, formlyConfigProvider, $urlMatcherFactoryProvider, $stateProvider, $urlRouterProvider, $rootScopeProvider, $uibTooltipProvider, permissionConfig) {
 
     $urlMatcherFactoryProvider.strictMode(false);
@@ -74,7 +74,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
         params: {
             requestedPage: '/login',
         },
-        templateUrl: '/static/frontend/views/login.html',
+        templateUrl: 'login.html',
         controller: 'LoginCtrl as vm',
         resolve: {
             authenticated: ['djangoAuth', function(djangoAuth){
@@ -92,8 +92,8 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             }],
         }
     })
-    .state('home.myPage', {
-        url: 'my-page',
+    .state('home.info', {
+        url: 'info',
         templateUrl: '/static/frontend/views/my_page.html',
         controller: 'MyPageCtrl as vm',
         resolve: {
@@ -602,7 +602,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
     });
     $urlRouterProvider.otherwise( function($injector) {
         var $state = $injector.get("$state");
-        $state.go('home.myPage');
+        $state.go('home.info');
     });
 
     $urlRouterProvider.deferIntercept();
@@ -821,6 +821,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
 .run(function(djangoAuth, $rootScope, $state, $location, $window, $cookies, $timeout, PermPermissionStore, PermRoleStore, $http, myService, formlyConfig, formlyValidationMessages, $urlRouter, permissionConfig, Messenger){
     formlyConfig.extras.errorExistsAndShouldBeVisibleExpression = 'form.$submitted || fc.$touched || fc[0].$touched';
     formlyValidationMessages.addStringMessage('required', 'This field is required');
+    $rootScope.app = 'ESSArch Preservation Platform'
     $rootScope.flowObjects = {};
     djangoAuth.initialize('/rest-auth', false).then(function(response) {
         $rootScope.auth = response.data;
@@ -856,7 +857,7 @@ angular.module('myApp', ['ngRoute', 'treeControl', 'ui.bootstrap', 'formly', 'fo
             if(from.name != "") {
                 $state.transitionTo(from.name);
             } else {
-                $state.transitionTo('home.myPage');
+                $state.transitionTo('home.info');
             }
         }
 

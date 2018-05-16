@@ -31,7 +31,7 @@ angular.module('myApp').controller('UtilCtrl', function(Notifications, $scope, $
         $window.location.href="/admin/";
     }
     $scope.infoPage = function() {
-        $state.go('home.myPage');
+        $state.go('home.info');
     }
     $scope.checkPermissions = function(page) {
         // Check if there is a sub state that does not require permissions

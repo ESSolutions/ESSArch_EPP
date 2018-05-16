@@ -34,8 +34,10 @@
 @import '../node_modules/angular-cron-jobs/dist/angular-cron-jobs';
 @import '../node_modules/messenger-hubspot/build/css/messenger';
 @import '../node_modules/messenger-hubspot/build/css/messenger-theme-flat';
+@import 'modules/colors';
+@import 'modules/mixins';
+@import 'core/modules/login';
 @import 'modules/index';
-@import 'modules/login';
 @import 'modules/reception';
 @import 'modules/my_page';
 @import 'modules/profile_maker';
