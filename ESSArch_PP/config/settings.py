@@ -109,10 +109,10 @@ INSTALLED_APPS = [
     'guardian',
 ]
 
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'guardian.backends.ObjectPermissionBackend',
-)
+]
 
 GROUPS_MANAGER = {
     'AUTH_MODELS_SYNC': True,
