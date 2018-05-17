@@ -578,5 +578,6 @@
     "PLACE_IN_CLASSIFICATION_STRUCTURE": "Place in classification structure",
     "UNAVAILABLE": "Unavailable",
     "TERMS_AND_CONDITION": "Terms and condition",
-    "DESC": "Description"
+    "DESC": "Description",
+    "INFO": "Info"
 }
