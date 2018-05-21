@@ -105,14 +105,13 @@ class ReceiveSIP(DBTask):
 
         parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
         aip_dir = os.path.join(policy.ingest_path.value, objid)
+        aip.object_path = aip_dir
         os.makedirs(aip_dir)
+        aip.save(update_fields=['aic', 'object_path'])
 
         ProcessTask.objects.create(
             name="ESSArch_Core.tasks.CreatePhysicalModel",
-            params={
-                "structure": aip.get_profile('aip').structure,
-                "root": aip_dir,
-            },
+            args=[aip.get_profile('aip').structure],
             log=EventIP,
             information_package=aip,
             responsible_id=self.responsible,
@@ -131,9 +130,6 @@ class ReceiveSIP(DBTask):
                     zipf.extractall(dst.encode('utf-8'))
         else:
             shutil.copy2(container, dst)
-
-        aip.object_path = aip_dir
-        aip.save(update_fields=['aic', 'object_path'])
 
         recipient = User.objects.get(pk=self.responsible).email
         if recipient:
