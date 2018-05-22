@@ -32,7 +32,6 @@ import os
 import re
 import shutil
 import uuid
-from collections import OrderedDict
 
 import six
 from celery import states as celery_states
@@ -40,8 +39,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
-from django.db.models import (BooleanField, Case, Exists, Max, Min, OuterRef,
-                              Prefetch, Q, Subquery, Value, When)
+from django.db.models import BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch, Q, Subquery, Value, When
 from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import DjangoFilterBackend
@@ -67,26 +65,19 @@ from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
-from ESSArch_Core.ip.models import (Agent, EventIP, InformationPackage, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT, Order,
-                                    Workarea)
-from ESSArch_Core.ip.permissions import (CanDeleteIP, CanUnlockProfile,
-                                         IsOrderResponsibleOrAdmin,
-                                         IsResponsibleOrReadOnly)
+from ESSArch_Core.ip.models import Agent, InformationPackage, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT, Order, Workarea
+from ESSArch_Core.ip.permissions import CanDeleteIP, CanUnlockProfile, IsOrderResponsibleOrAdmin, \
+    IsResponsibleOrReadOnly
 from ESSArch_Core.maintenance.models import AppraisalRule, ConversionRule
 from ESSArch_Core.mixins import PaginatedViewMixin
-from ESSArch_Core.profiles.models import (Profile, ProfileIP, ProfileIPData,
-                                          SubmissionAgreement)
-from ESSArch_Core.profiles.utils import fill_specification_data
+from ESSArch_Core.profiles.models import (Profile, ProfileIP, SubmissionAgreement)
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import (creation_date, find_destination, in_directory, list_files,
-                               mkdir_p, parse_content_range_header,
-                               remove_prefix, timestamp_to_datetime)
+from ESSArch_Core.util import creation_date, in_directory, list_files, mkdir_p, parse_content_range_header, \
+    remove_prefix, timestamp_to_datetime
 from ip.filters import InformationPackageFilter
-from ip.serializers import (InformationPackageDetailSerializer,
-                            InformationPackageSerializer,
-                            NestedInformationPackageSerializer,
-                            OrderSerializer)
+from ip.serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
+    NestedInformationPackageSerializer, OrderSerializer
 
 User = get_user_model()
 
@@ -165,17 +156,16 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         contained = self.get_contained_packages(reception)
         extracted = self.get_extracted_packages(reception)
-
         ips = contained + extracted
-        new_ips = []
 
         # Remove all keys not in filter_fields
-        conditions = {key: value for (key, value) in request.query_params.dict().iteritems() if key in filter_fields}
+        conditions = {key: value for (key, value) in six.iteritems(request.query_params) if key in filter_fields}
 
         # Filter ips based on conditions
-        new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k,v) in conditions.iteritems())), ips)
+        new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in six.iteritems(conditions))), ips)
 
-        from_db = InformationPackage.objects.filter(package_type=InformationPackage.AIP, state__in=['Prepared', 'Receiving'], **conditions)
+        from_db = InformationPackage.objects.filter(package_type=InformationPackage.AIP,
+                                                    state__in=['Prepared', 'Receiving'], **conditions)
         serializer = InformationPackageSerializer(
             data=from_db, many=True, context={'request': request, 'view': self}
         )
@@ -211,36 +201,34 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
         if existing is not None:
-            logger.warn('Tried to prepare IP with id %s which already exists' % (pk), extra={'user': request.user.pk})
+            logger.warn('Tried to prepare IP with id %s which already exists' % pk, extra={'user': request.user.pk})
             raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
         xmlfile = os.path.join(reception, '%s.xml' % pk)
 
         if not os.path.isfile(xmlfile):
-            logger.warn('Tried to prepare IP with missing XML file %s' % (xmlfile), extra={'user': request.user.pk})
+            logger.warn('Tried to prepare IP with missing XML file %s' % xmlfile, extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         try:
             container = os.path.join(reception, self.get_container_for_xml(xmlfile))
         except etree.LxmlError:
-            logger.warn('Tried to prepare IP with invalid XML file %s' % (xmlfile), extra={'user': request.user.pk})
+            logger.warn('Tried to prepare IP with invalid XML file %s' % xmlfile, extra={'user': request.user.pk})
             raise exceptions.ParseError('Invalid XML file, %s' % xmlfile)
 
         if not os.path.isfile(container):
-            logger.warn('Tried to prepare IP with missing container file %s' % (container), extra={'user': request.user.pk})
+            logger.warn('Tried to prepare IP with missing container file %s' % container, extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % container)
 
-        objid, container_type = os.path.splitext(os.path.basename(container))
         parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
-
         provided_sa = request.data.get('submission_agreement')
         parsed_sa = parsed.get('altrecordids', {}).get('SUBMISSIONAGREEMENT', [None])[0]
 
         if parsed_sa is not None and provided_sa is not None:
             if provided_sa == parsed_sa:
                 sa = provided_sa
-            if provided_sa != parsed_sa:
+            else:
                 raise exceptions.ParseError(detail='Must use SA specified in XML')
         elif parsed_sa and not provided_sa:
             sa = parsed_sa
@@ -383,9 +371,9 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             if tag_id is not None:
                 raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
 
-        ip.policy=policy
-        ip.state='Receiving'
-        ip.information_class=information_class
+        ip.policy = policy
+        ip.state = 'Receiving'
+        ip.information_class = information_class
         ip.save()
 
         generate_premis = ip.profile_locked('preservation_metadata')
@@ -957,7 +945,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if not any(x in options for x in data.keys()):
             raise exceptions.ParseError('No option set')
 
-        if not any(v for k, v in data.iteritems() if k in options):
+        if not any(v for k, v in six.iteritems(data) if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
         if data.get('new') and aip.new_version_in_progress() is not None:
@@ -1709,7 +1697,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         if request.method == 'GET':
             path = os.path.join(root, request.query_params.get('destination', ''))
-        elif request.method == 'POST':
+        else:
             path = os.path.join(root, request.data.get('destination', ''))
 
         self.validate_path(path, root)
@@ -1822,6 +1810,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         try:
             dip = self.request.data['dip']
+        except KeyError:
+            raise exceptions.ParseError('Missing dip parameter')
+
+        try:
             ip = InformationPackage.objects.get(pk=dip, package_type=InformationPackage.DIP)
 
             permission = IsResponsibleOrReadOnly()
@@ -1829,8 +1821,6 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
                 self.permission_denied(
                     request, message=getattr(permission, 'message', None)
                 )
-        except KeyError:
-            raise exceptions.ParseError('Missing dip parameter')
         except InformationPackage.DoesNotExist:
             raise exceptions.ParseError('DIP "%s" does not exist' % dip)
 
