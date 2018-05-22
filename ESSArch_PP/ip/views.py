@@ -588,6 +588,24 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         'id', 'object_identifier_value', 'start_date', 'end_date',
     )
 
+    def first_generation_case(self, lower_higher):
+        return Case(
+            When(aic__isnull=True, then=Value(1)),
+            When(generation=Subquery(lower_higher.values('min_gen')[:1]),
+                 then=Value(1)),
+            default=Value(0),
+            output_field=BooleanField(),
+        )
+
+    def last_generation_case(self, lower_higher):
+        return Case(
+            When(aic__isnull=True, then=Value(1)),
+            When(generation=Subquery(lower_higher.values('max_gen')[:1]),
+                 then=Value(1)),
+            default=Value(0),
+            output_field=BooleanField(),
+        )
+
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
@@ -621,22 +639,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             ).order_by().values('aic')
             lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
 
-            inner = inner.annotate(
-                first_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-                last_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-            )
+            inner = inner.annotate(first_generation=self.first_generation_case(lower_higher),
+                                   last_generation=self.last_generation_case(lower_higher))
 
             simple_outer = InformationPackage.objects.annotate(has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))).filter(
                 package_type=InformationPackage.AIC, has_ip=True,
@@ -661,22 +665,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 ).order_by().values('aic')
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
 
-                return qs.annotate(
-                    first_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    ),
-                    last_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    ),
-                 )
+                return qs.annotate(first_generation=self.first_generation_case(lower_higher),
+                                   last_generation=self.last_generation_case(lower_higher))
 
             def annotate_filtered_first_generation(qs):
                 lower_higher = InformationPackage.objects.visible_to_user(user).filter(
@@ -684,18 +674,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     active=True, aic=OuterRef('aic'),
                 ).order_by().values('aic')
                 lower_higher = InformationPackageFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
-
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
-
-                return qs.annotate(
-                    filtered_first_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    )
-                 )
+                return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 
             def get_related(qs):
                 qs = qs.select_related('responsible')
@@ -729,24 +709,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             )
 
             qs = InformationPackageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
-
-            qs = qs.annotate(
-                first_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-                last_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-             )
-
+            qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
+                             last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
             self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', to_attr='prefetched_workareas'))
             self.queryset = self.queryset.distinct()
@@ -1410,22 +1374,8 @@ class WorkareaViewSet(InformationPackageViewSet):
             ).order_by().values('aic')
             lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
 
-            inner = inner.annotate(
-                first_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-                last_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-            )
+            inner = inner.annotate(first_generation=self.first_generation_case(lower_higher),
+                                   last_generation=self.last_generation_case(lower_higher))
 
             simple_outer = InformationPackage.objects.annotate(has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))).filter(
                 package_type=InformationPackage.AIC, has_ip=True,
@@ -1451,22 +1401,8 @@ class WorkareaViewSet(InformationPackageViewSet):
                 ).order_by().values('aic')
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'), max_gen=Max('generation'))
 
-                return qs.annotate(
-                    first_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    ),
-                    last_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    ),
-                 )
+                return qs.annotate(first_generation=self.first_generation_case(lower_higher),
+                                   last_generation=self.last_generation_case(lower_higher))
 
             def annotate_filtered_first_generation(qs):
                 lower_higher = InformationPackage.objects.visible_to_user(user).annotate(
@@ -1479,18 +1415,8 @@ class WorkareaViewSet(InformationPackageViewSet):
                     lower_higher = lower_higher.filter(workareas__user=self.request.user)
 
                 lower_higher = InformationPackageFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
-
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
-
-                return qs.annotate(
-                    filtered_first_generation=Case(
-                        When(aic__isnull=True, then=Value(1)),
-                        When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                            then=Value(1)),
-                        default=Value(0),
-                        output_field=BooleanField(),
-                    )
-                 )
+                return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 
             def get_related(qs):
                 qs = qs.select_related('responsible')
@@ -1524,24 +1450,8 @@ class WorkareaViewSet(InformationPackageViewSet):
             )
 
             qs = InformationPackageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
-
-            qs = qs.annotate(
-                first_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-                last_generation=Case(
-                    When(aic__isnull=True, then=Value(1)),
-                    When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                        then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField(),
-                ),
-             )
-
+            qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
+                             last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
             self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
             return self.queryset
