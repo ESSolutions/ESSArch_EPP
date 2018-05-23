@@ -912,9 +912,18 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
         if not any(v for k, v in six.iteritems(data) if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
-        if data.get('new') and aip.new_version_in_progress() is not None:
-            working_user = aip.new_version_in_progress().ip.responsible
-            raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
+        if data.get('new'):
+            if aip.archived and 'get_from_storage_as_new' not in get_perms(request.user, aip):
+                raise exceptions.PermissionDenied('You do not have permission to create new generations of this IP')
+
+            if not aip.archived and 'add_to_ingest_workarea_as_new' not in get_perms(request.user, aip):
+                raise exceptions.PermissionDenied('You do not have permission to create new generations of this IP')
+
+            if aip.new_version_in_progress() is not None:
+                working_user = aip.new_version_in_progress().ip.responsible
+                raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
+
+            data['extracted'] = True
 
         workarea_type = Workarea.INGEST if aip.state == 'Received' else Workarea.ACCESS
 
@@ -924,9 +933,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         if not data.get('new') and ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
             raise Conflict('IP already in workarea')
-
-        if data.get('new'):
-            data['extracted'] = True
 
         step = ProcessStep.objects.create(
             name='Access AIP', eager=False,
