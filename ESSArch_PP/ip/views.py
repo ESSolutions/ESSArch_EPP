@@ -365,10 +365,13 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             raise ValueError('Information class of IP and policy does not match')
 
         tag_id = request.data.get('tag')
-        try:
-            ip.tag = TagStructure.objects.get(pk=tag_id)
-        except TagStructure.DoesNotExist:
-            if tag_id is not None:
+        if tag_id is not None:
+            if ip.get_profile('content_type') is not None:
+                raise exceptions.ParseError('Cannot set tag on IP that has content_type profile')
+
+            try:
+                ip.tag = TagStructure.objects.get(pk=tag_id)
+            except TagStructure.DoesNotExist:
                 raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
 
         ip.policy = policy
