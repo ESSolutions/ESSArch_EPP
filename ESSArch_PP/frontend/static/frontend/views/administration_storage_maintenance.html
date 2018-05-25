@@ -27,12 +27,14 @@
                     <div ng-if="vm.needToMigrateShow" class="form-group">
                         <br>
                         <div class="table-container" st-table="vm.list" st-safe-src="vm.migrationList">
-                            <div class="search-prepare-wrapper">
-                                <label for items-per-page></label>
-                                <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.migratePerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                                <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_MIGRATION' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                            <div class="toolbar-row">
+                                <div class="search-prepare-wrapper">
+                                    <label for items-per-page></label>
+                                    <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.migratePerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                                    <input st-search="" class="form-control global-search" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_MIGRATION' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                                </div>
                             </div>
-                            <div id="list-view" class="list-view-table">
+                            <div id="list-view" class="list-view-table table-x-overflow">
                                 <table class="table table-striped" style="margin-bottom: 0px;">
                                     <thead>
                                         <tr>
@@ -55,15 +57,17 @@
                 <button ng-class="vm.deactivateStorageMedium ? 'fa-minus':'fa-plus'" class="fa btn btn-default" ng-click="vm.collapseDeactivateStorageMedium()"> {{'DEACTIVATESTORAGEMEDIUM' | translate}}</button>
                 <div ng-if="vm.deactivateStorageMedium" class="form-group">
                 <br>
-                    <div class="table-container" st-table="vm.list" st-safe-src="vm.deactivateList">
-                        <div class="search-prepare-wrapper">
-                            <label for items-per-page></label>
-                            <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.deactivatePerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                            <input st-search="" style="width: 50%;" class="form-control" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_IP' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
-                            <div class="action-buttons">
-                                <button class="btn btn-default">{{'SELECTALL' | translate}}</button>
-                                <button class="btn btn-default">{{'DESELECTALL' | translate}}</button>
-                                <button class="btn btn-default">{{'DEACTIVATEMEDIA' | translate}}</button>
+                    <div class="table-container table-x-overflow" st-table="vm.list" st-safe-src="vm.deactivateList">
+                        <div class="toolbar-row">
+                            <div class="search-prepare-wrapper">
+                                <label for items-per-page></label>
+                                <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.deactivatePerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                                <input st-search="" class="form-control global-search" placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_IP' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                                <div class="action-buttons flex-row">
+                                    <button class="btn btn-default">{{'SELECTALL' | translate}}</button>
+                                    <button class="btn btn-default">{{'DESELECTALL' | translate}}</button>
+                                    <button class="btn btn-default">{{'DEACTIVATEMEDIA' | translate}}</button>
+                                </div>
                             </div>
                         </div>
                         <div id="list-view" class="list-view-table">

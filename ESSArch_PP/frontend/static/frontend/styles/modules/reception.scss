@@ -24,9 +24,6 @@
 .hover-middle {
     text-decoration: line-through;
 }
-.glyphicon-triangle-bottom {
-    cursor: pointer;
-}
 .column-label {
     margin: auto;
 }
@@ -34,91 +31,11 @@
     margin-bottom: 10px;
 }
 
-.search-prepare-wrapper {
-    display: flex;
-    flex-direction: row;
-    font-weight: bold;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    justify-content: flex-start;
-    overflow-x: auto;
-    width: 100%;
-    padding: 0 0 10px 0;
-    .btn-info {
-        margin-left: 10px;
-        padding: 2px 12px;
-    }
-}
-.organization-member-select {
-    max-width: 100px;
-    min-width: 76px;
-    margin-left: 10px;
-}
 .text-center {
     text-align: center;
     margin: auto;
 }
-.events-footer {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    margin: 5px;
-    padding: 5px;
-    .signature {
-        width: 250px;
-        height: 35px;
-        margin-left: 5px;
-        margin-right: 5px;
-        resize: none;
 
-        @include small-screen {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-        }
-    }
-}
-.events-form {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    width: 100%;
-    margin-left: 10px;
-    .status-note {
-        max-width: 125px;
-    }
-    @include small-screen {
-        flex-direction: column;
-        margin-left: 0;
-        .form-group {
-            width: 100%;
-        }
-        .status-note {
-            width: 100%;
-            max-width: 100%;
-        }
-    }
-}
-.events-form .submit-button {
-    height: 35px;
-    margin-top: 25px;
-    @include small-screen {
-        margin: 0;
-    }
-}
-.progress {
-    height: 20px;
-    width: 150px;
-    margin: 0;
-    background-color: #aaa;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.48);
-}
-.progress b {
-    position: relative;
-}
-.column-label {
-    cursor: pointer;
-}
 .clickable {
     cursor: pointer;
 }
@@ -129,27 +46,7 @@
         outline: 0;
     }
 }
-.events-status-wrapper {
-    @include container;
-    &:focus {
-        outline: 0;
-    }
-}
-.event-view {
-    margin: 5px;
-    padding: 5px;
-    .table {
-        position: relative;
-        overflow-x: auto;
-    }
-    .submit-button {
-        margin-bottom: 5px;
-    }
-}
-.items-per-page {
-    width: 15%;
-    min-width: 50px;
-}
+
 .select-view {
     margin: 5px;
     padding: 5px;
@@ -174,9 +71,6 @@
     padding-top: 0;
     padding-bottom: 0;
     font-size: 13px;
-}
-.tasks-list {
-    padding: 10px;
 }
 .sub-select-view > select {
     margin-left: 20px;

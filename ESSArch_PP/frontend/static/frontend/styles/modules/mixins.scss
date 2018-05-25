@@ -32,6 +32,15 @@ $large-width: 1024px;
     }
   }
 
+/*
+ * Mixin for responsive design from medium screen sizes down like mobile
+ */
+ @mixin medium-screen-down {
+    @media (max-width: #{$large-width - 1px}) {
+      @content;
+    }
+  }
+
   /*
  * Mixin for responsive design on large screen sizes like mobile
  */

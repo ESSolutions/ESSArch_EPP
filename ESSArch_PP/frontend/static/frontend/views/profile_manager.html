@@ -2,7 +2,7 @@
     <div class="content-wrapper">
         <div class="select-sub-edit-eventlog-wrapper">
             <div ng-if="select" class="select-view">
-                <div class="profile-manager-sub-menu" ng-controller="UtilCtrl as vm">
+                <div class="profile-manager-sub-menu menu" ng-controller="UtilCtrl as vm">
                     <div tabindex="0" ng-keydown="navKeydownListener($event, 'home.administration.profileManager.saEditor')" ng-click="navigateToState('home.administration.profileManager.saEditor')" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.saEditor'}"
                         ng-if="checkPermissions('home.administration.profileManager.saEditor')" class="nav-item sliding-middle-out">{{'SAEDITOR' | translate}}</div>
                     <div tabindex="0" ng-keydown="navKeydownListener($event, 'home.administration.profileManager.profileMaker')" ng-click="navigateToState('home.administration.profileManager.profileMaker')" ng-class="{chosen: $state.current.name == 'home.administration.profileManager.profileMaker'}"
