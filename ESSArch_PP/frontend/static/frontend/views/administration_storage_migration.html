@@ -44,16 +44,14 @@
                 <div ng-if="vm.selectionListShow" class="form-group">
                 <br>
                     <div class="table-container" st-table="vm.list" st-safe-src="vm.selectionList">
-                        <div class="toolbar-row">
-                            <div class="search-prepare-wrapper">
-                                <label for items-per-page></label>
-                                <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.ipsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                                <input st-search="" class="form-control global-search" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_IP' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
-                                <div class="action-buttons flex-row">
-                                    <button class="btn btn-default">{{'SELECTALL' | translate}}</button>
-                                    <button class="btn btn-default">{{'DESELECTALL' | translate}}</button>
-                                    <button class="btn btn-default">{{'STARTMIGRATION' | translate}}</button>
-                                </div>
+                        <div class="search-prepare-wrapper">
+                            <label for items-per-page></label>
+                            <select id="items-per-page" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.ipsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                            <input st-search="" class="form-control global-search" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_IP' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
+                            <div class="action-buttons flex-row">
+                                <button class="btn btn-default">{{'SELECTALL' | translate}}</button>
+                                <button class="btn btn-default">{{'DESELECTALL' | translate}}</button>
+                                <button class="btn btn-default">{{'STARTMIGRATION' | translate}}</button>
                             </div>
                         </div>
                         <div id="list-view" class="list-view-table table-x-overflow">
