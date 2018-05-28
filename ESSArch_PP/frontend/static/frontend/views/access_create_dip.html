@@ -37,7 +37,7 @@
                 </form>
             </div>
         <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="(eventShow || statusShow || vm.request.type =='preserve' && requestForm)" class="events-status-wrapper">
-            <event-table ng-if="eventShow || vm.request.type == 'preserve'" ip="ip"></event-table>
+            <event-table ng-if="eventShow" ip="ip"></event-table>
             <div ng-if="statusShow" class="status-view">
                 <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
             </div>
