@@ -31,4 +31,4 @@ def home(req):
     if not req.user.is_authenticated and getattr(settings, 'ENABLE_ADFS_LOGIN', False):
         return redirect(reverse('saml2:saml2_login'))
 
-    return render(req, 'main.html', {'STATIC_URL': settings.STATIC_URL})
+    return render(req, 'essarch_core_frontend/main.html')
