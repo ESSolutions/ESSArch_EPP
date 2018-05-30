@@ -1,15 +1,19 @@
 from __future__ import division
 
 import copy
+import csv
 import datetime
 import logging
 import math
+import tempfile
 
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django_filters.constants import EMPTY_VALUES
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
@@ -18,6 +22,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from six import iteritems
+from weasyprint import HTML
 
 from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.mixins import PaginatedViewMixin
@@ -27,10 +32,13 @@ from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
     TagVersionSerializerWithVersions, \
     TagVersionWriteSerializer
+from ESSArch_Core.util import generate_file_response
 from tags.permissions import SearchPermissions
 from tags.serializers import SearchSerializer
 
 logger = logging.getLogger('essarch.epp.search')
+EXPORT_FORMATS = ('csv', 'pdf')
+
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
@@ -214,8 +222,12 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
+        export = params.pop('export', None)
         if query:
             query = '%s' % query
+
+        if export is not None and export not in EXPORT_FORMATS:
+            raise exceptions.ParseError('Invalid export format "{}"'.format(export))
 
         filters = {
             'extension': params.pop('extension', None),
@@ -288,10 +300,43 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'aggregations': results_dict['aggregations'],
         }
 
+        if export is not None:
+            return self.generate_report(results_dict['hits']['hits'], export, request.user)
+
         if self.paginator is not None:
             return Response(r, headers={'Count': results.hits.total})
 
         return Response(r)
+
+    def generate_report(self, hits, format, user):
+        template = 'search_results.html'.format()
+
+        f = tempfile.TemporaryFile()
+        formatted_hits = []
+
+        for hit in hits:
+            hit = hit['_source']
+            hit['archive'] = get_archive(hit['archive'])
+            formatted_hits.append(hit)
+
+        if format == 'pdf':
+            ctype = 'application/pdf'
+            render = render_to_string(template, {'hits': formatted_hits, 'user': user, 'timestamp': timezone.now()})
+            HTML(string=render).write_pdf(f)
+        elif format == 'csv':
+            ctype = 'text/csv'
+            writer = csv.writer(f)
+            for hit in formatted_hits:
+                writer.writerow(
+                    [hit.get('archive', {}).get('name'), hit.get('name'), hit.get('reference_code'), hit.get('name'),
+                     hit.get('unit_dates', {}).get('date'), hit.get('description')])
+        else:
+            raise ValueError('Unsupported format {}'.format(format))
+
+        f.seek(0)
+        name = 'search_results_{time}_{user}.{format}'.format(time=timezone.localtime(), user=user.username,
+                                                              format=format)
+        return generate_file_response(f, content_type=ctype, name=name)
 
     def serialize(self, obj):
         return obj.to_dict(include_meta=True)
