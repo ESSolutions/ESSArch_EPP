@@ -162,6 +162,7 @@
     "HELP": "Help",
     "ITEMSPERPAGE": "Items per page",
     "GLOBALSEARCHDESC_IP":"List all IP's associated to the search term",
+    "GLOBALSEARCHDESC_EVENT":"List all events associated to the search term",
     "GLOBALSEARCHDESC_RULE":"List all rules associated to the search term",
     "GLOBALSEARCHDESC_MEDIUM":"List all storage mediums associated to the search term",
     "GLOBALSEARCHDESC_MEDIUM_CONTENT":"List all medium content associated to the search term",

@@ -162,6 +162,7 @@
     "HELP": "Hjälp",
     "ITEMSPERPAGE": "Objekt per sida",
     "GLOBALSEARCHDESC_IP":"Lista alla IPn som associeras med söktermen",
+    "GLOBALSEARCHDESC_EVENT":"Lista alla event som associeras med söktermen",
     "GLOBALSEARCHDESC_RULE":"Lista alla regler som associeras med söktermen",
     "GLOBALSEARCHDESC_MEDIUM":"Lista alla lagringsmedium som associeras med söktermen",
     "GLOBALSEARCHDESC_MEDIUM_CONTENT":"Lista allt innehåll i lagringsmedium som associeras med söktermen",
