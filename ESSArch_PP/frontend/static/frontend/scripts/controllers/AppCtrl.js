@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppCtrl', function($rootScope, $scope, $uibModal, $log) {
+angular.module('myApp').controller('AppCtrl', function($rootScope, $scope, $uibModal, $log, PermPermissionStore) {
     var vm = this;
     var questionMark = 187;
     vm.questionMarkListener = function(e) {
@@ -35,6 +35,10 @@ angular.module('myApp').controller('AppCtrl', function($rootScope, $scope, $uibM
             );
         }
     }
+
+    $scope.checkPermission = function(permissionName) {
+        return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
+    };
 
     //Create and show modal for keyboard shortcuts
     $scope.keyboardShortcutModal = function () {
