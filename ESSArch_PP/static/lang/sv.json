@@ -579,5 +579,7 @@
     "UNAVAILABLE": "Inte tillgänglig",
     "TERMS_AND_CONDITION": "Villkor",
     "DESC": "Beskrivning",
-    "INFO": "Info"
+    "INFO": "Info",
+    "CHANGE_ORGANIZATION": "Byt organisation",
+    "ORGANIZATION_CHANGED": "Organisation bytt"
 }

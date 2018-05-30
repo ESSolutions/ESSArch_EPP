@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state, Requests) {
+angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state, Requests, ContextMenuBase) {
 	var vm = this;
 	var ipSortString = "Received,Preserving";
 	$controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
@@ -29,6 +29,14 @@ angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controlle
                 }
             }
         );
+        methods.push(
+            ContextMenuBase.changeOrganization(
+                function () {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.changeOrganizationModal($scope.ip);
+                })
+            );
         return methods;
     }
 

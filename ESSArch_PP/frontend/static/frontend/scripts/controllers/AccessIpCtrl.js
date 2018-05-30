@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state, Requests, $uibModal, $log) {
+angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $state, Requests, $uibModal, $log, ContextMenuBase) {
     var vm = this;
     var ipSortString = "";
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
@@ -40,6 +40,15 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
                 }
             );
         }
+        methods.push(
+            ContextMenuBase.changeOrganization(
+                function () {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.changeOrganizationModal($scope.ip);
+                })
+        );
+
         methods.push(
             {
                 text: $translate.instant("INFORMATION_PACKAGE_INFORMATION"),
@@ -290,5 +299,4 @@ angular.module('myApp').controller('AccessIpCtrl', function($scope, $controller,
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
-
 });

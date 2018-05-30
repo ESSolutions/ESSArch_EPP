@@ -1070,6 +1070,30 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         });
     }
 
+    vm.changeOrganizationModal = function (ip) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'modals/change_organization_modal.html',
+            controller: 'OrganizationModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "sm",
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            $scope.getListViewData();
+        }).catch(function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
     //advanced filter form data
     $scope.columnFilters = {};
     $scope.filterModel = {};
@@ -1220,7 +1244,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             $scope.submitRequest($scope.ip, vm.request);
         }
     }
-
 
     vm.canDeleteIP = function (row) {
         // IPs in workareas can always be deleted, including AICs

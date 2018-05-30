@@ -1047,4 +1047,4 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
-})
+});

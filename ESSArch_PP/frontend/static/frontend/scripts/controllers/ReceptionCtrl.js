@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests){
+angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests, ContextMenuBase){
     var vm = this;
     var ipSortString = "";
     var watchers = [];
@@ -74,6 +74,20 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                 $scope.requestForm = true;
             }
         }
+    }
+
+    $scope.menuOptions = function (rowType, row) {
+        var methods = []
+        if (row.state === 'Prepared') {
+            methods.push(ContextMenuBase.changeOrganization(
+                function () {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.changeOrganizationModal($scope.ip);
+                })
+            );
+        }
+        return methods;
     }
 
     $scope.updateTags = function() {

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, WorkareaFiles, Workarea, $scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests, $uibModal, $sce, $window) {
+angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, WorkareaFiles, Workarea, $scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests, $uibModal, $sce, $window, ContextMenuBase) {
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
 
     vm.browserstate = {
@@ -17,8 +17,15 @@ angular.module('myApp').controller('WorkareaCtrl', function (vm, ipSortString, W
         }
     }
     vm.archived = null;
-    $scope.menuOptions = function () {
-        return [];
+    $scope.menuOptions = function (rowType, row) {
+        return [
+            ContextMenuBase.changeOrganization(
+                function () {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.changeOrganizationModal($scope.ip);
+            })
+        ];
     }
 
     vm.callServer = function callServer(tableState) {

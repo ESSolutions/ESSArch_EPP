@@ -1,4 +1,4 @@
-angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window) {
+angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window, ContextMenuBase) {
     var vm = this;
     var ipSortString = "";
     var watchers = [];
@@ -41,9 +41,17 @@ angular.module('myApp').controller('CreateDipCtrl', function(IP, ArchivePolicy, 
         vm.request.informationClass = vm.request.archivePolicy.value.information_class;
     }
     //context menu data
-    $scope.menuOptions = function() {
-        return [];
+    $scope.menuOptions = function (rowType, row) {
+        return [
+            ContextMenuBase.changeOrganization(
+                function () {
+                    $scope.ip = row;
+                    $rootScope.ip = row;
+                    vm.changeOrganizationModal($scope.ip);
+            })
+        ];
     }
+
     $scope.requestForm = false;
     $scope.openRequestForm = function(row) {
         $scope.select = false;

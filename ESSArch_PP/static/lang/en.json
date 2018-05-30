@@ -580,5 +580,7 @@
     "UNAVAILABLE": "Unavailable",
     "TERMS_AND_CONDITION": "Terms and condition",
     "DESC": "Description",
-    "INFO": "Info"
+    "INFO": "Info",
+    "CHANGE_ORGANIZATION": "Change organization",
+    "ORGANIZATION_CHANGED": "Organization changed"
 }
