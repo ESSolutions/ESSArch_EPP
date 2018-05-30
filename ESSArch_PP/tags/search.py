@@ -371,6 +371,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
 
+            if data.get('index') == 'archive':
+                if not request.user.has_perm('tags.create_archive'):
+                    raise exceptions.PermissionDenied('You do not have permission to create new archives')
+
             with transaction.atomic():
                 tag = Tag.objects.create()
                 tag_structure = TagStructure(tag=tag)
