@@ -1239,7 +1239,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         }
 
         // Does the current user have permission to delete this IP?
-        if (!row.permissions.includes('ip.delete_informationpackage')){
+        if (!row.permissions.includes('delete_informationpackage')){
             return false;
         }
 

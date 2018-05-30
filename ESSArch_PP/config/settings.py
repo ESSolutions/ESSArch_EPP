@@ -112,6 +112,7 @@ INSTALLED_APPS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'ESSArch_Core.auth.backends.GroupRoleBackend',
     'guardian.backends.ObjectPermissionBackend',
 ]
 
