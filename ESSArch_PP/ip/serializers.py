@@ -39,16 +39,9 @@ class InformationPackageSerializer(serializers.ModelSerializer):
         return obj.is_last_generation()
 
     def get_permissions(self, obj):
+        user = getattr(self.context.get('request'), 'user', None)
         checker = self.context.get('perm_checker')
-
-        if checker is not None:
-            return checker.get_perms(obj)
-
-        request = self.context.get('request')
-        if hasattr(request, 'user'):
-            return get_perms(request.user, obj)
-
-        return []
+        return obj.get_permissions(user=user, checker=checker)
 
     def get_agents(self, obj):
         agents = AgentSerializer(obj.agents.all(), many=True).data
@@ -113,16 +106,9 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return obj.get_package_type_display()
 
     def get_permissions(self, obj):
+        user = getattr(self.context.get('request'), 'user', None)
         checker = self.context.get('perm_checker')
-
-        if checker is not None:
-            return checker.get_perms(obj)
-
-        request = self.context.get('request')
-        if hasattr(request, 'user'):
-            return get_perms(request.user, obj)
-
-        return []
+        return obj.get_permissions(user=user, checker=checker)
 
     def get_agents(self, obj):
         agents = AgentSerializer(obj.agents.all(), many=True).data

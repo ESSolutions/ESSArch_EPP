@@ -504,12 +504,7 @@ class PrepareDIP(DBTask):
     def run(self, label, object_identifier_value=None, orders=[]):
         disseminations = Path.objects.get(entity='disseminations').value
 
-        try:
-            perms = copy.deepcopy(settings.IP_CREATION_PERMS_MAP)
-        except AttributeError:
-            msg = 'IP_CREATION_PERMS_MAP not defined in settings'
-            self.logger.error(msg)
-            raise ImproperlyConfigured(msg)
+        perms = copy.deepcopy(getattr(settings, 'IP_CREATION_PERMS_MAP', {}))
 
         ip = InformationPackage.objects.create(
             object_identifier_value=object_identifier_value,
@@ -526,6 +521,7 @@ class PrepareDIP(DBTask):
         user_perms = perms.pop('owner', [])
         organization = member.django_user.user_profile.current_organization
         organization.assign_object(ip, custom_permissions=perms)
+        organization.add_object(ip)
 
         for perm in user_perms:
             perm_name = get_permission_name(perm, ip)

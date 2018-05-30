@@ -34,7 +34,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.client.ingest import IngestClient
 from elasticsearch_dsl import Index, exceptions as elastic_exceptions
 
-from ESSArch_Core.auth.models import Group
+from ESSArch_Core.auth.models import Group, GroupMemberRole
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
 from ESSArch_Core.search import get_connection
 from ESSArch_Core.storage.models import (
@@ -101,9 +101,10 @@ def installDefaultUsers():
     organization, _ = GroupType.objects.get_or_create(label="organization")
     default_org, _ = Group.objects.get_or_create(name='Default', group_type=organization)
 
-    group_user, _ = Group.objects.get_or_create(name='user', parent=default_org)
+    role_user, _ = GroupMemberRole.objects.get_or_create(codename='user')
     permission_list_user = [
         ## ---- app: ip ---- model: informationpackage
+        ['view_informationpackage','ip','informationpackage'],       # Can view information packages
         ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
         ['delete_informationpackage','ip','informationpackage'], # Can delete Information Package (Ingest)
         ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
@@ -111,9 +112,7 @@ def installDefaultUsers():
         ['preserve_dip','ip','informationpackage'],                 # Can preserve DIP (Access)
         ['get_from_storage','ip','informationpackage'],         # Can get extracted IP from storage (Access)
         ['get_tar_from_storage','ip','informationpackage'],   # Can get packaged IP from storage (Access)
-        ['get_from_storage_as_new','ip','informationpackage'], # Can get IP "as new" from storage (Access)
         ['add_to_ingest_workarea','ip','informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
-        ['add_to_ingest_workarea_as_new','ip','informationpackage'],   # Can add IP as new generation to ingest workarea (Ingest)
         ['diff-check','ip','informationpackage'],                      # Can diff-check IP (?)
         ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
         ## ---- app: ip ---- model: workarea
@@ -135,33 +134,15 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_user.django_group.permissions.add(p_obj)
+        role_user.permissions.add(p_obj)
 
-    group_admin, _ = Group.objects.get_or_create(name='admin', parent=default_org)
+    role_admin, _ = GroupMemberRole.objects.get_or_create(codename='admin')
     permission_list_admin = [
         ## ---- app: ip ---- model: informationpackage
-        ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
-        ['delete_informationpackage','ip','informationpackage'], # Can delete Information Package (Ingest)
-        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
-        ['preserve','ip','informationpackage'],                        # Can preserve IP (Ingest)
-        ['preserve_dip','ip','informationpackage'],                 # Can preserve DIP (Access)
-        ['get_from_storage','ip','informationpackage'],         # Can get extracted IP from storage (Access)
-        ['get_tar_from_storage','ip','informationpackage'],   # Can get packaged IP from storage (Access)
         ['get_from_storage_as_new','ip','informationpackage'], # Can get IP "as new" from storage (Access)
-        ['add_to_ingest_workarea','ip','informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
         ['add_to_ingest_workarea_as_new','ip','informationpackage'],   # Can add IP as new generation to ingest workarea (Ingest)
-        ['diff-check','ip','informationpackage'],                      # Can diff-check IP (?)
-        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
-        ## ---- app: ip ---- model: workarea
-        ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
-        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)
-        ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
-        ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
         ## ---- app: ip ---- model: order
         ['prepare_order','ip','order'],                                        # Can prepare order (Access)
-        ## ---- app: WorkflowEngine ---- model: processtask
-        #['can_undo','WorkflowEngine','processtask'],           # Can undo tasks (other)
-        #['can_retry','WorkflowEngine','processtask'],           # Can retry tasks (other)
         ## ---- app: profiles ---- model: profile
         ['add_profile','profiles','profile'],                                  # Can add Profile (Administration)
         ## ---- app: profiles ---- model: submissionagreement
@@ -174,8 +155,6 @@ def installDefaultUsers():
         ['add_appraisalrule','maintenance','appraisalrule'],   # Can add appraisal rule (Administration)
         ## ---- app: maintenance ---- model: ConversionRule
         ['add_conversionrule','maintenance','conversionrule'],   # Can add conversion rule (Administration)
-        ## ---- app: tags ---- model: Tag
-        ['search','tags','tag'],   # Can search
     ]
 
     for p in permission_list_admin:
@@ -183,9 +162,9 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_admin.django_group.permissions.add(p_obj)
+        role_admin.permissions.add(p_obj)
 
-    group_sysadmin, _ = Group.objects.get_or_create(name='sysadmin', parent=default_org)
+    role_sysadmin, _ = GroupMemberRole.objects.get_or_create(codename='sysadmin')
     permission_list_sysadmin = [
         ## ---- app: auth ---- model: group
         ['add_group','auth','group'],                    # Can add group
@@ -260,7 +239,7 @@ def installDefaultUsers():
                                           codename=p[0], content_type__app_label=p[1],
                                           content_type__model=p[2],
                                           )
-        group_sysadmin.django_group.permissions.add(p_obj)
+        role_sysadmin.permissions.add(p_obj)
 
     #####################################
     # Users
@@ -281,7 +260,7 @@ def installDefaultUsers():
     if created:
         user_user.set_password('user')
         user_user.save()
-        group_user.add_member(user_user.essauth_member)
+        default_org.add_member(user_user.essauth_member, roles=[role_user])
 
     user_admin, created = User.objects.get_or_create(
         first_name='admin', last_name='Lastname',
@@ -291,7 +270,7 @@ def installDefaultUsers():
         user_admin.set_password('admin')
         user_admin.is_staff=True
         user_admin.save()
-        group_admin.add_member(user_admin.essauth_member)
+        default_org.add_member(user_admin.essauth_member, roles=[role_user, role_admin])
 
     user_sysadmin, created = User.objects.get_or_create(
         first_name='sysadmin', last_name='Lastname',
@@ -301,7 +280,7 @@ def installDefaultUsers():
         user_sysadmin.set_password('sysadmin')
         user_sysadmin.is_staff=True
         user_sysadmin.save()
-        group_sysadmin.add_member(user_sysadmin.essauth_member)
+        default_org.add_member(user_sysadmin.essauth_member, roles=[role_sysadmin])
 
     return 0
 

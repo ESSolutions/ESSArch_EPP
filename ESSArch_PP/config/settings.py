@@ -130,13 +130,6 @@ GROUPS_MANAGER = {
     'USER_USERNAME_SUFFIX': '',
 }
 
-IP_CREATION_PERMS_MAP = {
-    'owner': ['delete'],
-    'group': ['view_informationpackage'],
-    'groups_upstream': ['view_informationpackage'],
-    'groups_downstream': ['view_informationpackage'],
-}
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",

@@ -191,13 +191,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
     @detail_route(methods=['post'])
     def prepare(self, request, pk=None):
         logger = logging.getLogger('essarch.epp.ingest')
-
-        try:
-            perms = copy.deepcopy(settings.IP_CREATION_PERMS_MAP)
-        except AttributeError:
-            msg = 'IP_CREATION_PERMS_MAP not defined in settings'
-            logger.error(msg)
-            raise ImproperlyConfigured(msg)
+        perms = copy.deepcopy(getattr(settings, 'IP_CREATION_PERMS_MAP', {}))
 
         existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
         if existing is not None:
@@ -297,6 +291,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         organization = request.user.user_profile.current_organization
         organization.assign_object(ip, custom_permissions=perms)
+        organization.add_object(ip)
 
         for perm in user_perms:
             perm_name = get_permission_name(perm, ip)
