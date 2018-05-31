@@ -472,7 +472,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         if data:
             tag.update_search(data)
-        return serializer.data
+        return tag.from_search()
 
     def partial_update(self, request, index=None, pk=None):
         tag = self.get_tag_object()
