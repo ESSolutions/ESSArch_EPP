@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters.constants import EMPTY_VALUES
+from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from rest_framework import exceptions, status
@@ -500,6 +501,18 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             self._update_tag_metadata(tag, request.data)
 
         return Response()
+
+    @detail_route(methods=['post'], url_path='delete-field')
+    def delete_field(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        try:
+            field = request.data['field']
+        except KeyError:
+            raise exceptions.ParseError('Missing "field" parameter')
+
+        client = Elasticsearch()
+        client.update(index=tag.elastic_index, doc_type='doc', id=tag.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+        return Response(tag.from_search())
 
     @detail_route(methods=['post'], url_path='remove-from-structure')
     def remove_from_structure(self, request, index=None, pk=None):
