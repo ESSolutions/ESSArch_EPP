@@ -60,8 +60,14 @@
         <div class="title">
             <h1>Appraisal Report</h1>
             <b>Appraisal Rule: </b>{{rule.name}}
+            {% if rule.user %}
+            <b>Appraisal Rule Creator: </b>{{rule.user.username}}
+            {% endif %}
             <br/>
             <b>Appraisal Job: </b>{{job.pk}}
+            {% if job.user %}
+                <b>Appraisal Job Creator: </b>{{job.user.username}}
+            {% endif %}
             <br/>
             <hr/>
         </div>
