@@ -155,6 +155,8 @@ def installDefaultUsers():
         ['add_appraisalrule','maintenance','appraisalrule'],   # Can add appraisal rule (Administration)
         ## ---- app: maintenance ---- model: ConversionRule
         ['add_conversionrule','maintenance','conversionrule'],   # Can add conversion rule (Administration)
+        ## ---- app: tags ---- model: Tag
+        ['create_archive','tags','tag'],   # Can create archives
     ]
 
     for p in permission_list_admin:
