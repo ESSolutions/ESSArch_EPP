@@ -48,7 +48,7 @@ from elasticsearch_dsl import Index, Search
 from elasticsearch_dsl import Q as ElasticQ
 from groups_manager.utils import get_permission_name
 from guardian.core import ObjectPermissionChecker
-from guardian.shortcuts import assign_perm, get_perms
+from guardian.shortcuts import assign_perm
 from lxml import etree
 from natsort import natsorted
 from rest_framework import exceptions, filters, mixins, status, viewsets
@@ -748,7 +748,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         ip = self.get_object()
 
-        if 'delete_informationpackage' not in get_perms(request.user, ip):
+        if not request.user.has_perm('delete_informationpackage', ip):
             raise exceptions.PermissionDenied('You do not have permission to delete this IP')
 
         logger.info('Request issued to delete %s %s' % (ip.get_package_type_display(), pk), extra={'user': request.user.pk})
@@ -928,10 +928,10 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             raise exceptions.ParseError('Need at least one option set to true')
 
         if data.get('new'):
-            if aip.archived and 'get_from_storage_as_new' not in get_perms(request.user, aip):
+            if aip.archived and not request.user.has_perm('get_from_storage_as_new', aip):
                 raise exceptions.PermissionDenied('You do not have permission to create new generations of this IP')
 
-            if not aip.archived and 'add_to_ingest_workarea_as_new' not in get_perms(request.user, aip):
+            if not aip.archived and not request.user.has_perm('add_to_ingest_workarea_as_new', aip):
                 raise exceptions.PermissionDenied('You do not have permission to create new generations of this IP')
 
             if aip.new_version_in_progress() is not None:
