@@ -1417,7 +1417,7 @@ class ScheduleAppraisalJobs(DBTask):
         rules = AppraisalRule.objects.filter(
             information_packages__isnull=False, information_packages__active=True,
             information_packages__appraisal_date__lte=now
-        ).exclude(jobs__start_date__gte=now)
+        ).exclude(jobs__start_date__gte=now).exclude(frequency__exact='')
 
         for rule in rules.iterator():
             cron_entry = CronTab(rule.frequency)
@@ -1468,7 +1468,7 @@ class ScheduleConversionJobs(DBTask):
         # get rules without future jobs scheduled
         rules = ConversionRule.objects.filter(
             information_packages__isnull=False, information_packages__active=True,
-        ).exclude(jobs__start_date__gte=now)
+        ).exclude(jobs__start_date__gte=now).exclude(frequency__exact='')
 
         for rule in rules.iterator():
             cron_entry = CronTab(rule.frequency)
