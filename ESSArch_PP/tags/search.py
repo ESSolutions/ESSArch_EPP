@@ -18,7 +18,7 @@ from django_filters.constants import EMPTY_VALUES
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from rest_framework import exceptions, status
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from six import iteritems
@@ -445,16 +445,14 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             return Response(self.serialize(tag_version.to_search()))
 
-    def partial_update(self, request, index=None, pk=None):
-        tag = self.get_tag_object()
-
-        if 'parent' in request.data:
+    def _update_tag_metadata(self, tag, data):
+        if 'parent' in data:
             try:
-                structure = request.data.pop('structure')
+                structure = data.pop('structure')
             except KeyError:
                 raise exceptions.ParseError('Missing "structure" parameter')
             structure = Structure.objects.get(pk=structure)
-            parent = request.data.pop('parent')
+            parent = data.pop('parent')
             parent_tag_version = TagVersion.objects.get(pk=parent)
             parent_tag_structure = parent_tag_version.tag.structures.get(structure=structure)
             tag_structure, _ = TagStructure.objects.update_or_create(tag=tag.tag, structure=structure,
@@ -464,17 +462,44 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         db_fields_request_data = {}
 
         for f in db_fields:
-            if f in request.data:
-                db_fields_request_data[f] = request.data.pop(f)
+            if f in data:
+                db_fields_request_data[f] = data.pop(f)
 
         serializer = TagVersionWriteSerializer(tag, data=db_fields_request_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        if request.data:
-            tag.update_search(request.data)
+        if data:
+            tag.update_search(data)
+        return serializer.data
 
-        return Response(serializer.data)
+    def partial_update(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        return Response(self._update_tag_metadata(tag, request.data))
+
+    @detail_route(methods=['post'], url_path='update-descendants')
+    def update_descendants(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        include_self = request.query_params.get('include_self', False)
+        for descendant in tag.get_descendants(include_self=include_self):
+            self._update_tag_metadata(descendant, request.data)
+
+        return Response()
+
+    @list_route(methods=['post'], url_path='mass-update')
+    def mass_update(self, request, index=None):
+        try:
+            ids = request.query_params['ids'].split(',')
+        except KeyError:
+            raise exceptions.ParseError('Missing "ids" parameter')
+
+        for id in ids:
+            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+            self.kwargs[lookup_url_kwarg] = id
+            tag = self.get_tag_object()
+            self._update_tag_metadata(tag, request.data)
+
+        return Response()
 
     @detail_route(methods=['post'], url_path='remove-from-structure')
     def remove_from_structure(self, request, index=None, pk=None):
