@@ -445,6 +445,21 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         $window.open(showFile, '_blank');
     }
 
+    vm.emailDocument = function(record) {
+        return $http({
+            method: 'POST',
+            url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/'
+        }).then(function(response) {
+            Notifications.add($translate.instant('EMAIL_SENT'), 'error');
+        }).catch(function(response) {
+            if(response.data.detail) {
+                Notifications.add(response.data.detail, 'error');
+            } else {
+                Notifications.add('Unknown error', 'error');
+            }
+        })
+    }
+
     vm.gotoSearch = function() {
         $rootScope.$broadcast('CHANGE_TAB', {tab: 0});
         $state.go("home.access.search");
