@@ -582,5 +582,7 @@
     "DESC": "Description",
     "INFO": "Info",
     "CHANGE_ORGANIZATION": "Change organization",
-    "ORGANIZATION_CHANGED": "Organization changed"
+    "ORGANIZATION_CHANGED": "Organization changed",
+    "EXPORT_RESULT": "Export result",
+    "EXPORT_ACTION": "Export"
 }

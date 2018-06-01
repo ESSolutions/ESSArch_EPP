@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state) {
+angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -299,4 +299,52 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.applyModelChanges = function() {
         return !vm.ignoreChanges;
     };
+
+    vm.getExportResultUrl = function(tableState, format) {
+        if (tableState) {
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var number = pagination.number;  // Number of entries showed per page.
+            var pageNumber = start / number + 1;
+            formatFilters();
+            if (vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
+                delete vm.filterObject.extension;
+            }
+            var params = $httpParamSerializer(
+                angular.extend(
+                {
+                    page: pageNumber,
+                    page_size: number,
+                    export: format
+                }, vm.filterObject)
+            );
+            return appConfig.djangoUrl + "search/?" + params;
+        } else {
+            vm.showResults = true;
+        }
+    }
+
+    vm.exportResultModal = function () {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'modals/export_result_modal.html',
+            controller: 'ExportResultModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            scope: $scope,
+            size: "sm",
+            resolve: {
+                data: function () {
+                    return {
+                        vm: vm
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+        }).catch(function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
 });

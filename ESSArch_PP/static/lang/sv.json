@@ -581,5 +581,7 @@
     "DESC": "Beskrivning",
     "INFO": "Info",
     "CHANGE_ORGANIZATION": "Byt organisation",
-    "ORGANIZATION_CHANGED": "Organisation bytt"
+    "ORGANIZATION_CHANGED": "Organisation bytt",
+    "EXPORT_RESULT": "Exportera resultat",
+    "EXPORT_ACTION": "Exportera"
 }
