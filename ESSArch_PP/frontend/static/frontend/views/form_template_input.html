@@ -3,8 +3,13 @@
        popover-placement="top-left"
        popover-popup-delay="500"
        popover-append-to-body="true">{{to.label}} {{to.required ? '*' : ''}}</label>
-<input class="form-control"
-       id="{{::id}}"
-       name="{{::id}}"
-       class="form-control"
-       ng-model="model[options.key]" />
+<div class="flex-row align-items-center">
+
+    <input class="form-control"
+    id="{{::id}}"
+    name="{{::id}}"
+    class="form-control"
+    ng-model="model[options.key]" />
+    &nbsp;
+    <button ng-if="options.templateOptions.delete" ng-click="options.templateOptions.delete()" class="clickable fa fa-trash"></button>
+</div>

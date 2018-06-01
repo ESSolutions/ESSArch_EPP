@@ -199,3 +199,17 @@
         margin-left: 5px;
     }
 }
+.edit-form {
+    .formly {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: baseline;
+        padding: 5px;
+        width: 100%;
+        .formly-field {
+            display: block;
+            min-width: 150px;
+        }
+    }
+}

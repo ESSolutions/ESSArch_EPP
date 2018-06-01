@@ -785,23 +785,23 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         Notifications.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
         $uibModalInstance.close(conversion);
     }
-}).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
+}).controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
     var $ctrl = this;
     $ctrl.node = data.node;
     $ctrl.editData = {};
     $ctrl.editFields = [];
+    $ctrl.editFieldsNoDelete = [];
     $ctrl.options = {};
     $ctrl.fieldOptions = {};
+    $ctrl.newFieldKey = null;
+    $ctrl.newFieldVal = null;
     $ctrl.$onInit = function() {
         $ctrl.fieldOptions = getEditableFields($ctrl.node);
         var discludedFields = ["archive", "current_version"];
         angular.forEach($ctrl.fieldOptions, function(value, field) {
             if(!discludedFields.includes(field)) {
-                switch(field) {
-                    case "unit_ids":
-                        addNestedField(field, value)
-                        break;
-                    case "unit_dates":
+                switch(typeof(value)) {
+                    case "object":
                         addNestedField(field, value)
                         break;
                     default:
@@ -812,43 +812,93 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         })
     }
 
+    $ctrl.noDeleteFields = {
+        component: ['name'],
+        document: ['name'],
+        archive: ['name'],
+        information_package: ['name']
+    }
+
+    $ctrl.fieldsToDelete = [];
+    function deleteField(field) {
+        if (!angular.isUndefined($ctrl.node._source[field])) {
+            $ctrl.fieldsToDelete.push(field);
+        }
+        $ctrl.editFields.forEach(function(item, idx, list) {
+            if(item.key === field) {
+                list.splice(idx, 1);
+            }
+        })
+        delete $ctrl.editData[field];
+    }
+
     function addNestedField(field, value) {
         var model = {};
         var group = {
             "templateOptions": {
-                "label": $translate.instant(field.toUpperCase()),
+                "label":field,
             },
             "fieldGroup": []
         };
-        angular.forEach(value, function(val, key) {
+        angular.forEach(value, function (val, key) {
             model[key] = val;
-            $ctrl.editFields.push(
-                {
-                    "templateOptions": {
-                        "type": "text",
-                        "label": $translate.instant(key.toUpperCase()),
-                    },
-                    "type": "input",
-                    "model": 'model.'+field,
-                    "key": key,
-                }
-            )
+            if ($ctrl.noDeleteFields[$ctrl.node._index].includes(field + '.' + key)) {
+                $ctrl.editFieldsNoDelete.push(
+                    {
+                        "templateOptions": {
+                            "type": "text",
+                            "label": field + '.' + key,
+                        },
+                        "type": "input",
+                        "model": 'model.' + field,
+                        "key": key,
+                    }
+                )
+            } else {
+                $ctrl.editFields.push(
+                    {
+                        "templateOptions": {
+                            "type": "text",
+                            "label": field + '.' + key,
+                            "delete": function () { deleteField(key) }
+                        },
+                        "type": "input",
+                        "model": 'model.' + field,
+                        "key": key,
+                    }
+                )
+            }
         })
         $ctrl.editData[field] = model;
     }
 
     function addStandardField(field, value) {
         $ctrl.editData[field] = value;
-        $ctrl.editFields.push(
-            {
-                "templateOptions": {
-                    "type": "text",
-                    "label": $translate.instant(field.toUpperCase()),
-                },
-                "type": "input",
-                "key": field,
-            }
-        )
+        if ($ctrl.noDeleteFields[$ctrl.node._index].includes(field)) {
+            $ctrl.editFieldsNoDelete.push(
+                {
+                    "templateOptions": {
+                        "type": "text",
+                        "label": field,
+                    },
+                    "type": "input",
+                    "key": field,
+                }
+            )
+        } else {
+
+            $ctrl.editFields.push(
+                {
+                    "templateOptions": {
+                        "type": "text",
+                        "label": field,
+                        "delete": function () { deleteField(field) }
+                    },
+                    "type": "input",
+                    "key": field,
+                }
+            )
+        }
     }
 
     function getEditableFields(node) {
@@ -860,11 +910,55 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         return !angular.equals(getEditedFields($ctrl.editData), {});
     }
 
+    $ctrl.addNewField = function () {
+        if ($ctrl.newFieldKey && $ctrl.newFieldVal) {
+            var newFieldKey = angular.copy($ctrl.newFieldKey);
+            var newFieldVal = angular.copy($ctrl.newFieldVal);
+            var splitted = newFieldKey.split('.');
+            if((splitted.length > 1 && !angular.isUndefined($ctrl.editData[splitted[0]][splitted[1]]))|| !angular.isUndefined($ctrl.editData[newFieldKey])) {
+                Notifications.add($translate.instant('FIELD_EXISTS'), 'error')
+                return;
+            }
+            if(splitted.length > 1) {
+                $ctrl.editData[splitted[0]][splitted[1]] = newFieldVal;
+            } else {
+                $ctrl.editData[newFieldKey] = newFieldVal;
+            }
+            $ctrl.editFields.push(
+                {
+                    "templateOptions": {
+                        "type": "text",
+                        "label": newFieldKey,
+                        "delete": function () { deleteField(newFieldKey) }
+                    },
+                    "type": "input",
+                    "key": newFieldKey,
+                }
+            )
+            if ($ctrl.fieldsToDelete.includes(newFieldKey)) {
+                $ctrl.fieldsToDelete.splice($ctrl.fieldsToDelete.indexOf(newFieldKey), 1);
+            }
+            $ctrl.newFieldKey = null;
+            $ctrl.newFieldVal = null;
+        }
+    }
+
     function getEditedFields(data) {
         var edited = {};
         angular.forEach(data, function(value, key) {
-            if($ctrl.node._source[key] != value) {
-                edited[key] = value;
+            if(typeof(value) === 'object') {
+                angular.forEach(value, function(val, k) {
+                    if($ctrl.node._source[key][k] !== val) {
+                        if(!edited[key]) {
+                            edited[key] = {};
+                        }
+                        edited[key][k] = val;
+                    }
+                })
+            } else {
+                if($ctrl.node._source[key] != value) {
+                    edited[key] = value;
+                }
             }
         })
         return edited;
@@ -876,7 +970,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant(field.toUpperCase()),
+                    "label": field,
                 },
                 "type": "input",
                 "key": field,
@@ -884,17 +978,49 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         )
     }
 
-    $ctrl.submit = function() {
-        if($ctrl.changed()) {
+    $ctrl.submit = function () {
+        if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
             $ctrl.submitting = true;
-            Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function(response) {
+            var promises = [];
+            $ctrl.fieldsToDelete.forEach(function (item) {
+                promises.push(
+                    $http.post(appConfig.djangoUrl + 'search/' + $ctrl.node._index + '/' + $ctrl.node._id + '/delete-field/', { field: item })
+                        .then(function (response) {
+                            return response;
+                        }).catch(function (response) {
+                            $ctrl.submitting = false;
+                            if (response.data.detail) {
+                                Notifications.add(response.data.detail, 'error');
+                            } else {
+                                Notifications.add('Unknown error', 'error');
+                            }
+                            return response;
+                        })
+                );
+            });
+            $q.all(promises).then(function (results) {
+                if($ctrl.changed()) {
+                    Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function (response) {
+                        $ctrl.submitting = false;
+                        Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                        $uibModalInstance.close("edited");
+                    }).catch(function (response) {
+                        $ctrl.submitting = false;
+                        Notifications.add(response.data, 'error');
+                    });
+                } else {
+                    $ctrl.submitting = false;
+                    Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                    $uibModalInstance.close("edited");
+                }
+            }).catch(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add($translate.instant('NODE_EDITED'), 'success');
-                $uibModalInstance.close("edited");
-            }).catch(function(response) {
-                $ctrl.submitting = false;
-                Notifications.add(response.data, 'error');
-            })
+                if (response.data.detail) {
+                    Notifications.add(response.data.detail, 'error');
+                } else {
+                    Notifications.add('Unknown error', 'error');
+                }
+            });
         }
     }
     $ctrl.cancel = function() {
