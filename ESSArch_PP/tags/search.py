@@ -317,7 +317,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         for hit in hits:
             hit = hit['_source']
-            hit['archive'] = get_archive(hit['archive'])
+            try:
+                hit['archive'] = get_archive(hit['archive'])
+            except KeyError:
+                pass
             formatted_hits.append(hit)
 
         if format == 'pdf':
