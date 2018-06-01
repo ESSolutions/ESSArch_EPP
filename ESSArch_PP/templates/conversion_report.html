@@ -83,8 +83,8 @@
                         <td>{{entry.new_document}}</td>
                         <td>{{entry.ip.object_identifier_value}}</td>
                         <td>{{entry.tool}}</td>
-                        <td>{{entry.start_date | utc | date:"Y-m-d G:i:s"}}</td>
-                        <td>{{entry.end_date | utc | date:"Y-m-d G:i:s"}}</td>
+                        <td>{{entry.start_date | localtime | date:"Y-m-d G:i:s e"}}</td>
+                        <td>{{entry.end_date | localtime | date:"Y-m-d G:i:s e"}}</td>
                     </tr>
                 {% endfor %}
             </tbody>

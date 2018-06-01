@@ -61,7 +61,7 @@
     <h1>Search results</h1>
     <b>User: </b>{{user.username}}
     <br/>
-    <b>Date: </b>{{timestamp | utc | date:"Y-m-d G:i:s"}}
+    <b>Date: </b>{{timestamp | localtime | date:"Y-m-d G:i:s e"}}
     <br/>
     <hr/>
 </div>
