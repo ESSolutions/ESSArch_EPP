@@ -334,7 +334,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             for hit in formatted_hits:
                 writer.writerow(
                     [hit.get('archive', {}).get('name'), hit.get('name'), hit.get('reference_code'), hit.get('name'),
-                     hit.get('unit_dates', {}).get('date'), hit.get('description')])
+                     hit.get('unit_dates', {}).get('date'), hit.get('desc')])
         else:
             raise ValueError('Unsupported format {}'.format(format))
 
