@@ -137,7 +137,7 @@ class ReceiveSIP(DBTask):
                 logger.debug("Sending mail")
                 subject = 'Received "%s"' % aip.object_identifier_value
                 body = '"%s" is now received and ready for archiving' % aip.object_identifier_value
-                send_mail(subject, body, 'e-archive@essarch.org', [recipient], fail_silently=False)
+                send_mail(subject, body, None, [recipient], fail_silently=False)
             except smtplib.SMTPException:
                 logger.exception("Failed to send mail")
             except smtplib.socket.error:
@@ -897,7 +897,7 @@ class PollIOQueue(DBTask):
                 subject = 'Preserved "%s"' % ip.object_identifier_value
                 body = '"%s" is now preserved' % ip.object_identifier_value
                 try:
-                    send_mail(subject, body, 'e-archive@essarch.org', [user.email], fail_silently=False)
+                    send_mail(subject, body, None, [user.email], fail_silently=False)
                 except Exception:
                     logger.exception("Failed to send mail to notify user about preserved IP")
 
