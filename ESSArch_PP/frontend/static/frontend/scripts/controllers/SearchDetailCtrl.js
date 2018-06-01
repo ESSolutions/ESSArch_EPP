@@ -450,7 +450,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             method: 'POST',
             url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/'
         }).then(function(response) {
-            Notifications.add($translate.instant('EMAIL_SENT'), 'error');
+            Notifications.add($translate.instant('EMAIL_SENT'), 'success');
         }).catch(function(response) {
             if(response.data.detail) {
                 Notifications.add(response.data.detail, 'error');
