@@ -25,6 +25,7 @@ from rest_framework.viewsets import ViewSet
 from six import iteritems
 from weasyprint import HTML
 
+from ESSArch_Core.csv import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
@@ -329,7 +330,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             HTML(string=render).write_pdf(f)
         elif format == 'csv':
             ctype = 'text/csv'
-            writer = csv.writer(f)
+            writer = UnicodeCSVWriter(f)
             for hit in formatted_hits:
                 writer.writerow(
                     [hit.get('archive', {}).get('name'), hit.get('name'), hit.get('reference_code'), hit.get('name'),
