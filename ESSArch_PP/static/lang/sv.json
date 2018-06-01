@@ -583,5 +583,9 @@
     "CHANGE_ORGANIZATION": "Byt organisation",
     "ORGANIZATION_CHANGED": "Organisation bytt",
     "EXPORT_RESULT": "Exportera resultat",
-    "EXPORT_ACTION": "Exportera"
+    "EXPORT_ACTION": "Exportera",
+    "EMAIL": "Email",
+    "EMAIL_SENT": "Email skickat",
+    "NEW_FIELD": "Nytt fält",
+    "FIELD_EXISTS": "Fältet finns redan!"
 }

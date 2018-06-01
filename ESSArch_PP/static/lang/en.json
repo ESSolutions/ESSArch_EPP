@@ -584,5 +584,9 @@
     "CHANGE_ORGANIZATION": "Change organization",
     "ORGANIZATION_CHANGED": "Organization changed",
     "EXPORT_RESULT": "Export result",
-    "EXPORT_ACTION": "Export"
+    "EXPORT_ACTION": "Export",
+    "EMAIL": "Email",
+    "EMAIL_SENT": "Email sent",
+    "NEW_FIELD": "New field",
+    "FIELD_EXISTS": "Field already exists!"
 }
