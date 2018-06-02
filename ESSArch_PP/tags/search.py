@@ -1,14 +1,17 @@
 from __future__ import division
 
 import copy
-import csv
 import datetime
+import json
 import logging
 import math
+import os
 import tempfile
 
+import six
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
@@ -371,6 +374,28 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         serialized = TagVersionSerializerWithVersions(tag, context=context).data
 
         return Response(serialized)
+
+    @detail_route(methods=['post'], url_path='send-as-email')
+    def send_as_email(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+        user = self.request.user
+
+        if not user.email:
+            raise exceptions.ParseError('Missing email address')
+
+        metadata = tag.from_search()['_source']
+        subject = 'Export: {}'.format(tag.name)
+
+        body = '\n'.join(['{}: {}'.format(k, json.dumps(v)) for k, v in six.iteritems(metadata)])
+        email = EmailMessage(subject=subject, body=body, to=[user.email])
+
+        if tag.elastic_index == 'document':
+            ip = tag.tag.information_package
+            path = os.path.join(metadata['href'], metadata['filename'])
+            email.attach_file(ip.files(path))
+
+        email.send()
+        return Response('Email sent to {}'.format(user.email))
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
