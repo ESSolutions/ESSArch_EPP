@@ -37,12 +37,16 @@ from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
     TagVersionSerializerWithVersions, \
     TagVersionWriteSerializer
-from ESSArch_Core.util import generate_file_response
+from ESSArch_Core.util import generate_file_response, remove_prefix
 from tags.permissions import SearchPermissions
 from tags.serializers import SearchSerializer
 
 logger = logging.getLogger('essarch.epp.search')
 EXPORT_FORMATS = ('csv', 'pdf')
+SORTABLE_FIELDS = (
+    {'name.keyword': {'unmapped_type': 'keyword'}},
+    {'reference_code': {'unmapped_type': 'keyword'}}
+)
 
 
 class ComponentSearch(FacetedSearch):
@@ -224,6 +228,31 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return get_object_or_404(tag_version, pk=id)
 
+    def verify_sort_field(self, field, direction='asc'):
+        for f in [field, '{}.keyword'.format(field)]:
+            if f in SORTABLE_FIELDS:
+                return direction + f
+            for sf in copy.deepcopy(SORTABLE_FIELDS):
+                if isinstance(sf, dict):
+                    if f in sf:
+                        sf[f]['order'] = direction
+                        return sf
+        return False
+
+    def get_sorting(self, request):
+        fields = request.query_params.get('ordering', '').split(',')
+        sort = list()
+        for f in fields:
+            direction = 'desc' if f.startswith('-') else 'asc'
+            f = remove_prefix(f, '-')
+            verified_f = self.verify_sort_field(f, direction)
+            if verified_f is False:
+                raise exceptions.ParseError('Invalid sort field: {}'.format(f))
+            sort.append(verified_f)
+
+        return sort
+
+
     def list(self, request, index=None):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
@@ -249,7 +278,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         for f in ('page', 'page_size'):
             filter_values.pop(f, None)
 
-        s = ComponentSearch(query, filters=filters, filter_values=filter_values)
+        sort = self.get_sorting(request)
+        s = ComponentSearch(query, filters=filters, filter_values=filter_values, sort=sort)
 
         if self.paginator is not None:
             # Paginate in search engine
