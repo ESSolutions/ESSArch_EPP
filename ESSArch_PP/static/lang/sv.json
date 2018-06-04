@@ -589,5 +589,11 @@
     "NEW_FIELD": "Nytt fält",
     "FIELD_EXISTS": "Fältet finns redan!",
     "UPDATE_DESCENDANTS": "Uppdatera underliggande",
-    "PERSONAL_IDENTIFICATION_NUMBER": "Personnummer"
+    "PERSONAL_IDENTIFICATION_NUMBER": "Personnummer",
+    "DAY": "Dag",
+    "MONTH": "Månad",
+    "PUBLIC": "Publik",
+    "RUN_MANUALLY": "Kör manuellt",
+    "CREATE_APPRAISAL_JOB": "Skapa jobb",
+    "CREATE_APPRAISAL_JOB_AND_RUN": "Skapa och kör jobb"
 }

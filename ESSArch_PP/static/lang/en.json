@@ -590,5 +590,11 @@
     "NEW_FIELD": "New field",
     "FIELD_EXISTS": "Field already exists!",
     "UPDATE_DESCENDANTS": "Update descendants",
-    "PERSONAL_IDENTIFICATION_NUMBER": "Personal identification number"
+    "PERSONAL_IDENTIFICATION_NUMBER": "Personal identification number",
+    "DAY": "Day",
+    "MONTH": "Month",
+    "PUBLIC": "Public",
+    "RUN_MANUALLY": "Run manually",
+    "CREATE_APPRAISAL_JOB": "Create job",
+    "CREATE_APPRAISAL_JOB_AND_RUN": "Create and run job"
 }
