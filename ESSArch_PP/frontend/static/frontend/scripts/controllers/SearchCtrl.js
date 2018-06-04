@@ -241,12 +241,17 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         });
     }
 
-    vm.openResult = function(result) {
+    vm.openResult = function(result, e) {
         if(!result.id && result._id) {
             result.id = result._id;
         }
-        $state.go("home.access.search."+result._index, {id: result.id});
-        vm.activeTab = 1;
+        if(e.ctrlKey || e.metaKey) {
+            var url = $state.href('home.access.search.'+result._index, {id: result.id});
+            $window.open(url, '_blank')
+        } else {
+            $state.go("home.access.search."+result._index, {id: result.id});
+            vm.activeTab = 1;
+        }
     }
 
     var newId = 1;
