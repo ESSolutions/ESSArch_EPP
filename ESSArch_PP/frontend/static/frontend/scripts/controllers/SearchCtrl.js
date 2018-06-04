@@ -139,7 +139,11 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             if(vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
             }
-            Search.query(vm.filterObject, pageNumber, number).then(function (response) {
+            var ordering = tableState.sort.predicate;
+            if(tableState.sort.reverse) {
+                ordering = '-' + ordering;
+            }
+            Search.query(vm.filterObject, pageNumber, number, ordering).then(function (response) {
                 angular.copy(response.data, vm.searchResult);
                 vm.numberOfResults = response.count;
                 tableState.pagination.numberOfPages = response.numberOfPages;//set the number of pages so the pagination can update
@@ -310,11 +314,16 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             if (vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
             }
+            var ordering = tableState.sort.predicate;
+            if(tableState.sort.reverse) {
+                ordering = '-' + ordering;
+            }
             var params = $httpParamSerializer(
                 angular.extend(
                 {
                     page: pageNumber,
                     page_size: number,
+                    ordering: ordering,
                     export: format
                 }, vm.filterObject)
             );

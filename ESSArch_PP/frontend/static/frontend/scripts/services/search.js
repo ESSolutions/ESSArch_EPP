@@ -1,14 +1,15 @@
 angular.module('myApp').factory('Search', function($http, $sce, appConfig, $translate) {
     var service = {};
     var url = appConfig.djangoUrl;
-    service.query = function (filters, pageNumber, pageSize) {
+    service.query = function (filters, pageNumber, pageSize, ordering) {
         return $http({
             method: 'GET',
             url: url+"search/",
             params: angular.extend(
                 {
                     page: pageNumber,
-                    page_size: pageSize
+                    page_size: pageSize,
+                    ordering: ordering
                 },filters)
         }).then(function (response) {
             var returnData = response.data.hits.map(function (item) {
