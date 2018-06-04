@@ -304,7 +304,20 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                         vm.newVersionNodeModal(node);
                     }
                 }
-                var actions = { update: update, add: add, remove: remove, removeFromStructure: removeFromStructure, newVersion: newVersion };
+                var changeOrganization = {
+                    label: $translate.instant('CHANGE_ORGANIZATION'),
+                    action: function() {
+                        vm.changeOrganizationModal(vm.record);
+                    }
+                }
+                var actions = {
+                    update: update,
+                    add: add,
+                    remove: remove,
+                    removeFromStructure: removeFromStructure,
+                    newVersion: newVersion,
+                    changeOrganization: node.original._index === 'archive'?changeOrganization:null,
+                };
                 callback(actions);
                 return actions;
             }
@@ -736,6 +749,27 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
             vm.selectRecord(null, {node: parent, action: "select_node"});
             vm.loadRecordAndTree(parent.original._index, parent.original._id);
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+    vm.changeOrganizationModal = function(node) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'modals/change_node_organization.html',
+            controller: 'NodeOrganizationModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    node: node
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.loadRecordAndTree(node._index, node._id);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
