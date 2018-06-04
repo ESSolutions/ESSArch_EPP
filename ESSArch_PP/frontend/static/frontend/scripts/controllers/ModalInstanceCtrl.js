@@ -879,18 +879,24 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             }, {});
             $ctrl.manyNodes = true;
         }
+        $ctrl.arrayFields = [];
         $ctrl.fieldOptions = getEditableFields($ctrl.node);
         var discludedFields = ["archive", "current_version"];
         angular.forEach($ctrl.fieldOptions, function(value, field) {
             if(!discludedFields.includes(field)) {
-                switch(typeof(value)) {
-                    case "object":
+                if(angular.isArray(value)) {
+                    $ctrl.arrayFields.push(field);
+                    addStandardField(field, value.join(','));
+                } else {
+                    switch(typeof(value)) {
+                        case "object":
                         clearObject($ctrl.node._source[field]);
                         addNestedField(field, value)
                         break;
-                    default:
+                        default:
                         addStandardField(field, value);
                         break;
+                    }
                 }
             }
         })
@@ -1055,7 +1061,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     function getEditedFields(data) {
         var edited = {};
         angular.forEach(data, function(value, key) {
-            if(typeof(value) === 'object') {
+            if(typeof(value) === 'object' && !angular.isArray(value)) {
                 angular.forEach(value, function(val, k) {
                     if($ctrl.node._source[key][k] !== val) {
                         if(!edited[key]) {
@@ -1160,6 +1166,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
 
     $ctrl.submit = function () {
+        convertArrayFields();
         if($ctrl.manyNodes) {
             $ctrl.massUpdate();
         } else if($ctrl.updateDescendants) {
@@ -1168,6 +1175,15 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             $ctrl.updateSingleNode();
         }
     }
+
+    function convertArrayFields() {
+        $ctrl.arrayFields.forEach(function(field) {
+            if(!$ctrl.fieldsToDelete.includes(field) && $ctrl.editData[field] != $ctrl.node._source[field]) {
+                $ctrl.editData[field] = $ctrl.editData[field].split(',');
+            }
+        })
+    }
+
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');
     }
