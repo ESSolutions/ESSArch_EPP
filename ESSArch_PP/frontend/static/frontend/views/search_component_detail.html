@@ -12,7 +12,10 @@
             <table>
                 <tr ng-repeat="(key, value) in vm.record._source" ng-if="key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
                     <td ng-if="key != 'terms_and_condition'" style="padding-right: 10px;"><b>{{key}}</b></td>
-                    <td ng-if="key != 'terms_and_condition' && key != 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
+                    <td ng-if="vm.record.masked_fields.includes(key) && key != 'terms_and_condition' && key != 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">
+                        <div class="masked" ng-bind-html="value"></div>
+                    </td>
+                    <td ng-if="!vm.record.masked_fields.includes(key) && key != 'terms_and_condition' && key != 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value"></td>
                     <td ng-if="key == 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value.id"></td>
                 </tr>
             </table>
