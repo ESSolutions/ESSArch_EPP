@@ -1112,7 +1112,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     raise exceptions.NotFound
 
                 if hit.meta.index == 'document':
-                    return ip.files(path, force_download=download, paginator=self.paginator, request=request)
+                    return list_files(ip.files(path), force_download=download, paginator=self.paginator, request=request)
 
             # a directory with the path exists, get the content of it
             s = Search(index=['directory', 'document'])
@@ -1229,7 +1229,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             return list_files(fullpath, force_download=download, paginator=self.paginator, request=request)
 
-        return ip.files(path, force_download=download, paginator=self.paginator, request=request)
+        return list_files(ip.files(path), force_download=download, paginator=self.paginator, request=request)
 
     @detail_route(methods=['put'], url_path='check-profile')
     def check_profile(self, request, pk=None):
