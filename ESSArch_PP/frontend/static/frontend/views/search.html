@@ -82,7 +82,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x)" class="result-item-table clickable">
+                                            <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x, $event)" class="result-item-table clickable">
                                                 <td class="search-td-nowrap">{{vm.resultNumber($index)}}</td>
                                                 <td>
                                                     <span ng-if="x._index == 'archive'" class="fa fa-archive" uib-popover="{{x.type}}"
