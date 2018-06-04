@@ -424,7 +424,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         tag = self.get_tag_object()
         structure = self.request.query_params.get('structure')
         self.verify_structure(tag, structure)
-        context = {'structure': structure}
+        context = {'structure': structure, 'user': request.user}
         serialized = TagVersionSerializerWithVersions(tag, context=context).data
 
         return Response(serialized)
@@ -456,7 +456,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         parent = self.get_tag_object()
         structure = self.request.query_params.get('structure')
         self.verify_structure(parent, structure)
-        context = {'structure': structure}
+        context = {'structure': structure, 'user': request.user}
         children = parent.get_children(structure)
 
         if self.paginator is not None:
@@ -464,7 +464,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             serialized = TagVersionNestedSerializer(instance=paginated, many=True, context=context).data
             return self.paginator.get_paginated_response(serialized)
 
-        return Response(serialized = TagVersionSerializer(children, many=True).data)
+        return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
 
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, index=None, pk=None):
