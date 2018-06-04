@@ -544,8 +544,14 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def update_descendants(self, request, index=None, pk=None):
         tag = self.get_tag_object()
         include_self = request.query_params.get('include_self', False)
+        client = Elasticsearch()
         for descendant in tag.get_descendants(include_self=include_self):
             self._update_tag_metadata(descendant, request.data)
+            try:
+                for field in request.query_params['deleted_fields'].split(','):
+                    client.update(index=descendant.elastic_index, doc_type='doc', id=descendant.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+            except KeyError:
+                pass
 
         return Response()
 
@@ -556,11 +562,17 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing "ids" parameter')
 
+        client = Elasticsearch()
         for id in ids:
             lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
             self.kwargs[lookup_url_kwarg] = id
             tag = self.get_tag_object()
             self._update_tag_metadata(tag, request.data)
+            try:
+                for field in request.query_params['deleted_fields'].split(','):
+                    client.update(index=tag.elastic_index, doc_type='doc', id=tag.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+            except KeyError:
+                pass
 
         return Response()
 
