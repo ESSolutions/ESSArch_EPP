@@ -588,5 +588,7 @@
     "EMAIL": "Email",
     "EMAIL_SENT": "Email sent",
     "NEW_FIELD": "New field",
-    "FIELD_EXISTS": "Field already exists!"
+    "FIELD_EXISTS": "Field already exists!",
+    "UPDATE_DESCENDANTS": "Update descendants",
+    "PERSONAL_IDENTIFICATION_NUMBER": "Personal identification number"
 }

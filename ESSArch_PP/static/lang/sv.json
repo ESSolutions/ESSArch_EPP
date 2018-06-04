@@ -587,5 +587,7 @@
     "EMAIL": "Email",
     "EMAIL_SENT": "Email skickat",
     "NEW_FIELD": "Nytt fält",
-    "FIELD_EXISTS": "Fältet finns redan!"
+    "FIELD_EXISTS": "Fältet finns redan!",
+    "UPDATE_DESCENDANTS": "Uppdatera underliggande",
+    "PERSONAL_IDENTIFICATION_NUMBER": "Personnummer"
 }
