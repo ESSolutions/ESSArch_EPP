@@ -232,7 +232,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
      */
     vm.recordTreeConfig = {
         core : {
-            multiple : false,
+            multiple : true,
             animation: 50,
             error : function(error) {
                 $log.error('treeCtrl: error from js tree - ' + angular.toJson(error));
@@ -263,7 +263,14 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                     },
                     action: function update() {
                         if(vm.record._source) {
-                            vm.editNodeModal(vm.record);
+                            var selected = vm.recordTreeInstance.jstree(true).get_selected(true).map(function(x) {
+                                return x.original;
+                            });
+                            if(selected.length > 1) {
+                                vm.editNodeModal(selected);
+                            } else {
+                                vm.editNodeModal(vm.record);
+                            }
                         }
                     },
                 };
@@ -616,9 +623,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(node._index, node._id);
+            vm.loadRecordAndTree(vm.record._index, vm.record._id);
         }, function () {
-            vm.loadRecordAndTree(node._index, node._id);
+            vm.loadRecordAndTree(vm.record._index, vm.record._id);
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }

@@ -1,5 +1,5 @@
 <div class="enter-profile-name">
-    <h3 class="modal-title" id="modal-title">{{'EDIT' | translate}} <b>{{$ctrl.node._source.name}}</b></h3>
+    <h3 class="modal-title" id="modal-title">{{'EDIT' | translate}} <b>{{$ctrl.manyNodes?$ctrl.nameList:$ctrl.node._source.name}}</b></h3>
     <h3 class="modal-title" id="modal-title"></h3>
 </div>
 <div class="modal-body" id="modal-body">
@@ -25,6 +25,10 @@
     </div>
 </div>
 <div class="modal-footer">
+    <label ng-if="!$ctrl.manyNodes">
+        <input type="checkbox" ng-model="$ctrl.updateDescendants">&nbsp;
+        {{'UPDATE_DESCENDANTS' | translate}}
+    </label>
     <button class="btn btn-primary" ng-disabled="(!$ctrl.changed() && $ctrl.fieldsToDelete.length == 0) || $ctrl.submitting" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fa fa-spinner fa-spin"/></button>
     <button class="btn btn-warning" type="button" ng-disabled="$ctrl.submitting" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
 </div>

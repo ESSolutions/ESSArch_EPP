@@ -67,6 +67,43 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
             return response;
         });
     }
+
+    service.updateNodeAndDescendants = function(node, data, deletedFields, refresh) {
+        if(angular.isUndefined(refresh)) {
+            refresh = false;
+        }
+        return $http({
+            method: 'POST',
+            url: url+"search/"+node._index + "/" + node._id + "/update-descendants/",
+            params: {
+                refresh: refresh,
+                include_self: true,
+                deleted_fields: deletedFields
+            },
+            data: data
+        }).then(function(response) {
+            return response;
+        });
+    }
+
+    service.massUpdate = function(nodes, data, deletedFields, refresh) {
+        if(angular.isUndefined(refresh)) {
+            refresh = false;
+        }
+        return $http({
+            method: 'POST',
+            url: url+"search/mass-update/",
+            params: {
+                refresh: refresh,
+                deleted_fields: deletedFields,
+                ids: nodes
+            },
+            data: data
+        }).then(function(response) {
+            return response;
+        });
+    }
+
     service.addNode = function(node) {
         return $http({
             method: 'POST',

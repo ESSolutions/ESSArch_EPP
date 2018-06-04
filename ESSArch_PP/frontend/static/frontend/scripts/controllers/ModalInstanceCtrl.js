@@ -795,13 +795,34 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.fieldOptions = {};
     $ctrl.newFieldKey = null;
     $ctrl.newFieldVal = null;
+    $ctrl.updateDescendants = false;
+    $ctrl.manyNodes = false;
     $ctrl.$onInit = function() {
+        if(angular.isArray(data.node)) {
+            $ctrl.nodeList = data.node.map(function(x) {
+                return x._id;
+            }).join(',');
+            $ctrl.nameList = data.node.map(function(x) {
+                return x._source.name;
+            }).join(', ');
+            $ctrl.node = data.node[0];
+            $ctrl.node._source = data.node.reduce(function(result, currentObject) {
+                for(var key in currentObject._source) {
+                    if (currentObject._source.hasOwnProperty(key)) {
+                        result[key] = currentObject._source[key];
+                    }
+                }
+                return result;
+            }, {});
+            $ctrl.manyNodes = true;
+        }
         $ctrl.fieldOptions = getEditableFields($ctrl.node);
         var discludedFields = ["archive", "current_version"];
         angular.forEach($ctrl.fieldOptions, function(value, field) {
             if(!discludedFields.includes(field)) {
                 switch(typeof(value)) {
                     case "object":
+                        clearObject($ctrl.node._source[field]);
                         addNestedField(field, value)
                         break;
                     default:
@@ -821,15 +842,26 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
 
     $ctrl.fieldsToDelete = [];
     function deleteField(field) {
-        if (!angular.isUndefined($ctrl.node._source[field])) {
+        var splitted = field.split('.');
+        if (!angular.isUndefined($ctrl.node._source[field]) || (splitted.length > 1 && !angular.isUndefined($ctrl.node._source[splitted[0]][splitted[1]]))) {
             $ctrl.fieldsToDelete.push(field);
         }
         $ctrl.editFields.forEach(function(item, idx, list) {
-            if(item.key === field) {
-                list.splice(idx, 1);
+            if(splitted.length > 1) {
+                if(item.templateOptions.label === field) {
+                    list.splice(idx, 1);
+                }
+            } else {
+                if(item.key === field) {
+                    list.splice(idx, 1);
+                }
             }
         })
-        delete $ctrl.editData[field];
+        if(splitted.length > 1) {
+            delete $ctrl.editData[splitted[0]][splitted[1]];
+        } else {
+            delete $ctrl.editData[field];
+        }
     }
 
     function addNestedField(field, value) {
@@ -860,7 +892,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                         "templateOptions": {
                             "type": "text",
                             "label": field + '.' + key,
-                            "delete": function () { deleteField(key) }
+                            "delete": function () { deleteField(field + '.' + key) }
                         },
                         "type": "input",
                         "model": 'model.' + field,
@@ -869,11 +901,25 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 )
             }
         })
-        $ctrl.editData[field] = model;
+        if(!$ctrl.manyNodes) {
+            $ctrl.editData[field] = model;
+        } else {
+            $ctrl.editData[field] = model;
+        }
+    }
+
+    function clearObject(obj) {
+        angular.forEach(obj, function(val, key) {
+            obj[key] = null;
+        })
     }
 
     function addStandardField(field, value) {
-        $ctrl.editData[field] = value;
+        if(!$ctrl.manyNodes) {
+            $ctrl.editData[field] = value;
+        } else {
+            $ctrl.editData[field] = null;
+        }
         if ($ctrl.noDeleteFields[$ctrl.node._index].includes(field)) {
             $ctrl.editFieldsNoDelete.push(
                 {
@@ -978,7 +1024,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         )
     }
 
-    $ctrl.submit = function () {
+    $ctrl.updateSingleNode = function() {
         if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
             $ctrl.submitting = true;
             var promises = [];
@@ -1021,6 +1067,42 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                     Notifications.add('Unknown error', 'error');
                 }
             });
+        }
+    }
+
+    $ctrl.updateNodeAndDescendants = function() {
+        if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
+            Search.updateNodeAndDescendants($ctrl.node, getEditedFields($ctrl.editData), $ctrl.fieldsToDelete.join(',')).then(function (response) {
+                $ctrl.submitting = false;
+                Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                $uibModalInstance.close("edited");
+            }).catch(function (response) {
+                $ctrl.submitting = false;
+                Notifications.add('Could not update nodes', 'error');
+            });
+        }
+    }
+
+    $ctrl.massUpdate = function() {
+        if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
+            Search.massUpdate($ctrl.nodeList, getEditedFields($ctrl.editData), $ctrl.fieldsToDelete.join(',')).then(function (response) {
+                $ctrl.submitting = false;
+                Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                $uibModalInstance.close("edited");
+            }).catch(function (response) {
+                $ctrl.submitting = false;
+                Notifications.add('Could not update nodes', 'error');
+            });
+        }
+    }
+
+    $ctrl.submit = function () {
+        if($ctrl.manyNodes) {
+            $ctrl.massUpdate();
+        } else if($ctrl.updateDescendants) {
+            $ctrl.updateNodeAndDescendants();
+        } else {
+            $ctrl.updateSingleNode();
         }
     }
     $ctrl.cancel = function() {
