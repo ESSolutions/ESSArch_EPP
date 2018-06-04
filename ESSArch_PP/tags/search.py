@@ -9,6 +9,7 @@ import os
 import tempfile
 
 import six
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.mail import EmailMessage
@@ -28,6 +29,8 @@ from rest_framework.viewsets import ViewSet
 from six import iteritems
 from weasyprint import HTML
 
+from ESSArch_Core.auth.models import Group, GroupGenericObjects
+from ESSArch_Core.auth.util import get_objects_for_user, get_organization_groups
 from ESSArch_Core.csv import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.mixins import PaginatedViewMixin
@@ -69,6 +72,7 @@ class ComponentSearch(FacetedSearch):
         self.start_date = self.filter_values.get('start_date', None)
         self.end_date = self.filter_values.get('end_date', None)
         self.archive = self.filter_values.get('archive', None)
+        self.user = kwargs.pop('user')
 
         def validate_date(d):
             try:
@@ -105,9 +109,17 @@ class ComponentSearch(FacetedSearch):
         components and `_id` on archives.
         """
 
+        organization_archives = get_objects_for_user(self.user, TagVersion.objects.filter(elastic_index='archive'), [])
+        organization_archives = list(organization_archives.values_list('pk', flat=True))
+
         s = super(ComponentSearch, self).search()
         s = s.source(exclude=["attachment.content"])
         s = s.filter('term', current_version=True)
+
+        s = s.query(Q('bool', should=[
+            Q('terms', archive=organization_archives),
+            Q('terms', _id=organization_archives)
+        ]))
 
         if self.start_date not in EMPTY_VALUES:
             s = s.filter('range', end_date={'gte': self.start_date})
@@ -226,7 +238,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         prefetched_structures = TagStructure.objects.select_related('tag__current_version', 'parent__tag__current_version')
         tag_version = TagVersion.objects.select_related('tag').prefetch_related(Prefetch('tag__structures', prefetched_structures))
 
-        return get_object_or_404(tag_version, pk=id)
+        obj = get_object_or_404(tag_version, pk=id)
+        user_archives = get_objects_for_user(self.request.user, tag_version.filter(elastic_index='archive'), []).values_list('pk', flat=True)
+        if obj.get_root().pk not in user_archives:
+            raise exceptions.NotFound
+        return obj
 
     def verify_sort_field(self, field, direction='asc'):
         for f in [field, '{}.keyword'.format(field)]:
@@ -282,7 +298,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             filter_values.pop(f, None)
 
         sort = self.get_sorting(request)
-        s = ComponentSearch(query, filters=filters, filter_values=filter_values, sort=sort)
+        s = ComponentSearch(query, filters=filters, filter_values=filter_values, sort=sort, user=self.request.user)
 
         if self.paginator is not None:
             # Paginate in search engine
@@ -469,6 +485,29 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def set_as_current_version(self, request, index=None, pk=None):
         tag = self.get_tag_object()
         tag.set_as_current_version()
+        return Response()
+
+    @detail_route(methods=['post'], url_path='change-organization')
+    def change_organization(self, request, index=None, pk=None):
+        tag = self.get_tag_object()
+
+        if tag.elastic_index != 'archive':
+            raise exceptions.ParseError(detail='Only archives can be moved to other organizations')
+
+        try:
+            org_id = request.data['organization']
+        except KeyError:
+            raise exceptions.ParseError(detail='Missing "organization" parameter')
+
+        try:
+            org = get_organization_groups(request.user).get(pk=org_id)
+        except Group.DoesNotExist:
+            raise exceptions.ParseError('Invalid organization')
+
+        ctype = ContentType.objects.get_for_model(tag)
+        self._update_tag_metadata(tag, {'organization_group': org.pk})
+        GroupGenericObjects.objects.update_or_create(object_id=tag.pk, content_type=ctype,
+                                                     defaults={'group': org})
         return Response()
 
     def create(self, request, index=None):
