@@ -6,7 +6,7 @@
     <div class="select-options">
         <div class="option-pair">
             <div ng-show="myFrequency.base == 4" class="cron-select-wrap">
-                <label ng-show="myFrequency.base == 4">{{'CRON_ON' | translate}}
+                <label ng-show="myFrequency.base == 4">{{'DAY' | translate}}
                     <!-- If Multiple is Enabled -->
                     <select class="cron-select day-value" ng-model="myFrequency.dayValues" ng-if="allowMultiple" multiple ng-options="value as (value | cronDayName: cronStyle) for value in dayValues">
                     </select>
@@ -14,7 +14,7 @@
             </div>
 
             <div ng-show="myFrequency.base >= 5" class="cron-select-wrap">
-                <label ng-show="myFrequency.base >= 5">{{'CRON_ON_THE' | translate}}
+                <label ng-show="myFrequency.base >= 5">{{'DAY' | translate}}
                     <!-- If Multiple is Enabled -->
                     <select class="cron-select day-of-month-value" ng-model="myFrequency.dayOfMonthValues" ng-if="allowMultiple" multiple ng-options="value as (value | cronNumeral) for value in dayOfMonthValues">
                     </select>
@@ -22,7 +22,7 @@
             </div>
             <!-- If Multiple is Enabled -->
             <div ng-show="myFrequency.base == 6" class="cron-select-wrap">
-                <label ng-show="myFrequency.base == 6">{{'CRON_OF' | translate}}
+                <label ng-show="myFrequency.base == 6">{{'MONTH' | translate}}
                     <select class="cron-select month-value" ng-model="myFrequency.monthValues" ng-if="allowMultiple" multiple ng-options="value as (value | cronMonthName) for value in monthValues">
                     </select>
                 </label>
@@ -31,7 +31,7 @@
         <div class="option-pair">
             <!-- If Multiple is Enabled -->
             <div ng-show="myFrequency.base >= 3" class="cron-select-wrap">
-                <label ng-show="myFrequency.base >= 3">{{'CRON_AT' | translate}}
+                <label ng-show="myFrequency.base >= 3">{{'TIME' | translate}}
                     <select class="cron-select hour-value" ng-model="myFrequency.hourValues" ng-if="allowMultiple" multiple ng-options="value as value for value in hourValues">
                     </select>
                 </label>

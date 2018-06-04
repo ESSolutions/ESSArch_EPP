@@ -7,11 +7,18 @@
                 {{'NAME' | translate}}
                 <input class="form-control" required ng-model="$ctrl.name">
             </label>
-            <br/>
+            <hr />
             <label>
-                {{'FREQUENCY' | translate}}
+                <input type="checkbox" ng-model="$ctrl.publicRule">
+                {{'PUBLIC' | translate}}
             </label>
-            <div class="cron-form">
+            <br />
+            <label>
+                <input type="checkbox" ng-model="$ctrl.manualRule">
+                {{'RUN_MANUALLY' | translate}}
+            </label>
+            <hr />
+            <div class="cron-form" ng-if="!$ctrl.manualRule">
                 <cron-selection ng-model="$ctrl.frequency" my-frequency="$ctrl.myFrequency" template="static/frontend/views/cron_form.html" config="$ctrl.cronConfig"></cron-selection>
                 <b>{{'FREQUENCY' | translate}}: <span ng-class="{'color-red': !$ctrl.validCron($ctrl.frequency)}">{{$ctrl.prettyFrequency($ctrl.frequency)}}</span></b>
                 <br/>

@@ -394,6 +394,8 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     $ctrl.requestTypes = data.types;
     $ctrl.request = data.request;
     $ctrl.appraisalRules = [];
+    $ctrl.publicRule = true;
+    $ctrl.manualRule = false;
     $ctrl.ip = null;
     $ctrl.showRulesTable = function(ip) {
         $ctrl.ip = ip;
@@ -510,6 +512,60 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.appraisalRules = [];
         $ctrl.ip = null;
     }
+
+    $ctrl.createJob = function(rule) {
+        $ctrl.creatingJob = true;
+        $http({
+            url: appConfig.djangoUrl + "appraisal-jobs/",
+            method: "POST",
+            data: {rule: rule.id}
+        }).then(function (response) {
+            $ctrl.creatingJob = false;
+            Notifications.add("Job created!", "success");
+            $uibModalInstance.close($ctrl.data);
+        }).catch(function (response) {
+            $ctrl.creatingJob = false;
+            if (response.data.detail) {
+                Notifications.add(response.data.detail, "error");
+            } else {
+                Notifications.add('Unknown error', "error");
+
+            }
+        })
+    }
+    $ctrl.runningJob = false;
+    $ctrl.createJobAndStart = function(rule) {
+        $ctrl.runningJob = true;
+        $http({
+            url: appConfig.djangoUrl + "appraisal-jobs/",
+            method: "POST",
+            data: {rule: rule.id}
+        }).then(function (response) {
+            $http({
+                url: appConfig.djangoUrl + "appraisal-jobs/" + response.data.id + "/run/",
+                method: "POST",
+            }).then(function (response) {
+                $ctrl.runningJob = false;
+                Notifications.add("Job running!", "success");
+                $uibModalInstance.close($ctrl.data);
+            }).catch(function (response) {
+                $ctrl.runningJob = false;
+                if (response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add('Unknown error', "error");
+                }
+            })
+        }).catch(function (response) {
+            $ctrl.addingRule = false;
+            if (response.data.detail) {
+                Notifications.add(response.data.detail, "error");
+            } else {
+                Notifications.add('Unknown error', "error");
+            }
+        })
+    }
+
     $ctrl.path = "";
     $ctrl.pathList = [];
     $ctrl.addPath = function(path) {
@@ -522,31 +578,38 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $ctrl.pathList.splice($ctrl.pathList.indexOf(path), 1);
     }
     $ctrl.appraisalRule = null;
-    $ctrl.create = function() {
+    $ctrl.create = function () {
         $ctrl.addingRule = true;
-        if($ctrl.pathList.length == 0) {
+        if ($ctrl.pathList.length == 0) {
             $ctrl.showRequired = true;
             $ctrl.addingRule = false;
             return;
         }
         $ctrl.data = {
             name: $ctrl.name,
-            frequency: $ctrl.frequency,
-            specification: $ctrl.pathList
+            frequency: $ctrl.manualRule ? '' : $ctrl.frequency,
+            specification: $ctrl.pathList,
+            public: $ctrl.publicRule
         };
         $http({
-            url: appConfig.djangoUrl+"appraisal-rules/",
+            url: appConfig.djangoUrl + "appraisal-rules/",
             method: "POST",
             data: $ctrl.data
-        }).then(function(response) {
+        }).then(function (response) {
             $ctrl.addingRule = false;
-            Notifications.add("Rule created!", "success")
+            Notifications.add("Rule created!", "success");
             $uibModalInstance.close($ctrl.data);
-        }).catch(function(response) {
+        }).catch(function (response) {
             $ctrl.addingRule = false;
-            Notifications.add(response.data.detail, "error")
+            if (response.data.detail) {
+                Notifications.add(response.data.detail, "error");
+            } else {
+                Notifications.add('Unknown error', "error");
+
+            }
         })
     }
+
     $ctrl.removeAppraisal = function() {
         $ctrl.removingRule = true;
         var appraisal = data.appraisal;
