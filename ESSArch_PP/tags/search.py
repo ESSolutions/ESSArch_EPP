@@ -240,8 +240,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return False
 
     def get_sorting(self, request):
-        fields = request.query_params.get('ordering', '').split(',')
         sort = list()
+        ordering = request.query_params.get('ordering', '').strip()
+        if ordering == '':
+            return sort
+        fields = ordering.split(',')
         for f in fields:
             direction = 'desc' if f.startswith('-') else 'asc'
             f = remove_prefix(f, '-')
