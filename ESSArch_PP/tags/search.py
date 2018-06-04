@@ -72,6 +72,7 @@ class ComponentSearch(FacetedSearch):
         self.start_date = self.filter_values.get('start_date', None)
         self.end_date = self.filter_values.get('end_date', None)
         self.archive = self.filter_values.get('archive', None)
+        self.personal_identification_number = self.filter_values.get('personal_identification_number', None)
         self.user = kwargs.pop('user')
 
         def validate_date(d):
@@ -120,6 +121,9 @@ class ComponentSearch(FacetedSearch):
             Q('terms', archive=organization_archives),
             Q('terms', _id=organization_archives)
         ]))
+
+        if self.personal_identification_number not in EMPTY_VALUES:
+            s = s.filter('term', personal_identification_numbers=self.personal_identification_number)
 
         if self.start_date not in EMPTY_VALUES:
             s = s.filter('range', end_date={'gte': self.start_date})
