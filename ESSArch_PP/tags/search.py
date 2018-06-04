@@ -194,6 +194,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def __init__(self, *args, **kwargs):
         get_connection('default')
+        self.client = Elasticsearch()
         super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
     def get_object(self, index=None):
@@ -579,16 +580,27 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         tag = self.get_tag_object()
         return Response(self._update_tag_metadata(tag, request.data))
 
+    def _get_delete_field_script(self, field):
+        field_path = '.'.join(field.split('.')[:-1])
+        field_path = '.' + field_path if field_path else field_path
+        field = field.split('.')[-1]
+
+        return "ctx._source{path}.remove(\"{field}\")".format(path=field_path, field=field)
+
+    def _delete_field(self, tag, field):
+        index = tag.elastic_index
+        script = self._get_delete_field_script(field)
+        self.client.update(index=index, doc_type='doc', id=tag.pk, body={"script": script})
+
     @detail_route(methods=['post'], url_path='update-descendants')
     def update_descendants(self, request, index=None, pk=None):
         tag = self.get_tag_object()
         include_self = request.query_params.get('include_self', False)
-        client = Elasticsearch()
         for descendant in tag.get_descendants(include_self=include_self):
             self._update_tag_metadata(descendant, request.data)
             try:
                 for field in request.query_params['deleted_fields'].split(','):
-                    client.update(index=descendant.elastic_index, doc_type='doc', id=descendant.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+                    self._delete_field(descendant, field)
             except KeyError:
                 pass
 
@@ -601,7 +613,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing "ids" parameter')
 
-        client = Elasticsearch()
         for id in ids:
             lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
             self.kwargs[lookup_url_kwarg] = id
@@ -609,7 +620,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             self._update_tag_metadata(tag, request.data)
             try:
                 for field in request.query_params['deleted_fields'].split(','):
-                    client.update(index=tag.elastic_index, doc_type='doc', id=tag.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+                    self._delete_field(tag, field)
             except KeyError:
                 pass
 
@@ -623,8 +634,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except KeyError:
             raise exceptions.ParseError('Missing "field" parameter')
 
-        client = Elasticsearch()
-        client.update(index=tag.elastic_index, doc_type='doc', id=tag.pk, body={"script": "ctx._source.remove(\"{field}\")".format(field=field)})
+        self._delete_field(tag, field)
         return Response(tag.from_search())
 
     @detail_route(methods=['post'], url_path='remove-from-structure')
