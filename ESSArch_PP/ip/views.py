@@ -908,7 +908,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             responsible=self.request.user,
         )
         main_step.run()
-        return Response({'detail': 'Preserving IP %s...' % pk})
+        return Response({'detail': 'Preserving %s...' % ip.object_identifier_value})
 
     @detail_route(methods=['post'])
     def access(self, request, pk=None):
