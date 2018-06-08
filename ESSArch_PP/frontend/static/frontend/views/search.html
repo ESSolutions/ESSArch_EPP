@@ -2,7 +2,7 @@
     <div class="content-wrapper">
         <div class="search-page">
             <form ng-submit="vm.searchSubmit(vm.searchString)">
-                <input class="form-control search-field" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.searchString">
+                <input class="form-control search-field" ng-change="vm.searchSubmit(vm.searchString)" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.searchString">
                 <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}} <i class="fa fa-search"></i></button>
             </form>
             <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
@@ -21,18 +21,20 @@
                 <div>
                 <label>
                         {{'PERSONAL_IDENTIFICATION_NUMBER' | translate}}
-                        <input ng-model="vm.filterObject.personal_identification_number" type="text" maxlength="12" class="form-control"/>
+                        <input ng-model="vm.filterObject.personal_identification_number" type="text" maxlength="12" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)"/>
                     </label>
                 </div>
                 <hr />
                 <label ng-if="vm.fileExtensions.length">
                     {{'FILE_EXTENSIONS' | translate}}
                 </label>
-                <div ng-repeat="x in vm.fileExtensions">
-                    <label>
-                        <input type="checkbox" ng-model="vm.extensionFilter[x.key]">
-                        {{x.key}}
-                    </label>
+                <div class="file-type-filters">
+                    <div class="file-filter" ng-repeat="x in vm.fileExtensions">
+                        <label>
+                            <input type="checkbox" ng-model="vm.extensionFilter[x.key]" ng-change="vm.searchSubmit(vm.searchString)">
+                            {{x.key}}
+                        </label>
+                    </div>
                 </div>
                 <!--<br/>
                 <span ng-click="vm.showIncludedTypes = !vm.showIncludedTypes" class="clickable no-select">{{'INCLUDED_TYPES' | translate}}

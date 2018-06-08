@@ -203,6 +203,16 @@
         background-color: black;
         height: 16px;
     }
+    .file-type-filters {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        .file-filter {
+            padding-right: 5px;
+            padding-left: 5px;
+        }
+    }
 }
 .edit-form {
     .formly {
