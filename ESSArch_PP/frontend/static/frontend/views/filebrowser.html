@@ -28,13 +28,13 @@
         </div>
         <div ng-show="gridView">
             <div class="deckgrid">
-                <div ng-if="!deckGridData.length && gridArrayLoading" class="text-center">
+                <div ng-if="!deckGridData.length && gridArrayLoading || openingNewPage" class="text-center">
                     <div class="loading-column">{{'LOADING' | translate}}</div>
                 </div>
                 <div ng-if="!deckGridData.length && !gridArrayLoading" class="text-center">
                     <div>{{'NO_RESULTS_FOUND' | translate}}</div>
                 </div>
-                <div class="flex-grid">
+                <div class="flex-grid" ng-if="!openingNewPage">
                 <div class="card" ng-repeat="card in deckGridData" ng-include src="'static/frontend/views/deckgrid_card.html'"></div>
             </div>
         </div>
@@ -43,14 +43,14 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th translate="NAME"></th>
-                    <th translate="SIZE"></th>
-                    <th translate="CHANGED"></th>
+                    <th translate="NAME" class="name-column"></th>
+                    <th translate="SIZE" class="size-column"></th>
+                    <th translate="CHANGED" class="changed-column"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="isSelected(card)" ng-click="cardSelect(card)">
-                    <td class="type-name-column">
+                <tr ng-if="!openingNewPage" ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="isSelected(card)" ng-click="cardSelect(card)">
+                    <td class="type-name-column" uib-popover-html="'{{'NAME' | translate}}: {{card.name}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
                         <div ng-class="card.type" ng-if="card.type == 'file'">
                             <li class="fa fa-file-o"></li>
                         </div>
@@ -61,12 +61,12 @@
                             {{card.name}}
                         </div>
                     </td>
-                    <td>
+                    <td uib-popover-html="'{{'SIZE' | translate}}: {{card.size | filesize}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
                         <div class="one-row-ellipsis">
                             {{card.size | filesize}}
                         </div>
                     </td>
-                    <td>
+                    <td uib-popover-html="'{{'CHANGED' | translate}}: {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
                         <div class="one-row-ellipsis">
                             {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}
                         </div>
@@ -75,7 +75,7 @@
                 <tr ng-if="!deckGridData.length && !gridArrayLoading" class="empty-table-indicator">
                     <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
                 </tr>
-                <tr ng-if="!deckGridData.length && gridArrayLoading" class="empty-table-indicator">
+                <tr ng-if="!deckGridData.length && gridArrayLoading || openingNewPage" class="empty-table-indicator">
                     <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                 </tr>
             </tbody>
