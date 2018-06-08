@@ -29,10 +29,11 @@ angular.module('myApp').controller('DropdownCtrl', function ($scope, $log, $root
         'Shortcut 3'
     ];
     var options, optionsAuth;
-    $translate(['LOGIN', 'CHANGEPASSWORD', 'LOGOUT']).then(function(translations) {
+    $translate(['LOGIN', 'CHANGEPASSWORD', 'LOGOUT', 'USER_SETTINGS']).then(function(translations) {
         $scope.logIn = translations.LOGIN;
         $scope.changePassword = translations.CHANGEPASSWORD;
         $scope.logOut = translations.LOGOUT;
+        $scope.userSettings = translations.USER_SETTINGS;
         options = [
             {
                 label: $scope.logIn,
@@ -42,7 +43,7 @@ angular.module('myApp').controller('DropdownCtrl', function ($scope, $log, $root
         ];
         optionsAuth = [
             {
-                label: "User settings",
+                label: $scope.userSettings,
                 link: '',
                 click: function(){$state.go("home.userSettings");}
             },

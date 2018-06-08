@@ -596,5 +596,7 @@
     "PUBLIC": "Public",
     "RUN_MANUALLY": "Run manually",
     "CREATE_APPRAISAL_JOB": "Create job",
-    "CREATE_APPRAISAL_JOB_AND_RUN": "Create and run job"
+    "CREATE_APPRAISAL_JOB_AND_RUN": "Create and run job",
+    "MINUTE": "Minute",
+    "VERSIONS": "Versions"
 }

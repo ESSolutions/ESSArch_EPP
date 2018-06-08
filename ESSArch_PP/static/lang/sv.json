@@ -595,5 +595,7 @@
     "PUBLIC": "Publik",
     "RUN_MANUALLY": "Kör manuellt",
     "CREATE_APPRAISAL_JOB": "Skapa jobb",
-    "CREATE_APPRAISAL_JOB_AND_RUN": "Skapa och kör jobb"
+    "CREATE_APPRAISAL_JOB_AND_RUN": "Skapa och kör jobb",
+    "MINUTE": "Minut",
+    "VERSIONS": "Versioner"
 }
