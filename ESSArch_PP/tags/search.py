@@ -519,6 +519,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         request.data.setdefault('index', index)
         refresh = request.query_params.get('refresh', False)
         serializer = SearchSerializer(data=request.data)
+        organization = request.user.user_profile.current_organization
 
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
@@ -526,6 +527,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             if data.get('index') == 'archive':
                 if not request.user.has_perm('tags.create_archive'):
                     raise exceptions.PermissionDenied('You do not have permission to create new archives')
+                if organization is None:
+                    raise exceptions.ParseError('You must be part of an organization to create a new archive')
 
             with transaction.atomic():
                 tag = Tag.objects.create()
@@ -550,7 +553,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 tag.current_version = tag_version
                 tag.save()
 
-            return Response(self.serialize(tag_version.to_search()))
+                if tag_version.elastic_index == 'archive':
+                    org = request.user.user_profile.current_organization
+                    org.add_object(tag_version)
+
+                return Response(self.serialize(tag_version.to_search()))
 
     def _update_tag_metadata(self, tag, data):
         if 'parent' in data:
