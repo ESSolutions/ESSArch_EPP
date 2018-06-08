@@ -195,6 +195,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         perms = copy.deepcopy(getattr(settings, 'IP_CREATION_PERMS_MAP', {}))
 
         existing = InformationPackage.objects.filter(object_identifier_value=pk).first()
+        organization = request.user.user_profile.current_organization
+
+        if organization is None:
+            raise exceptions.ParseError('You must be part of an organization to prepare an IP')
+
         if existing is not None:
             logger.warn('Tried to prepare IP with id %s which already exists' % pk, extra={'user': request.user.pk})
             raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
@@ -290,7 +295,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         member = Member.objects.get(django_user=request.user)
         user_perms = perms.pop('owner', [])
 
-        organization = request.user.user_profile.current_organization
         organization.assign_object(ip, custom_permissions=perms)
         organization.add_object(ip)
 
