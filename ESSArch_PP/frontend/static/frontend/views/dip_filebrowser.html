@@ -61,10 +61,20 @@
                             <div ng-class="card.type" ng-if="card.type == 'dir'">
                                 <li class="fa fa-folder-o"></li>
                             </div>
-                            {{card.name}}
+                            <div class="one-row-ellipsis">
+                                {{card.name}}
+                            </div>
                         </td>
-                        <td>{{card.size | filesize}}</td>
-                        <td>{{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>
+                            <div class="one-row-ellipsis">
+                                {{card.size | filesize}}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="one-row-ellipsis">
+                                {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}
+                            </div>
+                        </td>
                     </tr>
                     <tr ng-if="!deckGridData.length && !workArrayLoading" class="empty-table-indicator">
                         <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
@@ -144,10 +154,20 @@
                         <div ng-class="card.type" ng-if="card.type == 'dir'">
                             <li class="fa fa-folder-o"></li>
                         </div>
-                        {{card.name}}
+                        <div class="one-row-ellipsis">
+                            {{card.name}}
+                        </div>
                     </td>
-                    <td>{{card.size | filesize}}</td>
-                    <td>{{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+                    <td>
+                        <div class="one-row-ellipsis">
+                            {{card.size | filesize}}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="one-row-ellipsis">
+                            {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}
+                        </div>
+                    </td>
                 </tr>
                 <tr ng-if="!chosenFiles.length && !gridArrayLoading" class="empty-table-indicator">
                     <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
