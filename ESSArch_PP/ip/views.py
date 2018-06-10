@@ -74,7 +74,7 @@ from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, SubmissionAgreement)
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import creation_date, in_directory, list_files, mkdir_p, parse_content_range_header, \
+from ESSArch_Core.util import creation_date, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
 from ip.filters import InformationPackageFilter
 from ip.serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
@@ -205,14 +205,14 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
-        xmlfile = os.path.join(reception, '%s.xml' % pk)
+        xmlfile = normalize_path(os.path.join(reception, '%s.xml' % pk))
 
         if not os.path.isfile(xmlfile):
             logger.warn('Tried to prepare IP with missing XML file %s' % xmlfile, extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         try:
-            container = os.path.join(reception, self.get_container_for_xml(xmlfile))
+            container = normalize_path(os.path.join(reception, self.get_container_for_xml(xmlfile)))
         except etree.LxmlError:
             logger.warn('Tried to prepare IP with invalid XML file %s' % xmlfile, extra={'user': request.user.pk})
             raise exceptions.ParseError('Invalid XML file, %s' % xmlfile)
