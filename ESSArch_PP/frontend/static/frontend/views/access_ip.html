@@ -4,19 +4,19 @@
         <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="(ips.length || ip != null) && requestForm && (checkPermission('ip.get_from_storage') || checkPermission('ip.get_from_storage_as_new') || checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id)" class="request-layout">
             <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(vm.request)">
                 <div class="request-type">
-                    <div ng-if="checkPermission('ip.get_from_storage') || auth.id == ip.responsible.id">
+                    <div ng-if="checkPermission('ip.get_from_storage')">
                         <label>
                             <input type="radio" ng-model="vm.request.type" value="get">
                             {{'GET' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.get_tar_from_storage') || auth.id == ip.responsible.id">
+                    <div ng-if="checkPermission('ip.get_tar_from_storage')">
                         <label>
                             <input type="radio" ng-model="vm.request.type" value="get_tar">
                             {{'GET_AS_CONTAINER' | translate}}
                         </label>
                     </div>
-                    <div ng-if="checkPermission('ip.get_from_storage_as_new') || auth.id == ip.responsible.id">
+                    <div ng-if="checkPermission('ip.get_from_storage_as_new')">
                         <label>
                             <input type="radio" ng-model="vm.request.type" value="get_as_new">
                             {{'GET_AS_NEW_GENERATION' | translate}}
