@@ -68,12 +68,15 @@ class ComponentSearch(FacetedSearch):
     }
 
     def __init__(self, *args, **kwargs):
-        self.filter_values = kwargs.pop('filter_values', {})
-        self.start_date = self.filter_values.get('start_date', None)
-        self.end_date = self.filter_values.get('end_date', None)
-        self.archive = self.filter_values.get('archive', None)
-        self.personal_identification_number = self.filter_values.get('personal_identification_number', None)
+        self.query_params_filter = kwargs.pop('filter_values', {})
+        self.start_date = self.query_params_filter.pop('start_date', None)
+        self.end_date = self.query_params_filter.pop('end_date', None)
+        self.archive = self.query_params_filter.pop('archive', None)
+        self.personal_identification_number = self.query_params_filter.pop('personal_identification_number', None)
         self.user = kwargs.pop('user')
+        self.filter_values = {
+            'indices': self.query_params_filter.pop('indices', [])
+        }
 
         def validate_date(d):
             try:
@@ -136,6 +139,11 @@ class ComponentSearch(FacetedSearch):
                 'source': "(doc.containsKey('archive') && doc['archive'].value==params.archive) || doc['_id'].value==params.archive",
                 'params': {'archive': self.archive},
             })))
+
+        for filter_k, filter_v in six.iteritems(self.query_params_filter):
+            if filter_v not in EMPTY_VALUES:
+                s = s.query('match', **{filter_k: filter_v})
+
         return s
 
     def aggregate(self, search):
