@@ -29,14 +29,11 @@ django.setup()
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from groups_manager.models import GroupType
-
-from elasticsearch import Elasticsearch
 from elasticsearch.client.ingest import IngestClient
-from elasticsearch_dsl import Index, exceptions as elastic_exceptions
 
 from ESSArch_Core.auth.models import Group, GroupMemberRole
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
-from ESSArch_Core.search import get_connection
+from ESSArch_Core.search import alias_migration, get_connection
 from ESSArch_Core.storage.models import (
     DISK,
 
@@ -412,24 +409,8 @@ def installPipelines():
 
 
 def installSearchIndices():
-    get_connection()
-    client = Elasticsearch()
-
-    indices = ['archive', 'component', 'directory', 'document', 'information_package']
-
-    for index in indices:
-        Index(index).delete(ignore=404)
-
-    doc_types = [Archive, Component, Directory, Document, InformationPackage]
-
-    for doc_type in doc_types:
-        name = doc_type().meta.index
-
-        if Index(name).exists():
-            client.indices.close(index=name)
-
-        doc_type.init()
-        client.indices.open(index=name)
+    for doctype in [Archive, Component, Directory, Document, InformationPackage]:
+        alias_migration.setup_index(doctype)
 
     print 'done'
 
