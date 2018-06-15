@@ -258,7 +258,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         obj = get_object_or_404(tag_version, pk=id)
         user_archives = get_objects_for_user(self.request.user, tag_version.filter(elastic_index='archive'), []).values_list('pk', flat=True)
-        if obj.get_root().pk not in user_archives:
+        if obj.get_root() is not None and obj.get_root().pk not in user_archives:
             raise exceptions.NotFound
         return obj
 
@@ -294,8 +294,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
         query = params.pop('q', '')
         export = params.pop('export', None)
-        if query:
-            query = '%s' % query
 
         if export is not None and export not in EXPORT_FORMATS:
             raise exceptions.ParseError('Invalid export format "{}"'.format(export))
@@ -333,7 +331,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             size = int(size)
             offset = (number-1)*size
-            max_results = int(Index('archive').get_settings()['archive']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+            max_results = DEFAULT_MAX_RESULT_WINDOW
             s[offset:offset+size]
 
         try:
