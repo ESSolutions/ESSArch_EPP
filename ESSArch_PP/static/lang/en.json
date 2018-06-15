@@ -551,6 +551,7 @@
     "MESSAGE": "Message",
     "POPUP_ENABLED": "Popup enabled",
     "STRUCTURE_UNIT": "Structure unit",
+    "STORAGE_UNIT": "Storage unit",
     "STORAGE_UNITS": "Storage units",
     "SELECT_ARCHIVE_TAG": "Select archive ...",
     "SELECT_CLASSIFICATION_STRUCTURE_TAG": "Select classification structure ...",

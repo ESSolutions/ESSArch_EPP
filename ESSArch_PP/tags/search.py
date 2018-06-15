@@ -32,7 +32,8 @@ from weasyprint import HTML
 from ESSArch_Core.auth.models import Group, GroupGenericObjects
 from ESSArch_Core.auth.util import get_objects_for_user, get_organization_groups
 from ESSArch_Core.csv import UnicodeCSVWriter
-from ESSArch_Core.ip.models import Agent
+from ESSArch_Core.ip.models import Agent, InformationPackage
+from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
@@ -62,6 +63,7 @@ class ComponentSearch(FacetedSearch):
         'parents': TermsFacet(field='parents', min_doc_count=0),
         'type': TermsFacet(field='type', min_doc_count=0),
         'archive': TermsFacet(field='archive', min_doc_count=0),
+        'information_package': TermsFacet(field='ip', min_doc_count=0),
         'institution': TermsFacet(field='institution', min_doc_count=0),
         'organization': TermsFacet(field='organization', min_doc_count=0),
         'extension': TermsFacet(field='extension', min_doc_count=0),
@@ -192,6 +194,9 @@ def get_archive(id):
     cache.set(cache_key, archive_data)
     return archive_data
 
+def get_information_package(id):
+    return {'object_identifier_value': get_cached_objid(id)}
+
 def get_organization(id):
     org = Agent.objects.get(pk=id)
     return {
@@ -299,6 +304,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'extension': params.pop('extension', None),
             'index': params.pop('index', index),
             'type': params.pop('type', None),
+            'information_package': params.pop('information_package', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
         }
@@ -351,6 +357,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 archive['name'] = archive_data['name']
             except NotFoundError:
                 logger.warn('Archive "%s" not found in search index, it might be queued for indexing' % archive['key'])
+
+        for ip in results_dict['aggregations']['_filter_information_package']['information_package']['buckets']:
+            try:
+                ip_data = get_information_package(ip['key'])
+                ip['name'] = ip_data['object_identifier_value']
+            except ObjectDoesNotExist:
+                logger.warn('Information package "%s" not found' % ip['key'])
 
         for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
             try:

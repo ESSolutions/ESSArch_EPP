@@ -550,6 +550,7 @@
     "MESSAGE": "Meddelande",
     "POPUP_ENABLED": "Popup aktiverad",
     "STRUCTURE_UNIT": "Strukturenhet",
+    "STORAGE_UNIT": "Förvaringsenhet",
     "STORAGE_UNITS": "Förvaringsenheter",
     "SELECT_ARCHIVE_TAG": "Välj arkiv ...",
     "SELECT_CLASSIFICATION_STRUCTURE_TAG": "Välj klassificeringsstruktur ...",

@@ -193,6 +193,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         var archiveChildren = getAggregationChildren(aggregations, 'archive');
         var institutionChildren = getAggregationChildren(aggregations, 'institution');
         var organizationChildren = getAggregationChildren(aggregations, 'organization');
+        var informationPackageChildren = getAggregationChildren(aggregations, 'information_package');
         var filters = [
             {
                 text: $translate.instant("INDEX"),
@@ -224,6 +225,12 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 state: {opened: true, disabled: true},
                 children: organizationChildren,
                 branch: 'organization',
+            },
+            {
+                text: $translate.instant("STORAGE_UNIT"),
+                state: {opened: true, disabled: true},
+                children: informationPackageChildren,
+                branch: 'information_package',
             },
         ];
         vm.recreateFilterTree(filters)
