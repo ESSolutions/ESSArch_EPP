@@ -1117,7 +1117,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 except IndexError:
                     raise exceptions.NotFound
 
-                if hit.meta.index == 'document':
+                if hit.meta.index.startswith('document'):
                     return list_files(ip.files(path), force_download=download, paginator=self.paginator, request=request)
 
             # a directory with the path exists, get the content of it
@@ -1140,7 +1140,11 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
                 size = int(size)
                 offset = (number-1)*size
-                max_results = int(Index('document').get_settings()['document']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+                try:
+                    max_results = int(Index('document').get_settings()['document']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+                except KeyError:
+                    max_results = DEFAULT_MAX_RESULT_WINDOW
+
                 s = s[offset:offset+size]
 
             try:
