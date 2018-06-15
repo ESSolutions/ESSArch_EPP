@@ -295,6 +295,7 @@ def installDefaultPaths():
         'disseminations': '/ESSArch/data/epp/disseminations',
         'orders': '/ESSArch/data/epp/orders',
         'verify': '/ESSArch/data/epp/verify',
+        'temp': '/ESSArch/data/epp/temp',
         'appraisal_reports': '/ESSArch/data/epp/reports/appraisal',
         'conversion_reports': '/ESSArch/data/epp/reports/conversion',
     }
