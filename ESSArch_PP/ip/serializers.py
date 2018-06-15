@@ -200,11 +200,15 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
     aic = InformationPackageAICSerializer(omit=['information_packages'])
     policy = ArchivePolicySerializer()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
+    archive = serializers.SerializerMethodField()
+
+    def get_archive(self, obj):
+        return obj.get_archive_tag()
 
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
-            'submission_agreement', 'submission_agreement_locked',
+            'submission_agreement', 'submission_agreement_locked', 'archive',
         )
         extra_kwargs = {
             'id': {
