@@ -457,7 +457,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     vm.viewFile = function(file) {
         var params = {};
         if(file.href != "") {
-            params.path = file.href+"/"+file.name;
+            params.path = file.href+"/"+file.filename;
         } else {
             params.path = file.name;
         }
