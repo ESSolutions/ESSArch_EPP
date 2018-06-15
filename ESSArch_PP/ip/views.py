@@ -366,13 +366,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         tag_id = request.data.get('tag')
         if tag_id is not None:
-            if ip.get_profile('content_type') is not None:
-                raise exceptions.ParseError('Cannot set tag on IP that has content_type profile')
+            if ip.get_archive_tag() is not None:
+                raise exceptions.ParseError('Cannot set tag on IP that has content_type with archive reference')
 
             try:
                 ip.tag = TagStructure.objects.get(pk=tag_id)
             except TagStructure.DoesNotExist:
                 raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
+
+        ip.tag = ip.get_archive_tag()
 
         ip.policy = policy
         ip.state = 'Receiving'
