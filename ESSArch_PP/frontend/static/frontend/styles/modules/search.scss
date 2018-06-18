@@ -144,25 +144,44 @@
             max-width: 150px;
         }
     }
+
+    .jstree-anchor {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .filter-tree {
         width: auto;
         margin-top: 10px;
-        .jstree {
-            min-width: 230px;
+        @include large-screen-up {
+            min-width: 250px;
         }
+
+        .jstree-anchor {
+            max-width: 90%;
+            @include large-screen-up() {
+                max-width: 200px;
+            }
+        }
+
     }
     .record-tree {
+        @include large-screen-up {
+            min-width: 300px;
+        }
         margin-top: 10px;
         .classification-select {
             padding-bottom: 15px;
             max-width: 300px;
         }
-        @include medium-screen {
-            overflow-x: auto;
+
+        .jstree-anchor {
+            max-width: 90%;
+            @include large-screen-up() {
+                max-width: 285px;
+            }
         }
-        @include small-screen {
-            overflow-x: auto;
-        }
+
     }
     .place-in-structure-wrapper {
         max-width: 300px;

@@ -162,8 +162,14 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         children = aggregation.buckets.map(function(item) {
             if (item.name) {
                 item.text = item.name + " (" + item.doc_count + ")";
+                item.a_attr = {
+                    title: item.name
+                }
             } else {
                 item.text = item.key + " (" + item.doc_count + ")";
+                item.a_attr = {
+                    title: item.key
+                }
             }
             item.state = {opened: true, selected: vm.filterObject[aggrType]==item.key}
             item.type = item.key;
@@ -178,6 +184,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             children.push({
                 key: vm.filterObject[aggrType],
                 text: vm.filterObject[aggrType] + " (0)",
+                a_attr: {
+                    title: vm.filterObject[aggrType]
+                },
                 state: {opened: true, selected: true},
                 type: vm.filterObject[aggrType],
                 children: []
@@ -196,6 +205,9 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         var filters = [
             {
                 text: $translate.instant("TYPE"),
+                a_attr: {
+                    title: $translate.instant("TYPE")
+                },
                 state: {opened: true, disabled: true},
                 type: 'series',
                 children: typeChildren,
@@ -203,24 +215,36 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             },
             {
                 text: $translate.instant("ARCHIVE"),
+                a_attr: {
+                    title: $translate.instant("ARCHIVE")
+                },
                 state: {opened: true, disabled: true},
                 children: archiveChildren,
                 branch: 'archive',
             },
             {
                 text: $translate.instant("ARCHIVALINSTITUTION"),
+                a_attr: {
+                    title: $translate.instant("ARCHIVALINSTITUTION")
+                },
                 state: {opened: true, disabled: true},
                 children: institutionChildren,
                 branch: 'institution',
             },
             {
                 text: $translate.instant("ARCHIVISTORGANIZATION"),
+                a_attr: {
+                    title: $translate.instant("ARCHIVISTORGANIZATION")
+                },
                 state: {opened: true, disabled: true},
                 children: organizationChildren,
                 branch: 'organization',
             },
             {
                 text: $translate.instant("STORAGE_UNIT"),
+                a_attr: {
+                    title: $translate.instant("STORAGE_UNIT")
+                },
                 state: {opened: true, disabled: true},
                 children: informationPackageChildren,
                 branch: 'information_package',

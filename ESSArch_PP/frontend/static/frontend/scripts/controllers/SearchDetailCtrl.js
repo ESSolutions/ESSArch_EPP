@@ -103,6 +103,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             child.name = "";
         }
         child.text = "<b>" + (child._source && child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
+        child.a_attr = {
+            title: child._source.name
+        }
         if (!child.is_leaf_node) {
             child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
         }
@@ -115,6 +118,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             startNode.name = "";
         }
         startNode.text = "<b>" + (startNode._source && startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode.name;
+        startNode.a_attr = {
+            title: startNode._source.name
+        }
         startNode.state = {opened: true};
         if(startNode._id == vm.record._id) {
             startNode.state.selected = true;
