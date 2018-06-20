@@ -72,6 +72,7 @@
     "angular-relative-date": "^2.1.1",
     "angular-resource": "^1.6.5",
     "angular-websocket": "^2.0.1",
+    "gulp-autoprefixer": "^5.0.0",
     "later": "^1.2.0",
     "messenger-hubspot": "^1.5.0-b2",
     "ng-js-tree": "^0.0.10",

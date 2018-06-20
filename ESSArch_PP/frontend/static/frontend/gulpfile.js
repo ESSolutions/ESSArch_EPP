@@ -24,6 +24,7 @@
 
 var gulp = require('gulp')
 var sass = require('gulp-sass');
+var autoprefixer = require('gulp-autoprefixer');
 var ngConstant = require('gulp-ng-constant');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
@@ -203,6 +204,10 @@ var compileSass = function() {
     .pipe(sourcemaps.init())
     .pipe(sass({includePaths: coreCssFiles}).on('error', sass.logError))
     .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(autoprefixer({
+        browsers: ['last 2 versions'],
+        cascade: false
+    }))
     .pipe(cleanCSS({
       cleanupCharsets: true, // controls `@charset` moving to the front of a stylesheet; defaults to `true`
       normalizeUrls: true, // controls URL normalization; defaults to `true`
