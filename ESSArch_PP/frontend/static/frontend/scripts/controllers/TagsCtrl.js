@@ -111,6 +111,14 @@ angular.module('myApp').controller('TagsCtrl', function($scope, vm, $http, Notif
                 }
             })
             return id;
+        } else if (vm.tags.archive.value && vm.tags.structure.value){
+            var id = null;
+            vm.tags.archive.value.structures.forEach(function(item) {
+                if(item.structure.id == vm.tags.structure.value.id) {
+                    id = item.id;
+                }
+            })
+            return id
         } else {
             return null;
         }

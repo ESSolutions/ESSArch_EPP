@@ -201,14 +201,18 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
     policy = ArchivePolicySerializer()
     submission_agreement = serializers.PrimaryKeyRelatedField(queryset=SubmissionAgreement.objects.all())
     archive = serializers.SerializerMethodField()
+    has_cts = serializers.SerializerMethodField()
 
     def get_archive(self, obj):
         return obj.get_archive_tag()
 
+    def get_has_cts(self, obj):
+        return bool(obj.get_content_type_file())
+
     class Meta:
         model = InformationPackageSerializer.Meta.model
         fields = InformationPackageSerializer.Meta.fields + (
-            'submission_agreement', 'submission_agreement_locked', 'archive',
+            'submission_agreement', 'submission_agreement_locked', 'archive', 'has_cts',
         )
         extra_kwargs = {
             'id': {

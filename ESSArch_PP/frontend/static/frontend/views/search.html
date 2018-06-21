@@ -18,6 +18,9 @@
                 </label>
                 <br/>-->
                 <br />
+                <hr />
+                <div ng-include src="'static/frontend/views/search_filters.html'"></div>
+                <hr />
                 <div>
                 <label>
                         {{'PERSONAL_IDENTIFICATION_NUMBER' | translate}}
@@ -142,7 +145,7 @@
                 </uib-tab>
                 <uib-tab ng-if="checkPermission('tags.create_archive')" index="2" heading="{{'NEW_ARCHIVE' | translate}}">
                     <div class="new-archive-container">
-                        <form ng-submit="vm.createArchive(vm.archiveName, vm.structureName, vm.nodeType)">
+                        <form ng-submit="vm.createArchive(vm.archiveName, vm.structureName, vm.nodeType, vm.referenceCode)">
                             <label>
                                 {{'NAME' | translate}}
                             </label>
@@ -155,6 +158,10 @@
                                 {{'TYPE' | translate}}
                             </label>
                             <input type="text" class="form-control" ng-model="vm.nodeType"/>
+                            <label class="margin-top-5">
+                                {{'REFERENCE_CODE' | translate}}
+                            </label>
+                            <input type="text" class="form-control" ng-model="vm.referenceCode"/>
                             <button type="submit" class="btn btn-success margin-top-5">{{'SAVE' | translate}}</button>
                         </form>
                     </div>

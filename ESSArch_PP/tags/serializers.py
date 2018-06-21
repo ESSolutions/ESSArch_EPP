@@ -5,6 +5,7 @@ class SearchSerializer(serializers.Serializer):
     index = serializers.ChoiceField(choices=['archive', 'component'])
     name = serializers.CharField()
     type = serializers.CharField()
+    reference_code = serializers.CharField()
     structure = serializers.CharField(required=False)
     parent = serializers.CharField(required=False)
     parent_index = serializers.ChoiceField(choices=['archive', 'component'], required=False)

@@ -10,7 +10,7 @@
         <h4>{{'METADATA' | translate}}</h4>
         <div class="table-x-overflow metadata-table">
             <table>
-                <tr ng-repeat="(key, value) in vm.record._source" ng-if="key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
+                <tr ng-repeat="(key, value) in vm.record._source" ng-if="key != 'agents' && key != 'archive' && key != 'unit_ids' && key != 'unit_dates' && key != '_index' && key != 'parents' && key != 'children' && key != 'state' && key != 'text' && key != '_type' && key != 'type' && key != '_id'">
                     <td ng-if="key != 'terms_and_condition'" style="padding-right: 10px;"><b>{{key}}</b></td>
                     <td ng-if="vm.record.masked_fields.includes(key) && key != 'terms_and_condition' && key != 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;">
                         <div class="masked" ng-bind-html="value"></div>
@@ -19,6 +19,31 @@
                     <td ng-if="key == 'parent'" style="border-left-style: solid;border-width: 1px;padding-left: 10px;" ng-bind-html="value.id"></td>
                 </tr>
             </table>
+            <hr/>
+            <strong>Agents:</strong>
+            <div ng-repeat="agent in vm.record._source.agents">
+                <div>Role: {{ agent.role }}</div>
+                <div>Name: {{ agent.name }}</div>
+                <br/>
+            </div>
+
+            <strong>Initiators:</strong>
+            <div ng-repeat="initiator in vm.record._source.initiators">
+                <div>Name: {{ initiator.name }}</div>
+                <div>Address: {{ initiator.address }}</div>
+                <div>Zip code: {{ initiator.zipcode }}</div>
+                <div>City: {{ initiator.city }}</div>
+                <div ng-if="!vm.record.masked_fields.includes('personal_identification_number')">
+                    <div>Personal Identification Number: {{ initiator.personal_identification_number }}</div>
+                </div>
+                <div ng-if="vm.record.masked_fields.includes('personal_identification_number')">
+                    <div>Personal Identification Number: <span class="masked">***********************</span></div>
+                </div>
+                <div>Phone: {{ initiator.phone }}</div>
+                <div>Mobile phone: {{ initiator.mobile_phone }}</div>
+                <div>E-mail: {{ initiator.email }}</div>
+                <br/>
+            </div>
         </div>
     </div>
     <br/>

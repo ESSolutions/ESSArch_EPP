@@ -1239,7 +1239,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
             {
                 "templateOptions": {
                     "label": $translate.instant("REFERENCE_CODE"),
-                    "type": "number",
+                    "type": "text",
                     "required": true
                 },
                 "type": "input",

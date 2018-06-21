@@ -13,6 +13,9 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
                 },filters)
         }).then(function (response) {
             var returnData = response.data.hits.map(function (item) {
+                if (item._index.indexOf("-") >= 0) {
+                    item._index = item._index.split("-", 1)[0];
+                }
                 item._source.id = item._id;
                 item._source.name = item._source.name;
                 item._source.text = item._source.reference_code + " - " + item._source.name;

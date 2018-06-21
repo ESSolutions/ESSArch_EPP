@@ -373,6 +373,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
                 ip.tag = TagStructure.objects.get(pk=tag_id)
             except TagStructure.DoesNotExist:
                 raise exceptions.ParseError('Tag "{id}" does not exist'.format(id=tag_id))
+        elif tag_id is None and ip.get_archive_tag() is None:
+            raise exceptions.ParseError('No archive selected for IP')
 
         ip.tag = ip.get_archive_tag()
 
@@ -1164,7 +1166,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             l = []
             for hit in results:
-                if hit.meta.index == 'directory':
+                if hit.meta.index.startswith('directory-'):
                     d = {
                         'type': 'dir',
                         'name': hit.name,

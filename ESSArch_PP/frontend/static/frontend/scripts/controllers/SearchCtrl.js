@@ -66,11 +66,12 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         file: true
     }
 
-    vm.createArchive = function(archiveName, structureName, type) {
-        Search.addNode({name: archiveName, structure: structureName, index: 'archive', type: type}).then(function(response) {
+    vm.createArchive = function(archiveName, structureName, type, referenceCode) {
+        Search.addNode({name: archiveName, structure: structureName, index: 'archive', type: type, reference_code: referenceCode}).then(function(response) {
             vm.archiveName = null;
             vm.structureName = null;
             vm.nodeType = null;
+            vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
             Notifications.add(response.data.detail, 'error');
@@ -269,11 +270,16 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if(!result.id && result._id) {
             result.id = result._id;
         }
+        if (result._index.indexOf('-') !== -1){
+            index = result._index.split('-')[0];
+        } else {
+            index = result._index;
+        }
         if(e.ctrlKey || e.metaKey) {
-            var url = $state.href('home.access.search.'+result._index, {id: result.id});
+            var url = $state.href('home.access.search.'+index, {id: result.id});
             $window.open(url, '_blank')
         } else {
-            $state.go("home.access.search."+result._index, {id: result.id});
+            $state.go("home.access.search."+index, {id: result.id});
             vm.activeTab = 1;
         }
     }

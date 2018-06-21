@@ -222,7 +222,7 @@ class CacheAIP(DBTask):
                     logger.exception('No content type importer specified in profile')
                     raise
                 ct_importer = get_content_type_importer(ct_importer_name)()
-                indexed_files = ct_importer.import_content(srcdir, cts, aip_obj)
+                indexed_files = ct_importer.import_content(aip_obj)
             else:
                 err = "Content type specification not found"
                 logger.error('{err}: {path}'.format(err=err, path=cts))

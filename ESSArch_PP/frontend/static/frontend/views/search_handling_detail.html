@@ -1,0 +1,86 @@
+<div class="component-result">
+    <h3 title="Namn">{{vm.record._source.name}}</h3>
+    <h4><span title="Strukturenhetstyp">{{vm.record._source.type}}</span> - <span title="Handlingstyp">{{vm.record._source.handlingstyp}}</span></h4>
+    <p class="result-description">{{vm.record._source.desc}}</p>
+    <br/>
+
+    <strong ng-if="vm.record._source.status">Status:</strong> {{ vm.record._source.status }}<br/>
+    <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip }}
+    <br/>
+
+    <div>
+        <strong>Datum:</strong>
+        <div ng-if="vm.record._source.create_date">Skapad: {{ vm.record._source.create_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.last_usage_date">Senast använd: {{ vm.record._source.last_usage_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.arrival_date">Inkommen: {{ vm.record._source.arrival_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.dispatch_date">Expedierad: {{ vm.record._source.dispatch_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.decision_date">Beslutat: {{ vm.record._source.descision_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.preparation_date">Upprättad: {{ vm.record._source.preparation_date | date:"yyyy-MM-dd"}}</div>
+        <div ng-if="vm.record._source.ended_date">Avslutat {{ vm.record._source.ended_date | date:"yyyy-MM-dd"}}</div>
+    </div>
+    <br/>
+
+    <div ng-if="vm.record._source.informationsklass">Informationsklass: {{ vm.record._source.informationsklass }}</div>
+    <div ng-if="vm.record._source.restriktioner">
+        <strong>Restriktioner:</strong>
+        <div ng-repeat="restriktion in vm.record._source.restriktioner">
+            <div ng-if="restriktion.beskrivning != null">Beskrivning: {{ restriktion.beskrivning }}</div>
+            <div ng-if="restriktion.lagrum != null">Lagrum: {{ restriktion.lagrum }}</div>
+            <div ng-if="restriktion.upphor != null">Upphör: {{ restriktion.upphor }}</div>
+            <div ng-if="restriktion.typ != null">Typ: {{ restriktion.typ }}</div>
+            <br/>
+        </div>
+    </div>
+
+    <div ng-if="vm.record._source.avsandare">
+        <strong>Avsändare:</strong>
+        <div ng-if="vm.record._source.avsandare.namn != null">Namn: {{ vm.record._source.avsandare.namn }}</div>
+        <div ng-if="vm.record._source.avsandare.organisation != null">Organisation: {{ vm.record._source.avsandare.organisation }}</div>
+        <div ng-if="vm.record._source.avsandare.postadress != null">Postadress: {{ vm.record._source.avsandare.postadress }}</div>
+        <div ng-if="vm.record._source.avsandare.postnummer != null">Postnummber: {{ vm.record._source.avsandare.postnummer }}</div>
+        <div ng-if="vm.record._source.avsandare.postort != null">Postort: {{ vm.record._source.avsandare.postort }}</div>
+        <div ng-if="vm.record._source.avsandare.land != null">Land: {{ vm.record._source.avsandare.land }}</div>
+        <div ng-if="vm.record._source.avsandare.id != null">ID-nummer: {{ vm.record._source.avsandare.id }}</div>
+        <div ng-if="vm.record._source.avsandare.telefon != null">Telefon: {{ vm.record._source.avsandare.telefon }}</div>
+        <div ng-if="vm.record._source.avsandare.fax != null">Fax: {{ vm.record._source.avsandare.fax }}</div>
+        <div ng-if="vm.record._source.avsandare.epost != null">E-post: {{ vm.record._source.avsandare.epost }}</div>
+        <div ng-if="vm.record._source.avsandare.skyddad_identitet != null">Skyddad identitet: {{ vm.record._source.avsandare.skyddad_identitet == 0 ? 'Nej' : 'Ja' }}</div>
+    </div>
+    <br/>
+
+    <div ng-if="vm.record._source.agenter">
+        <strong>Agenter:</strong>
+        <div ng-repeat="agent in vm.record._source.agenter">
+            <div ng-if="agent.namn != null">Namn: {{ agent.namn }}</div>
+            <div ng-if="agent.roll != null">Roll: {{ agent.roll }}</div>
+            <div ng-if="agent.enhet != null">Enhet: {{ agent.enhet }}</div>
+            <div ng-if="agent.organisation != null">Organisation: {{ agent.organisation }}</div>
+            <br/>
+        </div>
+    </div>
+
+    <h4>{{'CONTENTS' | translate}}</h4>
+    <div st-table="children" st-safe-src="vm.record_children" style="width:100%;" class="table-x-overflow">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{{'REFERENCE_CODE' | translate}}</th>
+                    <th>{{'TITLE' | translate}}</th>
+                    <th>{{'TIME' | translate}}</th>
+                    <th ng-if="x._type == 'document'"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="x in children">
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer"><b>{{x._source.reference_code}}</b></td>
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
+                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>
+                    <td>
+                        <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+    </div>
+</div>

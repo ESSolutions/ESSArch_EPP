@@ -4,6 +4,10 @@
     <p ng-if="vm.record._source.start_date">{{vm.record._source.start_date | date:"yyyy-MM-dd"}} - {{vm.record._source.end_date | date:"yyyy-MM-dd"}}</p>
     <p class="result-description">{{vm.record._source.desc}}</p>
     <br/>
+
+    <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip }}
+    <br/>
+
     <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
     <div class="metadata-tables-wrapper">
         <div class="table-x-overflow metadata-table">

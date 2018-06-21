@@ -457,9 +457,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             raise exceptions.ParseError('Missing email address')
 
         metadata = tag.from_search()['_source']
-        subject = 'Export: {}'.format(tag.name)
+        subject = u'Export: {}'.format(tag.name)
 
-        body = '\n'.join(['{}: {}'.format(k, json.dumps(v)) for k, v in six.iteritems(metadata)])
+        body = u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in six.iteritems(metadata)])
         email = EmailMessage(subject=subject, body=body, to=[user.email])
 
         if tag.elastic_index == 'document':
@@ -568,7 +568,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
                 tag_version = TagVersion.objects.create(
                     tag=tag, elastic_index=data['index'], name=data['name'],
-                    type=data['type'])
+                    type=data['type'], reference_code=data['reference_code'])
                 tag.current_version = tag_version
                 tag.save()
 
