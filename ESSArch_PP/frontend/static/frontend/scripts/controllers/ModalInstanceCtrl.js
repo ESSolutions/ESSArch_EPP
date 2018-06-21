@@ -226,7 +226,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('ReceiveModalInstanceCtrl', function (Notifications, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate) {
+.controller('ReceiveModalInstanceCtrl', function (Notifications, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate, IPReception) {
     var vm = data.vm;
     $scope.saAlert = null;
     $scope.alerts = {
@@ -271,8 +271,15 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
     }
     vm.receive = function (ip) {
         vm.receiving = true;
-        Requests.receive(ip, angular.extend(vm.request, {tag: $scope.getDescendantId()}), vm.validatorModel)
-            .then(function(response){
+        IPReception.receive({
+                id: ip.id,
+                archive_policy: vm.request.archivePolicy.value.id,
+                purpose: vm.request.purpose,
+                tag: $scope.getDescendantId(),
+                allow_unknown_files: vm.request.allowUnknownFiles,
+                validators: vm.validatorModel
+            }).$promise.then(function(response){
+                Notifications.add(response.detail, "success", 3000);
                 vm.data = {status: "received"};
                 vm.receiving = false;
                 $uibModalInstance.close(vm.data);
@@ -280,7 +287,7 @@ angular.module('myApp').controller('ModalInstanceCtrl', function ($uibModalInsta
                 vm.receiving = false;
                 if(response.status == 404) {
                     Notifications.add('IP could not be found', 'error');
-                } else {
+                } else if (response.status != 500 && response.data.detail) {
                     Notifications.add(response.data.detail, 'error');
                 }
             })

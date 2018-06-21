@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, Requests, ContextMenuBase){
+angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $cookieStore, $filter, $anchorScroll, PermPermissionStore, $q, $controller, ContextMenuBase){
     var vm = this;
     var ipSortString = "";
     var watchers = [];
@@ -350,20 +350,6 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
             .$promise.then(function (data) {
                 return data;
             });
-    }
-
-    $scope.receive = function(ips) {
-        ips.forEach(function(ip) {
-            Requests.receive(ip, vm.request, vm.validatorModel)
-            .then(function(){
-                $scope.getListViewData();
-                $scope.eventlog = false;
-                $scope.edit = false;
-                $scope.requestForm = false;
-                $scope.filebrowser = false;
-                $scope.initRequestData();
-            });
-        });
     }
 
     vm.uncheckIp = function (ip) {

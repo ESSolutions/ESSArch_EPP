@@ -23,23 +23,6 @@ Email - essarch@essolutions.se
 */
 
 angular.module('myApp').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
-    function receive(ip, request, validators) {
-        return IPReception.receive({
-                id: ip.id,
-                archive_policy: request.archivePolicy.value.id,
-                purpose: request.purpose,
-                tag: request.tag,
-                allow_unknown_files: request.allowUnknownFiles,
-                validators: validators,
-        }).$promise.then(function(response) {
-            Notifications.add(response.detail, "success", 3000);
-            return response;
-        }).catch(function(response) {
-            if(response.status != 500 && response.data.detail) {
-                Notifications.add(response.data.detail, "error");
-            }
-        })
-    };
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })
@@ -67,7 +50,6 @@ angular.module('myApp').factory('Requests', function(Notifications, IPReception,
         })
     }
     return {
-        receive: receive,
         preserve: preserve,
         access: access,
         moveToApproval: moveToApproval,
