@@ -355,6 +355,12 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         });
     }
 
+    vm.treeChange = function(jqueryobj, e) {
+        if(e.action === "select_node") {
+            vm.selectRecord(jqueryobj, e);
+        }
+    }
+
     vm.recordTreeData = [];
     vm.selectRecord = function (jqueryobj, e) {
         if(e.node && e.node.original.see_more) {
@@ -367,46 +373,49 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                 var see_more = null;
                 if(children[children.length-1].see_more) {
                     see_more = children.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
                 } else {
                     selectedElement = children.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(parent.children[parent.children.length-1]);
                     see_more = children.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
                 }
                 response.data.forEach(function(child) {
                     child = createChild(child);
                     children.push(child);
+                    vm.recordTreeInstance.jstree(true).create_node(parent.id, angular.copy(child));
                 });
                 if(children.length < count) {
                     children.push(see_more);
+                    vm.recordTreeInstance.jstree(true).create_node(parent.id, see_more);
                     if(selectedElement) {
                         var resultInChildren = getNodeById(children, selectedElement._id);
                         if(!resultInChildren) {
                             selectedElement.state.opened = true;
                             children.push(selectedElement);
+                            vm.recordTreeInstance.jstree(true).create_node(parent.id, selectedElement);
                         } else {
                             resultInChildren.state.selected = true;
                         }
                     }
                 }
-                vm.recreateRecordTree(tree);
             });
             return;
         }
-        if (e.action == "select_node") {
-            $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
-                vm.record = response.data;
-                $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
-                $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
+        $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
+            vm.record = response.data;
+            $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
+            $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
 
-                if (!vm.record.is_leaf_node) {
-                    vm.record.children = [{ text: "", parent: vm.record._id, placeholder: true, icon: false, state: { disabled: true } }];
-                }
-                vm.currentVersion = vm.record._id;
-                getVersionSelectData();
-                getChildren(vm.record).then(function (response) {
-                    vm.record_children = response.data;
-                })
+            if (!vm.record.is_leaf_node) {
+                vm.record.children = [{ text: "", parent: vm.record._id, placeholder: true, icon: false, state: { disabled: true } }];
+            }
+            vm.currentVersion = vm.record._id;
+            getVersionSelectData();
+            getChildren(vm.record).then(function (response) {
+                vm.record_children = response.data;
             })
-        }
+        })
     }
 
     function getVersionSelectData() {
@@ -432,6 +441,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                 response.data.forEach(function(child) {
                     child = createChild(child);
                     children.push(child);
+                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, angular.copy(child));
                 });
                 if(children.length < count) {
                     children.push({
@@ -442,13 +452,22 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                         _source: {
                         }
                     });
+                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, {
+                        text: $translate.instant("SEE_MORE"),
+                        see_more: true,
+                        type: "plus",
+                        parent: {id: parent._id, index: parent._index},
+                        _source: {
+                        }
+                    });
                 }
+                vm.recordTreeInstance.jstree(true).delete_node(vm.recordTreeInstance.jstree(true).get_node(e.node.id).children[0]);
                 parent.state = {opened: true}
-                vm.recordTreeConfig.version++;
                 return;
             });
         }
     }
+
     function getNodeById(node, id){
         var reduce = [].reduce;
         function runner(result, node){

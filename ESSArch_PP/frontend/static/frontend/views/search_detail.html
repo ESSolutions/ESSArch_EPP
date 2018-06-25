@@ -76,7 +76,7 @@
             </div>
             <button ng-if="vm.tags.structure.value && vm.tags.descendants.value" type="button" class="btn btn-success margin-top-5" ng-click="vm.addToStructure(vm.record)">{{'ADD_TO_STRUCTURE' | translate}}</button>
         </div>
-        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.selectRecord;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
+        <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.treeChange;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
     </div>
     <div ng-if="!vm.unavailable" class="view-content">
         <div class="float-right">
