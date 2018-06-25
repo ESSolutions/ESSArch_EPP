@@ -1,18 +1,33 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
+from rest_framework.decorators import detail_route
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import TagFilter
 from ESSArch_Core.tags.models import Structure, StructureUnit, Tag
 from ESSArch_Core.tags.serializers import TagSerializer, StructureSerializer, StructureUnitSerializer
+from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 
 
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = Structure.objects.prefetch_related('units')
     serializer_class = StructureSerializer
+
+    @detail_route(methods=['get'])
+    def tree(self, request, pk=None):
+        obj = self.get_object()
+
+        root_nodes = cache_tree_children(StructureUnit.objects.filter(structure=obj))
+        dicts = []
+        for n in root_nodes:
+            dicts.append(mptt_to_dict(n, StructureUnitSerializer))
+
+        return Response(dicts)
 
 
 class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
