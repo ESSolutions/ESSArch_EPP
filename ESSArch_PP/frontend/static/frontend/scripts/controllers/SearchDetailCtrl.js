@@ -747,9 +747,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
-            vm.selectRecord(null, {node: parent, action: "select_node"});
-            vm.loadRecordAndTree(parent.original._index, parent.original._id);
+            vm.recordTreeInstance.jstree(true).delete_node(node.id)
+            vm.recordTreeInstance.jstree(true).select_node(node.parent);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -771,9 +770,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            var parent = vm.recordTreeInstance.jstree(true).get_node(node.parent);
-            vm.selectRecord(null, {node: parent, action: "select_node"});
-            vm.loadRecordAndTree(parent.original._index, parent.original._id);
+            vm.recordTreeInstance.jstree(true).delete_node(node.id)
+            vm.recordTreeInstance.jstree(true).select_node(node.parent);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
