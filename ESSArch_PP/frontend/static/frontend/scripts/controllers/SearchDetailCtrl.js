@@ -465,7 +465,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         if(file.href != "") {
             params.path = file.href+"/"+file.filename;
         } else {
-            params.path = file.name;
+            params.path = file.filename;
         }
         var showFile = $sce.trustAsResourceUrl(appConfig.djangoUrl + "information-packages/"+file.ip+"/files/?path="+params.path);
         $window.open(showFile, '_blank');
