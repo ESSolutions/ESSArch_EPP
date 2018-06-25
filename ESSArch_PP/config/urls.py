@@ -45,7 +45,7 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
                            StorageMediumViewSet, StorageMethodViewSet, StorageMethodTargetRelationViewSet,
                            StorageTargetViewSet, TapeDriveViewSet, TapeSlotViewSet)
 from tags.search import ComponentSearchViewSet
-from tags.views import TagViewSet, TagInformationPackagesViewSet
+from tags.views import StructureViewSet, StructureUnitViewSet, TagViewSet, TagInformationPackagesViewSet
 
 router = ExtendedDefaultRouter()
 
@@ -55,6 +55,17 @@ admin.site.site_title = 'ESSArch Preservation Platform Administration'
 router.register(r'access-queue', AccessQueueViewSet)
 router.register(r'agents', AgentViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
+router.register(r'classification-structures', StructureViewSet).register(
+    r'units',
+    StructureUnitViewSet,
+    base_name='structure-units',
+    parents_query_lookups=['structure']
+).register(
+    r'children',
+    StructureUnitViewSet,
+    base_name='structure-units-children',
+    parents_query_lookups=['parent__structure', 'parent']
+)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)

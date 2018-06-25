@@ -1,13 +1,33 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import exceptions, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import TagFilter
-from ESSArch_Core.tags.models import Tag, TagStructure
-from ESSArch_Core.tags.serializers import TagSerializer, TagStructureSerializer
+from ESSArch_Core.tags.models import Structure, StructureUnit, Tag
+from ESSArch_Core.tags.serializers import TagSerializer, StructureSerializer, StructureUnitSerializer
 from ip.views import InformationPackageViewSet
+
+
+class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = Structure.objects.prefetch_related('units')
+    serializer_class = StructureSerializer
+
+
+class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = StructureUnit.objects.select_related('structure')
+    serializer_class = StructureUnitSerializer
+
+    def perform_create(self, serializer):
+        try:
+            structure = self.get_parents_query_dict()['structure']
+        except KeyError:
+            structure = self.get_parents_query_dict()['parent__structure']
+        parent = serializer.validated_data.get('parent')
+        if parent is not None and str(parent.structure.pk) != structure:
+            raise exceptions.ValidationError('Parent must be from the same classification structure')
+        serializer.save(structure_id=structure)
 
 
 class TagViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
