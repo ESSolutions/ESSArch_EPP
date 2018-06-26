@@ -69,7 +69,7 @@ router.register(r'classification-structures', StructureViewSet).register(
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
-router.register(r'organizations', OrganizationViewSet)
+router.register(r'organizations', OrganizationViewSet, base_name='organizations')
 router.register(r'appraisal-jobs', AppraisalJobViewSet)
 router.register(r'appraisal-rules', AppraisalRuleViewSet)
 router.register(r'conversion-jobs', ConversionJobViewSet)
