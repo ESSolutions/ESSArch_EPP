@@ -552,17 +552,22 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             with transaction.atomic():
                 tag = Tag.objects.create()
                 tag_structure = TagStructure(tag=tag)
+                structure = data.get('structure')
+
+                try:
+                    structure = Structure.objects.get(pk=data.get('structure'))
+                except Structure.DoesNotExist:
+                    if structure is not None:
+                        raise exceptions.ParseError(u'Structure {} does not exist'.format(data.get('structure')))
 
                 if data.get('parent') is not None:
                     parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
-                    structure = data.get('structure')
                     if structure is None:
                         raise exceptions.ParseError('Missing "structure" parameter')
                     parent_structure = parent_version.get_structures(structure).get()
                     tag_structure.parent = parent_structure
                     tag_structure.structure = parent_structure.structure
-                elif data.get('structure') is not None:
-                    structure = Structure.objects.create(name=data.get("structure"))
+                elif structure is not None:
                     tag_structure.structure = structure
                 tag_structure.save()
 
@@ -575,6 +580,24 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 if tag_version.elastic_index == 'archive':
                     org = request.user.user_profile.current_organization
                     org.add_object(tag_version)
+
+                    # create descendants from structure
+                    for unit in tag_structure.structure.units.all():
+                        tag = Tag.objects.create()
+                        tv = TagVersion.objects.create(tag=tag, elastic_index='component', name=unit.name,
+                                                       reference_code=unit.reference_code)
+                        tv.update_search({'archive': str(tag_version.pk), 'desc': unit.description})
+                        tag.save()
+                        ts = TagStructure(tag=tag, structure=structure)
+                        if unit.parent is not None:
+                            parent = unit.parent.reference_code
+                            ts.parent = TagStructure.objects.filter(tree_id=tag_structure.tree_id,
+                                                                    tag__versions__elastic_index='component')\
+                                                            .filter(tag__versions__reference_code=parent)\
+                                                            .distinct().get()
+                        else:
+                            ts.parent = tag_structure
+                        ts.save()
 
                 return Response(self.serialize(tag_version.to_search()))
 
