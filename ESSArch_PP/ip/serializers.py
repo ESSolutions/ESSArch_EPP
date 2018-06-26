@@ -207,7 +207,7 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
         return obj.get_archive_tag()
 
     def get_has_cts(self, obj):
-        return bool(obj.get_content_type_file())
+        return obj.get_profile('content_type') is not None and bool(obj.get_content_type_file())
 
     class Meta:
         model = InformationPackageSerializer.Meta.model
