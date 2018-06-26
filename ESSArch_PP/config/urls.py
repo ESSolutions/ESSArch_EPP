@@ -93,7 +93,7 @@ router.register(r'information-packages', InformationPackageViewSet).register(
     base_name='ip-events',
     parents_query_lookups=['linkingObjectIdentifierValue']
 )
-router.register(r'information-packages', StorageObjectViewSet).register(
+router.register(r'information-packages', InformationPackageViewSet).register(
     r'storage-objects',
     StorageObjectViewSet,
     base_name='ip-storage-objects',
