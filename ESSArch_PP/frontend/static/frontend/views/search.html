@@ -144,7 +144,7 @@
                     <div ui-view></div>
                 </uib-tab>
                 <uib-tab ng-if="checkPermission('tags.create_archive')" index="2" heading="{{'NEW_ARCHIVE' | translate}}">
-                    <archive-manager class="margin-top-5"></archive-manager>
+                    <archive-manager ng-if="vm.activeTab === 2" class="margin-top-5"></archive-manager>
                 </uib-tab>
                 <uib-tab index="3" ui-sref="home.access.search.classificationStructures" heading="{{'CLASSIFICATION_STRUCTURES' | translate}}">
                     <div ui-view></div>

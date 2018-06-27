@@ -8,6 +8,9 @@ angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http,
             url: appConfig.djangoUrl + 'classification-structures/',
         }).then(function(response) {
             vm.structures = response.data;
+            if(vm.structures.length > 0) {
+                vm.structure = vm.structures[0];
+            }
         }).catch(function(response) {
             if(response.data && response.data.detail) {
                 Notifications.add(response.data.detail, 'error');
@@ -24,7 +27,11 @@ angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http,
             vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(response.data && response.data.detail) {
+                Notifications.add(response.data.detail, 'error');
+            } else {
+                Notifications.add('Unknown error', 'error');
+            }
         })
     }
 })
