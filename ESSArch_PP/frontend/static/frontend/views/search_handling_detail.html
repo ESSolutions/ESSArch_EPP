@@ -11,7 +11,6 @@
     <div>
         <strong>Datum:</strong>
         <div ng-if="vm.record._source.create_date">Skapad: {{ vm.record._source.create_date | date:"yyyy-MM-dd"}}</div>
-        <div ng-if="vm.record._source.last_usage_date">Senast använd: {{ vm.record._source.last_usage_date | date:"yyyy-MM-dd"}}</div>
         <div ng-if="vm.record._source.arrival_date">Inkommen: {{ vm.record._source.arrival_date | date:"yyyy-MM-dd"}}</div>
         <div ng-if="vm.record._source.dispatch_date">Expedierad: {{ vm.record._source.dispatch_date | date:"yyyy-MM-dd"}}</div>
         <div ng-if="vm.record._source.decision_date">Beslutat: {{ vm.record._source.descision_date | date:"yyyy-MM-dd"}}</div>
