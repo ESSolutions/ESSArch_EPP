@@ -53,6 +53,7 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
                     ],
                     "required": true
                 },
+                "defaultValue": "Verksamhetsområde",
                 "type": "select",
                 "key": "type",
             },
