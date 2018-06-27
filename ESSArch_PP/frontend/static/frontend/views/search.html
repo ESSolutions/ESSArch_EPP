@@ -144,27 +144,10 @@
                     <div ui-view></div>
                 </uib-tab>
                 <uib-tab ng-if="checkPermission('tags.create_archive')" index="2" heading="{{'NEW_ARCHIVE' | translate}}">
-                    <div class="new-archive-container">
-                        <form ng-submit="vm.createArchive(vm.archiveName, vm.structureName, vm.nodeType, vm.referenceCode)">
-                            <label>
-                                {{'NAME' | translate}}
-                            </label>
-                            <input type="text" class="form-control" ng-model="vm.archiveName"/>
-                            <label class="margin-top-5">
-                                {{'CLASSIFICATION_STRUCTURE_NAME' | translate}}
-                            </label>
-                            <input type="text" class="form-control" ng-model="vm.structureName"/>
-                            <label class="margin-top-5">
-                                {{'TYPE' | translate}}
-                            </label>
-                            <input type="text" class="form-control" ng-model="vm.nodeType"/>
-                            <label class="margin-top-5">
-                                {{'REFERENCE_CODE' | translate}}
-                            </label>
-                            <input type="text" class="form-control" ng-model="vm.referenceCode"/>
-                            <button type="submit" class="btn btn-success margin-top-5">{{'SAVE' | translate}}</button>
-                        </form>
-                    </div>
+                    <archive-manager class="margin-top-5"></archive-manager>
+                </uib-tab>
+                <uib-tab index="3" ui-sref="home.access.search.classificationStructures" heading="{{'CLASSIFICATION_STRUCTURES' | translate}}">
+                    <div ui-view></div>
                 </uib-tab>
             </uib-tabset>
         </div>
