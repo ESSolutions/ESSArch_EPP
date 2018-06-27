@@ -18,9 +18,6 @@
                         <th st-sort="name">
                             {{'NAME' | translate}}
                         </th>
-                        <th st-sort="id">
-                            {{'ID' | translate}}
-                        </th>
                         <th st-sort="create_date">
                             {{'CREATE_DATE' | translate}}
                         </th>
@@ -36,9 +33,6 @@
                         ng-click="vm.structureClick(x)">
                         <td>
                             {{x.name}}
-                        </td>
-                        <td>
-                            {{x.id}}
                         </td>
                         <td>
                             {{x.create_date | date:"yyyy-MM-dd HH:mm:ss"}}
