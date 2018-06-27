@@ -35,10 +35,34 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
             },
             {
                 "templateOptions": {
+                    "label": $translate.instant("TYPE"),
+                    "type": "text",
+                    "options": [
+                        {
+                            name: "Verksamhetsområde",
+                            value: "Verksamhetsområde"
+                        },
+                        {
+                            name: "Processgrupp",
+                            value: "Processgrupp"
+                        },
+                        {
+                            name: "Process",
+                            value: "Process"
+                        }
+                    ],
+                    "required": true
+                },
+                "type": "select",
+                "key": "type",
+            },
+            {
+                "templateOptions": {
                     "label": $translate.instant("DESCRIPTION"),
                     "type": "text",
+                    "rows": 3
                 },
-                "type": "input",
+                "type": "textarea",
                 "key": "description",
             },
         ];

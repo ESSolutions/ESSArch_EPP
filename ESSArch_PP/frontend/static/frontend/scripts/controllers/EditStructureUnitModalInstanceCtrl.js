@@ -34,10 +34,33 @@ angular.module('myApp').controller('EditStructureUnitModalInstanceCtrl', functio
             },
             {
                 "templateOptions": {
+                    "label": $translate.instant("TYPE"),
+                    "type": "text",
+                    "options": [
+                        {
+                            name: "Verksamhetsområde",
+                            value: "Verksamhetsområde"
+                        },
+                        {
+                            name: "Processgrupp",
+                            value: "Processgrupp"
+                        },
+                        {
+                            name: "Process",
+                            value: "Process"
+                        }
+                    ],
+                },
+                "type": "select",
+                "key": "type",
+            },
+            {
+                "templateOptions": {
                     "label": $translate.instant("DESCRIPTION"),
                     "type": "text",
+                    "rows": 3
                 },
-                "type": "input",
+                "type": "textarea",
                 "key": "description",
             },
         ];
