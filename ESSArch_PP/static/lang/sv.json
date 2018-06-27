@@ -172,6 +172,7 @@
     "GLOBALSEARCHDESC_TAPE_DRIVE":"Lista alla bandenheter som associeras med söktermen",
     "GLOBALSEARCHDESC_MIGRATION":"Lista alla migreringar som associeras med söktermen",
     "GLOBALSEARCHDESC_ORDER":"Lista alla beställningar som associeras med söktermen",
+    "GLOBALSEARCHDESC_STRUCTURES":"Lista alla klassificeringsstrukturer som associeras med söktermen",
     "PREPAREIPDESC": "Gör ett nytt IP",
     "REFRESHTABLEDESC": "Uppdatera tabell",
     "LABELDESC": "Arbeta med IP",
@@ -598,5 +599,10 @@
     "CREATE_APPRAISAL_JOB": "Skapa jobb",
     "CREATE_APPRAISAL_JOB_AND_RUN": "Skapa och kör jobb",
     "MINUTE": "Minut",
-    "VERSIONS": "Versioner"
+    "VERSIONS": "Versioner",
+    "CLASSIFICATIONSTRUCTURES": "Klassificeringsstrukturer",
+    "CLASSIFICATION_STRUCTURES": "Klassificeringsstrukturer",
+    "NEW_CLASSIFICATION_STRUCTURE": "Ny Klassificeringsstruktur",
+    "CLASSIFICATION_STRUCTURE_CREATED": "Klassificeringsstruktur skapad",
+    "EDIT_CLASSIFICATION_STRUCTURE": "Editera Klassificeringsstruktur"
 }

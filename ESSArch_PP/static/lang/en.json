@@ -172,6 +172,7 @@
     "GLOBALSEARCHDESC_TAPE_DRIVE":"List all tape drives associated to the search term",
     "GLOBALSEARCHDESC_MIGRATION":"List all migrations associated to the search term",
     "GLOBALSEARCHDESC_ORDER":"List all orders associated to the search term",
+    "GLOBALSEARCHDESC_STRUCTURES":"List all classification structures associated to the search term",
     "PREPAREIPDESC": "Create a new IP",
     "REFRESHTABLEDESC": "Refresh table",
     "LABELDESC": "Work with IP",
@@ -599,5 +600,10 @@
     "CREATE_APPRAISAL_JOB": "Create job",
     "CREATE_APPRAISAL_JOB_AND_RUN": "Create and run job",
     "MINUTE": "Minute",
-    "VERSIONS": "Versions"
+    "VERSIONS": "Versions",
+    "CLASSIFICATIONSTRUCTURES": "Classification structures",
+    "CLASSIFICATION_STRUCTURES": "Classification structures",
+    "NEW_CLASSIFICATION_STRUCTURE": "New Classification structure",
+    "CLASSIFICATION_STRUCTURE_CREATED": "Classification structure created",
+    "EDIT_CLASSIFICATION_STRUCTURE": "Edit classification structure"
 }

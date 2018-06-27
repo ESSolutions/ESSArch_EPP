@@ -118,6 +118,21 @@ angular.module('myApp', ['templates', 'ngRoute', 'treeControl', 'ui.bootstrap', 
             }
         },
     })
+    .state('home.access.search.classificationStructures', {
+        url: '/classification-structures',
+        template: '<classification-structure-editor></classification-structure-editor>',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
     .state('home.access.search.information_package', {
         url: '/information_package/:id',
         templateUrl: '/static/frontend/views/search_ip_detail.html',

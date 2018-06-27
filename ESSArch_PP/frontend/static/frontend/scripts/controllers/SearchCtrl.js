@@ -37,6 +37,8 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         if($state.is('home.access.search.detail') || $state.is('home.access.search.information_package') || $state.is('home.access.search.component') || $state.is('home.access.search.archive') || $state.is('home.access.search.directory') || $state.is('home.access.search.document')) {
             vm.activeTab = 1;
             vm.showTree = true;
+        } else if ($state.is('home.access.search.classificationStructures')){
+            vm.activeTab = 3;
         } else {
             vm.activeTab = 0;
             vm.showResults = true;

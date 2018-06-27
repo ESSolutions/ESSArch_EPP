@@ -1,0 +1,13 @@
+<div class="enter-profile-name">
+        <h3 class="modal-title" id="modal-title">{{'NEW_CLASSIFICATION_STRUCTURE' | translate}}</h3>
+    </div>
+    <form ng-submit="$ctrl.save()">
+        <div class="modal-body" id="modal-body">
+            <label for="label">{{'NAME' | translate}}</label>
+            <input required focused="true" id="name" class="form-control" ng-model="$ctrl.name"></input>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.saving">{{'OK' | translate}} <i ng-if="$ctrl.saving" class="fa fa-spinner fa-spin"/></button>
+            <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.saving">{{'CANCEL' | translate}}</button>
+        </div>
+    </form>
