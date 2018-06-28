@@ -1,3 +1,5 @@
+import errno
+
 from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
@@ -204,10 +206,18 @@ class InformationPackageDetailSerializer(InformationPackageSerializer):
     has_cts = serializers.SerializerMethodField()
 
     def get_archive(self, obj):
-        return obj.get_archive_tag()
+        try:
+            return str(obj.get_archive_tag().tag.current_version.pk)
+        except AttributeError:
+            return None
 
     def get_has_cts(self, obj):
-        return obj.get_profile('content_type') is not None and bool(obj.get_content_type_file())
+        try:
+            return obj.get_profile('content_type') is not None and obj.get_content_type_file() is not None
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+            return False
 
     class Meta:
         model = InformationPackageSerializer.Meta.model
