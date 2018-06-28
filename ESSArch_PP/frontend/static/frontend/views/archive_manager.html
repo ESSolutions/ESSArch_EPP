@@ -1,23 +1,23 @@
 <div class="new-archive-container">
-        <form ng-submit="vm.createArchive(vm.archiveName, vm.structure.id, vm.nodeType, vm.referenceCode)">
-            <label>
-                {{'NAME' | translate}}
-            </label>
+    <form ng-submit="vm.createArchive(vm.archiveName, vm.structure.id, vm.nodeType, vm.referenceCode)">
+        <label class="margin-top-5">
+            {{'NAME' | translate}}
             <input type="text" class="form-control" required ng-model="vm.archiveName"/>
-            <label class="margin-top-5">
-                {{'CLASSIFICATION_STRUCTURE' | translate}}
-            </label>
+        </label>
+        <label class="margin-top-5">
+            {{'CLASSIFICATION_STRUCTURE' | translate}}
             <select class="form-control" required ng-options="x as x.name for x in vm.structures" ng-model="vm.structure">
                 <option></option>
             </select>
-            <label class="margin-top-5">
-                {{'TYPE' | translate}}
-            </label>
+        </label>
+        <label class="margin-top-5">
+            {{'TYPE' | translate}}
             <input type="text" class="form-control" required ng-model="vm.nodeType"/>
-            <label class="margin-top-5">
-                {{'REFERENCE_CODE' | translate}}
-            </label>
+        </label>
+        <label class="margin-top-5">
+            {{'REFERENCE_CODE' | translate}}
             <input type="text" class="form-control" required ng-model="vm.referenceCode"/>
-            <button type="submit" class="btn btn-success margin-top-5">{{'SAVE' | translate}}</button>
-        </form>
-    </div>
+        </label>
+        <button type="submit" class="btn btn-success margin-top-5">{{'SAVE' | translate}}</button>
+    </form>
+</div>
