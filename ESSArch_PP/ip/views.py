@@ -64,6 +64,7 @@ from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_agents, get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
 from ESSArch_Core.fixity.checksum import calculate_checksum
+from ESSArch_Core.fixity.format import FormatIdentifier
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
 from ESSArch_Core.ip.models import Agent, InformationPackage, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT, Order, Workarea
@@ -74,7 +75,7 @@ from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.profiles.models import (Profile, ProfileIP, SubmissionAgreement)
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import creation_date, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
+from ESSArch_Core.util import creation_date, generate_file_response, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
 from ip.filters import InformationPackageFilter
 from ip.serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
@@ -1120,7 +1121,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                     raise exceptions.NotFound
 
                 if hit.meta.index.startswith('document'):
-                    return list_files(ip.files(path), force_download=download, paginator=self.paginator, request=request)
+                    fid = FormatIdentifier(allow_unknown_file_types=True)
+                    content_type = fid.get_mimetype(path)
+                    return generate_file_response(ip.open_file(path, 'rb'), content_type=content_type, force_download=download, name=path)
 
             # a directory with the path exists, get the content of it
             s = Search(index=['directory', 'document'])
