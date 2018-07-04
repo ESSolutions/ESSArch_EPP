@@ -465,7 +465,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if tag.elastic_index == 'document':
             ip = tag.tag.information_package
             path = os.path.join(metadata['href'], metadata['filename'])
-            email.attach_file(ip.files(path))
+            email.attach(os.path.basename(path), ip.open_file(path, 'rb').read())
 
         email.send()
         return Response('Email sent to {}'.format(user.email))
