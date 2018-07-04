@@ -4,4 +4,5 @@
 dist/
 ESSArch_EPP.egg-info/
 MANIFEST
+.idea/
 .settings/
