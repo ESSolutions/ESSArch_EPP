@@ -1239,14 +1239,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             return Response('%s created' % path)
 
-        if os.path.isfile(ip.object_path):
-            fullpath = os.path.join(os.path.dirname(ip.object_path), path)
-            if not in_directory(fullpath, ip.object_path) and fullpath != os.path.splitext(ip.object_path)[0] + '.xml':
-                raise exceptions.ParseError('Illegal path %s' % path)
-
-            return list_files(fullpath, force_download=download, paginator=self.paginator, request=request)
-
-        return list_files(ip.files(path), force_download=download, paginator=self.paginator, request=request)
+        return ip.get_path_response(path, request, force_download=download, paginator=self.paginator)
 
     @detail_route(methods=['put'], url_path='check-profile')
     def check_profile(self, request, pk=None):

@@ -646,7 +646,7 @@ angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Wo
     }
 
     function getDir(ip, pathStr, pageNumber, pageSize) {
-        if(pathStr == ip.object_identifier_value+"/") {
+        if(pathStr == "") {
             sendData = {
                 id: ip.id,
                 page: pageNumber,
