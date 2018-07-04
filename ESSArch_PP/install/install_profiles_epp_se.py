@@ -695,23 +695,6 @@ def installProfileAIP(sa):
                         'name': 'metadata',
                         'children': [],
                     },
-                    {
-                        'type': 'folder',
-                        'name': '{{_OBJID}}',
-                        'children': [
-                            {
-                                'type': 'folder',
-                                'name': 'metadata',
-                                'children': [
-                                    {
-                                        'type': 'file',
-                                        'name': 'metadata.xml',
-                                        'use': 'content_type_specification'
-                                    }
-                                ]
-                            }
-                        ],
-                    },
                 ]
             },
             {
@@ -739,6 +722,23 @@ def installProfileAIP(sa):
                         'use': 'authoritive_information_file',
                     },
                 ]
+            },
+            {
+                'type': 'folder',
+                'name': '{{_INNER_IP_PATH}}',
+                'children': [
+                    {
+                        'type': 'folder',
+                        'name': 'metadata',
+                        'children': [
+                            {
+                                'type': 'file',
+                                'name': 'metadata.xml',
+                                'use': 'content_type_specification'
+                            }
+                        ]
+                    }
+                ],
             },
         ],
         'template': [

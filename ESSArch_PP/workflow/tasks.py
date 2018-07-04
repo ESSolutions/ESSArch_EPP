@@ -128,8 +128,12 @@ class ReceiveSIP(DBTask):
             elif container_type == '.zip':
                 with zipfile.ZipFile(container) as zipf:
                     zipf.extractall(dst.encode('utf-8'))
+            aip.sip_path = os.path.relpath(os.path.join(dst, aip.sip_objid), aip.object_path)
         else:
             shutil.copy2(container, dst)
+            aip.sip_path = os.path.relpath(os.path.join(dst, os.path.basename(container)), aip.object_path)
+
+        aip.save()
 
         recipient = User.objects.get(pk=self.responsible).email
         if recipient:

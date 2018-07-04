@@ -264,6 +264,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         ip = InformationPackage.objects.create(
             object_identifier_value=pk,
+            sip_objid=pk,
+            sip_path=pk,
             package_type=InformationPackage.AIP,
             state='Prepared',
             responsible=request.user,
