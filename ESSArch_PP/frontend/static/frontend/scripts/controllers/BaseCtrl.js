@@ -776,11 +776,11 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
                 cellTemplate: "<uib-progressbar class=\"progress\" value=\"row.branch[col.field]\" type=\"success\"><b>{{row.branch[col.field]+\"%\"}}</b></uib-progressbar>"
             }
         ];
-        if($scope.checkPermission("WorkflowEngine.can_undo") || $scope.checkPermission("WorkflowEngine.can_retry")) {
-            $scope.col_defs.push(
-            {
-                cellTemplate: "<div ng-include src=\"'static/frontend/views/undo_redo.html'\"></div>"
-            });
+        if($scope.checkPermission("WorkflowEngine.can_undo")) {
+            $scope.col_defs.push({cellTemplate: "<div ng-include src=\"'workflow/undo.html'\"></div>"});
+        }
+        if($scope.checkPermission("WorkflowEngine.can_retry")) {
+            $scope.col_defs.push({cellTemplate: "<div ng-include src=\"'workflow/redo.html'\"></div>"});
         }
     });
 
