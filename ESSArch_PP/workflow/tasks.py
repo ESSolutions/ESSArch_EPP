@@ -60,8 +60,8 @@ from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
-from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent
 from ESSArch_Core.essxml.util import parse_submit_description
+from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent, XMLGenerator
 from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea
 from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
@@ -80,7 +80,7 @@ from ESSArch_Core.storage.models import (DISK, TAPE, AccessQueue, IOQueue,
                                          StorageMethodTargetRelation,
                                          StorageObject, TapeDrive, TapeSlot)
 from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
-from ESSArch_Core.util import (creation_date, find_destination,
+from ESSArch_Core.util import (creation_date, find_destination, get_tree_size_and_count,
                                timestamp_to_datetime)
 from storage.serializers import IOQueueSerializer
 
@@ -178,8 +178,8 @@ class ReceiveAIP(DBTask):
 class CacheAIP(DBTask):
     event_type = 30310
 
-    def run(self, aip):
-        aip_obj = InformationPackage.objects.prefetch_related('policy').get(pk=aip)
+    def run(self):
+        aip_obj = InformationPackage.objects.prefetch_related('policy').get(pk=self.ip)
         policy = aip_obj.policy
         srcdir = aip_obj.object_path
         objid = aip_obj.object_identifier_value
@@ -275,32 +275,14 @@ class CacheAIP(DBTask):
         aip_profile = aip_obj.get_profile_rel('aip').profile
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(srcdir, mets_dir, mets_name)
+        generator = XMLGenerator(filesToCreate)
+        generator.generate(folderToParse=dsttar, extra_paths_to_parse=[mets_path], algorithm=algorithm)
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.GenerateXML",
-            params={
-                "filesToCreate": filesToCreate,
-                "folderToParse": dsttar,
-                "extra_paths_to_parse": [mets_path],
-                "algorithm": algorithm,
-            },
-            processstep_id=self.step,
-            processstep_pos=self.step_pos,
-            information_package=aip_obj,
-            responsible_id=self.responsible,
-        ).run().get()
-
-        InformationPackage.objects.filter(pk=aip).update(
+        size, count = get_tree_size_and_count(aip_obj.object_path)
+        InformationPackage.objects.filter(pk=self.ip).update(
             message_digest=checksum, message_digest_algorithm=policy.checksum_algorithm,
+            object_size=size, object_num_items=count,
         )
-
-        ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.UpdateIPSizeAndCount',
-            processstep_id=self.step,
-            processstep_pos=self.step_pos,
-            information_package_id=aip,
-            responsible_id=self.responsible,
-        ).run().get()
 
         aicxml = os.path.join(policy.cache_storage.value, str(aip_obj.aic.pk) + '.xml')
         aicinfo = fill_specification_data(aip_obj.get_profile_data('aic_description'), ip=aip_obj.aic)
@@ -339,20 +321,10 @@ class CacheAIP(DBTask):
                 'FIDType': 'UUID',
             })
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.GenerateXML",
-            params={
-                "filesToCreate": filesToCreate,
-                "parsed_files": parsed_files,
-                "algorithm": algorithm,
-            },
-            processstep_id=self.step,
-            processstep_pos=self.step_pos,
-            information_package=aip_obj,
-            responsible_id=self.responsible,
-        ).run().get()
+        generator = XMLGenerator(filesToCreate)
+        generator.generate(parsed_files=parsed_files, algorithm=algorithm)
 
-        InformationPackage.objects.filter(pk=aip).update(
+        InformationPackage.objects.filter(pk=self.ip).update(
             object_path=dstdir, cached=True
         )
         shutil.rmtree(srcdir)
@@ -367,30 +339,27 @@ class CacheAIP(DBTask):
                 except OSError as e:
                     if e.errno != errno.ENOENT:
                         raise
-        return aip
+        return self.ip
 
-    def undo(self, aip):
-        pass
-
-    def event_outcome_success(self, aip):
-        return "Cached AIP '%s'" % aip
+    def event_outcome_success(self, *args, **kwargs):
+        return "Cached AIP '%s'" % self.get_information_package().object_identifier_value
 
 
 class StoreAIP(DBTask):
     hidden = True
 
-    def run(self, aip):
-        policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=aip).policy
+    def run(self):
+        objid, aic, size = InformationPackage.objects.values_list('object_identifier_value', 'aic_id', 'object_size').get(pk=self.ip)
+        policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=self.ip).policy
 
         if not policy:
-            raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % aip)
+            raise ArchivePolicy.DoesNotExist("No policy found in IP: '%s'" % objid)
 
         storage_methods = policy.storage_methods.secure_storage().filter(status=True)
 
         if not storage_methods.exists():
             raise StorageMethod.DoesNotExist("No available longterm storage methods found in policy: '%s'" % policy)
 
-        objid, aic, size = InformationPackage.objects.values_list('object_identifier_value', 'aic_id', 'object_size').get(pk=aip)
         aic = str(aic)
         cache_dir = policy.cache_storage.value
         xml_file = os.path.join(cache_dir, objid) + '.xml'
@@ -411,21 +380,18 @@ class StoreAIP(DBTask):
 
                     entry, created = IOQueue.objects.get_or_create(
                         storage_method_target=method_target, req_type=req_type,
-                        ip_id=aip, status__in=[0, 2, 5],
+                        ip_id=self.ip, status__in=[0, 2, 5],
                         defaults={'user_id': self.responsible, 'status': 0, 'write_size': size+xml_size+aic_xml_size}
                     )
 
                     if created:
-                        InformationPackage.objects.filter(pk=aip).update(state='Preserving')
+                        InformationPackage.objects.filter(pk=self.ip).update(state='Preserving')
 
                     entry.step = step
                     entry.save(update_fields=['step'])
 
-    def undo(self, aip):
-        pass
-
-    def event_outcome_success(self, aip):
-        return "Created entries in IO queue for AIP '%s'" % aip
+    def event_outcome_success(self, *args, **kwargs):
+        return "Created entries in IO queue for AIP '%s'" % self.get_information_package().object_identifier_value
 
 
 class AccessAIP(DBTask):

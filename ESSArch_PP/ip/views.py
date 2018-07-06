@@ -912,7 +912,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         ProcessTask.objects.create(
             name='workflow.tasks.CacheAIP',
-            params={'aip': pk},
             information_package_id=pk,
             processstep=main_step,
             processstep_pos=10,
@@ -921,7 +920,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         ProcessTask.objects.create(
             name='workflow.tasks.StoreAIP',
-            params={'aip': pk},
             information_package_id=pk,
             processstep=main_step,
             processstep_pos=20,
