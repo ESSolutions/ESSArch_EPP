@@ -102,24 +102,9 @@ class ReceiveSIP(DBTask):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC, responsible=aip.responsible,
                                                 label=aip.label, start_date=aip.start_date, end_date=aip.end_date)
         aip.aic = aic
+        aip.save(update_fields=['aic'])
 
-        parsed = parse_submit_description(xml, srcdir=os.path.split(container)[0])
-        aip_dir = os.path.join(policy.ingest_path.value, objid)
-        aip.object_path = aip_dir
-        os.makedirs(aip_dir)
-        aip.save(update_fields=['aic', 'object_path'])
-
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.CreatePhysicalModel",
-            args=[aip.get_profile('aip').structure],
-            log=EventIP,
-            information_package=aip,
-            responsible_id=self.responsible,
-            processstep_id=self.step,
-            processstep_pos=self.step_pos,
-        ).run().get()
-
-        dst = find_destination('content', aip.get_profile('aip').structure, aip_dir)
+        dst = find_destination('content', aip.get_profile('aip').structure, aip.object_path)
         dst = os.path.join(dst[0], dst[1])
         if policy.receive_extract_sip:
             if container_type == '.tar':

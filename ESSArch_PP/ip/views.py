@@ -428,6 +428,15 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
                         "name": "Generate AIP",
                         "children": [
                             {
+                                "name": "ESSArch_Core.tasks.UpdateIPPath",
+                                "label": "Update IP Path",
+                                "args": ["{{_POLICY_INGEST_PATH}}/{{_OBJID}}"],
+                            },
+                            {
+                                "name": "ESSArch_Core.ip.tasks.CreatePhysicalModel",
+                                "label": "Create Physical Model",
+                            },
+                            {
                                 "name": "workflow.tasks.ReceiveSIP",
                                 "label": "Receive SIP",
                                 "params": {
