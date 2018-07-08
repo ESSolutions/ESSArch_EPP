@@ -726,6 +726,7 @@ def installProfileAIP(sa):
             {
                 'type': 'folder',
                 'name': '{{_INNER_IP_PATH}}',
+                'create': False,
                 'children': [
                     {
                         'type': 'folder',
