@@ -222,7 +222,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             logger.warn('Tried to prepare IP with missing container file %s' % container, extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % container)
 
-        parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
+        parsed = parse_submit_description(xmlfile, srcdir=os.path.dirname(container))
         provided_sa = request.data.get('submission_agreement')
         parsed_sa = parsed.get('altrecordids', {}).get('SUBMISSIONAGREEMENT', [None])[0]
 
@@ -255,13 +255,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         if sa.profile_dip is None:
             raise exceptions.ParseError('Submission agreement missing DIP profile')
 
-        parsed_policy = parsed.get('altrecordids', {}).get('POLICYID', [None])[0]
-
-        try:
-            policy = ArchivePolicy.objects.get(policy_id=parsed_policy)
-        except (ValueError, ArchivePolicy.DoesNotExist) as e:
-            policy = None
-
         ip = InformationPackage.objects.create(
             object_identifier_value=pk,
             sip_objid=pk,
@@ -269,31 +262,16 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             package_type=InformationPackage.AIP,
             state='Prepared',
             responsible=request.user,
-            generation=0,
             submission_agreement=sa,
             submission_agreement_locked=True,
-            policy=policy,
-            label=parsed.get('label'),
-            entry_date=parsed.get('entry_date'),
-            start_date=parsed.get('start_date'),
-            end_date=parsed.get('end_date'),
             object_path=container,
+            package_mets_path=xmlfile,
         )
-        algorithm = ip.get_checksum_algorithm()
-        ip.package_mets_path = xmlfile
-        ip.package_mets_create_date = timestamp_to_datetime(creation_date(xmlfile)).isoformat()
-        ip.package_mets_size = os.path.getsize(xmlfile)
-        ip.package_mets_digest_algorithm = MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT[algorithm.upper()]
-        ip.package_mets_digest = calculate_checksum(xmlfile, algorithm=algorithm)
         ip.save()
 
         # refresh date fields to convert them to datetime instances instead of
         # strings to allow further datetime manipulation
         ip.refresh_from_db(fields=['entry_date', 'start_date', 'end_date'])
-
-        for agent_el in get_agents(etree.parse(xmlfile)):
-            agent = Agent.objects.from_mets_element(agent_el)
-            ip.agents.add(agent)
 
         member = Member.objects.get(django_user=request.user)
         user_perms = perms.pop('owner', [])
@@ -339,33 +317,22 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         objid = ip.object_identifier_value
         xmlfile = os.path.join(reception, '%s.xml' % objid)
-        events_xmlfile = os.path.join(reception, '%s_ipevents.xml' % objid)
 
         if not os.path.isfile(xmlfile):
             logger.warn('Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile), extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
-
         if not os.path.isfile(container):
             logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
             raise exceptions.ParseError('%s does not exist' % container)
 
-        parsed = parse_submit_description(xmlfile, srcdir=os.path.split(container)[0])
-        policy_id = request.data.get('archive_policy')
-
         try:
+            policy_id = request.data.get('archive_policy')
             policy = ArchivePolicy.objects.get(pk=policy_id)
         except (ArchivePolicy.DoesNotExist, TypeError):
             msg = 'Archive policy with id %s does not exist' % policy_id
-            if policy_id is None:
-                msg = 'archive_policy parameter missing'
-
             raise exceptions.ParseError(msg)
-
-        information_class = parsed.get('information_class', policy.information_class)
-        if information_class != policy.information_class:
-            raise ValueError('Information class of IP and policy does not match')
 
         tag_id = request.data.get('tag')
         if tag_id is not None:
@@ -380,10 +347,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             raise exceptions.ParseError('No archive selected for IP')
 
         ip.tag = ip.get_archive_tag()
-
         ip.policy = policy
-        ip.state = 'Receiving'
-        ip.information_class = information_class
         ip.save()
 
         generate_premis = ip.profile_locked('preservation_metadata')
@@ -428,13 +392,17 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
                         "name": "Generate AIP",
                         "children": [
                             {
-                                "name": "ESSArch_Core.tasks.UpdateIPPath",
-                                "label": "Update IP Path",
-                                "args": ["{{_POLICY_INGEST_PATH}}/{{_OBJID}}"],
+                                "name": "ESSArch_Core.ip.tasks.ParseSubmitDescription",
+                                "label": "Parse submit description",
+                            },
+                            {
+                                "name": "ESSArch_Core.ip.tasks.ParseEvents",
+                                "label": "Parse events",
                             },
                             {
                                 "name": "ESSArch_Core.ip.tasks.CreatePhysicalModel",
                                 "label": "Create Physical Model",
+                                'params': {'root': '{{POLICY_INGEST_PATH}}/{{_OBJID}}'}
                             },
                             {
                                 "name": "workflow.tasks.ReceiveSIP",
@@ -443,12 +411,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
                                     'purpose': request.data.get('purpose'),
                                     'allow_unknown_files': request.data.get('allow_unknown_files', False),
                                 }
-                            },
-                            {
-                                "name": "ESSArch_Core.tasks.ParseEvents",
-                                "if": os.path.isfile(events_xmlfile),
-                                "label": "Parse events",
-                                "args": [events_xmlfile],
                             },
                             {
                                 "name": "ESSArch_Core.ip.tasks.GeneratePremis",

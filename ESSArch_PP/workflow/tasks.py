@@ -60,10 +60,9 @@ from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
-from ESSArch_Core.essxml.util import parse_submit_description
 from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent, XMLGenerator
 from ESSArch_Core.fixity.checksum import calculate_checksum
-from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea
+from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT
 from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
                                              ConversionJob, ConversionRule)
 from ESSArch_Core.profiles.utils import fill_specification_data
@@ -91,28 +90,44 @@ logger = logging.getLogger('essarch')
 class ReceiveSIP(DBTask):
     event_type = 20100
 
+    @transaction.atomic
     def run(self, purpose=None, allow_unknown_files=False):
         aip = InformationPackage.objects.get(pk=self.ip)
-        policy = aip.policy
+        algorithm = aip.get_checksum_algorithm()
         container = aip.object_path
-        xml = aip.package_mets_path
         objid, container_type = os.path.splitext(os.path.basename(container))
         container_type = container_type.lower()
-
+        xml = aip.package_mets_path
+        aip.package_mets_create_date = timestamp_to_datetime(creation_date(xml)).isoformat()
+        aip.package_mets_size = os.path.getsize(xml)
+        aip.package_mets_digest_algorithm = MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT[algorithm.upper()]
+        aip.package_mets_digest = calculate_checksum(xml, algorithm=algorithm)
+        aip.generation = 0
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC, responsible=aip.responsible,
                                                 label=aip.label, start_date=aip.start_date, end_date=aip.end_date)
         aip.aic = aic
-        aip.save(update_fields=['aic'])
+        aip_dir = os.path.join(aip.policy.ingest_path.value, objid)
+        aip.object_path = aip_dir
+        try:
+            os.makedirs(aip_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        aip.save()
 
         dst = find_destination('content', aip.get_profile('aip').structure, aip.object_path)
         dst = os.path.join(dst[0], dst[1])
-        if policy.receive_extract_sip:
+        if aip.policy.receive_extract_sip:
+            self.logger.debug(u'Extracting {} to {}'.format(container, dst))
             if container_type == '.tar':
                 with tarfile.open(container) as tar:
                     tar.extractall(dst.encode('utf-8'))
             elif container_type == '.zip':
                 with zipfile.ZipFile(container) as zipf:
                     zipf.extractall(dst.encode('utf-8'))
+            else:
+                raise ValueError(u'Invalid container type: {}'.format(container))
             aip.sip_path = os.path.relpath(os.path.join(dst, aip.sip_objid), aip.object_path)
         else:
             shutil.copy2(container, dst)
