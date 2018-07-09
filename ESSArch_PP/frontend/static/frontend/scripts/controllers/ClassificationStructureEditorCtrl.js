@@ -82,7 +82,7 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
             root: true,
             type: 'archive',
         };
-        return $http.get(appConfig.djangoUrl + 'classification-structures/' + structure.id + '/tree')
+        return $http.get(appConfig.djangoUrl + 'classification-structures/' + structure.id + '/tree/')
             .then(function(response) {
                 var tree = response.data;
                 if(tree.length <= 0) {
