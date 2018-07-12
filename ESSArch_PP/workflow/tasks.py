@@ -48,7 +48,6 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
-from elasticsearch_dsl.connections import get_connection
 from groups_manager.utils import get_permission_name
 from guardian.shortcuts import assign_perm
 from scandir import walk
@@ -84,7 +83,6 @@ from ESSArch_Core.util import (creation_date, find_destination, get_tree_size_an
 from storage.serializers import IOQueueSerializer
 
 User = get_user_model()
-es = get_connection()
 logger = logging.getLogger('essarch')
 
 class ReceiveSIP(DBTask):
