@@ -102,6 +102,7 @@ INSTALLED_APPS = [
     'ESSArch_Core.essxml.Generator',
     'ESSArch_Core.essxml.ProfileMaker',
     'ESSArch_Core.fixity',
+    'ESSArch_Core.search',
     'ESSArch_Core.storage',
     'ESSArch_Core.tags',
     'ESSArch_Core.WorkflowEngine',
@@ -206,10 +207,13 @@ CACHES = {
     }
 }
 
-ELASTICSEARCH_DSL={
+ELASTICSEARCH_CONNECTIONS = {
     'default': {
-        'hosts': 'localhost:9200'
-    },
+        'hosts': [{
+            'host': 'localhost',
+            'port': '9200'
+        }],
+    }
 }
 
 # Logging

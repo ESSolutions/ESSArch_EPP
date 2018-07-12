@@ -29,11 +29,12 @@ django.setup()
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from groups_manager.models import GroupType
+from elasticsearch_dsl.connections import get_connection
 from elasticsearch.client.ingest import IngestClient
 
 from ESSArch_Core.auth.models import Group, GroupMemberRole
 from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
-from ESSArch_Core.search import alias_migration, get_connection
+from ESSArch_Core.search import alias_migration
 from ESSArch_Core.storage.models import (
     DISK,
 

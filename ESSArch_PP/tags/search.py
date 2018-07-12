@@ -22,6 +22,7 @@ from django_filters.constants import EMPTY_VALUES
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
+from elasticsearch_dsl.connections import get_connection
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -35,7 +36,7 @@ from ESSArch_Core.csv import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent, InformationPackage
 from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
-from ESSArch_Core.search import get_connection, DEFAULT_MAX_RESULT_WINDOW
+from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
 from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
@@ -210,8 +211,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     lookup_url_kwarg = None
 
     def __init__(self, *args, **kwargs):
-        get_connection('default')
-        self.client = Elasticsearch()
+        self.client = get_connection()
         super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
     def get_object(self, index=None):
