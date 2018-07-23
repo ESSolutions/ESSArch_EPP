@@ -641,11 +641,11 @@ class WorkingThread:
                             logging.error('Problem to get information from sip.xml, self.SIPinfo:%s' % (str(self.SIPinfo)))
                             self.objectstatus = 99
                     if not errno and not self.objectstatus == 100:
-                        self.DataObjectSize, self.numfiles, self.file_list, errno, error_list = Functions().GetFiletreeSum(self.path)
+                        self.DataObjectSize, self.numfiles, self.file_list, errno, filetree_why = Functions().GetFiletreeSum(self.path)
                         if errno and not self.objectstatus == 100:
                             ###############################################################
                             # Problem to access object
-                            logging.error('Problem to get SIPinformation from filesystem, self.DataObjectSize:%s,self.numfiles:%s,self.file_list:%s' % (self.DataObjectSize, self.numfiles, str(self.file_list)))
+                            logging.error('Problem to get SIPinformation from filesystem for object: %s, self.DataObjectSize:%s, self.numfiles:%s, self.file_list:%s, errorcode: %s, error: %s' % (self.path, self.DataObjectSize, self.numfiles, str(self.file_list), str(errno),filetree_why))
                             self.objectstatus = 99
                     if not errno and not self.objectstatus == 100:
                         if self.SIPinfo[3][0][1][:5] == 'UUID:' or self.SIPinfo[3][0][1][:5] == 'RAID:':
