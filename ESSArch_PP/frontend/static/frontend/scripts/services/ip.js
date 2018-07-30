@@ -1,4 +1,4 @@
-angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Step) {
+angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Step, Task) {
     return $resource(appConfig.djangoUrl + 'information-packages/:id/:action/', {}, {
         query: {
             method: 'GET',
@@ -50,7 +50,16 @@ angular.module('myApp').factory('IP', function ($resource, appConfig, Event, Ste
         workflow: {
             method: "GET",
             params: { action: "workflow", id: "@id" },
-            isArray: true
+            isArray: true,
+            interceptor: {
+                response: function (response) {
+                    response.resource = response.resource.map(function(res) {
+                        return res.flow_type === "task" ? new Task(res) : new Step(res);
+                    });
+                    response.resource.$httpHeaders = response.headers;
+                    return response.resource;
+                }
+            }
         },
         checkProfile: {
             method: "PUT",
