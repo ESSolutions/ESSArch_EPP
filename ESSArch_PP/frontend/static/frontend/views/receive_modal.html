@@ -1,5 +1,5 @@
 <div class="enter-profile-name">
-    <h3 class="modal-title" id="modal-title">IP: {{ip.id}}</h3>
+    <h3 class="modal-title" id="modal-title">{{'RECEIVE' | translate}}: {{ip.object_identifier_value}}</h3>
 </div>
 <div class="modal-body" id="modal-body">
     <profile-editor ng-if="profileEditor" ip="ip" share-data="vm.getProfileData($event)"></profile-editor>
