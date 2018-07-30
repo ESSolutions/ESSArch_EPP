@@ -205,8 +205,7 @@ var compileSass = function() {
     .pipe(sass({includePaths: coreCssFiles}).on('error', sass.logError))
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(autoprefixer({
-        browsers: ['last 2 versions'],
-        cascade: false
+        browsers: ['>0%']
     }))
     .pipe(cleanCSS({
       cleanupCharsets: true, // controls `@charset` moving to the front of a stylesheet; defaults to `true`
