@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications) {
+angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];
@@ -15,7 +15,7 @@ angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http,
             if(response.data && response.data.detail) {
                 Notifications.add(response.data.detail, 'error');
             } else {
-                Notifications.add('Unknown error!' + response, 'error');
+                Notifications.add('Unknown error!', 'error');
             }
         })
     }
