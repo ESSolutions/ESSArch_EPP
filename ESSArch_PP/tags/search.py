@@ -585,7 +585,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     for unit in tag_structure.structure.units.all():
                         tag = Tag.objects.create()
                         tv = TagVersion.objects.create(tag=tag, elastic_index='component', name=unit.name,
-                                                       reference_code=unit.reference_code)
+                                                       reference_code=unit.reference_code, type=unit.type)
                         tv.update_search({'archive': str(tag_version.pk), 'desc': unit.description})
                         tag.save()
                         ts = TagStructure(tag=tag, structure=structure)
