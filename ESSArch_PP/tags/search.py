@@ -468,7 +468,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             email.attach(os.path.basename(path), ip.open_file(path, 'rb').read())
 
         email.send()
-        return Response('Email sent to {}'.format(user.email))
+        return Response(u'Email sent to {}'.format(user.email))
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
