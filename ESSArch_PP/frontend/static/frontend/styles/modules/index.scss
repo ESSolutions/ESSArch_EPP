@@ -19,7 +19,9 @@ body.modal-open {
 body.modal-open[style] {
     padding-right: 0px !important;
 }
-
+main {
+  display: block;
+}
 .ui-select-dropdown {
     opacity: 1 !important;
 }
