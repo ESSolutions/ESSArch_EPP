@@ -2,10 +2,8 @@ angular.module('myApp').controller('HeadCtrl', function($scope, $rootScope, $tim
     var vm = this;
     var appName = " | ESSArch Preservation Platform";
     vm.pageTitle = "ESSArch Preservation Platform";
-    vm.responsiveTag = "";
     $scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
         vm.pageTitle = $translate.instant(toState.name.split(".").pop().toUpperCase())+appName;
-        $scope.getResponsiveTag();
     });
     $scope.$on('$translateChangeSuccess', function () {
         vm.pageTitle = $translate.instant($state.current.name.split(".").pop().toUpperCase())+appName;
@@ -13,7 +11,4 @@ angular.module('myApp').controller('HeadCtrl', function($scope, $rootScope, $tim
     $rootScope.$on('UPDATE_TITLE', function (event, data) {
         vm.pageTitle = data.title + appName;
     });
-    $scope.getResponsiveTag = function() {
-        vm.responsiveTag = "width=device-width, initial-scale=1";
-    }
 });
