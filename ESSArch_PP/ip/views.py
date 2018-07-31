@@ -1086,7 +1086,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 basename = os.path.basename(path)
                 q = ElasticQ('bool',
                              should=[ElasticQ('bool', must=[ElasticQ('term', href=dirname),
-                                                            ElasticQ('term', name=basename)]),
+                                                            ElasticQ('term', **{'name.keyword': basename})]),
                                      ElasticQ('bool', must=[ElasticQ('term', href=dirname),
                                                             ElasticQ('match', filename=basename)])])
 
