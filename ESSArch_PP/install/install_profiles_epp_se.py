@@ -732,15 +732,9 @@ def installProfileAIP(sa):
                 'create': False,
                 'children': [
                     {
-                        'type': 'folder',
-                        'name': 'metadata',
-                        'children': [
-                            {
-                                'type': 'file',
-                                'name': 'metadata.xml',
-                                'use': 'content_type_specification'
-                            }
-                        ]
+                        'type': 'file',
+                        'name': 'metadata.xml',
+                        'use': 'content_type_specification'
                     }
                 ],
             },
