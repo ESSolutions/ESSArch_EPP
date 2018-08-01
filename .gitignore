@@ -1,6 +1,7 @@
 *.py[co]
 *.pyo
 *~
+celerybeat-schedule.db
 dist/
 ESSArch_EPP.egg-info/
 MANIFEST
