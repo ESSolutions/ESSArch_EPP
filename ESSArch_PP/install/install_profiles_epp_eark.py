@@ -503,6 +503,7 @@ def installProfileSIP(sa):
             {
                 "type": "folder",
                 "name": "metadata",
+                'use': 'metadata',
                 "children": [
                     {
                         "type": "folder",
@@ -780,6 +781,7 @@ def installProfileSIP(sa):
             {
                 "type": "folder",
                 "name": "metadata",
+                'use': 'metadata',
                 "children": [
                     {
                         "type": "folder",

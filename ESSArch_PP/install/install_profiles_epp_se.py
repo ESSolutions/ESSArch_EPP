@@ -415,10 +415,12 @@ def installProfileSIP(sa):
             {
                 'type': 'folder',
                 'name': 'content',
+                'use': 'content',
             },
             {
                 'type': 'folder',
                 'name': 'metadata',
+                'use': 'metadata',
                 'children': [
                     {
                         'type': 'file',
@@ -700,6 +702,7 @@ def installProfileAIP(sa):
             {
                 'type': 'folder',
                 'name': 'metadata',
+                'use': 'metadata',
                 'children': [
                     {
                         'type': 'file',
