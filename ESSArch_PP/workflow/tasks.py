@@ -86,10 +86,12 @@ User = get_user_model()
 logger = logging.getLogger('essarch')
 
 class ReceiveSIP(DBTask):
+    logger = logging.getLogger('essarch.epp.workflow.tasks.ReceiveSIP')
     event_type = 20100
 
     @transaction.atomic
     def run(self, purpose=None, allow_unknown_files=False):
+        self.logger.debug('Receiving SIP')
         aip = InformationPackage.objects.get(pk=self.ip)
         algorithm = aip.get_checksum_algorithm()
         container = aip.object_path
@@ -128,9 +130,11 @@ class ReceiveSIP(DBTask):
                 raise ValueError(u'Invalid container type: {}'.format(container))
             aip.sip_path = os.path.relpath(os.path.join(dst, aip.sip_objid), aip.object_path)
         else:
+            self.logger.debug(u'copying {} to {}'.format(container, dst))
             shutil.copy2(container, dst)
             aip.sip_path = os.path.relpath(os.path.join(dst, os.path.basename(container)), aip.object_path)
 
+        self.logger.debug(u'sip_path set to {}'.format(aip.sip_path))
         aip.save()
 
         recipient = User.objects.get(pk=self.responsible).email
