@@ -39,6 +39,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PROJECT_SHORTNAME = 'EPP'
+PROJECT_NAME = 'ESSArch Preservation Platform'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -328,6 +330,10 @@ CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
+    'RunWorkflowProfiles-every-10-seconds': {
+        'task': 'ESSArch_Core.tasks.RunWorkflowProfiles',
+        'schedule': timedelta(seconds=10),
+    },
    'PollAccessQueue-every-10-seconds': {
         'task': 'workflow.tasks.PollAccessQueue',
         'schedule': timedelta(seconds=10),
