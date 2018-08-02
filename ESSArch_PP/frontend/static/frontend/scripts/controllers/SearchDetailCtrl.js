@@ -24,6 +24,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     vm.updateRecord = function() {
         $http.get(appConfig.djangoUrl + "search/" + vm.record._index + "/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
+            $rootScope.latestRecord = response.data;
             getVersionSelectData();
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
@@ -37,6 +38,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         vm.viewContent = true;
         return $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
+            $rootScope.latestRecord = response.data;
             if(vm.record.structures.length == 0) {
                 $scope.getArchives().then(function (result) {
                     vm.tags.archive.options = result;
@@ -404,6 +406,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         }
         $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
             vm.record = response.data;
+            $rootScope.latestRecord = response.data;
             $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
             $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
 

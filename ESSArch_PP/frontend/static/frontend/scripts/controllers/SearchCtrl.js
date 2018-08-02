@@ -27,6 +27,13 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     $scope.$on("$stateChangeSuccess", function() {
         if ($state.is('home.access.search')) {
             vm.activeTab = 0;
+            vm.search(vm.tableState);
+        } else if ($state.is('home.access.search.archiveManager')) {
+            vm.activeTab = 2;
+        } else if ($state.is('home.access.search.classificationStructures')) {
+            vm.activeTab = 3;
+        }else {
+            vm.activeTab = 1;
         }
     });
 
@@ -53,6 +60,14 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     $scope.checkPermission = function(permissionName) {
         return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
     };
+
+    vm.goToDetailView = function() {
+        if($rootScope.latestRecord) {
+            $state.go('home.access.search.' + $rootScope.latestRecord._index, { id: $rootScope.latestRecord._id });
+            vm.activeTab = 1;
+        }
+    }
+
     vm.filterObject = {
         q: "",
         type: null,
