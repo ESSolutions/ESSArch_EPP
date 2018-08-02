@@ -604,5 +604,6 @@
     "CLASSIFICATION_STRUCTURES": "Klassificeringsstrukturer",
     "NEW_CLASSIFICATION_STRUCTURE": "Ny Klassificeringsstruktur",
     "CLASSIFICATION_STRUCTURE_CREATED": "Klassificeringsstruktur skapad",
-    "EDIT_CLASSIFICATION_STRUCTURE": "Redigera Klassificeringsstruktur"
+    "EDIT_CLASSIFICATION_STRUCTURE": "Redigera Klassificeringsstruktur",
+    "ARCHIVEMANAGER": "Arkivhanterare"
 }

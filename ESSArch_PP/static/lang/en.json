@@ -605,5 +605,6 @@
     "CLASSIFICATION_STRUCTURES": "Classification structures",
     "NEW_CLASSIFICATION_STRUCTURE": "New Classification structure",
     "CLASSIFICATION_STRUCTURE_CREATED": "Classification structure created",
-    "EDIT_CLASSIFICATION_STRUCTURE": "Edit classification structure"
+    "EDIT_CLASSIFICATION_STRUCTURE": "Edit classification structure",
+    "ARCHIVEMANAGER": "Archive manager"
 }
