@@ -10,9 +10,6 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.resultsPerPage = 25;
     vm.resultViewType = "list";
 
-    var auth = window.btoa("user:user");
-    var headers = { "Authorization": "Basic " + auth };
-
     // Change tab from outside this scope, used in search detail
     $scope.$on('CHANGE_TAB', function(event, data) {
         vm.activeTab = data.tab;
