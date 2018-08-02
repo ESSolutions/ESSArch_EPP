@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer) {
+angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -40,7 +40,10 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             vm.activeTab = 0;
             vm.showResults = true;
         }
-        $http.get(appConfig.djangoUrl+"search/", {params: {page_size: 0}}).then(function(response) {
+        angular.forEach($stateParams.query, function(value, key) {
+            vm.filterObject[key] = value;
+        })
+        $http.get(appConfig.djangoUrl+"search/", {params: angular.extend(vm.filterObject, {page: 1, page_size: vm.resultsPerPage, ordering: ""})}).then(function(response) {
             vm.loadTags(response.data.aggregations);
             vm.fileExtensions = response.data.aggregations._filter_extension.extension.buckets;
             vm.showTree = true;
@@ -149,6 +152,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
                 tableState.pagination.numberOfPages = response.numberOfPages;//set the number of pages so the pagination can update
                 vm.searching = false;
                 vm.loadTags(response.aggregations);
+                $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
             })
         } else {
             vm.showResults = true;

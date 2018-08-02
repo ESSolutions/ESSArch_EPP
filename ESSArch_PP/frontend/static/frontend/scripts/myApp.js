@@ -103,7 +103,7 @@ angular.module('myApp', ['templates', 'ngRoute', 'treeControl', 'ui.bootstrap', 
         }
     })
     .state('home.access.search', {
-        url: '/search',
+        url: '/search?{query:json}',
         templateUrl: '/static/frontend/views/search.html',
         controller: 'SearchCtrl as vm',
         resolve: {
