@@ -116,13 +116,21 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             return index+1+((vm.tableState.pagination.start/vm.tableState.pagination.number)*vm.tableState.pagination.number);
         }
     }
-    vm.searchSubmit = function(searchString) {
-        vm.filterObject.q = searchString;
+    vm.searchSubmit = function(searchString, debounce) {
         if(vm.tableState) {
             vm.tableState.pagination.start = 0;
         }
-        vm.search(vm.tableState);
-        vm.activeTab = 0;
+        if(debounce) {
+            $timeout(function() {
+                if(vm.filterObject.q === searchString) {
+                    vm.search(vm.tableState);
+                    vm.activeTab = 0;
+                }
+            }, 300);
+        } else {
+            vm.search(vm.tableState);
+            vm.activeTab = 0;
+        }
     }
 
     function formatFilters() {
