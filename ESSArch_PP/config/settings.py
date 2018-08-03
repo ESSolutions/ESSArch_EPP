@@ -35,6 +35,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -326,8 +327,6 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
 CELERY_IMPORTS = ("ESSArch_Core.ip.tasks", "workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = 'redis://'
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
-
-from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
     'RunWorkflowProfiles-every-10-seconds': {
