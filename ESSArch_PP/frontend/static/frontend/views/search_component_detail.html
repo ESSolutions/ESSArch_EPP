@@ -46,43 +46,6 @@
             </div>
         </div>
     </div>
-    <div class="detail-fields-wrapper">
-        <!--
-            <div class="detail-field" ng-if="vm.record._source.name">
-                <strong>
-                    {{'NAME' | translate}}
-                </strong>
-                <div ng-class="{masked : vm.record.masked_fields.includes('name')}"
-                ng-bind-html="vm.record._source.name">
-            </div>
-        </div>
-        <div class="detail-field" ng-if="vm.record._source.reference_code">
-            <strong>
-                {{'REFERENCE_CODE' | translate}}
-            </strong>
-            <div ng-class="{masked : vm.record.masked_fields.includes('reference_code')}"
-            ng-bind-html="vm.record._source.reference_code">
-        </div>
-    </div>
-    <div class="detail-field" ng-if="vm.record._source.ip">
-            <strong>
-                {{'IP' | translate}}
-            </strong>
-            <div ng-class="{masked : vm.record.masked_fields.includes('ip')}"
-            ng-bind-html="vm.record._source.ip">
-        </div>
-    </div>
-    <div class="detail-field" ng-if="vm.record._source.super_secret_field">
-        <strong>
-                {{'super_secret_field' | translate}}
-            </strong>
-            <div ng-class="{masked : vm.record.masked_fields.includes('super_secret_field')}"
-            ng-bind-html="vm.record._source.super_secret_field">
-        </div>
-    </div>
-    -->
-    <search-result-field label="'Name'" data="vm.record._source.name"></search-result-field>
-    </div>
     <br/>
     <strong ng-if="vm.record._source.agents">{{'AGENTS' | translate}}:</strong>
     <div ng-repeat="agent in vm.record._source.agents">
