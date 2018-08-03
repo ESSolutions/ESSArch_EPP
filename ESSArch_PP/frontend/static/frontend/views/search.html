@@ -100,7 +100,7 @@
                                                     popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
                                                     </span>
                                                 </td>
-                                                <td class="search-td-nowrap">{{x.reference_code}}</td>
+                                                <td class="search-td-nowrap" ng-bind-html="x.reference_code"></td>
                                                 <td ng-bind-html="x.name"></td>
                                                 <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
                                                 <td ng-bind-html="x.desc"></td>
