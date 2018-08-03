@@ -56,7 +56,7 @@ SORTABLE_FIELDS = (
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
-    fields = ['name', 'desc', 'attachment.content']
+    fields = ['reference_code', 'name', 'desc', 'attachment.content']
 
     facets = {
         # use bucket aggregations to define facets
