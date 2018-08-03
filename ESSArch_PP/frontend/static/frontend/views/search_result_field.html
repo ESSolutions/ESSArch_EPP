@@ -1,0 +1,12 @@
+<div ng-if="vm.data != null" title="{{vm.label}}"class="search-result-field">
+    {{vm.label}}:&nbsp;
+    <div ng-if="!vm.type">
+        {{vm.data}}
+    </div>
+    <div ng-if="vm.type === 'date'">
+        {{vm.data | date:"yyyy-MM-dd"}}
+    </div>
+    <div ng-if="vm.type === 'bool' || vm.type === 'boolean'">
+        {{vm.data?'Ja':'Nej'}}
+    </div>
+</div>
