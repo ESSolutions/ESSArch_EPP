@@ -40,8 +40,8 @@
             </nav>
             <div ng-controller="UtilCtrl" class="tasks-icons">
                 <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                <span ng-click="redirectAdmin()" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                <span ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                <a href="/admin/" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
+                <a ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
                 <div class="notification-icon">
                     <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
                     <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>

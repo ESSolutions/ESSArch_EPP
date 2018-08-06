@@ -278,6 +278,10 @@ main {
         margin-bottom: 10px;
         .fa {
             cursor: pointer;
+            color: #000;
+            &:hover, &:focus {
+                text-decoration: none;
+            }
         }
         @include small-screen {
             display: flex;

@@ -859,10 +859,6 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
         }
     };
 
-    //Redirect to admin page
-    $scope.redirectAdmin = function () {
-        $window.location.href="/admin/";
-    }
     $scope.checkPermission = function(permissionName) {
         return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
     };
