@@ -55,6 +55,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+ESSARCH_WORKFLOW_POLLERS = {
+    'dir': {
+        'class': 'workflow.polling.backends.directory.DirectoryWorkflowPoller',
+        'path': '/ESSArch/data/gate/reception',
+    }
+}
+
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': 'ESSArch_Core.metadata.CustomMetadata',
