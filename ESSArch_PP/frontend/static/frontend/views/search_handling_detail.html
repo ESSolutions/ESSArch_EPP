@@ -16,6 +16,14 @@
         <br/>
     </div>
 
+    <div title="Identifikatorer" ng-if="vm.record._source.extra_ids">
+        <strong>Identifikatorer:</strong>
+        <div ng-repeat="x in vm.record._source.extra_ids">
+            <strong>{{x.typ}}:</strong>&nbsp;{{x.id}}
+        </div>
+        <br/>
+    </div>
+
     <div title="Dokumentnummer" ng-if="vm.record._source.arkivobjekt_id">
         <strong>Dokumentnummer:</strong> {{ vm.record._source.arkivobjekt_id }}
         <br/>
