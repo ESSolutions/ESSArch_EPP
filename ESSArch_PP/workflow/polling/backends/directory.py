@@ -15,7 +15,7 @@ from ESSArch_Core.profiles.models import SubmissionAgreement
 from ESSArch_Core.profiles.utils import profile_types
 from ESSArch_Core.util import find_destination, stable_path
 
-logger = logging.getLogger('essarch.core.WorkflowEngine.polling.DirectoryWorkflowPoller')
+logger = logging.getLogger('essarch.epp.workflow.polling.DirectoryWorkflowPoller')
 p_types = [p_type.lower().replace(' ', '_') for p_type in profile_types]
 
 
