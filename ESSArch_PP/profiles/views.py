@@ -40,7 +40,7 @@ from ESSArch_Core.essxml.ProfileMaker.models import extensionPackage, templatePa
 from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
 from ESSArch_Core.ip.models import EventIP, InformationPackage
 from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA, ProfileIP
-from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileDetailSerializer, ProfileSASerializer, \
+from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileDetailSerializer, ProfileWriteSerializer, ProfileSASerializer, \
     SubmissionAgreementSerializer
 from ESSArch_Core.profiles.views import SubmissionAgreementViewSet as SAViewSetCore
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
@@ -160,7 +160,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ProfileSerializer
 
-        return ProfileDetailSerializer
+        if self.action == 'retrieve':
+            return ProfileDetailSerializer
+
+        return ProfileWriteSerializer
 
     def get_queryset(self):
         queryset = Profile.objects.all()
