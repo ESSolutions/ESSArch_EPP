@@ -137,23 +137,6 @@ class ReceiveSIP(DBTask):
         self.logger.debug(u'sip_path set to {}'.format(aip.sip_path))
         aip.save()
 
-        recipient = User.objects.get(pk=self.responsible).email
-        if recipient:
-            try:
-                logger.debug("Sending mail")
-                subject = 'Received "%s"' % aip.object_identifier_value
-                body = '"%s" is now received and ready for archiving' % aip.object_identifier_value
-                send_mail(subject, body, None, [recipient], fail_silently=False)
-            except smtplib.SMTPException:
-                logger.exception("Failed to send mail")
-            except smtplib.socket.error:
-                logger.exception("SMTP connection failed")
-            else:
-                logger.debug("Mail sent")
-
-    def undo(self, purpose=None, allow_unknown_files=False):
-        pass
-
     def event_outcome_success(self, purpose=None, allow_unknown_files=False):
         return "Received SIP"
 
