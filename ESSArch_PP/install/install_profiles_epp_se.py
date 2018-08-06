@@ -54,10 +54,14 @@ def installProfiles():
     installProfilePreservationMetadata(sa)
 
     # create ERMS SA
-    erms_sa = sa
-    erms_sa.pk = None
-    erms_sa.name = "SA National Archive and Government SE (ERMS)"
-    erms_sa.save()
+    erms_sa_name = "SA National Archive and Government SE (ERMS)"
+    try:
+        erms_sa = SubmissionAgreement.objects.get(name=erms_sa_name)
+    except SubmissionAgreement.DoesNotExist:
+        erms_sa = sa
+        erms_sa.pk = None
+        erms_sa.name = erms_sa_name
+        erms_sa.save()
 
     installProfileContentType(erms_sa)
 
