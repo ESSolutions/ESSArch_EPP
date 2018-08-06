@@ -5,8 +5,11 @@
         </strong>
     </h3>
     <h4><span title="Informationsobjekt">{{vm.record._source.type}}</span></h4>
-    <p ng-if="vm.record._source.desc" class="result-description">{{vm.record._source.desc}}</p>
-    <br/>
+    <div ng-if="vm.record._source.desc">
+        <p ng-if="vm.record._source.desc" class="result-description">
+            {{vm.record._source.desc}}
+        </p>
+    </div>
 
     <div title="Ärendenummer" ng-if="vm.record._source.arkivobjekt_id">
         <strong>Ärendenummer:</strong> {{ vm.record._source.arkivobjekt_id }}
