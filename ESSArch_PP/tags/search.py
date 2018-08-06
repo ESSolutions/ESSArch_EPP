@@ -25,6 +25,7 @@ from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
 from rest_framework import exceptions, status
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from six import iteritems
@@ -205,7 +206,7 @@ def get_organization(id):
     }
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
-    permission_classes = (SearchPermissions,)
+    permission_classes = (IsAuthenticated, SearchPermissions,)
     index = ComponentSearch.index
     lookup_field = 'pk'
     lookup_url_kwarg = None
