@@ -125,7 +125,12 @@ class ComponentSearch(FacetedSearch):
         s = s.filter('term', current_version=True)
 
         s = s.query(Q('bool', should=[
+            # no archive
+            Q('bool', must=[Q('bool', **{'must_not': {'exists': {'field': 'archive'}}}),
+                            Q('bool', **{'must_not': {'term': {'_index': 'archive'}}})]),
+            # in archive connected to organization
             Q('terms', archive=organization_archives),
+            # is archive connected to organization
             Q('terms', _id=organization_archives)
         ]))
 
