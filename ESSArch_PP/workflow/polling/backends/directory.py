@@ -44,12 +44,15 @@ class DirectoryWorkflowPoller(BaseWorkflowPoller):
             xmlfile = os.path.splitext(subpath)[0] + '.xml'
 
             if sa is None:
+                logger.info(u'No SA specified, get from submit description instead')
                 tree = etree.parse(xmlfile)
                 root = tree.getroot()
                 altrecordids = get_altrecordids(root)
                 sa_id = altrecordids['SUBMISSIONAGREEMENT'][0]
+                logger.info(u'Found SA in submit description: {}'.format(sa_id))
                 sa = SubmissionAgreement.objects.get(pk=sa_id)
             else:
+                logger.info(u'Using specified sa: {}'.format(sa))
                 sa = SubmissionAgreement.objects.get(name=sa)
 
             org = Group.objects.get(name='Default')
