@@ -42,6 +42,7 @@ from ESSArch_Core.profiles.models import (
 
 def installProfiles():
     sa = installSubmissionAgreement()
+    installProfileWorkflow(sa)
 
     installProfileSIP(sa)
     installProfileTransferProject(sa)
@@ -1413,6 +1414,22 @@ def installProfileContentType(sa):
     sa.save()
 
     print 'Installed profile content type'
+
+    return 0
+
+def installProfileWorkflow(sa):
+
+    dct = {
+        'name': 'Workflow SE',
+        'profile_type': 'workflow',
+        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_WORKFLOW.json')).read()),
+    }
+
+    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
+    sa.profile_workflow = profile
+    sa.save()
+
+    print 'Installed profile Workflow'
 
     return 0
 
