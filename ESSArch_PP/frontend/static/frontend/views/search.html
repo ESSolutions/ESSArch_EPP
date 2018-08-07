@@ -67,89 +67,87 @@
         <div class="search-detail-wrapper">
             <uib-tabset ng-if="vm.searchResult.length || vm.showResults || vm.showTree" active="vm.activeTab" class="tabs">
                 <uib-tab ui-sref="home.access.search" index="0" heading="{{'HITS' | translate}}">
-                    <div class="tree-result-wrapper" ng-if="vm.activeTab == 0">
-                        <div ng-if="vm.showTree"class="filter-tree">
-                            <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
+                </uib-tab>
+                <uib-tab ng-click="vm.goToDetailView()" ng-show="latestRecord || ('home.access.search.detail' | isState) || ('home.access.search.information_package' | isState) || ('home.access.search.component' | isState)|| ('home.access.search.archive' | isState) || ('home.access.search.document' | isState) || ('home.access.search.directory' | isState)" index="1" heading="{{'RECORD' | translate}}">
+                </uib-tab>
+                <uib-tab ng-if="checkPermission('tags.create_archive')" index="2" ui-sref="home.access.search.archiveManager" heading="{{'NEW_ARCHIVE' | translate}}">
+                </uib-tab>
+                <uib-tab index="3" ui-sref="home.access.search.classificationStructures" heading="{{'CLASSIFICATION_STRUCTURES' | translate}}">
+                </uib-tab>
+            </uib-tabset>
+            <div class="tree-result-wrapper" ng-if="vm.activeTab === 0">
+                <div ng-if="vm.showTree"class="filter-tree">
+                    <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
+                </div>
+                <div ng-if="vm.showResults" class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                    <div class="h-100 w-100">
+                        <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
+                        <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container search-result-table">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>{{'TYPE' | translate}}</th>
+                                        <th st-sort="reference_code" class="clickable">{{'REFERENCE_CODE' | translate}}</th>
+                                        <th st-sort="name" class="clickable">{{'TITLE' |translate}}</th>
+                                        <th>{{'DATE' |translate}}</th>
+                                        <th>{{'DESCRIPTION' | translate}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x, $event)" class="result-item-table clickable">
+                                        <td class="search-td-nowrap">{{vm.resultNumber($index)}}</td>
+                                        <td>
+                                            <span ng-if="x._index == 'archive'" class="fa fa-archive" uib-popover="{{x.type}}"
+                                            popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                                            </span>
+                                            <span ng-if="x._index == 'component'" class="fa fa-folder-o" uib-popover="{{x.type}}"
+                                            popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                                            </span>
+                                            <span ng-if="x._index == 'document'" class="fa fa-file-o" uib-popover="{{x.type}}"
+                                            popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                                            </span>
+                                        </td>
+                                        <td class="search-td-nowrap" ng-bind-html="x.reference_code"></td>
+                                        <td ng-bind-html="x.name"></td>
+                                        <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
+                                        <td ng-bind-html="x.desc"></td>
+                                    </tr>
+                                    <tr ng-if="!vm.searchResult.length && !ipLoading" class="empty-table-indicator">
+                                            <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                                        </tr>
+                                        <tr ng-if="!vm.searchResult.length && ipLoading" class="empty-table-indicator">
+                                            <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
+                                        </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div ng-if="vm.showResults" class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
-                            <div class="h-100 w-100">
-                                <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
-                                <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container search-result-table">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>{{'TYPE' | translate}}</th>
-                                                <th st-sort="reference_code" class="clickable">{{'REFERENCE_CODE' | translate}}</th>
-                                                <th st-sort="name" class="clickable">{{'TITLE' |translate}}</th>
-                                                <th>{{'DATE' |translate}}</th>
-                                                <th>{{'DESCRIPTION' | translate}}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x, $event)" class="result-item-table clickable">
-                                                <td class="search-td-nowrap">{{vm.resultNumber($index)}}</td>
-                                                <td>
-                                                    <span ng-if="x._index == 'archive'" class="fa fa-archive" uib-popover="{{x.type}}"
-                                                    popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                                                    </span>
-                                                    <span ng-if="x._index == 'component'" class="fa fa-folder-o" uib-popover="{{x.type}}"
-                                                    popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                                                    </span>
-                                                    <span ng-if="x._index == 'document'" class="fa fa-file-o" uib-popover="{{x.type}}"
-                                                    popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                                                    </span>
-                                                </td>
-                                                <td class="search-td-nowrap" ng-bind-html="x.reference_code"></td>
-                                                <td ng-bind-html="x.name"></td>
-                                                <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
-                                                <td ng-bind-html="x.desc"></td>
-                                            </tr>
-                                            <tr ng-if="!vm.searchResult.length && !ipLoading" class="empty-table-indicator">
-                                                    <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
-                                                </tr>
-                                                <tr ng-if="!vm.searchResult.length && ipLoading" class="empty-table-indicator">
-                                                    <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
-                                                </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div ng-show="vm.resultViewType == 'grid'">
-                                    <div class="grid-view">
-                                        <div class="flex-grid">
-                                            <div ng-repeat="x in vm.searchResult">
-                                                <div class="clickable result-item-grid" ng-click="vm.openResult(x)">
-                                                    <div class="item-image">
-                                                        <span ng-if="x._index == 'archive'" class="fa fa-3x fa-archive"></span>
-                                                        <span ng-if="x._index == 'component'" class="fa fa-3x fa-folder-o"></span>
-                                                        <span ng-if="x._index == 'document'" class="fa fa-3x fa-file-o"></span>
-                                                    </div>
-                                                    <div class="metadata-wrapper">
-                                                        <b>{{x.type}}</b>
-                                                        <br/>
-                                                        <b>{{x.reference_code}}</b>
-                                                        <p><span class="result-name" ng-bind-html="x.name"></span> <span ng-if="x.unit_dates.date">({{x.unit_dates.date}})</span></p>
-                                                    </div>
-                                                </div>
+                        <div ng-show="vm.resultViewType == 'grid'">
+                            <div class="grid-view">
+                                <div class="flex-grid">
+                                    <div ng-repeat="x in vm.searchResult">
+                                        <div class="clickable result-item-grid" ng-click="vm.openResult(x)">
+                                            <div class="item-image">
+                                                <span ng-if="x._index == 'archive'" class="fa fa-3x fa-archive"></span>
+                                                <span ng-if="x._index == 'component'" class="fa fa-3x fa-folder-o"></span>
+                                                <span ng-if="x._index == 'document'" class="fa fa-3x fa-file-o"></span>
+                                            </div>
+                                            <div class="metadata-wrapper">
+                                                <b>{{x.type}}</b>
+                                                <br/>
+                                                <b>{{x.reference_code}}</b>
+                                                <p><span class="result-name" ng-bind-html="x.name"></span> <span ng-if="x.unit_dates.date">({{x.unit_dates.date}})</span></p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                             </div>
                         </div>
+                        <div ng-if="vm.searchResult.length >= 10" class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                     </div>
-                </uib-tab>
-                <uib-tab ng-click="vm.goToDetailView()" ng-show="latestRecord || ('home.access.search.detail' | isState) || ('home.access.search.information_package' | isState) || ('home.access.search.component' | isState)|| ('home.access.search.archive' | isState) || ('home.access.search.document' | isState) || ('home.access.search.directory' | isState)" index="1" heading="{{'RECORD' | translate}}">
-                    <div ui-view></div>
-                </uib-tab>
-                <uib-tab ng-if="checkPermission('tags.create_archive')" index="2" ui-sref="home.access.search.archiveManager" heading="{{'NEW_ARCHIVE' | translate}}">
-                    <div class="margin-top-5" ui-view></div>
-                </uib-tab>
-                <uib-tab index="3" ui-sref="home.access.search.classificationStructures" heading="{{'CLASSIFICATION_STRUCTURES' | translate}}">
-                    <div ui-view></div>
-                </uib-tab>
-            </uib-tabset>
+                </div>
+            </div>
+            <div ng-if="vm.activeTab !== 0" ui-view></div>
         </div>
     </div>
 </div>
