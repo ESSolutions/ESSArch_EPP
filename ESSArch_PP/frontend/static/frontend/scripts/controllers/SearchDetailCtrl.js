@@ -26,8 +26,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             vm.record = response.data;
             $rootScope.latestRecord = response.data;
             getVersionSelectData();
-            getChildren(vm.record).then(function (response) {
-                vm.record_children = response.data;
+            getBreadcrumbs(vm.record).then(function(list) {
+                vm.record.breadcrumbs = list;
+                getChildren(vm.record).then(function (response) {
+                    vm.record_children = response.data;
+                })
+            }).catch(function(error) {
+                Notifications.add('Could not load breadcrumbs!', 'error');
             })
         }).catch(function(response) {
             Notifications.add("Could not update record", "error");
@@ -58,8 +63,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             if (angular.isUndefined(vm.record._source.terms_and_condition)) {
                 vm.record._source.terms_and_condition = null;
             }
-            getChildren(vm.record).then(function (response) {
-                vm.record_children = response.data;
+            getBreadcrumbs(vm.record).then(function(list) {
+                vm.record.breadcrumbs = list;
+                getChildren(vm.record).then(function (response) {
+                    vm.record_children = response.data;
+                })
+            }).catch(function(error) {
+                Notifications.add('Could not load breadcrumbs!', 'error');
             })
             return vm.record;
         }).catch(function(response) {
@@ -190,6 +200,22 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             return result[0];
         })
     }
+
+    function getBreadcrumbs(node) {
+        return getParentList([], {index: node._index, id: node._id});
+    }
+    function getParentList(parentList, parent) {
+        return $http.get(vm.url+"search/"+parent.index+"/"+parent.id+"/").then(function(response) {
+            if(response.data.parent !== null) {
+                parentList.unshift(response.data);
+                return getParentList(parentList, response.data.parent);
+            } else {
+                parentList.unshift(response.data);
+                return parentList;
+            }
+        });
+    }
+
     function getChildren(node) {
         return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {params: {page_size: 10, page: 1, structure: vm.structure}}).then(function(response) {
             var count = response.headers('Count');
@@ -415,8 +441,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
             vm.currentVersion = vm.record._id;
             getVersionSelectData();
-            getChildren(vm.record).then(function (response) {
-                vm.record_children = response.data;
+            getBreadcrumbs(vm.record).then(function(list) {
+                vm.record.breadcrumbs = list;
+                getChildren(vm.record).then(function (response) {
+                    vm.record_children = response.data;
+                })
+            }).catch(function(error) {
+                Notifications.add('Could not load breadcrumbs!', 'error');
             })
         })
     }

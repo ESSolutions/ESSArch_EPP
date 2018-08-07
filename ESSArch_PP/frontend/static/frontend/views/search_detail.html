@@ -17,6 +17,7 @@
                 <button ng-click="vm.newStructureModal(vm.recordTreeData[0])" class="btn btn-success lock-button">+</button>
             </div>
         </div>
+        <hr/>
         <div ng-if="vm.record.structures.length == 0" class="place-in-structure-wrapper">
             <p>{{'PLACE_IN_CLASSIFICATION_STRUCTURE' | translate}}</p>
             <label>{{'ARCHIVE' | translate}}</label>
@@ -79,20 +80,34 @@
         <div js-tree="vm.recordTreeConfig" should-apply="vm.applyRecordModelChanges()" ng-model="vm.recordTreeData" tree="vm.recordTreeInstance" tree-events="changed:vm.treeChange;ready:vm.setType;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
     </div>
     <div ng-if="!vm.unavailable" class="view-content">
-        <div class="float-right">
-            <label class="">
-                {{'VERSION' | translate}}
-            </label>
-            <div class="flex-row">
-                <select class="form-control version-select" ng-model="vm.currentVersion" ng-change="vm.showVersion(vm.currentVersion)">
-                    <option ng-repeat="version in vm.record.versions" value="{{version._id}}">
-                        {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
-                    </option>
-                </select>
-                <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+        <div class="detail-header">
+            <div>
+                <label>
+                    {{'PATH' | translate}}
+                </label>
+                <ul class="breadcrumb">
+                    <li ng-repeat="x in vm.record.breadcrumbs">
+                        <a ng-if="$index !== vm.record.breadcrumbs.length-1" ui-state="'home.access.search.'+x._index" ui-state-params="{id: x._id}">{{x.name}}</a>
+                        {{$index === vm.record.breadcrumbs.length-1?x.name:''}}
+                    </li>
+                </ul>
+            </div>
+            <div class="version-select-wrapper">
+                <label>
+                    {{'VERSION' | translate}}
+                </label>
+                <div class="flex-row">
+                    <select class="form-control version-select" ng-model="vm.currentVersion" ng-change="vm.showVersion(vm.currentVersion)">
+                        <option ng-repeat="version in vm.record.versions" value="{{version._id}}">
+                            {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
+                        </option>
+                    </select>
+                    <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+                </div>
             </div>
         </div>
-        <div ng-switch="vm.record._index">
+        <hr/>
+        <div class="type-specific-results" ng-switch="vm.record._index">
             <div ng-switch-when="component">
                 <div ng-switch="vm.record._source.type.toLowerCase()">
                     <div ng-switch-when="ärende">
@@ -115,7 +130,7 @@
             <div ng-switch-when="directory">
                 <div ng-include="'static/frontend/views/search_directory_detail.html'"></div>
             </div>
+            <button class="btn btn-warning lock-button margin-top-5" ng-click="vm.emailDocument(vm.record)">{{'EMAIL' | translate}}</button>
         </div>
-        <button class="btn btn-warning lock-button margin-top-5" ng-click="vm.emailDocument(vm.record)">{{'EMAIL' | translate}}</button>
     </div>
 </div>

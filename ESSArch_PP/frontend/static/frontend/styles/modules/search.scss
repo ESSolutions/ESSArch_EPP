@@ -129,7 +129,6 @@
     }
     .view-content {
         margin-top: 10px;
-        margin-left: 50px;
         width: 100%;
         @include medium-screen {
             width: 100%;
@@ -139,9 +138,15 @@
             width: 100%;
             margin-left: 0;
         }
+        .version-select-wrapper {
+            padding-bottom: 9px;
+        }
         .version-select {
             min-width: 100px;
             max-width: 150px;
+        }
+        hr {
+            margin-left: 25px;
         }
     }
 
@@ -168,27 +173,45 @@
     .record-tree {
         @include large-screen-up {
             min-width: 300px;
+            max-width: 300px;
+            overflow-x: hidden;
         }
         margin-top: 10px;
         .classification-select {
-            padding-bottom: 15px;
+            padding-bottom: 9px;
             max-width: 300px;
+            padding-right: 25px;
         }
 
         .jstree-anchor {
             max-width: 90%;
             @include large-screen-up() {
-                max-width: 285px;
+                max-width: 98%;
             }
         }
 
+        .jstree {
+            padding-right: 25px;
+        }
+
+        hr {
+            margin-right: 25px;
+        }
     }
     .place-in-structure-wrapper {
         max-width: 300px;
         padding-bottom: 5px;
+        padding-right: 25px;
     }
-    .tabs {
-        @include container(10px);
+
+    .type-specific-results {
+        border-left: 1px solid #eee;
+        padding-left: 25px;
+    }
+
+    hr {
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
     .filters {
         label {
@@ -197,9 +220,27 @@
     }
     .search-detail-wrapper {
         width: 100%;
+        @include container(10px);
     }
     .search-detail {
         margin-left: 5px;
+        .detail-header {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            padding-left: 25px;
+            border-left: 1px solid #eee;
+            .breadcrumb {
+                background: none;
+                padding-left: 0;
+                margin-bottom: 0;
+            }
+            @include medium-screen-up {
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                flex-direction: row;
+            }
+        }
     }
     .tree-result-wrapper {
         display: flex;
