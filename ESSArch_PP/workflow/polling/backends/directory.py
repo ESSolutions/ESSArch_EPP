@@ -20,7 +20,7 @@ p_types = [p_type.lower().replace(' ', '_') for p_type in profile_types]
 
 
 class DirectoryWorkflowPoller(BaseWorkflowPoller):
-    def poll(self, path):
+    def poll(self, path, sa=None):
         for entry in os.listdir(path):
             subpath = os.path.join(path, entry)
 
@@ -43,11 +43,14 @@ class DirectoryWorkflowPoller(BaseWorkflowPoller):
 
             xmlfile = os.path.splitext(subpath)[0] + '.xml'
 
-            tree = etree.parse(xmlfile)
-            root = tree.getroot()
-            altrecordids = get_altrecordids(root)
-            sa_id = altrecordids['SUBMISSIONAGREEMENT'][0]
-            sa = SubmissionAgreement.objects.get(pk=sa_id)
+            if sa is None:
+                tree = etree.parse(xmlfile)
+                root = tree.getroot()
+                altrecordids = get_altrecordids(root)
+                sa_id = altrecordids['SUBMISSIONAGREEMENT'][0]
+                sa = SubmissionAgreement.objects.get(pk=sa_id)
+            else:
+                sa = SubmissionAgreement.objects.get(name=sa)
 
             org = Group.objects.get(name='Default')
             role = 'admin'
