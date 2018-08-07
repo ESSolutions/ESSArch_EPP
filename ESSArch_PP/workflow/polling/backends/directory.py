@@ -49,8 +49,8 @@ class DirectoryWorkflowPoller(BaseWorkflowPoller):
             sa_id = altrecordids['SUBMISSIONAGREEMENT'][0]
             sa = SubmissionAgreement.objects.get(pk=sa_id)
 
-            org = Group.objects.get(name=sa.archivist_organization)
-            role = 'coordinator'
+            org = Group.objects.get(name='Default')
+            role = 'admin'
             responsible = GroupMember.objects.filter(roles__codename=role, group=org).get().member.django_user
 
             ip = InformationPackage.objects.create(
