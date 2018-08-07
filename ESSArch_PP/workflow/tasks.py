@@ -275,8 +275,8 @@ class CacheAIP(DBTask):
         aip_profile = aip_obj.get_profile_rel('aip').profile
         mets_dir, mets_name = find_destination("mets_file", aip_profile.structure)
         mets_path = os.path.join(srcdir, mets_dir, mets_name)
-        generator = XMLGenerator(filesToCreate)
-        generator.generate(folderToParse=dsttar, extra_paths_to_parse=[mets_path], algorithm=algorithm)
+        generator = XMLGenerator()
+        generator.generate(filesToCreate, folderToParse=dsttar, extra_paths_to_parse=[mets_path], algorithm=algorithm)
 
         size, count = get_tree_size_and_count(aip_obj.object_path)
         InformationPackage.objects.filter(pk=self.ip).update(
@@ -321,8 +321,8 @@ class CacheAIP(DBTask):
                 'FIDType': 'UUID',
             })
 
-        generator = XMLGenerator(filesToCreate)
-        generator.generate(parsed_files=parsed_files, algorithm=algorithm)
+        generator = XMLGenerator()
+        generator.generate(filesToCreate, parsed_files=parsed_files, algorithm=algorithm)
 
         InformationPackage.objects.filter(pk=self.ip).update(
             object_path=dstdir, cached=True
