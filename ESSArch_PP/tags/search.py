@@ -607,18 +607,27 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
                 return Response(self.serialize(tag_version.to_search()))
 
-    def _update_tag_metadata(self, tag, data):
+    def _update_tag_metadata(self, tag_version, data):
         if 'parent' in data:
             try:
                 structure = data.pop('structure')
             except KeyError:
                 raise exceptions.ParseError('Missing "structure" parameter')
-            structure = Structure.objects.get(pk=structure)
+
             parent = data.pop('parent')
+
+            structure = Structure.objects.get(pk=structure)
             parent_tag_version = TagVersion.objects.get(pk=parent)
             parent_tag_structure = parent_tag_version.tag.structures.get(structure=structure)
-            tag_structure, _ = TagStructure.objects.update_or_create(tag=tag.tag, structure=structure,
-                                                                     defaults={'parent': parent_tag_structure})
+
+            with transaction.atomic():
+                tag_structure, _ = TagStructure.objects.get_or_create(tag=tag_version.tag, structure=structure)
+
+                if not structure.is_move_allowed(tag_structure, parent_tag_structure):
+                    raise exceptions.ParseError(u'{} cannot be moved to {}'.format(tag_version.name, parent_tag_version.name))
+
+                tag_structure.parent = parent_tag_structure
+                tag_structure.save()
 
         db_fields = [f.name for f in TagVersion._meta.get_fields()]
         db_fields_request_data = {}
@@ -627,13 +636,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             if f in data:
                 db_fields_request_data[f] = data.pop(f)
 
-        serializer = TagVersionWriteSerializer(tag, data=db_fields_request_data, partial=True)
+        serializer = TagVersionWriteSerializer(tag_version, data=db_fields_request_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         if data:
-            tag.update_search(data)
-        return tag.from_search()
+            tag_version.update_search(data)
+        return tag_version.from_search()
 
     def partial_update(self, request, index=None, pk=None):
         tag = self.get_tag_object()
