@@ -129,7 +129,6 @@
     }
     .view-content {
         margin-top: 10px;
-        width: 100%;
         @include medium-screen {
             width: 100%;
             margin-left: 0;
@@ -172,9 +171,9 @@
     }
     .record-tree {
         @include large-screen-up {
+            width: 300px;
             min-width: 300px;
-            max-width: 300px;
-            overflow-x: hidden;
+            max-width: 900px;
         }
         margin-top: 10px;
         .classification-select {
@@ -205,7 +204,6 @@
     }
 
     .type-specific-results {
-        border-left: 1px solid #eee;
         padding-left: 25px;
     }
 
@@ -222,6 +220,11 @@
         width: 100%;
         @include container(10px);
     }
+    .rg-right {
+        @include medium-screen-down {
+            display: none;
+        }
+    }
     .search-detail {
         margin-left: 5px;
         .detail-header {
@@ -229,7 +232,6 @@
             flex-direction: column;
             flex-wrap: wrap;
             padding-left: 25px;
-            border-left: 1px solid #eee;
             .breadcrumb {
                 background: none;
                 padding-left: 0;

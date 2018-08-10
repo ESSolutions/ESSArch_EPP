@@ -101,6 +101,7 @@ var jsVendorFiles = [
         'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
         'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js',
         'node_modules/angular-clipboard/angular-clipboard.js',
+        'node_modules/angular-resizable/src/angular-resizable.js',
         'node_modules/angular-resource/angular-resource.js',
         'node_modules/jstree/dist/jstree.js',
         'node_modules/ng-js-tree/dist/ngJsTree.js',

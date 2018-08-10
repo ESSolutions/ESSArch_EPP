@@ -33,6 +33,7 @@
 @import '../node_modules/jstree/dist/themes/default/style';
 @import '../node_modules/angular-cron-jobs/dist/angular-cron-jobs';
 @import '../node_modules/messenger-hubspot/build/css/messenger';
+@import '../node_modules/angular-resizable/src/angular-resizable';
 @import '../node_modules/messenger-hubspot/build/css/messenger-theme-flat';
 @import 'modules/colors';
 @import 'modules/mixins';
@@ -46,6 +47,7 @@
 @import 'core/modules/step_task';
 @import 'core/modules/filebrowser';
 @import 'core/modules/events';
+@import 'core/modules/resize';
 @import 'modules/reception';
 @import 'modules/my_page';
 @import 'modules/profile_maker';
