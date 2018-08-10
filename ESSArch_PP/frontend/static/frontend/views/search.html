@@ -126,7 +126,7 @@
                             <div class="grid-view">
                                 <div class="flex-grid">
                                     <div ng-repeat="x in vm.searchResult">
-                                        <div class="clickable result-item-grid" ng-click="vm.openResult(x)">
+                                        <div class="clickable result-item-grid" ng-click="vm.openResult(x, $event)">
                                             <div class="item-image">
                                                 <span ng-if="x._index == 'archive'" class="fa fa-3x fa-archive"></span>
                                                 <span ng-if="x._index == 'component'" class="fa fa-3x fa-folder-o"></span>
