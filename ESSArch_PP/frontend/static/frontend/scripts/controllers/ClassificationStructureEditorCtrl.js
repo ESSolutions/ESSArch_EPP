@@ -7,7 +7,6 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
             vm.structure = null;
         } else {
             vm.getTree(row).then(function(tree) {
-                console.log(tree)
                 vm.structure = row;
                 vm.recreateTree(tree);
             });
