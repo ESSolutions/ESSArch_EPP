@@ -546,7 +546,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         }).catch(function(response) {
             if(response.data.detail) {
                 Notifications.add(response.data.detail, 'error');
-            } else {
+            } else if (response.status !== 500) {
                 Notifications.add('Unknown error', 'error');
             }
         })
