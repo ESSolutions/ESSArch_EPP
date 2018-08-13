@@ -265,6 +265,8 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
                     rules: rules
                 }
             }).$promise.then(function (resource) {
+                vm.structure = resource;
+                vm.rules = resource.specification.rules?angular.copy(resource.specification.rules):{};
                 vm.savingRules = false;
                 Notifications.add('Rules saved', 'success');
             })
