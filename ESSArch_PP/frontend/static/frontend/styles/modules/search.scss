@@ -129,6 +129,7 @@
     }
     .view-content {
         margin-top: 10px;
+        flex-grow: 1;
         @include medium-screen {
             width: 100%;
             margin-left: 0;
@@ -228,6 +229,7 @@
     .search-detail {
         margin-left: 5px;
         .detail-header {
+            width: 100%;
             display: flex;
             flex-direction: column;
             flex-wrap: wrap;
