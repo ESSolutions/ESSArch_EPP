@@ -606,5 +606,8 @@
     "NEW_CLASSIFICATION_STRUCTURE": "New Classification structure",
     "CLASSIFICATION_STRUCTURE_CREATED": "Classification structure created",
     "EDIT_CLASSIFICATION_STRUCTURE": "Edit classification structure",
-    "ARCHIVEMANAGER": "Archive manager"
+    "ARCHIVEMANAGER": "Archive manager",
+    "RULES": "Rules",
+    "CAN_BE_MOVED": "Can be moved",
+    "NEW_TYPE": "New rule"
 }

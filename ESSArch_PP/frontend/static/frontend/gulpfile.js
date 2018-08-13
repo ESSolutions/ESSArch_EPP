@@ -128,6 +128,7 @@ var jsVendorFiles = [
         'styles/modules/search.scss',
         'styles/modules/positions.scss',
         'styles/modules/utils.scss',
+        'styles/modules/classification_structure_editor.scss',
         'styles/styles.scss'
     ],
     cssDest = 'styles';

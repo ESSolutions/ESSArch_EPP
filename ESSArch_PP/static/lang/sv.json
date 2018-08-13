@@ -605,5 +605,8 @@
     "NEW_CLASSIFICATION_STRUCTURE": "Ny Klassificeringsstruktur",
     "CLASSIFICATION_STRUCTURE_CREATED": "Klassificeringsstruktur skapad",
     "EDIT_CLASSIFICATION_STRUCTURE": "Redigera Klassificeringsstruktur",
-    "ARCHIVEMANAGER": "Arkivhanterare"
+    "ARCHIVEMANAGER": "Arkivhanterare",
+    "RULES": "Regler",
+    "CAN_BE_MOVED": "Kan flyttas",
+    "NEW_TYPE": "Ny regel"
 }

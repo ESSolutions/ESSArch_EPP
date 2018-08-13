@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate) {
+angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate, Structure) {
     var $ctrl = this;
     $ctrl.name = null;
     $ctrl.newNode = {};
@@ -125,13 +125,11 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
      * Save new classification structure
      */
     $ctrl.save = function() {
-        $http({
-            method: 'POST',
-            url: appConfig.djangoUrl + 'classification-structures/',
-            data: {
+        Structure.new(
+            {
                 name: $ctrl.name
             }
-        }).then(function(response) {
+        ).$promise.then(function(response) {
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_CREATED'), 'success');
         }).catch(function(response) {

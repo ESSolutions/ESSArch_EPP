@@ -1,15 +1,21 @@
-angular.module('myApp').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate) {
+angular.module('myApp').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];
+    vm.rules = {};
+    $scope.angular = angular;
     vm.structureClick = function(row) {
         if(vm.structure && vm.structure.id === row.id) {
             vm.structure = null;
         } else {
-            vm.getTree(row).then(function(tree) {
-                vm.structure = row;
-                vm.recreateTree(tree);
-            });
+            Structure.get({id: row.id}).$promise.then(function(resource) {
+                vm.structure = resource;
+                vm.getTree(vm.structure).then(function(tree) {
+                    vm.recreateTree(tree);
+                    vm.rules = vm.structure.specification.rules?angular.copy(vm.structure.specification.rules):{};
+                });
+
+            })
         }
     }
 
@@ -41,18 +47,15 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
             if(sorting.reverse) {
                 sortString = "-"+sortString;
             }
-            $http({
-                method: 'GET',
-                url: appConfig.djangoUrl + 'classification-structures/',
-                params: {
+            Structure.query({
                     page: pageNumber,
                     page_size: number,
                     ordering: sortString,
                     search: search
                 }
-            }).then(function(response) {
-                vm.structures = response.data;
-                tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number);//set the number of pages so the pagination can update
+            ).$promise.then(function(resource) {
+                vm.structures = resource;
+                tableState.pagination.numberOfPages = Math.ceil(resource.$httpHeaders('Count') / number);//set the number of pages so the pagination can update
                 $scope.initLoad = false;
                 vm.structuresLoading = false;
             }).catch(function(response) {
@@ -239,6 +242,40 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
             vm.structureTreeConfig.version++;
         }
     }
+
+    // Rules
+    vm.newRule = null;
+    vm.addRule = function(name) {
+        if(name !== null) {
+            vm.rules[name] = {
+                movable: true
+            };
+            vm.newRule = null;
+        }
+    }
+    vm.savingRules = false;
+    vm.saveRules = function (rules, structure) {
+        vm.savingRules = true;
+        Structure.update(
+            {
+                id: structure.id
+            },
+            {
+                specification: {
+                    rules: rules
+                }
+            }).$promise.then(function (resource) {
+                vm.savingRules = false;
+                Notifications.add('Rules saved', 'success');
+            })
+    }
+
+    vm.removeRule = function (rule) {
+        if (vm.rules[rule]) {
+            delete vm.rules[rule];
+        }
+    }
+
     // Modals
 
     vm.editNodeModal = function(node) {

@@ -288,6 +288,19 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                 icon: "fa fa-plus"
             }
         },
+        dnd: {
+            is_draggable: function(nodes) {
+                var structure = null;
+                vm.archiveStructures.forEach(function(struct) {
+                    if(struct.id === vm.structure) {
+                        structure = struct;
+                    }
+                })
+                var type = nodes[0].original.type;
+                var rule = structure.specification.rules[type];
+                return angular.isUndefined(rule) || rule.movable;
+            },
+        },
         contextmenu: {
             items: function (node, callback) {
                 var update = {
