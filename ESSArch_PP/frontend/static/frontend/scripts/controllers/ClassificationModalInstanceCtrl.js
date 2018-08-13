@@ -127,7 +127,9 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
     $ctrl.save = function() {
         Structure.new(
             {
-                name: $ctrl.name
+                name: $ctrl.name,
+                start_date: $ctrl.startDate,
+                end_date: $ctrl.endDate
             }
         ).$promise.then(function(response) {
             $uibModalInstance.close(response.data);

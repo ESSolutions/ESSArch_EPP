@@ -41,15 +41,16 @@
                             {{'APPRAISAL_DATE' | translate}}
                         </label>
 
-                        <div class="dropdown">
-                            <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" data-toggle="dropdown">
+                        <div class="dropdown" uib-dropdown dropdown-append-to-body is-open="dropdown_status.appraisal_date">
+                            <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" uib-dropdown-toggle>
                                 <div class="input-group">
                                     <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="vm.request.appraisal_date"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 </div>
                             </a>
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
                                 <datetimepicker
                                     data-ng-model="vm.request.appraisal_date"
+                                    ng-change="dropdown_status.appraisal_date = false"
                                     data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
                             </ul>
                         </div>

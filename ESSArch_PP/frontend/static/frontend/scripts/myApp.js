@@ -781,6 +781,12 @@ angular.module('myApp', ['templates', 'ngRoute', 'treeControl', 'ui.bootstrap', 
         },
     });
 
+    /*
+     * Custom field type for datetime-picker
+     * Add appendToBody: false to templateOptions to not append
+     * datetime-picker to body(In modals etc) and true to append to body.
+     * True by default
+     */
     formlyConfigProvider.setType({
         name: 'datepicker',
         templateUrl: "static/frontend/views/datepicker_template.html",

@@ -26,16 +26,17 @@
                         <td>
                             <span ng-if="!$ctrl.editMode['appraisal_date']">{{$ctrl.ip.appraisal_date ? ($ctrl.ip.appraisal_date | date:"yyyy-MM-dd"):('UNSPECIFIED' | translate)}}</span>
                             <div ng-if="$ctrl.editMode['appraisal_date']" class="edit-field-row">
-                                <div class="dropdown">
-                                    <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" data-toggle="dropdown">
+                                <div class="dropdown" uib-dropdown is-open="status.appraisal_date">
+                                    <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" uib-dropdown-toggle>
                                         <div class="input-group">
                                             <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" ng-init="$ctrl.ipModifications['appraisal_date'] = $ctrl.ip.appraisal_date" data-ng-model="$ctrl.ipModifications['appraisal_date']" ng-enter="$ctrl.saveIpModifications()"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                         </div>
                                     </a>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
                                         <datetimepicker
                                             data-ng-model="$ctrl.ipModifications['appraisal_date']"
-                                            data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
+                                            ng-change="status.appraisal_date = false"
+                                            data-datetimepicker-config="{ minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
                                     </ul>
                                 </div>
                                 <input ng-enter="$ctrl.saveIpModifications()" placeholder="{{'COMMENT' | translate}}..." class="signature form-control" ng-model="$ctrl.ipModifications['comment']"></textarea>
