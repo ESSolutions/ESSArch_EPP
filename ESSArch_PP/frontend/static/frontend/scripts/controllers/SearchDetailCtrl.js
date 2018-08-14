@@ -65,11 +65,11 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }
             getBreadcrumbs(vm.record).then(function(list) {
                 vm.record.breadcrumbs = list;
-                getChildren(vm.record).then(function (response) {
-                    vm.record_children = response.data;
-                })
             }).catch(function(error) {
                 Notifications.add('Could not load breadcrumbs!', 'error');
+            })
+            getChildren(vm.record).then(function (response) {
+                vm.record_children = response.data;
             })
             return vm.record;
         }).catch(function(response) {
