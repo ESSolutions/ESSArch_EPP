@@ -20,6 +20,10 @@ angular.module('myApp').factory('Structure', function ($resource, appConfig) {
     update: {
         method: "PATCH",
         params: { id: "@id" }
+    },
+    remove: {
+        method: 'DELETE',
+        params: { id: "@id" }
     }
     });
 })

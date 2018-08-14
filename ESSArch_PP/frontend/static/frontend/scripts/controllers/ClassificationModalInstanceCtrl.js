@@ -5,6 +5,7 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
     $ctrl.options = {};
     $ctrl.nodeFields = [];
     $ctrl.types = [];
+    $ctrl.data = data;
     $ctrl.$onInit = function() {
         if(data.node) {
             $ctrl.node = data.node;
@@ -129,15 +130,32 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
             {
                 name: $ctrl.name,
                 start_date: $ctrl.startDate,
-                end_date: $ctrl.endDate
+                end_date: $ctrl.endDate,
+                level: $ctrl.level
             }
         ).$promise.then(function(response) {
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_CREATED'), 'success');
         }).catch(function(response) {
             if(response.data && response.data.detail) {
-                Notifications.add(response.data && response.data.detail, 'error');
+                Notifications.add(response.data.detail, 'error');
             } else {
+                Notifications.add('Unknown error!', 'error');
+            }
+        })
+    }
+
+    $ctrl.removing = false;
+    $ctrl.remove = function(structure) {
+        $ctrl.removing = true;
+        Structure.remove({id: structure.id}).$promise.then(function(response) {
+            $ctrl.removing = false;
+            Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
+            $uibModalInstance.close();
+        }).catch(function(response) {
+            if(response.data && response.data.detail) {
+                Notifications.add(response.data.detail, 'error');
+            } else if(response.status !== 500){
                 Notifications.add('Unknown error!', 'error');
             }
         })

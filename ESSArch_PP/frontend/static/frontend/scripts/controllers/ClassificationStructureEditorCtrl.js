@@ -352,6 +352,30 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
+
+    vm.removeStructureModal = function(structure) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/remove_structure_modal.html',
+            controller: 'ClassificationModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            size: "lg",
+            resolve: {
+                data: {
+                    structure: structure
+                }
+            }
+        });
+        modalInstance.result.then(function (data, $ctrl) {
+            vm.structure = null;
+            vm.updateStructures();
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
     vm.newStructureModal = function() {
         var modalInstance = $uibModal.open({
             animation: true,

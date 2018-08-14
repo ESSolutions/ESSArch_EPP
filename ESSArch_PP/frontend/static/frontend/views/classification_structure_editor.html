@@ -24,6 +24,9 @@
                         <th>
                             {{'VERSION' | translate}}
                         </th>
+                        <th>
+                            {{'REMOVE' | translate}}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,6 +42,9 @@
                         </td>
                         <td>
                             {{x.version}}
+                        </td>
+                        <td>
+                            <button class="fa fa-trash" ng-click="vm.removeStructureModal(x)"></button>
                         </td>
                     </tr>
                 </tbody>
