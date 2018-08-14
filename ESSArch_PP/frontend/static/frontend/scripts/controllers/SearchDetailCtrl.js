@@ -23,13 +23,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
 
     vm.updateRecord = function() {
         $http.get(appConfig.djangoUrl + "search/" + vm.record._index + "/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
-            vm.record = response.data;
-            $rootScope.latestRecord = response.data;
-            getVersionSelectData();
             getBreadcrumbs(vm.record).then(function(list) {
-                vm.record.breadcrumbs = list;
-                getChildren(vm.record).then(function (response) {
-                    vm.record_children = response.data;
+                response.data.breadcrumbs = list;
+                getChildren(vm.record).then(function (children) {
+                    vm.record = response.data;
+                    $rootScope.latestRecord = response.data;
+                    vm.record_children = children.data;
+                    getVersionSelectData();
                 })
             }).catch(function(error) {
                 Notifications.add('Could not load breadcrumbs!', 'error');
