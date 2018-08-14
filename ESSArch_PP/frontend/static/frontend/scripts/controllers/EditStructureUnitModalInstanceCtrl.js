@@ -63,6 +63,24 @@ angular.module('myApp').controller('EditStructureUnitModalInstanceCtrl', functio
                 "type": "textarea",
                 "key": "description",
             },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": $translate.instant("START_DATE"),
+                    "appendToBody": false
+                },
+                "type": "datepicker",
+                "key": "start_date",
+            },
+            {
+                "templateOptions": {
+                    "type": "text",
+                    "label": $translate.instant("END_DATE"),
+                    "appendToBody": false
+                },
+                "type": "datepicker",
+                "key": "end_date",
+            }
         ];
     }
 
