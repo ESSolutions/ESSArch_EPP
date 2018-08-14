@@ -789,7 +789,7 @@ angular.module('myApp', ['templates', 'ngRoute', 'treeControl', 'ui.bootstrap', 
      */
     formlyConfigProvider.setType({
         name: 'datepicker',
-        templateUrl: "static/frontend/views/datepicker_template.html",
+        templateUrl: "formly_templates/datepicker_template.html",
         overwriteOk: true,
         wrapper: ['bootstrapHasError'],
         defaultOptions: function defaultOptions(options) {
