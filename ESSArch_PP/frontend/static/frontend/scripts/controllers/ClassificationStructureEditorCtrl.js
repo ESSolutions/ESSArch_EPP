@@ -10,6 +10,7 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
         } else {
             Structure.get({id: row.id}).$promise.then(function(resource) {
                 vm.structure = resource;
+                vm.oldStructure = angular.copy(resource);
                 vm.getTree(vm.structure).then(function(tree) {
                     vm.recreateTree(tree);
                     vm.rules = vm.structure.specification.rules?angular.copy(vm.structure.specification.rules):{};
@@ -269,6 +270,25 @@ angular.module('myApp').controller('ClassificationStructureEditorCtrl', function
                 vm.rules = resource.specification.rules?angular.copy(resource.specification.rules):{};
                 vm.savingRules = false;
                 Notifications.add('Rules saved', 'success');
+            })
+    }
+
+        vm.savingSettings = false;
+        vm.saveSettings = function (structure) {
+        vm.savingSettings = true;
+        Structure.update(
+            {
+                id: structure.id
+            },
+            {
+                start_date: vm.structure.start_date,
+                end_date: vm.structure.end_date,
+            }).$promise.then(function (resource) {
+                vm.structure = resource;
+                vm.oldStructure = angular.copy(resource);
+                vm.rules = resource.specification.rules?angular.copy(resource.specification.rules):{};
+                vm.savingSettings = false;
+                Notifications.add('Settings saved', 'success');
             })
     }
 

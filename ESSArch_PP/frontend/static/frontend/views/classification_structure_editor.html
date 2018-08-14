@@ -108,5 +108,43 @@
                 </div>
             </div>
         </div>
+        <hr/>
+        <div>
+            <button ng-if="!vm.showSettings" class="btn btn-default" ng-click="vm.showSettings = true"><i class="fa fa-plus"></i>&nbsp;{{'SETTINGS' | translate}}</button>
+            <button ng-if="vm.showSettings" class="btn btn-default" ng-click="vm.showSettings = false"><i class="fa fa-minus"></i>&nbsp;{{'SETTINGS' | translate}}</button>
+        </div>
+        <div ng-if="vm.showSettings">
+            <div class="flex-row margin-top-5">
+                <div class="dropdown" uib-dropdown is-open="status.startDate">
+                    <label for="start-date">{{'START_DATE' | translate}}</label>
+                    <a class="dropdown-toggle" id="start-date" role="button" uib-dropdown-toggle>
+                        <div class="input-group">
+                            <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="vm.structure.start_date"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+                        <datetimepicker
+                            data-ng-model="vm.structure.start_date"
+                            ng-change="status.startDate = false"
+                            data-datetimepicker-config="{ minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
+                    </ul>
+                </div>
+                <div class="dropdown" uib-dropdown is-open="status.endDate">
+                    <label for="end-date">{{'END_DATE' | translate}}</label>
+                    <a class="dropdown-toggle" id="end-date" role="button" uib-dropdown-toggle>
+                        <div class="input-group">
+                            <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="vm.structure.end_date"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+                        <datetimepicker
+                            data-ng-model="vm.structure.end_date"
+                            ng-change="status.endDate = false"
+                            data-datetimepicker-config="{ minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"/>
+                    </ul>
+                </div>
+            </div>
+            <button class="btn btn-success btn-sm margin-top-5 float-right" ng-disabled="angular.equals(vm.oldStructure, vm.structure) || vm.savingSettings" ng-click="vm.saveSettings(vm.structure)">{{'SAVE' | translate}}&nbsp;<i ng-if="vm.savingSettings" class="fa fa-spinner fa-spin"/></button>
+        </div>
     </div>
 </div>
