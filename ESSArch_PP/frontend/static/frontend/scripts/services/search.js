@@ -108,6 +108,21 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         });
     }
 
+    service.massEmail = function(nodes) {
+        var ids = nodes.map(function(x) {
+            return x._id;
+        })
+        return $http({
+            method: 'POST',
+            url: url+"search/mass-email/",
+            data: {
+                ids: ids
+            },
+        }).then(function(response) {
+            return response;
+        });
+    }
+
     service.addNode = function(node) {
         return $http({
             method: 'POST',

@@ -608,5 +608,9 @@
     "ARCHIVEMANAGER": "Arkivhanterare",
     "RULES": "Regler",
     "CAN_BE_MOVED": "Kan flyttas",
-    "NEW_TYPE": "Ny regel"
+    "NEW_TYPE": "Ny regel",
+    "LEVEL": "Nivå",
+    "INCLUDE_DESCENDANTS": "Inkludera underliggande",
+    "CLASSIFICATION_STRUCTURE_REMOVED": "Klassificeringsstruktur borttagen",
+    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Vill du ta bort Klassificeringsstruktur?"
 }

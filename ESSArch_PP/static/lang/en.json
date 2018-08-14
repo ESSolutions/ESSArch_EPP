@@ -609,5 +609,9 @@
     "ARCHIVEMANAGER": "Archive manager",
     "RULES": "Rules",
     "CAN_BE_MOVED": "Can be moved",
-    "NEW_TYPE": "New rule"
+    "NEW_TYPE": "New rule",
+    "LEVEL": "Level",
+    "INCLUDE_DESCENDANTS": "Include descendants",
+    "CLASSIFICATION_STRUCTURE_REMOVED": "Classification structure removed",
+    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Do you want to delete classification structure?"
 }

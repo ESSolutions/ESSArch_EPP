@@ -362,9 +362,23 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                         vm.changeOrganizationModal(vm.record);
                     }
                 }
+                var email = {
+                    label: $translate.instant('EMAIL'),
+                    action: function() {
+                        var selected = vm.recordTreeInstance.jstree(true).get_selected(true).map(function(x) {
+                            return x.original;
+                        });
+                        if(selected.length > 1) {
+                            Search.massEmail(selected);
+                        } else if(selected.length == 1) {
+                            vm.emailDocument(selected[0]);
+                        }
+                    }
+                }
                 var actions = {
                     update: update,
                     add: add,
+                    email: email,
                     remove: remove,
                     removeFromStructure: removeFromStructure,
                     newVersion: newVersion,
@@ -542,10 +556,14 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         $window.open(showFile, '_blank');
     }
 
+    vm.includeDescendants = false;
     vm.emailDocument = function(record) {
         return $http({
             method: 'POST',
-            url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/'
+            url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/',
+            params: {
+                include_descendants: vm.includeDescendants
+            }
         }).then(function(response) {
             Notifications.add($translate.instant('EMAIL_SENT'), 'success');
         }).catch(function(response) {

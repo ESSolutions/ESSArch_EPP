@@ -130,7 +130,14 @@
             <div ng-switch-when="directory">
                 <div ng-include="'static/frontend/views/search_directory_detail.html'"></div>
             </div>
-            <button class="btn btn-warning lock-button margin-top-5" ng-click="vm.emailDocument(vm.record)">{{'EMAIL' | translate}}</button>
+            <div class="flex-row align-items-end">
+                <button class="btn btn-warning lock-button margin-top-5" ng-click="vm.emailDocument(vm.record)">{{'EMAIL' | translate}}</button>
+                <label class="m-0">
+                    <input type="checkbox" ng-model="vm.includeDescendants">
+                        {{'INCLUDE_DESCENDANTS' | translate}}
+                    </input>
+                </label>
+            </div>
         </div>
     </div>
 </div>
