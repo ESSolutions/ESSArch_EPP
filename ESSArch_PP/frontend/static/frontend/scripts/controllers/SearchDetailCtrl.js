@@ -22,6 +22,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     }
 
     vm.updateRecord = function() {
+        vm.childrenLoading = true;
         $http.get(appConfig.djangoUrl + "search/" + vm.record._index + "/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
             var promises = [];
             promises.push(getBreadcrumbs(vm.record).then(function(list) {
@@ -29,9 +30,9 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             }).catch(function(error) {
                 Notifications.add('Could not load breadcrumbs!', 'error');
             }));
-
             promises.push(getChildren(vm.record).then(function (children) {
                 vm.record_children = children.data;
+                vm.childrenLoading = false;
             }));
 
             $q.all(promises).then(function(results) {
@@ -46,6 +47,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
 
     vm.loadRecordAndTree = function(index, id) {
         vm.viewContent = true;
+        vm.record_children = [];
+        vm.childrenLoading = true;
         return $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
             $rootScope.latestRecord = response.data;
@@ -75,6 +78,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             })
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
+                vm.childrenLoading = false;
             })
             return vm.record;
         }).catch(function(response) {
@@ -462,6 +466,8 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             });
             return;
         }
+        vm.record_children = [];
+        vm.childrenLoading = true;
         $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
             vm.record = response.data;
             $rootScope.latestRecord = response.data;
@@ -477,6 +483,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                 vm.record.breadcrumbs = list;
                 getChildren(vm.record).then(function (response) {
                     vm.record_children = response.data;
+                    vm.childrenLoading = false;
                 })
             }).catch(function(error) {
                 Notifications.add('Could not load breadcrumbs!', 'error');
