@@ -79,7 +79,11 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(response.data && response.data.detail) {
+                Notifications.add(response.data.detail, 'error');
+            } else if(response.status !== 500){
+                Notifications.add('Unknown error!', 'error');
+            }
         })
     }
 
@@ -116,7 +120,7 @@ angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(d
             Notifications.add($translate.instant('NODE_UPDATED'), 'success');
         }).catch(function(response) {
             if(response.data && response.data.detail) {
-                Notifications.add(response.data && response.data.detail, 'error');
+                Notifications.add(response.data.detail, 'error');
             } else {
                 Notifications.add('Unknown error!', 'error');
             }

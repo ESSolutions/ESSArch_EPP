@@ -29,7 +29,7 @@ angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http,
         }).catch(function(response) {
             if(response.data && response.data.detail) {
                 Notifications.add(response.data.detail, 'error');
-            } else {
+            } else if (response.status !== 500){
                 Notifications.add('Unknown error', 'error');
             }
         })
