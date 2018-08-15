@@ -568,7 +568,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         return $http({
             method: 'POST',
             url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/',
-            params: {
+            data: {
                 include_descendants: vm.includeDescendants
             }
         }).then(function(response) {
