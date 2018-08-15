@@ -171,6 +171,11 @@
                 "args": [
                     "Submitted"
                 ]
+            },
+            {
+                "name": "ESSArch_Core.tasks.DeletePollingSource",
+                "label": "Delete from reception",
+                "args": ["{{WORKFLOW_POLLER}}", "{{WORKFLOW_POLL_PATH}}"]
             }
         ]
     },
@@ -237,6 +242,11 @@
                 "args": [
                     "Transferred"
                 ]
+            },
+            {
+                "name": "ESSArch_Core.tasks.DeletePollingSource",
+                "label": "Delete from reception",
+                "args": ["{{WORKFLOW_POLLER}}", "{{WORKFLOW_POLL_PATH}}"]
             }
         ]
     },
@@ -330,6 +340,11 @@
                                 "label": "Generate content-mets"
                             }
                         ]
+                    },
+                    {
+                        "name": "ESSArch_Core.tasks.DeletePollingSource",
+                        "label": "Delete from reception",
+                        "args": ["{{WORKFLOW_POLLER}}", "{{WORKFLOW_POLL_PATH}}"]
                     },
                     {
                         "step": true,
