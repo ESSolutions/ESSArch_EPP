@@ -454,6 +454,32 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(serialized)
 
+    def send_mass_email(self, ids, user):
+        tags = []
+        body = []
+        attachments = []
+
+        for id in ids:
+            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+            self.kwargs[lookup_url_kwarg] = id
+            tag = self.get_tag_object()
+            tags.append(tag)
+            metadata = tag.from_search()['_source']
+            body.append(u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in six.iteritems(metadata)]))
+
+            if tag.elastic_index == 'document':
+                ip = tag.tag.information_package
+                path = os.path.join(metadata['href'], metadata['filename'])
+                attachments.append((os.path.basename(path), ip.open_file(path, 'rb').read()))
+
+        subject = u'Export: {}'.format(''.join([t.name for t in tags]))
+        body = '\n\n'.join(body)
+        email = EmailMessage(subject=subject, body=body, to=[user.email])
+        for attachment in attachments:
+            email.attach(*attachment)
+        email.send()
+        return Response(u'Email sent to {}'.format(user.email))
+
     @detail_route(methods=['post'], url_path='send-as-email')
     def send_as_email(self, request, index=None, pk=None):
         tag = self.get_tag_object()
@@ -461,6 +487,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         if not user.email:
             raise exceptions.ParseError('Missing email address')
+
+        if request.data.get('include_descendants', False):
+            ids = tag.get_descendants(include_self=True).values_list('id', flat=True)
+            return self.send_mass_email(ids, user)
 
         metadata = tag.from_search()['_source']
         subject = u'Export: {}'.format(tag.name)
@@ -475,6 +505,19 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         email.send()
         return Response(u'Email sent to {}'.format(user.email))
+
+    @list_route(methods=['post'], url_path='mass-email')
+    def mass_email(self, request, index=None):
+        try:
+            ids = request.data['ids']
+        except KeyError:
+            raise exceptions.ParseError('Missing "ids" parameter')
+
+        user = self.request.user
+        if not user.email:
+            raise exceptions.ParseError('Missing email address')
+
+        return self.send_mass_email(ids, user)
 
     @detail_route(methods=['get'])
     def children(self, request, index=None, pk=None):
