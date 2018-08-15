@@ -46,7 +46,11 @@ class InformationPackageSerializer(serializers.ModelSerializer):
         return obj.get_permissions(user=user, checker=checker)
 
     def get_agents(self, obj):
-        agents = AgentSerializer(obj.agents.all(), many=True).data
+        try:
+            agent_objs = obj.prefetched_agents
+        except AttributeError:
+            agent_objs = obj.agents.all()
+        agents = AgentSerializer(agent_objs, many=True).data
         return {'{role}_{type}'.format(role=a['role'], type=a['type']): a for a in agents}
 
     def get_workarea(self, obj):
@@ -113,7 +117,11 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
         return obj.get_permissions(user=user, checker=checker)
 
     def get_agents(self, obj):
-        agents = AgentSerializer(obj.agents.all(), many=True).data
+        try:
+            agent_objs = obj.prefetched_agents
+        except AttributeError:
+            agent_objs = obj.agents.all()
+        agents = AgentSerializer(agent_objs, many=True).data
         return {'{role}_{type}'.format(role=a['role'], type=a['type']): a for a in agents}
 
     def get_information_packages(self, obj):

@@ -561,7 +561,8 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
     """
     API endpoint that allows information packages to be viewed or edited.
     """
-    queryset = InformationPackage.objects.select_related('responsible').prefetch_related('agents', 'steps')
+    queryset = InformationPackage.objects.select_related('responsible').prefetch_related(
+        Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'), 'steps')
     filter_backends = (
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
@@ -661,7 +662,9 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             def get_related(qs):
                 qs = qs.select_related('responsible')
-                return qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+                return qs.prefetch_related(
+                    Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'),
+                    'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
