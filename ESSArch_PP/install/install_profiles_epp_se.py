@@ -703,6 +703,18 @@ def installProfileAIP(sa):
                         'name': 'metadata',
                         'children': [],
                     },
+                    {
+                        'type': 'folder',
+                        'name': '{{INNER_IP_OBJID}}',
+                        'use': 'sip',
+                        'children': [
+                            {
+                                'type': 'file',
+                                'name': 'metadata.xml',
+                                'use': 'content_type_specification'
+                            }
+                        ],
+                    },
                 ]
             },
             {
@@ -731,18 +743,6 @@ def installProfileAIP(sa):
                         'use': 'authoritive_information_file',
                     },
                 ]
-            },
-            {
-                'type': 'folder',
-                'name': '{{_INNER_IP_PATH}}',
-                'create': False,
-                'children': [
-                    {
-                        'type': 'file',
-                        'name': 'metadata.xml',
-                        'use': 'content_type_specification'
-                    }
-                ],
             },
         ],
         'template': [

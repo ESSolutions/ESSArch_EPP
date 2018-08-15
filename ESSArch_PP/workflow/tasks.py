@@ -116,21 +116,36 @@ class ReceiveSIP(DBTask):
 
         aip.save()
 
-        dst = find_destination('content', aip.get_profile('aip').structure, aip.object_path)
-        dst = os.path.join(dst[0], dst[1])
+        dst_path, dst_name = find_destination('sip', aip.get_profile('aip').structure, aip.object_path)
+        if dst_path is None:
+            dst = aip.object_path
+        else:
+            dst_name, = self.parse_params(dst_name)
+            dst = os.path.join(dst_path, dst_name)
+
         if aip.policy.receive_extract_sip:
-            self.logger.debug(u'Extracting {} to {}'.format(container, dst))
+            tmpdir = Path.objects.cached('entity', 'temp', 'value')
+            self.logger.debug(u'Extracting {} to {}'.format(container, tmpdir))
             if container_type == '.tar':
                 with tarfile.open(container) as tar:
-                    tar.extractall(dst.encode('utf-8'))
+                    root_member_name = tar.getnames()[0]
+                    tar.extractall(tmpdir.encode('utf-8'))
             elif container_type == '.zip':
                 with zipfile.ZipFile(container) as zipf:
-                    zipf.extractall(dst.encode('utf-8'))
+                    root_member_name = zipf.namelist()[0]
+                    zipf.extractall(tmpdir.encode('utf-8'))
             else:
                 raise ValueError(u'Invalid container type: {}'.format(container))
-            aip.sip_path = os.path.relpath(os.path.join(dst, aip.sip_objid), aip.object_path)
+
+            tmp_root = os.path.join(tmpdir, root_member_name)
+            dst = os.path.join(dst, '')
+            self.logger.debug(u'Moving content of {} to {}'.format(tmp_root, dst))
+            for f in os.listdir(tmp_root):
+                shutil.move(os.path.join(tmp_root, f), dst)
+            self.logger.debug(u'Deleting {}'.format(tmp_root))
+            aip.sip_path = os.path.relpath(dst, aip.object_path)
         else:
-            self.logger.debug(u'copying {} to {}'.format(container, dst))
+            self.logger.debug(u'Copying {} to {}'.format(container, dst))
             shutil.copy2(container, dst)
             aip.sip_path = os.path.relpath(os.path.join(dst, os.path.basename(container)), aip.object_path)
 
