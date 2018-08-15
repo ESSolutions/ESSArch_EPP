@@ -3,7 +3,6 @@
 import errno
 import logging
 import os
-import shutil
 
 from lxml import etree
 
@@ -13,7 +12,7 @@ from ESSArch_Core.essxml.util import get_altrecordids
 from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.profiles.models import SubmissionAgreement
 from ESSArch_Core.profiles.utils import profile_types
-from ESSArch_Core.util import find_destination, stable_path
+from ESSArch_Core.util import stable_path
 
 logger = logging.getLogger('essarch.epp.workflow.polling.DirectoryWorkflowPoller')
 p_types = [p_type.lower().replace(' ', '_') for p_type in profile_types]
@@ -73,3 +72,18 @@ class DirectoryWorkflowPoller(BaseWorkflowPoller):
             ip.create_profile_rels(p_types, responsible)
             org.add_object(ip)
             yield ip
+
+    def delete_source(self, path, ip):
+        base_path = os.path.join(path, ip.object_identifier_value)
+        paths = [
+            base_path + '.tar',
+            base_path + '.xml',
+            base_path + '_ipevents.xml',
+        ]
+
+        for path in paths:
+            try:
+                os.remove(path)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
