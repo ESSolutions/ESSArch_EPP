@@ -64,7 +64,7 @@
     "PASSWORD": "Password",
     "UNDO": "Undo",
     "REDO": "Redo",
-    "GLOBALSEARCH": "global search ...",
+    "GLOBALSEARCH": "search ...",
     "ENABLEDDESC": "If checked, profile is enabled",
     "ENTITYDESC": "Profile type",
     "PROFILEDESC": "Select profile",

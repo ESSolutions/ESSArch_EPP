@@ -65,7 +65,7 @@
     "PASSWORD": "Lösenord",
     "UNDO": "Ångra",
     "REDO": "Gör om",
-    "GLOBALSEARCH": "global sök ...",
+    "GLOBALSEARCH": "sök ...",
     "ENABLEDDESC": "Profilen är aktiverad om den är checkad",
     "ENTITYDESC": "Profiltyp",
     "PROFILEDESC": "Välj profil",
