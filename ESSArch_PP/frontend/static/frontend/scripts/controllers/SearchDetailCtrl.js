@@ -373,7 +373,13 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                             return x.original;
                         });
                         if(selected.length > 1) {
-                            Search.massEmail(selected);
+                            Search.massEmail(selected).then(function(response) {
+                                Notifications.add($translate.instant('EMAILS_SENT'), 'success');
+                            }).catch(function(response) {
+                                if(response.status !== 500) {
+                                    Notifications.add($translate.instant('EMAILS_FAILED'), 'error');
+                                }
+                            })
                         } else if(selected.length == 1) {
                             vm.emailDocument(selected[0]);
                         }

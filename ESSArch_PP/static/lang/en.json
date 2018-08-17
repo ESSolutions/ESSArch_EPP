@@ -613,5 +613,7 @@
     "LEVEL": "Level",
     "INCLUDE_DESCENDANTS": "Include descendants",
     "CLASSIFICATION_STRUCTURE_REMOVED": "Classification structure removed",
-    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Do you want to delete classification structure?"
+    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Do you want to delete classification structure?",
+    "EMAILS_SENT": "Emails sent",
+    "EMAILS_FAILED": "Emails failed"
 }

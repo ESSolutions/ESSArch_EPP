@@ -612,5 +612,7 @@
     "LEVEL": "Nivå",
     "INCLUDE_DESCENDANTS": "Inkludera underliggande",
     "CLASSIFICATION_STRUCTURE_REMOVED": "Klassificeringsstruktur borttagen",
-    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Vill du ta bort Klassificeringsstruktur?"
+    "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Vill du ta bort Klassificeringsstruktur?",
+    "EMAILS_SENT": "Email skickades",
+    "EMAILS_FAILED": "Email misslyckades"
 }
