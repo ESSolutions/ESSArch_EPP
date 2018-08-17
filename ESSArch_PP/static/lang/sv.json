@@ -614,5 +614,6 @@
     "CLASSIFICATION_STRUCTURE_REMOVED": "Klassificeringsstruktur borttagen",
     "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Vill du ta bort Klassificeringsstruktur?",
     "EMAILS_SENT": "Email skickades",
-    "EMAILS_FAILED": "Email misslyckades"
+    "EMAILS_FAILED": "Email misslyckades",
+    "DURATION": "Duration"
 }
