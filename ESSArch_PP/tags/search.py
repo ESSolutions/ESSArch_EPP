@@ -472,7 +472,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 path = os.path.join(metadata['href'], metadata['filename'])
                 attachments.append((os.path.basename(path), ip.open_file(path, 'rb').read()))
 
-        subject = u'Export: {}'.format(''.join([t.name for t in tags]))
+        subject = u'Export: {}'.format(u', '.join([t.name for t in tags]))
         body = '\n\n'.join(body)
         email = EmailMessage(subject=subject, body=body, to=[user.email])
         for attachment in attachments:
