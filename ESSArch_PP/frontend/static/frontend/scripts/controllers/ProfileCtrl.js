@@ -353,7 +353,6 @@ angular.module('myApp').controller('ProfileCtrl', function($q, SA, Profile, $tim
         workflow: "Workflow",
         preservation_metadata: "Preservation Metadata",
         validation: "Validation",
-        transformation: "Transformation",
     }
 
     /**

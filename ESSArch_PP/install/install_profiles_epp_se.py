@@ -43,7 +43,6 @@ from ESSArch_Core.profiles.models import (
 def installProfiles():
     sa = installSubmissionAgreement()
     installProfileWorkflow(sa)
-    installProfileTransformation(sa)
 
     installProfileSIP(sa)
     installProfileTransferProject(sa)
@@ -1415,23 +1414,6 @@ def installProfileContentType(sa):
     sa.save()
 
     print 'Installed profile content type'
-
-    return 0
-
-
-def installProfileTransformation(sa):
-
-    dct = {
-        'name': 'Transformation SE',
-        'profile_type': 'transformation',
-        'specification': {'name': 'content'}
-    }
-
-    profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
-    sa.profile_transformation = profile
-    sa.save()
-
-    print 'Installed profile Transformation'
 
     return 0
 

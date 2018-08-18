@@ -46,7 +46,8 @@
             },
             {
                 "name": "ESSArch_Core.ip.tasks.Transform",
-                "label": "Update directory structure"
+                "label": "Update directory structure",
+                "args": ["content"]
             },
             {
                 "name": "ESSArch_Core.tasks.UpdateIPStatus",
