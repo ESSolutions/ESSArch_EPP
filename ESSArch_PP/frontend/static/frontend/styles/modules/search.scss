@@ -25,10 +25,16 @@
     }
     .search-results {
         margin-top: 10px;
-        width: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        flex-grow: 1;
+        @include large-screen-up {
+            padding-left: 10px;
+        }
+        @include medium-screen-down {
+            width: 100%;
+        }
     }
     .search-toolbar {
         display: flex;
@@ -157,7 +163,6 @@
     }
 
     .filter-tree {
-        width: auto;
         margin-top: 10px;
         @include large-screen-up {
             min-width: 250px;
@@ -166,7 +171,6 @@
         .jstree-anchor {
             max-width: 90%;
             @include large-screen-up() {
-                max-width: 200px;
             }
         }
 

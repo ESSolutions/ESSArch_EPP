@@ -76,7 +76,7 @@
                 </uib-tab>
             </uib-tabset>
             <div class="tree-result-wrapper" ng-if="vm.activeTab === 0">
-                <div ng-if="vm.showTree"class="filter-tree">
+                <div ng-if="vm.showTree"  resizable r-directions="['right']" r-grabber="<div class='resize-grabber'></div>" r-flex="true" class="filter-tree">
                     <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
                 </div>
                 <div ng-if="vm.showResults" class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
