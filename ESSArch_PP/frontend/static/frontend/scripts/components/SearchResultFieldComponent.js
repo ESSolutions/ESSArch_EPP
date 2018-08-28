@@ -4,6 +4,7 @@ angular.module('myApp').component('resultField', {
     controllerAs: 'vm',
     bindings: {
         label: "@",
+        stronglabel: "<",
         data: "<",
         type: "@",
         break: "<"
