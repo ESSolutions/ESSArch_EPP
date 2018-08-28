@@ -1,8 +1,25 @@
 <div class="document-result">
-    <h4>{{vm.record.type}}</h4>
-    <h4>{{vm.record._source.name}}</h4>
-    <p ng-if="vm.record._source.start_date">{{vm.record._source.start_date | date:"yyyy-MM-dd"}} - {{vm.record._source.end_date | date:"yyyy-MM-dd"}}</p>
-    <p class="result-description">{{vm.record._source.desc}}</p>
+    <h3 title="Namn">
+        <strong title="Namn" ng-if="vm.record._source.name">
+            {{vm.record._source.name}}
+        </strong>
+    </h3>
+    <h4 ng-if="vm.record.type">{{vm.record.type}}</h4>
+    <div ng-if="vm.record._source.desc">
+        <p ng-if="vm.record._source.desc" class="result-description">
+            {{vm.record._source.desc}}
+        </p>
+    </div>
+    <div ng-if="vm.record._source.create_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date">
+        <strong>Datum:</strong>
+        <result-field label="Skapad" data="vm.record._source.create_date" type="date"></result-field>
+        <result-field label="Inkommen" data="vm.record._source.arrival_date" type="date"></result-field>
+        <result-field label="Expedierad" data="vm.record._source.dispatch_date" type="date"></result-field>
+        <result-field label="Beslutat" data="vm.record._source.decision_date" type="date"></result-field>
+        <result-field label="Upprättad" data="vm.record._source.preparation_date" type="date"></result-field>
+        <result-field label="Avslutat" data="vm.record._source.ended_date" type="date"></result-field>
+        <br/>
+    </div>
     <br/>
     <div ng-if="vm.record._source.ip">
         <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip }}
@@ -10,27 +27,9 @@
     <br/>
 
     <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
-    <div class="metadata-tables-wrapper">
-        <div class="table-x-overflow metadata-table">
-            <table>
-                <tr>
-                    <td style="padding-right: 10px;"><b>{{'PATH' | translate}}</b></td>
-                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.href +'/'+ vm.record._source.filename}}</td>
-                </tr>
-                <tr>
-                    <td style="padding-right: 10px;"><b>{{'CHANGED' | translate}}</b></td>
-                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.modified | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                </tr>
-                <tr>
-                    <td style="padding-right: 10px;"><b>{{'CONTENT_TYPE' | translate}}</b></td>
-                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.attachment.content_type | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                </tr>
-                <tr>
-                    <td style="padding-right: 10px;"><b>{{'SIZE' | translate}}</b></td>
-                    <td style="border-left-style: solid;border-width: 1px;padding-left: 10px;">{{vm.record._source.size | filesize}}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    <result-field label="{{'PATH' | translate}}" stronglabel="true" data="vm.record._source.href +'/'+ vm.record._source.filename"></result-field>
+    <result-field label="{{'CHANGED' | translate}}" stronglabel="true" data="vm.record._source.modified" type="date-long"></result-field>
+    <result-field label="{{'CONTENT_TYPE' | translate}}" stronglabel="true" data="vm.record._source.attachment.content_type"></result-field>
+    <result-field label="{{'SIZE' | translate}}" stronglabel="true" data="vm.record._source.size" type="filesize"></result-field>
     <button class="btn btn-success lock-button margin-top-5" ng-click="vm.viewFile(vm.record._source)"><i class="fa fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
 </div>

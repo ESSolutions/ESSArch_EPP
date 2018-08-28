@@ -7,8 +7,14 @@
     <div ng-if="vm.type === 'date'">
         {{vm.data | date:"yyyy-MM-dd"}}
     </div>
+    <div ng-if="vm.type === 'date-long'">
+        {{vm.data | date:"yyyy-MM-dd HH:mm:ss"}}
+    </div>
+    <div ng-if="vm.type === 'filesize'">
+        {{vm.data | filesize}}
+    </div>
     <div ng-if="vm.type === 'bool' || vm.type === 'boolean'">
-        {{vm.data?'Ja':'Nej'}}
+        {{vm.data?'YES':'NO' | translate}}
     </div>
     <br ng-if="vm.break"/>
 </div>
