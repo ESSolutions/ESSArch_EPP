@@ -444,48 +444,11 @@ angular.module('myApp').controller('ReceptionCtrl', function (Notifications, IPR
                     })
                     .catch(function(response) {
                         vm.receiveModalLoading = false;
-                        var modalInstance = $uibModal.open({
-                            animation: true,
-                            ariaLabelledBy: 'modal-title',
-                            ariaDescribedBy: 'modal-body',
-                            templateUrl: 'static/frontend/views/receive_modal.html',
-                            controller: 'ReceiveModalInstanceCtrl',
-                            size: "lg",
-                            scope: $scope,
-                            controllerAs: '$ctrl',
-                            resolve: {
-                                data: function () {
-                                    return {
-                                        ip: resource,
-                                        vm: vm
-                                    };
-                                }
-                            },
-                        })
-                        modalInstance.result.then(function (data) {
-                            $scope.getListViewData();
-                            if (data.status == "received") {
-                                $scope.eventlog = false;
-                                $scope.edit = false;
-                                $scope.requestForm = false;
-                            }
-                            $scope.filebrowser = false;
-                            $scope.initRequestData();
-                            $scope.includedIps.shift();
-                            $scope.getListViewData();
-                            if ($scope.includedIps.length > 0) {
-                                $scope.getArchivePolicies().then(function (result) {
-                                    vm.request.archivePolicy.options = result;
-                                    $scope.getArchives().then(function (result) {
-                                        vm.tags.archive.options = result;
-                                        $scope.requestForm = true;
-                                        $scope.receiveModal($scope.includedIps[0]);
-                                    });
-                                });
-                            }
-                        }, function () {
-                            $log.info('modal-component dismissed at: ' + new Date());
-                        });
+                        if(response.data && response.data.detail) {
+                            Notifications.add(response.data.detail, 'error');
+                        } else if(response.status !== 500) {
+                            Notifications.add('Could not prepare IP', 'error');
+                        }
                     })
                 } else {
                     vm.receiveModalLoading = false;
