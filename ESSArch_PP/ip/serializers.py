@@ -5,7 +5,10 @@ from rest_framework import filters, serializers
 
 from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.ip.models import InformationPackage, Order
-from ESSArch_Core.ip.serializers import AgentSerializer, WorkareaSerializer
+from ESSArch_Core.ip.serializers import (
+    AgentSerializer, InformationPackageSerializer as CoreInformationPackageSerializer,
+    WorkareaSerializer,
+)
 from ESSArch_Core.profiles.models import SubmissionAgreement
 from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 from _version import get_versions
@@ -14,19 +17,12 @@ from configuration.serializers import ArchivePolicySerializer
 VERSION = get_versions()['version']
 
 
-class InformationPackageSerializer(serializers.ModelSerializer):
-    responsible = UserSerializer(read_only=True)
-    package_type = serializers.ChoiceField(choices=InformationPackage.PACKAGE_TYPE_CHOICES)
-    package_type_display = serializers.SerializerMethodField()
+class InformationPackageSerializer(CoreInformationPackageSerializer):
     workarea = serializers.SerializerMethodField()
     aic = serializers.PrimaryKeyRelatedField(queryset=InformationPackage.objects.all())
     first_generation = serializers.SerializerMethodField()
     last_generation = serializers.SerializerMethodField()
-    permissions = serializers.SerializerMethodField()
     agents = serializers.SerializerMethodField()
-
-    def get_package_type_display(self, obj):
-        return obj.get_package_type_display()
 
     def get_first_generation(self, obj):
         if hasattr(obj, 'first_generation'):
@@ -39,11 +35,6 @@ class InformationPackageSerializer(serializers.ModelSerializer):
             return obj.last_generation
 
         return obj.is_last_generation()
-
-    def get_permissions(self, obj):
-        user = getattr(self.context.get('request'), 'user', None)
-        checker = self.context.get('perm_checker')
-        return obj.get_permissions(user=user, checker=checker)
 
     def get_agents(self, obj):
         try:
@@ -67,18 +58,9 @@ class InformationPackageSerializer(serializers.ModelSerializer):
         return WorkareaSerializer(workareas, many=True, context=self.context).data
 
 
-    class Meta:
-        model = InformationPackage
-        fields = (
-            'url', 'id', 'label', 'object_identifier_value', 'object_size',
-            'package_type', 'package_type_display', 'responsible', 'create_date',
-            'entry_date', 'state', 'status', 'step_state',
-            'archived', 'cached', 'aic', 'generation', 'agents',
-            'policy', 'message_digest', 'message_digest_algorithm',
-            'content_mets_create_date', 'content_mets_size', 'content_mets_digest_algorithm', 'content_mets_digest',
-            'package_mets_create_date', 'package_mets_size', 'package_mets_digest_algorithm', 'package_mets_digest',
-            'workarea', 'first_generation', 'last_generation', 'start_date', 'end_date',
-            'permissions', 'appraisal_date',
+    class Meta(CoreInformationPackageSerializer.Meta):
+        fields = CoreInformationPackageSerializer.Meta.fields + (
+            'workarea', 'first_generation', 'last_generation',
         )
         extra_kwargs = {
             'id': {
