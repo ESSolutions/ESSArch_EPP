@@ -989,7 +989,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             ariaDescribedBy: 'modal-body',
             templateUrl: 'modals/task_info_modal.html',
             scope: $scope,
-            controller: 'ModalInstanceCtrl',
+            controller: 'TaskInfoModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {}
@@ -1008,7 +1008,7 @@ angular.module('myApp').controller('BaseCtrl',  function(IP, Task, Step, vm, ipS
             ariaDescribedBy: 'modal-body',
             templateUrl: 'modals/step_info_modal.html',
             scope: $scope,
-            controller: 'ModalInstanceCtrl',
+            controller: 'StepInfoModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {}
