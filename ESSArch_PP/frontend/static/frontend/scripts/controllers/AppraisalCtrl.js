@@ -203,6 +203,14 @@ angular.module('myApp').controller('AppraisalCtrl', function(ArchivePolicy, $sco
     }
 
     /**
+     *  Clear search input
+     */
+    $scope.clearSearch = function() {
+        delete vm.ruleTableState.search.predicateObject;
+        $('#search-input')[0].value = "";
+        vm.rulePipe();
+    }
+    /**
      * MODALS
      */
 

@@ -207,6 +207,15 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
     }
 
     /**
+     *  Clear search input
+     */
+    $scope.clearSearch = function() {
+        delete vm.ruleTableState.search.predicateObject;
+        $('#search-input')[0].value = "";
+        vm.rulePipe();
+    }
+
+    /**
      * MODALS
      */
 
