@@ -70,7 +70,7 @@
     "angular-cron-jobs": "^3.2.0",
     "angular-relative-date": "^2.1.1",
     "angular-resizable": "^1.2.0",
-    "angular-resource": "^1.6.5",
+    "angular-resource": "~1.6",
     "angular-websocket": "^2.0.1",
     "gulp-autoprefixer": "^5.0.0",
     "later": "^1.2.0",

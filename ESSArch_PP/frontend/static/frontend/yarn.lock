@@ -193,9 +193,9 @@ angular-resizable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/angular-resizable/-/angular-resizable-1.2.0.tgz#9dd29af008f8b54abfc051bd269a8f0b4fe43f1a"
 
-angular-resource@^1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.6.5.tgz#d1e712ab01afa5d2ec649f5e471673a704f2be40"
+angular-resource@~1.6:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.6.10.tgz#28c1834e9fa623467d2f9894716a4e6c7e077459"
 
 angular-route@~1.6:
   version "1.6.4"
