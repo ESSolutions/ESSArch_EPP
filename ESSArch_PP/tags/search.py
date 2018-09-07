@@ -295,11 +295,22 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return sort
 
+    @property
+    def paginator(self):
+        """
+        The paginator instance associated with the view, or `None`.
+        """
+        pager = self.request.query_params.get('pager', None)
+        if pager == 'none':
+            return None
+
+        return super(ComponentSearchViewSet, self).paginator
 
     def list(self, request, index=None):
-        params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
+        params = {key: value[0] for (key, value) in six.iteritems(dict(request.query_params))}
         query = params.pop('q', '')
         export = params.pop('export', None)
+        params.pop('pager', None)
 
         if export is not None and export not in EXPORT_FORMATS:
             raise exceptions.ParseError('Invalid export format "{}"'.format(export))
@@ -337,15 +348,16 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             size = int(size)
             offset = (number-1)*size
-            max_results = DEFAULT_MAX_RESULT_WINDOW
-            s[offset:offset+size]
+            s = s[offset:offset+size]
+        else:
+            s = s[0:DEFAULT_MAX_RESULT_WINDOW]
 
         try:
             results = s.execute()
         except TransportError:
             if self.paginator is not None:
-                if offset+size > max_results:
-                    raise exceptions.ParseError("Can't show more than {max} results".format(max=max_results))
+                if offset+size > DEFAULT_MAX_RESULT_WINDOW:
+                    raise exceptions.ParseError("Can't show more than {max} results".format(max=DEFAULT_MAX_RESULT_WINDOW))
 
             raise
 
@@ -387,10 +399,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if export is not None:
             return self.generate_report(results_dict['hits']['hits'], export, request.user)
 
-        if self.paginator is not None:
-            return Response(r, headers={'Count': results.hits.total})
-
-        return Response(r)
+        return Response(r, headers={'Count': results.hits.total})
 
     def generate_report(self, hits, format, user):
         template = 'search_results.html'.format()
