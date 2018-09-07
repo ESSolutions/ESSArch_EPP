@@ -32,6 +32,7 @@ from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
                                      UserViewSet)
 from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SysInfoView
+from ESSArch_Core.fixity.views import ValidationViewSet
 from ESSArch_Core.ip.views import AgentViewSet, EventIPViewSet, WorkareaEntryViewSet
 from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
                                             ConversionJobViewSet)
@@ -150,6 +151,12 @@ router.register(r'tags', TagViewSet, base_name='tags').register(
 )
 
 router.register(r'tasks', ProcessTaskViewSet)
+router.register(r'tasks', ProcessTaskViewSet).register(
+    r'validations',
+    ValidationViewSet,
+    base_name='task-validations',
+    parents_query_lookups=['task']
+)
 router.register(r'users', UserViewSet)
 router.register(r'workareas', WorkareaViewSet, base_name='workarea')
 router.register(r'workarea-entries', WorkareaEntryViewSet, base_name='workarea-entries')
