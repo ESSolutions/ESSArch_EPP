@@ -111,8 +111,8 @@ amdefine@>=0.0.4:
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
 angular-animate@~1.6:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/angular-animate/-/angular-animate-1.6.4.tgz#d3eb906d39834f2dfbdd982e6b8d7a3b4d9001d2"
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-animate/-/angular-animate-1.6.10.tgz#c520f6d341370e34e0a62060c99bcf47b7d7db8c"
 
 angular-bootstrap-contextmenu@0.9.7:
   version "0.9.7"
@@ -133,9 +133,13 @@ angular-clipboard@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/angular-clipboard/-/angular-clipboard-1.5.0.tgz#5dcfacd8f91184d165852a71c485e675c4233802"
 
-"angular-cookies@>=1.2.26 <1.7", angular-cookies@~1.6:
+"angular-cookies@>=1.2.26 <1.7":
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular-cookies/-/angular-cookies-1.6.4.tgz#c28f3f6aac7a9826c1e45f1d6807240036e5b26d"
+
+angular-cookies@~1.6:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-cookies/-/angular-cookies-1.6.10.tgz#20a014d501242e2edacd21397c0e5480e08dee00"
 
 angular-cron-jobs@^3.2.0:
   version "3.2.0"
@@ -169,12 +173,12 @@ angular-marked@~1.2.2:
     marked "^0.3.3"
 
 angular-messages@~1.6:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/angular-messages/-/angular-messages-1.6.4.tgz#9ec9c1393293b14de54161d2f849776489e980fe"
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-messages/-/angular-messages-1.6.10.tgz#09eedc5b50db99eeed9776414428c587c1259715"
 
 angular-mocks@~1.6:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.4.tgz#47fdf50921cf24fb489f100a8cf2ad99d0538f40"
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.10.tgz#6a139e43c461d0c9a5a1acebc91e63db16031176"
 
 angular-permission@~5.3.2:
   version "5.3.2"
@@ -198,12 +202,12 @@ angular-resource@~1.6:
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.6.10.tgz#28c1834e9fa623467d2f9894716a4e6c7e077459"
 
 angular-route@~1.6:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.4.tgz#7bb216fcda746a1b8c452054b05900a7074ecc62"
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.10.tgz#4247a32eab19495624623e96c1626dfba17ebf21"
 
 angular-sanitize@~1.6:
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.4.tgz#60a37ea96fb0d4a322a3ccb64ee4a5cf3b154f0c"
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.10.tgz#635a362afb2dd040179f17d3a5455962b2c1918f"
 
 angular-smart-table@~2.1.8:
   version "2.1.8"
@@ -257,13 +261,17 @@ angular@*, angular@^1.5.6:
   version "1.6.6"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.6.tgz#fd5a3cfb437ce382d854ee01120797978527cb64"
 
-"angular@>=1.2.26 <=1.6", angular@>=1.4.8, angular@^1.0.8, angular@^1.4.0, angular@^1.6.3, angular@^1.x, angular@~1.6:
+"angular@>=1.2.26 <=1.6", angular@>=1.4.8, angular@^1.0.8, angular@^1.4.0, angular@^1.6.3, angular@^1.x:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.4.tgz#03b7b15c01a0802d7e2cf593240e604054dc77fb"
 
 angular@~1.4:
   version "1.4.14"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.4.14.tgz#9d0feaf60ce6e52ce50f49ee328656d1e1875c37"
+
+angular@~1.6:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.10.tgz#eed3080a34d29d0f681ff119b18ce294e3f74826"
 
 ansi-colors@^1.0.1:
   version "1.1.0"
