@@ -34,7 +34,7 @@
                             <tr ng-repeat="x in vm.rules">
                                 <td class="clickable" ng-click="vm.ruleModal(x)">{{x.name}}</td>
                                 <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
-                                <td><button class="fa fa-trash" ng-click="vm.removeConversionRuleModal(x)"></button></td>
+                                <td><button class="fa fa-trash" ng-click="vm.removeConversionRuleModal(x)" permission permission-only="'maintenance.delete_conversionrule'"></button></td>
                             </tr>
                             <tr ng-if="!vm.rules.length && !ruleLoading" class="empty-table-indicator">
                                 <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
