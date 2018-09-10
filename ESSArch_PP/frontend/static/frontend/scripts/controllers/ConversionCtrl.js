@@ -173,7 +173,11 @@ angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $sc
         }).then(function(response) {
             Notifications.add("Running conversion job", "success");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(response.data && response.data.detail) {
+                Notifications.add(response.data.detail, 'error');
+            } else if(response.status !== 500){
+                Notifications.add('Unknown error!', 'error');
+            }
         })
     }
 
