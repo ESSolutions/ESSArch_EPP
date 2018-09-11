@@ -221,7 +221,8 @@ ELASTICSEARCH_CONNECTIONS = {
     'default': {
         'hosts': [{
             'host': 'localhost',
-            'port': '9200'
+            'port': '9200',
+            'timeout': 60,
         }],
     }
 }
