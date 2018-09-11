@@ -39,7 +39,7 @@
         <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="(eventShow || statusShow || vm.request.type =='preserve' && requestForm)" class="events-status-wrapper">
             <event-table ng-if="eventShow" ip="ip"></event-table>
             <div ng-if="statusShow" class="status-view">
-                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+                <state-tree-view ip="ip"></state-tree-view>
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">

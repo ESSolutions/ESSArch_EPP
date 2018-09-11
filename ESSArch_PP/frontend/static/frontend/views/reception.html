@@ -32,7 +32,7 @@
         <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
             <event-table ng-if="eventShow || vm.request.type == 'preserve'" ip="ip"></event-table>
             <div ng-if="statusShow" class="status-view">
-                <div ng-include src="'static/frontend/views/status_tree_view.html'"></div>
+                <state-tree-view ip="ip"></state-tree-view>
             </div>
         </div>
         <div ng-if="filebrowser" class="file-browser">
