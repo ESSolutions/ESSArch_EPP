@@ -4,6 +4,7 @@ angular.module('myApp').controller('SaEditorCtrl', function(Notifications, $time
     vm.saProfile = null;
     vm.saProfiles = [];
     vm.createNewSa = false;
+    vm.saLoading = false;
     vm.$onInit = function() {
         SA.query({pager: "none"}).$promise.then(function(resource) {
             vm.saProfiles = resource;
@@ -38,19 +39,27 @@ angular.module('myApp').controller('SaEditorCtrl', function(Notifications, $time
     }
 
     vm.chooseSa = function(sa) {
-        vm.getProfiles();
-        vm.saProfile = sa;
-        vm.saModel = null;
-        if(sa.published) {
-            vm.disableFields();
-        } else {
-            vm.enableFields();
-        }
-        $timeout(function() {
-            vm.saModel = sa;
+        vm.saLoading = true;
+        vm.getProfiles().then(function(resource) {
+            vm.saProfile = sa;
+            vm.saModel = null;
+            if(sa.published) {
+                vm.disableFields();
+            } else {
+                vm.enableFields();
+            }
+            $timeout(function() {
+                vm.saModel = sa;
+            })
+            vm.createNewSa = false;
+            $scope.edit = true;
+            vm.saLoading = false;
+        }).catch(function(response) {
+            vm.saProfile = null;
+            vm.saModel = null;
+            $scope.edit = false;
+            vm.saLoading = false;
         })
-        vm.createNewSa = false;
-        $scope.edit = true;
     }
 
     vm.disableFields = function() {
@@ -72,15 +81,18 @@ angular.module('myApp').controller('SaEditorCtrl', function(Notifications, $time
         }
     }
     vm.getProfiles = function () {
-        Profile.query().$promise.then(function (resource) {
+        return Profile.query().$promise.then(function (resource) {
             resource.forEach(function (profile) {
-                vm.profiles[profile.profile_type].forEach(function (item, idx, array) {
-                    if (item.id == profile.id) {
-                        array.splice(idx, 1)
-                    }
-                })
-                vm.profiles[profile.profile_type].push(profile);
+                if(vm.profiles[profile.profile_type]) {
+                    vm.profiles[profile.profile_type].forEach(function (item, idx, array) {
+                        if (item.id == profile.id) {
+                            array.splice(idx, 1)
+                        }
+                    })
+                    vm.profiles[profile.profile_type].push(profile);
+                }
             });
+            return resource;
         });
     }
 
