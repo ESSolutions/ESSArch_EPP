@@ -78,6 +78,7 @@
                         <select class="form-control" ng-change="vm.changeDataVersion(vm.profileIp, vm.dataVersion)" ng-model="vm.dataVersion" ng-options="x as vm.profileIp.data_versions.indexOf(x) == 0 ? 'Default' : vm.profileIp.data_versions.indexOf(x) for x in vm.profileIp.data_versions">{{ x }}</select>
                     </div>
                 </div>
+                <div class="loading-column w-100 text-center position-absolute" ng-if="vm.fieldsLoading()" >{{'LOADING' | translate}}</div>
                 <formly-form model="vm.profileModel" fields="vm.profileFields" options="vm.options" form="vm.editForm">
                 </formly-form>
                 <br />
