@@ -215,12 +215,6 @@ main {
 .well-sm {
     padding: 0px;
 }
-.param-value {
-    pre {
-        overflow-x: scroll;
-        white-space: pre-wrap;
-    }
-}
 .ui-select-placeholder {
     width: auto !important;
 }
@@ -562,10 +556,6 @@ body.modal-open {
             }
         }
     }
-}
-
-.margin-top-5 {
-    margin-top: 5px;
 }
 
 .new-archive-container {
