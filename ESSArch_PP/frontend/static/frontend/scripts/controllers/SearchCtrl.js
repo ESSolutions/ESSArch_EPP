@@ -50,7 +50,7 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
         angular.forEach($stateParams.query, function(value, key) {
             vm.filterObject[key] = value;
         })
-        $http.get(appConfig.djangoUrl+"search/", {params: angular.extend(vm.filterObject, {page: 1, page_size: vm.resultsPerPage, ordering: ""})}).then(function(response) {
+        $http.get(appConfig.djangoUrl+"search/", {params: vm.filterObject}).then(function(response) {
             vm.loadTags(response.data.aggregations);
             vm.fileExtensions = response.data.aggregations._filter_extension.extension.buckets;
             vm.showTree = true;
@@ -71,7 +71,10 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
     vm.filterObject = {
         q: "",
         type: null,
-        indices: null
+        indices: null,
+        page: 1,
+        page_size: vm.resultsPerPage || 25,
+        ordering: ""
     }
 
     vm.extensionFilter = {};
@@ -169,7 +172,10 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             if(tableState.sort.reverse) {
                 ordering = '-' + ordering;
             }
-            Search.query(vm.filterObject, pageNumber, number, ordering).then(function (response) {
+            vm.filterObject.page = pageNumber;
+            vm.filterObject.page_size = number;
+            vm.filterObject.ordering = ordering;
+            Search.query(vm.filterObject).then(function (response) {
                 angular.copy(response.data, vm.searchResult);
                 vm.numberOfResults = response.count;
                 tableState.pagination.numberOfPages = response.numberOfPages;//set the number of pages so the pagination can update
@@ -367,10 +373,6 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
 
     vm.getExportResultUrl = function(tableState, format) {
         if (tableState) {
-            var pagination = tableState.pagination;
-            var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
-            var number = pagination.number;  // Number of entries showed per page.
-            var pageNumber = start / number + 1;
             formatFilters();
             if (vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
@@ -382,9 +384,6 @@ angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $h
             var params = $httpParamSerializer(
                 angular.extend(
                 {
-                    page: pageNumber,
-                    page_size: number,
-                    ordering: ordering,
                     export: format
                 }, vm.filterObject)
             );
