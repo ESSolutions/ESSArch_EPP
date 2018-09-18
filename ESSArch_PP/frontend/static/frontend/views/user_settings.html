@@ -4,11 +4,6 @@
             <div ng-controller="UtilCtrl" class="main-view-options">
                 <a href="/admin/" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></a>
                 <a ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></a>
-                <div ng-click="showAlert()" class="notification-icon info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
-                    <i class="fa fa-bell"></i>
-                    <div ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
-                    <div ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
-                </div>
             </div>
             <div class="main-page-selects">
                 <div ng-controller="OrganizationCtrl" class="organization-select">
