@@ -173,6 +173,7 @@
     "GLOBALSEARCHDESC_MIGRATION":"Lista alla migreringar som associeras med söktermen",
     "GLOBALSEARCHDESC_ORDER":"Lista alla beställningar som associeras med söktermen",
     "GLOBALSEARCHDESC_STRUCTURES":"Lista alla klassificeringsstrukturer som associeras med söktermen",
+    "GLOBALSEARCHDESC_VALIDATION":"Lista alla valideringar som associeras med söktermen",
     "PREPAREIPDESC": "Gör ett nytt IP",
     "REFRESHTABLEDESC": "Uppdatera tabell",
     "LABELDESC": "Arbeta med IP",
@@ -615,5 +616,8 @@
     "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Vill du ta bort Klassificeringsstruktur?",
     "EMAILS_SENT": "Email skickades",
     "EMAILS_FAILED": "Email misslyckades",
-    "DURATION": "Duration"
+    "DURATION": "Duration",
+    "VALIDATOR": "Validator",
+    "VALIDATIONS": "Valideringar",
+    "RUNNING": "Körs"
 }

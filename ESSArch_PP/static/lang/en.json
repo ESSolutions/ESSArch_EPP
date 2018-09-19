@@ -173,6 +173,7 @@
     "GLOBALSEARCHDESC_MIGRATION":"List all migrations associated to the search term",
     "GLOBALSEARCHDESC_ORDER":"List all orders associated to the search term",
     "GLOBALSEARCHDESC_STRUCTURES":"List all classification structures associated to the search term",
+    "GLOBALSEARCHDESC_VALIDATION":"List all validations associated to the search term",
     "PREPAREIPDESC": "Create a new IP",
     "REFRESHTABLEDESC": "Refresh table",
     "LABELDESC": "Work with IP",
@@ -616,5 +617,8 @@
     "DO_YOU_WANT_TO_REMOVE_STRUCTURE": "Do you want to delete classification structure?",
     "EMAILS_SENT": "Emails sent",
     "EMAILS_FAILED": "Emails failed",
-    "DURATION": "Duration"
+    "DURATION": "Duration",
+    "VALIDATOR": "Validator",
+    "VALIDATIONS": "Validations",
+    "RUNNING": "Running"
 }
