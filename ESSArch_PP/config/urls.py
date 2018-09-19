@@ -26,7 +26,6 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from rest_framework_extensions.routers import ExtendedDefaultRouter
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
@@ -37,6 +36,7 @@ from ESSArch_Core.ip.views import AgentViewSet, EventIPViewSet, WorkareaEntryVie
 from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
                                             ConversionJobViewSet)
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
+from ESSArch_Core.routers import ESSArchRouter
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
@@ -48,7 +48,7 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
 from tags.search import ComponentSearchViewSet
 from tags.views import StructureViewSet, StructureUnitViewSet, TagViewSet, TagInformationPackagesViewSet
 
-router = ExtendedDefaultRouter()
+router = ESSArchRouter()
 
 admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
