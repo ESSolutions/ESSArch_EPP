@@ -39,71 +39,71 @@ describe('ReceptionCtrl', function() {
         beforeEach(inject(function($rootScope){
             $scope = $rootScope.$new();
             controller = $controller('ReceptionCtrl', { $scope: $scope });
+            $scope.ip = {
+                "url": "http://localhost:8000/api/information-packages/b76e97e8-2896-47a5-87df-da740dff7535/",
+                "id": "b76e97e8-2896-47a5-87df-da740dff7535",
+                "label": "test18911_1",
+                "object_identifier_value": "test18911_1",
+                "object_size": 38594892,
+                "object_path": "/ESSArch/data/etp/reception/test18911_1.tar",
+                "submission_agreement": "5672f6b9-bbe0-4ea2-8b1b-1cf527f7c936",
+                "submission_agreement_locked": true,
+                "package_type": 0,
+                "package_type_display": "SIP",
+                "responsible": {
+                    "id": 4,
+                    "username": "admin",
+                },
+                "create_date": "2018-09-11T13:44:20.799253+02:00",
+                "object_num_items": 45,
+                "entry_date": "2018-09-11T13:44:20.799253+02:00",
+                "state": "Created",
+                "status": 100,
+                "step_state": "SUCCESS",
+                "policy": null,
+                "message_digest": "",
+                "message_digest_algorithm": null,
+                "content_mets_create_date": "2018-09-11T13:45:22.188677+02:00",
+                "content_mets_size": 24958,
+                "content_mets_digest_algorithm": 3,
+                "content_mets_digest": "70a4b01e5c5878265cb8f6d16c423f87f5c95f665bca2950d23edc59ca088967",
+                "package_mets_create_date": null,
+                "package_mets_size": null,
+                "package_mets_digest_algorithm": null,
+                "package_mets_digest": "",
+                "start_date": "2016-11-10T00:00:00+01:00",
+                "end_date": "2016-12-20T00:00:00+01:00",
+                "permissions": [
+                    "submit_sip",
+                    "can_upload",
+                    "set_uploaded",
+                    "view_informationpackage",
+                    "add_submissionagreement",
+                    "prepare_ip",
+                    "delete_informationpackage",
+                    "create_sip"
+                ],
+                "appraisal_date": null,
+            }
         }));
 
-        describe('$scope.select', function() {
-            it('when true sets false', function() {
-                $scope.select = true;
-                $scope.toggleSelectView();
-
-                expect($scope.select).toBe(false);
+        describe('$scope.closeAlert', function() {
+            it('on init informationClassAlert should be null', function() {
+                expect($scope.informationClassAlert).toBe(null);
             });
 
-            it('when false sets true', function() {
-                $scope.select = false;
-                $scope.toggleSelectView();
+            it('after calling closeAlert() informationClassAlert should be null', function() {
+                $scope.informationClassAlert = {id: "id-123456"};
+                $scope.closeAlert();
 
-                expect($scope.select).toBe(true);
+                expect($scope.informationClassAlert).toBe(null);
             });
         });
 
-        describe('$scope.subSelect', function() {
-            it('when true sets false', function() {
-                $scope.subSelect = true;
-                $scope.toggleSubSelectView();
-
-                expect($scope.subSelect).toBe(false);
-            });
-
-            it('when false sets true', function() {
-                $scope.subSelect = false;
-                $scope.toggleSubSelectView();
-
-                expect($scope.subSelect).toBe(true);
-            });
-        });
-
-        describe('$scope.toggleEditView', function() {
-            it('when true sets false', function() {
-                $scope.edit = true;
-                $scope.toggleEditView();
-
-                expect($scope.edit).toBe(false);
-                expect($scope.eventlog).toBe(false);
-            });
-
-            it('when false sets true', function() {
-                $scope.edit = false;
-                $scope.toggleEditView();
-
-                expect($scope.edit).toBe(true);
-                expect($scope.eventlog).toBe(true);
-            });
-        });
-
-        describe('$scope.toggleEventLogView', function() {
-            it('when true sets false', function() {
-                $scope.eventlog = true;
-                $scope.toggleEventlogView();
-
-                expect($scope.eventlog).toBe(false);
-            });
-
-            it('when false sets true', function() {
-                $scope.eventlog = false;
-                $scope.toggleEventlogView();
-
-                expect($scope.eventlog).toBe(true);
+        describe('getFileList()', function() {
+            it('fileListCollection is populated', function() {
+                $scope.getFileList($scope.ip);
+                expect($scope.fileListCollection.length).toBe(1);
             });
         });
     });
