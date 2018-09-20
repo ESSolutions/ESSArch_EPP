@@ -245,7 +245,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except NotFoundError:
             raise exceptions.NotFound
 
-    def get_tag_object(self):
+    def get_tag_object(self, qs=None):
         # Perform the lookup filtering.
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
 
@@ -256,11 +256,14 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 (self.__class__.__name__, lookup_url_kwarg)
         )
 
+        if qs is None:
+            qs = TagVersion.objects.all()
+
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
 
         prefetched_structures = TagStructure.objects.select_related('tag__current_version', 'parent__tag__current_version')
-        tag_version = TagVersion.objects.select_related('tag').prefetch_related(Prefetch('tag__structures', prefetched_structures))
+        tag_version = qs.select_related('tag').prefetch_related(Prefetch('tag__structures', prefetched_structures))
 
         obj = get_object_or_404(tag_version, pk=id)
         user_archives = get_objects_for_user(self.request.user, tag_version.filter(elastic_index='archive'), []).values_list('pk', flat=True)
@@ -571,10 +574,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     @detail_route(methods=['post'], url_path='change-organization')
     def change_organization(self, request, index=None, pk=None):
-        tag = self.get_tag_object()
-
-        if tag.elastic_index != 'archive':
-            raise exceptions.ParseError(detail='Only archives can be moved to other organizations')
+        tag = self.get_tag_object(qs=TagVersion.objects.filter(elastic_index='archive'))
 
         try:
             org_id = request.data['organization']
