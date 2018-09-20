@@ -60,7 +60,7 @@
             <div class="text-center" st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
         </td>
     </div>
-    <div class="events-footer">
+    <div permission permission-only="'ip.add_eventip'" class="events-footer">
         <form class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
             <div class="form-group" style="margin-right: 5px;">
                 <label>{{'EVENTTYPE' | translate}}</label>
