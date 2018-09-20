@@ -173,7 +173,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         # Filter ips based on conditions
         new_ips = filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in six.iteritems(conditions))), ips)
 
-        from_db = InformationPackage.objects.filter(package_type=InformationPackage.AIP,
+        from_db = InformationPackage.objects.visible_to_user(request.user).filter(package_type=InformationPackage.AIP,
                                                     state__in=['Prepared', 'Receiving'], **conditions)
         serializer = InformationPackageSerializer(
             data=from_db, many=True, context={'request': request, 'view': self}
