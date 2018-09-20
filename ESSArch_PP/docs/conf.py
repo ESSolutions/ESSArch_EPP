@@ -194,7 +194,7 @@ release = u'1.0.0'
 language = None
 
 gettext_compact = False
-locale_dirs = ['locale']
+locale_dirs = ['locale', 'core/locale']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
