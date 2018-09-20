@@ -58,6 +58,7 @@ from rest_framework.response import Response
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.WorkflowEngine.serializers import ProcessStepChildrenSerializer
 from ESSArch_Core.WorkflowEngine.util import create_workflow
+from ESSArch_Core.auth.decorators import permission_required_or_403
 from ESSArch_Core.auth.models import Group, Member
 from ESSArch_Core.auth.util import get_organization_groups
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
@@ -91,6 +92,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         'responsible__last_name', 'responsible__username', 'state',
         'submission_agreement__name', 'start_date', 'end_date',
     )
+
+    def get_queryset(self):
+        user = self.request.user
+        return InformationPackage.objects.visible_to_user(user).filter(
+            state='Prepared', package_type=InformationPackage.AIP)
 
     def find_xml_files(self, path):
         for xmlfile in glob.glob(os.path.join(path, "*.xml")):
@@ -292,10 +298,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         logger.info('Prepared information package %s' % str(ip.pk), extra={'user': request.user.pk})
         return Response(data, status=status.HTTP_201_CREATED)
 
+    @permission_required_or_403(['ip.receive'])
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
         try:
-            ip = get_object_or_404(InformationPackage, id=pk)
+            ip = get_object_or_404(self.get_queryset(), id=pk)
         except (ValueError, ValidationError):
             raise exceptions.NotFound('Information package with id="%s" not found' % pk)
 
