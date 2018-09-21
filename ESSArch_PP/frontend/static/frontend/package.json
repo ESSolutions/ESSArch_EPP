@@ -84,14 +84,13 @@
     "string.prototype.startswith": "^0.2.0"
   },
   "scripts": {
-    "update-deps": "npm update",
-    "pretest": "npm install",
+    "pretest-single-run": "gulp",
     "test": "karma start karma.conf.js",
     "test-single-run": "karma start karma.conf.js --single-run",
     "test-single-run-junit": "karma start karma.conf.js --single-run --reporters junit",
-    "preupdate-webdriver": "npm install",
+    "preupdate-webdriver": "yarn",
     "update-webdriver": "webdriver-manager update",
-    "pree2e": "npm run update-webdriver",
+    "pree2e": "yarn run update-webdriver",
     "e2e": "protractor e2e-tests/protractor.conf.js",
     "postinstall": "bower install"
   }

@@ -47,6 +47,7 @@ var isProduction = (argv.production === undefined) ? false : true;
 var core = process.env.EC_FRONTEND;
 var coreHtmlFiles = [path.join(core, 'views/**/*.html')];
 var coreJsFiles = [path.join(core, 'scripts/**/*.js')];
+var coreTestFiles = [path.join(core, 'tests/*.js')];
 var coreCssFiles = path.join(core, 'styles');
 
 var jsPolyfillFiles = [
@@ -164,6 +165,12 @@ var buildCoreScripts = function() {
         .pipe(gulp.dest('scripts/core'));
 }
 
+var buildCoreTests = function() {
+    return gulp.src(coreTestFiles)
+        .pipe(concat('tests.js'))
+        .pipe(gulp.dest('tests/core'));
+}
+
 var buildScripts = function() {
     return gulp.src(jsFiles)
         .pipe(plumber(function(error) {
@@ -275,7 +282,7 @@ var permissionConfig = function() {
     .pipe(gulp.dest('./scripts/configs'));
 };
 
-gulp.task('default', ['core_templates', 'core_scripts'], function() {
+gulp.task('default', ['core_templates', 'core_scripts', 'core_tests',], function() {
     configConstants();
     permissionConfig();
     compileSass();
@@ -292,6 +299,7 @@ gulp.task('images', copyImages);
 gulp.task('polyfills', buildPolyfills);
 gulp.task('core_templates', buildCoreTemplates);
 gulp.task('core_scripts', buildCoreScripts);
+gulp.task('core_tests', buildCoreTests);
 gulp.task('scripts', buildScripts);
 gulp.task('vendors', buildVendors);
 gulp.task('sass', compileSass);
@@ -300,6 +308,7 @@ gulp.task('config', configConstants);
 gulp.task('watch', function(){
     gulp.watch(coreHtmlFiles, ['core_templates']);
     gulp.watch(coreJsFiles, ['core_scripts']);
+    gulp.watch(coreTestFiles, ['core_tests']);
     gulp.watch(jsFiles, ['scripts']);
     gulp.watch(jsPolyfillFiles, ['polyfills']);
     gulp.watch(jsVendorFiles, ['vendors']);
