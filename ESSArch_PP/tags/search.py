@@ -32,6 +32,7 @@ from six import iteritems
 from weasyprint import HTML
 
 from ESSArch_Core.auth.models import Group, GroupGenericObjects
+from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user, get_organization_groups
 from ESSArch_Core.csv import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent, InformationPackage
@@ -575,16 +576,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     @detail_route(methods=['post'], url_path='change-organization')
     def change_organization(self, request, index=None, pk=None):
         tag = self.get_tag_object(qs=TagVersion.objects.filter(elastic_index='archive'))
-
-        try:
-            org_id = request.data['organization']
-        except KeyError:
-            raise exceptions.ParseError(detail='Missing "organization" parameter')
-
-        try:
-            org = get_organization_groups(request.user).get(pk=org_id)
-        except Group.DoesNotExist:
-            raise exceptions.ParseError('Invalid organization')
+                
+        serializer = ChangeOrganizationSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        org = serializer.validated_data['organization']
 
         ctype = ContentType.objects.get_for_model(tag)
         self._update_tag_metadata(tag, {'organization_group': org.pk})
