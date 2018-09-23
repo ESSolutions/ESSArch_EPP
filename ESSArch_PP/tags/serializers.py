@@ -6,11 +6,5 @@ class SearchSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
     reference_code = serializers.CharField()
-    structure = serializers.CharField(required=False)
+    structure = serializers.CharField(required=True)
     parent = serializers.CharField(required=False)
-    parent_index = serializers.ChoiceField(choices=['archive', 'component'], required=False)
-
-    def validate(self, data):
-        if data.get('parent') is None and data.get('structure') is None:
-            raise serializers.ValidationError("parent or structure is required")
-        return data
