@@ -547,6 +547,36 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
 
+    @detail_route(methods=['get'], url_path='child-by-value')
+    def child_by_value(self, request, index=None, pk=None):
+        class ByValueSerializer(serializers.Serializer):
+            field = serializers.CharField(required=True)
+            value = serializers.CharField(required=True)
+            structure = serializers.UUIDField(required=False)
+
+        parent = self.get_tag_object()
+
+        serializer = ByValueSerializer(data=request.query_params, context={'request': request.user})
+        serializer.is_valid(raise_exception=True)
+
+        field = serializer.validated_data['field']
+        value = serializer.validated_data['value']
+        structure = serializer.validated_data.get('structure')
+
+        self.verify_structure(parent, structure)
+
+        filter_values = {field: value, 'parent.id': pk}
+        s = ComponentSearch('', filter_values=filter_values, user=self.request.user)
+        results = s.execute().to_dict()['hits']
+
+        if results['total'] > 1:
+            raise exceptions.ParseError('More than 1 result, found {}'.format(results['total']))
+
+        try:
+            return Response(results['hits'][0])
+        except IndexError:
+            raise exceptions.NotFound()
+
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, index=None, pk=None):
         tag = self.get_tag_object()
