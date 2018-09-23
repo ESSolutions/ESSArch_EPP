@@ -631,6 +631,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     raise exceptions.PermissionDenied('You do not have permission to create new archives')
                 if organization is None:
                     raise exceptions.ParseError('You must be part of an organization to create a new archive')
+            else:
+                if not request.user.has_perm('tags.add_tag'):
+                    raise exceptions.PermissionDenied('You do not have permission to create nodes')
 
             with transaction.atomic():
                 tag = Tag.objects.create()
