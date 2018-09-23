@@ -23,7 +23,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
-from rest_framework import exceptions, status
+from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -682,7 +682,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                             ts.parent = tag_structure
                         ts.save()
 
-                return Response(self.serialize(tag_version.to_search()))
+                return Response(self.serialize(tag_version.to_search()), status=status.HTTP_201_CREATED)
 
     def _update_tag_metadata(self, tag_version, data):
         if 'parent' in data:
