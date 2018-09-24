@@ -131,7 +131,7 @@ class work:
     "sync_IngestObject"
     ###############################################
     def sync_IngestObject(self,startDateTime,stopDateTime):
-        ArchiveObject_objs = ArchiveObject.objects.filter(LocalDBdatetime__range=(startDateTime,stopDateTime))
+        ArchiveObject_objs = ArchiveObject.objects.filter(PolicyId__isnull=False, LocalDBdatetime__range=(startDateTime,stopDateTime))
         for ArchiveObject_obj in ArchiveObject_objs:
             if not ArchiveObject_obj.check_db_sync():
                 rows2,errno2,why2 = ESSMSSQL.DB().action('IngestObject','GET3',('ObjectIdentifierValue',),('ObjectIdentifierValue',ArchiveObject_obj.ObjectIdentifierValue))
