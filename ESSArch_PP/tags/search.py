@@ -15,7 +15,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters.constants import EMPTY_VALUES
@@ -25,6 +24,7 @@ from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
 from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet

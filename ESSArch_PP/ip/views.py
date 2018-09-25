@@ -40,7 +40,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
 from django.db.models import BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch, Q, Subquery, Value, When
-from django.shortcuts import get_object_or_404
 from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import DjangoFilterBackend
 from elasticsearch.exceptions import TransportError
@@ -53,6 +52,7 @@ from lxml import etree
 from natsort import natsorted
 from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
