@@ -458,10 +458,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except ValidationError:
             raise exceptions.ParseError('Invalid structure id')
 
-    def retrieve(self, request, index=None, pk=None):
-        if index is None:
-            return self.list(request, index=pk)
-
+    def retrieve(self, request, pk=None):
         tag = self.get_tag_object()
         structure = self.request.query_params.get('structure')
         self.verify_structure(tag, structure)

@@ -23,7 +23,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
 
     vm.updateRecord = function() {
         vm.childrenLoading = true;
-        $http.get(appConfig.djangoUrl + "search/" + vm.record._index + "/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
+        $http.get(appConfig.djangoUrl + "search/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
             var promises = [];
             promises.push(getBreadcrumbs(vm.record).then(function(list) {
                 response.data.breadcrumbs = list;
@@ -49,7 +49,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         vm.viewContent = true;
         vm.record_children = [];
         vm.childrenLoading = true;
-        return $http.get(vm.url+"search/"+ index +"/"+id+"/", {params: {structure: vm.structure}}).then(function(response) {
+        return $http.get(vm.url+"search/" + id+"/", {params: {structure: vm.structure}}).then(function(response) {
             vm.record = response.data;
             $rootScope.latestRecord = response.data;
             if(vm.record.structures.length == 0) {
@@ -114,7 +114,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     }
 
     vm.getTag = function(tag) {
-        return $http.get(vm.url+"search/"+tag._index+"/"+tag._id+"/", {params: {structure: vm.structure}}).then(function(response) {
+        return $http.get(vm.url+"search/"+tag._id+"/", {params: {structure: vm.structure}}).then(function(response) {
             return response.data;
         });
     }
@@ -171,7 +171,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             });
         }
         if (startNode.parent) {
-            var parentPromise = $http.get(vm.url + "search/"+startNode.parent.index + "/" + startNode.parent.id + "/", {params: {structure: vm.structure}}).then(function (response) {
+            var parentPromise = $http.get(vm.url + "search/" + startNode.parent.id + "/", {params: {structure: vm.structure}}).then(function (response) {
                 var p = response.data;
                 p.children = [];
                 return getChildren(p).then(function (children) {
@@ -214,7 +214,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         return getParentList([], {index: node._index, id: node._id});
     }
     function getParentList(parentList, parent) {
-        return $http.get(vm.url+"search/"+parent.index+"/"+parent.id+"/").then(function(response) {
+        return $http.get(vm.url+"search/"+parent.id+"/").then(function(response) {
             if(response.data.parent !== null) {
                 parentList.unshift(response.data);
                 return getParentList(parentList, response.data.parent);
@@ -226,7 +226,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     }
 
     function getChildren(node) {
-        return $http.get(vm.url+"search/"+node._index+"/"+node._id+"/children/", {params: {page_size: 10, page: 1, structure: vm.structure}}).then(function(response) {
+        return $http.get(vm.url+"search/"+node._id+"/children/", {params: {page_size: 10, page: 1, structure: vm.structure}}).then(function(response) {
             var count = response.headers('Count');
             return {
                 data: response.data,
@@ -306,8 +306,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
                     }
                 })
                 var type = nodes[0].original.type;
-                var rule = structure.specification.rules[type];
-                return angular.isUndefined(rule) || rule.movable;
+                return _.get(structure, "specification.rules." + type + ".movable", true);
             },
         },
         contextmenu: {
@@ -437,7 +436,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
             var tree = vm.recordTreeData;
             var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
             var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original.parent.index+"/"+e.node.original.parent.id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original.parent.id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 var selectedElement = null;
                 var see_more = null;
@@ -474,7 +473,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         }
         vm.record_children = [];
         vm.childrenLoading = true;
-        $http.get(appConfig.djangoUrl + "search/" + e.node.original._index + "/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
+        $http.get(appConfig.djangoUrl + "search/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
             vm.record = response.data;
             $rootScope.latestRecord = response.data;
             $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
@@ -514,7 +513,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
         var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
         if(e.node.children.length < 2 || reload) {
-            $http.get(vm.url+"search/"+e.node.original._index+"/"+e.node.original._id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
+            $http.get(vm.url+"search/"+e.node.original._id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
                 var count = response.headers('Count');
                 children.pop();
                 response.data.forEach(function(child) {
@@ -573,7 +572,7 @@ angular.module('myApp').controller('SearchDetailCtrl', function($scope, $control
     vm.emailDocument = function(record) {
         return $http({
             method: 'POST',
-            url: appConfig.djangoUrl+'search/' + record._index + '/' + record._id + '/send-as-email/',
+            url: appConfig.djangoUrl+'search/' + record._id + '/send-as-email/',
             data: {
                 include_descendants: vm.includeDescendants
             }

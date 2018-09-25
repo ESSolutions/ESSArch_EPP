@@ -57,7 +57,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         }
         return $http({
             method: 'PATCH',
-            url: url+"search/"+node._index + "/" + node._id + "/",
+            url: url+"search/"+ node._id + "/",
             params: {
                 refresh: refresh,
             },
@@ -73,7 +73,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
         }
         return $http({
             method: 'POST',
-            url: url+"search/"+node._index + "/" + node._id + "/update-descendants/",
+            url: url+"search/" + node._id + "/update-descendants/",
             params: {
                 refresh: refresh,
                 include_self: true,
@@ -131,7 +131,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     service.createNewVersion = function(node) {
         return $http({
             method: 'POST',
-            url: url+"search/"+node._index + "/" + node._id + "/new-version/",
+            url: url+"search/" + node._id + "/new-version/",
             params: { refresh: true },
         }).then(function(response) {
             return response;
@@ -140,7 +140,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     service.createNewStructure = function(node, data) {
         return $http({
             method: 'POST',
-            url: url + "search/" + node._index + "/" + node._id + "/new-structure/",
+            url: url + "search/" + node._id + "/new-structure/",
             params: { refresh: true },
             data: data
         }).then(function(response) {
@@ -150,7 +150,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     service.removeNode = function(node) {
         return $http({
             method: 'DELETE',
-            url: url+"search/"+node._index + "/" + node._id + "/",
+            url: url+"search/" + node._id + "/",
             params: { refresh: true },
         }).then(function(response) {
             return response;
@@ -159,7 +159,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     service.removeNodeFromStructure = function(node, structure) {
         return $http({
             method: 'POST',
-            url: url+"search/"+node._index + "/" + node._id + "/remove-from-structure/",
+            url: url+"search/" + node._id + "/remove-from-structure/",
             params: { refresh: true },
             data: {structure: structure}
         }).then(function(response) {
@@ -169,7 +169,7 @@ angular.module('myApp').factory('Search', function($http, $sce, appConfig, $tran
     service.setAsCurrentVersion = function (node, refresh) {
         return $http({
             method: 'PATCH',
-            url: url + "search/" + node._index + "/" + node._id + "/set-as-current-version/",
+            url: url + "search/" + node._id + "/set-as-current-version/",
             params: {
                 refresh: refresh
             },
