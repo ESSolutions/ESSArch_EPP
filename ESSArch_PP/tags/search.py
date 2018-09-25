@@ -221,6 +221,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self.client = get_connection()
         super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
 
+    def get_view_name(self):
+        return u'Search {}'.format(getattr(self, 'suffix', None))
+
     def get_object(self, index=None):
         """
         Returns the object the view is displaying.
