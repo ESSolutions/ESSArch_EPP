@@ -192,7 +192,6 @@ router.register(r'robots', RobotViewSet, base_name='robots').register(
 )
 
 router.register(r'search', ComponentSearchViewSet, base_name='search')
-router.register(r'search/(?P<index>[^/]+)', ComponentSearchViewSet, base_name='search')
 
 urlpatterns = [
     url(r'^', include('frontend.urls'), name='home'),
