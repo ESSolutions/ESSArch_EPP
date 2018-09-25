@@ -788,6 +788,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     @detail_route(methods=['post'], url_path='remove-from-structure')
     def remove_from_structure(self, request, index=None, pk=None):
         obj = self.get_tag_object()
+
+        if obj.elastic_index == 'archive':
+            perm = 'tags.delete_archive'
+        else:
+            perm = 'tags.delete_tag'
+
+        if not request.user.has_perm(perm):
+            raise exceptions.PermissionDenied('You do not have permission to delete this node')
+
         try:
             structure = request.data['structure']
         except KeyError:
@@ -798,6 +807,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def destroy(self, request, index=None, pk=None):
         obj = self.get_tag_object()
+
+        if obj.elastic_index == 'archive':
+            perm = 'tags.delete_archive'
+        else:
+            perm = 'tags.delete_tag'
+
+        if not request.user.has_perm(perm):
+            raise exceptions.PermissionDenied('You do not have permission to delete this node')
+
         if request.query_params.get('delete_descendants', False):
             structure = request.query_params.get('structure')
             obj.get_descendants(structure=structure, include_self=True).delete()
