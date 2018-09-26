@@ -620,5 +620,6 @@
     "DURATION": "Duration",
     "VALIDATOR": "Validator",
     "VALIDATIONS": "Validations",
-    "RUNNING": "Running"
+    "RUNNING": "Running",
+    "OR": "Or"
 }
