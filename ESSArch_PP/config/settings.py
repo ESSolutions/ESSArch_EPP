@@ -297,7 +297,7 @@ REST_AUTH_SERIALIZERS = {
 }
 
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/?ref=logout'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
