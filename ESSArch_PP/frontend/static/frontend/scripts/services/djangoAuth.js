@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('myApp')
-  .service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope, PermPermissionStore, PermRoleStore) {
+  .service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope, $window, PermPermissionStore, PermRoleStore) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var service = {
         /* START CUSTOMIZATION HERE */
@@ -90,18 +90,7 @@ angular.module('myApp')
             });
         },
         'logout': function(){
-            var djangoAuth = this;
-            return this.request({
-                'method': "POST",
-                'url': "/logout/"
-            }).then(function(data){
-                djangoAuth.authenticated = false;
-                if (data.data.redirect) {
-                    window.location.replace(data.data.redirect);
-                } else {
-                    $rootScope.$broadcast("djangoAuth.logged_out");
-                }
-            });
+            return $window.location.href = '/rest-auth/logout/';
         },
         'changePassword': function(password1,password2,oldPassword){
             return this.request({
