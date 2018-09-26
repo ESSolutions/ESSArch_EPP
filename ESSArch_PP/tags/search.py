@@ -617,14 +617,12 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                                                      defaults={'group': org})
         return Response()
 
-    def create(self, request, index=None):
-        request.data.setdefault('index', index)
-        refresh = request.query_params.get('refresh', False)
+    def create(self, request):
         serializer = SearchSerializer(data=request.data)
         organization = request.user.user_profile.current_organization
 
         if serializer.is_valid(raise_exception=True):
-            data = serializer.data
+            data = serializer.validated_data
 
             if data.get('index') == 'archive':
                 if not request.user.has_perm('tags.create_archive'):
@@ -640,17 +638,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 tag_structure = TagStructure(tag=tag)
                 structure = data.get('structure')
 
-                try:
-                    structure = Structure.objects.get(pk=data.get('structure'))
-                except Structure.DoesNotExist:
-                    if structure is not None:
-                        raise exceptions.ParseError(u'Structure {} does not exist'.format(data.get('structure')))
-
-                if data.get('parent') is not None:
+                if data.get('index') != 'archive':
                     parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
                     if structure is None:
-                        raise exceptions.ParseError('Missing "structure" parameter')
-                    parent_structure = parent_version.get_structures(structure).get()
+                        parent_structure = parent_version.get_active_structure()
+                    else:
+                        parent_structure = parent_version.get_structures(structure).get()
+
                     tag_structure.parent = parent_structure
                     tag_structure.structure = parent_structure.structure
                 elif structure is not None:
