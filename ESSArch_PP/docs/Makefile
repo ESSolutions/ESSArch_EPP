@@ -13,7 +13,10 @@ LANGUAGE      = en
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+.PHONY: clean help Makefile
+
+clean:
+	-rm -rf $(BUILDDIR)/*
 
 html: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$(LANGUAGE)" -D language=$(LANGUAGE) $(SPHINXOPTS) $(O)
