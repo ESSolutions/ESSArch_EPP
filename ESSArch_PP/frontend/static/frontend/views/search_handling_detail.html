@@ -145,6 +145,12 @@
         </div>
     </div>
 
+    <div ng-if="vm.record._source.egna_element">
+        <strong>Övrigt:</strong>
+        <result-field ng-repeat="x in vm.record._source.egna_element" label="{{x.element[0].namn}}" data="x.element[0].varde"></result-field>
+        <br/>
+    </div>
+
     <h4>{{'CONTENTS' | translate}}</h4>
     <div st-table="children" st-safe-src="vm.record_children" class="table-x-overflow table-container">
         <table class="table table-striped">
