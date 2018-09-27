@@ -125,11 +125,6 @@
         <br/>
     </div>
 
-    <div ng-if="vm.record._source.ip_objid">
-        <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip_objid }}
-        <br/>
-    </div>
-
     <h4>{{'CONTENTS' | translate}}</h4>
     <div st-table="children" st-safe-src="vm.record_children" class="table-x-overflow table-container">
         <table class="table table-striped">
@@ -159,5 +154,9 @@
             </tbody>
         </table>
         <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
+    </div>
+    <div ng-if="vm.record._source.ip_objid">
+        <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip_objid }}
+        <br/>
     </div>
 </div>
