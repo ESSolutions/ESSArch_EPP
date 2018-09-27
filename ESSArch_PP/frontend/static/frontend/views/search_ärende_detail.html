@@ -20,11 +20,6 @@
         <strong>Klassificering:</strong> {{ vm.record._source.klassreferens }}
         <br/>
     </div>
-
-    <div title="Ärendetyp" ng-if="vm.record._source.arendetyp">
-        <strong>Ärendetyp:</strong> {{ vm.record._source.arendetyp }}
-        <br/>
-    </div>
     <br/>
 
     <div ng-if="vm.record._source.create_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date">
