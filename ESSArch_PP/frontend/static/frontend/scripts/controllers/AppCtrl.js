@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AppCtrl', function($rootScope, $scope, $uibModal, $log, PermPermissionStore) {
+angular.module('essarch.controllers').controller('AppCtrl', function($rootScope, $scope, $uibModal, $log, PermPermissionStore) {
     var vm = this;
     var questionMark = 187;
     vm.questionMarkListener = function(e) {
