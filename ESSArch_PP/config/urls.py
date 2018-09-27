@@ -194,7 +194,7 @@ router.register(r'robots', RobotViewSet, base_name='robots').register(
 router.register(r'search', ComponentSearchViewSet, base_name='search')
 
 urlpatterns = [
-    url(r'^', include('frontend.urls'), name='home'),
+    url(r'^', include('ESSArch_Core.frontend.urls'), name='home'),
     url(r'^accounts/changepassword', auth_views.password_change, {'post_change_redirect': '/'}),
     url(r'^accounts/login/$', auth_views.login),
     url(r'^admin/', admin.site.urls),
