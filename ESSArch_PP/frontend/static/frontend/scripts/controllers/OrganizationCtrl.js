@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('OrganizationCtrl', function($scope, $rootScope, $cookies, Organization) {
+angular.module('essarch.controllers').controller('OrganizationCtrl', function($scope, $rootScope, $cookies, Organization) {
 
     $scope.changeOrganization = function() {
         var org = $scope.currentOrganization;

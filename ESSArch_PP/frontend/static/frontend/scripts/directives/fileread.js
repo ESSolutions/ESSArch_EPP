@@ -1,4 +1,4 @@
-angular.module('myApp').directive("fileread", [function () {
+angular.module('essarch.directives').directive("fileread", [function () {
     return {
         scope: {
             fileread: "="

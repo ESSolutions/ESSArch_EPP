@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
+angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];

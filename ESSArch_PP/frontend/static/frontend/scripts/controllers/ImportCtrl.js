@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, Notifications, $uibModal) {
+angular.module('essarch.controllers').controller('ImportCtrl', function($q, $rootScope, $scope, $http, IP, Profile, SA, Notifications, $uibModal) {
     var vm = this;
     $scope.angular = angular;
     vm.saProfile = {

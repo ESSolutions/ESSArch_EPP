@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Appraisal', function ($http, appConfig) {
+angular.module('essarch.services').factory('Appraisal', function ($http, appConfig) {
     var service = {};
     service.getFinished = function (pageNumber, pageSize, sortString, searchString) {
         var data = {

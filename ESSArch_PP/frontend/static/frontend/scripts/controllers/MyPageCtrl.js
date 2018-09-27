@@ -1,4 +1,4 @@
-angular.module('myApp').controller('MyPageCtrl', function(Notifications, $scope, $controller, $rootScope) {
+angular.module('essarch.controllers').controller('MyPageCtrl', function(Notifications, $scope, $controller, $rootScope) {
     var vm = this;
     $scope.visibleRequests = {
         access: false,

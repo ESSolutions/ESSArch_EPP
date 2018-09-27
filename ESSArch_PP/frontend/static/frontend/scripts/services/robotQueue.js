@@ -1,4 +1,4 @@
-angular.module('myApp').factory('RobotQueue', function ($resource, appConfig) {
+angular.module('essarch.services').factory('RobotQueue', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'robot-queue/:id/:action/', { id: "@id" }, {
         query: {
             method: "GET",

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('StorageMigrationCtrl', function($scope, $rootScope) {
+angular.module('essarch.controllers').controller('StorageMigrationCtrl', function($scope, $rootScope) {
     var vm = this;
     $scope.select = true;
     vm.formFiltersShow = true;

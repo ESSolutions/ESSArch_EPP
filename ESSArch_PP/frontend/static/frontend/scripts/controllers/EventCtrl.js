@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', 'Notifications', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http, Notifications) {
+angular.module('essarch.controllers').controller('EventCtrl', ['Resource', '$scope', '$rootScope', 'listViewService', '$interval', 'appConfig', '$cookies', '$window', '$translate', '$http', 'Notifications', function (service, $scope, $rootScope, listViewService, $interval, appConfig, $cookies, $window, $translate, $http, Notifications) {
     var vm = this;
     vm.itemsPerPage = $cookies.get('epp-events-per-page') || 10;
     $scope.updateEventsPerPage = function(items) {

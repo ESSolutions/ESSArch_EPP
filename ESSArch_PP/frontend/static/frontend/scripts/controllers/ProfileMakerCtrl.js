@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ProfileMakerCtrl', function ($translate, ProfileMakerTemplate, ProfileMakerExtension, $scope, $state, $rootScope, $http, $uibModal, $log) {
+angular.module('essarch.controllers').controller('ProfileMakerCtrl', function ($translate, ProfileMakerTemplate, ProfileMakerExtension, $scope, $state, $rootScope, $http, $uibModal, $log) {
     var vm = this;
     vm.templates = [];
     vm.template = null;

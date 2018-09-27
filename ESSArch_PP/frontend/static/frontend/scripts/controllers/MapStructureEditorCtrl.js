@@ -1,7 +1,7 @@
-angular.module('myApp').controller('MapStructureEditorCtrl', function($scope, $rootScope, $translate) {
+angular.module('essarch.controllers').controller('MapStructureEditorCtrl', function($scope, $rootScope, $translate) {
     var vm = this;
     vm.noStructure = false;
-    
+
     vm.$onInit = function() {
         if(vm.profile.structure.length == 0) {
             vm.useDefaultStructure();

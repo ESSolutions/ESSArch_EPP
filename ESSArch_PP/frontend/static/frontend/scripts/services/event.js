@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Event', function ($resource, appConfig) {
+angular.module('essarch.services').factory('Event', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'events/:id/:action/', {}, {
         query: {
             method: 'GET',

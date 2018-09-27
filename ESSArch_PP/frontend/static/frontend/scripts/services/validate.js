@@ -24,7 +24,7 @@
 
 'use strict';
 
-angular.module('myApp')
+angular.module('essarch.services')
   .service('Validate', function Validate() {
     return {
         'message': {

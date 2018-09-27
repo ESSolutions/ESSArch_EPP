@@ -1,4 +1,4 @@
-angular.module('myApp').factory('User', function ($resource, appConfig) {
+angular.module('essarch.services').factory('User', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'users/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

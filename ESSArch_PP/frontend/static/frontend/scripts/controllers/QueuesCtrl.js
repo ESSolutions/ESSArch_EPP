@@ -1,4 +1,4 @@
-angular.module('myApp').controller('QueuesCtrl', function(appConfig, $scope, $rootScope, Storage, Resource, $interval) {
+angular.module('essarch.controllers').controller('QueuesCtrl', function(appConfig, $scope, $rootScope, Storage, Resource, $interval) {
     var vm = this;
     $scope.select = true;
     vm.ioQueue = [];

@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser, Notifications) {
+angular.module('essarch.services').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser, Notifications) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);

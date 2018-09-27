@@ -1,4 +1,4 @@
-angular.module('myApp').controller('StorageMaintenanceCtrl', function($scope, $rootScope) {
+angular.module('essarch.controllers').controller('StorageMaintenanceCtrl', function($scope, $rootScope) {
     var vm = this;
     $scope.select = true;
     vm.formFiltersShow = true;

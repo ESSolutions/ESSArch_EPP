@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SaEditorCtrl', function(Notifications, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
+angular.module('essarch.controllers').controller('SaEditorCtrl', function(Notifications, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;

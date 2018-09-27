@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate, Structure) {
+angular.module('essarch.controllers').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate, Structure) {
     var $ctrl = this;
     $ctrl.name = null;
     $ctrl.newNode = {};

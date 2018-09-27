@@ -25,7 +25,7 @@
 'use strict';
 
 describe('ReceptionCtrl', function() {
-    beforeEach(module('myApp'));
+    beforeEach(module('essarch.controllers'));
     window.onbeforeunload = jasmine.createSpy();
 
     var $controller, $scope;

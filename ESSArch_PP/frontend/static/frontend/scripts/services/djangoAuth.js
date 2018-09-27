@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp')
+angular.module('essarch.services')
   .service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope, $window, PermPermissionStore, PermRoleStore) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var service = {

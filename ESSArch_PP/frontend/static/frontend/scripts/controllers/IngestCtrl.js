@@ -1,2 +1,2 @@
-angular.module('myApp').controller('IngestCtrl', function($state, myService) {
+angular.module('essarch.controllers').controller('IngestCtrl', function($state, myService) {
 });

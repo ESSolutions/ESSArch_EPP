@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Profile', function ($resource, appConfig) {
+angular.module('essarch.services').factory('Profile', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'profiles/:id/:action/?pager=none', {}, {
     get: {
         method: "GET",

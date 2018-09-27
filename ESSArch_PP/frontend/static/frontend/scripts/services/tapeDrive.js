@@ -1,4 +1,4 @@
-angular.module('myApp').factory('TapeDrive', function ($resource, appConfig) {
+angular.module('essarch.services').factory('TapeDrive', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'tape-drives/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('UtilCtrl', function(Notifications, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
+angular.module('essarch.controllers').controller('UtilCtrl', function(Notifications, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
     $scope.$state = $state;
     $scope.reloadPage = function (){
         $state.reload();

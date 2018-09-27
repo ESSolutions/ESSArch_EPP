@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Step', function ($resource, appConfig, Task) {
+angular.module('essarch.services').factory('Step', function ($resource, appConfig, Task) {
     return $resource(appConfig.djangoUrl + 'steps/:id/:action/', {}, {
         get: {
             method: "GET",

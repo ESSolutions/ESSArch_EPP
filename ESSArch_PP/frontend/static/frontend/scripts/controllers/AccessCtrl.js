@@ -1,2 +1,2 @@
-angular.module('myApp').controller('AccessCtrl', function($state, myService) {
+angular.module('essarch.controllers').controller('AccessCtrl', function($state, myService) {
 });

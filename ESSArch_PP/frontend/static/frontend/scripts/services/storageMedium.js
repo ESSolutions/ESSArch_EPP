@@ -1,4 +1,4 @@
-angular.module('myApp').factory('StorageMedium', function ($resource, appConfig) {
+angular.module('essarch.services').factory('StorageMedium', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'storage-mediums/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

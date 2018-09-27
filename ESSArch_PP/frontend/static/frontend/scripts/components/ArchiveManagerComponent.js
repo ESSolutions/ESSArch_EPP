@@ -1,4 +1,4 @@
-angular.module('myApp').component('archiveManager', {
+angular.module('essarch.components').component('archiveManager', {
     templateUrl: 'static/frontend/views/archive_manager.html',
     controller: 'ArchiveManagerCtrl',
     controllerAs: 'vm',

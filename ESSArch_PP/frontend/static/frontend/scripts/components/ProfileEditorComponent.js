@@ -1,4 +1,4 @@
-angular.module('myApp').component('profileEditor', {
+angular.module('essarch.components').component('profileEditor', {
   templateUrl: 'static/frontend/views/profile_editor.html',
   controller: 'ProfileCtrl',
   controllerAs: 'vm',

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion) {
+angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;

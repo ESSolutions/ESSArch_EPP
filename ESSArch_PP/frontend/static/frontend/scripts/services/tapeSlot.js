@@ -1,4 +1,4 @@
-angular.module('myApp').factory('TapeSlot', function ($resource, appConfig) {
+angular.module('essarch.services').factory('TapeSlot', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'tape-slots/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

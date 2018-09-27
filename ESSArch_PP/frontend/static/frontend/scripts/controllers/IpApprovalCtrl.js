@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state, Requests, ContextMenuBase) {
+angular.module('essarch.controllers').controller('IpApprovalCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, listViewService, $http, $q, $state, Requests, ContextMenuBase) {
 	var vm = this;
 	var ipSortString = "Received,Preserving";
 	$controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });

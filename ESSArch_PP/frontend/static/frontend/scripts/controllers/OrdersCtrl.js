@@ -1,4 +1,4 @@
-angular.module('myApp').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService, $q) {
+angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService, $q) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
 

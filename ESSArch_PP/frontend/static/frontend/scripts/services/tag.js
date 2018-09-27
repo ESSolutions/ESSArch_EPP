@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Tag', function (IP, $resource, appConfig) {
+angular.module('essarch.services').factory('Tag', function (IP, $resource, appConfig) {
     var Tag = $resource(appConfig.djangoUrl + 'tags/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

@@ -1,3 +1,3 @@
-angular.module('myApp').factory('Messenger', function($window) {
+angular.module('essarch.services').factory('Messenger', function($window) {
     return $window.Messenger;
 })

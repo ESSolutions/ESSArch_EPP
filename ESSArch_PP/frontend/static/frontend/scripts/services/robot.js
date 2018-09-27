@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Robot', function ($resource, appConfig) {
+angular.module('essarch.services').factory('Robot', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'robots/:id/:action/', { id: "@id" }, {
         get: {
             method: "GET",

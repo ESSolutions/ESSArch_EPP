@@ -1,4 +1,4 @@
-angular.module('myApp').controller('AddCtrl', function (ProfileMakerTemplate, $http, $scope, appConfig) {
+angular.module('essarch.controllers').controller('AddCtrl', function (ProfileMakerTemplate, $http, $scope, appConfig) {
   var vm = this;
   vm.options = {};
 

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').config(function(uiSelectConfig) {
+angular.module('essarch.configs').config(function(uiSelectConfig) {
     uiSelectConfig.theme = 'bootstrap';
     uiSelectConfig.appendToBody = true;
 })
@@ -56,4 +56,3 @@ angular.module('myApp').config(function(uiSelectConfig) {
     return out;
   };
 });
-

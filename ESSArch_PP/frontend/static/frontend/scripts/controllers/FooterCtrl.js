@@ -1,4 +1,4 @@
-angular.module('myApp').controller('FooterCtrl', function($scope, $rootScope, $timeout, $translate, $state) {
+angular.module('essarch.controllers').controller('FooterCtrl', function($scope, $rootScope, $timeout, $translate, $state) {
     var vm = this;
     var appName = " | ESSArch Preservation Platform";
     vm.pageTitle = "ESSArch Preservation Platform";

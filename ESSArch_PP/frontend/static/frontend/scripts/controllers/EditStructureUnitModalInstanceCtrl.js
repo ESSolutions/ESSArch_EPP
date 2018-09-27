@@ -1,4 +1,4 @@
-angular.module('myApp').controller('EditStructureUnitModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
+angular.module('essarch.controllers').controller('EditStructureUnitModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
     var $ctrl = this;
     $ctrl.editNode = {};
     $ctrl.options = {};

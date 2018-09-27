@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('myApp').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
+angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })

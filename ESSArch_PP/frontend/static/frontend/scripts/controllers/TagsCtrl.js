@@ -1,4 +1,4 @@
-angular.module('myApp').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state) {
+angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state) {
     vm.tags = {
         archive: {
             options: [],

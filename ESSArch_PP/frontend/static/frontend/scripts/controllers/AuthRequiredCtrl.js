@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp')
+angular.module('essarch.controllers')
 .controller('AuthrequiredCtrl', function ($scope) {
     $scope.awesomeThings = [
         'HTML5 Boilerplate',

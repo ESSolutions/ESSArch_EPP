@@ -1,4 +1,4 @@
-angular.module('myApp').factory('EventType', function ($resource, appConfig) {
+angular.module('essarch.services').factory('EventType', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'event-types/:id/:action/', {}, {
     });
 });

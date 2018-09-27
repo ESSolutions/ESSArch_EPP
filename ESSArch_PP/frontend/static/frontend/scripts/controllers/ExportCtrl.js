@@ -1,4 +1,4 @@
-angular.module('myApp').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile) {
+angular.module('essarch.controllers').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile) {
     var vm = this;
     vm.$onInit = function() {
         $http.get(appConfig.djangoUrl + "submission-agreements/", { params: { pager: "none", published: true } })

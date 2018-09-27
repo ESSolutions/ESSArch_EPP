@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('AngularTreeCtrl', function AngularTreeCtrl(Tag, $scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
+angular.module('essarch.controllers').controller('AngularTreeCtrl', function AngularTreeCtrl(Tag, $scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
     $scope.treeOptions = {
         nodeChildren: "children",
         dirSelectable: true,

@@ -1,4 +1,4 @@
-angular.module("myApp").controller("UserSettingsCtrl", function(Me, $scope, $rootScope, $http, appConfig, $controller, $cookies, myService, $q, $window) {
+angular.module('essarch.controllers').controller("UserSettingsCtrl", function(Me, $scope, $rootScope, $http, appConfig, $controller, $cookies, myService, $q, $window) {
     var vm = this;
     $controller('BaseCtrl', {$scope: $scope, vm: vm, ipSortString: '' });
     vm.activeColumns = {chosen: []};

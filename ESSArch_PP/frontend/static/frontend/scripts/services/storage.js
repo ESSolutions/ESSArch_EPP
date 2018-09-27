@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Storage', function(StorageMedium, StorageObject, Robot, RobotQueue, IOQueue, TapeSlot, TapeDrive, $http, $q, appConfig) {
+angular.module('essarch.services').factory('Storage', function(StorageMedium, StorageObject, Robot, RobotQueue, IOQueue, TapeSlot, TapeDrive, $http, $q, appConfig) {
 
     // Get storage mediums
     function getStorageMediums(pageNumber, pageSize, filters, sortString, searchString) {

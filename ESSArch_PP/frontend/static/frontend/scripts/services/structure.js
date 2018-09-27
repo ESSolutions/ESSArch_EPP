@@ -1,4 +1,4 @@
-angular.module('myApp').factory('Structure', function ($resource, appConfig) {
+angular.module('essarch.services').factory('Structure', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'classification-structures/:id/:action/', {}, {
     query: {
         method: "GET",

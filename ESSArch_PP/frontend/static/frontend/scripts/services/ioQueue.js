@@ -1,4 +1,4 @@
-angular.module('myApp').factory('IOQueue', function ($resource, appConfig) {
+angular.module('essarch.services').factory('IOQueue', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'io-queue/:id/:action/', { id: "@id" }, {
         query: {
             method: "GET",

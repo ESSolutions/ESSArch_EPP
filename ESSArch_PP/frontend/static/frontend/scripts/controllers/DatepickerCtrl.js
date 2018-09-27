@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').controller('DatepickerCtrl', function ($scope) {
+angular.module('essarch.controllers').controller('DatepickerCtrl', function ($scope) {
   $scope.today = function() {
     $scope.dt = new Date();
   };

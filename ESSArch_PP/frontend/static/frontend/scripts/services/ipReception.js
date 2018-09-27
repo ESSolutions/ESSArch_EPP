@@ -1,4 +1,4 @@
-angular.module('myApp').factory('IPReception', function ($resource, appConfig) {
+angular.module('essarch.services').factory('IPReception', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'ip-reception/:id/:action/', {}, {
         query: {
             method: 'GET',

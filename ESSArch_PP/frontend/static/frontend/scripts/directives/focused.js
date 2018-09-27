@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('myApp').directive('focused', function ($timeout, $parse) {
+angular.module('essarch.directives').directive('focused', function ($timeout, $parse) {
     return {
         link: function ($scope, element, attributes) {
             var model = $parse(attributes.focused);

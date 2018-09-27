@@ -1,4 +1,4 @@
-angular.module('myApp').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure) {
+angular.module('essarch.controllers').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];

@@ -1,4 +1,4 @@
-angular.module('myApp').controller('IpInformationModalInstanceCtrl', function (IP, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications) {
+angular.module('essarch.controllers').controller('IpInformationModalInstanceCtrl', function (IP, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications) {
     var $ctrl = this;
     $scope.angular = angular;
     $ctrl.editMode = {};

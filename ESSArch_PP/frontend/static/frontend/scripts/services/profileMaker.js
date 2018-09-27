@@ -1,4 +1,4 @@
-angular.module('myApp').factory('ProfileMakerTemplate', function ($resource, appConfig) {
+angular.module('essarch.services').factory('ProfileMakerTemplate', function ($resource, appConfig) {
     return $resource(appConfig.djangoUrl + 'profilemaker-templates/:templateName/:action/', { templateName: "@templateName" }, {
         add: {
             method: "POST"

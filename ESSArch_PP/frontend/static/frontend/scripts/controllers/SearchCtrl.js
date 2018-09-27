@@ -1,4 +1,4 @@
-angular.module('myApp').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
+angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
