@@ -46,7 +46,6 @@
     "gulp-sourcemaps": "^1.9.1",
     "gulp-strip-debug": "^3.0.0",
     "gulp-uglify": "^2.0.0",
-    "gulp-util": "^3.0.7",
     "jasmine-core": "^3.2.1",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "~1.12.1",
