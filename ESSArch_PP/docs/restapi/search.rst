@@ -149,8 +149,8 @@
         "_source": {
           "name": "hmm",
           "parent": {
-            "index": "archive",
-            "id": "b351ca1f-0d27-483b-8f79-ede633f3c4c7"
+            "index": "component",
+            "id": "ed835644-0845-4ada-91f4-e3fd66d581c4"
           },
           "reference_code": "1",
           "current_version": true,
