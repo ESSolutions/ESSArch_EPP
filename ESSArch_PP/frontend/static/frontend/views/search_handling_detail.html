@@ -125,6 +125,15 @@
         <br/>
     </div>
 
+    <div ng-if="vm.record._source.relationer">
+        <strong>Relationer:</strong>
+        <div ng-repeat="relation in vm.record._source.relationer">
+            <result-field label="{{relation.typ}}" data="relation.referens"></result-field>
+            <br/>
+        </div>
+        <br/>
+    </div>
+
     <div ng-if="vm.record._source.agenter">
         <strong>Agenter:</strong>
         <div ng-repeat="agent in vm.record._source.agenter">
