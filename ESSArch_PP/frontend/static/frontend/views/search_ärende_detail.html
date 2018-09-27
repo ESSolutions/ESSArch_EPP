@@ -121,7 +121,7 @@
 
     <div ng-if="vm.record._source.egna_element">
         <strong>Övrigt:</strong>
-        <result-field ng-repeat="x in vm.record._source.egna_element" label="{{x.element[0].namn}}" data="x.element[0].varde"></result-field>
+        <result-field ng-repeat="x in vm.record._source.egna_element" ng-if="x.element[0].namn !== 'Ärende/Recno'" label="{{x.element[0].namn}}" data="x.element[0].varde"></result-field>
         <br/>
     </div>
 
