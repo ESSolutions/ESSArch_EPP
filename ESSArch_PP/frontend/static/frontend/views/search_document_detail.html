@@ -10,6 +10,16 @@
             {{vm.record._source.desc}}
         </p>
     </div>
+
+    <div title="Dokumentnummer" ng-if="vm.record.breadcrumbs[vm.record.breadcrumbs.length-2]._source.arkivobjekt_id">
+        <strong>Dokumentnummer:</strong> {{ vm.record.breadcrumbs[vm.record.breadcrumbs.length-2]._source.arkivobjekt_id }}
+        <br/>
+    </div>
+    <div title="Handling" ng-if="vm.record.breadcrumbs[vm.record.breadcrumbs.length-2]._source.name">
+        <strong>Handling:</strong> {{ vm.record.breadcrumbs[vm.record.breadcrumbs.length-2]._source.name }}
+        <br/>
+    </div>
+
     <div ng-if="vm.record._source.create_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date">
         <strong>Datum:</strong>
         <result-field label="Skapad" data="vm.record._source.create_date" type="date"></result-field>
