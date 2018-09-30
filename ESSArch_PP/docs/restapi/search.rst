@@ -37,14 +37,17 @@
       `max_result_window`_
    :status 404: invalid :code:`page`
 
-   **Example response**:
+   **Example**:
 
-   .. sourcecode:: http
+..  http:example:: curl
 
-      HTTP 200 OK
-      Vary: Accept
-      Content-Type: application/json
-      Count: 379
+   GET /api/search/?q=bar HTTP/1.1
+   Host: localhost
+   Accept: application/json
+
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
 
       {
         "hits": [

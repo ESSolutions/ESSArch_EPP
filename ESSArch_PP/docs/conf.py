@@ -145,7 +145,7 @@ def setup(app):
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosectionlabel', 'sphinx.ext.inheritance_diagram',
               'sphinx.ext.intersphinx', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode', 'sphinxcontrib.httpdomain',
-              'sphinxcontrib.inlinesyntaxhighlight']
+              'sphinxcontrib.httpexample', 'sphinxcontrib.inlinesyntaxhighlight']
 
 # True to prefix each section label with the name of the document it is in,
 # followed by a colon. For example, index:Introduction for a section called
@@ -195,6 +195,9 @@ language = None
 
 gettext_compact = False
 locale_dirs = ['locale', 'core/locale']
+
+# sphinxcontrib.example URL scheme
+httpexample_scheme = 'https'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
