@@ -756,14 +756,21 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
             page_size: page_size,
             hidden: false
         }).$promise.then(function (resource) {
-            var link = linkHeaderParser.parse(resource.$httpHeaders('Link'));
             var count = resource.$httpHeaders('Count');
             if (count == null) {
                 count = resource.length;
             }
             step.pages = Math.ceil(count / page_size);
-            link.next ? step.next = link.next : step.next = null;
-            link.prev ? step.prev = link.prev : step.prev = null;
+            var linkHeader = resource.$httpHeaders('Link');
+            if (linkHeader !== null){
+                var link = linkHeaderParser.parse(linkHeader);
+                link.next ? step.next = link.next : step.next = null;
+                link.prev ? step.prev = link.prev : step.prev = null;
+            } else {
+                step.next = null;
+                step.prev = null;
+            }
+
             step.page_number = page_number || 1;
             if (resource.length > 0) {
                 // Delete placeholder

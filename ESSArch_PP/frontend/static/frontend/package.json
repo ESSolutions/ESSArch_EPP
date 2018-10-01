@@ -28,7 +28,6 @@
     "angularjs-bootstrap-datetimepicker": "^1.1.4",
     "api-check": "^7.5.5",
     "bootstrap-sass": "~3.3.7",
-    "bower": "^1.8",
     "console-polyfill": "^0.3.0",
     "font-awesome": "~4.7.0",
     "gulp": "^3.9.1",
@@ -70,6 +69,7 @@
   "dependencies": {
     "angular-clipboard": "^1.6.2",
     "angular-cron-jobs": "^3.2.0",
+    "angular-link-header-parser": "^1.0.3",
     "angular-relative-date": "^2.1.1",
     "angular-resizable": "^1.2.0",
     "angular-resource": "~1.7",
@@ -81,7 +81,8 @@
     "prettycron": "^0.10.0",
     "string.prototype.endswith": "^0.2.0",
     "string.prototype.includes": "^1.0.0",
-    "string.prototype.startswith": "^0.2.0"
+    "string.prototype.startswith": "^0.2.0",
+    "uri-util": "^1.1.0"
   },
   "scripts": {
     "pretest-single-run": "gulp",
@@ -91,7 +92,6 @@
     "preupdate-webdriver": "yarn",
     "update-webdriver": "webdriver-manager update",
     "pree2e": "yarn run update-webdriver",
-    "e2e": "protractor e2e-tests/protractor.conf.js",
-    "postinstall": "bower install"
+    "e2e": "protractor e2e-tests/protractor.conf.js"
   }
 }

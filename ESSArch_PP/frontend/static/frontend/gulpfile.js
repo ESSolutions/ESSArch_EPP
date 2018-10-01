@@ -88,9 +88,8 @@ var jsVendorFiles = [
         'node_modules/ui-select/dist/select.js',
         'node_modules/bootstrap/dist/js/bootstrap.js',
         'node_modules/@flowjs/ng-flow/dist/ng-flow-standalone.js',
-        'bower_components/angular-link-header-parser/release/angular-link-header-parser.js',
-        'bower_components/lodash/lodash.js', // required by angular-link-header-parser
-        'bower_components/uri-util/dist/uri-util.js', // required by angular-link-header-parser
+        'node_modules/uri-util/dist/uri-util.js', // required by angular-link-header-parser
+        'node_modules/angular-link-header-parser/src/angular-link-header-parser.js',
         'node_modules/marked/lib/marked.js',
         'node_modules/messenger-hubspot/build/js/messenger.js',
         'node_modules/messenger-hubspot/build/js/messenger-theme-flat.js',

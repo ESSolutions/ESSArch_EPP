@@ -150,6 +150,12 @@ angular-formly@~8.4.1:
   version "8.4.1"
   resolved "https://registry.yarnpkg.com/angular-formly/-/angular-formly-8.4.1.tgz#5f89c8a1bef42ba0139f3a8a0d5b2c93713601af"
 
+angular-link-header-parser@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/angular-link-header-parser/-/angular-link-header-parser-1.0.3.tgz#35de1c58e7c3cffd4e46224a34cbfeabb08a43ca"
+  dependencies:
+    uri-util "~1.1.0"
+
 angular-marked@~1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/angular-marked/-/angular-marked-1.2.2.tgz#031f81015dad5fb01adf8d48922c52feb3588de5"
@@ -586,10 +592,6 @@ boom@2.x.x:
 bootstrap-sass@~3.3.7:
   version "3.3.7"
   resolved "https://registry.yarnpkg.com/bootstrap-sass/-/bootstrap-sass-3.3.7.tgz#6596c7ab40f6637393323ab0bc80d064fc630498"
-
-bower@^1.8:
-  version "1.8.4"
-  resolved "https://registry.yarnpkg.com/bower/-/bower-1.8.4.tgz#e7876a076deb8137f7d06525dc5e8c66db82f28a"
 
 brace-expansion@^1.0.0:
   version "1.1.7"
@@ -5132,6 +5134,10 @@ unset-value@^1.0.0:
 upath@^1.0.5:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/upath/-/upath-1.1.0.tgz#35256597e46a581db4793d0ce47fa9aebfc9fabd"
+
+uri-util@^1.1.0, uri-util@~1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/uri-util/-/uri-util-1.1.0.tgz#9766c8a1c7b543146184b2710f69f2bc024113d3"
 
 urix@^0.1.0, urix@~0.1.0:
   version "0.1.0"
