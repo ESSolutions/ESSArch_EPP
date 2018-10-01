@@ -23,7 +23,7 @@
     "angular-translate-storage-cookie": "~2.18.1",
     "angular-tree-control": "0.2.28",
     "angular-ui-bootstrap": "~2.5.6",
-    "angular-ui-router": "~0.4.2",
+    "angular-ui-router": "~0.4.3",
     "angular-ui-tree": "~2.22.6",
     "angularjs-bootstrap-datetimepicker": "^1.1.4",
     "api-check": "^7.5.5",
