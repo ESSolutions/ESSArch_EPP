@@ -98,8 +98,8 @@ var jsVendorFiles = [
         'node_modules/angular-filesize-filter/angular-filesize-filter.js',
         'node_modules/moment/min/moment-with-locales.js',
         'node_modules/angular-date-time-input/src/dateTimeInput.js',
-        'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
-        'node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js',
+        'node_modules/angularjs-bootstrap-datetimepicker/src/js/datetimepicker.js',
+        'node_modules/angularjs-bootstrap-datetimepicker/src/js/datetimepicker.templates.js',
         'node_modules/angular-clipboard/angular-clipboard.js',
         'node_modules/angular-resizable/src/angular-resizable.js',
         'node_modules/angular-resource/angular-resource.js',
@@ -235,6 +235,7 @@ var compileSass = function() {
       tidyAtRules: true, // controls at-rules (e.g. `@charset`, `@import`) optimizing; defaults to `true`
       tidyBlockScopes: true, // controls block scopes (e.g. `@media`) optimizing; defaults to `true`
       tidySelectors: true, // controls selectors optimizing; defaults to `true`,
+      inline: ['all'], // enables all inlining, same as ['local', 'remote']
       transform: function () {} // defines a callback for fine-grained property optimization; defaults to no-op
     }))
     .pipe(sourcemaps.write('.'))
