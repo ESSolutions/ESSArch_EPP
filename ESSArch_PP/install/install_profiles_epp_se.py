@@ -124,7 +124,7 @@ def installSubmissionAgreement():
 
     sa, _ = SubmissionAgreement.objects.update_or_create(name=dct['name'], defaults=dct)
 
-    print 'Installed submission agreement'
+    print('Installed submission agreement')
 
     return sa
 
@@ -250,7 +250,7 @@ def installProfileTransferProject(sa):
     sa.profile_transfer_project = profile
     sa.save()
 
-    print 'Installed profile transfer project'
+    print('Installed profile transfer project')
 
     return 0
 
@@ -389,7 +389,7 @@ def installProfileSubmitDescription(sa):
     sa.profile_submit_description = profile
     sa.save()
 
-    print 'Installed profile submit description'
+    print('Installed profile submit description')
 
     return 0
 
@@ -624,7 +624,7 @@ def installProfileSIP(sa):
     sa.profile_sip = profile
     sa.save()
 
-    print 'Installed profile SIP'
+    print('Installed profile SIP')
 
     return 0
 
@@ -654,7 +654,7 @@ def installProfileAICDescription(sa):
     sa.profile_aic_description = profile
     sa.save()
 
-    print 'Installed profile AIC Description'
+    print('Installed profile AIC Description')
 
     return 0
 
@@ -998,7 +998,7 @@ def installProfileAIP(sa):
     sa.profile_aip = profile
     sa.save()
 
-    print 'Installed profile AIP'
+    print('Installed profile AIP')
 
     return 0
 
@@ -1150,7 +1150,7 @@ def installProfileAIPDescription(sa):
     sa.profile_aip_description = profile
     sa.save()
 
-    print 'Installed profile AIP Description'
+    print('Installed profile AIP Description')
 
     return 0
 
@@ -1342,7 +1342,7 @@ def installProfileDIP(sa):
     sa.profile_dip = profile
     sa.save()
 
-    print 'Installed profile DIP'
+    print('Installed profile DIP')
 
     return 0
 
@@ -1391,7 +1391,7 @@ def installProfilePreservationMetadata(sa):
     sa.profile_preservation_metadata = profile
     sa.save()
 
-    print 'Installed profile preservation metadata'
+    print('Installed profile preservation metadata')
 
     return 0
 
@@ -1413,7 +1413,7 @@ def installProfileContentType(sa):
     sa.profile_content_type = profile
     sa.save()
 
-    print 'Installed profile content type'
+    print('Installed profile content type')
 
     return 0
 
@@ -1430,7 +1430,7 @@ def installProfileWorkflow(sa):
     sa.profile_workflow = profile
     sa.save()
 
-    print 'Installed profile Workflow'
+    print('Installed profile Workflow')
 
     return 0
 

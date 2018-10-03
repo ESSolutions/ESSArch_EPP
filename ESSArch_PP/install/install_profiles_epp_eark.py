@@ -114,7 +114,7 @@ def installSubmissionAgreement():
 
     sa, _ = SubmissionAgreement.objects.update_or_create(name=dct['name'], defaults=dct)
 
-    print 'Installed submission agreement'
+    print('Installed submission agreement')
 
     return sa
 
@@ -229,7 +229,7 @@ def installProfileTransferProject(sa):
     sa.profile_transfer_project = profile
     sa.save()
 
-    print 'Installed profile transfer project'
+    print('Installed profile transfer project')
 
     return 0
 
@@ -248,7 +248,7 @@ def installProfileContentType(sa):
     sa.profile_content_type = profile
     sa.save()
 
-    print 'Installed profile content type'
+    print('Installed profile content type')
 
     return 0
 
@@ -267,7 +267,7 @@ def installProfileDataSelection(sa):
     sa.profile_data_selection = profile
     sa.save()
 
-    print 'Installed profile data selection'
+    print('Installed profile data selection')
 
     return 0
 
@@ -284,7 +284,7 @@ def installProfileAuthorityInformation(sa):
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
 
-    print 'Installed profile authority information'
+    print('Installed profile authority information')
 
     return 0
 
@@ -303,7 +303,7 @@ def installProfileArchivalDescription(sa):
     sa.profile_archival_description = profile
     sa.save()
 
-    print 'Installed profile archival description'
+    print('Installed profile archival description')
 
     return 0
 
@@ -322,7 +322,7 @@ def installProfileImport(sa):
     sa.profile_import = profile
     sa.save()
 
-    print 'Installed profile import'
+    print('Installed profile import')
 
     return 0
 
@@ -472,7 +472,7 @@ def installProfileSubmitDescription(sa):
     sa.profile_submit_description = profile
     sa.save()
 
-    print 'Installed profile submit description'
+    print('Installed profile submit description')
 
     return 0
 
@@ -1033,7 +1033,7 @@ def installProfileSIP(sa):
     sa.profile_sip = profile
     sa.save()
 
-    print 'Installed profile SIP'
+    print('Installed profile SIP')
 
     return 0
 
@@ -1061,7 +1061,7 @@ def installProfileAIP(sa):
     sa.profile_aip = profile
     sa.save()
 
-    print 'Installed profile AIP'
+    print('Installed profile AIP')
 
     return 0
 
@@ -1089,7 +1089,7 @@ def installProfileDIP(sa):
     sa.profile_dip = profile
     sa.save()
 
-    print 'Installed profile DIP'
+    print('Installed profile DIP')
 
     return 0
 
@@ -1108,7 +1108,7 @@ def installProfileWorkflow(sa):
     sa.profile_workflow = profile
     sa.save()
 
-    print 'Installed profile workflow'
+    print('Installed profile workflow')
 
     return 0
 
@@ -1158,7 +1158,7 @@ def installProfilePreservationMetadata(sa):
     sa.profile_preservation_metadata = profile
     sa.save()
 
-    print 'Installed profile preservation metadata'
+    print('Installed profile preservation metadata')
 
     return 0
 

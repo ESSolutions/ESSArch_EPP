@@ -47,31 +47,31 @@ from ESSArch_Core.tags.documents import Archive, Component, Directory, Document,
 User = get_user_model()
 
 def installDefaultConfiguration():
-    print "\nInstalling parameters..."
+    print("\nInstalling parameters...")
     installDefaultParameters()
 
-    print "Installing users, groups and permissions..."
+    print("Installing users, groups and permissions...")
     installDefaultUsers()
 
-    print "\nInstalling paths..."
+    print("\nInstalling paths...")
     installDefaultPaths()
 
-    print "\nInstalling archive policies..."
+    print("\nInstalling archive policies...")
     installDefaultArchivePolicies()
 
-    print "\nInstalling storage methods..."
+    print("\nInstalling storage methods...")
     installDefaultStorageMethods()
 
-    print "\nInstalling storage targets..."
+    print("\nInstalling storage targets...")
     installDefaultStorageTargets()
 
-    print "\nInstalling storage method target relations..."
+    print("\nInstalling storage method target relations...")
     installDefaultStorageMethodTargetRelations()
 
-    print "\nInstalling Elasticsearch pipelines..."
+    print("\nInstalling Elasticsearch pipelines...")
     installPipelines()
 
-    print "\nInstalling search indices..."
+    print("\nInstalling search indices...")
     installSearchIndices()
 
     return 0
@@ -87,7 +87,7 @@ def installDefaultParameters():
     }
 
     for key in dct:
-        print '-> %s: %s' % (key, dct[key])
+        print('-> %s: %s' % (key, dct[key]))
         Parameter.objects.get_or_create(entity=key, value=dct[key])
 
     return 0
@@ -302,7 +302,7 @@ def installDefaultPaths():
     }
 
     for key in dct:
-        print '-> %s: %s' % (key, dct[key])
+        print('-> %s: %s' % (key, dct[key]))
         Path.objects.get_or_create(entity=key, value=dct[key])
 
     return 0
@@ -414,7 +414,7 @@ def installSearchIndices():
     for doctype in [Archive, Component, Directory, Document, InformationPackage]:
         alias_migration.setup_index(doctype)
 
-    print 'done'
+    print('done')
 
 if __name__ == '__main__':
     installDefaultConfiguration()

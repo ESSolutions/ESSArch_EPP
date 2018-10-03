@@ -1115,7 +1115,7 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
             if self.paginator is not None:
                 # Paginate in search engine
-                params = {key: value[0] for (key, value) in dict(request.query_params).iteritems()}
+                params = {key: value[0] for (key, value) in six.iteritems(dict(request.query_params))}
 
                 number = params.get(self.paginator.pager.page_query_param, 1)
                 size = params.get(self.paginator.pager.page_size_query_param, 10)
