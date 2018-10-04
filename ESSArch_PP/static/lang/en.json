@@ -621,5 +621,7 @@
     "VALIDATOR": "Validator",
     "VALIDATIONS": "Validations",
     "RUNNING": "Running",
-    "OR": "Or"
+    "OR": "Or",
+    "VERSION_HISTORY": "Version history",
+    "VERSION_HISTORY_DESC": "List of all versions of data for current node"
 }
