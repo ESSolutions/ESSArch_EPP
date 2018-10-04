@@ -67,6 +67,8 @@ class ComponentSearch(FacetedSearch):
         'type': TermsFacet(field='type', min_doc_count=0),
         'archive': TermsFacet(field='archive', min_doc_count=0),
         'information_package': TermsFacet(field='ip', min_doc_count=0),
+        'archive_creator': TermsFacet(field='archive_creator', min_doc_count=0),
+        'archive_responsible': TermsFacet(field='archive_responsible', min_doc_count=0),
         'institution': TermsFacet(field='institution', min_doc_count=0),
         'organization': TermsFacet(field='organization', min_doc_count=0),
         'extension': TermsFacet(field='extension', min_doc_count=0),
@@ -327,6 +329,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'index': params.pop('index', index),
             'type': params.pop('type', None),
             'information_package': params.pop('information_package', None),
+            'archive_creator': params.pop('archive_creator', None),
+            'archive_responsible': params.pop('archive_responsible', None),
             'institution': params.pop('institution', None),
             'organization': params.pop('organization', None),
         }
@@ -660,6 +664,16 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 if tag_version.elastic_index == 'archive':
                     org = request.user.user_profile.current_organization
                     org.add_object(tag_version)
+
+                    search_data = {}
+                    if data.get('archive_creator'):
+                        search_data['archive_creator'] = data.get('archive_creator')
+                    if data.get('archive_responsible'):
+                        search_data['archive_responsible'] = data.get('archive_responsible')
+
+                    if search_data:
+                        #tag_version.update_search(search_data)
+                        self._update_tag_metadata(tag_version, search_data)
 
                     # create descendants from structure
                     for unit in tag_structure.structure.units.all():

@@ -11,6 +11,8 @@ class SearchSerializer(serializers.Serializer):
     reference_code = serializers.CharField()
     structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.all())
     parent = serializers.CharField(required=False)
+    archive_creator = serializers.CharField(required=False)
+    archive_responsible = serializers.CharField(required=False)
 
     def validate(self, data):
         if data['index'] == 'archive' and 'structure' not in data:
