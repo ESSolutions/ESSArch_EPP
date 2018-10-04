@@ -5,6 +5,7 @@
         </strong>
     </h3>
     <h4 title="{{'TYPE' | translate}}">{{vm.record._source.type}}</h4>
+    <result-field label="{{'CLASSIFICATION_STRUCTURE' | translate}}" data="vm.getStructureById(vm.record.structures, vm.structure).name" stronglabel="true"></result-field>
     <result-field label="{{'ARCHIVE_REFERENCE' | translate}}" data="vm.record._source.reference_code" stronglabel="true"></result-field>
     <result-field label="{{'ARCHIVE_CREATOR' | translate}}" data="vm.record._source.archive_creator" stronglabel="true"></result-field>
     <result-field label="{{'ARCHIVE_RESPONSIBLE' | translate}}" data="vm.record._source.archive_responsible" stronglabel="true"></result-field>

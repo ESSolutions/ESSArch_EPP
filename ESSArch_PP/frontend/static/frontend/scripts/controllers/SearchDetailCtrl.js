@@ -557,6 +557,16 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         return runner(null, node);
     }
 
+    vm.getStructureById = function(structures, id) {
+        var structure = null;
+        structures.forEach(function(x) {
+            if(x.id === id) {
+                structure = x;
+            }
+        })
+        return structure;
+    }
+
     vm.viewFile = function(file) {
         var params = {};
         if(file.href != "") {
