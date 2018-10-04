@@ -19,12 +19,24 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
             }
         })
     }
-    vm.createArchive = function(archiveName, structureName, type, referenceCode) {
-        Search.addNode({name: archiveName, structure: structureName, index: 'archive', type: type, reference_code: referenceCode}).then(function(response) {
+    vm.createArchive = function (archiveName, structureName, type, referenceCode, archiveCreator, archiveResponsible) {
+        Search.addNode(
+            {
+                name: archiveName,
+                structure: structureName,
+                index: 'archive',
+                type: type,
+                reference_code: referenceCode,
+                archive_creator: archiveCreator,
+                archive_responsible: archiveResponsible
+            }
+        ).then(function (response) {
             vm.archiveName = null;
             vm.structure = null;
             vm.nodeType = null;
             vm.referenceCode = null;
+            vm.archiveResponsible = null;
+            vm.archiveCreator = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
             if(response.data && response.data.detail) {

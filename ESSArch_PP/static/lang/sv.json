@@ -625,5 +625,7 @@
     "VERSION_HISTORY_DESC": "Lista av alla versioner av data för aktuell nod",
     "SEND_AS_EMAIL": "Skicka som e-post",
     "INCLUDE_DESCENDANT_NODES": "Inkludera underliggande noder",
-    "ARCHIVE_REFERENCE": "Arkivreferens"
+    "ARCHIVE_REFERENCE": "Arkivreferens",
+    "ARCHIVE_CREATOR" :"Arkivbildare",
+    "ARCHIVE_RESPONSIBLE": "Arkivansvarig"
 }

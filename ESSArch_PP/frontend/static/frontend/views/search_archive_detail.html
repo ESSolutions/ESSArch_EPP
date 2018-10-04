@@ -5,9 +5,10 @@
         </strong>
     </h3>
     <h4 title="{{'TYPE' | translate}}">{{vm.record._source.type}}</h4>
-    <div title="{{'ARCHIVE_REFERENCE' | translate}}">
-        <b>{{'ARCHIVE_REFERENCE' | translate}}:</b>&nbsp;{{vm.record._source.reference_code}}
-    </div>
+    <result-field label="{{'ARCHIVE_REFERENCE' | translate}}" data="vm.record._source.reference_code" stronglabel="true"></result-field>
+    <result-field label="{{'ARCHIVE_CREATOR' | translate}}" data="vm.record._source.archive_creator" stronglabel="true"></result-field>
+    <result-field label="{{'ARCHIVE_RESPONSIBLE' | translate}}" data="vm.record._source.archive_responsible" stronglabel="true"></result-field>
+
     <div ng-if="vm.record._source.desc">
         <p ng-if="vm.record._source.desc" class="result-description">
             {{vm.record._source.desc}}
