@@ -622,5 +622,7 @@
     "RUNNING": "Körs",
     "OR": "Eller",
     "VERSION_HISTORY": "Versionshistorik",
-    "VERSION_HISTORY_DESC": "Lista av alla verisoner av data för aktuell nod"
+    "VERSION_HISTORY_DESC": "Lista av alla versioner av data för aktuell nod",
+    "SEND_AS_EMAIL": "Skicka som e-post",
+    "INCLUDE_DESCENDANT_NODES": "Inkludera underliggande noder"
 }

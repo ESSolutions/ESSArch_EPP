@@ -623,5 +623,7 @@
     "RUNNING": "Running",
     "OR": "Or",
     "VERSION_HISTORY": "Version history",
-    "VERSION_HISTORY_DESC": "List of all versions of data for current node"
+    "VERSION_HISTORY_DESC": "List of all versions of data for current node",
+    "SEND_AS_EMAIL": "Send as email",
+    "INCLUDE_DESCENDANT_NODES": "Include descendant nodes"
 }
