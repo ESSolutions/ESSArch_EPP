@@ -4,7 +4,10 @@
             {{vm.record._source.name}}
         </strong>
     </h3>
-    <h4><span title="Informationsobjekt">{{vm.record._source.type}}</span></h4>
+    <h4 title="{{'TYPE' | translate}}">{{vm.record._source.type}}</h4>
+    <div title="{{'ARCHIVE_REFERENCE' | translate}}">
+        <b>{{'ARCHIVE_REFERENCE' | translate}}:</b>&nbsp;{{vm.record._source.reference_code}}
+    </div>
     <div ng-if="vm.record._source.desc">
         <p ng-if="vm.record._source.desc" class="result-description">
             {{vm.record._source.desc}}
