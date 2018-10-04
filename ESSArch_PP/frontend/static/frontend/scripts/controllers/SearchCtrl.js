@@ -235,6 +235,8 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
         var institutionChildren = getAggregationChildren(aggregations, 'institution');
         var organizationChildren = getAggregationChildren(aggregations, 'organization');
         var informationPackageChildren = getAggregationChildren(aggregations, 'information_package');
+        var archiveCreatorChildren = getAggregationChildren(aggregations, 'archive_creator');
+        var archiveResponsibleChildren = getAggregationChildren(aggregations, 'archive_responsible');
         var filters = [
             {
                 text: $translate.instant("TYPE"),
@@ -254,6 +256,24 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 state: {opened: true, disabled: true},
                 children: archiveChildren,
                 branch: 'archive',
+            },
+            {
+                text: $translate.instant("ARCHIVE_CREATOR"),
+                a_attr: {
+                    title: $translate.instant("ARCHIVE_CREATOR")
+                },
+                state: {opened: true, disabled: true},
+                children: archiveCreatorChildren,
+                branch: 'archive_creator',
+            },
+            {
+                text: $translate.instant("ARCHIVE_RESPONSIBLE"),
+                a_attr: {
+                    title: $translate.instant("ARCHIVE_RESPONSIBLE")
+                },
+                state: {opened: true, disabled: true},
+                children: archiveResponsibleChildren,
+                branch: 'archive_responsible',
             },
             {
                 text: $translate.instant("ARCHIVALINSTITUTION"),
