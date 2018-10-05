@@ -628,5 +628,6 @@
     "INCLUDE_DESCENDANT_NODES": "Include descendant nodes",
     "ARCHIVE_REFERENCE": "Archive reference",
     "ARCHIVE_CREATOR" :"Archive creator",
-    "ARCHIVE_RESPONSIBLE": "Archive responsible"
+    "ARCHIVE_RESPONSIBLE": "Archive responsible",
+    "DATABASE": "Database"
 }

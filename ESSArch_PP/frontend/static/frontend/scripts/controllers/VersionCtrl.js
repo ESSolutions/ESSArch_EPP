@@ -48,7 +48,7 @@ angular.module('essarch.controllers').controller('VersionCtrl', function($scope,
         },
         {
             label: $scope.sysInfo,
-            templateUrl: "static/frontend/views/sysinfo.html"
+            templateUrl: "sysinfo.html"
         },
         {
             label: $scope.support,
