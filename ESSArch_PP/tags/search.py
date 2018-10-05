@@ -315,7 +315,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return super(ComponentSearchViewSet, self).paginator
 
-    def list(self, request, index=None):
+    def list(self, request):
         params = {key: value[0] for (key, value) in six.iteritems(dict(request.query_params))}
         query = params.pop('q', '')
         export = params.pop('export', None)
@@ -326,7 +326,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         filters = {
             'extension': params.pop('extension', None),
-            'index': params.pop('index', index),
             'type': params.pop('type', None),
             'information_package': params.pop('information_package', None),
             'archive_creator': params.pop('archive_creator', None),
@@ -498,7 +497,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(u'Email sent to {}'.format(user.email))
 
     @detail_route(methods=['post'], url_path='send-as-email')
-    def send_as_email(self, request, index=None, pk=None):
+    def send_as_email(self, request, pk=None):
         tag = self.get_tag_object()
         user = self.request.user
 
@@ -524,7 +523,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(u'Email sent to {}'.format(user.email))
 
     @list_route(methods=['post'], url_path='mass-email')
-    def mass_email(self, request, index=None):
+    def mass_email(self, request):
         try:
             ids = request.data['ids']
         except KeyError:
@@ -537,7 +536,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return self.send_mass_email(ids, user)
 
     @detail_route(methods=['get'])
-    def children(self, request, index=None, pk=None):
+    def children(self, request, pk=None):
         parent = self.get_tag_object()
         structure = self.request.query_params.get('structure')
         self.verify_structure(parent, structure)
@@ -552,7 +551,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
 
     @detail_route(methods=['get'], url_path='child-by-value')
-    def child_by_value(self, request, index=None, pk=None):
+    def child_by_value(self, request, pk=None):
         class ByValueSerializer(serializers.Serializer):
             field = serializers.CharField(required=True)
             value = serializers.CharField(required=True)
@@ -582,13 +581,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             raise exceptions.NotFound()
 
     @detail_route(methods=['post'], url_path='new-version')
-    def new_version(self, request, index=None, pk=None):
+    def new_version(self, request, pk=None):
         tag = self.get_tag_object()
         new_tag = tag.create_new()
         return Response()
 
     @detail_route(methods=['post'], url_path='new-structure')
-    def new_structure(self, request, index=None, pk=None):
+    def new_structure(self, request, pk=None):
         try:
             name = request.data['name']
         except KeyError:
@@ -602,13 +601,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response()
 
     @detail_route(methods=['patch'], url_path='set-as-current-version')
-    def set_as_current_version(self, request, index=None, pk=None):
+    def set_as_current_version(self, request, pk=None):
         tag = self.get_tag_object()
         tag.set_as_current_version()
         return Response()
 
     @detail_route(methods=['post'], url_path='change-organization')
-    def change_organization(self, request, index=None, pk=None):
+    def change_organization(self, request, pk=None):
         tag = self.get_tag_object(qs=TagVersion.objects.filter(elastic_index='archive'))
                 
         serializer = ChangeOrganizationSerializer(data=request.data, context={'request': request})
@@ -732,7 +731,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             tag_version.update_search(data)
         return tag_version.from_search()
 
-    def partial_update(self, request, index=None, pk=None):
+    def partial_update(self, request, pk=None):
         tag = self.get_tag_object()
         return Response(self._update_tag_metadata(tag, request.data))
 
@@ -749,7 +748,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self.client.update(index=index, doc_type='doc', id=tag.pk, body={"script": script})
 
     @detail_route(methods=['post'], url_path='update-descendants')
-    def update_descendants(self, request, index=None, pk=None):
+    def update_descendants(self, request, pk=None):
         tag = self.get_tag_object()
         include_self = request.query_params.get('include_self', False)
         for descendant in tag.get_descendants(include_self=include_self):
@@ -763,7 +762,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response()
 
     @list_route(methods=['post'], url_path='mass-update')
-    def mass_update(self, request, index=None):
+    def mass_update(self, request):
         try:
             ids = request.query_params['ids'].split(',')
         except KeyError:
@@ -783,7 +782,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response()
 
     @detail_route(methods=['post'], url_path='delete-field')
-    def delete_field(self, request, index=None, pk=None):
+    def delete_field(self, request, pk=None):
         tag = self.get_tag_object()
         try:
             field = request.data['field']
@@ -794,7 +793,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(tag.from_search())
 
     @detail_route(methods=['post'], url_path='remove-from-structure')
-    def remove_from_structure(self, request, index=None, pk=None):
+    def remove_from_structure(self, request, pk=None):
         obj = self.get_tag_object()
 
         if obj.elastic_index == 'archive':
@@ -813,7 +812,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         obj.tag.structures.get(structure=structure).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, index=None, pk=None):
+    def destroy(self, request, pk=None):
         obj = self.get_tag_object()
 
         if obj.elastic_index == 'archive':

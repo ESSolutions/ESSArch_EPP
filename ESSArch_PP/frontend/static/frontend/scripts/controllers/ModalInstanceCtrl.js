@@ -1106,7 +1106,7 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
             var promises = [];
             $ctrl.fieldsToDelete.forEach(function (item) {
                 promises.push(
-                    $http.post(appConfig.djangoUrl + 'search/' + $ctrl.node._index + '/' + $ctrl.node._id + '/delete-field/', { field: item })
+                    $http.post(appConfig.djangoUrl + 'search/' + $ctrl.node._id + '/delete-field/', { field: item })
                         .then(function (response) {
                             return response;
                         }).catch(function (response) {
