@@ -57,17 +57,6 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: ['PhantomJS'],
 
-    plugins: [
-      'karma-chrome-launcher',
-      'karma-firefox-launcher',
-      'karma-phantomjs-launcher',
-      'karma-safari-launcher',
-      'karma-ie-launcher',
-      'karma-edge-launcher',
-      'karma-jasmine',
-      'karma-junit-reporter'
-    ],
-
     junitReporter: {
       outputFile: 'test_out/unit.xml',
       suite: 'unit'
