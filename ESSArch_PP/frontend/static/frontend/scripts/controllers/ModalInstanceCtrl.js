@@ -1199,10 +1199,10 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
     $ctrl.node = data.node.original;
     $ctrl.newNode = {
         reference_code: data.node.children.length+1,
+        index: 'component'
     };
     $ctrl.options = {};
     $ctrl.nodeFields = [];
-    $ctrl.indexes = [];
     $ctrl.types = [];
 
     $ctrl.$onInit = function () {
@@ -1222,17 +1222,6 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                 },
                 "type": "input",
                 "key": "name",
-            },
-            {
-                "templateOptions": {
-                    "label": $translate.instant("INDEX"),
-                    "options": $ctrl.indexes,
-                    "required": true,
-                    "labelProp": "name",
-                    "valueProp": "name"
-                },
-                "type": "select",
-                "key": "index",
             },
             {
                 "templateOptions": {
