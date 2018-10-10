@@ -628,5 +628,6 @@
     "ARCHIVE_REFERENCE": "Arkivreferens",
     "ARCHIVE_CREATOR" :"Arkivbildare",
     "ARCHIVE_RESPONSIBLE": "Arkivansvarig",
-    "DATABASE": "Databas"
+    "DATABASE": "Databas",
+    "CLEAR": "Rensa"
 }

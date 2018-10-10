@@ -1,9 +1,14 @@
 <div class="search">
     <div class="content-wrapper">
         <div class="search-page">
-            <form ng-submit="vm.searchSubmit()" style="width: 100%;">
-                <input class="form-control search-field" ng-change="vm.searchSubmit()" ng-model-options="{debounce: 300}" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.filterObject.q">
-                <button type="submit" class="btn btn-success lock-button">{{'SEARCH' | translate}} <i class="fa fa-search"></i></button>
+            <form ng-submit="vm.searchSubmit()">
+                <div class="search-form">
+                    <input class="form-control search-field" ng-change="vm.searchSubmit()" ng-model-options="{debounce: 300}" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.filterObject.q">
+                    <div class="flex-column search-button-column">
+                        <button type="submit" class="btn btn-success">{{'SEARCH' | translate}} <i class="fa fa-search"></i></button>
+                        <button type="button" ng-disabled="vm.clearDisabled()" class="btn btn-primary" ng-click="vm.clearSearch()">{{'CLEAR' | translate}}</button>
+                    </div>
+                </div>
             </form>
             <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
@@ -86,7 +91,6 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
                                         <th>{{'TYPE' | translate}}</th>
                                         <th st-sort="reference_code" class="clickable">{{'REFERENCE_CODE' | translate}}</th>
                                         <th st-sort="name" class="clickable">{{'TITLE' |translate}}</th>
@@ -96,7 +100,6 @@
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="x in vm.searchResult"  ng-click="vm.openResult(x, $event)" class="result-item-table clickable">
-                                        <td class="search-td-nowrap">{{vm.resultNumber($index)}}</td>
                                         <td>
                                             {{x.type}}
                                         </td>

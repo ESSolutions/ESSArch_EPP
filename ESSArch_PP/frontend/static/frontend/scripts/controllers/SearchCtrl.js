@@ -71,7 +71,6 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
     vm.filterObject = {
         q: "",
         type: null,
-        indices: null,
         page: 1,
         page_size: vm.resultsPerPage || 25,
         ordering: ""
@@ -114,11 +113,26 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             return $translate.instant("SHOWING_RESULT") + " " + firstResult + "-"+ lastResult + " " + $translate.instant("OF") + " " + total;
         }
     }
-    vm.resultNumber = function(index) {
-        if(vm.tableState.pagination) {
-            return index+1+((vm.tableState.pagination.start/vm.tableState.pagination.number)*vm.tableState.pagination.number);
+
+    vm.clearSearch = function() {
+        vm.filterObject = {
+            q: "",
+            type: null,
+            page: 1,
+            page_size: vm.resultsPerPage || 25,
+            ordering: ""
         }
+        vm.extensionFilter = {};
+
+        vm.includedTypes = {
+            archive: true,
+            ip: true,
+            component: true,
+            file: true
+        }
+        vm.searchSubmit();
     }
+
     vm.searchSubmit = function() {
         if(vm.tableState) {
             vm.tableState.pagination.start = 0;

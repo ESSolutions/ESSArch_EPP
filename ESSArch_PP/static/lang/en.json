@@ -629,5 +629,6 @@
     "ARCHIVE_REFERENCE": "Archive reference",
     "ARCHIVE_CREATOR" :"Archive creator",
     "ARCHIVE_RESPONSIBLE": "Archive responsible",
-    "DATABASE": "Database"
+    "DATABASE": "Database",
+    "CLEAR": "Clear"
 }
