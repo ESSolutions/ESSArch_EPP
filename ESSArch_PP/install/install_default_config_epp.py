@@ -42,7 +42,7 @@ from ESSArch_Core.storage.models import (
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Archive, Component, Directory, Document, InformationPackage
+from ESSArch_Core.tags.documents import Archive, Component, Directory, File, InformationPackage
 
 User = get_user_model()
 
@@ -411,7 +411,7 @@ def installPipelines():
 
 
 def installSearchIndices():
-    for doctype in [Archive, Component, Directory, Document, InformationPackage]:
+    for doctype in [Archive, Component, Directory, File, InformationPackage]:
         alias_migration.setup_index(doctype)
 
     print('done')
