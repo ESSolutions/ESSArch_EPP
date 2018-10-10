@@ -34,7 +34,7 @@ from weasyprint import HTML
 from ESSArch_Core.auth.models import Group, GroupGenericObjects
 from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user, get_organization_groups
-from ESSArch_Core.csv import UnicodeCSVWriter
+from ESSArch_Core.csv_unicode import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent, InformationPackage
 from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
