@@ -327,12 +327,12 @@ DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/{lang}/html')
 # rabbitmqctl set_permissions -p epp guest ".*" ".*" ".*"
 
 # Celery settings
-BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/epp'
 CELERY_IMPORTS = ("ESSArch_Core.ip.tasks", "workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = 'redis://'
-CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'RunWorkflowProfiles-every-10-seconds': {
         'task': 'ESSArch_Core.tasks.RunWorkflowProfiles',
         'schedule': timedelta(seconds=10),
