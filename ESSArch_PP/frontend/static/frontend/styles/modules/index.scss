@@ -9,6 +9,11 @@ body {
     margin: 0px auto;
     overflow: auto;
     -ms-overflow-style: scrollbar;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: 100%;
 }
 body.modal-open {
     overflow: auto;
@@ -93,12 +98,12 @@ main {
     width: 0 !important;
 }
 .body-wrapper {
+    flex: 1 0 auto;
     display: flex;
     flex-direction: column;
     width: 100%;
     border-radius: 1px;
     min-height: 1131px;
-    height: 100%;
 }
 .receive-modal-button {
     align-items: center;
@@ -175,10 +180,8 @@ main {
 .nav-dynamic-wrapper {
     width:100%;
     padding: 0 10px 0 10px;
-    height: 100%;
 }
 .dynamic-part {
-    min-height:100%;
     @include small-screen {
         width: 100%;
     }
@@ -411,8 +414,7 @@ body.modal-open {
 }
 
 .page-footer {
-    position: absolute;
-    //margin-bottom: 0;
+    flex-shrink: 0;
     width: 100%;
     border-style: solid;
     border-width: 1px;
