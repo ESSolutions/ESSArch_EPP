@@ -2,7 +2,7 @@ angular.module('essarch.controllers').controller('AppCtrl', function($rootScope,
     var vm = this;
     var questionMark = 187;
     vm.questionMarkListener = function(e) {
-        if(e.keyCode == 16) {
+        if(e.shiftKey) {
             $('#list-view *').attr('UNSELECTABLE', 'on');
             $("#list-view").css(
                 {
