@@ -67,6 +67,10 @@ REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': 'ESSArch_Core.metadata.CustomMetadata',
     'DEFAULT_PAGINATION_CLASS': 'proxy_pagination.ProxyPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+      'rest_framework.authentication.BasicAuthentication',
+      'ESSArch_Core.auth.SessionAuthentication',
+    ),
     'DEFAULT_PERMISSION_CLASSES': (
       'rest_framework.permissions.IsAuthenticated',
     ),
