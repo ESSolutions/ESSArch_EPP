@@ -1,0 +1,48 @@
+<div class="reception">
+    <div class="content-wrapper">
+        <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+        <div class="select-sub-edit-eventlog-wrapper" ng-if="edit">
+            <div class="edit-view" ng-if="edit">
+                <h4 style="margin-left: 10px;">Submit Description</h4>
+                <form>
+                    <formly-form model="vm.sdModel" fields="vm.sdFields" options="vm.sdOptions">
+                    </formly-form>
+                </form>
+
+                <div class="file-list">
+                    <table st-table="fileListRowCollection" st-safe-src="fileListCollection" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="clickable" st-sort="filename">{{'FILENAME' | translate}}</th>
+                                <th class="clickable" st-sort="created">{{'CREATED' | translate}}</th>
+                                <th class="clickable" st-sort="size">{{'SIZE' | translate}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="row in fileListRowCollection">
+                                <td>{{row.filename}}</td>
+                                <td>{{row.created | date:"yyyy-MM-dd hh:mm:ss"}}</td>
+                                <td>{{row.size | filesize}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div ng-if="(eventShow || statusShow)" class="events-status-wrapper">
+            <event-table ng-if="eventShow || vm.request.type == 'preserve'" ip="ip"></event-table>
+            <div ng-if="statusShow" class="status-view">
+                <state-tree-view ip="ip"></state-tree-view>
+            </div>
+        </div>
+        <div ng-if="filebrowser" class="file-browser">
+            <filebrowser ip="ip"></filebrowser>
+        </div>
+        <div ng-if="includedIps.length>0" class="receive-button-wrapper">
+            <div id="request-form" class="request-form receive-modal-button">
+                <button class="btn btn-info" ng-click="receiveModal(includedIps[0])" ng-disabled="vm.receiveModalLoading">{{'RECEIVE' | translate}} <i ng-if="vm.receiveModalLoading" class="fa fa-spinner fa-spin"/></button>
+                <p style="margin-left: 5px; margin-bottom: 0;">{{includedIps.length}} {{'SELECTED' | translate}}</p>
+            </div>
+        </div>
+    </div>
+</div>

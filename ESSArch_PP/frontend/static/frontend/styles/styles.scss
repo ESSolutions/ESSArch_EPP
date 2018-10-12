@@ -1,0 +1,62 @@
+/*
+    ESSArch is an open source archiving and digital preservation system
+
+    ESSArch Preservation Platform (EPP)
+    Copyright (C) 2005-2017 ES Solutions AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+    Contact information:
+    Web - http://www.essolutions.se
+    Email - essarch@essolutions.se
+*/
+@import '../node_modules/normalize-scss/sass/normalize';
+@import '../node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
+@import '../node_modules/font-awesome/scss/font-awesome';
+@import '../node_modules/angularjs-bootstrap-datetimepicker/src/scss/datetimepicker';
+@import '../node_modules/select2/dist/css/select2';
+@import '../node_modules/ui-select/dist/select';
+@import '../node_modules/angular-bootstrap-grid-tree/src/treeGrid';
+@import '../node_modules/angular-tree-control/css/tree-control-attribute';
+@import '../node_modules/angular-tree-control/css/tree-control';
+@import '../node_modules/jstree/dist/themes/default/style';
+@import '../node_modules/angular-cron-jobs/dist/angular-cron-jobs';
+@import '../node_modules/messenger-hubspot/build/css/messenger';
+@import '../node_modules/angular-resizable/src/angular-resizable';
+@import '../node_modules/messenger-hubspot/build/css/messenger-theme-flat';
+@import 'core/modules/colors';
+@import 'core/modules/mixins';
+@import 'core/modules/login';
+@import 'modules/index';
+@import 'core/modules/tables';
+@import 'core/modules/header';
+@import 'core/modules/menu';
+@import 'core/modules/sub_menu';
+@import 'core/modules/navigation';
+@import 'core/modules/step_task';
+@import 'core/modules/filebrowser';
+@import 'core/modules/events';
+@import 'core/modules/resize';
+@import 'core/modules/footer';
+@import 'modules/reception';
+@import 'modules/my_page';
+@import 'modules/profile_maker';
+@import 'modules/tables';
+@import 'modules/tree_control';
+@import 'core/modules/notifications';
+@import 'modules/search';
+@import 'modules/profile_editor';
+@import 'modules/positions';
+@import 'core/modules/utils';
+@import 'modules/classification_structure_editor';

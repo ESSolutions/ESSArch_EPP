@@ -1,0 +1,28 @@
+<div ng-if="!subrow">
+    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row', row)">
+        <div class="object-identifier-value">{{row.object_identifier_value}}</div>
+        <div ng-if="row.package_type != 1 && row.package_type != 4 && row.state !== 'At reception'" class="generation-indicator"
+        uib-popover="{{'IP_GENERATION' | translate:row}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+            <i class="fa fa-lg fa-code-fork"></i>  {{row.generation}}
+        </div>
+        <div ng-if="row.new_version_in_progress != null" class="new-version-indicator" uib-popover="{{'WORKING_ON_NEW_GENERATION' | translate:row.new_version_in_progress.user}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+            <i class="fa fa-lg fa-wrench"></i>
+        </div>
+        <div class="read-only fa-stack fa-lg" ng-if="row.workarea[0].read_only && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))">
+                <i class="fa fa-pencil fa-stack-1x"></i>
+                <i class="fa fa-ban fa-stack-2x fa-rotate-90 text-danger"></i>
+        </div>
+    </div>
+</div>
+<div ng-if="subrow">
+    <div style="white-space: nowrap;text-overflow: ellipsis;" class="clickable" ng-click="ipTableClick(subrow, $event)" style="padding-left: 30px;" context-menu="menuOptions('subrow', subrow)">
+        <div style="display: inline-block" class="object-identifier-value">{{subrow.object_identifier_value}}</div>
+            <div class="generation-indicator" uib-popover="{{'IP_GENERATION' | translate:subrow}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+                <i class="fa fa-lg fa-code-fork"></i>  {{subrow.generation}}
+            </div>
+            <div class="read-only fa-stack fa-lg" ng-if="subrow.workarea[0].read_only && (('home.ingest.workarea' | isState) || ('home.access.workarea' | isState))">
+                    <i class="fa fa-pencil fa-stack-1x"></i>
+                    <i class="fa fa-ban fa-stack-2x fa-rotate-90 text-danger"></i>
+            </div>
+        </div>
+</div>

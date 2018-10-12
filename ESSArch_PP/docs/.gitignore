@@ -1,0 +1,4 @@
+_build
+core
+locale/**/LC_MESSAGES/core
+*.mo

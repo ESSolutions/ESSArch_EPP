@@ -1,0 +1,6 @@
+<div ng-if="!subrow && row.package_type !== 1">
+    <div class="clickable" ng-click="eventsClick(row)" uib-popover="{{'EVENTSDESC' | translate}}: {{subrow.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a tabindex="-1" class="no-select" href="">{{'EVENTS' | translate}}</a></div>
+</div>
+<div ng-if="subrow">
+    <div class="clickable" ng-click="eventsClick(subrow)" uib-popover="{{'EVENTSDESC' | translate}}: {{subrow.label}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" context-menu="menuOptions('subrow')"><a tabindex="-1" class="no-select" href="">{{'EVENTS' | translate}}</a></div>
+</div>

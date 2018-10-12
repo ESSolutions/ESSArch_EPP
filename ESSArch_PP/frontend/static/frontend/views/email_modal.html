@@ -1,0 +1,20 @@
+<div class="enter-profile-name">
+    <h3 class="modal-title" id="modal-title">Email Submit Description</h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <div class="sender-receiver-wrapper">
+        <label for="subject">{{'SENDER' | translate}}</label>
+        <input class="form-control" ng-model="auth.email" disabled="true"></input>
+        <label for="subject">{{'RECEIVER' | translate}}</label>
+        <input class="form-control" ng-model="vm.dependencyModel.preservation_organization_receiver_email" disabled="true"></input>
+    </div>
+    <br />
+    <label for="subject">{{'SUBJECT' | translate}}</label>
+    <input class="form-control" ng-model="$ctrl.email.subject"></input>
+    <textarea id="body" style="margin-top: 10px; height: 120px; max-width: 100%;" class="form-control" ng-model="$ctrl.email.body"></textarea>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMITSIP' | translate}}</button>
+    <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CLOSE' | translate}}</button>
+</div>

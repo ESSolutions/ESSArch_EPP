@@ -1,0 +1,76 @@
+<div class="create-dip">
+    <div class="content-wrapper">
+        <div class="list-view" ng-include src="'static/frontend/views/list_view_table.html'"></div>
+            <div ng-if="requestForm" class="request-layout" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
+                <form id="request-form" name="vm.requestForm" class="request-form" ng-submit="submitRequest(ip, vm.request)">
+                    <div class="request-type">
+                        <div ng-if="checkPermission('ip.diff_check')">
+                            <input type="radio" ng-model="vm.request.type" value="diff_check">
+                            <label>
+                                {{'DIFFCHECK' | translate}}
+                            </label>
+                        </div>
+                        <div ng-if="checkPermission('ip.preserve')">
+                            <input type="radio" ng-model="vm.request.type" value="preserve">
+                            <label>
+                                {{'PRESERVE' | translate}}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="request-params">
+                        <div ng-if="vm.request.type == 'view' || vm.request.type == 'edit_as_new' || vm.request.type == 'diff_check' || vm.request.type == 'preserve'">
+                            <div class="form-group">
+                                <label>
+                                    {{'COMMENT' | translate}}
+                                </label>
+                            </div>
+                            <input class="form-control" ng-model="vm.request.purpose">
+                            <div class="form-group">
+                                <label>
+                                    {{'ARCHIVE_POLICY' | translate}}
+                                </label>
+                                <select type="select" required="true" class="form-control" ng-change="archivePolicyChange()" ng-model="vm.request.archivePolicy.value"
+                                ng-options="x as x.policy_name for x in vm.request.archivePolicy.options" required></select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="(eventShow || statusShow || vm.request.type =='preserve' && requestForm)" class="events-status-wrapper">
+            <event-table ng-if="eventShow" ip="ip"></event-table>
+            <div ng-if="statusShow" class="status-view">
+                <state-tree-view ip="ip"></state-tree-view>
+            </div>
+        </div>
+        <div ng-if="filebrowser" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
+            <filebrowser ip="ip"></filebrowser>
+        </div>
+            <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="requestEventlog && (vm.request.type == 'edit_as_new' || vm.request.type == 'view' || vm.request.type == 'diff_check' || vm.request.type == 'preserve')" class="select-sub-edit-eventlog-wrapper">
+                <div ng-if="requestEventlog" class="eventlog-view">
+                    <form class="eventlog-form">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkBox" ng-disabled="vm.requestForm.$invalid" ng-model="approvedToPreserve">{{'REQUESTAPPROVED' | translate}}</input>
+                            </label>
+                        </div>
+                        <button type="submit" ng-click="clickSubmit()" ng-dblClick="" ng-disabled="!approvedToPreserve || vm.submittingRequest" class="btn btn-info submit-button">{{'SUBMIT' | translate}} <i ng-if="vm.submittingRequest" class="fa fa-spinner fa-spin"/></button>
+                    </form>
+                </div>
+            </div>
+        <div tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)" ng-if="select || subSelect || edit || eventlog" id="select-wrap" class="select-sub-edit-eventlog-wrapper">
+            <div ng-if="select" id="select-view" class="select-view">
+                <div ng-include src="'static/frontend/views/dip_filebrowser.html'"></div>
+            </div>
+            <div ng-if="eventlog" class="eventlog-view">
+                <form class="eventlog-form" ng-submit="createDip(ip)">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkBox" ng-model="approvedToCreate">{{'APPROVEDTOCREATE' | translate}}</input>
+                        </label>
+                    </div>
+                    <button class="btn btn-info submit-button" type="submit" ng-dblClick="" ng-disabled="!approvedToCreate || vm.creating" type="button" style="float: right;">{{'CREATEDIP' | translate}} <i ng-if="vm.creating" class="fa fa-spinner fa-spin"/></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

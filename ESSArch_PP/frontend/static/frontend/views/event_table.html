@@ -1,0 +1,85 @@
+<div class="event-view">
+    <div st-table="vm.displayed" st-pipe="eventPipe" class="table-container">
+        <div class="search-prepare-wrapper">
+            <select tabindex="-1" class="form-control items-per-page" ng-change="updateEventsPerPage(vm.itemsPerPage)" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]"></select>
+            <span class="fa fa-lg fa-filter filter-icon" ng-class="{'blue-border': showAdvancedFilters, 'filter-active': filterActive()}" ng-click="toggleAdvancedFilters()"></span>
+            <div ng-show="showAdvancedFilters" class="advanced-filters">
+                <form name="form1" style="position: relative;" novalidate>
+                    <div class="formly-buttons-wrapper">
+                        <formly-form model="filterModel" fields="fields" options="options">
+                        </formly-form>
+                    </div>
+                </form>
+                <button class="btn btn-default" style="float: right;margin-top: 5px;" ng-click="submitAdvancedFilters()">{{'APPLY' | translate}}</button>
+            </div>
+            <div class="global-search">
+                <input id="event-search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
+                uib-popover="{{'GLOBALSEARCHDESC_EVENT' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
+                />
+            </div>
+            <div class="refresh-icon">
+                <span ng-click="stCtrl.pipe()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': eventLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+            </div>
+        </div>
+        <div class="list-view-table">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="clickable" st-sort="eventType">{{'EVENTTYPE' | translate}}</th>
+                        <th class="clickable" st-sort="eventOutcomeDetailNote">{{'COMMENT' | translate}}</th>
+                        <th class="clickable" st-sort="eventOutcome">{{'OUTCOME' | translate}}</th>
+                        <th class="clickable" st-sort="linkingAgentIdentifierValue">{{'AGENT' | translate}}</th>
+                        <th style="min-width: 100px;" class="clickable" st-sort-default="reverse" st-sort="eventDateTime">{{'EVENTTIME' | translate}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-class="[row.class, row.eventOutcome > 30 ? 'row-error' : '', row.eventOutcome == 30 ? 'row-warning' : '']" ng-click="eventClick(row)" ng-repeat="row in vm.displayed">
+                        <td>{{row.eventDetail}}</td>
+                        <td>{{row.eventOutcomeDetailNote}}</td>
+                        <td>
+                            <div ng-if="getEventOutcome(row.eventOutcome) == 'Success'" class="step-state-success"><b>{{'SUCCESS' | translate}}</b></div>
+                            <div ng-if="getEventOutcome(row.eventOutcome) == 'Failure'" class="step-state-failure"><b>{{'FAILURE' | translate}}</b></div>
+                        </td>
+                        <td>{{row.linkingAgentIdentifierValue}}</td>
+                        <td>{{row.eventDateTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+                    </tr>
+                    <tr ng-if="!vm.displayed.length && !eventLoading" class="empty-table-indicator">
+                        <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    </tr>
+                    <tr ng-if="!vm.displayed.length && eventLoading" class="empty-table-indicator">
+                        <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <td class="text-center">
+            <div class="text-center" st-template="static/frontend/views/pagination.html" st-pagination="" st-items-by-page="vm.itemsPerPage" st-displayed-pages="7"></div>
+        </td>
+    </div>
+    <div permission permission-only="'ip.add_eventip'" class="events-footer">
+        <form class="events-form" ng-submit="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)">
+            <div class="form-group" style="margin-right: 5px;">
+                <label>{{'EVENTTYPE' | translate}}</label>
+                <select class="status-note form-control" ng-model="newEventForm.eventType" ng-options="x as x.eventDetail for x in vm.eventTypeCollection" ng-required="true">
+                    <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>{{'OUTCOME' | translate}}</label>
+                <select class="status-note form-control" ng-model="newEventForm.eventOutcome" ng-options="x as x.name for x in eventOutcomes" ng-required="true">
+                    <option value="" selected="selected" disabled>{{'SELECTONE' | translate}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>{{'COMMENT' | translate}}</label>
+                <textarea ng-enter="addEvent(ip, newEventForm.eventType, newEventForm.comment, newEventForm.eventOutcome)" maxlength="255" class="signature form-control" ng-model="newEventForm.comment" ng-required="true" id="signature"></textarea>
+            </div>
+            <button type="submit" class="btn btn-info submit-button">{{'ADDEVENT' | translate}}</button>
+        </form>
+    </div>
+    <div uib-alert ng-if="addEventAlert" style="width:50%; float:right; margin-right: 10px;" ng-class="'alert-' + (addEventAlert.type || 'warning')" close="closeAlert()">{{addEventAlert.msg | translate}}</div>
+</div>

@@ -1,6 +1,8 @@
-'''
-    ESSArch - ESSArch is an Electronic Archive system
-    Copyright (C) 2010-2014  ES Solutions AB
+"""
+    ESSArch is an open source archiving and digital preservation system
+
+    ESSArch Preservation Platform (EPP)
+    Copyright (C) 2005-2017 ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,19 +15,19 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 
     Contact information:
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
-'''
+"""
 
 import versioneer
 versioneer.VCS = 'git'
-versioneer.versionfile_source = 'ESSArch_EPP/_version.py'
+versioneer.versionfile_source = 'ESSArch_PP/_version.py'
 versioneer.versionfile_build = None
 versioneer.tag_prefix = '' # tags are like 1.2.0
-versioneer.parentdir_prefix = 'ESSArch_EPP-'
+versioneer.parentdir_prefix = 'ESSArch_PP-'
 
 from setuptools import find_packages, setup  
 from setuptools.command.install import install as _install  
@@ -45,15 +47,20 @@ if __name__ == '__main__':
     cmdclass=versioneer.get_cmdclass()
     cmdclass.update({'install': my_install})
     setup(
-        name='ESSArch_EPP',
+        name='ESSArch_PP',
         version=versioneer.get_version(),
         description='ESSArch Preservation Platform',
         author='Henrik Ek',
         author_email='henrik@essolutions.se',
         url='http://www.essolutions.se',
         install_requires=[
-            "ESSArch-Core>=1.1.0.*,<=1.5.9.*",
+            "ESSArch-Core>=1.1.0.*,<=1.1.1.*",
         ],
+        extras_require={
+            "mssql": ["django-pyodbc-azure==1.11.15.0"],
+            "mysql": ["mysqlclient==1.3.13"],
+            "postgres": ["psycopg2==2.7.5"],
+        },
         packages=find_packages(),
         include_package_data=True,
         zip_safe=False,

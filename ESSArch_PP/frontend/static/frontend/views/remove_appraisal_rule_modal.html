@@ -1,0 +1,12 @@
+<div class="enter-profile-name">
+    <h3 class="modal-title" id="modal-title">{{'REMOVE' | translate}}</h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <h4>
+        {{'DO_YOU_WANT_TO_REMOVE_APPRAISAL' | translate:$ctrl.data.appraisal}}?
+    </h4>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-disabled="$ctrl.removingRule" ng-click="$ctrl.removeAppraisal()" focused="true">{{'OK' | translate}} <i ng-if="$ctrl.removingRule" class="fa fa-spinner fa-spin"/></button>
+    <button class="btn btn-warning" type="button" ng-disabled="$ctrl.removingRule" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+</div>

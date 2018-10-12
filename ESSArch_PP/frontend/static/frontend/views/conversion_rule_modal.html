@@ -1,0 +1,48 @@
+<div class="enter-profile-name">
+        <h3 class="modal-title" id="modal-title">{{'CONVERSION_RULE' | translate}}</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <label>
+            {{'NAME' | translate}}
+        </label>
+        <p>{{$ctrl.data.rule.name}}</p>
+        <div class="cron-info">
+            <b>{{'FREQUENCY' | translate}}: <span ng-class="{'color-red': !$ctrl.validCron($ctrl.data.rule.frequency)}">{{$ctrl.prettyFrequency($ctrl.data.rule.frequency)}}</span></b>
+            <br/>
+            <b>{{'NEXT' | translate}}: {{$ctrl.nextPretty($ctrl.data.rule.frequency)}}</b>
+        </div>
+        <br/>
+        <label>
+            {{'SPECIFICATION' | translate}}
+        </label>
+        <table class="table" style="margin-top: 10px;">
+                <thead>
+                    <th>
+                        {{'PATH' | translate}}
+                    </th>
+                    <th>
+                        {{'TARGET' | translate}}
+                    </th>
+                    <th>
+                        {{'TOOL' | translate}}
+                    </th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(key, value) in $ctrl.data.rule.specification">
+                        <td>
+                            {{key}}
+                        </td>
+                        <td>
+                            {{value.target}}
+                        </td>
+                        <td>
+                            {{value.tool}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()" focused="true">{{'OK' | translate}}</button>
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+    </div>

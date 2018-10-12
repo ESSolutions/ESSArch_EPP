@@ -1,0 +1,6 @@
+frontend/static/frontend/bower_components
+frontend/static/frontend/node_modules
+frontend/static/frontend/scripts/scripts.min.js
+frontend/static/frontend/scripts/scripts.min.js.map
+frontend/static/frontend/scripts/vendors.min.js
+frontend/static/frontend/scripts/vendors.min.js.map

@@ -1,9 +1,0 @@
-{% extends 'index.html' %}
-
-{% block content %}
-    <form action="" method="post">
-    	{% csrf_token %}
-        <p>Are you sure want to delete ingest requestUUID {{ ingest.ReqUUID }}?</p>
-        <p><input type="submit" value="Continue &rarr;" /> or <a href="{% url 'ingest_list' %}"><input type="button" name="cancel" value="Cancel &rarr;" /></a></p>
-    </form>
-{% endblock %}

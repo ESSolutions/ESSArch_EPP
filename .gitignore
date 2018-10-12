@@ -1,7 +1,10 @@
 *.py[co]
 *.pyo
 *~
+celerybeat.pid
+celerybeat-schedule.db
 dist/
 ESSArch_EPP.egg-info/
 MANIFEST
+.idea/
 .settings/
