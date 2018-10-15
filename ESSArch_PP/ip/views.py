@@ -25,7 +25,6 @@
 import copy
 import errno
 import glob
-import itertools
 import logging
 import math
 import os
@@ -37,11 +36,10 @@ import six
 from celery import states as celery_states
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import BooleanField, Case, Exists, Max, Min, OuterRef, Prefetch, Q, Subquery, Value, When
 from django_filters.constants import EMPTY_VALUES
-from django_filters.rest_framework import DjangoFilterBackend
 from elasticsearch.exceptions import TransportError
 from elasticsearch_dsl import Index, Search
 from elasticsearch_dsl import Q as ElasticQ
@@ -50,38 +48,35 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm
 from lxml import etree
 from natsort import natsorted
-from rest_framework import exceptions, filters, mixins, status, viewsets
+from rest_framework import exceptions, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.WorkflowEngine.serializers import ProcessStepChildrenSerializer
 from ESSArch_Core.WorkflowEngine.util import create_workflow
 from ESSArch_Core.auth.decorators import permission_required_or_403
-from ESSArch_Core.auth.models import Group, Member
-from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
-from ESSArch_Core.auth.util import get_organization_groups
+from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
-from ESSArch_Core.essxml.util import get_agents, get_objectpath, parse_submit_description
+from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
 from ESSArch_Core.exceptions import Conflict
-from ESSArch_Core.filters import string_to_bool
-from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.fixity.format import FormatIdentifier
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
-from ESSArch_Core.ip.models import Agent, InformationPackage, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT, Order, Workarea
-from ESSArch_Core.ip.permissions import CanDeleteIP, CanUnlockProfile, IsOrderResponsibleOrAdmin, \
+from ESSArch_Core.ip.models import Agent, EventIP, InformationPackage, Order, Workarea
+from ESSArch_Core.ip.permissions import CanUnlockProfile, IsOrderResponsibleOrAdmin, \
     IsResponsibleOrReadOnly
+from ESSArch_Core.ip.views import InformationPackageViewSet as InformationPackageViewSetCore
 from ESSArch_Core.maintenance.models import AppraisalRule, ConversionRule
 from ESSArch_Core.mixins import PaginatedViewMixin
-from ESSArch_Core.profiles.models import (Profile, ProfileIP, SubmissionAgreement)
+from ESSArch_Core.profiles.models import ProfileIP, SubmissionAgreement
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import creation_date, generate_file_response, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
+from ESSArch_Core.util import generate_file_response, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
-from ip.filters import InformationPackageFilter
-from ip.serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
+
+from .filters import InformationPackageFilter
+from .serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
     NestedInformationPackageSerializer, OrderSerializer
 
 User = get_user_model()
@@ -562,22 +557,12 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         return Response({'detail': 'Upload of %s complete' % filepath})
 
 
-class InformationPackageViewSet(mixins.RetrieveModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
+class InformationPackageViewSet(InformationPackageViewSetCore):
     """
     API endpoint that allows information packages to be viewed or edited.
     """
     queryset = InformationPackage.objects.select_related('responsible').prefetch_related(
         Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'), 'steps')
-    filter_backends = (
-        filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
-    )
-    ordering_fields = (
-        'label', 'responsible', 'create_date', 'state',
-        'id', 'object_identifier_value', 'start_date', 'end_date',
-    )
 
     def first_generation_case(self, lower_higher):
         return Case(
@@ -731,11 +716,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         return context
 
-    def get_permissions(self):
-        if self.action == 'destroy':
-            self.permission_classes = [CanDeleteIP]
-
-        return super(InformationPackageViewSet, self).get_permissions()
 
     def destroy(self, request, pk=None):
         logger = logging.getLogger('essarch.epp')
@@ -806,17 +786,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
                 step.run()
 
         return super(InformationPackageViewSet, self).destroy(request, pk=pk)
-
-    @detail_route(methods=['post'], url_path='change-organization')
-    def change_organization(self, request, pk=None):
-        ip = self.get_object()
-
-        serializer = ChangeOrganizationSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        org = serializer.validated_data['organization']
-
-        ip.change_organization(org)
-        return Response()
 
     @detail_route(methods=['post'])
     def receive(self, request, pk=None):
@@ -1028,51 +997,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
 
         return Response(dip, status.HTTP_201_CREATED)
 
-    def get_object(self):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Perform the lookup filtering.
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-
-        assert lookup_url_kwarg in self.kwargs, (
-                'Expected view %s to be called with a URL keyword argument '
-                'named "%s". Fix your URL conf, or set the `.lookup_field` '
-                'attribute on the view correctly.' %
-                (self.__class__.__name__, lookup_url_kwarg)
-        )
-
-        lookup_field = self.lookup_field
-
-        objid = self.request.query_params.get('objid')
-        if objid is not None:
-            lookup_field = 'object_identifier_value'
-
-        filter_kwargs = {lookup_field: self.kwargs[lookup_url_kwarg]}
-        obj = get_object_or_404(queryset, **filter_kwargs)
-
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    @detail_route()
-    def workflow(self, request, pk=None):
-        ip = self.get_object()
-        hidden = request.query_params.get('hidden')
-
-        steps = ip.steps.filter(parent_step__information_package__isnull=True)
-        tasks = ip.processtask_set.filter(processstep__information_package__isnull=True)
-
-        if hidden is not None:
-            steps = steps.filter(hidden=string_to_bool(hidden))
-            tasks = tasks.filter(hidden=string_to_bool(hidden))
-
-        flow = sorted(itertools.chain(steps, tasks), key=lambda x: (x.get_pos(), x.time_created))
-
-        serializer = ProcessStepChildrenSerializer(data=flow, many=True, context={'request': request})
-        serializer.is_valid()
-        return Response(serializer.data)
-
     @detail_route(methods=['delete', 'get', 'post'])
     def files(self, request, pk=None):
         ip = self.get_object()
@@ -1222,39 +1146,6 @@ class InformationPackageViewSet(mixins.RetrieveModelMixin,
             return Response('%s created' % path)
 
         return ip.get_path_response(path, request, force_download=download, paginator=self.paginator)
-
-    @detail_route(methods=['put'], url_path='check-profile')
-    def check_profile(self, request, pk=None):
-        ip = self.get_object()
-        ptype = request.data.get("type")
-
-        pip = get_object_or_404(ProfileIP, ip=ip, profile__profile_type=ptype)
-
-        if not pip.LockedBy:
-            pip.included = request.data.get('checked', not pip.included)
-            pip.save()
-
-        return Response()
-
-    @detail_route(methods=['put'], url_path='change-profile')
-    def change_profile(self, request, pk=None):
-        ip = self.get_object()
-
-        try:
-            new_profile = get_object_or_404(Profile, pk=request.data.get("new_profile"))
-        except ValueError:
-            raise exceptions.NotFound
-
-        try:
-            ip.change_profile(new_profile)
-        except ValueError as e:
-            raise exceptions.ParseError(e.message)
-
-        return Response({
-            'detail': 'Updating IP (%s) with new profile (%s)' % (
-                ip.pk, new_profile
-            )
-        })
 
     @detail_route(methods=['post'], url_path='unlock-profile', permission_classes=[CanUnlockProfile])
     def unlock_profile(self, request, pk=None):
