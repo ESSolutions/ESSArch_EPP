@@ -34,7 +34,7 @@
                         </ui-select>
                         <span class="input-group-btn">
                             <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.archive.value = null" class="btn btn-sm btn-default">
-                                <span class="fa fa-trash"></span>
+                                <span class="fas fa-trash-alt"></span>
                             </button>
                         </span>
                     </div>
@@ -52,7 +52,7 @@
                             </ui-select>
                             <span class="input-group-btn">
                                 <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.structure.value = null" class="btn btn-sm btn-default">
-                                    <span class="fa fa-trash"></span>
+                                    <span class="fas fa-trash-alt"></span>
                                 </button>
                             </span>
                         </div>
@@ -71,7 +71,7 @@
                             </ui-select>
                             <span class="input-group-btn">
                                 <button ng-disabled="vm.sa.profile_content_type" type="button" ng-click="vm.tags.descendants.value = null" class="btn btn-sm btn-default">
-                                    <span class="fa fa-trash"></span>
+                                    <span class="fas fa-trash-alt"></span>
                                 </button>
                             </span>
                         </div>
@@ -89,14 +89,14 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-default" type="button" ng-click="vm.skip()">{{'SKIP' | translate}} <i class=" fa fa-angle-double-right"></i></button>
+    <button class="btn btn-default" type="button" ng-click="vm.skip()">{{'SKIP' | translate}} <i class=" fas fa-angle-double-right"></i></button>
     <div class="receive-footer">
         <div class="checkbox">
             <label>
                 <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
             </label>
         </div>
-        <button ng-disabled="!approvedToReceive || vm.receiving" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}} <i ng-if="vm.receiving" class="fa fa-spinner fa-spin"/></button>
+        <button ng-disabled="!approvedToReceive || vm.receiving" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}} <i ng-if="vm.receiving" class="fas fa-spinner fa-spin"/></button>
         <button class="btn btn-warning" type="button" ng-click="vm.cancel()" ng-disabled="vm.receiving">{{'CANCEL' | translate}}</button>
     </div>
 </div>

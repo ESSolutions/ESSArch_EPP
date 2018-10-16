@@ -2,26 +2,29 @@
     <header class="header">
         <div class="logo-search-user-admin-wrapper">
             <div class="hamburger" ng-show="false && (('home.ingest' | includedByState) || ('home.access' | includedByState) || ('home.orders' | includedByState))">
-                <i class="fa fa-2x fa-bars" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
+                <i class="fas fa-2x fa-bars" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
             </div>
             <div class="logo" ng-controller="UtilCtrl">
                 <h3 class="page-title" ng-click="infoPage()">ESSArch Preservation Platform</h3>
                 <h3 class="page-title-small" ng-click="infoPage()">EPP</h3>
             </div>
             <div class="user-admin">
-            <div ng-controller="UtilCtrl" class="mobile-notification">
-                <div class="notification-icon position-relative show-sm">
-                    <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
-                    <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
-                    <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
+                <div ng-controller="UtilCtrl" class="mobile-notification">
+                    <div class="notification-icon position-relative show-sm">
+                        <i ng-click="showAlert()" class="fas fa-bell fa-lg info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
+                        <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
+                        <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
+                    </div>
                 </div>
-            </div>
                 <div class="edit-user" ng-controller="DropdownCtrl">
                     <div class="btn-group" uib-dropdown is-open="status.isopen">
-                        <div class="user-dropdown" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
-                            <h4 class="username">{{auth.username}}</h4>
-                            <span class="fa fa-user-circle-o"></span>
-                        </div>
+                        <button class="btn btn-dark" uib-popover="{{'USERNAME' | translate}}: {{auth.username}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                            <i class="fas fa-user"></i>
+                            <span class="username">{{auth.username}}</span>
+                        </button>
+                        <button class="btn btn-dark" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                            <i class="fas fa-caret-down"></i>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="user-dropdown">
                             <li ng-repeat="choice in editUserOptions">
                                 <a ng-click="choice.click()">{{choice.label}}</a>
@@ -39,11 +42,11 @@
                 <a tabindex="0" ng-keydown="navKeydownListener($event, 'home.administration')" class="nav-item sliding-middle-out" ng-class="{'chosen': $state.includes('home.administration')}" ui-sref="home.administration" ng-if="checkPermissions('home.administration')">{{('ADMINISTRATION' | translate)}}</a>
             </nav>
             <div ng-controller="UtilCtrl" class="tasks-icons">
-                <span ng-click="reloadPage()" class="fa fa-refresh fa-refresh-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
-                <a href="/admin/" class="fa fa-cog info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
-                <a ui-sref="home.versionInfo" class="fa fa-question-circle info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
+                <span ng-click="reloadPage()" class="fas fa-sync-alt fa-lg fa-sync-alt-animate-once info-popover" uib-popover="{{'REFRESHPAGE' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                <a href="/admin/" class="fas fa-cog fa-lg info-popover" uib-popover="{{'SETTINGS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
+                <a ui-sref="home.versionInfo" class="fas fa-question-circle fa-lg info-popover" uib-popover="{{'HELP' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></a>
                 <div class="notification-icon">
-                    <i ng-click="showAlert()" class="fa fa-bell info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
+                    <i ng-click="showAlert()" class="fas fa-bell fa-lg info-popover" uib-popover="{{'NOTIFICATIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></i>
                     <div ng-click="showAlert()" ng-if="unseenNotifications != 0 && unseenNotifications <= 999" class="unseen-text">{{unseenNotifications}}</div>
                     <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
                     <notifications></notifications>

@@ -7,8 +7,8 @@
                     ng-model="vm.ongoingPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                 <div class="refresh-icon">
-                    <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable angular-animate fa fa-refresh fa-lg"
-                    ng-class="{'fa-refresh-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
+                    <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
+                    ng-class="{'fa-sync-alt-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
                     popover-popup-delay="500" popover-append-to-body="true"></span>
                 </div>
                 </div>
@@ -44,7 +44,7 @@
                 <select class="form-control items-per-page" ng-model="vm.nextPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
                     popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
                 <div class="refresh-icon">
-                    <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': nextLoading }"
+                    <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': nextLoading }"
                         uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                 </div>
             </div>
@@ -82,8 +82,8 @@
                     ng-model="vm.finishedPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                 <div class="refresh-icon">
-                    <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable angular-animate fa fa-refresh fa-lg"
-                    ng-class="{'fa-refresh-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
+                    <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
+                    ng-class="{'fa-sync-alt-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
                     popover-popup-delay="500" popover-append-to-body="true"></span>
                 </div>
                 </div>

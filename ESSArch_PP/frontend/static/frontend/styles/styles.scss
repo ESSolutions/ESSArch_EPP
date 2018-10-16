@@ -23,7 +23,9 @@
 */
 @import '../node_modules/normalize-scss/sass/normalize';
 @import '../node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
-@import '../node_modules/font-awesome/scss/font-awesome';
+@import '../node_modules/@fortawesome/fontawesome-free/scss/solid';
+@import '../node_modules/@fortawesome/fontawesome-free/scss/regular';
+@import '../node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
 @import '../node_modules/angularjs-bootstrap-datetimepicker/src/scss/datetimepicker';
 @import '../node_modules/select2/dist/css/select2';
 @import '../node_modules/ui-select/dist/select';
@@ -39,6 +41,7 @@
 @import 'core/modules/mixins';
 @import 'core/modules/login';
 @import 'modules/index';
+@import 'core/modules/buttons';
 @import 'core/modules/tables';
 @import 'core/modules/header';
 @import 'core/modules/menu';

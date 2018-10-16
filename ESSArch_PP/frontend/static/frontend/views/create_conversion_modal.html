@@ -33,7 +33,7 @@
                         {{'TOOL' | translate}}
                         <select class="form-control" ng-enter="$ctrl.addSpecification()" ng-model="$ctrl.tool" ng-init="$ctrl.tool = 'libreoffice'" ng-options="x for x in ['libreoffice']">{{x}}</select>
                     </label>
-                    <button type="button" class="btn btn-success btn-sm" ng-disabled="!$ctrl.path || !$ctrl.target || !$ctrl.tool" ng-click="$ctrl.addSpecification()"><i class="fa fa-plus"></i></button>
+                    <button type="button" class="btn btn-success btn-sm" ng-disabled="!$ctrl.path || !$ctrl.target || !$ctrl.tool" ng-click="$ctrl.addSpecification()"><i class="fas fa-plus"></i></button>
                 </div>
                 <table class="table" style="margin-top: 20px;">
                     <thead>
@@ -62,7 +62,7 @@
                                 {{value.tool}}
                             </td>
                             <td>
-                                <button class="fa fa-trash" ng-click="$ctrl.deleteSpecification(key)"></button>
+                                <button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="$ctrl.deleteSpecification(key)"></button>
                             </td>
                         </tr>
                         <tr ng-if="$ctrl.angular.equals($ctrl.specifications, {})" class="text-center">
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency) || $ctrl.addingRule" focused="true">{{'CREATE' | translate}} <i ng-if="$ctrl.addingRule" class="fa fa-spinner fa-spin"/></button>
+            <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency) || $ctrl.addingRule" focused="true">{{'CREATE' | translate}} <i ng-if="$ctrl.addingRule" class="fas fa-spinner fa-spin"/></button>
             <button class="btn btn-warning" type="button" ng-disabled="$ctrl.addingRule" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
         </div>
     </form>

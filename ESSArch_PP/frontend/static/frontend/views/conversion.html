@@ -11,13 +11,13 @@
                         />
                         <span ng-if="vm.ruleTableState.search.predicateObject && vm.ruleTableState.search.predicateObject['$']" class="input-group-addon clickable"
                             ng-click="clearSearch(); getListViewData();">
-                            <i class="fa fa-lg fa-times" style="color: red;"></i>
+                            <i class="fas fa-lg fa-times" style="color: red;"></i>
                         </span>
                     </div>
                     <button type="button" ng-click="vm.createRuleModal()" class="btn btn-info" uib-popover="{{'PREPARECONVERSIONDESC' | translate}}"
                         popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'CREATE' | translate}}</button>
                     <div class="refresh-icon">
-                        <span ng-click="vm.rulePipe(vm.ruleTableState)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ruleLoading }"
+                        <span ng-click="vm.rulePipe(vm.ruleTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': ruleLoading }"
                             uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                             <tr ng-repeat="x in vm.rules">
                                 <td class="clickable" ng-click="vm.ruleModal(x)">{{x.name}}</td>
                                 <td class="clickable" ng-click="vm.ruleModal(x)">{{x.frequency}}</td>
-                                <td><button class="fa fa-trash" ng-click="vm.removeConversionRuleModal(x)" permission permission-only="'maintenance.delete_conversionrule'"></button></td>
+                                <td><button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="vm.removeConversionRuleModal(x)" permission permission-only="'maintenance.delete_conversionrule'"></button></td>
                             </tr>
                             <tr ng-if="!vm.rules.length && !ruleLoading" class="empty-table-indicator">
                                 <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
@@ -54,8 +54,8 @@
                     ng-model="vm.ongoingPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                     <div class="refresh-icon">
-                        <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable angular-animate fa fa-refresh fa-lg"
-                        ng-class="{'fa-refresh-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
+                        <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
+                        ng-class="{'fa-sync-alt-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
                         popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                     <select class="form-control items-per-page" ng-model="vm.nextPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
                         popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
                     <div class="refresh-icon">
-                        <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': nextLoading }"
+                        <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': nextLoading }"
                             uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                 </div>
@@ -132,8 +132,8 @@
                     ng-model="vm.finishedPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
                     popover-popup-delay="500" popover-append-to-body="true"></select>
                     <div class="refresh-icon">
-                        <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable angular-animate fa fa-refresh fa-lg"
-                        ng-class="{'fa-refresh-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
+                        <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
+                        ng-class="{'fa-sync-alt-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
                         popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                 </div>

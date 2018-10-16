@@ -29,10 +29,10 @@
                     {{'PATHS' | translate}}
                     <input class="form-control" ng-enter="$ctrl.addPath($ctrl.path)" ng-model="$ctrl.path">
             </label>
-            <button type="button" class="btn btn-success btn-sm" ng-click="$ctrl.addPath($ctrl.path)"><i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-success btn-sm" ng-click="$ctrl.addPath($ctrl.path)"><i class="fas fa-plus"></i></button>
             <div class="path-row">
                 <div ng-repeat="path in $ctrl.pathList track by $index" class="path-item">
-                    {{path}}&nbsp;<i ng-click="$ctrl.removePath(path)" class="fa fa-times clickable"></i>
+                    {{path}}&nbsp;<i ng-click="$ctrl.removePath(path)" class="fas fa-times clickable"></i>
                 </div>
                 <div ng-if="$ctrl.pathList.length == 0">
                     <span ng-if="!$ctrl.showRequired">{{'NO_PATHS_CHOSEN' | translate}}</span>
@@ -41,7 +41,7 @@
             </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency) || $ctrl.addingRule" focused="true">{{'CREATE' | translate}} <i ng-if="$ctrl.addingRule" class="fa fa-spinner fa-spin"/></button>
+        <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency) || $ctrl.addingRule" focused="true">{{'CREATE' | translate}} <i ng-if="$ctrl.addingRule" class="fas fa-spinner fa-spin"/></button>
         <button class="btn btn-warning" ng-disabled="$ctrl.addingRule" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </form>
