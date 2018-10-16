@@ -1,7 +1,7 @@
 <div class="file-explorer" st-table="deckGridData" st-pipe="dirPipe">
     <div class="nav-refresh-wrapper">
         <div class="file-explorer-nav">
-        <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray()"></li>
+        <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="far fa-arrow-alt-circle-left fa-2x clickable" ng-click="previousGridArray()"></li>
         <b ng-if="!('**.workarea.**' | includedByState)" class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString()}}</b>
         <b ng-if="('**.workarea.**' | includedByState)" class="dir-path">{{previousGridArraysString()}}</b>
         </div>
@@ -14,14 +14,14 @@
             </div>
             <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()" uib-popover="{{'LIST_VIEW' | translate}}"
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th-list fa-lg"></i>
+                <i class="fas fa-th-list fa-lg"></i>
             </button>
             <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()" uib-popover="{{'GRID_VIEW' | translate}}"
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th fa-lg"></i>
+                <i class="fas fa-th fa-lg"></i>
             </button>
             <div class="refresh-filebrowser">
-                <span ng-click="updateGridArray(ip)" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+                <span ng-click="updateGridArray(ip)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': gridArrayLoading }"
                     uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
         </div>
@@ -52,10 +52,10 @@
                 <tr ng-if="!openingNewPage" ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="isSelected(card)" ng-click="cardSelect(card)">
                     <td class="type-name-column" uib-popover-html="'{{'NAME' | translate}}: {{card.name}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
                         <div ng-class="card.type" ng-if="card.type == 'file'">
-                            <li class="fa fa-file-o"></li>
+                            <li class="fas fa-file"></li>
                         </div>
                         <div ng-class="card.type" ng-if="card.type == 'dir'">
-                            <li class="fa fa-folder-o"></li>
+                            <li class="fas fa-folder"></li>
                         </div>
                         <div class="one-row-ellipsis">
                             {{card.name}}

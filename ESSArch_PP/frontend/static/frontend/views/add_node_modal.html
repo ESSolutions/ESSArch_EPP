@@ -6,7 +6,7 @@
         <formly-form model="$ctrl.newNode" fields="$ctrl.nodeFields" options="$ctrl.options"></formly-form>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" ng-disabled="!$ctrl.changed() || $ctrl.submitting" type="submit">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fa fa-spinner fa-spin"/></button>
+        <button class="btn btn-primary" ng-disabled="!$ctrl.changed() || $ctrl.submitting" type="submit">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fas fa-spinner fa-spin"/></button>
         <button class="btn btn-warning" type="button" ng-disabled="$ctrl.submitting" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </form>

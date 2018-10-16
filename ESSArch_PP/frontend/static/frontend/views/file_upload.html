@@ -10,8 +10,8 @@
 		<!--
         <input class="form-control" style="margin-bottom: 5px;" ng-model="vm.flowDestination" placeholder="Destination "type="text"></input>
 		-->
-        <button class="btn btn-default" flow-btn><i class="fa fa-file-o"></i> {{'CHOOSEFILES' | translate}}</button>
-        <button class="btn btn-default" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="fa fa-folder-o"></i>
+        <button class="btn btn-default" flow-btn><i class="far fa-file"></i> {{'CHOOSEFILES' | translate}}</button>
+        <button class="btn btn-default" flow-btn flow-directory ng-show="$flow.supportDirectory"><i class="far fa-folder"></i>
             {{'CHOOSEFOLDER' | translate}}
         </button>
         <br>
@@ -29,9 +29,9 @@
     <div>
         <div ng-if="transfers.length">
             <h4>{{'UPLOAD' | translate}}:</h4>
-            <a class="btn btn-small btn-success" ng-click="$flow.resume();updateListViewTimeout(1000)"><i class="fa fa-upload"></i> {{'UPLOAD' | translate}}</a>
-            <a class="btn btn-small btn-danger" ng-click="$flow.pause()"><i class="fa fa-pause"></i> {{'PAUSE' | translate}}</a>
-            <a class="btn btn-small btn-info" ng-click="$flow.cancel(); resetUploadedFiles()"><i class="fa fa-ban"></i> {{'CANCEL' | translate}}</a>
+            <a class="btn btn-small btn-success" ng-click="$flow.resume();updateListViewTimeout(1000)"><i class="fas fa-upload"></i> {{'UPLOAD' | translate}}</a>
+            <a class="btn btn-small btn-danger" ng-click="$flow.pause()"><i class="fas fa-pause"></i> {{'PAUSE' | translate}}</a>
+            <a class="btn btn-small btn-info" ng-click="$flow.cancel(); resetUploadedFiles()"><i class="fas fa-ban"></i> {{'CANCEL' | translate}}</a>
 
             <h4>{{'TRANSFERS' | translate}}</h4>
             <p>

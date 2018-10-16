@@ -17,8 +17,8 @@
         {{'SPECIFICATION' | translate}}
     </label>
     <p>{{$ctrl.data.rule.specification.join(', ')}}</p>
-    <button class="btn btn-success" ng-disabled="$ctrl.creatingJob" ng-click="$ctrl.createJob($ctrl.data.rule)">{{'CREATE_APPRAISAL_JOB' | translate}} <i ng-if="$ctrl.creatingJob" class="fa fa-spinner fa-spin"/></button>
-    <button class="btn btn-success" ng-disabled="$ctrl.runningJob" ng-click="$ctrl.createJobAndStart($ctrl.data.rule)">{{'CREATE_APPRAISAL_JOB_AND_RUN' | translate}} <i ng-if="$ctrl.runningJob" class="fa fa-spinner fa-spin"/></button>
+    <button class="btn btn-success" ng-disabled="$ctrl.creatingJob" ng-click="$ctrl.createJob($ctrl.data.rule)">{{'CREATE_APPRAISAL_JOB' | translate}} <i ng-if="$ctrl.creatingJob" class="fas fa-spinner fa-spin"/></button>
+    <button class="btn btn-success" ng-disabled="$ctrl.runningJob" ng-click="$ctrl.createJobAndStart($ctrl.data.rule)">{{'CREATE_APPRAISAL_JOB_AND_RUN' | translate}} <i ng-if="$ctrl.runningJob" class="fas fa-spinner fa-spin"/></button>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()" focused="true">{{'OK' | translate}}</button>

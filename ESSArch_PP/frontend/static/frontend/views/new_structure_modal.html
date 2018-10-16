@@ -11,7 +11,7 @@
                         <label for="start-date">{{'START_DATE' | translate}}</label>
                         <a class="dropdown-toggle" id="start-date" role="button" uib-dropdown-toggle>
                             <div class="input-group">
-                                <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="$ctrl.startDate"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="$ctrl.startDate"><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
                             </div>
                         </a>
                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
@@ -27,7 +27,7 @@
                         <label for="end-date">{{'END_DATE' | translate}}</label>
                         <a class="dropdown-toggle" id="end-date" role="button" uib-dropdown-toggle>
                             <div class="input-group">
-                                <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="$ctrl.endDate"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" data-ng-model="$ctrl.endDate"><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
                             </div>
                         </a>
                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.saving">{{'OK' | translate}} <i ng-if="$ctrl.saving" class="fa fa-spinner fa-spin"/></button>
+            <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.saving">{{'OK' | translate}} <i ng-if="$ctrl.saving" class="fas fa-spinner fa-spin"/></button>
             <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.saving">{{'CANCEL' | translate}}</button>
         </div>
     </form>

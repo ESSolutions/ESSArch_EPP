@@ -29,7 +29,7 @@
                                 <div class="dropdown" uib-dropdown is-open="status.appraisal_date">
                                     <a class="dropdown-toggle" id="dropdown-appraisalDate" role="button" uib-dropdown-toggle>
                                         <div class="input-group">
-                                            <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" ng-init="$ctrl.ipModifications['appraisal_date'] = $ctrl.ip.appraisal_date" data-ng-model="$ctrl.ipModifications['appraisal_date']" ng-enter="$ctrl.saveIpModifications()"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" data-date-time-input="YYYY-MM-DD" class="form-control" ng-init="$ctrl.ipModifications['appraisal_date'] = $ctrl.ip.appraisal_date" data-ng-model="$ctrl.ipModifications['appraisal_date']" ng-enter="$ctrl.saveIpModifications()"><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
                                         </div>
                                     </a>
                                     <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
@@ -43,7 +43,7 @@
                                 <button class="btn btn-success btn-sm" ng-disabled="$ctrl.ipModifications['appraisal_date'] == $ctrl.ip.appraisal_date || angular.isUndefined($ctrl.ipModifications['appraisal_date'])" ng-click="$ctrl.saveIpModifications()">{{'SAVE' | translate}}</button>
                                 <button class="btn btn-warning btn-sm" ng-click="$ctrl.closeIpEdit('appraisal_date')">{{'CANCEL' | translate}}</button>
                             </div>
-                            &nbsp;<i class="fa fa-pencil cursor-pointer" ng-click="$ctrl.editField('appraisal_date')" ng-if="!$ctrl.editMode['appraisal_date']"></i>
+                            &nbsp;<i class="fas fa-pencil cursor-pointer" ng-click="$ctrl.editField('appraisal_date')" ng-if="!$ctrl.editMode['appraisal_date']"></i>
                         </td>
                     </tr>
                     <tr>

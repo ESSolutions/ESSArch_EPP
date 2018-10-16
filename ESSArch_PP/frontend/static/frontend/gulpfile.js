@@ -242,8 +242,8 @@ var compileSass = function() {
     .pipe(gulp.dest('styles'));
 };
 var copyIcons = function() {
-    return gulp.src('node_modules/font-awesome/fonts/**.*') 
-        .pipe(gulp.dest('fonts')); 
+    return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/**.*')
+        .pipe(gulp.dest('webfonts'));
 };
 var copyImages = function() {
     return gulp.src('node_modules/angular-tree-control/images/**.*') 

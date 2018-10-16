@@ -7,6 +7,11 @@
   resolved "http://registry.npmjs.org/@flowjs/ng-flow/-/ng-flow-2.7.8.tgz#1d9f9d1f82acda5360328c315bacfd60dbfd9819"
   integrity sha512-zO6jNvz41oMOJj9+1N+vLT0ytitbCtuGABJQRzQDOPXyRMmlSXfJ7om5oYOztyUFrr4jDpE4QFPt+r2/RFceCg==
 
+"@fortawesome/fontawesome-free@~5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.4.1.tgz#6194786c1a705ab84253e06429834466670e3c3f"
+  integrity sha512-ZcxfUmLFl4RLG71cPeZcTXRa6rt3xLnMmomAb7aYKRzUmlRRj7E8EVqSwYSXBiV2x6XpSQmGOQmNQx6HSeSwVQ==
+
 "@gulp-sourcemaps/identity-map@1.X":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@gulp-sourcemaps/identity-map/-/identity-map-1.0.2.tgz#1e6fe5d8027b1f285dc0d31762f566bccd73d5a9"
@@ -1849,11 +1854,6 @@ flagged-respawn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/flagged-respawn/-/flagged-respawn-1.0.0.tgz#4e79ae9b2eb38bf86b3bb56bf3e0a56aa5fcabd7"
   integrity sha1-Tnmumy6zi/hrO7Vr8+ClaqX8q9c=
-
-font-awesome@~4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.7.0.tgz#8fa8cf0411a1a31afd07b06d2902bb9fc815a133"
-  integrity sha1-j6jPBBGhoxr9B7BtKQK7n8gVoTM=
 
 for-in@^1.0.1, for-in@^1.0.2:
   version "1.0.2"

@@ -5,13 +5,13 @@
                 <div class="search-form">
                     <input class="form-control search-field" ng-change="vm.searchSubmit()" ng-model-options="{debounce: 300}" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.filterObject.q">
                     <div class="flex-column search-button-column">
-                        <button type="submit" class="btn btn-success">{{'SEARCH' | translate}} <i class="fa fa-search"></i></button>
+                        <button type="submit" class="btn btn-success">{{'SEARCH' | translate}} <i class="fas fa-search"></i></button>
                         <button type="button" ng-disabled="vm.clearDisabled()" class="btn btn-primary" ng-click="vm.clearSearch()">{{'CLEAR' | translate}}</button>
                     </div>
                 </div>
             </form>
-            <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fa fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
-            <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fa fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true"><i class="fas fa-plus"></i>&nbsp;{{'FILTERS' | translate}}</button>
+            <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false"><i class="fas fa-minus"></i>&nbsp;{{'FILTERS' | translate}}</button>
             <div ng-if="vm.showFilters" class="filters">
                 <!--<label>
                     {{'START_DATE' | translate}}
@@ -46,8 +46,8 @@
                 </div>
                 <!--<br/>
                 <span ng-click="vm.showIncludedTypes = !vm.showIncludedTypes" class="clickable no-select">{{'INCLUDED_TYPES' | translate}}
-                    <i ng-if="!vm.showIncludedTypes" class="fa fa-caret-right"></i>
-                    <i ng-if="vm.showIncludedTypes"class="fa fa-caret-down"></i>
+                    <i ng-if="!vm.showIncludedTypes" class="fas fa-caret-right"></i>
+                    <i ng-if="vm.showIncludedTypes"class="fas fa-caret-down"></i>
                 </span>
                 <div ng-if="vm.showIncludedTypes" class="form-group">
                     <label>
@@ -84,7 +84,7 @@
                 <div ng-if="vm.showTree"  resizable r-directions="['right']" r-grabber="<div class='resize-grabber'></div>" r-flex="true" class="filter-tree">
                     <div js-tree="vm.treeConfig" should-apply="vm.applyModelChanges()" ng-model="vm.tags" tree="vm.treeInstance" tree-events="changed:vm.selectFilter"></div>
                 </div>
-                <div ng-if="vm.showResults" class="search-results" st-table="vm.searchResult" st-pipe="vm.search">
+                <div ng-if="vm.showResults" class="search-results" st-persist="{{vm.tableState}}" st-table="vm.searchResult" st-pipe="vm.search">
                     <div class="h-100 w-100">
                         <div class="search-toolbar" ng-include src="'static/frontend/views/search_toolbar.html'"></div>
                         <div ng-show="vm.resultViewType == 'list'" class="table-x-overflow table-container search-result-table">
@@ -123,9 +123,9 @@
                                     <div ng-repeat="x in vm.searchResult">
                                         <div class="clickable result-item-grid" ng-click="vm.openResult(x, $event)">
                                             <div class="item-image">
-                                                <span ng-if="x._index == 'archive'" class="fa fa-3x fa-archive"></span>
-                                                <span ng-if="x._index == 'component'" class="fa fa-3x fa-folder-o"></span>
-                                                <span ng-if="x._index == 'document'" class="fa fa-3x fa-file-o"></span>
+                                                <span ng-if="x._index == 'archive'" class="fas fa-3x fa-archive"></span>
+                                                <span ng-if="x._index == 'component'" class="far fa-3x fa-folder"></span>
+                                                <span ng-if="x._index == 'document'" class="far fa-3x fa-file"></span>
                                             </div>
                                             <div class="metadata-wrapper">
                                                 <b>{{x.type}}</b>

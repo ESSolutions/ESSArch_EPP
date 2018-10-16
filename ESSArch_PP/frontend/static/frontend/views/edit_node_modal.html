@@ -21,7 +21,7 @@
             {{'VALUE' | translate}}
             <input ng-model="$ctrl.newFieldVal" class="form-control" type="text" ng-enter="$ctrl.addNewField()" />
         </label>
-        <button ng-disabled="!($ctrl.newFieldKey && $ctrl.newFieldVal)" class="btn btn-success btn-sm" ng-click="$ctrl.addNewField()"><i class="fa fa-plus"></i></button>
+        <button ng-disabled="!($ctrl.newFieldKey && $ctrl.newFieldVal)" class="btn btn-success btn-sm" ng-click="$ctrl.addNewField()"><i class="fas fa-plus"></i></button>
     </div>
 </div>
 <div class="modal-footer">
@@ -29,6 +29,6 @@
         <input type="checkbox" ng-model="$ctrl.updateDescendants">&nbsp;
         {{'UPDATE_DESCENDANTS' | translate}}
     </label>
-    <button class="btn btn-primary" ng-disabled="(!$ctrl.changed() && $ctrl.fieldsToDelete.length == 0) || $ctrl.submitting" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fa fa-spinner fa-spin"/></button>
+    <button class="btn btn-primary" ng-disabled="(!$ctrl.changed() && $ctrl.fieldsToDelete.length == 0) || $ctrl.submitting" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fas fa-spinner fa-spin"/></button>
     <button class="btn btn-warning" type="button" ng-disabled="$ctrl.submitting" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
 </div>

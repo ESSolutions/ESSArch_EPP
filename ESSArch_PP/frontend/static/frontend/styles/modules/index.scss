@@ -195,24 +195,6 @@ main {
         outline: 0;
     }
 }
-.fa.fa-refresh {
-    font-size: 21px;
-}
-.fa.fa-print {
-    font-size: 21px;
-}
-.fa.fa-cog {
-    font-size: 21px;
-}
-.fa.fa-envelope {
-    font-size: 21px;
-}
-.fa.fa-question-circle {
-    font-size: 21px;
-}
-.fa.fa-bell {
-    font-size: 21px;
-}
 .well-sm {
     padding: 0px;
 }
@@ -269,8 +251,7 @@ main {
     }
     .main-view-options {
         display: none;
-        margin-bottom: 10px;
-        .fa {
+        .fas {
             cursor: pointer;
             color: #000;
             &:hover, &:focus {
@@ -279,6 +260,7 @@ main {
         }
         @include small-screen {
             display: flex;
+            align-items: center;
         }
     }
 }

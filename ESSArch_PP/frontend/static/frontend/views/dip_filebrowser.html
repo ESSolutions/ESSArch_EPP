@@ -1,7 +1,7 @@
 <div class="file-explorer" st-table="deckGridData" st-pipe="workareaPipe">
     <div class="nav-refresh-wrapper">
         <div class="file-explorer-nav">
-            <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
+            <li ng-class="{'arrow-disabled': previousGridArrays1.length == 0}" class="far fa-arrow-alt-circle-left fa-2x clickable" ng-click="previousGridArray(1)"></li>
             <b class="dir-path">{{'/' + previousGridArraysString(1)}}</b>
         </div>
         <div class="button-refresh-wrapper">
@@ -17,14 +17,14 @@
         </div>
         <button class="btn btn-default btn-sm" ng-class="{'active': workareaListView}" ng-click="useListView(1)"
             uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-            <i class="fa fa-th-list fa-lg"></i>
+            <i class="fas fa-th-list fa-lg"></i>
         </button>
         <button class="btn btn-default btn-sm" ng-class="{'active': workareaGridView}" ng-click="useGridView(1)"
             uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-            <i class="fa fa-th fa-lg"></i>
+            <i class="fas fa-th fa-lg"></i>
         </button>
         <div class="refresh-filebrowser">
-            <span ng-click="updateWorkareaFiles()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': workArrayLoading }"
+            <span ng-click="updateWorkareaFiles()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': workArrayLoading }"
             uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500"
             popover-append-to-body="true"></span>
         </div>
@@ -56,10 +56,10 @@
                     <tr ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(1, ip, card)" ng-class="isSelected(1, card)" ng-click="cardSelect(1, card)">
                         <td class="type-name-column">
                             <div ng-class="card.type" ng-if="card.type == 'file'">
-                                <li class="fa fa-file-o"></li>
+                                <li class="fas fa-file"></li>
                             </div>
                             <div ng-class="card.type" ng-if="card.type == 'dir'">
-                                <li class="fa fa-folder-o"></li>
+                                <li class="fas fa-folder"></li>
                             </div>
                             <div class="one-row-ellipsis">
                                 {{card.name}}
@@ -96,7 +96,7 @@
 <div class="file-explorer" st-table="chosenFiles" st-pipe="dipPipe">
     <div class="nav-refresh-wrapper">
         <div class="file-explorer-nav">
-            <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="fa fa-arrow-circle-o-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
+            <li ng-class="{'arrow-disabled': previousGridArrays2.length == 0}" class="far arrow-alt-circle-left fa-2x clickable" ng-click="previousGridArray(2)"></li>
             <b class="dir-path">{{ip.object_identifier_value + '/' + previousGridArraysString(2)}}</b>
         </div>
         <div class="button-refresh-wrapper">
@@ -108,14 +108,14 @@
             </div>
             <button class="btn btn-default btn-sm" ng-class="{'active': dipListView}" ng-click="useListView(2)" uib-popover="{{'LIST_VIEW' | translate}}"
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th-list fa-lg"></i>
+                <i class="fas fa-th-list fa-lg"></i>
             </button>
             <button class="btn btn-default btn-sm" ng-class="{'active': dipGridView}" ng-click="useGridView(2)" uib-popover="{{'GRID_VIEW' | translate}}"
                 popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
-                <i class="fa fa-th fa-lg"></i>
+                <i class="fas fa-th fa-lg"></i>
             </button>
             <div class="refresh-filebrowser">
-                <span ng-click="updateDipFiles()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': gridArrayLoading }"
+                <span ng-click="updateDipFiles()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': gridArrayLoading }"
                 uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
         </div>
@@ -149,10 +149,10 @@
                 <tr ng-repeat="card in chosenFiles" class="clickable" ng-dblClick="expandFile(2, ip, card)" ng-class="isSelected(2, card)" ng-click="cardSelect(2, card)">
                     <td class="type-name-column">
                         <div ng-class="card.type" ng-if="card.type == 'file'">
-                            <li class="fa fa-file-o"></li>
+                            <li class="fas fa-file"></li>
                         </div>
                         <div ng-class="card.type" ng-if="card.type == 'dir'">
-                            <li class="fa fa-folder-o"></li>
+                            <li class="fas fa-folder"></li>
                         </div>
                         <div class="one-row-ellipsis">
                             {{card.name}}

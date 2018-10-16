@@ -6,7 +6,7 @@
             <input st-search="" class="form-control global-search" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_ORDER' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true" />
             <button type="button" ng-click="newOrderModal()" class="btn btn-info">{{'NEWORDER' | translate}}</button>
             <div class="refresh-icon">
-                <span ng-click="getListViewData()" class="clickable angular-animate fa fa-refresh fa-lg" ng-class="{'fa-refresh-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                <span ng-click="getListViewData()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': ipLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
         </div>
         <div id="list-view" tabindex="0" ng-keydown="vm.ipListKeydownListener($event)" class="list-view-table">
@@ -26,7 +26,7 @@
                             <button type="button"
                                     ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
                                     ng-click="removeIpModal(row)"
-                                    class="fa fa-trash"
+                                    class="fas fa-trash-alt btn btn-default btn-sm"
                                     uib-popover="{{'REMOVEIP' | translate}}: {{row.label}}"
                                     popover-placement="top-left"
                                     popover-popup-delay="500"
@@ -45,8 +45,8 @@
             <div class="table-container" st-table="vm.ips" st-pipe="vm.ipPipe">
                 <div class="search-prepare-wrapper">
                     <div class="refresh-icon">
-                        <span ng-click="vm.ipPipe(vm.ipTableState)" class="clickable angular-animate fa fa-refresh fa-lg"
-                        ng-class="{'fa-refresh-animate': ipsLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
+                        <span ng-click="vm.ipPipe(vm.ipTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
+                        ng-class="{'fa-sync-alt-animate': ipsLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
                         popover-popup-delay="500" popover-append-to-body="true"></span>
                     </div>
                 </div>

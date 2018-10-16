@@ -15,8 +15,8 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat-start="ip in $ctrl.data.ips" ng-click="$ctrl.expandIp(ip)" class="clickable" ng-class="{'selected': $ctrl.ip.object_identifier_value == ip.object_identifier_value}">
-                        <td ng-if="ip.expanded"><i class="fa fa-minus"></i>&nbsp;{{ip.object_identifier_value}}</td>
-                        <td ng-if="!ip.expanded"><i class="fa fa-plus"></i>&nbsp;{{ip.object_identifier_value}}</td>
+                        <td ng-if="ip.expanded"><i class="fas fa-minus"></i>&nbsp;{{ip.object_identifier_value}}</td>
+                        <td ng-if="!ip.expanded"><i class="fas fa-plus"></i>&nbsp;{{ip.object_identifier_value}}</td>
                         <td>{{ip.label}}</td>
                         <td>{{ip.responsible.username}}</td>
                         <td>
@@ -25,7 +25,7 @@
                             <td colspan="2" style="padding-left: 15px;">{{x.name}}</td>
                             <td>{{x.frequency}}</td>
                             <td>
-                                <button class="fa fa-trash" ng-click="$ctrl.removeRule(ip, x)"></button>
+                                <button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="$ctrl.removeRule(ip, x)"></button>
                             </td>
                         </tr>
                         <tr ng-if="ip.expanded" ng-repeat-end>

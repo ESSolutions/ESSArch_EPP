@@ -22,8 +22,8 @@
                         </select>
                         </td>
                         <td class="flex-row">
-                            <button ng-if="saProfile.profile" class="btn btn-default lock-button btn-sm" ng-click="saClick(saProfile)" uib-popover="{{saProfile.profile.name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="fa fa-eye">&nbsp;</i>{{'VIEW' | translate}}</i> <i ng-if="vm.loadingSa" class="fa fa-spinner fa-spin"/></button>
-                            <button ng-if="!saProfile.disabled" ng-disabled="!saProfile.profile" class="btn btn-success prepare-button btn-sm" ng-click="prepare(ip)">{{'PREPARE' | translate}} <i ng-if="vm.preparingIp" class="fa fa-spinner fa-spin"/></button>
+                            <button ng-if="saProfile.profile" class="btn btn-default lock-button btn-sm" ng-click="saClick(saProfile)" uib-popover="{{saProfile.profile.name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="far fa-eye">&nbsp;</i>{{'VIEW' | translate}}</i> <i ng-if="vm.loadingSa" class="fas fa-spinner fa-spin"/></button>
+                            <button ng-if="!saProfile.disabled" ng-disabled="!saProfile.profile" class="btn btn-success prepare-button btn-sm" ng-click="prepare(ip)">{{'PREPARE' | translate}} <i ng-if="vm.preparingIp" class="fas fa-spinner fa-spin"/></button>
                         </td>
                         <p>{{'PATH' | translate}}: {{ip.object_path}}</p>
                     </tr>
@@ -59,7 +59,7 @@
                                         {{profileIp.profile_name}}
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-default lock-button btn-sm" ng-click="profileClick(profileIp, {})" uib-popover="{{profileIp.profile_name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="fa fa-pencil"></i>&nbsp;{{'EDIT' | translate}}</i> <i ng-if="vm.loadingProfileData[profileIp.profile_type]" class="fa fa-spinner fa-spin"/></button>
+                                        <button type="button" class="btn btn-default lock-button btn-sm" ng-click="profileClick(profileIp, {})" uib-popover="{{profileIp.profile_name}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"><i class="fas fa-sm fa-pencil-alt"></i>&nbsp;{{'EDIT' | translate}}</i> <i ng-if="vm.loadingProfileData[profileIp.profile_type]" class="fas fa-spinner fa-spin"/></button>
                                     </td>
                                 </div>
                             </tr>
@@ -83,7 +83,7 @@
                 </formly-form>
                 <br />
                 <div class="button-wrapper">
-                    <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="vm.editForm.$invalid || angular.equals(vm.profileOldModel, vm.profileModel)">{{'SAVE' | translate}} <i ng-if="vm.savingProfileModel" class="fa fa-spinner fa-spin"/></button>
+                    <button ng-if="vm.profileFields.length" type="submit" class="btn btn-info" ng-disabled="vm.editForm.$invalid || angular.equals(vm.profileOldModel, vm.profileModel)">{{'SAVE' | translate}} <i ng-if="vm.savingProfileModel" class="fas fa-spinner fa-spin"/></button>
                     <button ng-if="vm.profileFields.length" ng-click="vm.cancel()" class="btn btn-warning">{{'CANCEL' | translate}}</button>
                 </div>
             </form>

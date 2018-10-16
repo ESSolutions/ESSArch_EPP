@@ -285,16 +285,16 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         },
         types : {
             default : {
-                icon: 'fa fa-folder-o'
+                icon: 'far fa-folder'
             },
             archive : {
-                icon : 'fa fa-archive'
+                icon : 'fas fa-archive'
             },
             document : {
-                icon : 'fa fa-file-o'
+                icon : 'far fa-file'
             },
             plus: {
-                icon: "fa fa-plus"
+                icon: "fas fa-plus"
             }
         },
         dnd: {
