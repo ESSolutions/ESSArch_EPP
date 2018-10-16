@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService, $q) {
+angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $http, $uibModal, listViewService, $q, $log) {
     var vm = this;
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: '' });
 
@@ -105,12 +105,12 @@ angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, 
     $scope.edit = false;
     $scope.eventlog = false;
     $scope.requestForm = false;
-    $scope.removeIp = function (ipObject) {
+    $scope.removeIp = function (order) {
         $http({
             method: 'DELETE',
-            url: ipObject.url
+            url: appConfig.djangoUrl + 'orders/' + order.id + '/'
         }).then(function() {
-            vm.displayedIps.splice(vm.displayedIps.indexOf(ipObject), 1);
+            vm.displayedIps.splice(vm.displayedIps.indexOf(order), 1);
             $scope.edit = false;
             $scope.select = false;
             $scope.eventlog = false;
@@ -129,7 +129,7 @@ angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, 
             ariaDescribedBy: 'modal-body',
             templateUrl: 'static/frontend/views/new-order-modal.html',
             scope: $scope,
-            controller: 'ModalInstanceCtrl',
+            controller: 'OrderModalInstanceCtrl',
             controllerAs: '$ctrl',
             resolve: {
                 data: {}
@@ -139,6 +139,30 @@ angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, 
             $timeout(function() {
                 $scope.getListViewData();
             });
+        });
+    }
+
+    //Create and show modal for remove ip
+    $scope.removeOrderModal = function (order) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/remove-order-modal.html',
+            controller: 'OrderModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        order: order
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            $scope.getListViewData();
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
         });
     }
 });

@@ -629,5 +629,6 @@
     "ARCHIVE_CREATOR" :"Arkivbildare",
     "ARCHIVE_RESPONSIBLE": "Arkivansvarig",
     "DATABASE": "Databas",
-    "CLEAR": "Rensa"
+    "CLEAR": "Rensa",
+    "DO_YOU_WANT_TO_REMOVE_ORDER": "Vill du ta bort beställning"
 }
