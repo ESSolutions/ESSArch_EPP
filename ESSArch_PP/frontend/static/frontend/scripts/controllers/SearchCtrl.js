@@ -141,7 +141,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
         vm.activeTab = 0;
     }
 
-    function formatFilters() {
+    vm.formatFilters = function() {
         var includedTypes = [];
         for(var key in vm.includedTypes) {
             if(vm.includedTypes[key]) {
@@ -169,7 +169,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number;  // Number of entries showed per page.
             var pageNumber = start / number + 1;
-            formatFilters();
+            vm.formatFilters();
             if(vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
             }
@@ -398,7 +398,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
 
     vm.getExportResultUrl = function(tableState, format) {
         if (tableState) {
-            formatFilters();
+            vm.formatFilters();
             if (vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
             }
