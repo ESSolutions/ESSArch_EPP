@@ -1,0 +1,17 @@
+dist: trusty
+language: node_js
+node_js:
+  - 8
+  - 9
+  - 10
+cache:
+  yarn: true
+  directories:
+    - .npm
+install:
+  - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
+  - export EC_FRONTEND="$HOME/core/ESSArch_Core/frontend"
+  - cd ESSArch_PP/frontend/static/frontend
+  - yarn
+script:
+  - yarn test-single-run
