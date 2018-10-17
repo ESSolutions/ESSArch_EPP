@@ -11,31 +11,35 @@ angular.module('essarch.controllers').controller('SaEditorCtrl', function(Notifi
         });
     }
     vm.newSa = function(use_template) {
-        vm.getProfiles();
-        vm.enableFields();
-        vm.saModel = null;
-        if(use_template && !angular.isUndefined(use_template)) {
-            var sa = angular.copy(vm.saProfile);
-            vm.saProfile = null;
-            delete sa.id;
-            delete sa.url;
-            sa.published = false;
-            sa.name = "";
-            $timeout(function() {
-                vm.saModel = sa;
-                vm.saProfiles.push(vm.saModel);
-                vm.saProfile = vm.saModel;
-            })
-        } else {
-            vm.saProfile = null;
-            $timeout(function() {
-                vm.saModel = {};
-                vm.saProfiles.push(vm.saModel);
-                vm.saProfile = vm.saModel;
-            });
-        }
-        vm.createNewSa = true;
-        $scope.edit = true;
+        vm.saLoading = true;
+        vm.getProfiles().then(function() {
+            vm.enableFields();
+            vm.saModel = null;
+            if(use_template && !angular.isUndefined(use_template)) {
+                var sa = angular.copy(vm.saProfile);
+                vm.saProfile = null;
+                delete sa.id;
+                delete sa.url;
+                sa.published = false;
+                sa.name = "";
+                $timeout(function() {
+                    vm.saModel = sa;
+                    vm.saProfiles.push(vm.saModel);
+                    vm.saProfile = vm.saModel;
+                    vm.saLoading = false;
+                })
+            } else {
+                vm.saProfile = null;
+                $timeout(function() {
+                    vm.saModel = {};
+                    vm.saProfiles.push(vm.saModel);
+                    vm.saProfile = vm.saModel;
+                    vm.saLoading = false;
+                });
+            }
+            vm.createNewSa = true;
+            $scope.edit = true;
+        })
     }
 
     vm.chooseSa = function(sa) {
