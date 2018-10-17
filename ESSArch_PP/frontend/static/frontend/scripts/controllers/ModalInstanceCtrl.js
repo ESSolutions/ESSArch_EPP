@@ -56,16 +56,6 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
     $ctrl.updateField = function() {
         $uibModalInstance.close($ctrl.field);
     }
-    $ctrl.newOrder = function(label) {
-        $ctrl.creatingOrder = true;
-        listViewService.prepareOrder(label).then(function(result) {
-            $ctrl.creatingOrder = false;
-            $uibModalInstance.close();
-        }).catch(function(response) {
-            $ctrl.creatingOrder = false;
-            Notifications.add(response.data.detail, 'error');
-        });
-    };
     $ctrl.save = function () {
         $ctrl.data = {
             name: $ctrl.profileName

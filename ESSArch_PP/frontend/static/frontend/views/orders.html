@@ -25,13 +25,19 @@
                         <td ng-click="ipRowClick(row)">
                             <button type="button"
                                     ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
-                                    ng-click="removeIpModal(row)"
+                                    ng-click="removeOrderModal(row)"
                                     class="fas fa-trash-alt btn btn-default btn-sm"
                                     uib-popover="{{'REMOVEIP' | translate}}: {{row.label}}"
                                     popover-placement="top-left"
                                     popover-popup-delay="500"
                                     popover-append-to-body="true"></button>
                         </td>
+                    </tr>
+                    <tr ng-if="!vm.displayedIps.length && !ipLoading" class="empty-table-indicator">
+                        <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    </tr>
+                    <tr ng-if="!vm.displayedIps.length && ipLoading" class="empty-table-indicator">
+                        <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
                     </tr>
                 </tbody>
             </table>
