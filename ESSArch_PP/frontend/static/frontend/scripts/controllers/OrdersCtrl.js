@@ -160,6 +160,7 @@ angular.module('essarch.controllers').controller('OrdersCtrl', function($scope, 
             },
         })
         modalInstance.result.then(function (data) {
+            $scope.select = false;
             $scope.getListViewData();
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
