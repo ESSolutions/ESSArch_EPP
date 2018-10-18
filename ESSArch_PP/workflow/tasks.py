@@ -129,11 +129,11 @@ class ReceiveSIP(DBTask):
             if container_type == '.tar':
                 with tarfile.open(container) as tar:
                     root_member_name = tar.getnames()[0]
-                    tar.extractall(tmpdir.encode('utf-8'))
+                    tar.extractall(tmpdir)
             elif container_type == '.zip':
                 with zipfile.ZipFile(container) as zipf:
                     root_member_name = zipf.namelist()[0]
-                    zipf.extractall(tmpdir.encode('utf-8'))
+                    zipf.extractall(tmpdir)
             else:
                 raise ValueError(u'Invalid container type: {}'.format(container))
 
