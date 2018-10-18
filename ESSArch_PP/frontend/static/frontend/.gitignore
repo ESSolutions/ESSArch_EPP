@@ -1,5 +1,4 @@
 node_modules
-bower_components
 scripts/core
 scripts/scripts.js
 scripts/scripts.min.js
@@ -9,7 +8,7 @@ scripts/vendors.min.js
 scripts/scripts.min.js.map
 scripts/vendors.min.js.map
 scripts/polyfills.min.js.map
-fonts
+webfonts
 images
 styles/styles.css
 styles/styles.css.map
