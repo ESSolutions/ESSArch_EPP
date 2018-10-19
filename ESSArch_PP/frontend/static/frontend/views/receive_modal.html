@@ -91,12 +91,7 @@
 <div class="modal-footer">
     <button class="btn btn-default" type="button" ng-click="vm.skip()">{{'SKIP' | translate}} <i class=" fas fa-angle-double-right"></i></button>
     <div class="receive-footer">
-        <div class="checkbox">
-            <label>
-                <input type="checkBox" ng-change="vm.fetchProfileData()" ng-disabled="receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" ng-model="approvedToReceive">{{'APPROVEDTORECEIVE' | translate}}</input>
-            </label>
-        </div>
-        <button ng-disabled="!approvedToReceive || vm.receiving" class="btn btn-primary" type="submit" ng-click="vm.receive(ip)">{{'RECEIVE' | translate}} <i ng-if="vm.receiving" class="fas fa-spinner fa-spin"/></button>
+        <button class="btn btn-primary" ng-disabled="vm.receiving || receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" type="submit" ng-click="vm.confirmReceiveModal(ip)">{{'RECEIVE' | translate}} <i ng-if="vm.receiving" class="fas fa-spinner fa-spin"/></button>
         <button class="btn btn-warning" type="button" ng-click="vm.cancel()" ng-disabled="vm.receiving">{{'CANCEL' | translate}}</button>
     </div>
 </div>

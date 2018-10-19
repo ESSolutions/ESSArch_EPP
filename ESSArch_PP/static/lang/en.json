@@ -631,5 +631,6 @@
     "ARCHIVE_RESPONSIBLE": "Archive responsible",
     "DATABASE": "Database",
     "CLEAR": "Clear",
-    "DO_YOU_WANT_TO_REMOVE_ORDER": "Do you want to remove order"
+    "DO_YOU_WANT_TO_REMOVE_ORDER": "Do you want to remove order",
+    "RECEIVE_SIP_DESC": "Do you want to receive SIP {{object_identifier_value}}?"
 }

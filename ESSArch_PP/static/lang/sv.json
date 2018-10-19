@@ -630,5 +630,6 @@
     "ARCHIVE_RESPONSIBLE": "Arkivansvarig",
     "DATABASE": "Databas",
     "CLEAR": "Rensa",
-    "DO_YOU_WANT_TO_REMOVE_ORDER": "Vill du ta bort beställning"
+    "DO_YOU_WANT_TO_REMOVE_ORDER": "Vill du ta bort beställning",
+    "RECEIVE_SIP_DESC": "Vill du ta emot SIP {{object_identifier_value}}?"
 }

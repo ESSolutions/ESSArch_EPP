@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ReceiveModalInstanceCtrl', function (Notifications, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate, IPReception) {
+angular.module('essarch.controllers').controller('ReceiveModalInstanceCtrl', function (Notifications, $uibModalInstance, $scope, $rootScope,  djangoAuth, data, Requests, $translate, IPReception, $uibModal, $log) {
     var vm = data.vm;
     $scope.saAlert = null;
     $scope.alerts = {
@@ -41,35 +41,39 @@ angular.module('essarch.controllers').controller('ReceiveModalInstanceCtrl', fun
             $scope.approvedToReceive = $event.approved;
         }
     }
-    vm.receive = function (ip) {
-        vm.receiving = true;
-        IPReception.receive({
-                id: ip.id,
-                archive_policy: vm.request.archivePolicy.value.id,
-                purpose: vm.request.purpose,
-                tag: $scope.getDescendantId(),
-                allow_unknown_files: vm.request.allowUnknownFiles,
-                validators: vm.validatorModel
-            }).$promise.then(function(response){
-                Notifications.add(response.detail, "success", 3000);
-                vm.data = {status: "received"};
-                vm.receiving = false;
-                $uibModalInstance.close(vm.data);
-            }).catch(function(response) {
-                vm.receiving = false;
-                if(response.status == 404) {
-                    Notifications.add('IP could not be found', 'error');
-                } else if (response.status != 500 && response.data.detail) {
-                    Notifications.add(response.data.detail, 'error');
-                }
-            })
-    };
+
     vm.fetchProfileData = function() {
         if($scope.approvedToReceive) {
             $scope.approvedToReceive = false;
             $scope.$broadcast('get_profile_data', {})
         }
     }
+
+    vm.confirmReceiveModal = function(ip) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/confirm_receive_modal.html',
+            controller: 'ConfirmReceiveCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: {
+                    ip: ip,
+                    validatorModal: vm.validatorModel,
+                    request: vm.request,
+                    tag: $scope.getDescendantId()
+                }
+            }
+        })
+        modalInstance.result.then(function (data) {
+            vm.resetForm();
+            $uibModalInstance.close(data);
+        }).catch(function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
     vm.skip = function() {
         vm.data = {
             status: "skip"
