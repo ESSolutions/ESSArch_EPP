@@ -199,9 +199,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'db.sqlite',
-        'OPTIONS': {
-            'isolation_level': 'read committed',
-        }
     }
 }
 
