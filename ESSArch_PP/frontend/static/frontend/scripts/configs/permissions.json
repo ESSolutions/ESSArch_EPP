@@ -39,14 +39,14 @@
                         "ip.preserve_from_access_workarea"
                     ]
                 },
-                "createDip": {
-                    "_permissions": [
-                        "ip.preserve_dip"
-                    ]
-                },
                 "orders": {
                     "_permissions": [
                         "ip.prepare_order"
+                    ]
+                },
+                "createDip": {
+                    "_permissions": [
+                        "ip.preserve_dip"
                     ]
                 }
             },
