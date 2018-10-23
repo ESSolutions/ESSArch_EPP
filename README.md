@@ -1,4 +1,4 @@
-# EPP (ESSArch Preservation Platform)
+# EPP (ESSArch Preservation Platform) [![Build Status](https://travis-ci.org/ESSolutions/ESSArch_EPP.svg?branch=master)](https://travis-ci.org/ESSolutions/ESSArch_EPP)
 
 EPP (ESSArch Preservation Platform) - an practical implementation of the OAIS (Reference Model for an Open Archival Information System)
 
