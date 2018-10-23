@@ -35,15 +35,12 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.configuration.models import Path
 from ESSArch_Core.essxml.ProfileMaker.models import extensionPackage, templatePackage
 from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, generateElement, removeChildren
-from ESSArch_Core.ip.models import EventIP, InformationPackage
-from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA, ProfileIP
-from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileDetailSerializer, ProfileWriteSerializer, ProfileSASerializer, \
+from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA
+from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileSASerializer, \
     SubmissionAgreementSerializer
-from ESSArch_Core.profiles.views import SubmissionAgreementViewSet as SAViewSetCore
+from ESSArch_Core.profiles.views import ProfileViewSet as ProfileViewSetCore, SubmissionAgreementViewSet as SAViewSetCore
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
 
@@ -151,30 +148,7 @@ class ProfileSAViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSASerializer
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows profiles to be viewed or edited.
-    """
-    queryset = Profile.objects.all()
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return ProfileSerializer
-
-        if self.action == 'retrieve':
-            return ProfileDetailSerializer
-
-        return ProfileWriteSerializer
-
-    def get_queryset(self):
-        queryset = Profile.objects.all()
-        profile_type = self.request.query_params.get('type', None)
-
-        if profile_type is not None:
-            queryset = queryset.filter(profile_type=profile_type)
-
-        return queryset
-
+class ProfileViewSet(ProfileViewSetCore):
     @detail_route(methods=['post'])
     def save(self, request, pk=None):
         profile = Profile.objects.get(pk=pk)
