@@ -17,12 +17,12 @@
                     </div>
                 </div>
                 <div class="edit-user" ng-controller="DropdownCtrl">
-                    <div class="btn-group" uib-dropdown is-open="status.isopen">
-                        <button class="btn btn-dark" uib-popover="{{'USERNAME' | translate}}: {{auth.username}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                    <div class="btn-group" uib-dropdown uib-dropdown-toggle is-open="status.isopen" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                        <button class="btn btn-dark">
                             <i class="fas fa-user"></i>
                             <span class="username">{{auth.username}}</span>
                         </button>
-                        <button class="btn btn-dark" uib-dropdown-toggle ng-disabled="disabled" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
+                        <button class="btn btn-dark" ng-disabled="disabled">
                             <i class="fas fa-caret-down"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="user-dropdown">
