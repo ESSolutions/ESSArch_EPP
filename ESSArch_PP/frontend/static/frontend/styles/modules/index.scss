@@ -207,11 +207,6 @@ main {
         width: 25%;
     }
 }
-#passwordForm {
-    input {
-        width: 50%;
-    }
-}
 .user-settings {
     @include container(10px);
     margin-top: 10px;

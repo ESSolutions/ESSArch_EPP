@@ -16,22 +16,7 @@
                         <div ng-click="showAlert()" ng-if="unseenNotifications > 999" class="unseen-text">{{999}}+</div>
                     </div>
                 </div>
-                <div class="edit-user" ng-controller="DropdownCtrl">
-                    <div class="btn-group" uib-dropdown uib-dropdown-toggle is-open="status.isopen" uib-popover="{{'USEROPTIONS' | translate}}"  popover-placement="left" popover-popup-delay="500" popover-append-to-body="true">
-                        <button class="btn btn-dark">
-                            <i class="fas fa-user"></i>
-                            <span class="username">{{auth.username}}</span>
-                        </button>
-                        <button class="btn btn-dark" ng-disabled="disabled">
-                            <i class="fas fa-caret-down"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="user-dropdown">
-                            <li ng-repeat="choice in editUserOptions">
-                                <a ng-click="choice.click()">{{choice.label}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <user-dropdown auth="auth"></user-dropdown>
             </div>
         </div>
         <div class="menu-task-wrapper">
