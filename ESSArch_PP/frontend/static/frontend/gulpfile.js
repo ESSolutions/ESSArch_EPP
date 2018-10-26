@@ -265,7 +265,7 @@ var copyImages = function() {
 };
 var copyImagesJstree = function() {
     return gulp.src('node_modules/jstree/dist/themes/default/**.{png,gif}')
-        .pipe(gulp.dest('styles'));
+        .pipe(gulp.dest('build'));
 };
 var configConstants = function() {
     var myConfig = require('./scripts/configs/config.json');
@@ -297,12 +297,13 @@ var permissionConfig = function() {
 
 gulp.task('default', function(){runSequence(
     'config', 'permission_config', 'core_templates', 'core_scripts',
-    'core_tests', 'sass', 'icons', 'images', 'polyfills', 'scripts', 'vendors',
+    'core_tests', 'sass', 'icons', 'images', 'jstree_images', 'polyfills', 'scripts', 'vendors',
     'rev',
 )});
 
 gulp.task('icons', copyIcons);
 gulp.task('images', copyImages);
+gulp.task('jstree_images', copyImagesJstree);
 gulp.task('polyfills', buildPolyfills);
 gulp.task('core_templates', buildCoreTemplates);
 gulp.task('core_scripts', buildCoreScripts);
