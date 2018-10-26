@@ -202,7 +202,8 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             name: $ctrl.name,
             frequency: $ctrl.manualRule ? '' : $ctrl.frequency,
             specification: $ctrl.pathList,
-            public: $ctrl.publicRule
+            public: $ctrl.publicRule,
+            description: $ctrl.description
         };
         $http({
             url: appConfig.djangoUrl + "appraisal-rules/",
