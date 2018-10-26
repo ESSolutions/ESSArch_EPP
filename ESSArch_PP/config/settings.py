@@ -319,6 +319,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+DJANGO_GULP_REV_PATH = os.path.join(BASE_DIR, 'frontend/static/frontend/build/rev-manifest.json')
+
 # Documentation
 DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/{lang}/html')
 

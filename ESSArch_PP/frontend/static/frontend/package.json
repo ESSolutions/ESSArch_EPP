@@ -13,6 +13,7 @@
     "gulp-ng-constant": "^1.2.0",
     "gulp-plumber": "^1.2.0",
     "gulp-rename": "^1.4.0",
+    "gulp-rev": "^9.0.0",
     "gulp-sass": "4.0.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-strip-debug": "^3.0.0",
@@ -25,6 +26,8 @@
     "karma-spec-reporter": "^0.0.32",
     "normalize-scss": "^7.0.1",
     "protractor": "^5.4.1",
+    "rev-del": "^1.0.5",
+    "run-sequence": "^2.2.1",
     "yargs": "^12.0.2"
   },
   "dependencies": {
