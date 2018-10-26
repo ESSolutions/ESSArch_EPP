@@ -168,7 +168,8 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         $ctrl.data = {
             name: $ctrl.name,
             frequency: $ctrl.frequency,
-            specification: $ctrl.specifications
+            specification: $ctrl.specifications,
+            description: $ctrl.description
         };
         $http({
             url: appConfig.djangoUrl+"conversion-rules/",
