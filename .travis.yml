@@ -19,4 +19,4 @@ install:
   - cd ESSArch_PP/frontend/static/frontend
   - yarn
 script:
-  - yarn test-single-run
+  - yarn test

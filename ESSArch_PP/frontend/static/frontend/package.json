@@ -22,12 +22,14 @@
     "karma-jasmine": "^1.1.0",
     "karma-junit-reporter": "^1.2.0",
     "karma-phantomjs-launcher": "^1.0.2",
+    "karma-spec-reporter": "^0.0.32",
     "normalize-scss": "^7.0.1",
     "protractor": "^5.4.1",
     "yargs": "^12.0.2"
   },
   "dependencies": {
     "@flowjs/ng-flow": "~2.7.8",
+    "@fortawesome/fontawesome-free": "~5.4.1",
     "angular": "~1.7",
     "angular-animate": "~1.7",
     "angular-bootstrap-contextmenu": "~1.1.0",
@@ -62,7 +64,6 @@
     "api-check": "^7.5.5",
     "bootstrap-sass": "~3.3.7",
     "console-polyfill": "^0.3.0",
-    "@fortawesome/fontawesome-free": "~5.4.1",
     "jquery": "^3.3.1",
     "jquery-ui-dist": "~1.12.1",
     "later": "^1.2.0",
@@ -80,10 +81,10 @@
     "uri-util": "^1.1.0"
   },
   "scripts": {
-    "pretest-single-run": "gulp",
-    "test": "karma start karma.conf.js",
-    "test-single-run": "karma start karma.conf.js --single-run",
+    "pretest": "gulp",
+    "test": "karma start karma.conf.js --single-run --reporters spec",
     "test-single-run-junit": "karma start karma.conf.js --single-run --reporters junit",
+    "test-watch": "karma start karma.conf.js --reporters spec",
     "preupdate-webdriver": "yarn",
     "update-webdriver": "webdriver-manager update",
     "pree2e": "yarn run update-webdriver",
