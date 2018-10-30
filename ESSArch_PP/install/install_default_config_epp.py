@@ -145,6 +145,8 @@ def installDefaultUsers():
         ['add_profile','profiles','profile'],                                  # Can add Profile (Administration)
         ## ---- app: profiles ---- model: submissionagreement
         ['add_submissionagreement','profiles','submissionagreement'], # Can add Submission Agreement (Administration)
+        ## ---- app: profiles ---- model: profile
+        ['add_profile','profiles','profile'], # Can add Profile (Administration)
         ## ---- app: storage ---- model: storageobject
         ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
         ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
