@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('EditStructureUnitModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
+angular.module('essarch.controllers').controller('EditStructureUnitModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q, ErrorResponse) {
     var $ctrl = this;
     $ctrl.editNode = {};
     $ctrl.options = {};
@@ -103,11 +103,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             $uibModalInstance.close(response.data);
         }).catch(function(response) {
             $ctrl.saving = false;
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data && response.data.detail, 'error');
-            } else {
-                Notifications.add('Unknown error!', 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 

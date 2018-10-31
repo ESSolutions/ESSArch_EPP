@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
+angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams, ErrorResponse) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -93,7 +93,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            ErrorResponse.default(response);
         })
     }
 
@@ -187,6 +187,10 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 vm.searching = false;
                 vm.loadTags(response.aggregations);
                 $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
+            }).catch(function(response) {
+                if(response.status !== 404) { // Until we never get a 404 response initially
+                    ErrorResponse.default(response);
+                }
             })
         } else {
             vm.showResults = true;

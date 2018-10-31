@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
+angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
     var $ctrl = this;
     $ctrl.data = data;
     $ctrl.node = data.node.original;
@@ -8,7 +8,7 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            ErrorResponse.default(response);
         })
     }
     $ctrl.removeFromStructure = function() {
@@ -16,7 +16,7 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED_FROM_STRUCTURE'), 'success');
             $uibModalInstance.close("removed");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            ErrorResponse.default(response);
         })
     }
     $ctrl.cancel = function() {

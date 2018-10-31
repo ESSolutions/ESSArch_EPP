@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, $controller, ContextMenuBase){
+angular.module('essarch.controllers').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, $controller, ContextMenuBase, ErrorResponse){
     var vm = this;
     var ipSortString = "";
     var watchers = [];
@@ -444,11 +444,7 @@ angular.module('essarch.controllers').controller('ReceptionCtrl', function (Noti
                     })
                     .catch(function(response) {
                         vm.receiveModalLoading = false;
-                        if(response.data && response.data.detail) {
-                            Notifications.add(response.data.detail, 'error');
-                        } else if(response.status !== 500) {
-                            Notifications.add('Could not prepare IP', 'error');
-                        }
+                        ErrorResponse.default(response);
                     })
                 } else {
                     vm.receiveModalLoading = false;

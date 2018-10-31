@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion) {
+angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion, ErrorResponse) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -62,6 +62,8 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 });
                 vm.rules = response.data;
                 $scope.ruleLoading = false;
+            }).catch(function(response) {
+                ErrorResponse.default(response);
             })
         }
     }
@@ -91,7 +93,8 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.ongoingTableState = tableState;
                 vm.ongoing = response.data;
                 $scope.ongoingLoading = false;
-
+            }).catch(function(response){
+                ErrorResponse.default(response);
             })
         }
     }
@@ -121,6 +124,8 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.nextTableState = tableState;
                 vm.next = response.data;
                 $scope.nextLoading = false;
+            }).catch(function(response){
+                ErrorResponse.default(response);
             })
         }
     }
@@ -150,6 +155,8 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.finishedTableState = tableState;
                 vm.finished = response.data;
                 $scope.finishedLoading = false;
+            }).catch(function(response) {
+                ErrorResponse.default(response);
             })
         }
     }
@@ -165,11 +172,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
         }).then(function(response) {
             Notifications.add("Running conversion job", "success");
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if(response.status !== 500){
-                Notifications.add('Unknown error!', 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 

@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
+angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q, ErrorResponse) {
     var $ctrl = this;
     $ctrl.node = data.node;
     $ctrl.editData = {};
@@ -254,11 +254,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                             return response;
                         }).catch(function (response) {
                             $ctrl.submitting = false;
-                            if (response.data.detail) {
-                                Notifications.add(response.data.detail, 'error');
-                            } else {
-                                Notifications.add('Unknown error', 'error');
-                            }
+                            ErrorResponse.default(response);
                             return response;
                         })
                 );
@@ -271,7 +267,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                         $uibModalInstance.close("edited");
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        Notifications.add(response.data, 'error');
+                        ErrorResponse.default(response);
                     });
                 } else {
                     $ctrl.submitting = false;
@@ -280,11 +276,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 }
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                if (response.data.detail) {
-                    Notifications.add(response.data.detail, 'error');
-                } else {
-                    Notifications.add('Unknown error', 'error');
-                }
+                ErrorResponse.default(response);
             });
         }
     }
@@ -297,7 +289,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add('Could not update nodes', 'error');
+                ErrorResponse.default(response);
             });
         }
     }
@@ -310,7 +302,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add('Could not update nodes', 'error');
+                ErrorResponse.default(response);
             });
         }
     }

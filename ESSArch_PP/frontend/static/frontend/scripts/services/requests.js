@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
+angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig, $translate, ErrorResponse) {
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })
@@ -30,7 +30,7 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            ErrorResponse.default(response);
         })
     }
     function access(ip, data) {
@@ -38,7 +38,7 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            ErrorResponse.default(response);
         })
     }
     function moveToApproval(ip, data) {
@@ -46,7 +46,7 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            ErrorResponse.default(response);
         })
     }
     return {

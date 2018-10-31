@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state) {
+angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state, ErrorResponse) {
     vm.tags = {
         archive: {
             options: [],
@@ -67,7 +67,7 @@ angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm
             vm.tags.archive.options = mapped;
             return mapped;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            ErrorResponse.default(response);
         });
     }
 
@@ -99,6 +99,8 @@ angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm
             $scope.descendantsLoading = false;
             vm.tags.descendants.options = mapped;
             return mapped;
+        }).catch(function(response) {
+            ErrorResponse.default(response);
         })
     }
 

@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter) {
+angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter, ErrorResponse) {
     var vm = this;
     $controller('TagsCtrl', { $scope: $scope, vm: vm });
     $scope.angular = angular;
@@ -589,11 +589,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         }).then(function(response) {
             Notifications.add($translate.instant('EMAIL_SENT'), 'success');
         }).catch(function(response) {
-            if(response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if (response.status !== 500) {
-                Notifications.add('Unknown error', 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -635,7 +631,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
             $state.reload();
         }).catch(function(response) {
-            Notifications.add("Could not be added to structure unit", "error");
+            ErrorResponse.default(response);
         })
     }
     vm.editField = function(key, value) {

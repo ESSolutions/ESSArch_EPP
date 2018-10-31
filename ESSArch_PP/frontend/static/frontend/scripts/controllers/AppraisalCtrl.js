@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Appraisal) {
+angular.module('essarch.controllers').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Appraisal, ErrorResponse) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -161,11 +161,7 @@ angular.module('essarch.controllers').controller('AppraisalCtrl', function(Archi
         }).then(function(response) {
             Notifications.add("Running appraisal job", "success");
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if(response.status !== 500){
-                Notifications.add('Unknown error!', 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 

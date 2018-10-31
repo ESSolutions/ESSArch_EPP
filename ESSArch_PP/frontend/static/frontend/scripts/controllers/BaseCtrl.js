@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications){
+angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ErrorResponse){
     // Initialize variables
 
     $scope.$window = $window;
@@ -518,11 +518,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             $scope.initRequestData();
             $scope.getListViewData();
         }).catch(function(response) {
-            if(response.status == 404) {
-                Notifications.add('IP could not be found', 'error');
-            } else {
-                Notifications.add(response.data.detail, 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -545,11 +541,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $rootScope.ip = null;
                 $scope.getListViewData();
             }).catch(function(response) {
-                if(response.status == 404) {
-                    Notifications.add('IP could not be found', 'error');
-                } else {
-                    Notifications.add(response.data.detail, 'error');
-                }
+                ErrorResponse.default(response);
             })
         });
     }
@@ -575,11 +567,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $scope.getListViewData();
             });
         }).catch(function(response) {
-            if(response.status == 404) {
-                Notifications.add('IP could not be found', 'error');
-            } else {
-                Notifications.add(response.data.detail, 'error');
-            }
+            ErrorResponse.default(response);
         })
     }
 
