@@ -15,7 +15,13 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
         return $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.appraisalRules = response.data;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     if(data.preview && data.job) {
@@ -31,7 +37,13 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             IP.appraisalRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
             }).catch(function(response) {
-                Notifications.add(response.data.detail, "error");
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             })
         }
     }
@@ -97,7 +109,13 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         });
     }
     $ctrl.removeRule = function(ip, rule) {
@@ -118,7 +136,13 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -138,11 +162,12 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.creatingJob = false;
-            if (response.data.detail) {
-                Notifications.add(response.data.detail, "error");
-            } else {
-                Notifications.add('Unknown error', "error");
-
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -163,18 +188,22 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
                 $uibModalInstance.close($ctrl.data);
             }).catch(function (response) {
                 $ctrl.runningJob = false;
-                if (response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add('Unknown error', "error");
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
             })
         }).catch(function (response) {
             $ctrl.addingRule = false;
-            if (response.data.detail) {
-                Notifications.add(response.data.detail, "error");
-            } else {
-                Notifications.add('Unknown error', "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -215,11 +244,12 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.addingRule = false;
-            if (response.data.detail) {
-                Notifications.add(response.data.detail, "error");
-            } else {
-                Notifications.add('Unknown error', "error");
-
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -236,7 +266,13 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add("Appraisal rule could not be removed", "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
 

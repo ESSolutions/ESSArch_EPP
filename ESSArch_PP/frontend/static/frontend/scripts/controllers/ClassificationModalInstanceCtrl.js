@@ -97,10 +97,12 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if(response.status !== 500){
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -119,7 +121,13 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
                         $uibModalInstance.close(response.data);
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        Notifications.add(response.data.detail, 'error');
+                        if(![401, 403, 500, 503].includes(response.status)) {
+                            if(response.data && response.data.detail) {
+                                Notifications.add(response.data.detail, "error");
+                            } else {
+                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                            }
+                        }
                     })
         }
     }
@@ -137,10 +145,12 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('NODE_UPDATED'), 'success');
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else {
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -159,10 +169,12 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_CREATED'), 'success');
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else {
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -175,10 +187,12 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
             $uibModalInstance.close();
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if(response.status !== 500){
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }

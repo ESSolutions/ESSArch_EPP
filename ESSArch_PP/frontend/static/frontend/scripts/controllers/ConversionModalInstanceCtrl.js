@@ -13,7 +13,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         return $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.conversionRules = response.data;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
 
@@ -25,7 +31,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
             }).catch(function(response) {
-                Notifications.add(response.data.detail, "error");
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             })
         }
     }
@@ -82,7 +94,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
             ip.rules = resource;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     if(data.preview && data.job) {
@@ -104,7 +122,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         });
     }
 
@@ -140,7 +164,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -181,7 +211,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            Notifications.add(response.data.detail, "error")
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
 
@@ -197,7 +233,13 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add("conversion rule could not be removed", "errorepp");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
 

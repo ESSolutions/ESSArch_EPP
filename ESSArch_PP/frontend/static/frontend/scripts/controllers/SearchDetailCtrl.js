@@ -589,10 +589,12 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         }).then(function(response) {
             Notifications.add($translate.instant('EMAIL_SENT'), 'success');
         }).catch(function(response) {
-            if(response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if (response.status !== 500) {
-                Notifications.add('Unknown error', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -635,7 +637,13 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
             $state.reload();
         }).catch(function(response) {
-            Notifications.add("Could not be added to structure unit", "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     vm.editField = function(key, value) {

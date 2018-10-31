@@ -518,10 +518,12 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             $scope.initRequestData();
             $scope.getListViewData();
         }).catch(function(response) {
-            if(response.status == 404) {
-                Notifications.add('IP could not be found', 'error');
-            } else {
-                Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -545,10 +547,12 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $rootScope.ip = null;
                 $scope.getListViewData();
             }).catch(function(response) {
-                if(response.status == 404) {
-                    Notifications.add('IP could not be found', 'error');
-                } else {
-                    Notifications.add(response.data.detail, 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
             })
         });
@@ -575,10 +579,12 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $scope.getListViewData();
             });
         }).catch(function(response) {
-            if(response.status == 404) {
-                Notifications.add('IP could not be found', 'error');
-            } else {
-                Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }

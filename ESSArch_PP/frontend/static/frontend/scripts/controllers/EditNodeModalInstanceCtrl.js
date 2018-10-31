@@ -254,10 +254,12 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                             return response;
                         }).catch(function (response) {
                             $ctrl.submitting = false;
-                            if (response.data.detail) {
-                                Notifications.add(response.data.detail, 'error');
-                            } else {
-                                Notifications.add('Unknown error', 'error');
+                            if(![401, 403, 500, 503].includes(response.status)) {
+                                if(response.data && response.data.detail) {
+                                    Notifications.add(response.data.detail, "error");
+                                } else {
+                                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                                }
                             }
                             return response;
                         })
@@ -271,7 +273,13 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                         $uibModalInstance.close("edited");
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        Notifications.add(response.data, 'error');
+                        if(![401, 403, 500, 503].includes(response.status)) {
+                            if(response.data && response.data.detail) {
+                                Notifications.add(response.data.detail, "error");
+                            } else {
+                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                            }
+                        }
                     });
                 } else {
                     $ctrl.submitting = false;
@@ -280,10 +288,12 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 }
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                if (response.data.detail) {
-                    Notifications.add(response.data.detail, 'error');
-                } else {
-                    Notifications.add('Unknown error', 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
             });
         }
@@ -297,7 +307,13 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add('Could not update nodes', 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             });
         }
     }
@@ -310,7 +326,13 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add('Could not update nodes', 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             });
         }
     }

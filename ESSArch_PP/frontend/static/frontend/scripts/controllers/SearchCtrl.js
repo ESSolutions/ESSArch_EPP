@@ -93,7 +93,13 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
 
@@ -187,6 +193,14 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 vm.searching = false;
                 vm.loadTags(response.aggregations);
                 $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
+            }).catch(function(response) {
+                if(![401, 403, 404, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             })
         } else {
             vm.showResults = true;

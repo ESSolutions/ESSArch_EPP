@@ -61,7 +61,13 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {
                 $ctrl.submitting = false;
-                Notifications.add(response.data.detail, 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             })
         }
     }

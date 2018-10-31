@@ -12,10 +12,12 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
                 vm.structure = vm.structures[0];
             }
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else {
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }
@@ -39,10 +41,12 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
             vm.archiveCreator = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
-            } else if (response.status !== 500){
-                Notifications.add('Unknown error', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }

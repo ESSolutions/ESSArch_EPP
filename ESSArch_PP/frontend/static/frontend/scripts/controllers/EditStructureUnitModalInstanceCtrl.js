@@ -103,10 +103,12 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             $uibModalInstance.close(response.data);
         }).catch(function(response) {
             $ctrl.saving = false;
-            if(response.data && response.data.detail) {
-                Notifications.add(response.data && response.data.detail, 'error');
-            } else {
-                Notifications.add('Unknown error!', 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
         })
     }

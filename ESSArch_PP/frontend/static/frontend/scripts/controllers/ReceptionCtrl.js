@@ -444,10 +444,12 @@ angular.module('essarch.controllers').controller('ReceptionCtrl', function (Noti
                     })
                     .catch(function(response) {
                         vm.receiveModalLoading = false;
-                        if(response.data && response.data.detail) {
-                            Notifications.add(response.data.detail, 'error');
-                        } else if(response.status !== 500) {
-                            Notifications.add('Could not prepare IP', 'error');
+                        if(![401, 403, 500, 503].includes(response.status)) {
+                            if(response.data && response.data.detail) {
+                                Notifications.add(response.data.detail, "error");
+                            } else {
+                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                            }
                         }
                     })
                 } else {

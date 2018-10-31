@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService) {
+angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, $translate) {
     var $ctrl = this;
     if(data) {
         $ctrl.data = data;
@@ -82,7 +82,13 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.preparing = false;
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     };
 
@@ -119,10 +125,12 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                         $uibModalInstance.close();
                     }).catch(function (response) {
                         $ctrl.removing = false;
-                        if (response.status == 404) {
-                            Notifications.add('IP could not be found', 'error');
-                        } else {
-                            Notifications.add(response.data.detail, 'error');
+                        if(![401, 403, 500, 503].includes(response.status)) {
+                            if(response.data && response.data.detail) {
+                                Notifications.add(response.data.detail, "error");
+                            } else {
+                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                            }
                         }
                     })
             }
@@ -134,10 +142,12 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                 $uibModalInstance.close();
             }).catch(function (response) {
                 $ctrl.removing = false;
-                if (response.status == 404) {
-                    Notifications.add('IP could not be found', 'error');
-                } else {
-                    Notifications.add(response.data.detail, 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
             })
         }

@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig) {
+angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig, $translate) {
     function preserve(ip, request) {
         return IP.preserve(
             angular.extend(request, { id: ip.id })
@@ -30,7 +30,13 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     function access(ip, data) {
@@ -38,7 +44,13 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     function moveToApproval(ip, data) {
@@ -46,7 +58,13 @@ angular.module('essarch.services').factory('Requests', function(Notifications, I
             Notifications.add(response.detail, "success", 3000);
             return response;
         }).catch(function(response) {
-            Notifications.add(response.data.detail, "error");
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     return {

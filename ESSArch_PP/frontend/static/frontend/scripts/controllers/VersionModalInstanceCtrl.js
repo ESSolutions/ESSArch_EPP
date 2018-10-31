@@ -7,7 +7,13 @@ angular.module('essarch.controllers').controller('VersionModalInstanceCtrl', fun
             Notifications.add($translate.instant('NEW_VERSION_CREATED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     $ctrl.cancel = function() {

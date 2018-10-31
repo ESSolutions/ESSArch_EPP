@@ -60,10 +60,12 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 $scope.initLoad = false;
                 vm.structuresLoading = false;
             }).catch(function(response) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, 'error');
-                } else {
-                    Notifications.add('Unknown error!' + response, 'error');
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
             })
         }
@@ -99,10 +101,12 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 var finalTree = [rootNode];
                 return finalTree;
             }).catch(function(response) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, 'error')
-                } else {
-                    Notifications.add('Unknown error!', 'error')
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
                 }
                 return [rootNode];
             })

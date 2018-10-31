@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('OrderModalInstanceCtrl', function ($uibModalInstance, data, $http, Notifications, appConfig, listViewService) {
+angular.module('essarch.controllers').controller('OrderModalInstanceCtrl', function ($uibModalInstance, data, $http, Notifications, appConfig, listViewService, $translate) {
     var $ctrl = this;
     if(data) {
         $ctrl.data = data;
@@ -10,7 +10,13 @@ angular.module('essarch.controllers').controller('OrderModalInstanceCtrl', funct
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.creatingOrder = false;
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         });
     };
     $ctrl.remove = function (order) {

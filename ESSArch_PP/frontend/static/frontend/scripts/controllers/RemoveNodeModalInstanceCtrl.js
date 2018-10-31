@@ -8,7 +8,13 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     $ctrl.removeFromStructure = function() {
@@ -16,7 +22,13 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED_FROM_STRUCTURE'), 'success');
             $uibModalInstance.close("removed");
         }).catch(function(response) {
-            Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
+            }
         })
     }
     $ctrl.cancel = function() {

@@ -6,7 +6,13 @@ angular.module('essarch.controllers').controller("ExportCtrl", function ($scope,
                 vm.sas = response.data;
                 vm.sa = null;
             }).catch(function(response) {
-                Notifications.add(response.data.detail, "error");
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             });
 
         $http.get(appConfig.djangoUrl+"profiles/", {params: { pager: "none"}})
@@ -14,7 +20,13 @@ angular.module('essarch.controllers').controller("ExportCtrl", function ($scope,
                 vm.profiles = response.data;
                 vm.profile = null;
             }).catch(function(response) {
-                Notifications.add(response.data.detail, "error");
+                if(![401, 403, 500, 503].includes(response.status)) {
+                    if(response.data && response.data.detail) {
+                        Notifications.add(response.data.detail, "error");
+                    } else {
+                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                    }
+                }
             });
     }
 

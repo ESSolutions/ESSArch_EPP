@@ -633,5 +633,11 @@
     "CLEAR": "Clear",
     "DO_YOU_WANT_TO_REMOVE_ORDER": "Do you want to remove order",
     "RECEIVE_SIP_DESC": "Do you want to receive SIP {{object_identifier_value}}?",
-    "PLATFORM": "Platform"
+    "PLATFORM": "Platform",
+    "UNKNOWN_ERROR": "Unknown error",
+    "CONNECTION_RESTORED": "Connection has been restored",
+    "ERROR_500": "Internal server error",
+    "ERROR_503": "Request failed, try again",
+    "ERROR_403": "You do not have permission to perform this action",
+    "CONNECTION_LOST": "Lost connection to server"
 }

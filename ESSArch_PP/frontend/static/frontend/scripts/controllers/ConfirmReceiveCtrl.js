@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller) {
+angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller, $translate) {
     var $ctrl = this;
 
     $ctrl.receiving = false;
@@ -22,10 +22,12 @@ angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function 
         }).catch(function (response) {
             $ctrl.receiving = false;
             $ctrl.data = { received: false, status: "error" };
-            if (response.status == 404) {
-                Notifications.add('IP could not be found', 'error');
-            } else if (response.status != 500 && response.data.detail) {
-                Notifications.add(response.data.detail, 'error');
+            if(![401, 403, 500, 503].includes(response.status)) {
+                if(response.data && response.data.detail) {
+                    Notifications.add(response.data.detail, "error");
+                } else {
+                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
+                }
             }
             $uibModalInstance.dismiss($ctrl.data);
         })
