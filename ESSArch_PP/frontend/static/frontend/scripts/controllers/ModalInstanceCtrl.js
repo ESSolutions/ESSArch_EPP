@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, $translate) {
+angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, ErrorResponse) {
     var $ctrl = this;
     if(data) {
         $ctrl.data = data;
@@ -82,13 +82,7 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.preparing = false;
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     };
 
@@ -125,13 +119,7 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                         $uibModalInstance.close();
                     }).catch(function (response) {
                         $ctrl.removing = false;
-                        if(![401, 403, 500, 503].includes(response.status)) {
-                            if(response.data && response.data.detail) {
-                                Notifications.add(response.data.detail, "error");
-                            } else {
-                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                            }
-                        }
+                        ErrorResponse.default(response);
                     })
             }
         } else {
@@ -142,13 +130,7 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                 $uibModalInstance.close();
             }).catch(function (response) {
                 $ctrl.removing = false;
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             })
         }
     };

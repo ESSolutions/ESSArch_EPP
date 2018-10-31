@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
+angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q, ErrorResponse) {
     var $ctrl = this;
     $ctrl.node = data.node;
     $ctrl.editData = {};
@@ -254,13 +254,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                             return response;
                         }).catch(function (response) {
                             $ctrl.submitting = false;
-                            if(![401, 403, 500, 503].includes(response.status)) {
-                                if(response.data && response.data.detail) {
-                                    Notifications.add(response.data.detail, "error");
-                                } else {
-                                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                                }
-                            }
+                            ErrorResponse.default(response);
                             return response;
                         })
                 );
@@ -273,13 +267,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                         $uibModalInstance.close("edited");
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        if(![401, 403, 500, 503].includes(response.status)) {
-                            if(response.data && response.data.detail) {
-                                Notifications.add(response.data.detail, "error");
-                            } else {
-                                Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                            }
-                        }
+                        ErrorResponse.default(response);
                     });
                 } else {
                     $ctrl.submitting = false;
@@ -288,13 +276,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 }
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             });
         }
     }
@@ -307,13 +289,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             });
         }
     }
@@ -326,13 +302,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             });
         }
     }

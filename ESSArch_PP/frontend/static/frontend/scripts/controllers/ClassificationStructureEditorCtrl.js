@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure) {
+angular.module('essarch.controllers').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure, ErrorResponse) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];
@@ -60,13 +60,7 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 $scope.initLoad = false;
                 vm.structuresLoading = false;
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             })
         }
     }
@@ -101,13 +95,7 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 var finalTree = [rootNode];
                 return finalTree;
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
                 return [rootNode];
             })
     }

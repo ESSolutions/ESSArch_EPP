@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state, $translate) {
+angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm, $http, Notifications, appConfig, $state, ErrorResponse) {
     vm.tags = {
         archive: {
             options: [],
@@ -67,13 +67,7 @@ angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm
             vm.tags.archive.options = mapped;
             return mapped;
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         });
     }
 
@@ -106,13 +100,7 @@ angular.module('essarch.controllers').controller('TagsCtrl', function($scope, vm
             vm.tags.descendants.options = mapped;
             return mapped;
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 

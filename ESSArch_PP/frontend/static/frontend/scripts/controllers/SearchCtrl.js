@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
+angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams, ErrorResponse) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -93,13 +93,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -194,12 +188,8 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 vm.loadTags(response.aggregations);
                 $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
             }).catch(function(response) {
-                if(![401, 403, 404, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
+                if(response.status !== 404) { // Until we never get a 404 response initially
+                    ErrorResponse.default(response);
                 }
             })
         } else {

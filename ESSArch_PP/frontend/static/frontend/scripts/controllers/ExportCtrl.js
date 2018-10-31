@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile) {
+angular.module('essarch.controllers').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile, ErrorResponse) {
     var vm = this;
     vm.$onInit = function() {
         $http.get(appConfig.djangoUrl + "submission-agreements/", { params: { pager: "none", published: true } })
@@ -6,13 +6,7 @@ angular.module('essarch.controllers').controller("ExportCtrl", function ($scope,
                 vm.sas = response.data;
                 vm.sa = null;
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             });
 
         $http.get(appConfig.djangoUrl+"profiles/", {params: { pager: "none"}})
@@ -20,13 +14,7 @@ angular.module('essarch.controllers').controller("ExportCtrl", function ($scope,
                 vm.profiles = response.data;
                 vm.profile = null;
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             });
     }
 

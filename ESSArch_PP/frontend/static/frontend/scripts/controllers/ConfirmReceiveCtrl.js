@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller, $translate) {
+angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller, ErrorResponse) {
     var $ctrl = this;
 
     $ctrl.receiving = false;
@@ -22,13 +22,7 @@ angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function 
         }).catch(function (response) {
             $ctrl.receiving = false;
             $ctrl.data = { received: false, status: "error" };
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
             $uibModalInstance.dismiss($ctrl.data);
         })
     };

@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications){
+angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ErrorResponse){
     // Initialize variables
 
     $scope.$window = $window;
@@ -518,13 +518,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             $scope.initRequestData();
             $scope.getListViewData();
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -547,13 +541,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $rootScope.ip = null;
                 $scope.getListViewData();
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
             })
         });
     }
@@ -579,13 +567,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $scope.getListViewData();
             });
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 

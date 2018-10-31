@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
+angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
     var $ctrl = this;
     $ctrl.data = data;
     $ctrl.node = data.node.original;
@@ -8,13 +8,7 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
     $ctrl.removeFromStructure = function() {
@@ -22,13 +16,7 @@ angular.module('essarch.controllers').controller('RemoveNodeModalInstanceCtrl', 
             Notifications.add($translate.instant('NODE_REMOVED_FROM_STRUCTURE'), 'success');
             $uibModalInstance.close("removed");
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
     $ctrl.cancel = function() {

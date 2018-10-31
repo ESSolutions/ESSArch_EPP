@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter) {
+angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter, ErrorResponse) {
     var vm = this;
     $controller('TagsCtrl', { $scope: $scope, vm: vm });
     $scope.angular = angular;
@@ -589,13 +589,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         }).then(function(response) {
             Notifications.add($translate.instant('EMAIL_SENT'), 'success');
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -637,13 +631,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
             $state.reload();
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
     vm.editField = function(key, value) {

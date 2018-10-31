@@ -31,7 +31,9 @@ angular.module('essarch.controllers').controller('ImportCtrl', function($q, $roo
             vm.saProfile.profiles = response.data;
             vm.select = true;
         }).catch(function(response) {
-            $scope.error = response.data.detail;
+            if(response.data && response.data.detail) {
+                $scope.error = response.data.detail;
+            }
         })
     }
 

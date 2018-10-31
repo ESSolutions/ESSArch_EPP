@@ -22,7 +22,7 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('essarch.services').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser, Notifications, $translate) {
+angular.module('essarch.services').factory('listViewService', function(Tag, Profile, IP, Workarea, WorkareaFiles, Order, IPReception, Event, EventType, SA, Step, $q, $http, $state, $log, appConfig, $rootScope, $filter, linkHeaderParser, Notifications, $translate, ErrorResponse) {
     //Go to Given state
     function changePath(state) {
         $state.go(state);
@@ -308,13 +308,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_aip = resource;
                             }).catch(function (response) {
-                                if(![401, 403, 500, 503].includes(response.status)) {
-                                    if(response.data && response.data.detail) {
-                                        Notifications.add(response.data.detail, "error");
-                                    } else {
-                                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                                    }
-                                }
+                                ErrorResponse.default(response);
                             }));
                     }
                     if (saProfile.profile.profile_dip) {
@@ -322,13 +316,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
                             .$promise.then(function (resource) {
                                 saProfile.profile.profile_dip = resource;
                             }).catch(function (response) {
-                                if(![401, 403, 500, 503].includes(response.status)) {
-                                    if(response.data && response.data.detail) {
-                                        Notifications.add(response.data.detail, "error");
-                                    } else {
-                                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                                    }
-                                }
+                                ErrorResponse.default(response);
                             }));
                     }
                 }
@@ -337,13 +325,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
                 return saProfile;
             })
         }).catch(function (response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
         })
     }
 
@@ -662,13 +644,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
         }).$promise.then(function(response) {
             return response;
         }).catch(function(response) {
-            if(![401, 403, 500, 503].includes(response.status)) {
-                if(response.data && response.data.detail) {
-                    Notifications.add(response.data.detail, "error");
-                } else {
-                    Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                }
-            }
+            ErrorResponse.default(response);
             return response;
         });
     }
@@ -700,13 +676,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
                     data: data
                 };
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
                 return response;
             });
         } else {
@@ -720,13 +690,7 @@ angular.module('essarch.services').factory('listViewService', function(Tag, Prof
                     data: data
                 };
             }).catch(function(response) {
-                if(![401, 403, 500, 503].includes(response.status)) {
-                    if(response.data && response.data.detail) {
-                        Notifications.add(response.data.detail, "error");
-                    } else {
-                        Notifications.add($translate('UNKNOWN_ERROR'), 'error')
-                    }
-                }
+                ErrorResponse.default(response);
                 return response;
             });
         }
