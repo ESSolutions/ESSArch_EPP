@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion, ErrorResponse) {
+angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion, ErrorResponse, $translate) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -170,7 +170,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
             url: appConfig.djangoUrl+"conversion-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            Notifications.add("Running conversion job", "success");
+            Notifications.add($translate.instant('JOB_RUNNING'), "success");
         }).catch(function(response) {
             ErrorResponse.default(response);
         })

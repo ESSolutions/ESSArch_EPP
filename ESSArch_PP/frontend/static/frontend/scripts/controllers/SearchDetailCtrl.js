@@ -28,7 +28,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             promises.push(getBreadcrumbs(vm.record).then(function(list) {
                 response.data.breadcrumbs = list;
             }).catch(function(error) {
-                Notifications.add('Could not load breadcrumbs!', 'error');
+                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
             }));
             promises.push(getChildren(vm.record).then(function (children) {
                 vm.record_children = children.data;
@@ -74,7 +74,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             getBreadcrumbs(vm.record).then(function(list) {
                 vm.record.breadcrumbs = list;
             }).catch(function(error) {
-                Notifications.add('Could not load breadcrumbs!', 'error');
+                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
             })
             getChildren(vm.record).then(function (response) {
                 vm.record_children = response.data;
@@ -491,7 +491,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     vm.childrenLoading = false;
                 })
             }).catch(function(error) {
-                Notifications.add('Could not load breadcrumbs!', 'error');
+                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
             })
         })
     }

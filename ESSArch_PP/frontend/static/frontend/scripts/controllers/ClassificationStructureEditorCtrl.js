@@ -261,7 +261,7 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 vm.structure = resource;
                 vm.rules = resource.specification.rules?angular.copy(resource.specification.rules):{};
                 vm.savingRules = false;
-                Notifications.add('Rules saved', 'success');
+                Notifications.add($translate.instant('RULES_SAVED'), 'success');
             })
     }
 
@@ -275,12 +275,13 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
             {
                 start_date: vm.structure.start_date,
                 end_date: vm.structure.end_date,
+                level: vm.structure.level
             }).$promise.then(function (resource) {
                 vm.structure = resource;
                 vm.oldStructure = angular.copy(resource);
                 vm.rules = resource.specification.rules?angular.copy(resource.specification.rules):{};
                 vm.savingSettings = false;
-                Notifications.add('Settings saved', 'success');
+                Notifications.add($translate.instant('SETTINGS_SAVED'), 'success');
             })
     }
 

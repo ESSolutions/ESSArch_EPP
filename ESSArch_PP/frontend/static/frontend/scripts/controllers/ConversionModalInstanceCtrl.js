@@ -177,7 +177,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             data: $ctrl.data
         }).then(function(response) {
             $ctrl.addingRule = false;
-            Notifications.add("Rule created!", "success")
+            Notifications.add($translate.instant('RULE_CREATED'), "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
             $ctrl.addingRule = false;
@@ -193,7 +193,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             method: "DELETE"
         }).then(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add("conversion rule: "+conversion.name+" has been removed", "success");
+            Notifications.add($translate.instant('CONVERSION_RULE_REMOVED', {name: conversion.name}), "success");
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
@@ -208,7 +208,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         $uibModalInstance.dismiss('cancel');
     };
     $ctrl.submitConversion = function(conversion) {
-        Notifications.add($ctrl.data.record.name + ", har lagts till i konverteringsregerl: " + conversion.name, "success");
+        Notifications.add($translate.instant('NODE_ADDED_TO_CONVERSION_RULE', { node: $ctrl.data.record.name, rule: conversion.name }), "success");
         $uibModalInstance.close(conversion);
     }
 });

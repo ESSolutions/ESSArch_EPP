@@ -134,7 +134,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             data: {rule: rule.id}
         }).then(function (response) {
             $ctrl.creatingJob = false;
-            Notifications.add("Job created!", "success");
+            Notifications.add($translate.instant('JOB_CREATED'), "success");
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.creatingJob = false;
@@ -154,7 +154,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
                 method: "POST",
             }).then(function (response) {
                 $ctrl.runningJob = false;
-                Notifications.add("Job running!", "success");
+                Notifications.add($translate.instant('JOB_RUNNING'), "success");
                 $uibModalInstance.close($ctrl.data);
             }).catch(function (response) {
                 $ctrl.runningJob = false;
@@ -198,7 +198,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             data: $ctrl.data
         }).then(function (response) {
             $ctrl.addingRule = false;
-            Notifications.add("Rule created!", "success");
+            Notifications.add($translate.instant('RULE_CREATED'), "success");
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.addingRule = false;
@@ -214,7 +214,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             method: "DELETE"
         }).then(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add("Appraisal rule: "+appraisal.name+" has been removed", "success");
+            Notifications.add($translate.instant('APPRAISAL_RULE_REMOVED', {name: appraisal.name}), "success");
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
@@ -229,7 +229,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
         $uibModalInstance.dismiss('cancel');
     };
     $ctrl.submitAppraisal = function(appraisal) {
-        Notifications.add($ctrl.data.record.name + ", har lagts till i gallringsregel: " + appraisal.name, "success");
+        Notifications.add($translate.instant('NODE_ADDED_TO_APPRAISAL_RULE', { node: $ctrl.data.record.name, rule: appraisal.name }), "success");
         $uibModalInstance.close(appraisal);
     }
 });

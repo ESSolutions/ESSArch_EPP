@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, Profile, SA, Notifications) {
+angular.module('essarch.controllers').controller('OverwriteModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, Profile, SA, Notifications, $translate) {
     var $ctrl = this;
     if(data.file) {
         $ctrl.file = data.file;
@@ -11,26 +11,26 @@ angular.module('essarch.controllers').controller('OverwriteModalInstanceCtrl', f
     }
     $ctrl.overwriteProfile = function() {
         return Profile.update($ctrl.profile).$promise.then(function(resource) {
-            Notifications.add("Profile: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
-            $ctrl.data = {
-                status: "overwritten"
-            }
-            $uibModalInstance.close($ctrl.data);
-            return resource;
-        }).catch(function(repsonse) {
-            Notifications.add(response.detail, "error");
-        })
-    }
-    $ctrl.overwriteSa = function() {
-        return SA.update($ctrl.profile).$promise.then(function(resource) {
-            Notifications.add("Submission agreement: \"" + resource.name + "\" has been imported. <br/>ID: " + resource.id , "success", 5000, {isHtml: true});
+            Notifications.add($translate.instant('PROFILE_IMPORTED', resource), "success", 5000, {isHtml: true});
             $ctrl.data = {
                 status: "overwritten"
             }
             $uibModalInstance.close($ctrl.data);
             return resource;
         }).catch(function(response) {
-            Notifications.add("Submission Agreement " + $ctrl.profile.name + " is Published and can not be overwritten", "error");
+            ErrorResponse.default(response);
+        })
+    }
+    $ctrl.overwriteSa = function() {
+        return SA.update($ctrl.profile).$promise.then(function(resource) {
+            Notifications.add($translate.instant('SA_IMPORTED', resource), "success", 5000, {isHtml: true});
+            $ctrl.data = {
+                status: "overwritten"
+            }
+            $uibModalInstance.close($ctrl.data);
+            return resource;
+        }).catch(function(response) {
+            Notifications.add($translate.instant('SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN', $ctrl.profile), "error");
         })
     }
     $ctrl.overwrite = function () {
