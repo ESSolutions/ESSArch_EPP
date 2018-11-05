@@ -639,5 +639,19 @@
     "ERROR_500": "Internal server error",
     "ERROR_503": "Request failed, try again",
     "ERROR_403": "You do not have permission to perform this action",
-    "CONNECTION_LOST": "Lost connection to server"
+    "CONNECTION_LOST": "Lost connection to server",
+    "IP_REMOVED": "IP {{label}} removed!",
+    "RULES_SAVED": "Rules saved",
+    "SETTINGS_SAVED": "Settings saved",
+    "COULD_NOT_LOAD_PATH": "Could not load path!",
+    "JOB_CREATED": "Job created",
+    "JOB_RUNNING": "Job running",
+    "RULE_CREATED": "Rule created",
+    "APPRAISAL_RULE_REMOVED": "Appraisal rule: {{name}} has been removed",
+    "NODE_ADDED_TO_APPRAISAL_RULE": "{{node}} has been added to appraisal rule: {{rule}}",
+    "CONVERSION_RULE_REMOVED": "Conversion rule: {{name}} has been removed",
+    "NODE_ADDED_TO_CONVERSION_RULE": "{{node}} has been added to conversion rule: {{rule}}",
+    "SA_IMPORTED": "Submission agreement \"{{name}}\" has been imported. \nID: {{id}}",
+    "PROFILE_IMPORTED": "Profile: \"{{name}}\" has been imported. \nID: {{id}}",
+    "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Submission Agreement {{name}} is Published and can not be overwritten"
 }

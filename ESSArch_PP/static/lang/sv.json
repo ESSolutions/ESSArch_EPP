@@ -638,5 +638,19 @@
     "ERROR_500": "Internt serverfel",
     "ERROR_503": "Förfrågan misslyckades, försök igen",
     "ERROR_403": "Du har inte rätt att utföra denna åtgärd",
-    "CONNECTION_LOST": "Anslutning förlorad"
+    "CONNECTION_LOST": "Anslutning förlorad",
+    "IP_REMOVED": "IP {{label}} raderat!",
+    "RULES_SAVED": "Regler sparade",
+    "SETTINGS_SAVED": "Inställningar sparade",
+    "COULD_NOT_LOAD_PATH": "Kunde inte ladda sökväg!",
+    "JOB_CREATED": "Jobb skapat",
+    "JOB_RUNNING": "Jobb körs",
+    "RULE_CREATED": "Regel skapad",
+    "APPRAISAL_RULE_REMOVED": "Gallringsregel: {{name}} har tagits bort",
+    "NODE_ADDED_TO_APPRAISAL_RULE": "{{node}} har lagts till i gallringsregel: {{rule}}",
+    "CONVERSION_RULE_REMOVED": "Konverteringsregel: {{name}} har tagits bort",
+    "NODE_ADDED_TO_CONVERSION_RULE": "{{node}} har lagts till i konverteringsregel: {{rule}}",
+    "SA_IMPORTED": "Leveransöverenskommelse \"{{name}}\" har importerats. \nID: {{id}}",
+    "PROFILE_IMPORTED": "Profil: \"{{name}}\" har importerats. \nID: {{id}}",
+    "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Leveransöverenskommelse {{name}} är publicerad och kan inte skrivas över"
 }
