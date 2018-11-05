@@ -652,5 +652,6 @@
     "NODE_ADDED_TO_CONVERSION_RULE": "{{node}} har lagts till i konverteringsregel: {{rule}}",
     "SA_IMPORTED": "Leveransöverenskommelse \"{{name}}\" har importerats. \nID: {{id}}",
     "PROFILE_IMPORTED": "Profil: \"{{name}}\" har importerats. \nID: {{id}}",
-    "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Leveransöverenskommelse {{name}} är publicerad och kan inte skrivas över"
+    "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Leveransöverenskommelse {{name}} är publicerad och kan inte skrivas över",
+    "SA_PUBLISHED": "Leveransöverenskommelse: {{name}} har publicerats"
 }
