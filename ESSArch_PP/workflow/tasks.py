@@ -1181,7 +1181,7 @@ class IOTape(IO):
     read_types = (20,)
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(IOTape, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+        super(self.__class__, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         agent = entry.user.username
@@ -1189,7 +1189,7 @@ class IOTape(IO):
         logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(IOTape, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+        super(self.__class__, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
@@ -1209,7 +1209,7 @@ class IODisk(IO):
     read_types = (25,)
 
     def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(IODisk, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+        super(self.__class__, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         agent = entry.user.username
@@ -1217,7 +1217,7 @@ class IODisk(IO):
         logger.info(msg, extra=extra)
 
     def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(IODisk, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+        super(self.__class__, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
