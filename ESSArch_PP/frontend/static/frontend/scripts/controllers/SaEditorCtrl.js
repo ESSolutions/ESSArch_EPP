@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SaEditorCtrl', function(Notifications, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll) {
+angular.module('essarch.controllers').controller('SaEditorCtrl', function(Notifications, $timeout, SA, Profile, $scope, $rootScope, $http, appConfig, $anchorScroll, $translate) {
     var vm = this;
     $scope.edit = false;
     vm.saProfile = null;
@@ -162,7 +162,7 @@ angular.module('essarch.controllers').controller('SaEditorCtrl', function(Notifi
                     vm.chooseSa(vm.saProfile);
                     vm.getProfiles();
                     $scope.edit = false;
-                    Notifications.add("Submission agreement: " + vm.saProfile.name + " has been published!", "success", 5000);
+                    Notifications.add($translate.instant('SA_PUBLISHED', vm.saProfile), "success", 5000);
                 });
                 return resource;
             });
