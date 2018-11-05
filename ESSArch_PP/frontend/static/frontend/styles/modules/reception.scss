@@ -169,9 +169,10 @@ input[type="checkbox"] {
             border-bottom-style: none;
         .formly {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: flex-start;
             align-items: flex-start;
+            flex-wrap: wrap;
             min-height: 45px;
             .formly-field {
                 min-width: 105px;
