@@ -169,13 +169,7 @@ class ReceiveAIP(DBTask):
         ingest = ip.policy.ingest_path
         dst = os.path.join(ingest.value, ip.object_identifier_value)
 
-        ProcessTask.objects.create(
-            name='ESSArch_Core.tasks.CopyDir',
-            args=[ip.object_path, dst],
-            processstep_id=self.step,
-            information_package=ip,
-            responsible_id=self.responsible,
-        ).run().get()
+        shutil.copytree(ip.object_path, dst)
 
         ip.object_path = dst
         ip.state = 'Received'
@@ -434,11 +428,7 @@ class AccessAIP(DBTask):
             workarea_user = os.path.join(workarea, responsible.username)
             dst_dir = os.path.join(workarea_user, new_aip.object_identifier_value, )
 
-            ProcessTask.objects.create(
-                name='ESSArch_Core.tasks.CopyDir',
-                args=[aip.object_path, dst_dir],
-                information_package=aip
-            ).run().get()
+            shutil.copytree(aip.object_path, dst_dir)
 
             workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
             Notification.objects.create(message="%s is now in workarea" % new_aip.object_identifier_value, level=logging.INFO, user_id=self.responsible, refresh=True)
