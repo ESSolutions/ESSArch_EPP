@@ -30,7 +30,11 @@ angular.module('essarch.controllers').controller('OverwriteModalInstanceCtrl', f
             $uibModalInstance.close($ctrl.data);
             return resource;
         }).catch(function(response) {
-            Notifications.add($translate.instant('SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN', $ctrl.profile), "error");
+            if(response.status === 405) {
+                Notifications.add($translate.instant('SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN', $ctrl.profile), "error");
+            } else {
+                ErrorResponse.default(response);
+            }
         })
     }
     $ctrl.overwrite = function () {
