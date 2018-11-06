@@ -599,6 +599,8 @@
     "RUN_MANUALLY": "Kör manuellt",
     "CREATE_APPRAISAL_JOB": "Skapa jobb",
     "CREATE_APPRAISAL_JOB_AND_RUN": "Skapa och kör jobb",
+    "CREATE_CONVERSION_JOB": "Skapa jobb",
+    "CREATE_CONVERSION_JOB_AND_RUN": "Skapa och kör jobb",
     "MINUTE": "Minut",
     "VERSIONS": "Versioner",
     "CLASSIFICATIONSTRUCTURES": "Klassificeringsstrukturer",

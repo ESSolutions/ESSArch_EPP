@@ -16,31 +16,33 @@
         {{'SPECIFICATION' | translate}}
     </label>
     <table class="table" style="margin-top: 10px;">
-            <thead>
-                <th>
-                    {{'PATH' | translate}}
-                </th>
-                <th>
-                    {{'TARGET' | translate}}
-                </th>
-                <th>
-                    {{'TOOL' | translate}}
-                </th>
-            </thead>
-            <tbody>
-                <tr ng-repeat="(key, value) in $ctrl.data.rule.specification">
-                    <td>
-                        {{key}}
-                    </td>
-                    <td>
-                        {{value.target}}
-                    </td>
-                    <td>
-                        {{value.tool}}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <thead>
+            <th>
+                {{'PATH' | translate}}
+            </th>
+            <th>
+                {{'TARGET' | translate}}
+            </th>
+            <th>
+                {{'TOOL' | translate}}
+            </th>
+        </thead>
+        <tbody>
+            <tr ng-repeat="(key, value) in $ctrl.data.rule.specification">
+                <td>
+                    {{key}}
+                </td>
+                <td>
+                    {{value.target}}
+                </td>
+                <td>
+                    {{value.tool}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="btn btn-success" ng-disabled="$ctrl.creatingJob" ng-click="$ctrl.createJob($ctrl.data.rule)">{{'CREATE_CONVERSION_JOB' | translate}} <i ng-if="$ctrl.creatingJob" class="fas fa-spinner fa-spin"/></button>
+    <button class="btn btn-success" ng-disabled="$ctrl.runningJob" ng-click="$ctrl.createJobAndStart($ctrl.data.rule)">{{'CREATE_CONVERSION_JOB_AND_RUN' | translate}} <i ng-if="$ctrl.runningJob" class="fas fa-spinner fa-spin"/></button>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()" focused="true">{{'OK' | translate}}</button>
