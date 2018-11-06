@@ -6,6 +6,12 @@
         {{'NAME' | translate}}
     </label>
     <p>{{$ctrl.data.rule.name}}</p>
+    <div ng-if="$ctrl.data.rule.description">
+        <label>
+            {{'DESCRIPTION' | translate}}
+        </label>
+        <p>{{$ctrl.data.rule.description}}</p>
+    </div>
     <div class="cron-info">
         <b>{{'FREQUENCY' | translate}}: <span ng-class="{'color-red': !$ctrl.validCron($ctrl.data.rule.frequency)}">{{$ctrl.data.rule.frequency === ''?('RUN_MANUALLY' | translate):$ctrl.prettyFrequency($ctrl.data.rule.frequency)}}</span></b>
         <br/>
