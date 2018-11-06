@@ -606,7 +606,7 @@ class PollAccessQueue(DBTask):
             tmpdir = tempfile.mkdtemp(dir=access_user)
 
             with tarfile.open(dst_tar) as tarf:
-                tarf.extractall(tmpdir.encode('utf-8'))
+                tarf.extractall(tmpdir)
 
             os.rename(os.path.join(tmpdir, str(entry.ip.object_identifier_value)), dst_dir)
             shutil.rmtree(tmpdir)
