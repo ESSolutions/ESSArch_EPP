@@ -147,6 +147,48 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         $ctrl.conversionRules = [];
         $ctrl.ip = null;
     }
+
+    $ctrl.createJob = function(rule) {
+        $ctrl.creatingJob = true;
+        $http({
+            url: appConfig.djangoUrl + "conversion-jobs/",
+            method: "POST",
+            data: {rule: rule.id}
+        }).then(function (response) {
+            $ctrl.creatingJob = false;
+            Notifications.add($translate.instant('JOB_CREATED'), "success");
+            $uibModalInstance.close($ctrl.data);
+        }).catch(function (response) {
+            $ctrl.creatingJob = false;
+            ErrorResponse.default(response);
+        })
+    }
+
+    $ctrl.runningJob = false;
+    $ctrl.createJobAndStart = function(rule) {
+        $ctrl.runningJob = true;
+        $http({
+            url: appConfig.djangoUrl + "conversion-jobs/",
+            method: "POST",
+            data: {rule: rule.id}
+        }).then(function (response) {
+            $http({
+                url: appConfig.djangoUrl + "conversion-jobs/" + response.data.id + "/run/",
+                method: "POST",
+            }).then(function (response) {
+                $ctrl.runningJob = false;
+                Notifications.add($translate.instant('JOB_RUNNING'), "success");
+                $uibModalInstance.close($ctrl.data);
+            }).catch(function (response) {
+                $ctrl.runningJob = false;
+                ErrorResponse.default(response);
+            })
+        }).catch(function (response) {
+            $ctrl.runningJob = false;
+            ErrorResponse.default(response);
+        })
+    }
+
     $ctrl.path = "";
     $ctrl.pathList = [];
     $ctrl.addPath = function(path) {
@@ -167,8 +209,9 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         }
         $ctrl.data = {
             name: $ctrl.name,
-            frequency: $ctrl.frequency,
+            frequency: $ctrl.manualRule ? '' : $ctrl.frequency,
             specification: $ctrl.specifications,
+            public: $ctrl.publicRule,
             description: $ctrl.description
         };
         $http({

@@ -600,6 +600,8 @@
     "RUN_MANUALLY": "Run manually",
     "CREATE_APPRAISAL_JOB": "Create job",
     "CREATE_APPRAISAL_JOB_AND_RUN": "Create and run job",
+    "CREATE_CONVERSION_JOB": "Create job",
+    "CREATE_CONVERSION_JOB_AND_RUN": "Create and run job",
     "MINUTE": "Minute",
     "VERSIONS": "Versions",
     "CLASSIFICATIONSTRUCTURES": "Classification structures",
