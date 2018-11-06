@@ -161,7 +161,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
                 ErrorResponse.default(response);
             })
         }).catch(function (response) {
-            $ctrl.addingRule = false;
+            $ctrl.runningJob = false;
             ErrorResponse.default(response);
         })
     }
