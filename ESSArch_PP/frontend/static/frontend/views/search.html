@@ -4,7 +4,7 @@
             <form ng-submit="vm.searchSubmit()">
                 <div class="search-form">
                     <input class="form-control search-field" ng-change="vm.searchSubmit()" ng-model-options="{debounce: 300}" aria-label="{{ 'SEARCH' | translate }}" ng-model="vm.filterObject.q">
-                    <div class="flex-column search-button-column">
+                    <div class="search-button-column">
                         <button type="submit" class="btn btn-success">{{'SEARCH' | translate}} <i class="fas fa-search"></i></button>
                         <button type="button" ng-disabled="vm.clearDisabled()" class="btn btn-primary" ng-click="vm.clearSearch()">{{'CLEAR' | translate}}</button>
                     </div>
