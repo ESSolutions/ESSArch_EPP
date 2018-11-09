@@ -657,5 +657,10 @@
     "PROFILE_IMPORTED": "Profile: \"{{name}}\" has been imported. \nID: {{id}}",
     "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Submission Agreement {{name}} is Published and can not be overwritten",
     "SA_PUBLISHED": "Submission agreement: {{name}} has been published",
-    "NO_ORGANIZATIONS": "No organizations"
+    "NO_ORGANIZATIONS": "No organizations",
+    "LANGUAGE": "Language",
+    "ORGANIZATION": "Organization",
+    "IP_VIEW_TYPE": "IP view type",
+    "VISIBLE_COLUMNS": "Visible columns",
+    "AVAILABLE_COLUMNS": "Available columns"
 }
