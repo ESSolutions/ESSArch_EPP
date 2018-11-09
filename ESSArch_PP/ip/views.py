@@ -47,7 +47,6 @@ from groups_manager.utils import get_permission_name
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm
 from lxml import etree
-from natsort import natsorted
 from rest_framework import exceptions, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.generics import get_object_or_404
@@ -59,7 +58,7 @@ from ESSArch_Core.auth.decorators import permission_required_or_403
 from ESSArch_Core.auth.models import Member
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.util import get_objectpath, parse_submit_description
-from ESSArch_Core.exceptions import Conflict
+from ESSArch_Core.exceptions import Conflict, NoFileChunksFound
 from ESSArch_Core.fixity.format import FormatIdentifier
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
@@ -72,7 +71,7 @@ from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.profiles.models import ProfileIP, SubmissionAgreement
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import generate_file_response, in_directory, list_files, mkdir_p, normalize_path, parse_content_range_header, \
+from ESSArch_Core.util import generate_file_response, in_directory, list_files, merge_file_chunks, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
 
 from .filters import InformationPackageFilter
@@ -1598,15 +1597,10 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         if workarea_obj.read_only:
             raise exceptions.MethodNotAllowed(request.method)
 
-        chunks = natsorted(glob.glob('%s_*' % re.sub(r'([\[\]])', '[\\1]', path)))
-        if len(chunks) == 0:
+        try:
+            merge_file_chunks(path)
+        except NoFileChunksFound:
             raise exceptions.NotFound('No chunks found')
-
-        with open(path, 'wb') as f:
-
-            for chunk_file in natsorted(glob.glob('%s_*' % re.sub(r'([\[\]])', '[\\1]', path))):
-                f.write(open(chunk_file).read())
-                os.remove(chunk_file)
 
         return Response({'detail': 'Merged chunks'})
 
