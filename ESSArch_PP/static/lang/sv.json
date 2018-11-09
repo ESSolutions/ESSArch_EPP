@@ -662,5 +662,6 @@
     "ORGANIZATION": "Organisation",
     "IP_VIEW_TYPE": "IP-visualisering",
     "VISIBLE_COLUMNS": "Synliga kolumner",
-    "AVAILABLE_COLUMNS": "Tillgängliga kolumner"
+    "AVAILABLE_COLUMNS": "Tillgängliga kolumner",
+    "TABLE_COLUMNS": "Tabellkolumner"
 }

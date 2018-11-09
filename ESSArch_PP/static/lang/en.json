@@ -662,5 +662,6 @@
     "ORGANIZATION": "Organization",
     "IP_VIEW_TYPE": "IP view type",
     "VISIBLE_COLUMNS": "Visible columns",
-    "AVAILABLE_COLUMNS": "Available columns"
+    "AVAILABLE_COLUMNS": "Available columns",
+    "TABLE_COLUMNS": "Table columns"
 }
