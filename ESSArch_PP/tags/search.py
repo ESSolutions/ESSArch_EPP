@@ -52,13 +52,13 @@ logger = logging.getLogger('essarch.epp.search')
 EXPORT_FORMATS = ('csv', 'pdf')
 SORTABLE_FIELDS = (
     {'name.keyword': {'unmapped_type': 'keyword'}},
-    {'reference_code': {'unmapped_type': 'keyword'}}
+    {'reference_code.keyword': {'unmapped_type': 'keyword'}}
 )
 
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
-    fields = ['reference_code', 'name', 'desc', 'attachment.content']
+    fields = ['reference_code.keyword^5', 'reference_code^3', 'name^2', 'desc', 'attachment.content', 'attachment.keywords']
 
     facets = {
         # use bucket aggregations to define facets
@@ -338,7 +338,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             filters[k] = v.split(',') if v is not None else v
 
         filter_values = copy.copy(params)
-        for f in ('page', 'page_size'):
+        for f in ('page', 'page_size', 'ordering'):
             filter_values.pop(f, None)
 
         sort = self.get_sorting(request)
