@@ -656,5 +656,12 @@
     "PROFILE_IMPORTED": "Profil: \"{{name}}\" har importerats. \nID: {{id}}",
     "SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN": "Leveransöverenskommelse {{name}} är publicerad och kan inte skrivas över",
     "SA_PUBLISHED": "Leveransöverenskommelse: {{name}} har publicerats",
-    "NO_ORGANIZATIONS": "Inga organisationer"
+    "NARROW_RESULTS": "Avgränsa resultat",
+    "NO_ORGANIZATIONS": "Inga organisationer",
+    "LANGUAGE": "Språk",
+    "ORGANIZATION": "Organisation",
+    "IP_VIEW_TYPE": "IP-visualisering",
+    "VISIBLE_COLUMNS": "Synliga kolumner",
+    "AVAILABLE_COLUMNS": "Tillgängliga kolumner",
+    "TABLE_COLUMNS": "Tabellkolumner"
 }
