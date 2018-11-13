@@ -148,13 +148,13 @@ GROUPS_MANAGER = {
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "ROUTING": "ESSArch_Core.routing.channel_routing",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": ["redis://localhost/3"],
         },
     },
 }
+ASGI_APPLICATION = 'ESSArch_Core.routing.application'
 
 SITE_ID = 1
 
