@@ -64,7 +64,7 @@ from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
 from ESSArch_Core.ip.models import Agent, EventIP, InformationPackage, Order, Workarea
 from ESSArch_Core.ip.permissions import CanUnlockProfile, IsOrderResponsibleOrAdmin, \
-    IsResponsibleOrReadOnly
+    IsResponsibleOrReadOnly, IsResponsibleOrCanSeeAllFiles
 from ESSArch_Core.ip.views import InformationPackageViewSet as InformationPackageViewSetCore
 from ESSArch_Core.maintenance.models import AppraisalRule, ConversionRule
 from ESSArch_Core.mixins import PaginatedViewMixin
@@ -996,7 +996,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return Response(dip, status.HTTP_201_CREATED)
 
-    @detail_route(methods=['delete', 'get', 'post'])
+    @detail_route(methods=['delete', 'get', 'post'], permission_classes=[IsResponsibleOrCanSeeAllFiles])
     def files(self, request, pk=None):
         ip = self.get_object()
         download = request.query_params.get('download', False)
