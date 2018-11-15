@@ -1,8 +1,8 @@
 <div ng-if="!('home.ingest.workarea' | isState) && !('home.access.workarea' | isState)">
-    <div ng-if="!subrow && (row.responsible.id == auth.id || row.responsible == null) && row.package_type != 1 && row.state !== 'Receiving'">
+    <div ng-if="!subrow && (row.responsible.id == auth.id || row.responsible == null || row.permissions.includes('see_other_user_ip_files')) && row.package_type != 1 && row.state !== 'Receiving'">
         <a tabindex="-1" class="no-select" ng-click="filebrowserClick(row)">{{'FILEBROWSER' | translate}}</a>
     </div>
-    <div ng-if="subrow && (subrow.responsible.id == auth.id || subrow.responsible == null)  && row.state !== 'Receiving'">
+    <div ng-if="subrow && (subrow.responsible.id == auth.id || subrow.responsible == null || subrow.permissions.includes('see_other_user_ip_files'))  && row.state !== 'Receiving'">
         <a class="no-select" ng-click="filebrowserClick(subrow)">{{'FILEBROWSER' | translate}}</a>
     </div>
 </div>

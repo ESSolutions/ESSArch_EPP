@@ -178,11 +178,9 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $rootScope.ip = null;
             }
         } else {
-            if ($rootScope.auth.id == ip.responsible.id || !ip.responsible) {
-                $scope.filebrowser = true;
-                $scope.ip = ip;
-                $rootScope.ip = ip;
-            }
+            $scope.filebrowser = true;
+            $scope.ip = ip;
+            $rootScope.ip = ip;
         }
     }
 
