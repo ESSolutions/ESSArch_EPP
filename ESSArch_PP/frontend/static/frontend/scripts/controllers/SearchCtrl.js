@@ -186,7 +186,9 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 tableState.pagination.numberOfPages = response.numberOfPages;//set the number of pages so the pagination can update
                 vm.searching = false;
                 vm.loadTags(response.aggregations);
-                $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
+                if($state.current.name === 'home.access.search') {
+                    $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
+                }
             }).catch(function(response) {
                 if(response.status !== 404) { // Until we never get a 404 response initially
                     ErrorResponse.default(response);
