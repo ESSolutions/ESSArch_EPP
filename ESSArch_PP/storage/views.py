@@ -254,7 +254,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
 
-    filter_class = StorageMediumFilter
+    filterset_class = StorageMediumFilter
 
     ordering_fields = (
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
