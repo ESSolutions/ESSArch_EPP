@@ -84,7 +84,7 @@ class WorkareaFilter(InformationPackageFilter):
         except KeyError:
             raise exceptions.ParseError('Workarea of type "%s" does not exist' % value)
 
-        return self.filter_fields(queryset, name, workarea_type)
+        return self.filterset_fields(queryset, name, workarea_type)
 
     class Meta:
         model = InformationPackage
