@@ -29,7 +29,7 @@ from ESSArch_Core.storage.models import StorageMedium
 
 
 class StorageMediumFilter(filters.FilterSet):
-    status = ListFilter(name='status', distinct='true')
+    status = ListFilter(field_name='status', distinct='true')
 
     class Meta:
         model = StorageMedium

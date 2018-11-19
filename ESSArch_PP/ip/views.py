@@ -153,7 +153,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         return ips
 
     def list(self, request):
-        filter_fields = ["label", "object_identifier_value", "responsible",
+        filterset_fields = ["label", "object_identifier_value", "responsible",
                          "create_date", "object_size", "start_date", "end_date"]
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
@@ -162,8 +162,8 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         extracted = self.get_extracted_packages(reception)
         ips = contained + extracted
 
-        # Remove all keys not in filter_fields
-        conditions = {key: value for (key, value) in six.iteritems(request.query_params) if key in filter_fields}
+        # Remove all keys not in filterset_fields
+        conditions = {key: value for (key, value) in six.iteritems(request.query_params) if key in filterset_fields}
 
         # Filter ips based on conditions
         new_ips = list(filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in six.iteritems(conditions))), ips))

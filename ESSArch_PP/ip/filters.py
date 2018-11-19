@@ -52,8 +52,8 @@ def get_ip_search_fields(nested=True):
 class InformationPackageFilter(InformationPackageFilterCore):
     search_filter = SearchFilter()
 
-    package_type = ListFilter(name='package_type')
-    package_type_name_exclude = filters.CharFilter(name='Package Type Name', method='filter_package_type_name')
+    package_type = ListFilter(field_name='package_type')
+    package_type_name_exclude = filters.CharFilter(field_name='Package Type Name', method='filter_package_type_name')
     search = filters.CharFilter(method='filter_search')
 
     def filter_search(self, queryset, name, value):
@@ -74,7 +74,7 @@ class InformationPackageFilter(InformationPackageFilterCore):
 
 
 class WorkareaFilter(InformationPackageFilter):
-    type = ListFilter(name='workareas__type', method='filter_workarea')
+    type = ListFilter(field_name='workareas__type', method='filter_workarea')
 
     def filter_workarea(self, queryset, name, value):
         workarea_type_reverse = dict((v.lower(), k) for k, v in Workarea.TYPE_CHOICES)
@@ -84,7 +84,7 @@ class WorkareaFilter(InformationPackageFilter):
         except KeyError:
             raise exceptions.ParseError('Workarea of type "%s" does not exist' % value)
 
-        return self.filter_fields(queryset, name, workarea_type)
+        return self.filterset_fields(queryset, name, workarea_type)
 
     class Meta:
         model = InformationPackage

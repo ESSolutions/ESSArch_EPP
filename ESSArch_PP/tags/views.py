@@ -50,7 +50,7 @@ class TagViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = TagSerializer
 
     filter_backends = (DjangoFilterBackend, SearchFilter)
-    filter_class = TagFilter
+    filterset_class = TagFilter
     search_fields = ('current_version__name',)
 
     http_method_names = ('get', 'head', 'options')
