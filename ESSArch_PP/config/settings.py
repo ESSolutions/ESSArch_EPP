@@ -200,7 +200,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {'default': dj_database_url.config(env='DATABASE_URL_EPP', default='sqlite://db.sqlite')}
+DATABASES = {'default': dj_database_url.config(env='DATABASE_URL_EPP', default='sqlite:///db.sqlite')}
 
 # Cache
 CACHES = {
