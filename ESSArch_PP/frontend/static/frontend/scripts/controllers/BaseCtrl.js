@@ -875,7 +875,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                                 "label": $translate.instant(key.toUpperCase() + "_START"),
                             },
                             "type": "datepicker",
-                            "key": key + "_0"
+                            "key": key + "_after"
                         }
                     )
                     $scope.fields.push(
@@ -885,7 +885,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                                 "label": $translate.instant(key.toUpperCase() + "_END"),
                             },
                             "type": "datepicker",
-                            "key": key + "_1"
+                            "key": key + "_before"
                         }
                     )
                     break;
