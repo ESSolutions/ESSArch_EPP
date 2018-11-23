@@ -58,4 +58,18 @@ angular.module('essarch.controllers').controller('AppCtrl', function($rootScope,
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
+
+    $rootScope.mapStepStateProgress = function(row) {
+        var property = angular.isUndefined(row.step_state) ? 'status' : 'step_state';
+        switch (row[property]) {
+            case 'SUCCESS':
+                return 'success';
+            case 'FAILURE':
+                return 'danger';
+            case 'STARTED':
+                return 'warning';
+            default:
+                return 'warning';
+        }
+    }
 });

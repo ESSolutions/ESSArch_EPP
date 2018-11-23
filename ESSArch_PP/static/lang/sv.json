@@ -46,7 +46,7 @@
     "CANCEL": "Avbryt",
     "SUBJECT": "Ämne",
     "PARAMETERS": "Parametrar",
-     "STEP": "Steg",
+    "STEP": "Steg",
     "RESULT": "Resultat",
     "ENTERIPLABEL": "Ange ny IP-etikett",
     "DOYOUWANTTOREMOVEIP": "Vill du ta bort IP?",
@@ -276,7 +276,7 @@
     "CHANGED": "Ändrad",
     "FILEBROWSER": "Filhanterare",
     "NO_TAGS": "Det finns inga taggar ...",
-    "COPYID": "Kopiera ID",
+    "COPYID": "Kopiera",
     "INVENTORY": "Inventera",
     "INVENTORYROBOTS": "Inventera robotar",
     "POSTED": "Inlagt",
@@ -661,5 +661,9 @@
     "IP_VIEW_TYPE": "IP-visualisering",
     "VISIBLE_COLUMNS": "Synliga kolumner",
     "AVAILABLE_COLUMNS": "Tillgängliga kolumner",
-    "TABLE_COLUMNS": "Tabellkolumner"
+    "TABLE_COLUMNS": "Tabellkolumner",
+    "EVENT_SUCCESS": "Lyckad",
+    "EVENT_FAILURE": "Misslyckad",
+    "TASKS": "Jobb",
+    "IDENTIFICATION": "Identifikation"
 }

@@ -661,5 +661,9 @@
     "IP_VIEW_TYPE": "IP view type",
     "VISIBLE_COLUMNS": "Visible columns",
     "AVAILABLE_COLUMNS": "Available columns",
-    "TABLE_COLUMNS": "Table columns"
+    "TABLE_COLUMNS": "Table columns",
+    "EVENT_SUCCESS": "Success",
+    "EVENT_FAILURE": "Failure",
+    "TASKS": "Tasks",
+    "IDENTIFICATION": "Identification"
 }
