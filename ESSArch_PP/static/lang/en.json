@@ -456,7 +456,7 @@
     "MEDIA_MIGRATION": "Media migration",
     "DELETE_FIELD": "Do you want to delete field: {{field}}?",
     "SUBMISSION_AGREEMENT": "Submission agreement",
-    "IMPORT_SA_FROM_FILE": "Import SA from file",
+    "IMPORT_SA_FROM_FILE": "Import submission agreement from file",
     "IMPORT_PROFILE_FROM_FILE": "Import profile from file",
     "IMPORT_PROFILE": "Import profile",
     "EXPORT": "Export",
