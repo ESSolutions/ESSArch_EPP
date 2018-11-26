@@ -1,5 +1,12 @@
 <div class="content-wrapper">
     <div class="list-view" st-table="vm.displayedMediums" st-pipe="vm.callServer">
+        <div class="title-action-button-row">
+            <div class="title">
+                <h4>
+                    {{'STORAGE_MEDIUMS' | translate}}
+                </h4>
+            </div>
+        </div>
         <div class="search-prepare-wrapper">
             <label for items-per-page></label>
             <select id="items-per-page" ng-change="updateIpsPerPage(vm.itemsPerPage)" style="margin-right: 10px;" class="form-control items-per-page" ng-model="vm.itemsPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>

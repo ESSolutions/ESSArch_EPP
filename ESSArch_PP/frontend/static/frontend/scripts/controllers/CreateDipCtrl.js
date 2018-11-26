@@ -7,6 +7,9 @@ angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, A
         current: null,
         options: [],
     }
+
+    vm.listViewTitle = $translate.instant('DISSEMINATION_PACKAGES');
+
     vm.$onInit = function() {
         vm.organizationMember.current = $rootScope.auth;
         if($scope.checkPermission('ip.see_all_in_workspaces') && $rootScope.auth.current_organization) {
