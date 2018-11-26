@@ -41,7 +41,7 @@ from ESSArch_Core.storage.models import (AccessQueue, IOQueue, Robot,
                                          StorageMethod,
                                          StorageMethodTargetRelation,
                                          StorageObject, StorageTarget,
-                                         TapeDrive, TapeSlot)
+                                         TAPE, TapeDrive, TapeSlot)
 from ESSArch_Core.util import parse_content_range_header
 from configuration.serializers import (StorageMethodSerializer,
                                        StorageMethodTargetRelationSerializer,
@@ -267,6 +267,9 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
     def mount(self, request, pk=None):
         medium = self.get_object()
 
+        if medium.get_type() != TAPE:
+            raise exceptions.ParseError('%s is not a tape' % medium)
+
         if medium.tape_drive is not None:
             raise Conflict(detail='Tape already mounted')
 
@@ -418,9 +421,14 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
         drive = self.get_object()
 
         try:
-            storage_medium = request.data['storage_medium']
+            storage_medium = StorageMedium.objects.get(pk=request.data['storage_medium'])
         except KeyError:
             raise exceptions.ParseError('Missing parameter storage_medium')
+        except StorageMedium.DoesNotExist:
+            raise exceptions.ParseError('Invalid storage_medium')
+
+        if storage_medium.get_type() != TAPE:
+            raise exceptions.ParseError('%s is not a tape' % storage_medium)
 
         RobotQueue.objects.get_or_create(
             user=self.request.user,
