@@ -25,12 +25,13 @@
 from django_filters import rest_framework as filters
 
 from ESSArch_Core.filters import ListFilter
-from ESSArch_Core.storage.models import StorageMedium
+from ESSArch_Core.storage.models import StorageMedium, medium_type_CHOICES
 
 
 class StorageMediumFilter(filters.FilterSet):
     status = ListFilter(field_name='status', distinct='true')
+    storage_type = filters.ChoiceFilter(field_name='storage_target__type', choices=medium_type_CHOICES)
 
     class Meta:
         model = StorageMedium
-        fields = ('status',)
+        fields = ('status', 'storage_type')
