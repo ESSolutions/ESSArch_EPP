@@ -41,5 +41,5 @@
     <result-field label="{{'CHANGED' | translate}}" stronglabel="true" data="vm.record._source.modified" type="date-long"></result-field>
     <result-field label="{{'CONTENT_TYPE' | translate}}" stronglabel="true" data="vm.record._source.attachment.content_type"></result-field>
     <result-field label="{{'SIZE' | translate}}" stronglabel="true" data="vm.record._source.size" type="filesize"></result-field>
-    <button class="btn btn-success lock-button margin-top-5" ng-click="vm.viewFile(vm.record._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+    <button class="btn btn-success btn-small margin-top-5" ng-click="vm.viewFile(vm.record._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
 </div>

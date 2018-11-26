@@ -141,7 +141,7 @@
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>
                     <td>
-                        <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                        <button ng-if="x._index == 'document'" class="btn btn-success btn-small" ng-click="vm.viewFile(x._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                     </td>
                 </tr>
                 <tr ng-if="children.length <= 0 && !vm.childrenLoading" class="empty-table-indicator">

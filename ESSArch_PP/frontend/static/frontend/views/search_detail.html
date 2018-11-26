@@ -14,7 +14,7 @@
                         {{classification.name}}&nbsp;{{!vm.existsForRecord(classification.id) ? '('+('UNAVAILABLE' | translate)+')':''}}
                     </option>
                 </select>
-                <button ng-click="vm.newStructureModal(vm.recordTreeData[0])" class="btn btn-success lock-button">+</button>
+                <button ng-click="vm.newStructureModal(vm.recordTreeData[0])" class="btn btn-success btn-small">+</button>
             </div>
         </div>
         <hr class="small"/>
@@ -102,7 +102,7 @@
                             {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
                         </option>
                     </select>
-                    <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success lock-button" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+                    <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success btn-small" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
                 </div>
             </div>
         </div>
