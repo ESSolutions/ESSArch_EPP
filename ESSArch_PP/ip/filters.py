@@ -34,7 +34,7 @@ from ESSArch_Core.ip.models import InformationPackage, Workarea
 ip_search_fields = (
     'object_identifier_value', 'label', 'responsible__first_name',
     'responsible__last_name', 'responsible__username', 'state',
-    'submission_agreement__name', 'start_date', 'end_date',
+    'submission_agreement__name', 'start_date', 'end_date', 'aic__object_identifier_value',
 )
 
 def get_ip_search_fields(nested=True):
