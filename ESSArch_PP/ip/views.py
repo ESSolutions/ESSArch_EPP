@@ -562,6 +562,8 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
     """
     queryset = InformationPackage.objects.select_related('responsible').prefetch_related(
         Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'), 'steps')
+    filterset_class = None
+    search_fields = None
 
     def first_generation_case(self, lower_higher):
         return Case(
