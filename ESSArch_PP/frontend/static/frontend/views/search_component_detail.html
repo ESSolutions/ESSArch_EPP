@@ -23,7 +23,7 @@
         <br/>
     </div>
     <br/>
-    <button ng-if="vm.record.type == 'document' && (vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record._source.name)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+    <button ng-if="vm.record.type == 'document' && (vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))" class="btn btn-success btn-small" ng-click="vm.viewFile(vm.record._source.name)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
     <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
     <div class="metadata-tables-wrapper">
         <div class="table-x-overflow metadata-table">
@@ -94,7 +94,7 @@
     -->
     </div>
     <result-field label="Förvaringsenhet" stronglabel="true" data="vm.record._source.ip_objid"></result-field>
-    <button ng-if="vm.record._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(vm.record)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+    <button ng-if="vm.record._index == 'document'" class="btn btn-success btn-small" ng-click="vm.viewFile(vm.record)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
     <h4>{{'CONTENTS' | translate}}</h4>
     <div st-table="children" st-safe-src="vm.record_children" class="table-x-overflow table-container">
         <table class="table table-striped">
@@ -112,7 +112,7 @@
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
                     <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>
                     <td>
-                        <button ng-if="x._index == 'document'" class="btn btn-success lock-button" ng-click="vm.viewFile(x._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
+                        <button ng-if="x._index == 'document'" class="btn btn-success btn-small" ng-click="vm.viewFile(x._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
                     </td>
                 </tr>
                 <tr ng-if="children.length <= 0 && !vm.childrenLoading" class="empty-table-indicator">

@@ -111,7 +111,7 @@
                             <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                             <td>{{x.rule}}</td>
                             <td>
-                                <button class="btn btn-success lock-button" ng-click="vm.previewModal(x)">{{'PREVIEW' | translate}}</button>
+                                <button class="btn btn-success btn-small" ng-click="vm.previewModal(x)">{{'PREVIEW' | translate}}</button>
                             </td>
                         </tr>
                         <tr ng-if="!vm.next.length && !nextLoading" class="empty-table-indicator">
