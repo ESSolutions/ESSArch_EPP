@@ -58,7 +58,7 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         try:
             existingElements, allElements = generateJsonRes(schemadoc, validated_data['root_element'], validated_data['prefix']);
         except ValueError as e:
-            raise ValidationError(e.message)
+            raise ValidationError(e)
 
         return templatePackage.objects.create(
             existingElements=existingElements, allElements=allElements,

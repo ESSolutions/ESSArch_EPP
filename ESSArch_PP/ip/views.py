@@ -243,7 +243,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         try:
             sa = SubmissionAgreement.objects.get(pk=sa)
         except (ValueError, SubmissionAgreement.DoesNotExist) as e:
-            raise exceptions.ParseError(detail=e.message)
+            raise exceptions.ParseError(e)
 
         if sa.profile_aic_description is None:
             raise exceptions.ParseError('Submission agreement missing AIC Description profile')
@@ -835,7 +835,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             except ArchivePolicy.DoesNotExist:
                 raise exceptions.ParseError('Policy "%s" does not exist' % policy)
             except ValueError as e:
-                raise exceptions.ParseError(e.message)
+                raise exceptions.ParseError(e)
 
             ip.save(update_fields=['policy'])
 
