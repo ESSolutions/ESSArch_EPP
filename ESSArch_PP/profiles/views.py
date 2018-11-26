@@ -168,7 +168,7 @@ class ProfileViewSet(ProfileViewSetCore):
                     structure=new_structure,
                 )
             except ValidationError as e:
-                return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.ParseError(e)
 
             serializer = ProfileSerializer(
                 new_profile, context={'request': request}
