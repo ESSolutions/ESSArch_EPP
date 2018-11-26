@@ -665,5 +665,7 @@
     "EVENT_SUCCESS": "Success",
     "EVENT_FAILURE": "Failure",
     "TASKS": "Tasks",
-    "IDENTIFICATION": "Identification"
+    "IDENTIFICATION": "Identification",
+    "IMPORT_SA_FROM_ARCHIVE": "Import submission agreement from archive",
+    "IMPORT_SA_FROM_FILE_SHORT": "Import SA from file"
 }

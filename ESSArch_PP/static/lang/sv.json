@@ -665,5 +665,7 @@
     "EVENT_SUCCESS": "Lyckad",
     "EVENT_FAILURE": "Misslyckad",
     "TASKS": "Jobb",
-    "IDENTIFICATION": "Identifikation"
+    "IDENTIFICATION": "Identifikation",
+    "IMPORT_SA_FROM_ARCHIVE": "Hämta leveransöverenskommelse från arkiv",
+    "IMPORT_SA_FROM_FILE_SHORT": "Importera SA från fil"
 }
