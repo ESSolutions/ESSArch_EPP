@@ -667,5 +667,8 @@
     "TASKS": "Tasks",
     "IDENTIFICATION": "Identification",
     "IMPORT_SA_FROM_ARCHIVE": "Import submission agreement from archive",
-    "IMPORT_SA_FROM_FILE_SHORT": "Import SA from file"
+    "IMPORT_SA_FROM_FILE_SHORT": "Import SA from file",
+    "INFORMATION_PACKAGES": "Information packages",
+    "STORAGE_MEDIUMS": "Storage mediums",
+    "DISSEMINATION_PACKAGES": "Dissemination packages"
 }

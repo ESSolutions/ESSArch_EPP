@@ -667,5 +667,8 @@
     "TASKS": "Jobb",
     "IDENTIFICATION": "Identifikation",
     "IMPORT_SA_FROM_ARCHIVE": "Hämta leveransöverenskommelse från arkiv",
-    "IMPORT_SA_FROM_FILE_SHORT": "Importera SA från fil"
+    "IMPORT_SA_FROM_FILE_SHORT": "Importera SA från fil",
+    "INFORMATION_PACKAGES": "Informationspaket",
+    "STORAGE_MEDIUMS": "Lagringsmedier",
+    "DISSEMINATION_PACKAGES": "Utlämnandepaket"
 }

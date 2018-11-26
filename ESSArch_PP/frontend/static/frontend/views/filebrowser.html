@@ -1,4 +1,11 @@
 <div class="file-explorer" st-table="deckGridData" st-pipe="dirPipe">
+    <div class="title-action-button-row">
+        <div class="title">
+            <h4>
+                {{'FILEBROWSER' | translate}}
+            </h4>
+        </div>
+    </div>
     <div class="nav-refresh-wrapper">
         <div class="file-explorer-nav">
         <li ng-class="{'arrow-disabled': previousGridArrays.length == 0}" class="far fa-arrow-alt-circle-left fa-2x clickable" ng-click="previousGridArray()"></li>

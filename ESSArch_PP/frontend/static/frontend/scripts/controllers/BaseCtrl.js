@@ -45,6 +45,9 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     vm.archived = false;
 
+    // Can be overwritten in controllers to change title
+    vm.listViewTitle = $translate.instant('INFORMATION_PACKAGES');
+
     var watchers = [];
     // Init request form
 
