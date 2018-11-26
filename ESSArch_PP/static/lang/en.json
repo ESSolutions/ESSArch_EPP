@@ -666,6 +666,6 @@
     "EVENT_FAILURE": "Failure",
     "TASKS": "Tasks",
     "IDENTIFICATION": "Identification",
-    "IMPORT_SA_FROM_ARCHIVE": "Import submisison agreement from archive",
+    "IMPORT_SA_FROM_ARCHIVE": "Import submission agreement from archive",
     "IMPORT_SA_FROM_FILE_SHORT": "Import SA from file"
 }
