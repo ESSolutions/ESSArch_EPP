@@ -562,7 +562,6 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
     """
     queryset = InformationPackage.objects.select_related('responsible').prefetch_related(
         Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'), 'steps')
-    filterset_class = None
     search_fields = None
 
     def first_generation_case(self, lower_higher):
@@ -582,6 +581,9 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             default=Value(0),
             output_field=BooleanField(),
         )
+
+    def filter_queryset(self, queryset):
+        return queryset
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
