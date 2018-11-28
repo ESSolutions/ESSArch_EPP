@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
 from rest_framework.decorators import detail_route
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
@@ -17,6 +17,9 @@ from ip.views import InformationPackageViewSet
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = Structure.objects.prefetch_related('units')
     serializer_class = StructureSerializer
+    filter_backends = (OrderingFilter, SearchFilter,)
+    ordering_fields = ('name', 'create_date', 'version',)
+    search_fields = ('name',)
 
     @detail_route(methods=['get'])
     def tree(self, request, pk=None):
