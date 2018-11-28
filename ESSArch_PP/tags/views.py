@@ -4,6 +4,7 @@ from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.filters import SearchFilter
+from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
@@ -17,6 +18,7 @@ from ip.views import InformationPackageViewSet
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = Structure.objects.prefetch_related('units')
     serializer_class = StructureSerializer
+    permission_classes = (DjangoModelPermissions,)
 
     @detail_route(methods=['get'])
     def tree(self, request, pk=None):
@@ -33,6 +35,7 @@ class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = StructureUnit.objects.select_related('structure')
     serializer_class = StructureUnitSerializer
+    permission_classes = (DjangoModelPermissions,)
 
     def perform_create(self, serializer):
         try:
