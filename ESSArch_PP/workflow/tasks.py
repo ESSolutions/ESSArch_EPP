@@ -118,10 +118,10 @@ class ReceiveSIP(DBTask):
 
         dst_path, dst_name = find_destination('sip', aip.get_profile('aip').structure, aip.object_path)
         if dst_path is None:
-            dst = aip.object_path
-        else:
-            dst_name, = self.parse_params(dst_name)
-            dst = os.path.join(dst_path, dst_name)
+            dst_path, dst_name = find_destination('content', aip.get_profile('aip').structure, aip.object_path)
+
+        dst_name, = self.parse_params(dst_name)
+        dst = os.path.join(dst_path, dst_name)
 
         if aip.policy.receive_extract_sip:
             tmpdir = Path.objects.cached('entity', 'temp', 'value')
