@@ -139,6 +139,11 @@ class ReceiveSIP(DBTask):
 
             tmp_root = os.path.join(tmpdir, root_member_name)
             dst = os.path.join(dst, '')
+            try:
+                os.makedirs(dst)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
             self.logger.debug(u'Moving content of {} to {}'.format(tmp_root, dst))
             for f in os.listdir(tmp_root):
                 shutil.move(os.path.join(tmp_root, f), dst)
