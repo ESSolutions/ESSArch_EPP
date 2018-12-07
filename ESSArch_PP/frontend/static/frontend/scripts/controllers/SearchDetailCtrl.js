@@ -1,5 +1,5 @@
 angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter, ErrorResponse) {
-    const PAGE_SIZE = 10;
+    var PAGE_SIZE = 10;
 
     var vm = this;
     $controller('TagsCtrl', { $scope: $scope, vm: vm });
