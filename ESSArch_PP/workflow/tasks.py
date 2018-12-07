@@ -65,7 +65,7 @@ from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea, MESSAG
 from ESSArch_Core.maintenance.models import (AppraisalJob, AppraisalRule,
                                              ConversionJob, ConversionRule)
 from ESSArch_Core.profiles.utils import fill_specification_data
-from ESSArch_Core.search.importers import get_content_type_importer
+from ESSArch_Core.search.importers import get_backend as get_importer
 from ESSArch_Core.search.ingest import index_path
 from ESSArch_Core.storage.copy import copy_file
 from ESSArch_Core.storage.exceptions import (TapeDriveLockedError,
@@ -224,8 +224,8 @@ class CacheAIP(DBTask):
                 except KeyError:
                     logger.exception('No content type importer specified in profile')
                     raise
-                ct_importer = get_content_type_importer(ct_importer_name)()
-                indexed_files = ct_importer.import_content(aip_obj)
+                ct_importer = get_importer(ct_importer_name)()
+                indexed_files = ct_importer.import_content(self.task_id, cts, ip=aip_obj)
             else:
                 err = "Content type specification not found"
                 logger.error('{err}: {path}'.format(err=err, path=cts))
