@@ -43,6 +43,11 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = StructureUnitFilter
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['archive'] = self.request.data.get('archive')
+        return context
+
     def perform_create(self, serializer):
         try:
             structure = self.get_parents_query_dict()['structure']
@@ -82,7 +87,7 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
         children = unit.get_children()
         serializer = self.get_serializer_class()
-        context = {'user': request.user}
+        context = {'user': request.user, 'archive': request.query_params.get('archive'), 'structure': request.query_params.get('structure')}
         if self.paginator is not None:
             paginated = self.paginator.paginate_queryset(children, request)
             serialized = serializer(instance=paginated, many=True, context=context).data
