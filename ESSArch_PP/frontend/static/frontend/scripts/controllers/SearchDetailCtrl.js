@@ -1,10 +1,13 @@
 angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter, ErrorResponse) {
+    var PAGE_SIZE = 10;
+
     var vm = this;
     $controller('TagsCtrl', { $scope: $scope, vm: vm });
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
     vm.unavailable = false;
     vm.structure = null;
+    vm.recordTreeData = [];
 
     // Record update interval
     var recordInterval;
@@ -15,81 +18,342 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
     });
 
     vm.$onInit = function() {
-        vm.loadRecordAndTree($state.current.name.split(".").pop(), $stateParams.id).then(function() {
-            $interval.cancel(recordInterval);
-            recordInterval = $interval(function(){vm.updateRecord()}, appConfig.recordInterval);
-        });
+        vm.loadRecordAndTree();
     }
 
-    vm.updateRecord = function() {
-        vm.childrenLoading = true;
-        $http.get(appConfig.djangoUrl + "search/" + vm.record._id + "/", {params: {structure: vm.structure}}).then(function(response) {
-            var promises = [];
-            promises.push(getBreadcrumbs(vm.record).then(function(list) {
-                response.data.breadcrumbs = list;
-            }).catch(function(error) {
-                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
-            }));
-            promises.push(getChildren(vm.record).then(function (children) {
-                vm.record_children = children.data;
-                vm.childrenLoading = false;
-            }));
+    vm.loadRecordAndTree = function() {
+        var isStructureUnit = $state.current.name == "home.access.search.structure_unit";
+        var nodeId = $stateParams.id;
+        var nodePromise = isStructureUnit ? vm.getStructureUnit(nodeId) : vm.getNode(nodeId);
 
-            $q.all(promises).then(function(results) {
-                vm.record = response.data;
-                $rootScope.latestRecord = response.data;
+        nodePromise.then(function(data){
+            data.state = {selected: true, opened: true};
+            vm.record = data;
+            var startNode = data;
+            var archiveId = null;
+
+            $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
+
+            if (!data._is_structure_unit) {
+                vm.currentVersion = vm.record._id;
                 getVersionSelectData();
-            })
-        }).catch(function(response) {
-            Notifications.add("Could not update record", "error");
-        })
-    }
 
-    vm.loadRecordAndTree = function(index, id) {
-        vm.viewContent = true;
-        vm.record_children = [];
-        vm.childrenLoading = true;
-        return $http.get(vm.url+"search/" + id+"/", {params: {structure: vm.structure}}).then(function(response) {
-            vm.record = response.data;
-            $rootScope.latestRecord = response.data;
-            if(vm.record.structures.length == 0) {
-                $scope.getArchives().then(function (result) {
-                    vm.tags.archive.options = result;
+                archiveId = data.root;
+            } else {
+                archiveId = $stateParams.archive;
+                vm.structure = vm.record.structure;
+            }
+
+            if (vm.record._id === archiveId) {
+                var archive = angular.copy(vm.record);
+                delete archive.parent;
+                vm.archive = angular.copy(vm.record);
+                vm.archiveStructures = angular.copy(archive.structures);
+
+                if(!vm.structure && vm.record.structures.length > 0) {
+                    vm.structure = vm.record.structures[vm.record.structures.length-1].id;
+                }
+
+                vm.buildTree(startNode, archive).then(function(children){
+                    archive.children = children.data;
+                    var tree = [archive];
+
+                    vm.ignoreRecordChanges = true;
+                    if(!angular.equals(tree, vm.recordTreeData)) {
+                        angular.copy(tree, vm.recordTreeData);
+                    }
+                    vm.recordTreeConfig.version++;
+                });
+            } else {
+                vm.getNode(archiveId).then(function(archive){
+                    delete archive.parent;
+                    vm.archive = archive;
+                    vm.archiveStructures = angular.copy(archive.structures);
+
+                    if(!vm.structure && vm.record.structures.length > 0) {
+                        vm.structure = vm.record.structures[vm.record.structures.length-1].id;
+                    }
+
+                    vm.buildTree(startNode, archive).then(function(children){
+                        archive.children = children.data;
+                        var tree = [archive];
+
+                        vm.ignoreRecordChanges = true;
+                        if(!angular.equals(tree, vm.recordTreeData)) {
+                            angular.copy(tree, vm.recordTreeData);
+                        }
+                        vm.recordTreeConfig.version++;
+                    });
                 });
             }
-            if(!vm.structure && vm.record.structures.length > 0) {
-                vm.structure = vm.record.structures[vm.record.structures.length-1].id;
+        });
+    };
+
+    vm.createNode = function(node) {
+        if (angular.isUndefined(node.name)) {
+            node.name = "";
+        }
+        if (node._is_structure_unit !== true){
+            node.id = node._id;
+        }
+
+        if(node._is_structure_unit !== true){
+            node.reference_code = node._source && node._source.reference_code ? node._source.reference_code : "";
+        }
+
+        node.text = "<b>" + node.reference_code + "</b> " + node.name;
+        node.a_attr = {
+            title: node.name
+        };
+        if (!node.is_leaf_node) {
+            node.children = [vm.createPlaceholderNode()];
+        }
+        node.state = { opened: false };
+        return node;
+    };
+
+    vm.getNode = function(id) {
+        return $http.get(vm.url +"search/" + id + "/", {params: {structure: vm.structure}}).then(function(response) {
+            response.data._is_structure_unit = false;
+            return vm.createNode(response.data);
+        });
+    };
+
+    vm.getStructureUnit = function(id) {
+        return $http.get(vm.url +"classification-structure-units/" + id + "/").then(function(response) {
+            response.data._id = response.data.id;
+            response.data._is_structure_unit = true;
+            return vm.createNode(response.data);
+        });
+    };
+
+    vm.getParent = function(childNode) {
+        if (childNode.structure_unit) {
+            return vm.getStructureUnit(childNode.structure_unit.id);
+        } else if (childNode.parent) {
+            if (childNode._is_structure_unit) {
+                return vm.getStructureUnit(childNode.parent);
             }
-            getVersionSelectData();
+            return vm.getNode(childNode.parent.id);
+        } else {
+            var deferred = $q.defer();
+            deferred.resolve(null);
+            return deferred.promise;
+        }
+    };
+
+    vm.getChildren = function(node, archive, page) {
+        var url;
+        page = page || 1;
+        if (node._is_structure_unit === true) {
+            url = vm.url+"classification-structure-units/" + node._id + "/children/";
+        } else if (node._id === vm.archive._id) {
+            return vm.getClassificationStructureChildren(vm.structure);
+        } else {
+            url = vm.url+"search/" + node._id + "/children/";
+        }
+
+        return $http.get(url, {params: {page_size: PAGE_SIZE, page: page, archive: archive._id, structure: vm.structure}}).then(function(response) {
+            var data = response.data.map(function(child) {
+                child._is_structure_unit = node._is_structure_unit && !node.is_unit_leaf_node;
+                if (angular.isUndefined(child._id)) {
+                    child._id = child.id;
+                }
+                delete child.parent;
+                return vm.createNode(child);
+            });
+            return {
+                data: data,
+                count: response.headers("Count")
+            };
+        });
+    };
+
+    vm.getClassificationStructureChildren = function(id) {
+        var url = vm.url + "classification-structures/" + id + "/units/";
+        return $http.get(url, {params: {has_parent: false, pager: "none"}}).then(function(response) {
+            var data = response.data.map(function(unit) {
+                unit._id = unit.id;
+                unit._is_structure_unit = true;
+                delete unit.parent;
+                return vm.createNode(unit);
+            });
+            return {
+                data: data,
+                count: response.headers("Count")
+            };
+        });
+    };
+
+    vm.createPlaceholderNode = function() {
+        return {
+            text: "",
+            placeholder: true,
+            icon: false,
+            state: {disabled: true}
+        };
+    };
+
+    vm.createSeeMoreNode = function() {
+        return {
+            text: $translate.instant("SEE_MORE"),
+            see_more: true,
+            type: "plus",
+            _source: {}
+        };
+    };
+
+    vm.buildTree = function(start, archive) {
+        return vm.getChildren(start, archive).then(function(children) {
+            var existingChild = (start.children && start.children.length > 0 && start.children[0].placeholder !== true) ? start.children[0] : null;
+
+            start.children = [];
+            children.data.forEach(function(child){
+                if (existingChild === null || existingChild._id !== child._id) {
+                    start.children.push(child);
+                } else if(existingChild !== null && existingChild._id === child._id) {
+                    start.children.push(existingChild);
+                }
+            });
+
+            if (start.children.length < children.count) {
+                start.children.push(vm.createSeeMoreNode());
+                if (existingChild && !getNodeById(start, existingChild._id)) {
+                    start.state.opened = true;
+                    start.children.push(existingChild);
+                }
+            }
+
+            return vm.getParent(start).then(function(parent) {
+                delete start.parent;
+
+                if (parent !== null) {
+                    parent.children = [start];
+                    parent.state = {opened: true};
+                    return vm.buildTree(parent, archive, vm.structure);
+                } else {
+                    return vm.getClassificationStructureChildren(vm.structure).then(function(children){
+                        var result = [];
+                        children.data.forEach(function(child){
+                            if (start._id === child._id) {
+                                result.push(start);
+                            } else {
+                                result.push(child);
+                            }
+                        });
+
+                        return {
+                            data: result,
+                            count: children.count
+                        };
+                    });
+                }
+            });
+        });
+    };
+
+    vm.selectRecord = function (jqueryobj, e) {
+        if(e.node && e.node.original.see_more) {
+            var tree = vm.recordTreeData;
+            var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
+            var childrenNodes = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
+            var page = Math.ceil(childrenNodes.length/PAGE_SIZE);
+
+            return vm.getChildren(parent.original, vm.archive, page).then(function(children) {
+                var count = children.count;
+                var selectedElement = null;
+                var seeMore = null;
+
+                if(childrenNodes[childrenNodes.length-1].see_more) {
+                    seeMore = childrenNodes.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
+                } else {
+                    selectedElement = childrenNodes.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(parent.children[parent.children.length-1]);
+                    seeMore = childrenNodes.pop();
+                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
+                }
+                children.data.forEach(function(child) {
+                    if (selectedElement !== null && child._id === selectedElement._id) {
+                        child = selectedElement;
+                    } else {
+                        child = vm.createNode(child);
+                    }
+                    childrenNodes.push(child);
+                    vm.recordTreeInstance.jstree(true).create_node(parent.id, angular.copy(child));
+                });
+
+                if(childrenNodes.length < count) {
+                    childrenNodes.push(seeMore);
+                    vm.recordTreeInstance.jstree(true).create_node(parent.id, seeMore);
+                }
+            });
+        }
+        vm.goToNode(e.node.id);
+    };
+
+    vm.goToNode = function(id) {
+        var tree = vm.recordTreeInstance.jstree(true);
+        var node = tree.get_node(id);
+
+        if (node.original._is_structure_unit != vm.record._is_structure_unit) {
+            vm.goToNodePage(id, node.original._is_structure_unit);
+            return;
+        }
+
+        var nodePromise = node.original._is_structure_unit ? vm.getStructureUnit(node.original._id) : vm.getNode(node.original._id);
+        tree.deselect_node(vm.record.id);
+        tree.select_node(node);
+        nodePromise.then(function (node) {
+            vm.record = node;
+            vm.getChildren(vm.record, vm.archive).then(function(children) {
+                vm.record.children = children.data;
+            });
+            $rootScope.latestRecord = node;
+            if (vm.record._is_structure_unit)
+                $state.go("home.access.search.structure_unit", {id: vm.record._id, archive: vm.archive._id}, {notify: false});
+            else {
+                $state.go("home.access.search." + vm.record._index, {id: vm.record._id}, {notify: false});
+                getVersionSelectData();
+            }
             $rootScope.$broadcast('UPDATE_TITLE', {title: vm.record.name});
-            vm.activeTab = 1;
-            vm.buildRecordTree(response.data).then(function(node) {
-                var treeData = [node];
-                vm.recreateRecordTree(treeData);
-            })
-            vm.record.children = [];//[{text: "", parent: vm.record.id, placeholder: true, icon: false, state: {disabled: true}}];
-            if (angular.isUndefined(vm.record._source.terms_and_condition)) {
-                vm.record._source.terms_and_condition = null;
-            }
-            getBreadcrumbs(vm.record).then(function(list) {
-                vm.record.breadcrumbs = list;
-            }).catch(function(error) {
-                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
-            })
-            getChildren(vm.record).then(function (response) {
-                vm.record_children = response.data;
+
+            vm.currentVersion = vm.record._id;
+            vm.record.breadcrumbs = getBreadcrumbs(vm.record);
+
+            vm.getChildrenTable(vm.recordTableState);
+        });
+    };
+
+    vm.goToNodePage = function(id, isStructureUnit) {
+        if (isStructureUnit)
+            $state.go("home.access.search.structure_unit", {id: id, archive: vm.archive._id}, {notify: true});
+        else {
+            $state.go("home.access.search.component", {id: id}, {notify: true});
+        }
+    };
+
+    vm.getChildrenTable = function(tableState) {
+        if (!angular.isUndefined(tableState)) {
+            vm.recordTableState = tableState;
+            var pagination = tableState.pagination;
+            var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+            var pageSize = pagination.number || PAGE_SIZE; // Number of entries showed per page.
+            var pageNumber = start/pageSize+1;
+
+            vm.childrenLoading = true;
+            vm.getChildren(vm.record, vm.archive, pageNumber).then(function (result) {
                 vm.childrenLoading = false;
-            })
-            return vm.record;
-        }).catch(function(response) {
-            if (response.status == 403 || response.status == 404) {
-                vm.unavailable = true;
-            }
-            return vm.record;
-        })
-    }
+                vm.recordChildren = result.data;
+                tableState.pagination.numberOfPages = Math.ceil(result.count / pageSize);
+            });
+        }
+    };
 
     vm.currentItem = null;
+    vm.structureUnits = null;
+    vm.archive = null;
+    vm.rootNode = null;
 
     $scope.checkPermission = function(permissionName) {
         return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
@@ -102,140 +366,24 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                 if(structure.id == classification) {
                     temp = true;
                 }
-            })
+            });
             return temp;
         }
-    }
-
-    vm.getPathFromParents = function(tag) {
-        if(tag.parents.length > 0) {
-            vm.getTag(tag.parents[0]);
-        }
-    }
-
-    vm.getTag = function(tag) {
-        return $http.get(vm.url+"search/"+tag._id+"/", {params: {structure: vm.structure}}).then(function(response) {
-            return response.data;
-        });
-    }
-
-    createChild = function(child) {
-        if (angular.isUndefined(child.name)) {
-            child.name = "";
-        }
-        child.text = "<b>" + (child._source && child._source.reference_code ? child._source.reference_code : "") + "</b> " + child.name;
-        child.a_attr = {
-            title: child._source.name
-        }
-        if (!child.is_leaf_node) {
-            child.children = [{ text: "", parent: child._id, placeholder: true, icon: false, state: { disabled: true } }];
-        }
-        child.state = { opened: false };
-        return child;
-    }
-
-    vm.buildRecordTree = function(startNode) {
-        if(angular.isUndefined(startNode.name)) {
-            startNode.name = "";
-        }
-        startNode.text = "<b>" + (startNode._source && startNode._source.reference_code ? startNode._source.reference_code : "") + "</b> " + startNode.name;
-        startNode.a_attr = {
-            title: startNode._source.name
-        }
-        startNode.state = {opened: true};
-        if(startNode._id == vm.record._id) {
-            startNode.state.selected = true;
-        }
-        if (!startNode.children || startNode.children.length <= 0) {
-            var startNodePromise = getChildren(startNode).then(function (start_node_children) {
-
-                start_node_children.data.forEach(function (child) {
-                    child = createChild(child);
-                    startNode.children.push(child);
-                });
-
-                if (start_node_children.data.length < start_node_children.count) {
-                    startNode.children.push({
-                        text: $translate.instant("SEE_MORE"),
-                        see_more: true,
-                        type: "plus",
-                        parent: {id: startNode._id, index: startNode._index},
-                        _source: {
-                        }
-                    });
-                    if (!getNodeById(startNode, startNode._id)) {
-                        startNode.state.opened = true;
-                        startNode.children.push(startNode);
-                    }
-                }
-            });
-        }
-        if (startNode.parent) {
-            var parentPromise = $http.get(vm.url + "search/" + startNode.parent.id + "/", {params: {structure: vm.structure}}).then(function (response) {
-                var p = response.data;
-                p.children = [];
-                return getChildren(p).then(function (children) {
-                    children.data.forEach(function (child) {
-                        if (child._id == startNode._id) {
-                            p.children.push(startNode);
-                        } else {
-                            child = createChild(child);
-                            p.children.push(child);
-                        }
-                    });
-                    if (children.data.length < children.count) {
-                        p.children.push({
-                            text: $translate.instant("SEE_MORE"),
-                            see_more: true,
-                            type: "plus",
-                            parent: {id: p._id, index: p._index},
-                            _source: {
-                            }
-                        });
-                        if (!getNodeById(p, startNode._id)) {
-                            startNode.state.opened = true;
-                            p.children.push(startNode);
-                        }
-                    }
-                    return vm.buildRecordTree(p);
-                })
-            });
-        } else {
-            var defer = $q.defer();
-            defer.resolve(startNode);
-            var parentPromise = defer.promise;
-        }
-        return $q.all([parentPromise, startNodePromise]).then(function(result) {
-            return result[0];
-        })
-    }
+    };
 
     function getBreadcrumbs(node) {
-        return getParentList([], {index: node._index, id: node._id});
-    }
-    function getParentList(parentList, parent) {
-        return $http.get(vm.url+"search/"+parent.id+"/").then(function(response) {
-            if(response.data.parent !== null) {
-                parentList.unshift(response.data);
-                return getParentList(parentList, response.data.parent);
-            } else {
-                parentList.unshift(response.data);
-                return parentList;
-            }
+        var tree = vm.recordTreeInstance.jstree(true);
+        var start = tree.get_node(node.id);
+
+        if (start === false){
+            return [];
+        }
+
+        return tree.get_path(start, false, true).map(function(id) {
+            return tree.get_node(id).original;
         });
     }
 
-    function getChildren(node) {
-        return $http.get(vm.url+"search/"+node._id+"/children/", {params: {page_size: 10, page: 1, structure: vm.structure}}).then(function(response) {
-            var count = response.headers('Count');
-            return {
-                data: response.data,
-                count: count
-            }
-        });
-    }
-
-    var newId = 1;
     vm.ignoreChanges = false;
     vm.ignoreRecordChanges = false;
     vm.newNode = {};
@@ -243,32 +391,6 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
     vm.applyRecordModelChanges = function() {
         return !vm.ignoreRecordChanges;
     };
-
-    /**
-     * Recreates record tree with given tags.
-     * Version variable is updated so that the tree will detect
-     * a change in the configuration object, desroy and rebuild with data from vm.recordTreeData
-     */
-    vm.recreateRecordTree = function(tags) {
-        if(!angular.equals(vm.archiveStructures, tags[0].structures)) {
-            vm.archiveStructures = angular.copy(tags[0].structures);
-        }
-        if(!vm.structure) {
-            for(i=vm.archiveStructures.length-1; i>=0; i--) {
-                if(vm.existsForRecord(vm.archiveStructures[i].id)) {
-                    vm.structure = vm.archiveStructures[i].id;
-                    break;
-                }
-            }
-        }
-        vm.ignoreRecordChanges = true;
-        if(angular.equals(tags, vm.recordTreeData)) {
-            vm.recordTreeConfig.version++;
-        } else {
-            angular.copy(tags, vm.recordTreeData);
-            vm.recordTreeConfig.version++;
-        }
-    }
 
     /**
      * Tree config for Record tree
@@ -299,6 +421,13 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         },
         dnd: {
             is_draggable: function(nodes) {
+                var not_draggable = nodes.some(function(node) {
+                    return (node.original._is_structure_unit || node.original._index === 'archive');
+                });
+                if (not_draggable) {
+                    return false;
+                }
+
                 var structure = null;
                 vm.archiveStructures.forEach(function(struct) {
                     if(struct.id === vm.structure) {
@@ -310,39 +439,40 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             },
         },
         contextmenu: {
+            select_node: false,
             items: function (node, callback) {
                 var update = {
                     label: $translate.instant('UPDATE'),
                     _disabled: function(){
-                        return vm.record._source == null
+                        return node.original._is_structure_unit;
                     },
                     action: function update() {
-                        if(vm.record._source) {
-                            var selected = vm.recordTreeInstance.jstree(true).get_selected(true).map(function(x) {
-                                return x.original;
-                            });
-                            if(selected.length > 1) {
-                                vm.editNodeModal(selected);
-                            } else {
-                                vm.editNodeModal(vm.record);
-                            }
-                        }
+                        vm.editNodeModal(node.original);
                     },
                 };
                 var add = {
                     label: $translate.instant('ADD'),
+                    _disabled: function(){
+                        return node.original._index === 'archive';
+                    },
                     action: function () {
                         vm.addNodeModal(node, vm.structure);
                     },
                 };
                 var remove = {
                     label: $translate.instant('REMOVE'),
+                    _disabled: function(){
+                        return node.original._is_structure_unit || node.original._index === 'archive';
+                    },
                     action: function () {
                         vm.removeNodeModal(node);
                     },
                 };
                 var removeFromStructure = {
                     label: $translate.instant('REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
+                    _disabled: function(){
+                        return node.original._is_structure_unit || node.original._index === 'archive';
+                    },
                     action: function () {
                         var struct;
                         vm.archiveStructures.forEach(function(item) {
@@ -355,18 +485,27 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                 };
                 var newVersion = {
                     label: $translate.instant('NEW_VERSION'),
+                    _disabled: function(){
+                        return node.original._is_structure_unit;
+                    },
                     action: function() {
                         vm.newVersionNodeModal(node);
                     }
                 }
                 var changeOrganization = {
                     label: $translate.instant('CHANGE_ORGANIZATION'),
+                    _disabled: function(){
+                        return node.original._index !== 'archive';
+                    },
                     action: function() {
                         vm.changeOrganizationModal(vm.record);
                     }
                 }
                 var email = {
                     label: $translate.instant('EMAIL'),
+                    _disabled: function(){
+                        return node.original._is_structure_unit;
+                    },
                     action: function() {
                         var selected = vm.recordTreeInstance.jstree(true).get_selected(true).map(function(x) {
                             return x.original;
@@ -391,7 +530,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     remove: remove,
                     removeFromStructure: removeFromStructure,
                     newVersion: newVersion,
-                    changeOrganization: node.original._index === 'archive'?changeOrganization:null,
+                    changeOrganization: changeOrganization,
                 };
                 callback(actions);
                 return actions;
@@ -406,95 +545,41 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
     }
 
     vm.dropNode = function(jqueryObj, data) {
-        var node = data.node.original;
-        var parent = vm.recordTreeInstance.jstree(true).get_node(data.parent);
-        Search.updateNode(node,{parent: parent.original._id, structure: vm.structure}, true).then(function(response) {
-            vm.loadRecordAndTree(parent.original._index, parent.original._id);
+        var node = data.node;
+        var parentNode = vm.recordTreeInstance.jstree(true).get_node(node.parent);
+        var data = {structure: vm.structure};
+
+        if (parentNode.original._is_structure_unit) {
+            data.structure_unit = parentNode.id;
+        } else {
+            data.parent = parentNode.id;
+        }
+
+        Search.updateNode(node.original, data, true).then(function(response) {
+            vm.loadRecordAndTree();
         }).catch(function(response) {
             Notifications.add("Could not be moved", "error");
-        })
-    }
+        });
+    };
 
     vm.setType = function() {
-        var array = vm.recordTreeInstance.jstree(true).get_json("#", {flat: true}).forEach(function(item) {
+        if (vm.record) {
+            vm.record.breadcrumbs = getBreadcrumbs(vm.record);
+        }
+
+        vm.recordTreeInstance.jstree(true).get_json("#", {flat: true}).forEach(function(item) {
             var fullItem = vm.recordTreeInstance.jstree(true).get_node(item.id);
             if(fullItem.original._index == "archive") {
                 vm.recordTreeInstance.jstree(true).set_type(item, "archive");
             }
         });
-    }
+    };
 
     vm.treeChange = function(jqueryobj, e) {
         if(e.action === "select_node") {
             vm.selectRecord(jqueryobj, e);
         }
-    }
-
-    vm.recordTreeData = [];
-    vm.selectRecord = function (jqueryobj, e) {
-        if(e.node && e.node.original.see_more) {
-            var tree = vm.recordTreeData;
-            var parent = vm.recordTreeInstance.jstree(true).get_node(e.node.parent);
-            var children = tree.map(function(x) {return getNodeById(x, parent.original._id); })[0].children;
-            $http.get(vm.url+"search/"+e.node.original.parent.id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
-                var count = response.headers('Count');
-                var selectedElement = null;
-                var see_more = null;
-                if(children[children.length-1].see_more) {
-                    see_more = children.pop();
-                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
-                } else {
-                    selectedElement = children.pop();
-                    vm.recordTreeInstance.jstree(true).delete_node(parent.children[parent.children.length-1]);
-                    see_more = children.pop();
-                    vm.recordTreeInstance.jstree(true).delete_node(e.node.id);
-                }
-                response.data.forEach(function(child) {
-                    child = createChild(child);
-                    children.push(child);
-                    vm.recordTreeInstance.jstree(true).create_node(parent.id, angular.copy(child));
-                });
-                if(children.length < count) {
-                    children.push(see_more);
-                    vm.recordTreeInstance.jstree(true).create_node(parent.id, see_more);
-                    if(selectedElement) {
-                        var resultInChildren = getNodeById(children, selectedElement._id);
-                        if(!resultInChildren) {
-                            selectedElement.state.opened = true;
-                            children.push(selectedElement);
-                            vm.recordTreeInstance.jstree(true).create_node(parent.id, selectedElement);
-                        } else {
-                            resultInChildren.state.selected = true;
-                        }
-                    }
-                }
-            });
-            return;
-        }
-        vm.record_children = [];
-        vm.childrenLoading = true;
-        $http.get(appConfig.djangoUrl + "search/" + e.node.original._id + "/", { params: { structure: vm.structure } }).then(function (response) {
-            vm.record = response.data;
-            $rootScope.latestRecord = response.data;
-            $state.go("home.access.search." + vm.record._index, { id: vm.record._id }, { notify: false });
-            $rootScope.$broadcast('UPDATE_TITLE', { title: vm.record.name });
-
-            if (!vm.record.is_leaf_node) {
-                vm.record.children = [{ text: "", parent: vm.record._id, placeholder: true, icon: false, state: { disabled: true } }];
-            }
-            vm.currentVersion = vm.record._id;
-            getVersionSelectData();
-            getBreadcrumbs(vm.record).then(function(list) {
-                vm.record.breadcrumbs = list;
-                getChildren(vm.record).then(function (response) {
-                    vm.record_children = response.data;
-                    vm.childrenLoading = false;
-                })
-            }).catch(function(error) {
-                Notifications.add($translate.instant('COULD_NOT_LOAD_PATH'), 'error');
-            })
-        })
-    }
+    };
 
     function getVersionSelectData() {
         vm.currentVersion = vm.record._id;
@@ -505,46 +590,31 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             if (a_date < b_date) return -1;
             if (a_date > b_date) return 1;
             return 0;
-        })
+        });
     }
 
     vm.expandChildren = function (jqueryobj, e, reload) {
         var tree = vm.recordTreeData;
         var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
-        var children = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
+        var childrenNodes = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
         if(e.node.children.length < 2 || reload) {
-            $http.get(vm.url+"search/"+e.node.original._id+"/children/", {params: {structure: vm.structure, page_size: 10, page: Math.ceil(children.length/10)}}).then(function(response) {
-                var count = response.headers('Count');
-                children.pop();
-                response.data.forEach(function(child) {
-                    child = createChild(child);
-                    children.push(child);
+            vm.getChildren(e.node.original, vm.archive).then(function (children) {
+                childrenNodes.pop();
+                children.data.forEach(function(child) {
+                    child = vm.createNode(child);
+                    childrenNodes.push(child);
                     vm.recordTreeInstance.jstree(true).create_node(e.node.id, angular.copy(child));
                 });
-                if(children.length < count) {
-                    children.push({
-                        text: $translate.instant("SEE_MORE"),
-                        see_more: true,
-                        type: "plus",
-                        parent: {id: parent._id, index: parent._index},
-                        _source: {
-                        }
-                    });
-                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, {
-                        text: $translate.instant("SEE_MORE"),
-                        see_more: true,
-                        type: "plus",
-                        parent: {id: parent._id, index: parent._index},
-                        _source: {
-                        }
-                    });
+                if(childrenNodes.length < children.count) {
+                    var seeMoreNode = vm.createSeeMoreNode();
+                    childrenNodes.push(seeMoreNode);
+                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, seeMoreNode);
                 }
                 vm.recordTreeInstance.jstree(true).delete_node(vm.recordTreeInstance.jstree(true).get_node(e.node.id).children[0]);
-                parent.state = {opened: true}
-                return;
+                parent.state = {opened: true};
             });
         }
-    }
+    };
 
     function getNodeById(node, id){
         var reduce = [].reduce;
@@ -607,7 +677,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
         })
         if(node) {
             return Search.setAsCurrentVersion(node, true).then(function(response){
-                vm.loadRecordAndTree(node._index, node._id);
+                vm.loadRecordAndTree();
             })
         }
     }
@@ -749,9 +819,9 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(vm.record._index, vm.record._id);
+            vm.loadRecordAndTree();
         }, function () {
-            vm.loadRecordAndTree(vm.record._index, vm.record._id);
+            vm.loadRecordAndTree();
             $log.info('modal-component dismissed at: ' + new Date());
         });
     }
@@ -767,12 +837,13 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             resolve: {
                 data: {
                     node: node,
-                    structure: structure
+                    structure: structure,
+                    archive: vm.archive._id
                 }
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(data._index, data._id);
+            vm.loadRecordAndTree();
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -793,7 +864,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(node.original._index, node.original._id);
+            vm.loadRecordAndTree();
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -814,7 +885,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(node._index, node._id);
+            vm.loadRecordAndTree();
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });
@@ -880,7 +951,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             }
         });
         modalInstance.result.then(function (data, $ctrl) {
-            vm.loadRecordAndTree(node._index, node._id);
+            vm.loadRecordAndTree();
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());
         });

@@ -2,7 +2,7 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
     var $ctrl = this;
     $ctrl.node = data.node.original;
     $ctrl.newNode = {
-        reference_code: data.node.children.length+1,
+        reference_code: (data.node.children.length+1).toString(),
         index: 'component'
     };
     $ctrl.options = {};
@@ -55,7 +55,14 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
     $ctrl.submit = function() {
         if($ctrl.changed()) {
             $ctrl.submitting = true;
-            Search.addNode(angular.extend($ctrl.newNode, {parent: $ctrl.node._id, parent_index: $ctrl.node._index, structure: data.structure})).then(function(response) {
+            var params = angular.extend($ctrl.newNode, {archive: data.archive, structure: data.structure});
+            if ($ctrl.node._is_structure_unit)
+                params.structure_unit = $ctrl.node._id;
+            else {
+                params.parent = $ctrl.node._id;
+            }
+
+            Search.addNode(params).then(function(response) {
                 $ctrl.submitting = false;
                 Notifications.add($translate.instant('NODE_ADDED'), 'success');
                 $uibModalInstance.close(response.data);

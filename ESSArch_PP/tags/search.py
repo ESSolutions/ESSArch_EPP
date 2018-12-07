@@ -18,9 +18,8 @@ from django.db.models import Prefetch
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters.constants import EMPTY_VALUES
-from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError, TransportError
-from elasticsearch_dsl import Index, Q, FacetedSearch, TermsFacet
+from elasticsearch_dsl import Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
 from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -31,17 +30,17 @@ from rest_framework.viewsets import ViewSet
 from six import iteritems
 from weasyprint import HTML
 
-from ESSArch_Core.auth.models import Group, GroupGenericObjects
+from ESSArch_Core.auth.models import GroupGenericObjects
 from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
-from ESSArch_Core.auth.util import get_objects_for_user, get_organization_groups
+from ESSArch_Core.auth.util import get_objects_for_user
 from ESSArch_Core.csv_unicode import UnicodeCSVWriter
-from ESSArch_Core.ip.models import Agent, InformationPackage
+from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
-from ESSArch_Core.tags.models import Structure, Tag, TagStructure, TagVersion
-from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, TagVersionSerializer, \
+from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagStructure, TagVersion
+from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, \
     TagVersionSerializerWithVersions, \
     TagVersionWriteSerializer
 from ESSArch_Core.util import generate_file_response, remove_prefix
@@ -639,17 +638,28 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             with transaction.atomic():
                 tag = Tag.objects.create()
                 tag_structure = TagStructure(tag=tag)
-                structure = data.get('structure')
+                structure = data.pop('structure')
 
                 if data.get('index') != 'archive':
-                    parent_version = TagVersion.objects.select_for_update().get(pk=data.get('parent'))
-                    if structure is None:
-                        parent_structure = parent_version.get_active_structure()
-                    else:
-                        parent_structure = parent_version.get_structures(structure).get()
+                    if 'structure_unit' in data:
+                        structure_unit = StructureUnit.objects.get(pk=data.pop('structure_unit'))
+                        tag_structure.structure_unit = structure_unit
+                        tag_structure.structure = structure_unit.structure
 
-                    tag_structure.parent = parent_structure
-                    tag_structure.structure = parent_structure.structure
+                        archive_structure = TagStructure.objects.get(tag__versions=data.pop('archive'))
+                        tag_structure.parent = archive_structure
+
+                        tag_structure.save()
+
+                    elif 'parent' in data:
+                        parent_version = TagVersion.objects.select_for_update().get(pk=data.pop('parent'))
+                        if structure is None:
+                            parent_structure = parent_version.get_active_structure()
+                        else:
+                            parent_structure = parent_version.get_structures(structure).get()
+
+                        tag_structure.parent = parent_structure
+                        tag_structure.structure = parent_structure.structure
                 elif structure is not None:
                     tag_structure.structure = structure
                 tag_structure.save()
@@ -659,6 +669,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     type=data['type'], reference_code=data['reference_code'])
                 tag.current_version = tag_version
                 tag.save()
+
+                self._update_tag_metadata(tag_version, data)
 
                 if tag_version.elastic_index == 'archive':
                     org = request.user.user_profile.current_organization
@@ -671,7 +683,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                         search_data['archive_responsible'] = data.get('archive_responsible')
 
                     if search_data:
-                        #tag_version.update_search(search_data)
                         self._update_tag_metadata(tag_version, search_data)
 
                     # create descendants from structure
@@ -695,7 +706,19 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 return Response(self.serialize(tag_version.to_search()), status=status.HTTP_201_CREATED)
 
     def _update_tag_metadata(self, tag_version, data):
-        if 'parent' in data:
+        if 'structure_unit' in data:
+            try:
+                structure = data.pop('structure')
+            except KeyError:
+                raise exceptions.ParseError('Missing "structure" parameter')
+
+            structure = Structure.objects.get(pk=structure)
+            tag_structure, _ = TagStructure.objects.get_or_create(tag=tag_version.tag, structure=structure)
+            tag_structure.parent = tag_structure.get_root()
+            tag_structure.structure_unit_id = data.get('structure_unit')
+            tag_structure.save()
+
+        elif 'parent' in data:
             try:
                 structure = data.pop('structure')
             except KeyError:
@@ -714,6 +737,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     raise exceptions.ParseError(u'{} cannot be moved to {}'.format(tag_version.name, parent_tag_version.name))
 
                 tag_structure.parent = parent_tag_structure
+                if tag_structure.parent != tag_structure.get_root():
+                    tag_structure.structure_unit = None
+
                 tag_structure.save()
 
         db_fields = [f.name for f in TagVersion._meta.get_fields()]
@@ -727,8 +753,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        if data:
-            tag_version.update_search(data)
+        tag_version.update_search(data)
         return tag_version.from_search()
 
     def partial_update(self, request, pk=None):
