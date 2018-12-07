@@ -101,7 +101,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             node.reference_code = node._source && node._source.reference_code ? node._source.reference_code : "";
         }
 
-        node.text = `<b>${node.reference_code}</b> ${node.name}`;
+        node.text = "<b>" + node.reference_code + "</b> " + node.name;
         node.a_attr = {
             title: node.name
         };
