@@ -199,6 +199,22 @@ angular.module('essarch', [
             }
         },
     })
+    .state('home.access.search.structure_unit', {
+        url: '/structure-unit/:id?{archive}',
+        templateUrl: '/static/frontend/views/search_structure_unit_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
     .state('home.access.search.directory', {
         url: '/directory/:id',
         templateUrl: '/static/frontend/views/search_detail.html',

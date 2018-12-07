@@ -61,12 +61,8 @@ router.register(r'classification-structures', StructureViewSet).register(
     StructureUnitViewSet,
     base_name='structure-units',
     parents_query_lookups=['structure']
-).register(
-    r'children',
-    StructureUnitViewSet,
-    base_name='structure-units-children',
-    parents_query_lookups=['parent__structure', 'parent']
 )
+router.register(r'classification-structure-units', StructureUnitViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)

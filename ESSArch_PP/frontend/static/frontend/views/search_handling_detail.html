@@ -150,36 +150,7 @@
         <br/>
     </div>
 
-    <h4>{{'CONTENTS' | translate}}</h4>
-    <div st-table="children" st-safe-src="vm.record_children" class="table-x-overflow table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>{{'REFERENCE_CODE' | translate}}</th>
-                    <th>{{'TITLE' | translate}}</th>
-                    <th>{{'TIME' | translate}}</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="x in children">
-                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer"><b>{{x._source.reference_code}}</b></td>
-                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.name}}</td>
-                    <td ng-click="vm.gotoNode(x)" class="cursor-pointer">{{x._source.unit_dates.date}}</td>
-                    <td>
-                        <button ng-if="x._index == 'document'" class="btn btn-success btn-small" ng-click="vm.viewFile(x._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
-                    </td>
-                </tr>
-                <tr ng-if="children.length <= 0 && !vm.childrenLoading" class="empty-table-indicator">
-                    <td colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
-                </tr>
-                <tr ng-if="children.length <= 0 && vm.childrenLoading" class="empty-table-indicator">
-                    <td class="loading-column" colspan="4">{{'LOADING' | translate}}</td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>
-    </div>
+    <div ng-include="'static/frontend/views/search_detail_contents.html'"></div>
     <div ng-if="vm.record._source.ip_objid">
         <strong>Förvaringsenhet:</strong> {{ vm.record._source.ip_objid }}
         <br/>

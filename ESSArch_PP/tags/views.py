@@ -8,9 +8,9 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
-from ESSArch_Core.tags.filters import TagFilter
-from ESSArch_Core.tags.models import Structure, StructureUnit, Tag
-from ESSArch_Core.tags.serializers import TagSerializer, StructureSerializer, StructureUnitSerializer
+from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
+from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagVersion
+from ESSArch_Core.tags.serializers import TagSerializer, TagVersionNestedSerializer, StructureSerializer, StructureUnitSerializer
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 
@@ -27,7 +27,8 @@ class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     def tree(self, request, pk=None):
         obj = self.get_object()
 
-        root_nodes = cache_tree_children(StructureUnit.objects.filter(structure=obj))
+        qs = StructureUnit.objects.filter(structure=obj)
+        root_nodes = cache_tree_children(qs)
         dicts = []
         for n in root_nodes:
             dicts.append(mptt_to_dict(n, StructureUnitSerializer))
@@ -39,6 +40,8 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = StructureUnit.objects.select_related('structure')
     serializer_class = StructureUnitSerializer
     permission_classes = (DjangoModelPermissions,)
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = StructureUnitFilter
 
     def perform_create(self, serializer):
         try:
@@ -49,6 +52,43 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         if parent is not None and str(parent.structure.pk) != structure:
             raise exceptions.ValidationError('Parent must be from the same classification structure')
         serializer.save(structure_id=structure)
+
+    @detail_route(methods=['get'])
+    def nodes(self, request, pk=None, parent_lookup_structure=None):
+        archive_id = request.query_params.get('archive')
+        unit = self.get_object()
+
+        structure = unit.structure
+        try:
+            nodes = TagVersion.objects.get(pk=archive_id).get_descendants(structure)
+        except TagVersion.DoesNotExist:
+            raise exceptions.ParseError('Invalid archive {}'.format(archive_id))
+        children = nodes.filter(tag__structures__structure_unit=unit)
+
+        context = {'structure': structure, 'user': request.user}
+
+        if self.paginator is not None:
+            paginated = self.paginator.paginate_queryset(children, request)
+            serialized = TagVersionNestedSerializer(instance=paginated, many=True, context=context).data
+            return self.paginator.get_paginated_response(serialized)
+
+        return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
+
+    @detail_route(methods=['get'])
+    def children(self, request, pk=None, parent_lookup_structure=None):
+        unit = self.get_object()
+        if unit.is_leaf_node():
+            return self.nodes(request, pk, parent_lookup_structure)
+
+        children = unit.get_children()
+        serializer = self.get_serializer_class()
+        context = {'user': request.user}
+        if self.paginator is not None:
+            paginated = self.paginator.paginate_queryset(children, request)
+            serialized = serializer(instance=paginated, many=True, context=context).data
+            return self.paginator.get_paginated_response(serialized)
+
+        return Response(serializer(children, many=True, context=context).data)
 
 
 class TagViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
