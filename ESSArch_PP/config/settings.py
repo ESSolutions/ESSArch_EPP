@@ -49,7 +49,10 @@ PROJECT_NAME = 'ESSArch Preservation Platform'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-REDIS_URL = os.environ.get('REDIS_URL_EPP', 'redis://localhost/3')
+try:
+    from local_epp_settings import REDIS_URL
+except ImportError as exp:
+    REDIS_URL = os.environ.get('REDIS_URL_EPP','redis://localhost/3')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'x3lzf9b+nq_0nnu(&q3ukdo^97gpp2(x4yonr+5x@m9m9d8ftg'
@@ -200,7 +203,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {'default': dj_database_url.config(env='DATABASE_URL_EPP', default='sqlite:///db.sqlite')}
+try:
+    from local_epp_settings import DATABASE_URL
+except ImportError as exp:
+    DATABASE_URL = os.environ.get('DATABASE_URL_EPP','sqlite:///db.sqlite')
+DATABASES = {'default': dj_database_url.parse(url=DATABASE_URL)}
 
 # Cache
 CACHES = {
@@ -214,7 +221,11 @@ CACHES = {
     }
 }
 
-elasticsearch_url = urlparse(os.environ.get('ELASTICSEARCH_URL_EPP', 'http://localhost:9200'))
+try:
+    from local_epp_settings import ELASTICSEARCH_URL
+except ImportError as exp:
+    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL_EPP', 'http://localhost:9200')
+elasticsearch_url = urlparse(ELASTICSEARCH_URL)
 ELASTICSEARCH_CONNECTIONS = {
     'default': {
         'hosts': [{
@@ -331,7 +342,11 @@ DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/{lang}/html')
 # rabbitmqctl set_permissions -p epp guest ".*" ".*" ".*"
 
 # Celery settings
-CELERY_BROKER_URL = os.environ.get('RABBITMQ_URL_EPP', 'amqp://guest:guest@localhost:5672/epp')
+try:
+    from local_epp_settings import RABBITMQ_URL
+except ImportError as exp:
+    RABBITMQ_URL = os.environ.get('RABBITMQ_URL_EPP', 'amqp://guest:guest@localhost:5672/epp')
+CELERY_BROKER_URL = RABBITMQ_URL
 CELERY_IMPORTS = ("ESSArch_Core.ip.tasks", "workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_EAGER_PROPAGATES = True
