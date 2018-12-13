@@ -1109,38 +1109,59 @@ class InformationPackageViewSetTestCase(TestCase):
 
         self.assertEqual(len(res.data), 0)
 
-    @mock.patch('ip.views.shutil.rmtree')
-    @mock.patch('ip.views.os.remove')
-    def test_delete_ip_without_permission(self, mock_os, mock_shutil):
-        ip = InformationPackage.objects.create(object_path='foo')
-        url = reverse('informationpackage-detail', args=(str(ip.pk),))
-        res = self.client.delete(url)
+    @mock.patch('ip.views.ProcessStep.run')
+    def test_delete_ip(self, mock_step):
+        cache = Path.objects.create(entity='cache', value='cache')
+        ingest = Path.objects.create(entity='ingest', value='ingest')
+        policy = ArchivePolicy.objects.create(cache_storage=cache, ingest_path=ingest)
 
+        ip = InformationPackage.objects.create(object_path='foo', policy=policy)
+        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+
+        # no permission
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+        # view permission
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+        res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-        mock_shutil.assert_not_called()
-        mock_os.assert_not_called()
 
-    @mock.patch('ip.views.shutil.rmtree')
-    @mock.patch('ip.views.os.remove')
-    def test_delete_ip_with_permission(self, mock_os, mock_shutil):
-        ip = InformationPackage.objects.create(object_path='foo', responsible=self.user)
-        url = reverse('informationpackage-detail', args=(str(ip.pk),))
+        # delete permission
+        perms = {'group': ['view_informationpackage', 'delete_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
         res = self.client.delete(url)
-
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        mock_shutil.assert_called_once_with(ip.object_path)
-        mock_os.assert_not_called()
 
-    @mock.patch('ip.views.shutil.rmtree')
-    @mock.patch('ip.views.os.remove')
-    def test_delete_archived_ip(self, mock_os, mock_shutil):
+        mock_step.assert_called_once()
+
+    def test_delete_archived_ip(self):
         ip = InformationPackage.objects.create(object_path='foo', responsible=self.user, archived=True)
         url = reverse('informationpackage-detail', args=(str(ip.pk),))
         res = self.client.delete(url)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_shutil.assert_not_called()
-        mock_os.assert_not_called()
+        # no permission
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+        # view permission
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # delete permission
+        perms = {'group': ['view_informationpackage', 'delete_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # delete archived permission
+        perms = {'group': ['view_informationpackage', 'delete_informationpackage', 'delete_archived']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
     @mock.patch('workflow.tasks.PrepareDIP.run', side_effect=lambda *args, **kwargs: None)
     def test_prepare_dip_no_label(self, mock_prepare):
@@ -1197,6 +1218,9 @@ class InformationPackageViewSetTestCase(TestCase):
         self.url = reverse('informationpackage-detail', args=(self.ip.pk,))
         self.url = self.url + 'preserve/'
 
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, self.ip, custom_permissions=perms)
+
         self.client.post(self.url)
         mock_step.assert_called_once()
 
@@ -1211,6 +1235,9 @@ class InformationPackageViewSetTestCase(TestCase):
         self.ip = InformationPackage.objects.create(package_type=InformationPackage.DIP)
         self.url = reverse('informationpackage-detail', args=(self.ip.pk,))
         self.url = self.url + 'preserve/'
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, self.ip, custom_permissions=perms)
 
         self.client.post(self.url, {'policy': str(policy.pk)})
         mock_step.assert_called_once()
