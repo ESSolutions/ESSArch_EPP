@@ -74,7 +74,6 @@ from ESSArch_Core.tags.models import TagStructure
 from ESSArch_Core.util import generate_file_response, in_directory, list_files, merge_file_chunks, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
 
-from .filters import InformationPackageFilter
 from .serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
     NestedInformationPackageSerializer, OrderSerializer
 
@@ -788,7 +787,6 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                         processstep=step,
                         responsible=request.user,
                     )
-                    t.run()
 
                 step.run()
 
