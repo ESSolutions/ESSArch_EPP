@@ -273,9 +273,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         obj = get_object_or_404(tag_version, pk=id)
         user_archives = get_objects_for_user(self.request.user, tag_version.filter(elastic_index='archive'), []).values_list('pk', flat=True)
 
-        if obj.get_root() is not None and obj.get_root().pk not in user_archives:
-            obj_ctype = ContentType.objects.get_for_model(obj)
-            in_any_groups = GroupGenericObjects.objects.filter(object_id=str(obj.pk), content_type=obj_ctype).exists()
+        root = obj.get_root()
+        if root is not None and root.pk not in user_archives:
+            obj_ctype = ContentType.objects.get_for_model(root)
+            in_any_groups = GroupGenericObjects.objects.filter(object_id=str(root.pk), content_type=obj_ctype).exists()
 
             if in_any_groups:
                 raise exceptions.NotFound
