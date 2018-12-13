@@ -595,23 +595,19 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
 
     vm.expandChildren = function (jqueryobj, e, reload) {
         var tree = vm.recordTreeData;
-        var parent = tree.map(function(x) {return getNodeById(x, e.node.original._id); })[0];
-        var childrenNodes = tree.map(function(x) {return getNodeById(x, parent._id); })[0].children;
+        var childrenNodes = [];
         if(e.node.children.length < 2 || reload) {
             vm.getChildren(e.node.original, vm.archive).then(function (children) {
-                childrenNodes.pop();
                 children.data.forEach(function(child) {
                     child = vm.createNode(child);
                     childrenNodes.push(child);
-                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, angular.copy(child));
                 });
                 if(childrenNodes.length < children.count) {
                     var seeMoreNode = vm.createSeeMoreNode();
                     childrenNodes.push(seeMoreNode);
-                    vm.recordTreeInstance.jstree(true).create_node(e.node.id, seeMoreNode);
                 }
-                vm.recordTreeInstance.jstree(true).delete_node(vm.recordTreeInstance.jstree(true).get_node(e.node.id).children[0]);
-                parent.state = {opened: true};
+                e.node.original.children = childrenNodes;
+                e.node.original.state = {opened: true};
             });
         }
     };
