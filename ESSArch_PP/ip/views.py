@@ -74,7 +74,6 @@ from ESSArch_Core.tags.models import TagStructure
 from ESSArch_Core.util import generate_file_response, in_directory, list_files, merge_file_chunks, mkdir_p, normalize_path, parse_content_range_header, \
     remove_prefix, timestamp_to_datetime
 
-from .filters import InformationPackageFilter
 from .serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
     NestedInformationPackageSerializer, OrderSerializer
 
@@ -562,7 +561,6 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
     """
     queryset = InformationPackage.objects.select_related('responsible').prefetch_related(
         Prefetch('agents', queryset=Agent.objects.prefetch_related('notes'), to_attr='prefetched_agents'), 'steps')
-    search_fields = None
 
     def first_generation_case(self, lower_higher):
         return Case(
@@ -585,6 +583,11 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
     def filter_queryset(self, queryset):
         return queryset
 
+    def apply_filters(self, queryset):
+        for backend in list(self.filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
+
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
@@ -601,12 +604,12 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         if not see_all:
             workareas = workareas.filter(user=self.request.user)
 
-        if self.action == 'list' and view_type == 'aic':
+        if not self.detail and view_type == 'aic':
             simple_inner = InformationPackage.objects.visible_to_user(user).filter(
                 Q(Q(workareas=None) | Q(workareas__read_only=True)),
                 active=True,
             )
-            simple_inner = InformationPackageFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
+            simple_inner = self.apply_filters(simple_inner)
 
             inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
                                                                                                   queryset=workareas,
@@ -630,13 +633,13 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             self.outer_queryset = simple_outer.distinct() | dips.distinct()
             self.inner_queryset = simple_inner
             return self.queryset
-        elif self.action == 'list' and view_type == 'ip':
+        elif not self.detail and view_type == 'ip':
             filtered = InformationPackage.objects.visible_to_user(user).filter(
                 Q(Q(workareas=None) | Q(workareas__read_only=True)),
                 active=True,
             ).exclude(package_type=InformationPackage.AIC)
 
-            simple = InformationPackageFilter(data=self.request.query_params, queryset=filtered, request=self.request).qs
+            simple = self.apply_filters(filtered)
 
             def annotate_generations(qs):
                 lower_higher = InformationPackage.objects.filter(
@@ -652,7 +655,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                     Q(Q(workareas=None) | Q(workareas__read_only=True)),
                     active=True, aic=OuterRef('aic'),
                 ).order_by().values('aic')
-                lower_higher = InformationPackageFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
+                lower_higher = self.apply_filters(queryset=lower_higher)
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
                 return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 
@@ -678,7 +681,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             self.queryset = outer
             return self.queryset
 
-        if self.action == 'retrieve':
+        if self.detail:
             lower_higher = InformationPackage.objects.filter(
                 Q(aic=OuterRef('aic')), Q(Q(workareas=None) | Q(workareas__read_only=True))
             ).order_by().values('aic')
@@ -689,7 +692,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                 active=True,
             )
 
-            qs = InformationPackageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
+            qs = self.apply_filters(qs)
             qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
                              last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
@@ -743,7 +746,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                     raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
 
         if ip.archived:
-            if not request.user.has_perm('ip.delete_archived'):
+            if not request.user.has_perm('delete_archived', ip):
                 raise exceptions.PermissionDenied('You do not have permission to delete archived IPs')
 
             if request.query_params.get('delete-files', True):
@@ -784,7 +787,6 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                         processstep=step,
                         responsible=request.user,
                     )
-                    t.run()
 
                 step.run()
 
@@ -1270,7 +1272,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 workarea_exists=Exists(workareas.filter(ip=OuterRef('pk')))
             ).filter(workarea_exists=True, active=True)
 
-            simple_inner = InformationPackageFilter(data=self.request.query_params, queryset=simple_inner, request=self.request).qs
+            simple_inner = self.apply_filters(simple_inner)
 
             inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
                                                                                                   queryset=workareas,
@@ -1301,7 +1303,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 package_type=InformationPackage.AIC
             )
 
-            simple = InformationPackageFilter(data=self.request.query_params, queryset=filtered, request=self.request).qs
+            simple = self.apply_filters(filtered)
 
             def annotate_generations(qs):
                 lower_higher = InformationPackage.objects.filter(
@@ -1322,7 +1324,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 if not see_all:
                     lower_higher = lower_higher.filter(workareas__user=self.request.user)
 
-                lower_higher = InformationPackageFilter(data=self.request.query_params, queryset=lower_higher, request=self.request).qs
+                lower_higher = self.apply_filters(lower_higher)
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
                 return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 
@@ -1357,7 +1359,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 active=True,
             )
 
-            qs = InformationPackageFilter(data=self.request.query_params, queryset=qs, request=self.request).qs
+            qs = self.apply_filters(qs)
             qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
                              last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
