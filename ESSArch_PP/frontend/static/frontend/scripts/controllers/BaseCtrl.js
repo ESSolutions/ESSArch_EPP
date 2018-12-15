@@ -591,10 +591,15 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             return false;
         }
     }
+    vm.clearFilters = function() {
+        vm.setupForm();
+        $scope.submitAdvancedFilters();
+    }
+
     $scope.clearSearch = function() {
-            delete $scope.tableState.search.predicateObject;
-            $('#search-input')[0].value = "";
-            $scope.getListViewData();
+        delete $scope.tableState.search.predicateObject;
+        $('#search-input')[0].value = "";
+        $scope.getListViewData();
     }
 
     // AIC's
@@ -831,67 +836,71 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
         $scope.filterModel = {};
         for (var key in $scope.usedColumns) {
             var column = $scope.usedColumns[key];
-            switch (column.type) {
-                case "ModelChoiceFilter":
-                case "ChoiceFilter":
-                    $scope.fields.push({
-                        "templateOptions": {
-                            "type": "text",
-                            "label": $translate.instant(key.toUpperCase()),
-                            "labelProp": "display_name",
-                            "valueProp": "value",
-                            "options": column.choices,
-                        },
-                        "type": "select",
-                        "key": key,
-                    })
-                    break;
-                case "BooleanFilter":
-                    $scope.fields.push({
-                        "templateOptions": {
-                            "label": $translate.instant(key.toUpperCase()),
-                            "labelProp": key,
-                            "valueProp": key,
-                        },
-                        "type": "checkbox",
-                        "key": key,
-                    })
-                    break;
-                case "ListFilter":
-                case "CharFilter":
-                    $scope.fields.push({
-                        "templateOptions": {
-                            "type": "text",
-                            "label": $translate.instant(key.toUpperCase()),
-                            "labelProp": key,
-                            "valueProp": key,
-                        },
-                        "type": "input",
-                        "key": key,
-                    })
-                    break;
-                case "IsoDateTimeFromToRangeFilter":
-                    $scope.fields.push(
-                        {
+            if(key == "package_type_name_exclude") {
+                delete column;
+            } else {
+                switch (column.type) {
+                    case "ModelMultipleChoiceFilter":
+                    case "MultipleChoiceFilter":
+                        $scope.fields.push({
                             "templateOptions": {
                                 "type": "text",
-                                "label": $translate.instant(key.toUpperCase() + "_START"),
+                                "label": column.label,
+                                "labelProp": "display_name",
+                                "valueProp": "value",
+                                "options": column.choices,
                             },
-                            "type": "datepicker",
-                            "key": key + "_after"
-                        }
-                    )
-                    $scope.fields.push(
-                        {
+                            "type": "select",
+                            "key": key,
+                        })
+                        break;
+                    case "BooleanFilter":
+                        $scope.fields.push({
+                            "templateOptions": {
+                                "label": column.label,
+                                "labelProp": key,
+                                "valueProp": key,
+                            },
+                            "type": "checkbox",
+                            "key": key,
+                        })
+                        break;
+                    case "ListFilter":
+                    case "CharFilter":
+                        $scope.fields.push({
                             "templateOptions": {
                                 "type": "text",
-                                "label": $translate.instant(key.toUpperCase() + "_END"),
+                                "label": column.label,
+                                "labelProp": key,
+                                "valueProp": key,
                             },
-                            "type": "datepicker",
-                            "key": key + "_before"
-                        }
-                    )
-                    break;
+                            "type": "input",
+                            "key": key,
+                        })
+                        break;
+                    case "IsoDateTimeFromToRangeFilter":
+                        $scope.fields.push(
+                            {
+                                "templateOptions": {
+                                    "type": "text",
+                                    "label": column.label + " " + $translate.instant("START"),
+                                },
+                                "type": "datepicker",
+                                "key": key + "_after"
+                            }
+                        )
+                        $scope.fields.push(
+                            {
+                                "templateOptions": {
+                                    "type": "text",
+                                    "label": column.label + " " + $translate.instant("END"),
+                                },
+                                "type": "datepicker",
+                                "key": key + "_before"
+                            }
+                        )
+                        break;
+                }
             }
         }
     }
