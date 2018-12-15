@@ -47,6 +47,6 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" type="submit" ng-disabled="!$ctrl.validCron($ctrl.frequency) || $ctrl.addingRule" focused="true">{{'CREATE' | translate}} <i ng-if="$ctrl.addingRule" class="fas fa-spinner fa-spin"/></button>
-        <button class="btn btn-warning" ng-disabled="$ctrl.addingRule" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+        <button class="btn btn-default" ng-disabled="$ctrl.addingRule" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </form>

@@ -11,7 +11,7 @@
         <h4>SA fields</h4>
         <form name="sa-form" ng-submit="vm.saveSa()" ng-if="vm.saModel">
             <formly-form model="vm.saModel" fields="vm.saFields" options="vm.validatorOptions"></formly-form>
-            <button class="btn btn-info" ng-if="!vm.saProfile.published" type="submit" translate="SAVE"></button>
+            <button class="btn btn-primary" ng-if="!vm.saProfile.published" type="submit" translate="SAVE"></button>
         </form>
     </div>
 </div>

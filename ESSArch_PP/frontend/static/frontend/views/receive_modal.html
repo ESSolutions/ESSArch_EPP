@@ -92,6 +92,6 @@
     <button class="btn btn-default" type="button" ng-click="vm.skip()">{{'SKIP' | translate}} <i class=" fas fa-angle-double-right"></i></button>
     <div class="receive-footer">
         <button class="btn btn-primary" ng-disabled="vm.receiving || receiveDisabled || vm.form.$invalid || ip.state != 'Prepared'" type="submit" ng-click="vm.confirmReceiveModal(ip)">{{'RECEIVE' | translate}}</button>
-        <button class="btn btn-warning" type="button" ng-click="vm.cancel()" ng-disabled="vm.receiving">{{'CANCEL' | translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="vm.cancel()" ng-disabled="vm.receiving">{{'CANCEL' | translate}}</button>
     </div>
 </div>
