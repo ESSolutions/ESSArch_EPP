@@ -175,7 +175,7 @@
     "PREPAREIPDESC": "Create a new IP",
     "REFRESHTABLEDESC": "Refresh table",
     "LABELDESC": "Work with IP",
-    "IPSTATEDESC": "Open status view for IP",
+    "IPSTATEDESC": "Current state of IP",
     "EVENTSDESC": "List Events for IP",
     "REMOVEIP": "Remove IP",
     "CHOOSELANGUAGE": "Choose preferred language",
@@ -670,5 +670,10 @@
     "IMPORT_SA_FROM_FILE_SHORT": "Import SA from file",
     "INFORMATION_PACKAGES": "Information packages",
     "STORAGE_MEDIUMS": "Storage mediums",
-    "DISSEMINATION_PACKAGES": "Dissemination packages"
+    "DISSEMINATION_PACKAGES": "Dissemination packages",
+    "SEARCH_ADMIN": "Search",
+    "SEARCH_ADMINISTRATION": "Administration for search views",
+    "SELECT_ALL": "Select all",
+    "NO_ACTIONS_FOR_SELECTED_IPS": "No actions available for selected object(s)",
+    "READ_ONLY": "Read only"
 }

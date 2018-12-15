@@ -28,11 +28,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
         if ($state.is('home.access.search')) {
             vm.activeTab = 0;
             vm.search(vm.tableState);
-        } else if ($state.is('home.access.search.archiveManager')) {
-            vm.activeTab = 2;
-        } else if ($state.is('home.access.search.classificationStructures')) {
-            vm.activeTab = 3;
-        }else {
+        } else {
             vm.activeTab = 1;
         }
     });
@@ -200,7 +196,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
     }
     vm.tags = [];
 
-    var getAggregationChildren = function(aggregations, aggrType){
+    vm.getAggregationChildren = function(aggregations, aggrType){
         var aggregation = aggregations['_filter_' + aggrType][aggrType]
         var missing = true;
         children = aggregation.buckets.map(function(item) {
@@ -241,13 +237,13 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
     }
 
     vm.loadTags = function(aggregations) {
-        var typeChildren = getAggregationChildren(aggregations, 'type');
-        var archiveChildren = getAggregationChildren(aggregations, 'archive');
-        var institutionChildren = getAggregationChildren(aggregations, 'institution');
-        var organizationChildren = getAggregationChildren(aggregations, 'organization');
-        var informationPackageChildren = getAggregationChildren(aggregations, 'information_package');
-        var archiveCreatorChildren = getAggregationChildren(aggregations, 'archive_creator');
-        var archiveResponsibleChildren = getAggregationChildren(aggregations, 'archive_responsible');
+        var typeChildren = vm.getAggregationChildren(aggregations, 'type');
+        var archiveChildren = vm.getAggregationChildren(aggregations, 'archive');
+        var institutionChildren = vm.getAggregationChildren(aggregations, 'institution');
+        var organizationChildren = vm.getAggregationChildren(aggregations, 'organization');
+        var informationPackageChildren = vm.getAggregationChildren(aggregations, 'information_package');
+        var archiveCreatorChildren = vm.getAggregationChildren(aggregations, 'archive_creator');
+        var archiveResponsibleChildren = vm.getAggregationChildren(aggregations, 'archive_responsible');
         var filters = [
             {
                 text: $translate.instant("TYPE"),

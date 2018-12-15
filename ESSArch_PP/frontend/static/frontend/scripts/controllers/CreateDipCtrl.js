@@ -1,6 +1,6 @@
-angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window, ContextMenuBase) {
+angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window, ContextMenuBase, ContentTabs) {
     var vm = this;
-    var ipSortString = "";
+    var ipSortString = [];
     var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     vm.organizationMember = {
@@ -57,37 +57,9 @@ angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, A
 
     $scope.requestForm = false;
     $scope.openRequestForm = function(row) {
-        $scope.select = false;
-        $scope.eventlog = false;
-        $scope.edit = false;
-        $scope.eventShow = false;
-        if(row.package_type == 1) {
-            $scope.requestForm = false;
-            $scope.requestEventlog = false;
-            if ($scope.ip != null && $scope.ip.object_identifier_value== row.object_identifier_value) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-            } else {
-                $scope.ip = row;
-                $rootScope.ip = $scope.ip;
-            }
-            return;
-        }
-        if($scope.requestForm && $scope.ip.id== row.id){
-            $scope.requestForm = false;
-            $scope.requestEventlog = false;
-            $scope.ip = null;
-            $rootScope.ip = null;
-        } else {
-            $scope.requestForm = true;
-            $scope.requestEventlog = true;
-            $scope.ip = row;
-            $rootScope.ip = $scope.ip;
-            $scope.getArchivePolicies().then(function(data) {
-                vm.request.archivePolicy.options = data;
-            })
-        }
-        $scope.statusShow = false;
+        $scope.getArchivePolicies().then(function(data) {
+            vm.request.archivePolicy.options = data;
+        })
     }
 
     //Cancel update intervals on state change
@@ -154,44 +126,41 @@ angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, A
     };
 
 
-    //Click function for Ip table
-    $scope.ipTableClick = function (row) {
+    // Click function for Ip table
+    vm.selectSingleRow = function (row) {
+        $scope.ips = [];
         if (row.state == "Created") {
-            //$scope.openRequestForm(row);
+            $scope.openRequestForm(row);
+        }
+        if (row.state === "Creating" || (($scope.select || $scope.requestForm) && $scope.ip && $scope.ip.id == row.id)) {
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
+            $scope.filebrowser = false;
         } else {
-
-            if (row.state === "Creating" || (($scope.select || $scope.requestForm) && $scope.ip.id == row.id)) {
-                $scope.select = false;
-                $scope.eventlog = false;
-                $scope.edit = false;
-                $scope.ip = null;
-                $rootScope.ip = null;
-                $scope.filebrowser = false;
-            } else {
-                $scope.ip = row;
-                $rootScope.ip = $scope.ip;
-                $scope.select = true;
-                $scope.eventlog = true;
-                $scope.edit = true;
-                $scope.filesPerPage = $cookies.get("files-per-page") || 50;
-                $scope.dipFilesPerPage = $cookies.get("files-per-page") || 50;
+            $scope.ip = row;
+            $rootScope.ip = $scope.ip;
+            $scope.select = true;
+            $scope.edit = true;
+            $scope.filesPerPage = $cookies.get("files-per-page") || 50;
+            $scope.dipFilesPerPage = $cookies.get("files-per-page") || 50;
+            if($scope.ip.state === 'Prepared') {
                 $scope.deckGridInit(row);
             }
-            $scope.requestForm = false;
-            $scope.requestEventlog = false;
-            $scope.eventShow = false;
-            $scope.statusShow = false;
         }
-    };
-        $scope.colspan = 9;
-        $scope.stepTaskInfoShow = false;
-        $scope.statusShow = false;
-        $scope.eventShow = false;
-        $scope.select = false;
-        $scope.subSelect = false;
-        $scope.edit = false;
-        $scope.eventlog = false;
         $scope.requestForm = false;
+        $scope.requestEventlog = false;
+        $scope.eventShow = false;
+        $scope.statusShow = false;
+    };
+    $scope.colspan = 9;
+    $scope.select = false;
+    $scope.subSelect = false;
+    $scope.edit = false;
+    $scope.eventlog = false;
+    $scope.requestForm = false;
 
     $scope.removeIp = function(ipObject) {
         IP.delete({
@@ -399,7 +368,7 @@ angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, A
                 $scope.workArrayLoading = false;
                 $scope.initLoad = false;
             }).catch(function(response) {
-                if(response.status === 404) {
+                if(response.status == 404) {
                     $scope.deckGridData = [];
                     $scope.workarea_tableState.pagination.numberOfPages = 0;//set the number of pages so the pagination can update
                     $scope.workarea_tableState.pagination.start = 0;//set the number of pages so the pagination can update

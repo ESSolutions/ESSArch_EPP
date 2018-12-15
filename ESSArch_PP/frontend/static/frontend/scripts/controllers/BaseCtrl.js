@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ErrorResponse){
+angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ErrorResponse, ContentTabs){
     // Initialize variables
 
     $scope.$window = $window;
@@ -40,11 +40,14 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
     $scope.filebrowser = false;
     $scope.ip = null;
     $rootScope.ip = null;
+    $scope.ips = [];
     $scope.myTreeControl = {};
     $scope.myTreeControl.scope = this;
     vm.itemsPerPage = $cookies.get('epp-ips-per-page') || 10;
     vm.archived = false;
+    vm.specificTabs = [];
 
+    $scope.ContentTabs = ContentTabs;
     // Can be overwritten in controllers to change title
     vm.listViewTitle = $translate.instant('INFORMATION_PACKAGES');
 
@@ -68,6 +71,39 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
     // Watchers
     watchers.push($scope.$watch(function () { return $rootScope.selectedTag; }, function (newVal, oldVal) {
         $scope.getListViewData();
+    }, true));
+
+    watchers.push($scope.$watch(function() {
+        return $scope.ips.length;
+    }, function(newVal) {
+        $timeout(function(){
+            if($scope.ip !== null) {
+                vm.specificTabs = ContentTabs.visible([$scope.ip], $state.current.name)                ;
+            } else {
+                vm.specificTabs = ContentTabs.visible($scope.ips, $state.current.name);
+            }
+            if(newVal > 0) {
+                vm.activeTab = vm.specificTabs[0];
+            } else {
+                vm.activeTab = 'no_tabs';
+            }
+        })
+    }, true));
+
+    watchers.push($scope.$watch(function() {
+        return $scope.ip;
+    }, function(newVal) {
+        if(newVal !== null) {
+
+            $timeout(function(){
+                vm.specificTabs = ContentTabs.visible([$scope.ip], $state.current.name);
+                if(vm.specificTabs.length > 0) {
+                    vm.activeTab = vm.specificTabs[0];
+                } else {
+                    vm.activeTab = 'tasks';
+                }
+            })
+        }
     }, true));
 
     // Initialize intervals
@@ -126,66 +162,6 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
     vm.updateListViewConditional();
 
     // Click fucntions
-
-    //Click function for status view
-    $scope.stateClicked = function (row) {
-        if ($scope.statusShow) {
-                $scope.tree_data = [];
-            if ($scope.ip == row) {
-                $scope.statusShow = false;
-                if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow && !$scope.requestForm && !$scope.filebrowser) {
-                    $scope.ip = null;
-                    $rootScope.ip = null;
-                }
-            } else {
-                $scope.statusShow = true;
-                $scope.edit = false;
-                $scope.ip = row;
-                $rootScope.ip = row;
-            }
-        } else {
-            $scope.statusShow = true;
-            $scope.edit = false;
-            $scope.ip = row;
-            $rootScope.ip = row;
-        }
-        $scope.subSelect = false;
-        $scope.eventlog = false;
-        $scope.select = false;
-        $scope.requestForm = false;
-        $scope.eventShow = false;
-    };
-
-    //Click funciton for event view
-    $scope.eventsClick = function (row) {
-        if($scope.eventShow && $scope.ip == row){
-            $scope.eventShow = false;
-            $rootScope.stCtrl = null;
-            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow && !$scope.requestForm && !$scope.filebrowser) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-            }
-        } else {
-            $scope.eventShow = true;
-            $scope.statusShow = false;
-            $scope.ip = row;
-            $rootScope.ip = row;
-        }
-    };
-
-    $scope.filebrowserClick = function (ip) {
-        if ($scope.filebrowser && $scope.ip == ip) {
-            $scope.filebrowser = false;
-            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow && !$scope.requestForm && !$scope.filebrowser) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-            }
-        } else {
-            $scope.filebrowser = true;
-            $scope.ip = ip;
-            $rootScope.ip = ip;
-        }
-    }
 
     // List view
 
@@ -477,19 +453,39 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
     $scope.submitRequest = function(ip, request) {
         switch(request.type) {
             case "preserve":
-                $scope.preserveIp(ip, request);
+                if($scope.ips.length > 0) {
+                    vm.preserveModal($scope.ips, request);
+                } else {
+                    vm.preserveModal(ip, request);
+                }
                 break;
             case "get":
-                $scope.accessIp(ip, request);
+                if($scope.ips.length > 0) {
+                    vm.accessModal($scope.ips, request);
+                } else {
+                    vm.accessModal(ip, request);
+                }
                 break;
             case "get_tar":
-                $scope.accessIp(ip, request);
+                if($scope.ips.length > 0) {
+                    vm.accessModal($scope.ips, request);
+                } else {
+                    vm.accessModal(ip, request);
+                }
                 break;
             case "get_as_new":
-                $scope.accessIp(ip, request);
+                if($scope.ips.length > 0) {
+                    vm.accessModal($scope.ips, request);
+                } else {
+                    vm.accessModal(ip, request);
+                }
                 break;
             case "move_to_approval":
-                $scope.moveToApproval(ip, request);
+                if($scope.ips.length > 0) {
+                    vm.moveToApprovalModal($scope.ips, request);
+                } else {
+                    vm.moveToApprovalModal(ip, request);
+                }
                 break;
             case "diff_check":
                 console.log("request not implemented");
@@ -498,6 +494,110 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 console.log("request not matched");
                 break;
         }
+    }
+
+    vm.preserveModal = function(ip, request) {
+        var ips = null;
+        if(Array.isArray(ip)) {
+            ips = ip;
+        }
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/preserve_modal.html',
+            controller: 'PreserveModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
+                        ips: ips,
+                        request: request
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            $scope.ip = null;
+            $rootScope.ip = null;
+            $scope.ips = [];
+            $scope.initRequestData();
+            $scope.getListViewData();
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.accessModal = function(ip, request) {
+        var ips = null;
+        if(Array.isArray(ip)) {
+            ips = ip;
+        }
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/access_modal.html',
+            controller: 'AccessModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
+                        ips: ips,
+                        request: request
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            $scope.ip = null;
+            $rootScope.ip = null;
+            $scope.ips = [];
+            $scope.initRequestData();
+            $timeout(function() {
+                $scope.getListViewData();
+            })
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
+    }
+
+    vm.moveToApprovalModal = function(ip, request) {
+        var ips = null;
+        if(Array.isArray(ip)) {
+            ips = ip;
+        }
+        var modalInstance = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'static/frontend/views/move_to_approval_modal.html',
+            controller: 'MoveToApprovalModalInstanceCtrl',
+            controllerAs: '$ctrl',
+            resolve: {
+                data: function () {
+                    return {
+                        ip: ip,
+                        ips: ips,
+                        request: request
+                    };
+                }
+            },
+        })
+        modalInstance.result.then(function (data) {
+            $scope.ip = null;
+            $scope.ips = [];
+            $rootScope.ip = null;
+            $scope.initRequestData();
+            $timeout(function() {
+                vm.submittingRequest = false;
+                $scope.getListViewData();
+            });
+        }, function () {
+            $log.info('modal-component dismissed at: ' + new Date());
+        });
     }
 
     // Preserve IP
@@ -570,6 +670,152 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
         }).catch(function(response) {
             ErrorResponse.default(response);
         })
+    }
+
+    // Click functionality
+
+    //Click function for Ip table
+      $scope.ipTableClick = function(row, event) {
+        if( event && event.shiftKey) {
+            vm.shiftClickrow(row);
+        } else if(event && event.ctrlKey) {
+            vm.ctrlClickRow(row);
+        } else {
+            vm.selectSingleRow(row);
+        }
+    };
+
+    vm.shiftClickrow = function (row) {
+        var index = vm.displayedIps.map(function(ip) { return ip.id; }).indexOf(row.id);
+        var last;
+        if($scope.ips.length > 0) {
+            last = $scope.ips[$scope.ips.length-1].id;
+        } else if ($scope.ips.length <= 0 && $scope.ip != null) {
+            last = $scope.ip.id;
+        } else {
+            last = null;
+        }
+        var lastIndex = last != null?vm.displayedIps.map(function(ip) { return ip.id; }).indexOf(last):index;
+        if(lastIndex > index) {
+            for(i = lastIndex;i >= index;i--) {
+                if(!$scope.selectedAmongOthers(vm.displayedIps[i].id)) {
+                    $scope.ips.push(vm.displayedIps[i]);
+                }
+            }
+        } else if(lastIndex < index) {
+            for(i = lastIndex;i <= index;i++) {
+                if(!$scope.selectedAmongOthers(vm.displayedIps[i].id)) {
+                    $scope.ips.push(vm.displayedIps[i]);
+                }
+            }
+        } else {
+            vm.selectSingleRow(row);
+        }
+        $scope.statusShow = false;
+    }
+
+    vm.ctrlClickRow = function (row) {
+        if(row.package_type != 1) {
+            if($scope.ip != null) {
+                $scope.ips.push($scope.ip);
+            }
+            $scope.ip = null;
+            $rootScope.ip = null;
+            $scope.eventShow = false;
+            $scope.statusShow = false;
+            $scope.filebrowser = false;
+            var deleted = false;
+            $scope.ips.forEach(function(ip, idx, array) {
+                if(!deleted && ip.object_identifier_value == row.object_identifier_value) {
+                    array.splice(idx, 1);
+                    deleted = true;
+                }
+            })
+            if(!deleted) {
+                if($scope.ips.length ==  0) {
+                    $scope.initRequestData();
+                }
+                $scope.select = true;
+                $scope.eventlog = true;
+                $scope.edit = true;
+                $scope.requestForm = true;
+                $scope.eventShow = false;
+                $scope.ips.push(row);
+            }
+            if($scope.ips.length == 1) {
+                $scope.ip = $scope.ips[0];
+                $rootScope.ip = $scope.ips[0];
+                $scope.ips = [];
+            }
+        }
+        $scope.statusShow = false;
+    }
+
+    vm.selectSingleRow = function (row) {
+        if(row.package_type == 1) {
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.eventShow = false;
+            $scope.requestForm = false;
+            if ($scope.ip != null && $scope.ip.object_identifier_value == row.object_identifier_value) {
+                $scope.ip = null;
+                $rootScope.ip = null;
+                $scope.filebrowser = false;
+            } else {
+                $scope.ip = row;
+                $rootScope.ip = $scope.ip;
+            }
+            return;
+        }
+        $scope.ips = [];
+        if($scope.select &&$scope.ip != null && $scope.ip.object_identifier_value == row.object_identifier_value){
+            $scope.select = false;
+            $scope.eventlog = false;
+            $scope.edit = false;
+            $scope.eventShow = false;
+            $scope.requestForm = false;
+            $scope.ip = null;
+            $rootScope.ip = null;
+            $scope.filebrowser = false;
+            $scope.initRequestData();
+        } else {
+            $scope.select = true;
+            $scope.eventlog = true;
+            $scope.edit = true;
+            $scope.requestForm = true;
+            $scope.eventShow = false;
+            $scope.ip = row;
+            $rootScope.ip = $scope.ip;
+        }
+        $scope.statusShow = false;
+    }
+
+    $scope.selectedAmongOthers = function(id) {
+        var exists = false;
+        $scope.ips.forEach(function(ip) {
+            if(ip.id == id) {
+                exists = true;
+            }
+        })
+        return exists;
+    }
+
+    vm.selectAll = function() {
+        $scope.ips = [];
+        vm.displayedIps.forEach(function(ip) {
+            vm.ctrlClickRow(ip);
+            if(ip.information_packages && ip.information_packages.length > 0 && !ip.collapsed) {
+                ip.information_packages.forEach(function(subIp) {
+                    vm.ctrlClickRow(subIp);
+                });
+            }
+        });
+    }
+    vm.deselectAll = function() {
+        $scope.ips = [];
+        $scope.ip = null;
+        $rootScope.ip = null;
     }
 
     // Basic functions
@@ -769,6 +1015,9 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             },
         })
         modalInstance.result.then(function (data) {
+            $scope.ips = [];
+            $scope.ip = null;
+            $rootScope.ip = null;
             $scope.ipRemoved(ipObject);
         }, function () {
             $log.info('modal-component dismissed at: ' + new Date());

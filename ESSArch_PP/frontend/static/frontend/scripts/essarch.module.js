@@ -137,36 +137,6 @@ angular.module('essarch', [
             }
         },
     })
-    .state('home.access.search.classificationStructures', {
-        url: '/classification-structures',
-        template: '<classification-structure-editor></classification-structure-editor>',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        },
-        data: {
-            permissions: {
-                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
-                redirectTo: 'home.restricted'
-            }
-        },
-    })
-    .state('home.access.search.archiveManager', {
-        url: '/archive-manager',
-        template: '<archive-manager></archive-manager>',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        },
-        data: {
-            permissions: {
-                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
-                redirectTo: 'home.restricted'
-            }
-        },
-    })
     .state('home.access.search.information_package', {
         url: '/information_package/:id',
         templateUrl: '/static/frontend/views/search_ip_detail.html',
@@ -315,22 +285,6 @@ angular.module('essarch', [
             }
         },
     })
-    .state('home.ingest.workarea', {
-        url: '/workarea',
-        templateUrl: '/static/frontend/views/ingest_workarea.html',
-        controller: 'IngestWorkareaCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        },
-        data: {
-            permissions: {
-                only: nestedPermissions(Object.resolve("home.ingest.workarea", permissionConfig)),
-                redirectTo: 'home.restricted'
-            }
-        },
-    })
     .state('home.access', {
         url: 'access',
         templateUrl: '/static/frontend/views/access.html',
@@ -357,22 +311,6 @@ angular.module('essarch', [
             }
         },
     })
-    .state('home.access.workarea', {
-        url: '/workarea',
-        templateUrl: '/static/frontend/views/access_workarea.html',
-        controller: 'AccessWorkareaCtrl as vm',
-        resolve: {
-            authenticated: ['djangoAuth', function(djangoAuth){
-                return djangoAuth.authenticationStatus();
-            }],
-        },
-        data: {
-            permissions: {
-                only: nestedPermissions(Object.resolve("home.access.workarea", permissionConfig)),
-                redirectTo: 'home.restricted'
-            }
-        },
-    })
     .state('home.access.createDip', {
         url: '/create-DIP',
         templateUrl: '/static/frontend/views/access_create_dip.html',
@@ -386,6 +324,22 @@ angular.module('essarch', [
         data: {
             permissions: {
                 only: nestedPermissions(Object.resolve("home.access.createDip", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
+    .state('home.workarea', {
+        url: 'workspace',
+        templateUrl: '/static/frontend/views/combined_workarea.html',
+        controller: 'CombinedWorkareaCtrl as vm',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.workarea", permissionConfig)),
                 redirectTo: 'home.restricted'
             }
         },
@@ -488,6 +442,52 @@ angular.module('essarch', [
                 return djangoAuth.authenticationStatus();
             }],
         }
+    })
+    .state('home.administration.searchAdmin', {
+        url: '/search-admin',
+        template: '<search-admin></search-admin>',
+        redirectTo: 'home.administration.searchAdmin.archiveManager',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.administration.searchAdmin", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
+    .state('home.administration.searchAdmin.classificationStructures', {
+        url: '/classification-structures',
+        template: '<classification-structure-editor></classification-structure-editor>',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
+    })
+    .state('home.administration.searchAdmin.archiveManager', {
+        url: '/archive-manager',
+        template: '<archive-manager></archive-manager>',
+        resolve: {
+            authenticated: ['djangoAuth', function(djangoAuth){
+                return djangoAuth.authenticationStatus();
+            }],
+        },
+        data: {
+            permissions: {
+                only: nestedPermissions(Object.resolve("home.access.search", permissionConfig)),
+                redirectTo: 'home.restricted'
+            }
+        },
     })
     .state('home.administration.mediaInformation', {
         url: '/media-information',

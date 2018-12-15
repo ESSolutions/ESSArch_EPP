@@ -23,14 +23,10 @@
                 <label for items-per-page></label>
                 <select class="form-control items-per-page" ng-model="vm.rulesPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
                     popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
-                <div class="input-group margin-bottom-sm global-search">
+                <div class="global-search">
                     <input id="search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
                         uib-popover="{{'GLOBALSEARCHDESC_RULE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
                     />
-                    <span ng-if="vm.ruleTableState.search.predicateObject && vm.ruleTableState.search.predicateObject['$']" class="input-group-addon clickable"
-                        ng-click="clearSearch(); getListViewData();">
-                        <i class="fas fa-lg fa-times" style="color: red;"></i>
-                    </span>
                 </div>
                 <button type="button" ng-click="getListviewData()" class="btn btn-primary btn-small" style="margin-left: 5px;" uib-popover="{{'SEARCH' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i></button>
                 <div class="refresh-icon">
