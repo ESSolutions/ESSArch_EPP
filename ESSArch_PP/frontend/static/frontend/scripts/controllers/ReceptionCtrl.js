@@ -24,7 +24,7 @@ Email - essarch@essolutions.se
 
 angular.module('essarch.controllers').controller('ReceptionCtrl', function (Notifications, IPReception, IP, Tag, ArchivePolicy, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, $controller, ContextMenuBase, ErrorResponse){
     var vm = this;
-    var ipSortString = [];
+    var ipSortString = "";
     var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     $controller('TagsCtrl', { $scope: $scope, vm: vm });

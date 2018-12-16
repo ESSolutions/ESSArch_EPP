@@ -1,6 +1,6 @@
 angular.module('essarch.controllers').controller('CombinedWorkareaCtrl', function (WorkareaFiles, Workarea, $scope, $controller, $rootScope, Resource, $interval, $timeout, appConfig, $cookies, $anchorScroll, $translate, $state, $http, listViewService, Requests, $uibModal, $sce, $window) {
     var vm = this;
-    var ipSortString = [];
+    var ipSortString = "";
     vm.workarea = '';
 
     $controller('WorkareaCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
