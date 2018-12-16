@@ -311,6 +311,7 @@ LOGOUT_REDIRECT_URL = '/?ref=logout'
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
+LANGUAGE_COOKIE_NAME = 'essarch_language'
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Europe/Stockholm'
