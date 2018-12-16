@@ -39,7 +39,7 @@
     </div>
     <div ng-if="select" style="margin-top: 5px;" class="select-sub-edit-eventlog-wrapper">
         <div ng-if="select" id="select-view" class="select-view">
-            <button class="btn btn-info" ng-click="vm.inventoryClick(vm.selectedRobot)">{{'INVENTORYROBOTS' | translate}}</button>
+            <button class="btn btn-primary" ng-click="vm.inventoryClick(vm.selectedRobot)">{{'INVENTORYROBOTS' | translate}}</button>
             <h4>{{'ROBOTQUEUE' | translate}}</h4>
             <div class="table-container" st-table="vm.robotQueue" st-pipe="getRobotQueue">
                 <div class="search-prepare-wrapper">

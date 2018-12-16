@@ -12,7 +12,7 @@
     </div>
     <br/>
     <div class="save-settings">
-        <button class="btn btn-info" ng-click="saveColumns()">{{'SAVE' | translate}}</button>
+        <button class="btn btn-primary" ng-click="saveColumns()">{{'SAVE' | translate}}</button>
         <div uib-alert ng-if="saveAlert" ng-class="'alert-' + (saveAlert.type || 'warning')" close="closeAlert()">{{saveAlert.msg | translate}}</div>
     </div>
 </div>

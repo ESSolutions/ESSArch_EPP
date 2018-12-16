@@ -6,7 +6,7 @@
                 uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
             <input st-search="" class="form-control global-search" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-popover="{{'GLOBALSEARCHDESC_STRUCTURES' | translate}}"
                 popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
-            <button class="btn btn-info" ng-click="vm.newStructureModal()">{{'NEW_CLASSIFICATION_STRUCTURE' | translate}}</button>
+            <button class="btn btn-primary" ng-click="vm.newStructureModal()">{{'NEW_CLASSIFICATION_STRUCTURE' | translate}}</button>
             <div class="refresh-icon">
                 <span ng-click="vm.updateStructures()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': vm.structuresLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
             </div>
@@ -64,7 +64,7 @@
             <div class="structure-rules">
                 <div class="rules-header">
                     <h4 class="mb-0">{{'RULES' | translate}}</h4>
-                    <button class="btn btn-success btn-sm" ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)" ng-click="vm.saveRules(vm.rules, vm.structure)">
+                    <button class="btn btn-primary" ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)" ng-click="vm.saveRules(vm.rules, vm.structure)">
                         {{'SAVE' | translate}}&nbsp; <i ng-if="vm.savingRules" class="fas fa-spinner fa-spin"/>
                     </button>
                 </div>
@@ -144,7 +144,7 @@
                     </ul>
                 </div>
             </div>
-            <button class="btn btn-success btn-sm margin-top-5 float-right" ng-disabled="angular.equals(vm.oldStructure, vm.structure) || vm.savingSettings" ng-click="vm.saveSettings(vm.structure)">{{'SAVE' | translate}}&nbsp;<i ng-if="vm.savingSettings" class="fas fa-spinner fa-spin"/></button>
+            <button class="btn btn-primary margin-top-5 float-right" ng-disabled="angular.equals(vm.oldStructure, vm.structure) || vm.savingSettings" ng-click="vm.saveSettings(vm.structure)">{{'SAVE' | translate}}&nbsp;<i ng-if="vm.savingSettings" class="fas fa-spinner fa-spin"/></button>
         </div>
     </div>
 </div>

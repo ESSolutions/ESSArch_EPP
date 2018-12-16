@@ -7,7 +7,7 @@
         <input required focused="true" id="label" class="form-control" ng-model="$ctrl.label"></input>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.creatingOrder">{{'OK' | translate}} <i ng-if="$ctrl.creatingOrder" class="fas fa-spinner fa-spin"/></button>
-        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creatingOrder">{{'CANCEL' | translate}}</button>
+        <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.creatingOrder">{{'CREATE' | translate}} <i ng-if="$ctrl.creatingOrder" class="fas fa-spinner fa-spin"/></button>
+        <button class="btn btn-default" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creatingOrder">{{'CANCEL' | translate}}</button>
     </div>
 </form>

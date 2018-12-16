@@ -40,8 +40,8 @@
                                     </ul>
                                 </div>
                                 <input ng-enter="$ctrl.saveIpModifications()" placeholder="{{'COMMENT' | translate}}..." class="signature form-control" ng-model="$ctrl.ipModifications['comment']"></textarea>
-                                <button class="btn btn-success btn-sm" ng-disabled="$ctrl.ipModifications['appraisal_date'] == $ctrl.ip.appraisal_date || angular.isUndefined($ctrl.ipModifications['appraisal_date'])" ng-click="$ctrl.saveIpModifications()">{{'SAVE' | translate}}</button>
-                                <button class="btn btn-warning btn-sm" ng-click="$ctrl.closeIpEdit('appraisal_date')">{{'CANCEL' | translate}}</button>
+                                <button class="btn btn-primary btn-sm" ng-disabled="$ctrl.ipModifications['appraisal_date'] == $ctrl.ip.appraisal_date || angular.isUndefined($ctrl.ipModifications['appraisal_date'])" ng-click="$ctrl.saveIpModifications()">{{'SAVE' | translate}}</button>
+                                <button class="btn btn-default btn-sm" ng-click="$ctrl.closeIpEdit('appraisal_date')">{{'CANCEL' | translate}}</button>
                             </div>
                             &nbsp;<i class="fas fa-pencil cursor-pointer" ng-click="$ctrl.editField('appraisal_date')" ng-if="!$ctrl.editMode['appraisal_date']"></i>
                         </td>
@@ -156,6 +156,6 @@
 </div>
 <div class="modal-footer">
     <div class="receive-footer">
-        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
+        <button class="btn btn-default" type="button" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>
     </div>
 </div>
