@@ -1,6 +1,6 @@
 angular.module('essarch.controllers').controller('CreateDipCtrl', function(IP, ArchivePolicy, $scope, $rootScope, $state, $stateParams, $controller, $cookies, $http, $interval, appConfig, $timeout, $anchorScroll, $uibModal, $translate, listViewService, Resource, Requests, $sce, $window, ContextMenuBase) {
     var vm = this;
-    var ipSortString = "";
+    var ipSortString = [];
     var watchers = [];
     $controller('BaseCtrl', { $scope: $scope, vm: vm, ipSortString: ipSortString });
     vm.organizationMember = {
