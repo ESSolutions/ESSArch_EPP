@@ -64,9 +64,10 @@
 
 <div id="list-view" tabindex="0" ng-keydown="vm.ipListKeydownListener($event)" class="list-view-table">
     <table class="table table-striped" style="margin-bottom: 0px;">
-        <a ng-if="vm.expandAllVisible() && vm.showExpand" ng-click="vm.expandAll()" translate="EXPAND_ALL"></a>
-        <a ng-if="vm.expandAllVisible() && !vm.showExpand" ng-click="vm.collapseAll()" translate="COLLAPSE_ALL"></a>
-        <a ng-if="('home.ingest.reception' | isState) && includedIps.length" ng-click="vm.uncheckAll()" translate="CLEAR_ALL"></a>
+        <a ng-if="vm.expandAllVisible() && vm.showExpand" class="pr-base" ng-click="vm.expandAll()" translate="EXPAND_ALL"></a>
+        <a ng-if="vm.expandAllVisible() && !vm.showExpand" class="pr-base" ng-click="vm.collapseAll()" translate="COLLAPSE_ALL"></a>
+        <a ng-if="(ips.length || ip !== null)" ng-click="vm.deselectAll()" translate="CLEAR_ALL"></a>
+        <a ng-if="ips.length == 0 && ip === null && vm.displayedIps.length > 0" ng-click="vm.selectAll()" translate="SELECT_ALL"></a>
         <thead>
             <tr>
                 <th class="clickable" class="column-label"></th>
@@ -82,12 +83,6 @@
         <tbody>
             <tr ng-repeat-start="row in vm.displayedIps" ng-class="{'selected': ip.object_identifier_value == row.object_identifier_value || selectedAmongOthers(row.id)}" class="table-item">
                 <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row', row)">
-                    <div class="checkbox table-col">
-                        <label>
-                            <input tabindex="-1" ng-disabled="row.state == 'Receiving'" type="checkbox" ng-model="row.checked" ng-change="includeIp(row)" uib-popover="{{'MARKFORRECEIVE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
-                            </input>
-                        </label>
-                    </div>
                 </td>
                 <td ng-if="!('home.ingest.reception' | isState)" class="clickable" ng-click="expandAic(row)"><i class="fas fa-plus" ng-if="row.collapsed && row.information_packages.length > 0"></i><i class="fas fa-minus" ng-if="!row.collapsed && row.information_packages.length > 0"></i></td>
                 <td ng-repeat="col in listViewColumns">

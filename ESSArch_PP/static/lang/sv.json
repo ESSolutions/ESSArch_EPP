@@ -175,7 +175,7 @@
     "PREPAREIPDESC": "Gör ett nytt IP",
     "REFRESHTABLEDESC": "Uppdatera tabell",
     "LABELDESC": "Arbeta med IP",
-    "IPSTATEDESC": "Öppna status-vyn för IP",
+    "IPSTATEDESC": "Nuvarande tillstånd för IP",
     "EVENTSDESC": "Lista alla events för IP",
     "REMOVEIP": "Ta bort IP",
     "CHOOSELANGUAGE": "Välj språk",
@@ -670,5 +670,10 @@
     "IMPORT_SA_FROM_FILE_SHORT": "Importera SA från fil",
     "INFORMATION_PACKAGES": "Informationspaket",
     "STORAGE_MEDIUMS": "Lagringsmedier",
-    "DISSEMINATION_PACKAGES": "Utlämnandepaket"
+    "DISSEMINATION_PACKAGES": "Utlämnandepaket",
+    "SEARCH_ADMIN": "Sök",
+    "SEARCH_ADMINISTRATION": "Administration för sökvyer",
+    "SELECT_ALL": "Markera alla",
+    "NO_ACTIONS_FOR_SELECTED_IPS": "Det finns inga tillgängliga funktioner för valda objekt",
+    "READ_ONLY": "Endast läsbar"
 }

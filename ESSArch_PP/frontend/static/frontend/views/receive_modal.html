@@ -4,7 +4,7 @@
 <div class="modal-body" id="modal-body">
     <profile-editor ng-if="profileEditor" ip="ip" share-data="vm.getProfileData($event)"></profile-editor>
     <div ng-if="requestForm" class="request-layout">
-        <form id="request-form" name="vm.form" class="request-form" ng-submit="vm.receive(includedIps[0])">
+        <form id="request-form" name="vm.form" class="request-form" ng-submit="vm.receive(ips[0])">
             <div class="request-type">
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
                     <label>{{'COMMENT' | translate}}</label>

@@ -152,22 +152,13 @@ angular.module('essarch.services').factory('Resource', function ($q, $filter, $t
         });
     }
 
-    function getReceptionPage(start, number, pageNumber, params, checked, sort, search, state, columnFilters) {
+    function getReceptionPage(start, number, pageNumber, params, sort, search, state, columnFilters) {
         var sortString = sort.predicate;
         if(sort.reverse) {
             sortString = "-"+sortString;
         }
         return listViewService.getReceptionIps(pageNumber, number, $rootScope.navigationFilter, sortString, search, state, columnFilters).then(function(value) {
             var ipCollection = value.data;
-            ipCollection.forEach(function(ip) {
-                ip.checked = false;
-                checked.forEach(function(checkedIp) {
-                    if(ip.id == checkedIp.id) {
-                        ip.checked = true;
-                    }
-                });
-            });
-
             return {
                 data: ipCollection,
                 numberOfPages: Math.ceil(value.count / number)

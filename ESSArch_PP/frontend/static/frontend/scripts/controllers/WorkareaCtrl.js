@@ -85,9 +85,6 @@ angular.module('essarch.controllers').controller('WorkareaCtrl', function (vm, i
                 }
             })
             if(!temp) {
-                $scope.eventShow = false;
-                $scope.statusShow = false;
-                $scope.filebrowser = false;
                 $scope.requestForm = false;
                 $scope.eventlog = false;
                 $scope.requestEventlog = false;
@@ -99,92 +96,30 @@ angular.module('essarch.controllers').controller('WorkareaCtrl', function (vm, i
         $scope.edit = false;
         $scope.select = false;
         $scope.eventlog = false;
-        $scope.eventShow = false;
-        $scope.statusShow = false;
-        $scope.filebrowser = false;
         $scope.requestForm = false;
+        $scope.ips = [];
+        $scope.ip = null;
+        $rootScope.ip = null;
         if (vm.displayedIps.length == 0) {
             $state.reload();
         }
         $scope.getListViewData();
     }
 
-    //Click function for Ip table
-    $scope.ipTableClick = function (row) {
-        if (row.workarea && row.workarea[0].read_only) {
-            $scope.ip = row;
-            $rootScope.ip = row;
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.edit = false;
-            $scope.eventShow = false;
-            $scope.requestForm = false;
-            $scope.filebrowser = false;
-            return;
-        }
-        if (row.package_type == 1 || row.workarea == null) {
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.edit = false;
-            $scope.eventShow = false;
-            $scope.requestForm = false;
-            $scope.initRequestData();
-            if ($scope.ip != null && $scope.ip.object_identifier_value == row.object_identifier_value) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-                $scope.filebrowser = false;
-            } else {
-                $scope.ip = row;
-                $rootScope.ip = $scope.ip;
-            }
-            return;
-        }
-        if ($scope.select && $scope.ip.object_identifier_value == row.object_identifier_value) {
-            $scope.select = false;
-            $scope.eventlog = false;
-            $scope.edit = false;
-            $scope.eventShow = false;
-            $scope.requestForm = false;
-            $scope.ip = null;
-            $rootScope.ip = null;
-            $scope.filebrowser = false;
-            $scope.initRequestData();
-        } else {
-            $scope.select = true;
-            $scope.eventlog = true;
-            $scope.edit = true;
-            $scope.requestForm = true;
-            $scope.eventShow = false;
-            $scope.ip = row;
-            $rootScope.ip = $scope.ip;
-        }
-        $scope.statusShow = false;
-    };
-
     $scope.filebrowserClick = function (ip) {
-        if ($scope.filebrowser && $scope.ip == ip) {
-            $scope.filebrowser = false;
-            if(!$scope.select && !$scope.edit && !$scope.statusShow && !$scope.eventShow && !$scope.requestForm && !$scope.filebrowser) {
-                $scope.ip = null;
-                $rootScope.ip = null;
-            }
-        } else {
-            $scope.ip = ip;
-            $rootScope.ip = ip;
-            $scope.previousGridArrays = [];
-            $scope.filebrowser = true;
-            if(!$rootScope.flowObjects[$scope.ip.id]) {
-                $scope.createNewFlow($scope.ip);
-            }
-            $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.id];
-            if($scope.filebrowser) {
-                $scope.showFileUpload = false;
-                $timeout(function() {
-                    $scope.showFileUpload = true;
-                });
-            }
-            $scope.previousGridArrays = [];
+        $scope.previousGridArrays = [];
+        $scope.filebrowser = true;
+        if(!$rootScope.flowObjects[$scope.ip.id]) {
+            $scope.createNewFlow($scope.ip);
         }
+        $scope.currentFlowObject = $rootScope.flowObjects[$scope.ip.id];
+        if($scope.filebrowser) {
+            $scope.showFileUpload = false;
+            $timeout(function() {
+                $scope.showFileUpload = true;
+            });
+        }
+        $scope.previousGridArrays = [];
     }
 
     // **********************************

@@ -38,13 +38,13 @@
             </div>
             <!-- If Multiple is Enabled -->
             <div ng-show="myFrequency.base >= 2" class="cron-select-wrap seconds-wrap">
-                <b ng-show="myFrequency.base >= 2"> :
+                <b ng-show="myFrequency.base >= 3"> :
+                </b>
+                <b ng-show="myFrequency.base >= 2 && myFrequency.base < 3">{{'MINUTE' | translate}}
                 </b>
                 <select class="cron-select minute-value" ng-model="myFrequency.minuteValues" ng-if="allowMultiple" multiple ng-options="value as value for value in minuteValues">
                 </select>
             </div>
         </div>
-
-        <label ng-show="myFrequency.base == 2"> {{'CRON_PAST_THE_HOUR' | translate}}</label>
     </div>
 </div>

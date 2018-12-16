@@ -14,12 +14,6 @@
                         "ip.add_to_ingest_workarea_as_new",
                         "ip.diff-check"
                     ]
-                },
-                "workarea": {
-                    "_permissions": [
-                        "ip.move_from_ingest_workarea",
-                        "ip.preserve_from_ingest_workarea"
-                    ]
                 }
             },
             "access": {
@@ -33,12 +27,6 @@
                         "ip.get_from_storage_as_new"
                     ]
                 },
-                "workarea": {
-                    "_permissions": [
-                        "ip.move_from_access_workarea",
-                        "ip.preserve_from_access_workarea"
-                    ]
-                },
                 "orders": {
                     "_permissions": [
                         "ip.prepare_order"
@@ -49,6 +37,14 @@
                         "ip.preserve_dip"
                     ]
                 }
+            },
+            "workarea": {
+                "_permissions": [
+                    "ip.move_from_ingest_workarea",
+                    "ip.preserve_from_ingest_workarea",
+                    "ip.move_from_access_workarea",
+                    "ip.preserve_from_access_workarea"
+                ]
             },
             "management": {
                 "_permissions": []
@@ -68,6 +64,18 @@
                 }
             },
             "administration": {
+                "searchAdmin": {
+                    "archiveManager": {
+                        "_permissions": [
+                            "tags.search"
+                        ]
+                    },
+                    "classificationStructures": {
+                        "_permissions": [
+                            "tags.search"
+                        ]
+                    }
+                },
                 "mediaInformation": {
                     "_permissions": [
                         "storage.storage_management"
