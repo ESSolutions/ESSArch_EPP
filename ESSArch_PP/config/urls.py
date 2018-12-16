@@ -155,6 +155,12 @@ router.register(r'tasks', ProcessTaskViewSet).register(
 )
 router.register(r'users', UserViewSet)
 router.register(r'workareas', WorkareaViewSet, base_name='workarea')
+router.register(r'workareas', WorkareaViewSet).register(
+    r'events',
+    EventIPViewSet,
+    base_name='workarea-events',
+    parents_query_lookups=['linkingObjectIdentifierValue']
+)
 router.register(r'workarea-entries', WorkareaEntryViewSet, base_name='workarea-entries')
 router.register(r'workarea-files', WorkareaFilesViewSet, base_name='workarea-files')
 
