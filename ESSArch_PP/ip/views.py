@@ -890,6 +890,9 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             raise exceptions.ParseError('Need at least one option set to true')
 
         if data.get('new'):
+            if request.user.user_profile.current_organization is None:
+                raise exceptions.ParseError('You must be part of an organization to create a new generation of an IP')
+
             if aip.archived and not request.user.has_perm('get_from_storage_as_new', aip):
                 raise exceptions.PermissionDenied('You do not have permission to create new generations of this IP')
 
