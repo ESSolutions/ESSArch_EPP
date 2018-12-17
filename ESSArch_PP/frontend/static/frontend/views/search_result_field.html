@@ -14,7 +14,7 @@
         {{vm.data | filesize}}
     </div>
     <div ng-if="vm.type === 'bool' || vm.type === 'boolean'">
-        {{vm.data?'YES':'NO' | translate}}
+        {{(vm.data === true || vm.data === 'true') ? 'YES':'NO' | translate}}
     </div>
     <br ng-if="vm.break"/>
 </div>
