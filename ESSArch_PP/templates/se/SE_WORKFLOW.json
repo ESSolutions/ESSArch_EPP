@@ -286,6 +286,13 @@
                 "name": "Receive SIP",
                 "children": [
                     {
+                        "name": "ESSArch_Core.tasks.UpdateIPStatus",
+                        "label": "Set status to receiving",
+                        "args": [
+                            "Receiving"
+                        ]
+                    },
+                    {
                         "step": true,
                         "name": "Validation",
                         "children": [
