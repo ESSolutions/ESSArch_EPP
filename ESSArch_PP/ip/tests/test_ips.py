@@ -579,6 +579,62 @@ class InformationPackageViewSetTestCase(TestCase):
         res = self.client.get(self.url, data={'view_type': 'aic'})
         self.assertEqual(len(res.data), 0)
 
+    def test_aic_view_type_with_ordering_and_filter(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip14 = InformationPackage.objects.create(aic=aic, generation=4, state='foo')
+        aip12 = InformationPackage.objects.create(aic=aic, generation=2, state='foo')
+        aip13 = InformationPackage.objects.create(aic=aic, generation=3, state='foo')
+        aip11 = InformationPackage.objects.create(aic=aic, generation=1, state='foo')
+        aic2 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip2 = InformationPackage.objects.create(aic=aic2, generation=0, state='foo')
+        aic3 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip3 = InformationPackage.objects.create(aic=aic3, generation=0, state='bar')
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip11, custom_permissions=perms)
+        self.member.assign_object(self.group, aip12, custom_permissions=perms)
+        self.member.assign_object(self.group, aip13, custom_permissions=perms)
+        self.member.assign_object(self.group, aip14, custom_permissions=perms)
+        self.member.assign_object(self.group, aip2, custom_permissions=perms)
+        self.member.assign_object(self.group, aip3, custom_permissions=perms)
+
+        res = self.client.get(self.url, data={'view_type': 'aic', 'ordering': 'create_date', 'state': 'foo'})
+        self.assertEqual(len(res.data), 2)
+        self.assertEqual(res.data[0]['id'], str(aic.pk))
+        self.assertEqual(res.data[0]['information_packages'][0]['id'], str(aip11.pk))
+        self.assertEqual(res.data[0]['information_packages'][1]['id'], str(aip12.pk))
+        self.assertEqual(res.data[0]['information_packages'][2]['id'], str(aip13.pk))
+        self.assertEqual(res.data[0]['information_packages'][3]['id'], str(aip14.pk))
+        self.assertEqual(res.data[1]['id'], str(aic2.pk))
+
+        res = self.client.get(self.url, data={'view_type': 'aic', 'ordering': '-create_date', 'state': 'foo'})
+        self.assertEqual(len(res.data), 2)
+        self.assertEqual(res.data[0]['id'], str(aic2.pk))
+        self.assertEqual(res.data[1]['id'], str(aic.pk))
+
+    def test_ip_view_type_with_ordering_and_filter(self):
+        aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip = InformationPackage.objects.create(aic=aic, generation=0, state='foo')
+        aic2 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip2 = InformationPackage.objects.create(aic=aic2, generation=0, state='foo')
+        aic3 = InformationPackage.objects.create(package_type=InformationPackage.AIC)
+        aip3 = InformationPackage.objects.create(aic=aic3, generation=0, state='bar')
+
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, aip, custom_permissions=perms)
+        self.member.assign_object(self.group, aip2, custom_permissions=perms)
+        self.member.assign_object(self.group, aip3, custom_permissions=perms)
+
+        res = self.client.get(self.url, data={'view_type': 'ip', 'ordering': 'create_date', 'state': 'foo'})
+        self.assertEqual(len(res.data), 2)
+        self.assertEqual(res.data[0]['id'], str(aip.pk))
+        self.assertEqual(res.data[1]['id'], str(aip2.pk))
+
+        res = self.client.get(self.url, data={'view_type': 'ip', 'ordering': '-create_date', 'state': 'foo'})
+        self.assertEqual(len(res.data), 2)
+        self.assertEqual(res.data[0]['id'], str(aip2.pk))
+        self.assertEqual(res.data[1]['id'], str(aip.pk))
+
     def test_aic_view_type_aic_two_aips_first_inactive(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
         aip = InformationPackage.objects.create(aic=aic, generation=0, active=False, package_type=InformationPackage.AIP)
@@ -832,14 +888,14 @@ class InformationPackageViewSetTestCase(TestCase):
 
     def test_aic_view_type_aic_multiple_aips_different_labels_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, label='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, label='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='bar', aic=aic, package_type=InformationPackage.AIP)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
         self.member.assign_object(self.group, aip2, custom_permissions=perms)
 
-        res = self.client.get(self.url, data={'view_type': 'aic', 'label': 'foo'})
+        res = self.client.get(self.url, data={'view_type': 'aic', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aic.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 1)
@@ -877,35 +933,35 @@ class InformationPackageViewSetTestCase(TestCase):
         self.assertEqual(res.data[1]['information_packages'][1]['first_generation'], False)
         self.assertEqual(res.data[1]['information_packages'][1]['last_generation'], False)
 
-    def test_ip_view_type_aic_multiple_aips_different_labels_filter_label(self):
+    def test_ip_view_type_aic_multiple_aips_different_states_filter_state(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, label='foo', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, label='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='foo', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='bar', aic=aic, package_type=InformationPackage.AIP)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
         self.member.assign_object(self.group, aip2, custom_permissions=perms)
 
-        res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'foo'})
+        res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aip.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 0)
 
-        res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'bar'})
+        res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'bar'})
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['id'], str(aip2.pk))
         self.assertEqual(len(res.data[0]['information_packages']), 0)
 
     def test_ip_view_type_aic_multiple_aips_different_labels_all_filter_label(self):
         aic = InformationPackage.objects.create(package_type=InformationPackage.AIC)
-        aip = InformationPackage.objects.create(generation=0, label='bar', aic=aic, package_type=InformationPackage.AIP)
-        aip2 = InformationPackage.objects.create(generation=1, label='baz', aic=aic, package_type=InformationPackage.AIP)
+        aip = InformationPackage.objects.create(generation=0, state='bar', aic=aic, package_type=InformationPackage.AIP)
+        aip2 = InformationPackage.objects.create(generation=1, state='baz', aic=aic, package_type=InformationPackage.AIP)
 
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, aip, custom_permissions=perms)
         self.member.assign_object(self.group, aip2, custom_permissions=perms)
 
-        res = self.client.get(self.url, data={'view_type': 'ip', 'label': 'foo'})
+        res = self.client.get(self.url, data={'view_type': 'ip', 'state': 'foo'})
         self.assertEqual(len(res.data), 0)
 
     def test_aic_view_type_aic_multiple_aips_different_labels_global_search(self):
