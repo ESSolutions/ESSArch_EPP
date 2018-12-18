@@ -22,13 +22,11 @@
     Email - essarch@essolutions.se
 """
 
+import errno
 import os
-import shutil
-import tempfile
 import uuid
 
 from django.contrib.auth.models import Permission, User
-from django.http.response import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
@@ -37,55 +35,69 @@ from groups_manager.models import GroupType
 import mock
 
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.test import APIClient
 
-from ESSArch_Core.auth.models import Group, GroupMember, Member
+from ESSArch_Core.auth.models import Group
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.ip.models import InformationPackage, Order, Workarea
 from ESSArch_Core.profiles.models import Profile, ProfileSA, SubmissionAgreement
-from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
-from ESSArch_Core.util import timestamp_to_datetime
+from ESSArch_Core.tags.models import Structure, Tag, TagStructure
+from ESSArch_Core.WorkflowEngine.models import ProcessStep
 
 
 class AccessTestCase(TestCase):
     def setUp(self):
+        Path.objects.create(entity="access_workarea", value="")
+        Path.objects.create(entity="ingest_workarea", value="")
+
+        self.ip = InformationPackage.objects.create()
+
         self.user = User.objects.create(username="admin")
+        self.member = self.user.essauth_member
+        self.org_group_type = GroupType.objects.create(label='organization')
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, self.ip, custom_permissions=perms)
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+        self.url = reverse('informationpackage-access', args=[self.ip.pk])
 
-        self.root = os.path.dirname(os.path.realpath(__file__))
-        self.datadir = os.path.join(self.root, 'datadir')
-
-        self.ip = InformationPackage.objects.create(object_path=self.datadir)
-        self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
-        self.url = self.url + 'access/'
-
-    @mock.patch('ip.views.ProcessStep.run')
-    def test_no_valid_option_set(self, mock_step):
-        res = self.client.post(self.url, format='json')
+    def test_no_valid_option_set(self):
+        res = self.client.post(self.url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_step.assert_not_called()
 
-    @mock.patch('ip.views.ProcessStep.run')
-    def test_no_valid_option_set_to_true(self, mock_step):
-        res = self.client.post(self.url, {'tar': False}, format='json')
+    def test_no_valid_option_set_to_true(self):
+        res = self.client.post(self.url, {'tar': False})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_step.assert_not_called()
 
-    @mock.patch('ip.views.ProcessStep.run')
-    def test_not_in_workarea(self, mock_step):
-        res = self.client.post(self.url, {'tar': True}, format='json')
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        mock_step.assert_called_once()
-
-    @mock.patch('ip.views.ProcessStep.run')
-    def test_already_in_workarea(self, mock_step):
+    def test_already_in_workarea(self):
         Workarea.objects.create(user=self.user, ip=self.ip, type=Workarea.ACCESS)
 
         res = self.client.post(self.url, {'tar': True}, format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_step.assert_not_called()
+
+    def test_invalid_state(self):
+        res = self.client.post(self.url, {'tar': True})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.ProcessStep.run')
+    def test_received_ip(self, mock_step):
+        self.ip.state = 'Received'
+        self.ip.save()
+        res = self.client.post(self.url, {'tar': True})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        mock_step.assert_called_once()
+
+    @mock.patch('ip.views.ProcessStep.run')
+    def test_archived_ip(self, mock_step):
+        self.ip.archived = True
+        self.ip.save()
+        res = self.client.post(self.url, {'tar': True})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        mock_step.assert_called_once()
 
 
 class WorkareaViewSetTestCase(TestCase):
@@ -387,24 +399,19 @@ class WorkareaViewSetTestCase(TestCase):
 
 class WorkareaFilesViewTestCase(TestCase):
     def setUp(self):
+        Path.objects.create(entity="access_workarea", value="access")
+        Path.objects.create(entity="ingest_workarea", value="ingest")
+
         self.user = User.objects.create(username="admin", password='admin')
+        self.member = self.user.essauth_member
+        self.org_group_type = GroupType.objects.create(label='organization')
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-        self.datadir = tempfile.mkdtemp()
-        Path.objects.create(entity='access', value=self.datadir)
-
-        self.path = os.path.join(self.datadir, str(self.user.pk))
-        os.mkdir(self.path)
-
         self.url = reverse('workarea-files-list')
-
-    def tearDown(self):
-        try:
-            shutil.rmtree(self.datadir)
-        except:
-            pass
 
     def test_no_type_parameter(self):
         res = self.client.get(self.url)
@@ -416,134 +423,107 @@ class WorkareaFilesViewTestCase(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_list_file(self):
-        _, path = tempfile.mkstemp(dir=self.path)
-        res = self.client.get(self.url, {'type': 'access'})
-
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(path), 'size': os.stat(path).st_size, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
-
-    def test_list_file_content(self):
-        _, path = tempfile.mkstemp(dir=self.path)
-        res = self.client.get(self.url, {'type': 'access', 'path': path})
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_list_folder(self):
-        path = tempfile.mkdtemp(dir=self.path)
-        res = self.client.get(self.url, {'type': 'access'})
-
-        self.assertEqual(res.data, [{'type': 'dir', 'name': os.path.basename(path), 'size': 0, 'modified': timestamp_to_datetime(os.stat(path).st_mtime)}])
-
-    def test_list_folder_content(self):
-        path = tempfile.mkdtemp(dir=self.path)
-        _, filepath = tempfile.mkstemp(dir=path)
-        res = self.client.get(self.url, {'type': 'access', 'path': path})
-
-        self.assertEqual(res.data, [{'type': 'file', 'name': os.path.basename(filepath), 'size': os.stat(filepath).st_size, 'modified': timestamp_to_datetime(os.stat(filepath).st_mtime)}])
-
     def test_illegal_path(self):
-        path = os.path.join(self.path, '..')
-        res = self.client.get(self.url, {'type': 'access', 'path': path})
-
+        res = self.client.get(self.url, {'type': 'access', 'path': '..'})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_non_existing_path(self):
-        path = os.path.join(self.path, 'does/not/exist')
-        res = self.client.get(self.url, {'type': 'access', 'path': path})
+        res = self.client.get(self.url, {'type': 'access', 'path': 'does/not/exist'})
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+    @mock.patch('ip.views.list_files', return_value=Response())
+    def test_existing_path(self, mock_list_files):
+        path = 'does/exist'
+        fullpath = os.path.join('access', self.user.username, path)
+
+        exists = os.path.exists
+        with mock.patch('ip.views.os.path.exists', side_effect=lambda x: x==fullpath or exists(x)) as mock_exists:
+            res = self.client.get(self.url, {'type': 'access', 'path': path})
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        mock_list_files.assert_called_once_with(fullpath, False, paginator=mock.ANY, request=mock.ANY)
 
     def test_add_to_dip_not_responsible(self):
-        self.url = self.url + 'add-to-dip/'
-
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        _, src = tempfile.mkstemp(dir=srcdir)
-
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = 'foo.txt'
-
-        ip = InformationPackage.objects.create(object_path=dstdir, package_type=InformationPackage.DIP)
+        self.url = reverse('workarea-files-add-to-dip')
+        src = 'src.txt'
+        dst = 'dst.txt'
+        ip = InformationPackage.objects.create(package_type=InformationPackage.DIP)
 
         res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse(os.path.isfile(os.path.join(dstdir, dst)))
 
-    def test_add_to_dip_file_to_file(self):
-        self.url = self.url + 'add-to-dip/'
+    def test_add_file_to_dip(self):
+        self.url = reverse('workarea-files-add-to-dip')
 
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        _, src = tempfile.mkstemp(dir=srcdir)
+        dstdir = 'dst'
+        src = 'src.txt'
+        dst = 'dst.txt'
 
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = 'foo.txt'
-
-        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
-
-        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
-
-        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst)))
-
-    def test_add_to_dip_file_to_file_overwrite(self):
-        self.url = self.url + 'add-to-dip/'
-
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        _, src = tempfile.mkstemp(dir=srcdir)
-
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = 'foo.txt'
-
-        open(os.path.join(dstdir, dst), 'a').close()
+        fullpath_src = os.path.join('access', self.user.username, src)
+        fullpath_dst = os.path.join(dstdir, dst)
 
         ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
 
-        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+        exists = os.path.exists
+        isfile = os.path.isfile
+        with mock.patch('ip.views.os.path.exists', side_effect=lambda x: x==fullpath_src or exists(x)), \
+             mock.patch('ip.views.os.path.isfile', side_effect=lambda x: x==fullpath_src or isfile(x)), \
+             mock.patch('ip.views.shutil.copy2') as mock_copy:
 
-        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst)))
+            res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+            mock_copy.assert_called_once_with(fullpath_src, fullpath_dst)
 
-    def test_add_to_dip_file_to_dir(self):
-        self.url = self.url + 'add-to-dip/'
+    def test_add_dir_to_dip(self):
+        self.url = reverse('workarea-files-add-to-dip')
 
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        _, src = tempfile.mkstemp(dir=srcdir)
+        dstdir = 'dst'
+        src = 'src'
+        dst = 'dst'
 
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
-
-        ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
-
-        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
-
-        self.assertTrue(os.path.isfile(os.path.join(dstdir, dst, os.path.basename(src))))
-
-    def test_add_to_dip_dir_to_dir(self):
-        self.url = self.url + 'add-to-dip/'
-
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        src = tempfile.mkdtemp(dir=srcdir)
-
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = 'foo'
+        fullpath_src = os.path.join('access', self.user.username, src)
+        fullpath_dst = os.path.join(dstdir, dst)
 
         ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
 
-        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+        exists = os.path.exists
+        with mock.patch('ip.views.os.path.exists', side_effect=lambda x: x==fullpath_src or exists(x)), \
+             mock.patch('ip.views.shutil.copytree') as mock_copy:
 
-        self.assertTrue(os.path.isdir(os.path.join(dstdir, dst)))
+            res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+            mock_copy.assert_called_once_with(fullpath_src, fullpath_dst)
 
-    def test_add_to_dip_dir_to_dir_overwrite(self):
-        self.url = self.url + 'add-to-dip/'
+    def test_overwrite_dir_to_dip(self):
+        self.url = reverse('workarea-files-add-to-dip')
 
-        srcdir = tempfile.mkdtemp(dir=self.path)
-        src = tempfile.mkdtemp(dir=srcdir)
+        dstdir = 'dst'
+        src = 'src'
+        dst = 'dst'
 
-        dstdir = tempfile.mkdtemp(dir=self.path)
-        dst = os.path.basename(tempfile.mkdtemp(dir=dstdir))
+        fullpath_src = os.path.join('access', self.user.username, src)
+        fullpath_dst = os.path.join(dstdir, dst)
 
         ip = InformationPackage.objects.create(object_path=dstdir, responsible=self.user, package_type=InformationPackage.DIP)
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
 
-        res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+        exists = os.path.exists
+        with mock.patch('ip.views.os.path.exists', side_effect=lambda x: x==fullpath_src or exists(x)), \
+             mock.patch('ip.views.shutil.copytree', side_effect=[OSError(errno.EEXIST, "error"), mock.DEFAULT]) as mock_copy, \
+             mock.patch('ip.views.shutil.rmtree') as mock_rmtree:
 
-        self.assertTrue(os.path.isdir(os.path.join(dstdir, dst)))
+            res = self.client.post(self.url, {'type': 'access', 'src': src, 'dst': dst, 'dip': str(ip.pk)})
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+            mock_rmtree.assert_called_once_with(fullpath_dst)
+
+            copy_calls = [mock.call(fullpath_src, fullpath_dst),
+                          mock.call(fullpath_src, fullpath_dst)]
+            mock_copy.assert_has_calls(copy_calls)
 
 
 class InformationPackageViewSetTestCase(TestCase):
@@ -1295,80 +1275,11 @@ class InformationPackageViewSetTestCase(TestCase):
         perms = {'group': ['view_informationpackage']}
         self.member.assign_object(self.group, self.ip, custom_permissions=perms)
 
-        self.client.post(self.url, {'policy': str(policy.pk)})
+        res = self.client.post(self.url, {'policy': str(policy.pk)})
         mock_step.assert_called_once()
 
         self.assertTrue(ProcessStep.objects.filter(information_package=self.ip).exists())
 
-
-class InformationPackageViewSetFilesTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username="admin", password='admin')
-
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
-
-        self.datadir = tempfile.mkdtemp()
-
-        self.ip = InformationPackage.objects.create(object_path=self.datadir, package_type=InformationPackage.DIP)
-        self.url = reverse('informationpackage-detail', args=(str(self.ip.pk),))
-        self.url = self.url + 'files/'
-
-    def tearDown(self):
-        try:
-            shutil.rmtree(self.datadir)
-        except:
-            pass
-
-    def test_delete_file(self):
-        _, path = tempfile.mkstemp(dir=self.datadir)
-        res = self.client.delete(self.url, {'path': path})
-
-        self.assertFalse(os.path.exists(path))
-
-    def test_delete_folder(self):
-        path = tempfile.mkdtemp(dir=self.datadir)
-        res = self.client.delete(self.url, {'path': path})
-
-        self.assertFalse(os.path.exists(path))
-
-    def test_delete_no_path(self):
-        res = self.client.delete(self.url)
-        res.status = status.HTTP_400_BAD_REQUEST
-
-    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
-    def test_list_file(self, mock_files):
-        _, path = tempfile.mkstemp(dir=self.datadir)
-        self.client.get(self.url)
-
-        mock_files.assert_called_once_with('')
-
-    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
-    def test_list_folder(self, mock_files):
-        path = tempfile.mkdtemp(dir=self.datadir)
-        self.client.get(self.url)
-
-        mock_files.assert_called_once_with('')
-
-    @mock.patch('ESSArch_Core.ip.models.InformationPackage.files', return_value=HttpResponse())
-    def test_list_folder_content(self, mock_files):
-        path = tempfile.mkdtemp(dir=self.datadir)
-        _, filepath = tempfile.mkstemp(dir=path)
-        self.client.get(self.url, {'path': path})
-
-        mock_files.assert_called_once_with(path)
-
-    def test_create_folder(self):
-        path = 'foo'
-        res = self.client.post(self.url, {'path': path, 'type': 'dir'})
-
-        self.assertTrue(os.path.isdir(os.path.join(self.ip.object_path, path)))
-
-    def test_create_file(self):
-        path = 'foo.txt'
-        res = self.client.post(self.url, {'path': path, 'type': 'file'})
-
-        self.assertTrue(os.path.isfile(os.path.join(self.ip.object_path, path)))
 
 class InformationPackageReceptionViewSetTestCase(TestCase):
     def setUp(self):
@@ -1381,141 +1292,165 @@ class InformationPackageReceptionViewSetTestCase(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
+        self.member = self.user.essauth_member
+        self.org_group_type = GroupType.objects.create(label='organization')
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
         self.url = reverse('ip-reception-list')
 
-        self.datadir = tempfile.mkdtemp()
-        Path.objects.create(entity='reception', value=self.datadir)
+        Path.objects.create(entity='reception', value='reception')
 
         self.sa = SubmissionAgreement.objects.create()
         aip_profile = Profile.objects.create(profile_type='aip')
         ProfileSA.objects.create(submission_agreement=self.sa, profile=aip_profile)
 
-        self.tar_filepath = os.path.join(self.datadir, '1.tar')
-        self.xml_filepath = os.path.join(self.datadir, '1.xml')
+    def test_receive_without_permission(self):
+        ip = InformationPackage.objects.create()
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
 
-        open(self.tar_filepath, 'a').close()
-        with open(self.xml_filepath, 'w') as xml:
-            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1" LABEL="my label">
-                <metsHdr/>
-                <file><FLocat href="file:///1.tar"/></file>
-            </root>
-            ''')
+        # return 403 when user doesn't have ip.receive permission
+        res = self.client.post(url, data={})
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
+    def test_receive_ip_with_wrong_state(self):
+        ip = InformationPackage.objects.create()
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        # return 404 when IP is not in state Prepared
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+        res = self.client.post(url, data={})
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_receive_ip_with_incorrect_package_type(self):
+        ip = InformationPackage.objects.create(state='Prepared')
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        # return 404 when IP is not of type AIP
+        res = self.client.post(url, data={})
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_receive_ip_with_missing_files(self):
+        ip = InformationPackage.objects.create(state='Prepared', package_type=InformationPackage.AIP)
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        # return 400 when any of the files doesn't exist
+        ip.package_type = InformationPackage.AIP
+        ip.save()
+        res = self.client.post(url, data={})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_receive_ip_with_missing_policy(self, mock_isfile, mock_get_container):
+        ip = InformationPackage.objects.create(state='Prepared', package_type=InformationPackage.AIP)
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        # return 400 when invalid or no policy is provided
+        res = self.client.post(url, data={})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_receive_ip_with_missing_tag(self, mock_isfile, mock_get_container):
+        ip = InformationPackage.objects.create(state='Prepared', package_type=InformationPackage.AIP)
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        # return 400 when no tag is provided
+        res = self.client.post(url, data={'archive_policy': self.policy.pk})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
     @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive(self, mock_receive, mock_find_dest):
-        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
-        res = self.client.post(self.url + '1/receive/', data=data)
+    def test_receive_ip_with_correct_data(self, mock_receive, mock_isfile, mock_get_container):
+        ip = InformationPackage.objects.create(state='Prepared', package_type=InformationPackage.AIP)
+        url = reverse('ip-reception-receive', args=[ip.pk])
+        perms = {'group': ['view_informationpackage', 'ip.receive']}
+        self.member.assign_object(self.group, ip, custom_permissions=perms)
+
+        tag = Tag.objects.create()
+        structure = Structure.objects.create()
+        tag_structure = TagStructure.objects.create(tag=tag, structure=structure)
+        res = self.client.post(url, data={'archive_policy': self.policy.pk, 'tag': tag_structure.pk})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
         mock_receive.assert_called_once()
 
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_existing(self, mock_receive):
-        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
-        InformationPackage.objects.create(object_identifier_value='1')
-        res = self.client.post(self.url + '1/receive/', data=data)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_receive.assert_not_called()
+    def test_prepare_conflict(self):
+        ip = InformationPackage.objects.create(object_identifier_value='foo')
+        url = reverse('ip-reception-prepare', args=[ip.object_identifier_value])
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_no_sa(self, mock_receive, mock_find_dest):
-        data = {'archive_policy': str(self.policy.pk)}
-        res = self.client.post(self.url + '1/receive/', data=data)
+    def test_prepare_missing_package(self):
+        url = reverse('ip-reception-prepare', args=[123])
+        res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_non_existing_sa_in_xml(self, mock_receive, mock_find_dest):
-        with open(self.xml_filepath, 'w') as xml:
-            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1" LABEL="my label">
-                <metsHdr>
-                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
-                </metsHdr>
-                <file><FLocat href="file:///1.tar"/></file>
-            </root>
-            ''' % str(uuid.uuid4()))
-
-        data = {'archive_policy': str(self.policy.pk)}
-
-        res = self.client.post(self.url + '1/receive/', data=data)
+    @mock.patch('ip.views.parse_submit_description', return_value={})
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_prepare_without_sa(self, mock_isfile, mock_get_container, mock_parse_sd):
+        url = reverse('ip-reception-prepare', args=[123])
+        res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_sa_in_xml_and_no_provided(self, mock_receive, mock_find_dest):
-        with open(self.xml_filepath, 'w') as xml:
-            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1" LABEL="my label">
-                <metsHdr>
-                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
-                </metsHdr>
-                <file><FLocat href="file:///1.tar"/></file>
-            </root>
-            ''' % str(self.sa.pk))
+    @mock.patch('ip.views.parse_submit_description')
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_prepare_with_invalid_sa_in_xml(self, mock_isfile, mock_get_container, mock_parse_sd):
+        mock_parse_sd.return_value = {'altrecordids': {'SUBMISSIONAGREEMENT': [uuid.uuid4()]}}
 
-        data = {'archive_policy': str(self.policy.pk)}
-        res = self.client.post(self.url + '1/receive/', data=data)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_sa_in_xml_and_provided_match(self, mock_receive, mock_find_dest):
-        with open(self.xml_filepath, 'w') as xml:
-            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1" LABEL="my label">
-                <metsHdr>
-                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
-                </metsHdr>
-                <file><FLocat href="file:///1.tar"/></file>
-            </root>
-            ''' % str(self.sa.pk))
-
-        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
-        res = self.client.post(self.url + '1/receive/', data=data)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_sa_in_xml_and_provided_not_match(self, mock_receive, mock_find_dest):
-        new_sa = SubmissionAgreement.objects.create()
-
-        with open(self.xml_filepath, 'w') as xml:
-            xml.write('''<?xml version="1.0" encoding="UTF-8" ?>
-            <root OBJID="1" LABEL="my label">
-                <metsHdr>
-                    <altRecordID TYPE="SUBMISSIONAGREEMENT">%s</altRecordID>
-                </metsHdr>
-                <file><FLocat href="file:///1.tar"/></file>
-            </root>
-            ''' % str(new_sa.pk))
-
-        data = {'archive_policy': str(self.policy.pk), 'submission_agreement': self.sa.pk}
-        res = self.client.post(self.url + '1/receive/', data=data)
+        url = reverse('ip-reception-prepare', args=[123])
+        res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_invalid_validator(self, mock_receive, mock_find_dest):
-        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_invalid': True}, 'submission_agreement': self.sa.pk}
-        res = self.client.post(self.url + '1/receive/', data=data)
+    @mock.patch('ip.views.parse_submit_description')
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_prepare_with_valid_sa_without_profiles_referenced_in_xml(self, mock_isfile, mock_get_container, mock_parse_sd):
+        sa = SubmissionAgreement.objects.create()
+        mock_parse_sd.return_value = {'altrecordids': {'SUBMISSIONAGREEMENT': [sa.pk]}}
 
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertFalse(ProcessStep.objects.filter(name='Validate').exists())
-        mock_receive.assert_called_once()
+        url = reverse('ip-reception-prepare', args=[123])
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @mock.patch('ip.views.find_destination', return_value=('foo', 'bar'))
-    @mock.patch('ip.views.ProcessStep.run', side_effect=lambda *args, **kwargs: None)
-    def test_receive_validator(self, mock_receive, mock_find_dest):
-        data = {'archive_policy': str(self.policy.pk), 'validators': {'validate_xml_file': True}, 'submission_agreement': self.sa.pk}
-        res = self.client.post(self.url + '1/receive/', data=data)
+    @mock.patch('ip.views.parse_submit_description')
+    @mock.patch('ip.views.InformationPackageReceptionViewSet.get_container_for_xml', return_value='foo.tar')
+    @mock.patch('ip.views.os.path.isfile', return_value=True)
+    def test_prepare_with_valid_sa_with_profiles_referenced_in_xml(self, mock_isfile, mock_get_container, mock_parse_sd):
+        sa = SubmissionAgreement.objects.create(
+            profile_aic_description = Profile.objects.create(),
+            profile_aip = Profile.objects.create(),
+            profile_aip_description = Profile.objects.create(),
+            profile_dip = Profile.objects.create(),
+        )
+        mock_parse_sd.return_value = {'altrecordids': {'SUBMISSIONAGREEMENT': [sa.pk]}}
 
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertTrue(ProcessStep.objects.filter(name='Validate').exists())
-        self.assertTrue(ProcessTask.objects.filter(name='workflow.tasks.ValidateXMLFile').exists())
-        mock_receive.assert_called_once()
+        url = reverse('ip-reception-prepare', args=[123])
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        ip_exists = InformationPackage.objects.filter(
+            object_identifier_value='123',
+            package_type=InformationPackage.AIP,
+            responsible=self.user,
+            submission_agreement=sa).exists()
+        self.assertTrue(ip_exists)
 
 
 class OrderViewSetTestCase(TestCase):
