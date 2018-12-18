@@ -588,6 +588,12 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             queryset = backend().filter_queryset(self.request, queryset, self)
         return queryset
 
+    def apply_ordering_filters(self, queryset):
+        tmp_qs = queryset
+        for backend in list(self.filter_backends):
+            tmp_qs = backend().filter_queryset(self.request, tmp_qs, self)
+        return queryset.order_by(*tmp_qs.query.order_by)
+
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
         user = self.request.user
@@ -609,7 +615,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                 Q(Q(workareas=None) | Q(workareas__read_only=True)),
                 active=True,
             )
-            simple_inner = self.apply_filters(simple_inner)
+            simple_inner = self.apply_filters(simple_inner).order_by(*InformationPackage._meta.ordering)
 
             inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
                                                                                                   queryset=workareas,
@@ -629,7 +635,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             )
             aics = simple_outer.prefetch_related(Prefetch('information_packages', queryset=inner)).distinct()
 
-            self.queryset = aics | dips
+            self.queryset = self.apply_ordering_filters(aics) | self.apply_filters(dips)
             self.outer_queryset = simple_outer.distinct() | dips.distinct()
             self.inner_queryset = simple_inner
             return self.queryset
@@ -655,7 +661,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                     Q(Q(workareas=None) | Q(workareas__read_only=True)),
                     active=True, aic=OuterRef('aic'),
                 ).order_by().values('aic')
-                lower_higher = self.apply_filters(queryset=lower_higher)
+                lower_higher = self.apply_filters(queryset=lower_higher).order_by()
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
                 return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 
@@ -1324,7 +1330,7 @@ class WorkareaViewSet(InformationPackageViewSet):
                 if not see_all:
                     lower_higher = lower_higher.filter(workareas__user=self.request.user)
 
-                lower_higher = self.apply_filters(lower_higher)
+                lower_higher = self.apply_filters(lower_higher).order_by()
                 lower_higher = lower_higher.annotate(min_gen=Min('generation'))
                 return qs.annotate(filtered_first_generation=self.first_generation_case(lower_higher))
 

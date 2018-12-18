@@ -71,7 +71,7 @@ router.register(r'appraisal-jobs', AppraisalJobViewSet)
 router.register(r'appraisal-rules', AppraisalRuleViewSet)
 router.register(r'conversion-jobs', ConversionJobViewSet)
 router.register(r'conversion-rules', ConversionRuleViewSet)
-router.register(r'information-packages', InformationPackageViewSet)
+router.register(r'information-packages', InformationPackageViewSet, base_name='informationpackage')
 router.register(r'information-packages', InformationPackageViewSet).register(
     r'appraisal-rules',
     AppraisalRuleViewSet,
@@ -155,7 +155,7 @@ router.register(r'tasks', ProcessTaskViewSet).register(
 )
 router.register(r'users', UserViewSet)
 router.register(r'workareas', WorkareaViewSet, base_name='workarea')
-router.register(r'workareas', WorkareaViewSet).register(
+router.register(r'workareas', WorkareaViewSet, base_name='workarea').register(
     r'events',
     EventIPViewSet,
     base_name='workarea-events',
