@@ -47,7 +47,7 @@ from groups_manager.utils import get_permission_name
 from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm
 from lxml import etree
-from rest_framework import exceptions, status, viewsets
+from rest_framework import exceptions, permissions, status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -204,7 +204,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         if existing is not None:
             logger.warn('Tried to prepare IP with id %s which already exists' % pk, extra={'user': request.user.pk})
-            raise exceptions.ParseError('IP with id %s already exists: %s' % (pk, str(existing.pk)))
+            raise Conflict('IP with id %s already exists: %s' % (pk, str(existing.pk)))
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
         xmlfile = normalize_path(os.path.join(reception, '%s.xml' % pk))
@@ -1259,6 +1259,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
 class WorkareaViewSet(InformationPackageViewSet):
     queryset = InformationPackage.objects.select_related('responsible').all()
+    http_method_names = [p.lower() for p in permissions.SAFE_METHODS]
 
     def get_queryset(self):
         view_type = self.request.query_params.get('view_type', 'aic')
@@ -1663,16 +1664,13 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         dst = os.path.join(ip.object_path, dst)
 
-        if os.path.isfile(src) and os.path.isdir(dst):
-            dst = os.path.join(dst, os.path.basename(src))
+        if os.path.isfile(src):
             shutil.copy2(src, dst)
         else:
             try:
                 shutil.copytree(src, dst)
             except OSError as e:
-                if e.errno == errno.ENOTDIR:
-                    shutil.copy2(src, dst)
-                elif e.errno == errno.EEXIST:
+                if e.errno == errno.EEXIST:
                     shutil.rmtree(dst)
                     shutil.copytree(src, dst)
                 else:
