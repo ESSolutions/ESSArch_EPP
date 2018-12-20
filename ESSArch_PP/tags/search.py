@@ -417,7 +417,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(r, headers={'Count': results.hits.total})
 
     def generate_report(self, hits, format, user):
-        template = 'search_results.html'.format()
+        template = 'tags/search_results.html'.format()
 
         f = tempfile.TemporaryFile()
         formatted_hits = []
