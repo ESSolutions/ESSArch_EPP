@@ -11,22 +11,22 @@
             ng-change="resetWorkareaGridArrays(); workareaPipe(workarea_tableState);"></select>
         <div>
             <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-            uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            uib-tooltip="{{'FILES_PER_PAGE' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
                 {{x}}
             </select>
         </div>
         <button class="btn btn-default btn-sm" ng-class="{'active': workareaListView}" ng-click="useListView(1)"
-            uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            uib-tooltip="{{'LIST_VIEW' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
             <i class="fas fa-th-list fa-lg"></i>
         </button>
         <button class="btn btn-default btn-sm" ng-class="{'active': workareaGridView}" ng-click="useGridView(1)"
-            uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            uib-tooltip="{{'GRID_VIEW' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
             <i class="fas fa-th fa-lg"></i>
         </button>
         <div class="refresh-filebrowser">
             <span ng-click="updateWorkareaFiles()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': workArrayLoading }"
-            uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500"
-            popover-append-to-body="true"></span>
+            uib-tooltip="{{'REFRESH' | translate}}" tooltip-placement="auto left"
+            tooltip-append-to-body="true"></span>
         </div>
     </div>
     </div>
@@ -102,21 +102,21 @@
         <div class="button-refresh-wrapper">
             <div>
                 <select class="form-control items-per-page" ng-change="changeFilesPerPage(dipFilesPerPage)" ng-model="dipFilesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                uib-tooltip="{{'FILES_PER_PAGE' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
                     {{x}}
                 </select>
             </div>
-            <button class="btn btn-default btn-sm" ng-class="{'active': dipListView}" ng-click="useListView(2)" uib-popover="{{'LIST_VIEW' | translate}}"
-                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': dipListView}" ng-click="useListView(2)" uib-tooltip="{{'LIST_VIEW' | translate}}"
+                tooltip-placement="auto top" tooltip-append-to-body="true">
                 <i class="fas fa-th-list fa-lg"></i>
             </button>
-            <button class="btn btn-default btn-sm" ng-class="{'active': dipGridView}" ng-click="useGridView(2)" uib-popover="{{'GRID_VIEW' | translate}}"
-                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': dipGridView}" ng-click="useGridView(2)" uib-tooltip="{{'GRID_VIEW' | translate}}"
+                tooltip-placement="auto top" tooltip-append-to-body="true">
                 <i class="fas fa-th fa-lg"></i>
             </button>
             <div class="refresh-filebrowser">
                 <span ng-click="updateDipFiles()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': gridArrayLoading }"
-                uib-popover="{{'REFRESH' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                uib-tooltip="{{'REFRESH' | translate}}" tooltip-placement="auto left" tooltip-append-to-body="true"></span>
             </div>
         </div>
     </div>

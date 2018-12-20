@@ -11,27 +11,26 @@
                     <button type="button"
                             ng-click="vm.createRuleModal()"
                             class="btn btn-primary"
-                            uib-popover="{{'PREPAREAPPRAISALDESC' | translate}}"
-                            popover-placement="left"
-                            popover-popup-delay="500"
-                            popover-append-to-body="true">
+                            uib-tooltip="{{'PREPAREAPPRAISALDESC' | translate}}"
+                            tooltip-placement="auto left"
+                            tooltip-append-to-body="true">
                         {{'CREATE' | translate}}
                     </button>
                 </div>
             </div>
             <div class="search-prepare-wrapper">
                 <label for items-per-page></label>
-                <select class="form-control items-per-page" ng-model="vm.rulesPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
-                    popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+                <select class="form-control items-per-page" ng-model="vm.rulesPerPage" ng-options="x for x in [5,10,20,25,50]" uib-tooltip="{{'ITEMSPERPAGE' | translate}}"
+                    tooltip-placement="auto top" tooltip-append-to-body="true"></select>
                 <div class="global-search">
                     <input id="search-input" st-search="" class="form-control" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text"
-                        uib-popover="{{'GLOBALSEARCHDESC_RULE' | translate}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"
+                        uib-tooltip="{{'GLOBALSEARCHDESC_RULE' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true"
                     />
                 </div>
-                <button type="button" ng-click="getListviewData()" class="btn btn-primary btn-small" style="margin-left: 5px;" uib-popover="{{'SEARCH' | translate}}"  popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">{{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i></button>
+                <button type="button" ng-click="getListviewData()" class="btn btn-primary btn-small" style="margin-left: 5px;" uib-tooltip="{{'SEARCH' | translate}}"  tooltip-placement="auto top" tooltip-append-to-body="true">{{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i></button>
                 <div class="refresh-icon">
                     <span ng-click="vm.rulePipe(vm.ruleTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': ruleLoading }"
-                        uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                        uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left" tooltip-append-to-body="true"></span>
                 </div>
             </div>
             <div class="table-x-overflow">
@@ -64,12 +63,12 @@
         <div class="table-container" st-table="vm.ongoing" st-pipe="vm.ongoingPipe">
             <div class="search-prepare-wrapper">
                 <select class="form-control items-per-page"
-                ng-model="vm.ongoingPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
-                popover-popup-delay="500" popover-append-to-body="true"></select>
+                ng-model="vm.ongoingPerPage" ng-options="x for x in [5,10,20,25,50]" uib-tooltip="{{'ITEMSPERPAGE' | translate}}" tooltip-placement="auto top"
+                tooltip-append-to-body="true"></select>
                 <div class="refresh-icon">
                     <span ng-click="vm.ongoingPipe(vm.ongoingTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
-                    ng-class="{'fa-sync-alt-animate': ongoingLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
-                    popover-popup-delay="500" popover-append-to-body="true"></span>
+                    ng-class="{'fa-sync-alt-animate': ongoingLoading }" uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left"
+                    tooltip-append-to-body="true"></span>
                 </div>
             </div>
             <div class="table-x-overflow">
@@ -101,11 +100,11 @@
         <h4>{{"NEXT" | translate}}</h4>
         <div class="table-container" st-table="vm.next" st-pipe="vm.nextPipe">
             <div class="search-prepare-wrapper">
-            <select class="form-control items-per-page" ng-model="vm.nextPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}"
-                popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true"></select>
+            <select class="form-control items-per-page" ng-model="vm.nextPerPage" ng-options="x for x in [5,10,20,25,50]" uib-tooltip="{{'ITEMSPERPAGE' | translate}}"
+                tooltip-placement="auto top" tooltip-append-to-body="true"></select>
                 <div class="refresh-icon">
                     <span ng-click="vm.nextPipe(vm.nextTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': nextLoading }"
-                        uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                        uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left" tooltip-append-to-body="true"></span>
                 </div>
             </div>
             <div class="table-x-overflow">
@@ -142,12 +141,12 @@
         <div class="table-container" st-table="vm.finished" st-pipe="vm.finishedPipe">
             <div class="search-prepare-wrapper">
                 <select class="form-control items-per-page"
-                ng-model="vm.finishedPerPage" ng-options="x for x in [5,10,20,25,50]" uib-popover="{{'ITEMSPERPAGE' | translate}}" popover-placement="top-left"
-                popover-popup-delay="500" popover-append-to-body="true"></select>
+                ng-model="vm.finishedPerPage" ng-options="x for x in [5,10,20,25,50]" uib-tooltip="{{'ITEMSPERPAGE' | translate}}" tooltip-placement="auto top"
+                tooltip-append-to-body="true"></select>
                 <div class="refresh-icon">
                     <span ng-click="vm.finishedPipe(vm.finishedTableState)" class="clickable angular-animate fas fa-sync-alt fa-lg"
-                    ng-class="{'fa-sync-alt-animate': finishedLoading }" uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left"
-                    popover-popup-delay="500" popover-append-to-body="true"></span>
+                    ng-class="{'fa-sync-alt-animate': finishedLoading }" uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left"
+                    tooltip-append-to-body="true"></span>
                 </div>
             </div>
             <div class="table-x-overflow">
