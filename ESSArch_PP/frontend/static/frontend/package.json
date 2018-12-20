@@ -1,13 +1,13 @@
 {
   "private": true,
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-angular-templatecache": "^2.2.0",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-clean-css": "^3.10.0",
     "gulp-concat": "^2.6.1",
     "gulp-concat-css": "^3.1.0",
-    "gulp-header-license": "^1.0.9",
+    "gulp-header": "^2.0.7",
     "gulp-if": "^2.0.2",
     "gulp-ng-annotate": "^2.1.0",
     "gulp-ng-constant": "^1.2.0",
@@ -15,7 +15,6 @@
     "gulp-rename": "^1.4.0",
     "gulp-rev": "^9.0.0",
     "gulp-sass": "4.0.1",
-    "gulp-sourcemaps": "^2.6.4",
     "gulp-strip-debug": "^3.0.0",
     "gulp-uglify": "~3.0.1",
     "jasmine-core": "^3.2.1",
@@ -27,7 +26,6 @@
     "normalize-scss": "^7.0.1",
     "protractor": "^5.4.1",
     "rev-del": "^1.0.5",
-    "run-sequence": "^2.2.1",
     "yargs": "^12.0.2"
   },
   "dependencies": {
