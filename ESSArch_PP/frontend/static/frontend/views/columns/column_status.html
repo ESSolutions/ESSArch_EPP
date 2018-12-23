@@ -5,10 +5,9 @@
                          animate="true"
                          value="row.status"
                          type="{{mapStepStateProgress(row)}}"
-                         uib-popover="{{row.step_state | translate}}"
-                         popover-placement="top"
-                         popover-popup-delay="500"
-                         popover-append-to-body="true">
+                         uib-tooltip="{{row.step_state | translate}}"
+                         tooltip-placement="auto top"
+                         tooltip-append-to-body="true">
             <b>{{row.status | number : 0}}%</b>
         </uib-progressbar>
     </div>
@@ -20,10 +19,9 @@
                          animate="true"
                          value="subrow.status"
                          type="{{mapStepStateProgress(subrow)}}"
-                         uib-popover="{{subrow.step_state | translate}}"
-                         popover-placement="top"
-                         popover-popup-delay="500"
-                         popover-append-to-body="true">
+                         uib-tooltip="{{subrow.step_state | translate}}"
+                         tooltip-placement="auto top"
+                         tooltip-append-to-body="true">
             <b>{{subrow.status | number : 0}}%</b>
         </uib-progressbar>
     </div>

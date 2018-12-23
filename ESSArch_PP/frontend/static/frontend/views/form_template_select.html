@@ -1,8 +1,7 @@
 <label ng-if="options.templateOptions.label !== null" class="control-label" for="{{::id}}"
-       uib-popover="{{options.templateOptions.desc}}"
-       popover-placement="top-left"
-       popover-popup-delay="500"
-       popover-append-to-body="true">{{to.label}} {{to.required ? '*' : ''}}</label>
+       uib-tooltip="{{options.templateOptions.desc}}"
+       tooltip-placement="auto top"
+       tooltip-append-to-body="true">{{to.label}} {{to.required ? '*' : ''}}</label>
 <select class="form-control"
        id="{{::id}}"
        name="{{::id}}"

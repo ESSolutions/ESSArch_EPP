@@ -5,11 +5,11 @@
     <select class="form-control items-per-page" ng-model="vm.resultsPerPage" ng-options="x for x in [10,25,50,100]">{{x}}</select>
     <div>
         <button class="btn btn-default btn-sm" ng-class="{'active': vm.resultViewType == 'list'}" ng-click="vm.resultViewType = 'list';"
-            uib-popover="{{'LIST_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            uib-tooltip="{{'LIST_VIEW' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
             <i class="fas fa-th-list fa-lg"></i>
         </button>
         <button class="btn btn-default btn-sm" ng-class="{'active': vm.resultViewType == 'grid'}" ng-click="vm.resultViewType = 'grid';"
-            uib-popover="{{'GRID_VIEW' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            uib-tooltip="{{'GRID_VIEW' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
             <i class="fas fa-th fa-lg"></i>
         </button>
     </div>

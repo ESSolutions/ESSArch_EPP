@@ -1,8 +1,8 @@
 <div ng-if="row" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row', row)"
-    uib-popover="{{row.end_date | date:'yyyy-MM-dd HH:mm:ss'}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+    uib-tooltip="{{row.end_date | date:'yyyy-MM-dd HH:mm:ss'}}" tooltip-placement="auto top" tooltip-append-to-body="true">
     {{row.end_date | date:"yyyy-MM-dd"}}
 </div>
 <div ng-if="subrow" class="clickable" style="white-space: nowrap;" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow', subrow)"
-    uib-popover="{{subrow.end_date | date:'yyyy-MM-dd HH:mm:ss'}}" popover-placement="top-left" popover-popup-delay="500" popover-append-to-body="true">
+    uib-tooltip="{{subrow.end_date | date:'yyyy-MM-dd HH:mm:ss'}}" tooltip-placement="auto top" tooltip-append-to-body="true">
     {{subow.end_date | date:"yyyy-MM-dd"}}
 </div>

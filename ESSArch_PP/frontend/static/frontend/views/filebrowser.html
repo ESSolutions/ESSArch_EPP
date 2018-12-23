@@ -15,21 +15,21 @@
         <div class="button-refresh-wrapper">
             <div>
                 <select class="form-control items-per-page" ng-change="changeFilesPerPage(filesPerPage)" ng-model="filesPerPage" ng-options="x for x in [5, 10, 25, 50]"
-                    uib-popover="{{'FILES_PER_PAGE' | translate}}" popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+                    uib-tooltip="{{'FILES_PER_PAGE' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true">
                     {{x}}
                 </select>
             </div>
-            <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()" uib-popover="{{'LIST_VIEW' | translate}}"
-                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': listView}" ng-click="useListView()" uib-tooltip="{{'LIST_VIEW' | translate}}"
+                tooltip-placement="auto top" tooltip-append-to-body="true">
                 <i class="fas fa-th-list fa-lg"></i>
             </button>
-            <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()" uib-popover="{{'GRID_VIEW' | translate}}"
-                popover-placement="top" popover-popup-delay="500" popover-append-to-body="true">
+            <button class="btn btn-default btn-sm" ng-class="{'active': gridView}" ng-click="useGridView()" uib-tooltip="{{'GRID_VIEW' | translate}}"
+                tooltip-placement="auto top" tooltip-append-to-body="true">
                 <i class="fas fa-th fa-lg"></i>
             </button>
             <div class="refresh-filebrowser">
                 <span ng-click="updateGridArray(ip)" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': gridArrayLoading }"
-                    uib-popover="{{'REFRESHTABLEDESC' | translate}}" popover-placement="left" popover-popup-delay="500" popover-append-to-body="true"></span>
+                    uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left" tooltip-append-to-body="true"></span>
             </div>
         </div>
         </div>
@@ -57,7 +57,7 @@
             </thead>
             <tbody>
                 <tr ng-if="!openingNewPage" ng-repeat="card in deckGridData" class="clickable" ng-dblClick="expandFile(ip, card)" ng-class="isSelected(card)" ng-click="cardSelect(card)">
-                    <td class="type-name-column" uib-popover-html="'{{'NAME' | translate}}: {{card.name}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
+                    <td class="type-name-column" uib-tooltip-html="'{{'NAME' | translate}}: {{card.name}}'" tooltip-placement="auto top" tooltip-popup-delay="1000" tooltip-append-to-body="true">
                         <div ng-class="card.type" ng-if="card.type == 'file'">
                             <li class="fas fa-file"></li>
                         </div>
@@ -68,12 +68,12 @@
                             {{card.name}}
                         </div>
                     </td>
-                    <td uib-popover-html="'{{'SIZE' | translate}}: {{card.size | filesize}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
+                    <td uib-tooltip-html="'{{'SIZE' | translate}}: {{card.size | filesize}}'" tooltip-placement="auto top" tooltip-popup-delay="1000" tooltip-append-to-body="true">
                         <div class="one-row-ellipsis">
                             {{card.size | filesize}}
                         </div>
                     </td>
-                    <td uib-popover-html="'{{'CHANGED' | translate}}: {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}'" popover-placement="top" popover-popup-delay="1000" popover-append-to-body="true">
+                    <td uib-tooltip-html="'{{'CHANGED' | translate}}: {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}'" tooltip-placement="auto top" tooltip-popup-delay="1000" tooltip-append-to-body="true">
                         <div class="one-row-ellipsis">
                             {{card.modified | date: 'yyyy-MM-dd HH:mm:ss'}}
                         </div>
