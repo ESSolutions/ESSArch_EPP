@@ -32,7 +32,7 @@ from django.urls import reverse
 
 from groups_manager.models import GroupType
 
-import mock
+import unittest.mock
 
 from rest_framework import status
 from rest_framework.response import Response
