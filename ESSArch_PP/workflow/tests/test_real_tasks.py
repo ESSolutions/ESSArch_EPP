@@ -37,7 +37,7 @@ from django.contrib.auth.models import User
 from django.test import tag, TransactionTestCase, override_settings
 from django.utils.timezone import localtime
 
-import unittest.mock
+from unittest import mock
 
 from ESSArch_Core.configuration.models import (
     ArchivePolicy, Path,
