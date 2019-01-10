@@ -50,7 +50,7 @@ from django.db.models import F
 from django.utils import timezone
 from groups_manager.utils import get_permission_name
 from guardian.shortcuts import assign_perm
-from scandir import walk
+from os import walk
 from six.moves import urllib
 
 # noinspection PyUnresolvedReferences
