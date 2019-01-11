@@ -292,6 +292,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         logger.info('Prepared information package %s' % str(ip.pk), extra={'user': request.user.pk})
         return Response(data, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic
     @permission_required_or_403(['ip.receive'])
     @detail_route(methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
@@ -729,6 +730,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return context
 
 
+    @transaction.atomic
     def destroy(self, request, pk=None):
         logger = logging.getLogger('essarch.epp')
 
@@ -825,6 +827,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return Response({'detail': 'Receiving %s' % str(ip.pk)}, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @detail_route(methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
         ip = self.get_object()
@@ -945,6 +948,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return Response({'detail': 'Accessing AIP %s...' % pk})
 
+    @transaction.atomic
     @detail_route(methods=['post'], url_path='create-dip')
     def create_dip(self, request, pk=None):
         dip = InformationPackage.objects.get(pk=pk)
@@ -976,6 +980,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return Response()
 
+    @transaction.atomic
     @list_route(methods=['post'], url_path='prepare-dip')
     def prepare_dip(self, request):
         try:
