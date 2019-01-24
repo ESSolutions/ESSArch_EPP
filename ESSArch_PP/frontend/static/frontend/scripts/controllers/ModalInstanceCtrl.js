@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, ErrorResponse, $translate) {
+angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, $translate) {
     var $ctrl = this;
     if(data) {
         $ctrl.data = data;
@@ -82,7 +82,6 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.preparing = false;
-            ErrorResponse.default(response);
         })
     };
 
@@ -116,11 +115,9 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                 $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea[0].id + "/")
                     .then(function (response) {
                         $ctrl.removing = false;
-                        Notifications.add($translate.instant('IP_REMOVED', {label: ipObject.label}), 'success');
                         $uibModalInstance.close();
                     }).catch(function (response) {
                         $ctrl.removing = false;
-                        ErrorResponse.default(response);
                     })
             }
         } else {
@@ -132,7 +129,6 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
                 $uibModalInstance.close();
             }).catch(function (response) {
                 $ctrl.removing = false;
-                ErrorResponse.default(response);
             })
         }
     };

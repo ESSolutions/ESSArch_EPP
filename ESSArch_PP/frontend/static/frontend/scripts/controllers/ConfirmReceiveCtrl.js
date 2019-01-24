@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller, ErrorResponse) {
+angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function (IPReception, Notifications, $uibModalInstance, data, $scope, $controller) {
     var $ctrl = this;
 
     $ctrl.receiving = false;
@@ -22,7 +22,6 @@ angular.module('essarch.controllers').controller('ConfirmReceiveCtrl', function 
         }).catch(function (response) {
             $ctrl.receiving = false;
             $ctrl.data = { received: false, status: "error" };
-            ErrorResponse.default(response);
             $uibModalInstance.dismiss($ctrl.data);
         })
     };

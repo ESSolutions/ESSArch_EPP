@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q, ErrorResponse) {
+angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, $q) {
     var $ctrl = this;
     $ctrl.node = data.node;
     $ctrl.editData = {};
@@ -254,7 +254,6 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                             return response;
                         }).catch(function (response) {
                             $ctrl.submitting = false;
-                            ErrorResponse.default(response);
                             return response;
                         })
                 );
@@ -267,7 +266,6 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                         $uibModalInstance.close("edited");
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        ErrorResponse.default(response);
                     });
                 } else {
                     $ctrl.submitting = false;
@@ -276,7 +274,6 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 }
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                ErrorResponse.default(response);
             });
         }
     }
@@ -289,7 +286,6 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                ErrorResponse.default(response);
             });
         }
     }
@@ -302,7 +298,6 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
-                ErrorResponse.default(response);
             });
         }
     }

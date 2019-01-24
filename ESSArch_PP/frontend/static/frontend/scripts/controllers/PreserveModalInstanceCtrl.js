@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('PreserveModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, ErrorResponse, $q) {
+angular.module('essarch.controllers').controller('PreserveModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, $q) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
@@ -31,7 +31,6 @@ angular.module('essarch.controllers').controller('PreserveModalInstanceCtrl', fu
             promises.push(Requests.preserve(ip, params).then(function(result) {
                 return result;
             }).catch(function(response) {
-                ErrorResponse.default(response);
                 return response;
             }));
         });

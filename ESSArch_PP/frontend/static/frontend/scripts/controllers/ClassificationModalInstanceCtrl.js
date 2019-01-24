@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate, Structure, ErrorResponse) {
+angular.module('essarch.controllers').controller('ClassificationModalInstanceCtrl', function(data, $http, appConfig, Notifications, $uibModalInstance, $translate, Structure) {
     var $ctrl = this;
     $ctrl.name = null;
     $ctrl.newNode = {};
@@ -96,9 +96,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
         $http.delete(appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id).then(function(response) {
             Notifications.add($translate.instant('NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.submit = function () {
@@ -115,7 +113,6 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
                         $uibModalInstance.close(response.data);
                     }).catch(function (response) {
                         $ctrl.submitting = false;
-                        ErrorResponse.default(response);
                     })
         }
     }
@@ -132,9 +129,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
         }).then(function(response) {
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('NODE_UPDATED'), 'success');
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     /**
      * Save new classification structure
@@ -150,9 +145,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
         ).$promise.then(function(response) {
             $uibModalInstance.close(response.data);
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_CREATED'), 'success');
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.removing = false;
@@ -162,9 +155,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             $ctrl.removing = false;
             Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
             $uibModalInstance.close();
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');

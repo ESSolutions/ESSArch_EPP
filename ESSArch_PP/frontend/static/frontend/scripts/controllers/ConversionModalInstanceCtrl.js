@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
+angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     // Set later to use local time for next job
     later.date.localTime();
@@ -12,9 +12,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         $ctrl.ip = ip;
         return $http.get(appConfig.djangoUrl+"conversion-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.conversionRules = response.data;
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.expandIp = function(ip) {
@@ -24,9 +22,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             ip.expanded = true;
             IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -81,9 +77,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
     function getRules() {
         IP.conversionRules({id: ip.id}).$promise.then(function(resource) {
             ip.rules = resource;
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     if(data.preview && data.job) {
         $http.get(appConfig.djangoUrl+"conversion-jobs/"+data.job.id+"/preview/").then(function(response) {
@@ -104,7 +98,6 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            ErrorResponse.default(response);
         });
     }
 
@@ -140,7 +133,6 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            ErrorResponse.default(response);
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -160,8 +152,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.creatingJob = false;
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.runningJob = false;
@@ -181,12 +172,10 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
                 $uibModalInstance.close($ctrl.data);
             }).catch(function (response) {
                 $ctrl.runningJob = false;
-                ErrorResponse.default(response);
-            })
+            });
         }).catch(function (response) {
             $ctrl.runningJob = false;
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.path = "";
@@ -224,8 +213,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.removeConversion = function() {
@@ -240,8 +228,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $ctrl.ok = function() {

@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
+angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
     $ctrl.newNode = {
@@ -68,7 +68,6 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {
                 $ctrl.submitting = false;
-                ErrorResponse.default(response);
             })
         }
     }

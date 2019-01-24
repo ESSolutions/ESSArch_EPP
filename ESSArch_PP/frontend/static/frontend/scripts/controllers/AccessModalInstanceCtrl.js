@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('AccessModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, ErrorResponse, $q) {
+angular.module('essarch.controllers').controller('AccessModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, $q) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
@@ -37,8 +37,6 @@ angular.module('essarch.controllers').controller('AccessModalInstanceCtrl', func
         $ctrl.data.ips.forEach(function(ip) {
             promises.push(Requests.access(ip, data).then(function(response) {
                 return response;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
             }));
         });
         $q.all(promises).then(function(data) {

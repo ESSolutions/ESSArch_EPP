@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion, ErrorResponse, $translate) {
+angular.module('essarch.controllers').controller('ConversionCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Conversion, $translate) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -62,9 +62,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 });
                 vm.rules = response.data;
                 $scope.ruleLoading = false;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -93,9 +91,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.ongoingTableState = tableState;
                 vm.ongoing = response.data;
                 $scope.ongoingLoading = false;
-            }).catch(function(response){
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -124,9 +120,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.nextTableState = tableState;
                 vm.next = response.data;
                 $scope.nextLoading = false;
-            }).catch(function(response){
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -155,9 +149,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
                 vm.finishedTableState = tableState;
                 vm.finished = response.data;
                 $scope.finishedLoading = false;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -171,9 +163,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
             method: "POST",
         }).then(function(response) {
             Notifications.add($translate.instant('JOB_RUNNING'), "success");
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     /*

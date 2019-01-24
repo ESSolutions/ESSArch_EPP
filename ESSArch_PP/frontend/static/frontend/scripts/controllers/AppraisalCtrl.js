@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Appraisal, ErrorResponse, $translate) {
+angular.module('essarch.controllers').controller('AppraisalCtrl', function(ArchivePolicy, $scope, $controller, $rootScope, $cookies, $stateParams, appConfig, $http, $timeout, $uibModal, $log, $sce, $window, Notifications, $filter, $interval, Appraisal, $translate) {
     var vm = this;
     vm.rulesPerPage = 10;
     vm.ongoingPerPage = 10;
@@ -160,9 +160,7 @@ angular.module('essarch.controllers').controller('AppraisalCtrl', function(Archi
             method: "POST",
         }).then(function(response) {
             Notifications.add($translate.instant('JOB_RUNNING'), "success");
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     /*

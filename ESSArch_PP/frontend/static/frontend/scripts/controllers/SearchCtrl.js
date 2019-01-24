@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams, ErrorResponse) {
+angular.module('essarch.controllers').controller('SearchCtrl', function(Search, $q, $scope, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $httpParamSerializer, $stateParams) {
     var vm = this;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
@@ -88,9 +88,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             vm.nodeType = null;
             vm.referenceCode = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     vm.changeClassificationStructure = function() {
@@ -164,7 +162,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             var pagination = tableState.pagination;
             var start = pagination.start || 0;     // This is NOT the page number, but the index of item in the list that you want to use to display the table.
             var number = pagination.number;  // Number of entries showed per page.
-            var pageNumber = start / number + 1;
+            var pageNumber = Number.isNaN(start / number)? 1 : start  /number + 1; // Prevents initial 404 response where pagenumber os NaN in request
             vm.formatFilters();
             if(vm.filterObject.extension == "" || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
                 delete vm.filterObject.extension;
@@ -185,11 +183,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 if($state.current.name === 'home.access.search') {
                     $state.go('home.access.search', {query: vm.filterObject}, { notify: false });
                 }
-            }).catch(function(response) {
-                if(response.status !== 404) { // Until we never get a 404 response initially
-                    ErrorResponse.default(response);
-                }
-            })
+            });
         } else {
             vm.showResults = true;
         }
