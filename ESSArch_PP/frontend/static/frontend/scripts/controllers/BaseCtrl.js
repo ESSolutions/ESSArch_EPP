@@ -22,7 +22,7 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ErrorResponse, ContentTabs){
+angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task, Step, vm, ipSortString, $log, $uibModal, $timeout, $scope, $window, $location, $sce, $http, myService, appConfig, $state, $stateParams, $rootScope, listViewService, $interval, Resource, $translate, $cookies, $filter, $anchorScroll, PermPermissionStore, $q, Requests, Notifications, ContentTabs){
     // Initialize variables
 
     $scope.$window = $window;
@@ -618,9 +618,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
             vm.submittingRequest = false;
             $scope.initRequestData();
             $scope.getListViewData();
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     $scope.accessIp = function(ip, request) {
@@ -641,9 +639,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $scope.ip = null;
                 $rootScope.ip = null;
                 $scope.getListViewData();
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         });
     }
 
@@ -667,9 +663,7 @@ angular.module('essarch.controllers').controller('BaseCtrl',  function(IP, Task,
                 $rootScope.ip = null;
                 $scope.getListViewData();
             });
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     // Click functionality

@@ -1,20 +1,16 @@
-angular.module('essarch.controllers').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile, ErrorResponse) {
+angular.module('essarch.controllers').controller("ExportCtrl", function ($scope, appConfig, $http, Notifications, $translate, $window, SA, Profile) {
     var vm = this;
     vm.$onInit = function() {
         $http.get(appConfig.djangoUrl + "submission-agreements/", { params: { pager: "none", published: true } })
             .then(function (response) {
                 vm.sas = response.data;
                 vm.sa = null;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
             });
 
         $http.get(appConfig.djangoUrl+"profiles/", {params: { pager: "none"}})
             .then(function(response) {
                 vm.profiles = response.data;
                 vm.profile = null;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
             });
     }
 

@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
+angular.module('essarch.controllers').controller('VersionModalInstanceCtrl', function (Search, $translate, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
 
@@ -6,9 +6,7 @@ angular.module('essarch.controllers').controller('VersionModalInstanceCtrl', fun
         Search.createNewVersion(node).then(function(response) {
             Notifications.add($translate.instant('NEW_VERSION_CREATED'), 'success');
             $uibModalInstance.close("added");
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     $ctrl.cancel = function() {
         $uibModalInstance.dismiss('cancel');

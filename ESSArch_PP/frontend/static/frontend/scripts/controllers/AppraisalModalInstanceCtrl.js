@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout, ErrorResponse) {
+angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', function (cronService, $filter, $translate, IP, $uibModalInstance, djangoAuth, appConfig, $http, data, $scope, Notifications, $timeout) {
     var $ctrl = this;
     // Set later to use local time for next job
     later.date.localTime();
@@ -14,9 +14,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
         $ctrl.ip = ip;
         return $http.get(appConfig.djangoUrl+"appraisal-rules/", {params: {not_related_to_ip: ip.id}}).then(function(response) {
             $ctrl.appraisalRules = response.data;
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     if(data.preview && data.job) {
         $http.get(appConfig.djangoUrl+"appraisal-jobs/"+data.job.id+"/preview/").then(function(response) {
@@ -30,9 +28,7 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             ip.expanded = true;
             IP.appraisalRules({id: ip.id}).$promise.then(function(resource) {
                 ip.rules = resource;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
     $ctrl.cronConfig = {
@@ -97,7 +93,6 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.addingRule = false;
-            ErrorResponse.default(response);
         });
     }
     $ctrl.removeRule = function(ip, rule) {
@@ -118,7 +113,6 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $ctrl.showRulesTable(ip);
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            ErrorResponse.default(response);
         });
     }
     $ctrl.closeRulesTable = function(){
@@ -138,7 +132,6 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.creatingJob = false;
-            ErrorResponse.default(response);
         })
     }
     $ctrl.runningJob = false;
@@ -158,11 +151,9 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
                 $uibModalInstance.close($ctrl.data);
             }).catch(function (response) {
                 $ctrl.runningJob = false;
-                ErrorResponse.default(response);
             })
         }).catch(function (response) {
             $ctrl.runningJob = false;
-            ErrorResponse.default(response);
         })
     }
 
@@ -202,7 +193,6 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.addingRule = false;
-            ErrorResponse.default(response);
         })
     }
 
@@ -218,7 +208,6 @@ angular.module('essarch.controllers').controller('AppraisalModalInstanceCtrl', f
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
-            ErrorResponse.default(response);
         })
     }
 

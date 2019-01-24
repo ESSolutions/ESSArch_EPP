@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter, ErrorResponse) {
+angular.module('essarch.controllers').controller('SearchDetailCtrl', function($scope, $controller, $stateParams, Search, $q, $http, $rootScope, appConfig, $log, $timeout, Notifications, $sce, $translate, $anchorScroll, $uibModal, PermPermissionStore, $window, $state, $interval, $filter) {
     var PAGE_SIZE = 10;
 
     var vm = this;
@@ -654,9 +654,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
             }
         }).then(function(response) {
             Notifications.add($translate.instant('EMAIL_SENT'), 'success');
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 
     vm.gotoSearch = function() {
@@ -696,9 +694,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
     vm.addToStructure = function(record) {
         Search.updateNode(record,{parent: vm.tags.descendants.value.id, structure: vm.tags.structure.value.id}, true).then(function(response) {
             $state.reload();
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     vm.editField = function(key, value) {
         var modalInstance = $uibModal.open({

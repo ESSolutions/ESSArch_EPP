@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('MoveToApprovalModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, ErrorResponse, $q) {
+angular.module('essarch.controllers').controller('MoveToApprovalModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, $q) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
@@ -25,8 +25,6 @@ angular.module('essarch.controllers').controller('MoveToApprovalModalInstanceCtr
         var promises = [];
         $ctrl.data.ips.forEach(function(ip) {
             promises.push(Requests.moveToApproval(ip, data).then(function(response) {
-            }).catch(function(response) {
-                ErrorResponse.default(response);
             }));
         });
         $q.all(promises).then(function(data) {

@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure, ErrorResponse) {
+angular.module('essarch.controllers').controller('ClassificationStructureEditorCtrl', function($scope, $http, appConfig, Notifications, $uibModal, $log, $translate, Structure) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];
@@ -59,9 +59,7 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 tableState.pagination.numberOfPages = Math.ceil(resource.$httpHeaders('Count') / number);//set the number of pages so the pagination can update
                 $scope.initLoad = false;
                 vm.structuresLoading = false;
-            }).catch(function(response) {
-                ErrorResponse.default(response);
-            })
+            });
         }
     }
 
@@ -95,7 +93,6 @@ angular.module('essarch.controllers').controller('ClassificationStructureEditorC
                 var finalTree = [rootNode];
                 return finalTree;
             }).catch(function(response) {
-                ErrorResponse.default(response);
                 return [rootNode];
             })
     }

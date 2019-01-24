@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate, ErrorResponse) {
+angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
     var vm = this;
     vm.structure = null;
     vm.structures = [];
@@ -11,9 +11,7 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
             if(vm.structures.length > 0) {
                 vm.structure = vm.structures[0];
             }
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
     vm.createArchive = function (archiveName, structureName, type, referenceCode, archiveCreator, archiveResponsible) {
         Search.addNode(
@@ -34,8 +32,6 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
             vm.archiveResponsible = null;
             vm.archiveCreator = null;
             Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
-        }).catch(function(response) {
-            ErrorResponse.default(response);
-        })
+        });
     }
 })
