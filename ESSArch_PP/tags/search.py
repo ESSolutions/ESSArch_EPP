@@ -1,6 +1,7 @@
 from __future__ import division
 
 import copy
+import csv
 import datetime
 import json
 import logging
@@ -33,7 +34,6 @@ from weasyprint import HTML
 from ESSArch_Core.auth.models import GroupGenericObjects
 from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user
-from ESSArch_Core.csv_unicode import UnicodeCSVWriter
 from ESSArch_Core.ip.models import Agent
 from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
@@ -436,7 +436,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             HTML(string=render).write_pdf(f)
         elif format == 'csv':
             ctype = 'text/csv'
-            writer = UnicodeCSVWriter(f)
+            writer = csv.writer(f)
             for hit in formatted_hits:
                 writer.writerow(
                     [hit.get('archive', {}).get('name'), hit.get('name'), hit.get('reference_code'), hit.get('name'),
