@@ -88,7 +88,7 @@ def installDefaultParameters():
 
     for key in dct:
         print('-> %s: %s' % (key, dct[key]))
-        Parameter.objects.get_or_create(entity=key, value=dct[key])
+        Parameter.objects.get_or_create(entity=key, defaults={'value': dct[key]})
 
     return 0
 
@@ -307,7 +307,7 @@ def installDefaultPaths():
 
     for key in dct:
         print('-> %s: %s' % (key, dct[key]))
-        Path.objects.get_or_create(entity=key, value=dct[key])
+        Path.objects.get_or_create(entity=key, defaults={'value': dct[key]})
 
     return 0
 
@@ -316,11 +316,11 @@ def installDefaultArchivePolicies():
     cache = Path.objects.get(entity='cache')
     ingest = Path.objects.get(entity='ingest')
 
-    ArchivePolicy.objects.update_or_create(
-        policy_id='1',
+    ArchivePolicy.objects.get_or_create(
+        policy_name='default',
         defaults={
             'checksum_algorithm': ArchivePolicy.MD5,
-            'policy_name': 'default',
+            'policy_id': '1',
             'cache_storage': cache, 'ingest_path': ingest,
             'receive_extract_sip': True
         }
@@ -332,18 +332,22 @@ def installDefaultArchivePolicies():
 def installDefaultStorageMethods():
     StorageMethod.objects.get_or_create(
         name='Default Storage Method 1',
-        archive_policy=ArchivePolicy.objects.get(policy_name='default'),
-        status=True,
-        type=DISK,
-        containers=False,
+        defaults={
+            'archive_policy': ArchivePolicy.objects.get(policy_name='default'),
+            'status': True,
+            'type': DISK,
+            'containers': False,
+        }
     )
 
     StorageMethod.objects.get_or_create(
         name='Default Long-term Storage Method 1',
-        archive_policy=ArchivePolicy.objects.get(policy_name='default'),
-        status=True,
-        type=DISK,
-        containers=True,
+        defaults={
+            'archive_policy': ArchivePolicy.objects.get(policy_name='default'),
+            'status': True,
+            'type': DISK,
+            'containers': True,
+        }
     )
 
     return 0
@@ -352,16 +356,20 @@ def installDefaultStorageMethods():
 def installDefaultStorageTargets():
     StorageTarget.objects.get_or_create(
         name='Default Storage Target 1',
-        status=True,
-        type=DISK,
-        target=u'/ESSArch/data/store/disk1',
+        defaults={
+            'status': True,
+            'type': DISK,
+            'target': '/ESSArch/data/store/disk1',
+        }
     )
 
     StorageTarget.objects.get_or_create(
         name='Default Long-term Storage Target 1',
-        status=True,
-        type=DISK,
-        target=u'/ESSArch/data/store/longterm_disk1',
+        defaults={
+            'status': True,
+            'type': DISK,
+            'target': '/ESSArch/data/store/longterm_disk1',
+        }
     )
 
     return 0
@@ -370,16 +378,20 @@ def installDefaultStorageTargets():
 def installDefaultStorageMethodTargetRelations():
     StorageMethodTargetRelation.objects.get_or_create(
         name='Default Storage Method Target Relation 1',
-        status=True,
-        storage_method=StorageMethod.objects.get(name='Default Storage Method 1'),
-        storage_target=StorageTarget.objects.get(name='Default Storage Target 1'),
+        defaults={
+            'status': True,
+            'storage_method': StorageMethod.objects.get(name='Default Storage Method 1'),
+            'storage_target': StorageTarget.objects.get(name='Default Storage Target 1'),
+        }
     )
 
     StorageMethodTargetRelation.objects.get_or_create(
         name='Default Long-term Storage Method Target Relation 1',
-        status=True,
-        storage_method=StorageMethod.objects.get(name='Default Long-term Storage Method 1'),
-        storage_target=StorageTarget.objects.get(name='Default Long-term Storage Target 1'),
+        defaults={
+            'status': True,
+            'storage_method': StorageMethod.objects.get(name='Default Long-term Storage Method 1'),
+            'storage_target': StorageTarget.objects.get(name='Default Long-term Storage Target 1'),
+        }
     )
 
     return 0
