@@ -1,6 +1,6 @@
 <div class="content-wrapper">
     <div class="appraisal-page">
-        <h4>{{"ONGOING" | translate}}</h4>
+        <h4>{{"ARCHIVE_MAINTENANCE.ONGOING" | translate}}</h4>
         <div class="table-container" st-table="vm.ongoing" st-pipe="vm.ongoingPipe">
             <div class="search-prepare-wrapper">
                 <select class="form-control items-per-page"
@@ -18,7 +18,7 @@
                             <tr>
                                 <th>{{'ID' | translate}}</th>
                                 <th>{{'START' | translate}}</th>
-                                <th>{{'RULE' | translate}}</th>
+                                <th>{{'ARCHIVE_MAINTENANCE.RULE' | translate}}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,7 +55,7 @@
                         <tr>
                             <th>{{'ID' | translate}}</th>
                             <th>{{'START' | translate}}</th>
-                            <th>{{'RULE' | translate}}</th>
+                            <th>{{'ARCHIVE_MAINTENANCE.RULE' | translate}}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,7 +75,7 @@
                 <div class="search-pagination" style="float: right;" st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="vm.nextPerPage" st-displayed-pages="7"></div>
             </div>
         </div>
-        <h4>{{"FINISHED" | translate}}</h4>
+        <h4>{{"ARCHIVE_MAINTENANCE.FINISHED" | translate}}</h4>
         <div class="table-container" st-table="vm.finished" st-pipe="vm.finishedPipe">
             <div class="search-prepare-wrapper">
                     <select class="form-control items-per-page"
@@ -94,8 +94,8 @@
                                 <th>{{'ID' | translate}}</th>
                                 <th>{{'START' | translate}}</th>
                                 <th>{{'END' | translate}}</th>
-                                <th>{{'REPORT' | translate}}</th>
-                                <th>{{'RULE' | translate}}</th>
+                                <th>{{'ARCHIVE_MAINTENANCE.REPORT' | translate}}</th>
+                                <th>{{'ARCHIVE_MAINTENANCE.RULE' | translate}}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,7 +103,7 @@
                                 <td>{{x.id}}</td>
                                 <td>{{x.start_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
                                 <td>{{x.end_date | date:"yyyy-MM-dd HH:mm:ss"}}</td>
-                                <td><a ng-click="vm.showReport(x)">{{'REPORT' | translate}}</a></td>
+                                <td><a ng-click="vm.showReport(x)">{{'ARCHIVE_MAINTENANCE.REPORT' | translate}}</a></td>
                                 <td>{{x.rule}}</td>
                             </tr>
                             <tr ng-if="!vm.finished.length && !finishedLoading" class="empty-table-indicator">

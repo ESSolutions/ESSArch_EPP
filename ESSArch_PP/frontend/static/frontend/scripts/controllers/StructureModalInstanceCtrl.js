@@ -6,7 +6,7 @@ angular.module('essarch.controllers').controller('StructureModalInstanceCtrl', f
     $ctrl.createNewStructure = function(node) {
         $ctrl.creating = true;
         Search.createNewStructure(node, { name: $ctrl.structureName }).then(function (response) {
-            Notifications.add($translate.instant('NEW_STRUCTURE_CREATED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NEW_STRUCTURE_CREATED'), 'success');
             $uibModalInstance.close("added");
             $ctrl.creating = false;
         }).catch(function (response) {

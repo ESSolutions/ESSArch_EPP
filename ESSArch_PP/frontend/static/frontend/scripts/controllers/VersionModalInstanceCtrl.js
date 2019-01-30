@@ -4,7 +4,7 @@ angular.module('essarch.controllers').controller('VersionModalInstanceCtrl', fun
 
     $ctrl.createNewVersion = function(node) {
         Search.createNewVersion(node).then(function(response) {
-            Notifications.add($translate.instant('NEW_VERSION_CREATED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NEW_VERSION_CREATED'), 'success');
             $uibModalInstance.close("added");
         });
     }

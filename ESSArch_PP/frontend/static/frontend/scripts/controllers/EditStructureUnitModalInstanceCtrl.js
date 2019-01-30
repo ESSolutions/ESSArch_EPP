@@ -17,7 +17,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
         $ctrl.nodeFields = [
             {
                 "templateOptions": {
-                    "label": $translate.instant("REFERENCE_CODE"),
+                    "label": $translate.instant('ACCESS.REFERENCE_CODE'),
                     "type": "text",
                     "focus": true
                 },
@@ -27,14 +27,14 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("NAME"),
+                    "label": $translate.instant('NAME'),
                 },
                 "type": "input",
                 "key": "name",
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("TYPE"),
+                    "label": $translate.instant('TYPE'),
                     "type": "text",
                     "options": [
                         {
@@ -56,7 +56,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("DESCRIPTION"),
+                    "label": $translate.instant('ACCESS.DESCRIPTION'),
                     "type": "text",
                     "rows": 3
                 },
@@ -66,7 +66,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("START_DATE"),
+                    "label": $translate.instant('START_DATE'),
                     "appendToBody": false
                 },
                 "type": "datepicker",
@@ -75,7 +75,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("END_DATE"),
+                    "label": $translate.instant('END_DATE'),
                     "appendToBody": false
                 },
                 "type": "datepicker",
@@ -99,7 +99,7 @@ angular.module('essarch.controllers').controller('EditStructureUnitModalInstance
             data: $ctrl.editNode
         }).then(function(response) {
             $ctrl.saving = false;
-            Notifications.add($translate.instant('NODE_EDITED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
             $uibModalInstance.close(response.data);
         }).catch(function(response) {
             $ctrl.saving = false;

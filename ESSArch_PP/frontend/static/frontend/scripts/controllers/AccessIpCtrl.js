@@ -27,7 +27,7 @@ angular.module('essarch.controllers').controller('AccessIpCtrl', function($scope
         if (true) { // CHANGE TO REAL PERMISSION NAME
             methods.push(
                 {
-                    text: $translate.instant("CONVERSION"),
+                    text: $translate.instant('CONVERSION'),
                     click: function ($itemScope, $event, modelValue, text, $li) {
                         if ($scope.ips.length == 0) {
                             $scope.ip = row;

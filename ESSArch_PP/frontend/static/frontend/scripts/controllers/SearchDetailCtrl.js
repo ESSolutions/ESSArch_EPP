@@ -196,7 +196,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
 
     vm.createSeeMoreNode = function() {
         return {
-            text: $translate.instant("SEE_MORE"),
+            text: $translate.instant("ACCESS.SEE_MORE"),
             see_more: true,
             type: "plus",
             _source: {}
@@ -469,7 +469,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     },
                 };
                 var removeFromStructure = {
-                    label: $translate.instant('REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
+                    label: $translate.instant('ACCESS.REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
                     _disabled: function(){
                         return node.original._is_structure_unit || node.original._index === 'archive';
                     },
@@ -484,7 +484,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     },
                 };
                 var newVersion = {
-                    label: $translate.instant('NEW_VERSION'),
+                    label: $translate.instant('ACCESS.NEW_VERSION'),
                     _disabled: function(){
                         return node.original._is_structure_unit;
                     },
@@ -493,7 +493,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     }
                 }
                 var changeOrganization = {
-                    label: $translate.instant('CHANGE_ORGANIZATION'),
+                    label: $translate.instant('ORGANIZATION.CHANGE_ORGANIZATION'),
                     _disabled: function(){
                         return node.original._index !== 'archive';
                     },
@@ -502,7 +502,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                     }
                 }
                 var email = {
-                    label: $translate.instant('EMAIL'),
+                    label: $translate.instant('EMAIL.EMAIL'),
                     _disabled: function(){
                         return node.original._is_structure_unit;
                     },
@@ -653,7 +653,7 @@ angular.module('essarch.controllers').controller('SearchDetailCtrl', function($s
                 include_descendants: vm.includeDescendants
             }
         }).then(function(response) {
-            Notifications.add($translate.instant('EMAIL_SENT'), 'success');
+            Notifications.add($translate.instant('EMAIL.EMAIL_SENT'), 'success');
         });
     }
 

@@ -39,7 +39,7 @@
     <p style="color: red; white-space: nowrap;" ng-if="vm.record.type == 'document' && !(vm.record._source.terms_and_condition == null || checkPermission('tags.view_pul'))">Ej behörig att visa</p>
     <result-field label="{{'PATH' | translate}}" stronglabel="true" data="vm.record._source.href +'/'+ vm.record._source.filename"></result-field>
     <result-field label="{{'CHANGED' | translate}}" stronglabel="true" data="vm.record._source.modified" type="date-long"></result-field>
-    <result-field label="{{'CONTENT_TYPE' | translate}}" stronglabel="true" data="vm.record._source.attachment.content_type"></result-field>
+    <result-field label="{{'ACCESS.CONTENT_TYPE' | translate}}" stronglabel="true" data="vm.record._source.attachment.content_type"></result-field>
     <result-field label="{{'SIZE' | translate}}" stronglabel="true" data="vm.record._source.size" type="filesize"></result-field>
     <button class="btn btn-success btn-small margin-top-5" ng-click="vm.viewFile(vm.record._source)"><i class="far fa-eye"></i>&nbsp;{{'VIEW' | translate}}</button>
 </div>

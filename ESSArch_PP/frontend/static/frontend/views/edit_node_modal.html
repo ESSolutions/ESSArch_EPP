@@ -11,7 +11,7 @@
     <hr />
     <div class="add-field">
         <h4>
-            {{'NEW_FIELD' | translate}}
+            {{'ACCESS.NEW_FIELD' | translate}}
         </h4>
         <label>
             {{'NAME' | translate}}
@@ -27,7 +27,7 @@
 <div class="modal-footer">
     <label ng-if="!$ctrl.manyNodes">
         <input type="checkbox" ng-model="$ctrl.updateDescendants">&nbsp;
-        {{'UPDATE_DESCENDANTS' | translate}}
+        {{'ACCESS.UPDATE_DESCENDANTS' | translate}}
     </label>
     <button class="btn btn-primary" ng-disabled="(!$ctrl.changed() && $ctrl.fieldsToDelete.length == 0) || $ctrl.submitting" type="button" ng-click="$ctrl.submit()" focused="true">{{'SUBMIT' | translate}} <i ng-if="$ctrl.submitting" class="fas fa-spinner fa-spin"/></button>
     <button class="btn btn-default" type="button" ng-disabled="$ctrl.submitting" ng-click="$ctrl.cancel()">{{'CANCEL' | translate}}</button>

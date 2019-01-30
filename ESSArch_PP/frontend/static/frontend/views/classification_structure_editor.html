@@ -6,7 +6,7 @@
                 uib-tooltip="{{'ITEMSPERPAGE' | translate}}" tooltip-placement="auto top" tooltip-append-to-body="true"></select>
             <input st-search="" class="form-control global-search" ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}" type="text" uib-tooltip="{{'GLOBALSEARCHDESC_STRUCTURES' | translate}}"
                 tooltip-placement="auto top" tooltip-append-to-body="true">
-            <button class="btn btn-primary" ng-click="vm.newStructureModal()">{{'NEW_CLASSIFICATION_STRUCTURE' | translate}}</button>
+            <button class="btn btn-primary" ng-click="vm.newStructureModal()">{{'ACCESS.NEW_CLASSIFICATION_STRUCTURE' | translate}}</button>
             <div class="refresh-icon">
                 <span ng-click="vm.updateStructures()" class="clickable angular-animate fas fa-sync-alt fa-lg" ng-class="{'fa-sync-alt-animate': vm.structuresLoading }" uib-tooltip="{{'REFRESHTABLEDESC' | translate}}" tooltip-placement="auto left" tooltip-append-to-body="true"></span>
             </div>
@@ -22,7 +22,7 @@
                             {{'CREATE_DATE' | translate}}
                         </th>
                         <th>
-                            {{'VERSION' | translate}}
+                            {{'ACCESS.VERSION' | translate}}
                         </th>
                         <th>
                             {{'REMOVE' | translate}}
@@ -58,12 +58,12 @@
     <div class="structure-edit-view" ng-if="vm.structure">
         <div class="structure-edit-wrapper">
             <div class="structure-tree" resizable r-directions="['right']" r-grabber="<div class='resize-grabber'></div>" r-flex="true">
-            <h4 class="mb-0">{{'EDIT_CLASSIFICATION_STRUCTURE' | translate}}</h4>
+            <h4 class="mb-0">{{'ACCESS.EDIT_CLASSIFICATION_STRUCTURE' | translate}}</h4>
                 <div ng-if="vm.structureTreeData" js-tree="vm.structureTreeConfig" should-apply="vm.applyStructureModelChanges()" ng-model="vm.structureTreeData" tree="vm.structureTreeInstance" tree-events="changed:vm.structureTreeChange;ready:vm.treeReady;open_node:vm.expandChildren;move_node:vm.dropNode;"></div>
             </div>
             <div class="structure-rules">
                 <div class="rules-header">
-                    <h4 class="mb-0">{{'RULES' | translate}}</h4>
+                    <h4 class="mb-0">{{'ACCESS.RULES' | translate}}</h4>
                     <button class="btn btn-primary" ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)" ng-click="vm.saveRules(vm.rules, vm.structure)">
                         {{'SAVE' | translate}}&nbsp; <i ng-if="vm.savingRules" class="fas fa-spinner fa-spin"/>
                     </button>
@@ -77,7 +77,7 @@
                             </th>
                             <th>
                                 <strong>
-                                    {{'CAN_BE_MOVED' | translate}}
+                                    {{'ACCESS.CAN_BE_MOVED' | translate}}
                                 </strong>
                             </th>
                             <th>
@@ -100,7 +100,7 @@
                     </table>
                 </div>
                 <label for="rule-type">
-                    {{'NEW_TYPE' | translate}}
+                    {{'ACCESS.NEW_TYPE' | translate}}
                 </label>
                 <div class="flex-row">
                     <input id="rule-type" placeholder="{{'TYPE' | translate}} ..." class="form-control rule-type-input" ng-model="vm.newRule" ng-enter="vm.addRule(vm.newRule)">

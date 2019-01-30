@@ -21,10 +21,10 @@
                 </div>
                 <div uib-alert ng-if="informationClassAlert" style="width: 75%;" ng-class="'alert-' + (informationClassAlert.type || 'warning')">{{informationClassAlert.message}}</div>
                 <div ng-if="vm.request.type == 'receive' && checkPermission('ip.receive')">
-                    <label>{{'ARCHIVE' | translate}}</label>
+                    <label>{{'ACCESS.ARCHIVE' | translate}}</label>
                     <div class="input-group">
                         <ui-select ng-disabled="ip.archive !== null" allow-clear ng-model="vm.tags.archive.value" on-select="archiveChanged($item)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
-                            <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ARCHIVE') | translate}}">{{vm.tags.archive.value.name}}</ui-select-match>
+                            <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.ARCHIVE') | translate}}">{{vm.tags.archive.value.name}}</ui-select-match>
                             <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getArchives($select.search)" repeat="x in vm.tags.archive.options | propsFilter: {name: $select.search}">
                                 <div ng-bind-html="x.name | highlight: $select.search"></div>
                             </ui-select-choices>
@@ -39,10 +39,10 @@
                         </span>
                     </div>
                     <div ng-if="vm.tags.archive.value" class="margin-top-5">
-                        <label>{{'CLASSIFICATION_STRUCTURE' | translate}}</label>
+                        <label>{{'ACCESS.CLASSIFICATION_STRUCTURE' | translate}}</label>
                         <div class="input-group">
                             <ui-select allow-clear ng-model="vm.tags.structure.value" on-select="structureChanged($item)" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
-                                <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('CLASSIFICATION_STRUCTURE') | translate}}">{{vm.tags.structure.value.name}}</ui-select-match>
+                                <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.CLASSIFICATION_STRUCTURE') | translate}}">{{vm.tags.structure.value.name}}</ui-select-match>
                                 <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getStructures(vm.tags.archive.value)" repeat="x in vm.tags.structure.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>
@@ -58,10 +58,10 @@
                         </div>
                     </div>
                     <div ng-if="vm.tags.structure.value && vm.tags.archive.value && !ip.has_cts" class="margin-top-5">
-                        <label>{{'STRUCTURE_UNIT' | translate}}</label>
+                        <label>{{'ACCESS.STRUCTURE_UNIT' | translate}}</label>
                         <div class="input-group">
                             <ui-select allow-clear ng-model="vm.tags.descendants.value" theme="bootstrap" sortable="true" close-on-select="true" append-to-body="false">
-                                <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('STRUCTURE_UNIT') | translate}}">{{vm.tags.descendants.value.name}}</ui-select-match>
+                                <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.STRUCTURE_UNIT') | translate}}">{{vm.tags.descendants.value.name}}</ui-select-match>
                                 <ui-select-choices ng-hide="!$select.open" refresh-delay="0" refresh="getTagDescendants(vm.tags.archive.value.parent_id, vm.tags.structure.value.id, $select.search)" repeat="x in vm.tags.descendants.options | propsFilter: {name: $select.search}">
                                     <div ng-bind-html="x.name | highlight: $select.search"></div>
                                 </ui-select-choices>

@@ -20,7 +20,7 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("NAME"),
+                    "label": $translate.instant('NAME'),
                     "required": true,
                     "focus": true
                 },
@@ -29,7 +29,7 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("TYPE"),
+                    "label": $translate.instant('TYPE'),
                     "type": "text",
                     "required": true
                 },
@@ -38,7 +38,7 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("REFERENCE_CODE"),
+                    "label": $translate.instant('ACCESS.REFERENCE_CODE'),
                     "type": "text",
                     "required": true
                 },
@@ -64,7 +64,7 @@ angular.module('essarch.controllers').controller('AddNodeModalInstanceCtrl', fun
 
             Search.addNode(params).then(function(response) {
                 $ctrl.submitting = false;
-                Notifications.add($translate.instant('NODE_ADDED'), 'success');
+                Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
                 $uibModalInstance.close(response.data);
             }).catch(function(response) {
                 $ctrl.submitting = false;
