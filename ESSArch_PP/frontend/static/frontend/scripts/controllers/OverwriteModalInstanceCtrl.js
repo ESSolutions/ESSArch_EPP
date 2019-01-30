@@ -29,7 +29,7 @@ angular.module('essarch.controllers').controller('OverwriteModalInstanceCtrl', f
             return resource;
         }).catch(function(response) {
             if(response.status === 405) {
-                Notifications.add($translate.instant('SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN', $ctrl.profile), "error");
+                Notifications.add($translate.instant('IMPORT.SA_IS_PUBLISHED_CANNOT_BE_OVERWRITTEN', $ctrl.profile), "error");
             }
         });
     }

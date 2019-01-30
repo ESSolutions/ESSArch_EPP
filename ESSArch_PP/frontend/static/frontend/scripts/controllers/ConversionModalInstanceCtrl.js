@@ -63,7 +63,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         if($ctrl.validCron(frequency)) {
             return prettyCron.toString(frequency);
         } else {
-            return $translate.instant("INVALID_FREQUENCY")
+            return $translate.instant('ARCHIVE_MAINTENANCE.INVALID_FREQUENCY')
         }
     }
     $ctrl.nextPretty = function(frequency) {
@@ -148,7 +148,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             data: {rule: rule.id}
         }).then(function (response) {
             $ctrl.creatingJob = false;
-            Notifications.add($translate.instant('JOB_CREATED'), "success");
+            Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.JOB_CREATED'), "success");
             $uibModalInstance.close($ctrl.data);
         }).catch(function (response) {
             $ctrl.creatingJob = false;
@@ -168,7 +168,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
                 method: "POST",
             }).then(function (response) {
                 $ctrl.runningJob = false;
-                Notifications.add($translate.instant('JOB_RUNNING'), "success");
+                Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.JOB_RUNNING'), "success");
                 $uibModalInstance.close($ctrl.data);
             }).catch(function (response) {
                 $ctrl.runningJob = false;
@@ -209,7 +209,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             data: $ctrl.data
         }).then(function(response) {
             $ctrl.addingRule = false;
-            Notifications.add($translate.instant('RULE_CREATED'), "success")
+            Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.RULE_CREATED'), "success")
             $uibModalInstance.close($ctrl.data);
         }).catch(function(response) {
             $ctrl.addingRule = false;
@@ -224,7 +224,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
             method: "DELETE"
         }).then(function(response) {
             $ctrl.removingRule = false;
-            Notifications.add($translate.instant('CONVERSION_RULE_REMOVED', {name: conversion.name}), "success");
+            Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.CONVERSION_RULE_REMOVED', {name: conversion.name}), "success");
             $uibModalInstance.close();
         }).catch(function(response) {
             $ctrl.removingRule = false;
@@ -238,7 +238,7 @@ angular.module('essarch.controllers').controller('ConversionModalInstanceCtrl', 
         $uibModalInstance.dismiss('cancel');
     };
     $ctrl.submitConversion = function(conversion) {
-        Notifications.add($translate.instant('NODE_ADDED_TO_CONVERSION_RULE', { node: $ctrl.data.record.name, rule: conversion.name }), "success");
+        Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.NODE_ADDED_TO_CONVERSION_RULE', { node: $ctrl.data.record.name, rule: conversion.name }), "success");
         $uibModalInstance.close(conversion);
     }
 });

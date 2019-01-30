@@ -17,7 +17,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
         $ctrl.nodeFields = [
             {
                 "templateOptions": {
-                    "label": $translate.instant("REFERENCE_CODE"),
+                    "label": $translate.instant('ACCESS.REFERENCE_CODE'),
                     "type": "text",
                     "required": true,
                     "focus": true
@@ -28,7 +28,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("NAME"),
+                    "label": $translate.instant('NAME'),
                     "required": true,
                 },
                 "type": "input",
@@ -36,7 +36,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("TYPE"),
+                    "label": $translate.instant('TYPE'),
                     "type": "text",
                     "options": [
                         {
@@ -60,7 +60,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             },
             {
                 "templateOptions": {
-                    "label": $translate.instant("DESCRIPTION"),
+                    "label": $translate.instant('ACCESS.DESCRIPTION'),
                     "type": "text",
                     "rows": 3
                 },
@@ -70,7 +70,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("START_DATE"),
+                    "label": $translate.instant('START_DATE'),
                     "appendToBody": false
                 },
                 "type": "datepicker",
@@ -79,7 +79,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             {
                 "templateOptions": {
                     "type": "text",
-                    "label": $translate.instant("END_DATE"),
+                    "label": $translate.instant('END_DATE'),
                     "appendToBody": false
                 },
                 "type": "datepicker",
@@ -94,7 +94,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
 
     $ctrl.remove = function() {
         $http.delete(appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id).then(function(response) {
-            Notifications.add($translate.instant('NODE_REMOVED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NODE_REMOVED'), 'success');
             $uibModalInstance.close("added");
         });
     }
@@ -109,7 +109,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
                         parent: $ctrl.node.id,
                     })).then(function (response) {
                         $ctrl.submitting = false;
-                        Notifications.add($translate.instant('NODE_ADDED'), 'success');
+                        Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
                         $uibModalInstance.close(response.data);
                     }).catch(function (response) {
                         $ctrl.submitting = false;
@@ -144,7 +144,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
             }
         ).$promise.then(function(response) {
             $uibModalInstance.close(response.data);
-            Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_CREATED'), 'success');
+            Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
         });
     }
 
@@ -153,7 +153,7 @@ angular.module('essarch.controllers').controller('ClassificationModalInstanceCtr
         $ctrl.removing = true;
         Structure.remove({id: structure.id}).$promise.then(function(response) {
             $ctrl.removing = false;
-            Notifications.add($translate.instant('CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
+            Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
             $uibModalInstance.close();
         });
     }

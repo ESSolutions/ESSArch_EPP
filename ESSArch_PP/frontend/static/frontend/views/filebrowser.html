@@ -2,7 +2,7 @@
     <div class="title-action-button-row">
         <div class="title">
             <h4>
-                {{'FILEBROWSER' | translate}}
+                {{'FILEBROWSER.FILEBROWSER' | translate}}
             </h4>
         </div>
     </div>
@@ -92,5 +92,5 @@
         <div st-template="static/frontend/views/file_pagination.html" st-pagination="" st-items-by-page="filesPerPage" st-displayed-pages="7"></div>
     </div>
     <button ng-if="ip.workarea && !ip.workarea[0].read_only && selectedCards.length && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception' && ip.state !== 'Preserved'" class="btn btn-default" ng-click="removeFiles()" translate="REMOVE"></button>
-    <button ng-if="ip.workarea && !ip.workarea[0].read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception' && ip.state !== 'Preserved'" ng-click="newDirModal()" class="btn btn-default" translate="NEWFOLDER"></button>
+    <button ng-if="ip.workarea && !ip.workarea[0].read_only && ip.state !== 'Created' && ip.state !== 'Creating' && ip.state !== 'Submitted' && ip.state !=='Uploaded' && ip.state !== 'At reception' && ip.state !== 'Preserved'" ng-click="newDirModal()" class="btn btn-default" translate="FILEBROWSER.NEWFOLDER"></button>
 </div>

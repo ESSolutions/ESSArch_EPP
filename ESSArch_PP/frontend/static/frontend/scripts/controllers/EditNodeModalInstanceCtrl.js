@@ -181,7 +181,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
             var newFieldVal = angular.copy($ctrl.newFieldVal);
             var splitted = newFieldKey.split('.');
             if((splitted.length > 1 && !angular.isUndefined($ctrl.editData[splitted[0]][splitted[1]]))|| !angular.isUndefined($ctrl.editData[newFieldKey])) {
-                Notifications.add($translate.instant('FIELD_EXISTS'), 'error')
+                Notifications.add($translate.instant('ACCESS.FIELD_EXISTS'), 'error')
                 return;
             }
             if(splitted.length > 1) {
@@ -262,14 +262,14 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
                 if($ctrl.changed()) {
                     Search.updateNode($ctrl.node, getEditedFields($ctrl.editData)).then(function (response) {
                         $ctrl.submitting = false;
-                        Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                        Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
                         $uibModalInstance.close("edited");
                     }).catch(function (response) {
                         $ctrl.submitting = false;
                     });
                 } else {
                     $ctrl.submitting = false;
-                    Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                    Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
                     $uibModalInstance.close("edited");
                 }
             }).catch(function (response) {
@@ -282,7 +282,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
         if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
             Search.updateNodeAndDescendants($ctrl.node, getEditedFields($ctrl.editData), $ctrl.fieldsToDelete.join(',')).then(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;
@@ -294,7 +294,7 @@ angular.module('essarch.controllers').controller('EditNodeModalInstanceCtrl', fu
         if ($ctrl.changed() || $ctrl.fieldsToDelete.length > 0) {
             Search.massUpdate($ctrl.nodeList, getEditedFields($ctrl.editData), $ctrl.fieldsToDelete.join(',')).then(function (response) {
                 $ctrl.submitting = false;
-                Notifications.add($translate.instant('NODE_EDITED'), 'success');
+                Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
                 $uibModalInstance.close("edited");
             }).catch(function (response) {
                 $ctrl.submitting = false;

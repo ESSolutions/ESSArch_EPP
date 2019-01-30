@@ -4,8 +4,8 @@
         <div class="detail-header">
             <div ng-include src="'static/frontend/views/search_detail_breadcrumbs.html'"></div>
             <div class="version-select-wrapper">
-                <label title="{{'VERSION_HISTORY_DESC' | translate}}">
-                    {{'VERSION_HISTORY' | translate}}
+                <label title="{{'ACCESS.VERSION_HISTORY_DESC' | translate}}">
+                    {{'ACCESS.VERSION_HISTORY' | translate}}
                 </label>
                 <div class="flex-row">
                     <select class="form-control version-select" ng-model="vm.currentVersion" ng-change="vm.showVersion(vm.currentVersion)">
@@ -13,7 +13,7 @@
                             {{$index+1}}, {{version.create_date | date:"yyyy-MM-dd"}}
                         </option>
                     </select>
-                    <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success btn-small" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'SET_CURRENT_VERSION' | translate}}</button>
+                    <button type="button" ng-disabled="vm.record._source.current_version" class="btn btn-success btn-small" ng-click="vm.setCurrentVersion(vm.currentVersion)">{{'ACCESS.SET_CURRENT_VERSION' | translate}}</button>
                 </div>
             </div>
         </div>
@@ -43,10 +43,10 @@
             </div>
             <hr class="mx-0"/>
             <div class="flex-row align-items-end">
-                <button class="btn btn-primary" ng-click="vm.emailDocument(vm.record)">{{'SEND_AS_EMAIL' | translate}}</button>
+                <button class="btn btn-primary" ng-click="vm.emailDocument(vm.record)">{{'ACCESS.SEND_AS_EMAIL' | translate}}</button>
                 <label class="m-0">
                     <input type="checkbox" ng-model="vm.includeDescendants">
-                        {{'INCLUDE_DESCENDANT_NODES' | translate}}
+                        {{'ACCESS.INCLUDE_DESCENDANT_NODES' | translate}}
                     </input>
                 </label>
             </div>

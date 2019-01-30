@@ -87,7 +87,7 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
             vm.structureName = null;
             vm.nodeType = null;
             vm.referenceCode = null;
-            Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NEW_ARCHIVE_CREATED'), 'success');
         });
     }
 
@@ -98,13 +98,13 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
     vm.calculatePageNumber = function() {
         if(!angular.isUndefined(vm.tableState) && vm.tableState.pagination) {
             if(vm.searchResult.length == 0) {
-                return $translate.instant("SHOWING_RESULT") + " " + "0" + " " + $translate.instant("OF") + " " + "0";
+                return $translate.instant("ACCESS.SHOWING_RESULT") + " " + "0" + " " + $translate.instant("ACCESS.OF") + " " + "0";
             }
             var pageNumber = vm.tableState.pagination.start/vm.tableState.pagination.number;
             var firstResult = pageNumber*vm.tableState.pagination.number+1;
             var lastResult = vm.searchResult.length+((vm.tableState.pagination.start/vm.tableState.pagination.number)*vm.tableState.pagination.number);
             var total = vm.numberOfResults;
-            return $translate.instant("SHOWING_RESULT") + " " + firstResult + "-"+ lastResult + " " + $translate.instant("OF") + " " + total;
+            return $translate.instant("ACCESS.SHOWING_RESULT") + " " + firstResult + "-"+ lastResult + " " + $translate.instant("ACCESS.OF") + " " + total;
         }
     }
 
@@ -240,9 +240,9 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
         var archiveResponsibleChildren = vm.getAggregationChildren(aggregations, 'archive_responsible');
         var filters = [
             {
-                text: $translate.instant("TYPE"),
+                text: $translate.instant('TYPE'),
                 a_attr: {
-                    title: $translate.instant("TYPE")
+                    title: $translate.instant('TYPE')
                 },
                 state: {opened: true, disabled: true},
                 type: 'series',
@@ -250,54 +250,54 @@ angular.module('essarch.controllers').controller('SearchCtrl', function(Search, 
                 branch: 'type',
             },
             {
-                text: $translate.instant("ARCHIVE"),
+                text: $translate.instant('ACCESS.ARCHIVE'),
                 a_attr: {
-                    title: $translate.instant("ARCHIVE")
+                    title: $translate.instant('ACCESS.ARCHIVE')
                 },
                 state: {opened: true, disabled: true},
                 children: archiveChildren,
                 branch: 'archive',
             },
             {
-                text: $translate.instant("ARCHIVE_CREATOR"),
+                text: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
                 a_attr: {
-                    title: $translate.instant("ARCHIVE_CREATOR")
+                    title: $translate.instant('ACCESS.ARCHIVE_CREATOR')
                 },
                 state: {opened: true, disabled: true},
                 children: archiveCreatorChildren,
                 branch: 'archive_creator',
             },
             {
-                text: $translate.instant("ARCHIVE_RESPONSIBLE"),
+                text: $translate.instant('ACCESS.ARCHIVE_RESPONSIBLE'),
                 a_attr: {
-                    title: $translate.instant("ARCHIVE_RESPONSIBLE")
+                    title: $translate.instant('ACCESS.ARCHIVE_RESPONSIBLE')
                 },
                 state: {opened: true, disabled: true},
                 children: archiveResponsibleChildren,
                 branch: 'archive_responsible',
             },
             {
-                text: $translate.instant("ARCHIVALINSTITUTION"),
+                text: $translate.instant('ARCHIVALINSTITUTION'),
                 a_attr: {
-                    title: $translate.instant("ARCHIVALINSTITUTION")
+                    title: $translate.instant('ARCHIVALINSTITUTION')
                 },
                 state: {opened: true, disabled: true},
                 children: institutionChildren,
                 branch: 'institution',
             },
             {
-                text: $translate.instant("ARCHIVISTORGANIZATION"),
+                text: $translate.instant('ARCHIVISTORGANIZATION'),
                 a_attr: {
-                    title: $translate.instant("ARCHIVISTORGANIZATION")
+                    title: $translate.instant('ARCHIVISTORGANIZATION')
                 },
                 state: {opened: true, disabled: true},
                 children: organizationChildren,
                 branch: 'organization',
             },
             {
-                text: $translate.instant("STORAGE_UNIT"),
+                text: $translate.instant('STORAGE_UNIT'),
                 a_attr: {
-                    title: $translate.instant("STORAGE_UNIT")
+                    title: $translate.instant('STORAGE_UNIT')
                 },
                 state: {opened: true, disabled: true},
                 children: informationPackageChildren,

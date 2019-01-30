@@ -162,7 +162,7 @@ angular.module('essarch.controllers').controller('ConversionCtrl', function(Arch
             url: appConfig.djangoUrl+"conversion-jobs/"+job.id+"/run/",
             method: "POST",
         }).then(function(response) {
-            Notifications.add($translate.instant('JOB_RUNNING'), "success");
+            Notifications.add($translate.instant('ARCHIVE_MAINTENANCE.JOB_RUNNING'), "success");
         });
     }
 

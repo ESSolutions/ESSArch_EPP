@@ -60,6 +60,7 @@ function nestedEmptyPermissions(page) {
 }
 
 angular.module('essarch', [
+    'essarch.language',
     'essarch.controllers',
     'essarch.services',
     'essarch.configs',

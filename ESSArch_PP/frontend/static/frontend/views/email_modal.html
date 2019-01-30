@@ -3,13 +3,13 @@
 </div>
 <div class="modal-body" id="modal-body">
     <div class="sender-receiver-wrapper">
-        <label for="subject">{{'SENDER' | translate}}</label>
+        <label for="subject">{{'EMAIL.SENDER' | translate}}</label>
         <input class="form-control" ng-model="auth.email" disabled="true"></input>
-        <label for="subject">{{'RECEIVER' | translate}}</label>
+        <label for="subject">{{'EMAIL.RECEIVER' | translate}}</label>
         <input class="form-control" ng-model="vm.dependencyModel.preservation_organization_receiver_email" disabled="true"></input>
     </div>
     <br />
-    <label for="subject">{{'SUBJECT' | translate}}</label>
+    <label for="subject">{{'EMAIL.SUBJECT' | translate}}</label>
     <input class="form-control" ng-model="$ctrl.email.subject"></input>
     <textarea id="body" style="margin-top: 10px; height: 120px; max-width: 100%;" class="form-control" ng-model="$ctrl.email.body"></textarea>
 

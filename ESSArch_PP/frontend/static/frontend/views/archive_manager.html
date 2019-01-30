@@ -5,17 +5,17 @@
             <input type="text" class="form-control" required ng-model="vm.archiveName"/>
         </label>
         <label class="margin-top-5">
-            {{'CLASSIFICATION_STRUCTURE' | translate}}
+            {{'ACCESS.CLASSIFICATION_STRUCTURE' | translate}}
             <select class="form-control" required ng-options="x as x.name for x in vm.structures" ng-model="vm.structure">
                 <option></option>
             </select>
         </label>
         <label class="margin-top-5">
-            {{'ARCHIVE_CREATOR' | translate}}
+            {{'ACCESS.ARCHIVE_CREATOR' | translate}}
             <input type="text" class="form-control" ng-model="vm.archiveCreator"/>
         </label>
         <label class="margin-top-5">
-            {{'ARCHIVE_RESPONSIBLE' | translate}}
+            {{'ACCESS.ARCHIVE_RESPONSIBLE' | translate}}
             <input type="text" class="form-control" ng-model="vm.archiveResponsible"/>
         </label>
         <label class="margin-top-5">
@@ -23,7 +23,7 @@
             <input type="text" class="form-control" required ng-model="vm.nodeType"/>
         </label>
         <label class="margin-top-5">
-            {{'REFERENCE_CODE' | translate}}
+            {{'ACCESS.REFERENCE_CODE' | translate}}
             <input type="text" class="form-control" required ng-model="vm.referenceCode"/>
         </label>
         <button type="submit" class="btn btn-primary margin-top-5">{{'SAVE' | translate}}</button>

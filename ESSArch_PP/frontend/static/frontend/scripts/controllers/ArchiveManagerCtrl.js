@@ -31,7 +31,7 @@ angular.module('essarch.controllers').controller('ArchiveManagerCtrl', function(
             vm.referenceCode = null;
             vm.archiveResponsible = null;
             vm.archiveCreator = null;
-            Notifications.add($translate.instant('NEW_ARCHIVE_CREATED'), 'success');
+            Notifications.add($translate.instant('ACCESS.NEW_ARCHIVE_CREATED'), 'success');
         });
     }
 })

@@ -69,7 +69,7 @@
         </div>
         <div class="detail-field" ng-if="vm.record._source.reference_code">
             <strong>
-                {{'REFERENCE_CODE' | translate}}
+                {{'ACCESS.REFERENCE_CODE' | translate}}
             </strong>
             <div ng-class="{masked : vm.record.masked_fields.includes('reference_code')}"
             ng-bind-html="vm.record._source.reference_code">
@@ -77,7 +77,7 @@
     </div>
     <div class="detail-field" ng-if="vm.record._source.ip">
             <strong>
-                {{'IP' | translate}}
+                {{'IP.IP' | translate}}
             </strong>
             <div ng-class="{masked : vm.record.masked_fields.includes('ip')}"
             ng-bind-html="vm.record._source.ip">

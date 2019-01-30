@@ -72,12 +72,12 @@
                     </div>
                 </div>
             </uib-tab>
-            <uib-tab ng-if="ip !== null && ips.length == 0" index="'events'" heading="{{'EVENTS' | translate}}">
+            <uib-tab ng-if="ip !== null && ips.length == 0" index="'events'" heading="{{'EVENT.EVENTS' | translate}}">
                 <div ng-if="vm.activeTab === 'events'" class="events-status-wrapper">
                     <event-table ip="ip"></event-table>
                 </div>
             </uib-tab>
-            <uib-tab ng-if="ip !== null && ips.length == 0 && (ip.responsible.id == auth.id || ip.responsible == null || ip.permissions.includes('see_other_user_ip_files')) && ip.package_type != 1 && ip.state !== 'Receiving'" index="'filebrowser'" heading="{{'FILEBROWSER' | translate}}" ng-click="filebrowserClick(ip)">
+            <uib-tab ng-if="ip !== null && ips.length == 0 && (ip.responsible.id == auth.id || ip.responsible == null || ip.permissions.includes('see_other_user_ip_files')) && ip.package_type != 1 && ip.state !== 'Receiving'" index="'filebrowser'" heading="{{'FILEBROWSER.FILEBROWSER' | translate}}" ng-click="filebrowserClick(ip)">
                 <div ng-if="vm.activeTab === 'filebrowser'" class="file-browser" tabindex="-1" ng-keydown="vm.contentViewsKeydownListener($event)">
                     <filebrowser ip="ip" workarea="vm.workarea" user="vm.organizationMember.current" browserstate="vm.browserstate"></filebrowser>
                     <div id="file-upload" ng-if="!ip.workarea[0].read_only && (ip.responsible.id == auth.id || checkPermission('ip.can_upload')) && showFileUpload" ng-include
