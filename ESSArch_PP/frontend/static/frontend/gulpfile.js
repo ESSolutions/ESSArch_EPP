@@ -310,7 +310,7 @@ gulp.task('default', gulp.series(
         gulp.series(
             gulp.parallel('config', 'permission_config'),
             gulp.parallel('core_templates', 'core_scripts','core_tests'),
-            gulp.parallel('icons', 'images', 'polyfills', 'scripts'),
+            gulp.parallel('icons', 'jstree_images', 'images', 'polyfills', 'scripts'),
         ),
         'sass',
         'vendors'
