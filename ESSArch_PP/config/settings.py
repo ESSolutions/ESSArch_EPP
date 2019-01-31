@@ -328,9 +328,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.environ.get('STATIC_ROOT_EPP', os.path.join(BASE_DIR, 'static_root'))
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
 
 DJANGO_GULP_REV_PATH = os.path.join(BASE_DIR, 'frontend/static/frontend/build/rev-manifest.json')
 
