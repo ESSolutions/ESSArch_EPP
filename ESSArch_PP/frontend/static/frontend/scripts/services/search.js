@@ -16,9 +16,6 @@ angular.module('essarch.services').factory('Search', function($http, $sce, appCo
                 item._source.text = item._source.reference_code + " - " + item._source.name;
                 item._source.parent = "#";
                 item._source._index = item._index;
-                if(item._index == "archive") {
-                    item._source.type = $translate.instant("ARCHIVE");
-                }
                 for (var key in item.highlight) {
                     item._source[key] = $sce.trustAsHtml(item.highlight[key][0]);
                 }
