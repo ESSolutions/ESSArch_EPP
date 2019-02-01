@@ -1,4 +1,3 @@
-import six
 from lxml import etree
 
 from rest_framework.exceptions import ValidationError
@@ -19,7 +18,7 @@ class ProfileMakerExtensionSerializer(serializers.ModelSerializer):
         schemadoc = etree.fromstring(schema_request.content)
 
         print(schemadoc.nsmap)
-        nsmap = {k: v for k, v in six.iteritems(schemadoc.nsmap) if k and v != "http://www.w3.org/2001/XMLSchema"}
+        nsmap = {k: v for k, v in schemadoc.nsmap.items() if k and v != "http://www.w3.org/2001/XMLSchema"}
         targetNamespace = schemadoc.get('targetNamespace')
 
         prefix = validated_data.pop('prefix')
@@ -55,7 +54,7 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
 
         schemadoc = etree.fromstring(schema_request.content)
         targetNamespace = schemadoc.get('targetNamespace')
-        nsmap = {k: v for k, v in six.iteritems(schemadoc.nsmap) if k and v != "http://www.w3.org/2001/XMLSchema"}
+        nsmap = {k: v for k, v in schemadoc.nsmap.items() if k and v != "http://www.w3.org/2001/XMLSchema"}
 
         try:
             existingElements, allElements = generateJsonRes(

@@ -31,7 +31,6 @@ import os
 import shutil
 import uuid
 
-import six
 from celery import states as celery_states
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -172,10 +171,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         ips = contained + extracted
 
         # Remove all keys not in filterset_fields
-        conditions = {key: value for (key, value) in six.iteritems(request.query_params) if key in filterset_fields}
+        conditions = {key: value for (key, value) in request.query_params.items() if key in filterset_fields}
 
         # Filter ips based on conditions
-        new_ips = list(filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in six.iteritems(conditions))), ips))
+        new_ips = list(filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in conditions.items())), ips))
 
         from_db = InformationPackage.objects.visible_to_user(request.user).filter(
             package_type=InformationPackage.AIP,
@@ -625,7 +624,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
 
         workarea_params = {}
-        for key, val in six.iteritems(self.request.query_params):
+        for key, val in self.request.query_params.items():
             if key.startswith('workspace_'):
                 key_suffix = remove_prefix(key, 'workspace_')
                 workarea_params[key_suffix] = val
@@ -935,7 +934,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         if not any(x in options for x in data.keys()):
             raise exceptions.ParseError('No option set')
 
-        if not any(v for k, v in six.iteritems(data) if k in options):
+        if not any(v for k, v in data.items() if k in options):
             raise exceptions.ParseError('Need at least one option set to true')
 
         if data.get('new'):
@@ -1111,7 +1110,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
             if self.paginator is not None:
                 # Paginate in search engine
-                params = {key: value[0] for (key, value) in six.iteritems(dict(request.query_params))}
+                params = {key: value[0] for (key, value) in dict(request.query_params).items()}
 
                 number = params.get(self.paginator.pager.page_query_param, 1)
                 size = params.get(self.paginator.pager.page_size_query_param, 10)
@@ -1328,7 +1327,7 @@ class WorkareaViewSet(InformationPackageViewSet):
         see_all = self.request.user.has_perm('ip.see_all_in_workspaces')
 
         workarea_params = {}
-        for key, val in six.iteritems(self.request.query_params):
+        for key, val in self.request.query_params.items():
             if key.startswith('workspace_'):
                 key_suffix = remove_prefix(key, 'workspace_')
                 workarea_params[key_suffix] = val
