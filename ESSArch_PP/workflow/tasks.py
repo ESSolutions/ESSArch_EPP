@@ -33,6 +33,7 @@ import shutil
 import smtplib
 import tarfile
 import tempfile
+import urllib
 import uuid
 import zipfile
 
@@ -51,7 +52,6 @@ from django.utils import timezone
 from groups_manager.utils import get_permission_name
 from guardian.shortcuts import assign_perm
 from os import walk
-from six.moves import urllib
 
 # noinspection PyUnresolvedReferences
 from ESSArch_Core import tasks

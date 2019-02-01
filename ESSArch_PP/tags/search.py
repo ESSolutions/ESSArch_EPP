@@ -9,7 +9,6 @@ import math
 import os
 import tempfile
 
-import six
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -28,7 +27,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from six import iteritems
 from weasyprint import HTML
 
 from ESSArch_Core.auth.models import GroupGenericObjects
@@ -151,7 +149,7 @@ class ComponentSearch(FacetedSearch):
                 'params': {'archive': self.archive},
             })))
 
-        for filter_k, filter_v in six.iteritems(self.query_params_filter):
+        for filter_k, filter_v in self.query_params_filter.items():
             if filter_v not in EMPTY_VALUES:
                 s = s.query('match', **{filter_k: filter_v})
 
@@ -164,10 +162,10 @@ class ComponentSearch(FacetedSearch):
 
         We override this to also aggregate on fields in `facets`
         """
-        for f, facet in iteritems(self.facets):
+        for f, facet in self.facets.items():
             agg = facet.get_aggregation()
             agg_filter = Q('match_all')
-            for field, filter in iteritems(self._filters):
+            for field, filter in self._filters.items():
                 agg_filter &= filter
             search.aggs.bucket(
                 '_filter_' + f,
@@ -321,7 +319,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return super(ComponentSearchViewSet, self).paginator
 
     def list(self, request):
-        params = {key: value[0] for (key, value) in six.iteritems(dict(request.query_params))}
+        params = {key: value[0] for (key, value) in dict(request.query_params).items()}
         query = params.pop('q', '')
         export = params.pop('export', None)
         params.pop('pager', None)
@@ -339,7 +337,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             'organization': params.pop('organization', None),
         }
 
-        for k, v in iteritems(filters):
+        for k, v in filters.items():
             filters[k] = v.split(',') if v is not None else v
 
         filter_values = copy.copy(params)
@@ -486,7 +484,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             tag = self.get_tag_object()
             tags.append(tag)
             metadata = tag.from_search()['_source']
-            body.append(u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in six.iteritems(metadata)]))
+            body.append(u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in metadata.items()]))
 
             if tag.elastic_index == 'document':
                 ip = tag.tag.information_package
@@ -516,7 +514,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         metadata = tag.from_search()['_source']
         subject = u'Export: {}'.format(tag.name)
 
-        body = u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in six.iteritems(metadata)])
+        body = u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in metadata.items()])
         email = EmailMessage(subject=subject, body=body, to=[user.email])
 
         if tag.elastic_index == 'document':
