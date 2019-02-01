@@ -18,9 +18,24 @@ from ip.serializers import (InformationPackageDetailSerializer,
 
 
 class StorageMediumSerializer(serializers.ModelSerializer):
-    storage_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=False, required=True, queryset=StorageTarget.objects.all())
-    tape_drive = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, required=False, queryset=TapeDrive.objects.all())
-    tape_slot = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, required=False, queryset=TapeSlot.objects.all())
+    storage_target = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        allow_null=False,
+        required=True,
+        queryset=StorageTarget.objects.all()
+    )
+    tape_drive = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        allow_null=True,
+        required=False,
+        queryset=TapeDrive.objects.all()
+    )
+    tape_slot = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        allow_null=True,
+        required=False,
+        queryset=TapeSlot.objects.all()
+    )
     location_status_display = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
 
@@ -33,8 +48,9 @@ class StorageMediumSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageMedium
         fields = (
-            'url', 'id', 'medium_id', 'status', 'status_display', 'location', 'location_status', 'location_status_display', 'block_size', 'format',
-            'used_capacity', 'num_of_mounts', 'create_date', 'agent', 'storage_target', 'tape_slot', 'tape_drive',
+            'url', 'id', 'medium_id', 'status', 'status_display', 'location', 'location_status',
+            'location_status_display', 'block_size', 'format', 'used_capacity', 'num_of_mounts', 'create_date',
+            'agent', 'storage_target', 'tape_slot', 'tape_drive',
         )
         extra_kwargs = {
             'id': {
@@ -85,8 +101,9 @@ class RobotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Robot
         fields = (
-            'url','id', 'label', 'device', 'online',
+            'url', 'id', 'label', 'device', 'online',
         )
+
 
 class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     storage_medium = StorageMediumSerializer()
@@ -108,8 +125,10 @@ class TapeSlotSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TapeSlot
         fields = (
-            'url','id', 'slot_id', 'medium_id', 'robot', 'status', 'status_display', 'locked', 'mounted', 'storage_medium',
+            'url', 'id', 'slot_id', 'medium_id', 'robot', 'status', 'status_display', 'locked', 'mounted',
+            'storage_medium',
         )
+
 
 class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     storage_medium = StorageMediumSerializer(read_only=True)
@@ -121,8 +140,8 @@ class TapeDriveSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TapeDrive
         fields = (
-            'url', 'id', 'drive_id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status', 'status_display', 'storage_medium',
-            'locked', 'last_change',
+            'url', 'id', 'drive_id', 'device', 'io_queue_entry', 'num_of_mounts', 'idle_time', 'robot', 'status',
+            'status_display', 'storage_medium', 'locked', 'last_change',
         )
 
 
@@ -130,8 +149,16 @@ class IOQueueSerializer(DynamicHyperlinkedModelSerializer):
     ip = InformationPackageDetailSerializer()
     result = serializers.ModelField(model_field=IOQueue()._meta.get_field('result'), read_only=False)
     user = UserSerializer()
-    storage_method_target = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMethodTargetRelation.objects.all())
-    storage_medium = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), allow_null=True, queryset=StorageMedium.objects.all())
+    storage_method_target = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        allow_null=True,
+        queryset=StorageMethodTargetRelation.objects.all()
+    )
+    storage_medium = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        allow_null=True,
+        queryset=StorageMedium.objects.all()
+    )
     storage_object = StorageObjectNestedSerializer(allow_null=True, required=False)
 
     req_type_display = serializers.SerializerMethodField()
@@ -193,18 +220,23 @@ class IOQueueWriteSerializer(IOQueueSerializer):
         for storage_method_data in storage_method_set_data:
             storage_method_target_set_data = storage_method_data.pop('storage_method_target_relations')
             storage_method_data['archive_policy'] = policy
-            storage_method, _ = StorageMethod.objects.update_or_create(id=storage_method_data['id'],
-                                                                       defaults=storage_method_data)
+            storage_method, _ = StorageMethod.objects.update_or_create(
+                id=storage_method_data['id'],
+                defaults=storage_method_data
+            )
 
             for storage_method_target_data in storage_method_target_set_data:
                 storage_target_data = storage_method_target_data.pop('storage_target')
-                storage_target, _ = StorageTarget.objects.update_or_create(id=storage_target_data['id'],
-                                                                           defaults=storage_target_data)
+                storage_target, _ = StorageTarget.objects.update_or_create(
+                    id=storage_target_data['id'],
+                    defaults=storage_target_data
+                )
                 storage_method_target_data['storage_method'] = storage_method
                 storage_method_target_data['storage_target'] = storage_target
                 storage_method_target, _ = StorageMethodTargetRelation.objects.update_or_create(
-                                                                            id=storage_method_target_data['id'],
-                                                                            defaults=storage_method_target_data)
+                    id=storage_method_target_data['id'],
+                    defaults=storage_method_target_data
+                )
 
         aic, _ = InformationPackage.objects.get_or_create(id=aic_data['id'], defaults=aic_data)
 
@@ -251,16 +283,17 @@ class IOQueueWriteSerializer(IOQueueSerializer):
             storage_medium_data = storage_object_data.pop('storage_medium')
             storage_medium_data['agent'] = user
             storage_medium, _ = StorageMedium.objects.update_or_create(
-                                    id=storage_medium_data['id'],
-                                    defaults=storage_medium_data)
+                id=storage_medium_data['id'],
+                defaults=storage_medium_data
+            )
 
             storage_object_data['storage_medium'] = storage_medium
             storage_object, _ = StorageObject.objects.update_or_create(
-                                id=storage_object_data['id'],
-                                defaults=storage_object_data)
+                id=storage_object_data['id'],
+                defaults=storage_object_data
+            )
 
             instance.storage_object = storage_object
-
 
         storage_medium_data = validated_data.pop('storage_medium', None)
 

@@ -28,7 +28,6 @@ import glob
 import logging
 import math
 import os
-import re
 import shutil
 import uuid
 
@@ -62,7 +61,7 @@ from ESSArch_Core.exceptions import Conflict, NoFileChunksFound
 from ESSArch_Core.fixity.format import FormatIdentifier
 from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.filters import WorkareaEntryFilter
-from ESSArch_Core.ip.models import Agent, EventIP, InformationPackage, Order, Workarea
+from ESSArch_Core.ip.models import Agent, InformationPackage, Order, Workarea
 from ESSArch_Core.ip.permissions import CanUnlockProfile, IsOrderResponsibleOrAdmin, \
     IsResponsibleOrReadOnly, IsResponsibleOrCanSeeAllFiles
 from ESSArch_Core.ip.views import InformationPackageViewSet as InformationPackageViewSetCore
@@ -71,8 +70,17 @@ from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.profiles.models import ProfileIP, SubmissionAgreement
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.models import TagStructure
-from ESSArch_Core.util import generate_file_response, in_directory, list_files, merge_file_chunks, mkdir_p, normalize_path, parse_content_range_header, \
-    remove_prefix, timestamp_to_datetime
+from ESSArch_Core.util import (
+    generate_file_response,
+    in_directory,
+    list_files,
+    merge_file_chunks,
+    mkdir_p,
+    normalize_path,
+    parse_content_range_header,
+    remove_prefix,
+    timestamp_to_datetime,
+)
 
 from .serializers import InformationPackageDetailSerializer, InformationPackageSerializer, \
     NestedInformationPackageSerializer, OrderSerializer
@@ -152,8 +160,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         return ips
 
     def list(self, request):
-        filterset_fields = ["label", "object_identifier_value", "responsible",
-                         "create_date", "object_size", "start_date", "end_date"]
+        filterset_fields = [
+            "label", "object_identifier_value", "responsible",
+            "create_date", "object_size", "start_date", "end_date"
+        ]
 
         reception = Path.objects.values_list('value', flat=True).get(entity="reception")
 
@@ -167,8 +177,11 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         # Filter ips based on conditions
         new_ips = list(filter(lambda ip: all((v in str(ip.get(k)) for (k, v) in six.iteritems(conditions))), ips))
 
-        from_db = InformationPackage.objects.visible_to_user(request.user).filter(package_type=InformationPackage.AIP,
-                                                    state__in=['Prepared', 'Receiving'], **conditions)
+        from_db = InformationPackage.objects.visible_to_user(request.user).filter(
+            package_type=InformationPackage.AIP,
+            state__in=['Prepared', 'Receiving'],
+            **conditions
+        )
         serializer = InformationPackageSerializer(
             data=from_db, many=True, context={'request': request, 'view': self}
         )
@@ -220,7 +233,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
             raise exceptions.ParseError('Invalid XML file, %s' % xmlfile)
 
         if not os.path.isfile(container):
-            logger.warn('Tried to prepare IP with missing container file %s' % container, extra={'user': request.user.pk})
+            logger.warn(
+                'Tried to prepare IP with missing container file %s' % container,
+                extra={'user': request.user.pk}
+            )
             raise exceptions.ParseError('%s does not exist' % container)
 
         parsed = parse_submit_description(xmlfile, srcdir=os.path.dirname(container))
@@ -304,7 +320,10 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         logger = logging.getLogger('essarch.epp.ingest')
 
         if ip.state != 'Prepared':
-            logger.warn('Tried to receive IP %s from reception which is in state "%s"' % (pk, ip.state), extra={'user': request.user.pk})
+            logger.warn(
+                'Tried to receive IP %s from reception which is in state "%s"' % (pk, ip.state),
+                extra={'user': request.user.pk}
+            )
             raise exceptions.ParseError('Information package must be in state "Prepared"')
 
         for profile_ip in ProfileIP.objects.filter(ip=ip).iterator():
@@ -322,12 +341,18 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         xmlfile = os.path.join(reception, '%s.xml' % objid)
 
         if not os.path.isfile(xmlfile):
-            logger.warn('Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile), extra={'user': request.user.pk})
+            logger.warn(
+                'Tried to receive IP %s from reception with missing XML file %s' % (pk, xmlfile),
+                extra={'user': request.user.pk}
+            )
             raise exceptions.ParseError('%s does not exist' % xmlfile)
 
         container = os.path.join(reception, self.get_container_for_xml(xmlfile))
         if not os.path.isfile(container):
-            logger.warn('Tried to receive IP %s from reception with missing container file %s' % (pk, container), extra={'user': request.user.pk})
+            logger.warn(
+                'Tried to receive IP %s from reception with missing container file %s' % (pk, container),
+                extra={'user': request.user.pk}
+            )
             raise exceptions.ParseError('%s does not exist' % container)
 
         try:
@@ -511,7 +536,6 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         }
         return Response([entry, xmlentry])
 
-
     @list_route(methods=['post'])
     def upload(self, request):
         if not request.user.has_perm('ip.can_receive_remote_files'):
@@ -618,9 +642,10 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             )
             simple_inner = self.apply_filters(simple_inner).order_by(*InformationPackage._meta.ordering)
 
-            inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
-                                                                                                  queryset=workareas,
-                                                                                                  to_attr='prefetched_workareas'))
+            inner = simple_inner.select_related('responsible').prefetch_related(
+                'agents', 'steps',
+                Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas')
+            )
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -631,9 +656,13 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             inner = inner.annotate(first_generation=self.first_generation_case(lower_higher),
                                    last_generation=self.last_generation_case(lower_higher))
 
-            simple_outer = InformationPackage.objects.annotate(has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))).filter(
-                package_type=InformationPackage.AIC, has_ip=True,
-            )
+            simple_outer = InformationPackage.objects.annotate(
+                has_ip=Exists(
+                    simple_inner.only('id').filter(
+                        aic=OuterRef('pk')
+                    )
+                )
+            ).filter(package_type=InformationPackage.AIC, has_ip=True,)
             aics = simple_outer.prefetch_related(Prefetch('information_packages', queryset=inner)).distinct()
 
             self.queryset = self.apply_ordering_filters(aics) | self.apply_filters(dips)
@@ -681,7 +710,9 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             outer = get_related(outer)
 
             inner = inner.filter(filtered_first_generation=False)
-            outer = outer.filter(filtered_first_generation=True).prefetch_related(Prefetch('aic__information_packages', queryset=inner)).distinct()
+            outer = outer.filter(filtered_first_generation=True).prefetch_related(
+                Prefetch('aic__information_packages', queryset=inner)
+            ).distinct()
 
             self.inner_queryset = simple
             self.outer_queryset = simple
@@ -703,7 +734,10 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
                              last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
-            self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', to_attr='prefetched_workareas'))
+            self.queryset = qs.prefetch_related(
+                'agents', 'steps',
+                Prefetch('workareas', to_attr='prefetched_workareas')
+            )
             self.queryset = self.queryset.distinct()
             return self.queryset
 
@@ -729,7 +763,6 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return context
 
-
     @transaction.atomic
     def destroy(self, request, pk=None):
         logger = logging.getLogger('essarch.epp')
@@ -739,7 +772,10 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         if not request.user.has_perm('delete_informationpackage', ip):
             raise exceptions.PermissionDenied('You do not have permission to delete this IP')
 
-        logger.info('Request issued to delete %s %s' % (ip.get_package_type_display(), pk), extra={'user': request.user.pk})
+        logger.info(
+            'Request issued to delete %s %s' % (ip.get_package_type_display(), pk),
+            extra={'user': request.user.pk}
+        )
 
         if ip.package_type == InformationPackage.AIC:
             raise exceptions.ParseError(detail='AICs cannot be deleted')
@@ -747,11 +783,15 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         if ip.package_type == InformationPackage.AIP:
             if ip.is_first_generation():
                 if not request.user.has_perm('ip.delete_first_generation'):
-                    raise exceptions.PermissionDenied('You do not have permission to delete the first generation of an IP')
+                    raise exceptions.PermissionDenied(
+                        'You do not have permission to delete the first generation of an IP'
+                    )
 
             if ip.is_last_generation():
                 if not request.user.has_perm('ip.delete_last_generation'):
-                    raise exceptions.PermissionDenied('You do not have permission to delete the last generation of an IP')
+                    raise exceptions.PermissionDenied(
+                        'You do not have permission to delete the last generation of an IP'
+                    )
 
         if ip.archived:
             if not request.user.has_perm('delete_archived', ip):
@@ -910,7 +950,9 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
             if aip.new_version_in_progress() is not None:
                 working_user = aip.new_version_in_progress().ip.responsible
-                raise exceptions.ParseError('User %s already has a new generation in their workarea' % working_user.username)
+                raise exceptions.ParseError(
+                    'User %s already has a new generation in their workarea' % working_user.username
+                )
 
             data['extracted'] = True
 
@@ -920,14 +962,18 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         ingest_path = Path.objects.get(entity='ingest_workarea')
         access_path = Path.objects.get(entity='access_workarea')
 
-        if not data.get('new') and ip_workarea.exists() and (ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path):
+        ip_already_in_workarea = ip_workarea.exists() and (
+            ip_workarea.filter(type=workarea_type).exists() or ingest_path == access_path
+        )
+
+        if not data.get('new') and ip_already_in_workarea:
             raise Conflict('IP already in workarea')
 
         step = ProcessStep.objects.create(
             name='Access AIP', eager=False,
             information_package_id=pk,
         )
-        task = ProcessTask.objects.create(
+        ProcessTask.objects.create(
             name='workflow.tasks.AccessAIP',
             params={
                 'aip': pk,
@@ -993,7 +1039,9 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         if object_identifier_value:
             ip_exists = InformationPackage.objects.filter(object_identifier_value=object_identifier_value).exists()
             if ip_exists:
-                raise exceptions.ParseError('IP with object identifer value "%s" already exists' % object_identifier_value)
+                raise exceptions.ParseError(
+                    'IP with object identifer value "%s" already exists' % object_identifier_value
+                )
 
         orders = request.data.get('orders', [])
 
@@ -1051,7 +1099,11 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                 if hit.meta.index.startswith('document'):
                     fid = FormatIdentifier(allow_unknown_file_types=True)
                     content_type = fid.get_mimetype(path)
-                    return generate_file_response(ip.open_file(path, 'rb'), content_type=content_type, force_download=download, name=path)
+                    return generate_file_response(
+                        ip.open_file(path, 'rb'),
+                        content_type=content_type,
+                        force_download=download, name=path
+                    )
 
             # a directory with the path exists, get the content of it
             s = Search(index=['directory', 'document'])
@@ -1072,30 +1124,34 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                     raise exceptions.NotFound('Invalid page.')
 
                 size = int(size)
-                offset = (number-1)*size
+                offset = (number - 1) * size
                 try:
-                    max_results = int(Index('document').get_settings()['document']['settings']['index'].get('max_result_window', DEFAULT_MAX_RESULT_WINDOW))
+                    max_results = int(
+                        Index('document').get_settings()['document']['settings']['index'].get(
+                            'max_result_window', DEFAULT_MAX_RESULT_WINDOW
+                        )
+                    )
                 except KeyError:
                     max_results = DEFAULT_MAX_RESULT_WINDOW
 
-                s = s[offset:offset+size]
+                s = s[offset:offset + size]
 
             try:
                 results = s.execute()
             except TransportError:
                 if self.paginator is not None:
-                    if offset+size > max_results:
+                    if offset + size > max_results:
                         raise exceptions.ParseError("Can't show more than {max} results".format(max=max_results))
 
                 raise
 
             if self.paginator is not None:
-                ceil = math.ceil(results.hits.total/size)
+                ceil = math.ceil(results.hits.total / size)
                 ceil = 1 if ceil < 1 else ceil
                 if results.hits.total > 0 and number > ceil:
                     raise exceptions.NotFound('Invalid page.')
 
-            l = []
+            results_list = []
             for hit in results:
                 if hit.meta.index.startswith('directory-'):
                     d = {
@@ -1110,12 +1166,12 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
                         'size': hit.size,
                     }
 
-                l.append(d)
+                results_list.append(d)
 
             if self.paginator is not None:
-                return Response(l, headers={'Count': results.hits.total})
+                return Response(results_list, headers={'Count': results.hits.total})
 
-            return Response(l)
+            return Response(results_list)
 
         if request.method == 'DELETE':
             if ip.package_type != InformationPackage.DIP:
@@ -1289,9 +1345,10 @@ class WorkareaViewSet(InformationPackageViewSet):
 
             simple_inner = self.apply_filters(simple_inner)
 
-            inner = simple_inner.select_related('responsible').prefetch_related('agents', 'steps', Prefetch('workareas',
-                                                                                                  queryset=workareas,
-                                                                                                  to_attr='prefetched_workareas'))
+            inner = simple_inner.select_related('responsible').prefetch_related(
+                'agents', 'steps',
+                Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas')
+            )
             dips = inner.filter(package_type=InformationPackage.DIP).distinct()
 
             lower_higher = InformationPackage.objects.filter(
@@ -1302,9 +1359,9 @@ class WorkareaViewSet(InformationPackageViewSet):
             inner = inner.annotate(first_generation=self.first_generation_case(lower_higher),
                                    last_generation=self.last_generation_case(lower_higher))
 
-            simple_outer = InformationPackage.objects.annotate(has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))).filter(
-                package_type=InformationPackage.AIC, has_ip=True,
-            )
+            simple_outer = InformationPackage.objects.annotate(
+                has_ip=Exists(simple_inner.only('id').filter(aic=OuterRef('pk')))
+            ).filter(package_type=InformationPackage.AIC, has_ip=True)
             aics = simple_outer.prefetch_related(Prefetch('information_packages', queryset=inner)).distinct()
 
             self.queryset = aics | dips
@@ -1345,7 +1402,10 @@ class WorkareaViewSet(InformationPackageViewSet):
 
             def get_related(qs):
                 qs = qs.select_related('responsible')
-                return qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+                return qs.prefetch_related(
+                    'agents', 'steps',
+                    Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas')
+                )
 
             inner = annotate_generations(simple)
             inner = annotate_filtered_first_generation(inner)
@@ -1356,7 +1416,9 @@ class WorkareaViewSet(InformationPackageViewSet):
             outer = get_related(outer)
 
             inner = inner.filter(filtered_first_generation=False)
-            outer = outer.filter(filtered_first_generation=True).prefetch_related(Prefetch('aic__information_packages', queryset=inner)).distinct()
+            outer = outer.filter(filtered_first_generation=True).prefetch_related(
+                Prefetch('aic__information_packages', queryset=inner)
+            ).distinct()
 
             self.inner_queryset = simple
             self.outer_queryset = simple
@@ -1378,7 +1440,10 @@ class WorkareaViewSet(InformationPackageViewSet):
             qs = qs.annotate(first_generation=self.first_generation_case(lower_higher),
                              last_generation=self.last_generation_case(lower_higher))
             qs = qs.select_related('responsible')
-            self.queryset = qs.prefetch_related('agents', 'steps', Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas'))
+            self.queryset = qs.prefetch_related(
+                'agents', 'steps',
+                Prefetch('workareas', queryset=workareas, to_attr='prefetched_workareas')
+            )
             return self.queryset
 
         return self.queryset
@@ -1462,7 +1527,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root, existence=False)
 
-        relative_root = path[len(root)+1:].split('/')[0]
+        relative_root = path[len(root) + 1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1481,7 +1546,6 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return Response(status=status.HTTP_201_CREATED)
 
-
     @list_route(methods=['delete'], url_path='')
     def delete(self, request):
         try:
@@ -1497,7 +1561,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
         path = os.path.join(root, request.data.get('path', ''))
         self.validate_path(path, root)
 
-        relative_root = path[len(root)+1:].split('/')[0]
+        relative_root = path[len(root) + 1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1536,7 +1600,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
             path = os.path.join(root, request.data.get('destination', ''))
 
         self.validate_path(path, root)
-        relative_root = path[len(root)+1:].split('/')[0]
+        relative_root = path[len(root) + 1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)
@@ -1609,7 +1673,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         self.validate_path(path, root, existence=False)
 
-        relative_root = path[len(root)+1:].split('/')[0]
+        relative_root = path[len(root) + 1:].split('/')[0]
 
         try:
             workarea_obj = Workarea.objects.get(ip__object_identifier_value=relative_root)

@@ -57,7 +57,10 @@ SORTABLE_FIELDS = (
 
 class ComponentSearch(FacetedSearch):
     index = ['component', 'archive', 'document', 'information_package']
-    fields = ['reference_code.keyword^5', 'reference_code^3', 'name^2', 'desc', 'attachment.content', 'attachment.keywords']
+    fields = [
+        'reference_code.keyword^5', 'reference_code^3', 'name^2', 'desc', 'attachment.content',
+        'attachment.keywords',
+    ]
 
     facets = {
         # use bucket aggregations to define facets
@@ -147,7 +150,10 @@ class ComponentSearch(FacetedSearch):
 
         if self.archive is not None:
             s = s.query(Q('bool', must=Q('script', script={
-                'source': "(doc.containsKey('archive') && doc['archive'].value==params.archive) || doc['_id'].value==params.archive",
+                'source': (
+                    "(doc.containsKey('archive') && doc['archive'].value==params.archive)"
+                    "|| doc['_id'].value==params.archive"
+                ),
                 'params': {'archive': self.archive},
             })))
 
@@ -175,10 +181,13 @@ class ComponentSearch(FacetedSearch):
                 filter=agg_filter
             ).bucket(f, agg)
 
-
         search.aggs.bucket('_filter_archive', 'filter', filter=agg_filter).bucket(
             'archive', 'terms',
-            script="doc['_index'].value != 'information_package' ? (doc.containsKey('archive') ? doc['archive'].value : doc['_id'].value) : null"
+            script=(
+                "doc['_index'].value != 'information_package'"
+                " ? (doc.containsKey('archive')"
+                " ? doc['archive'].value : doc['_id'].value) : null"
+            )
         )
 
     def highlight(self, search):
@@ -188,8 +197,11 @@ class ComponentSearch(FacetedSearch):
 
         pre_tags = ["<strong>"]
         post_tags = ["</strong>"]
-        search = search.highlight_options(number_of_fragments=0, pre_tags=pre_tags, post_tags=post_tags, require_field_match=True)
+        search = search.highlight_options(
+            number_of_fragments=0, pre_tags=pre_tags, post_tags=post_tags, require_field_match=True
+        )
         return super(ComponentSearch, self).highlight(search)
+
 
 def get_archive(id):
     # try to get from cache first
@@ -203,14 +215,17 @@ def get_archive(id):
     cache.set(cache_key, archive_data)
     return archive_data
 
+
 def get_information_package(id):
     return {'object_identifier_value': get_cached_objid(id)}
+
 
 def get_organization(id):
     org = Agent.objects.get(pk=id)
     return {
         'name': org.name,
     }
+
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     permission_classes = (IsAuthenticated, SearchPermissions,)
@@ -255,10 +270,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
 
         assert lookup_url_kwarg in self.kwargs, (
-                'Expected view %s to be called with a URL keyword argument '
-                'named "%s". Fix your URL conf, or set the `.lookup_field` '
-                'attribute on the view correctly.' %
-                (self.__class__.__name__, lookup_url_kwarg)
+            'Expected view %s to be called with a URL keyword argument '
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            'attribute on the view correctly.' %
+            (self.__class__.__name__, lookup_url_kwarg)
         )
 
         if qs is None:
@@ -267,11 +282,16 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         # Search for object in index by id
         id = self.kwargs[lookup_url_kwarg]
 
-        prefetched_structures = TagStructure.objects.select_related('tag__current_version', 'parent__tag__current_version')
+        prefetched_structures = TagStructure.objects.select_related(
+            'tag__current_version', 'parent__tag__current_version'
+        )
         tag_version = qs.select_related('tag').prefetch_related(Prefetch('tag__structures', prefetched_structures))
 
         obj = get_object_or_404(tag_version, pk=id)
-        user_archives = get_objects_for_user(self.request.user, tag_version.filter(elastic_index='archive'), []).values_list('pk', flat=True)
+        user_archives = get_objects_for_user(
+            self.request.user,
+            tag_version.filter(elastic_index='archive'), []
+        ).values_list('pk', flat=True)
 
         root = obj.get_root()
         if root is not None and root.pk not in user_archives:
@@ -362,8 +382,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 raise exceptions.NotFound('Invalid page.')
 
             size = int(size)
-            offset = (number-1)*size
-            s = s[offset:offset+size]
+            offset = (number - 1) * size
+            s = s[offset:offset + size]
         else:
             s = s[0:DEFAULT_MAX_RESULT_WINDOW]
 
@@ -371,13 +391,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             results = s.execute()
         except TransportError:
             if self.paginator is not None:
-                if offset+size > DEFAULT_MAX_RESULT_WINDOW:
-                    raise exceptions.ParseError("Can't show more than {max} results".format(max=DEFAULT_MAX_RESULT_WINDOW))
+                if offset + size > DEFAULT_MAX_RESULT_WINDOW:
+                    raise exceptions.ParseError(
+                        "Can't show more than {max} results".format(max=DEFAULT_MAX_RESULT_WINDOW)
+                    )
 
             raise
 
         if self.paginator is not None:
-            if size > 0 and results.hits.total > 0 and number > math.ceil(results.hits.total/size):
+            if size > 0 and results.hits.total > 0 and number > math.ceil(results.hits.total / size):
                 raise exceptions.NotFound('Invalid page.')
 
         results_dict = results.to_dict()
@@ -486,7 +508,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             tag = self.get_tag_object()
             tags.append(tag)
             metadata = tag.from_search()['_source']
-            body.append(u'\n'.join([u'{}: {}'.format(k, json.dumps(v, ensure_ascii=False)) for k, v in six.iteritems(metadata)]))
+            body.append(u'\n'.join([u'{}: {}'.format(
+                k, json.dumps(v, ensure_ascii=False)
+            ) for k, v in six.iteritems(metadata)]))
 
             if tag.elastic_index == 'document':
                 ip = tag.tag.information_package
@@ -588,7 +612,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     @detail_route(methods=['post'], url_path='new-version')
     def new_version(self, request, pk=None):
         tag = self.get_tag_object()
-        new_tag = tag.create_new()
+        tag.create_new()
         return Response()
 
     @detail_route(methods=['post'], url_path='new-structure')
@@ -614,7 +638,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     @detail_route(methods=['post'], url_path='change-organization')
     def change_organization(self, request, pk=None):
         tag = self.get_tag_object(qs=TagVersion.objects.filter(elastic_index='archive'))
-                
+
         serializer = ChangeOrganizationSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         org = serializer.validated_data['organization']
@@ -740,7 +764,9 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 tag_structure, _ = TagStructure.objects.get_or_create(tag=tag_version.tag, structure=structure)
 
                 if not structure.is_move_allowed(tag_structure, parent_tag_structure):
-                    raise exceptions.ParseError(u'{} cannot be moved to {}'.format(tag_version.name, parent_tag_version.name))
+                    raise exceptions.ParseError(
+                        '{} cannot be moved to {}'.format(tag_version.name, parent_tag_version.name)
+                    )
 
                 tag_structure.parent = parent_tag_structure
                 if tag_structure.parent != tag_structure.get_root():

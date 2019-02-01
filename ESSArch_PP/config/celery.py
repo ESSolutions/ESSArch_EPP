@@ -28,12 +28,6 @@ import os
 
 from celery import Celery
 
-# Add the site-packages of the chosen virtualenv to work with and Activate
-#import site
-#site.addsitedir('~/.virtualenvs/epp3/lib/python2.7/site-packages')
-#activate_env=os.path.expanduser("~/.virtualenvs/epp3/bin/activate_this.py")
-#execfile(activate_env, dict(__file__=activate_env))
-
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 

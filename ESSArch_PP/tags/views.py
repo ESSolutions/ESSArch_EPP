@@ -10,7 +10,12 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
 from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagVersion
-from ESSArch_Core.tags.serializers import TagSerializer, TagVersionNestedSerializer, StructureSerializer, StructureUnitSerializer
+from ESSArch_Core.tags.serializers import (
+    TagSerializer,
+    TagVersionNestedSerializer,
+    StructureSerializer,
+    StructureUnitSerializer,
+)
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 
@@ -87,7 +92,11 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
         children = unit.get_children()
         serializer = self.get_serializer_class()
-        context = {'user': request.user, 'archive': request.query_params.get('archive'), 'structure': request.query_params.get('structure')}
+        context = {
+            'user': request.user,
+            'archive': request.query_params.get('archive'),
+            'structure': request.query_params.get('structure')
+        }
         if self.paginator is not None:
             paginated = self.paginator.paginate_queryset(children, request)
             serialized = serializer(instance=paginated, many=True, context=context).data

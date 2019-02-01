@@ -59,8 +59,12 @@ class DirectoryWorkflowPoller(BaseWorkflowPoller):
             if sa.profile_workflow is None:
                 logger.debug(u'No workflow profile in SA, skipping')
                 continue
-            if not proj in sa.profile_workflow.specification:
-                logger.debug(u'No workflow specified in {} for current project {}, skipping'.format(sa.profile_workflow, proj))
+            if proj not in sa.profile_workflow.specification:
+                logger.debug(
+                    'No workflow specified in {} for current project {}, skipping'.format(
+                        sa.profile_workflow, proj
+                    )
+                )
                 continue
 
             org = Group.objects.get(name='Default')

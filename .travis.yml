@@ -5,6 +5,17 @@ branches:
   only:
   - master
 
+matrix:
+  include:
+    - env: FLAKE8
+      language: python
+      python: "3.6"
+      cache: pip
+      before_install: ''
+      install: pip install flake8==3.7.1
+      before_script: ''
+      script: flake8
+
 node_js:
   - 8
   - 9

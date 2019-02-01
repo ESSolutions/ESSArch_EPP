@@ -9,6 +9,7 @@ import requests
 from ESSArch_Core.essxml.ProfileMaker.models import extensionPackage, templatePackage
 from ESSArch_Core.essxml.ProfileMaker.xsdtojson import generateExtensionRef, generateJsonRes
 
+
 class ProfileMakerExtensionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         schema_url = validated_data.pop('schemaURL')
@@ -46,6 +47,7 @@ class ProfileMakerExtensionSerializer(serializers.ModelSerializer):
             }
         }
 
+
 class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         schema_request = requests.get(validated_data['schemaURL'])
@@ -56,7 +58,11 @@ class ProfileMakerTemplateSerializer(serializers.ModelSerializer):
         nsmap = {k: v for k, v in six.iteritems(schemadoc.nsmap) if k and v != "http://www.w3.org/2001/XMLSchema"}
 
         try:
-            existingElements, allElements = generateJsonRes(schemadoc, validated_data['root_element'], validated_data['prefix']);
+            existingElements, allElements = generateJsonRes(
+                schemadoc,
+                validated_data['root_element'],
+                validated_data['prefix']
+            )
         except ValueError as e:
             raise ValidationError(e)
 

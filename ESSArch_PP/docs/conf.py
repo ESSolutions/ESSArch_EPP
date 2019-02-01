@@ -42,7 +42,6 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import django
-import importlib
 import inspect
 import os
 import sys
@@ -57,7 +56,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 # Stop Django from executing DB queries
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet  # noqa
 QuerySet.__repr__ = lambda self: self.__class__.__name__
 
 try:
@@ -88,7 +87,7 @@ def process_django_models(app, what, name, obj, options, lines):
             verbose_name = force_text(field.verbose_name).capitalize()
 
             if help_text:
-                lines.append(':param %s: %s - %s' % (field.attname, verbose_name,  help_text))
+                lines.append(':param %s: %s - %s' % (field.attname, verbose_name, help_text))
             else:
                 lines.append(':param %s: %s' % (field.attname, verbose_name))
 
@@ -127,6 +126,7 @@ def process_modules(app, what, name, obj, options, lines):
     lines += spelling_white_list
     return lines
 
+
 def setup(app):
     # Register the docstring processor with sphinx
     app.connect('autodoc-process-docstring', process_django_models)
@@ -139,6 +139,7 @@ def setup(app):
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
