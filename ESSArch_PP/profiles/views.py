@@ -27,7 +27,6 @@ import json
 import os
 import uuid
 
-import six
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from rest_framework import exceptions, serializers, status, viewsets
@@ -123,7 +122,7 @@ class SubmissionAgreementViewSet(SAViewSetCore):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-        for k, v in six.iteritems(new_data):
+        for k, v in new_data.items():
             if v != getattr(sa, k):
                 changed_data = True
                 break
