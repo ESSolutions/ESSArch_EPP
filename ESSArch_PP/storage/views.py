@@ -165,7 +165,6 @@ class IOQueueViewSet(viewsets.ModelViewSet):
             except KeyError:
                 raise exceptions.ParseError(detail='entry.storage_method_target.storage_target parameter missing')
 
-
             storage_method_target_data.pop('url', None)
             storage_method_target, _ = StorageMethodTargetRelation.objects.get_or_create(
                 id=storage_method_target_data['id'], defaults=storage_method_target_data
@@ -299,6 +298,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
+
 class StorageMethodViewSet(viewsets.ModelViewSet):
     """
     API endpoint for storage method
@@ -306,12 +306,14 @@ class StorageMethodViewSet(viewsets.ModelViewSet):
     queryset = StorageMethod.objects.all()
     serializer_class = StorageMethodSerializer
 
+
 class StorageMethodTargetRelationViewSet(viewsets.ModelViewSet):
     """
     API endpoint for storage method target relation
     """
     queryset = StorageMethodTargetRelation.objects.all()
     serializer_class = StorageMethodTargetRelationSerializer
+
 
 class StorageObjectViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
@@ -338,6 +340,7 @@ class StorageTargetViewSet(viewsets.ModelViewSet):
     """
     queryset = StorageTarget.objects.all()
     serializer_class = StorageTargetSerializer
+
 
 class RobotViewSet(viewsets.ModelViewSet):
     """
@@ -369,6 +372,7 @@ class RobotViewSet(viewsets.ModelViewSet):
 
         return Response()
 
+
 class AccessQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint for access queue
@@ -379,6 +383,7 @@ class AccessQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter,
     )
     ordering_fields = ('posted',)
+
 
 class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
@@ -399,6 +404,7 @@ class RobotQueueViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         'storage_medium__medium_id', 'req_type', 'status',
     )
 
+
 class TapeDriveViewSet(viewsets.ModelViewSet):
     """
     API endpoint for TapeDrive
@@ -414,7 +420,6 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
     search_fields = (
         'id', 'device', 'num_of_mounts', 'idle_time',
     )
-
 
     @detail_route(methods=['post'])
     def mount(self, request, pk=None):
@@ -456,6 +461,7 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
         )
 
         return Response()
+
 
 class TapeSlotViewSet(viewsets.ModelViewSet):
     """

@@ -31,12 +31,11 @@ import os
 import django
 django.setup()
 
-from django.conf import settings
+from django.conf import settings  # noqa
 
-from ESSArch_Core.profiles.models import (
+from ESSArch_Core.profiles.models import (  # noqa
     SubmissionAgreement,
     Profile,
-    ProfileSA,
 )
 
 
@@ -173,11 +172,11 @@ def installProfileTransferProject(sa):
                 'key': 'container_format',
                 'type': 'select',
                 'templateOptions': {
-                  'label': 'Container format',
-                  'options': [
-                    {'name': 'TAR', 'value': 'tar'},
-                    {'name': 'ZIP', 'value': 'zip'},
-                  ]
+                    'label': 'Container format',
+                    'options': [
+                        {'name': 'TAR', 'value': 'tar'},
+                        {'name': 'ZIP', 'value': 'zip'},
+                    ]
                 }
             }, {
                 "templateOptions": {
@@ -192,11 +191,11 @@ def installProfileTransferProject(sa):
                 'key': 'checksum_algorithm',
                 'type': 'select',
                 'templateOptions': {
-                  'label': 'Checksum algorithm',
-                  'options': [
-                    {'name': 'MD5', 'value': 'MD5'},
-                    {'name': 'SHA-256', 'value': 'SHA-256'},
-                  ]
+                    'label': 'Checksum algorithm',
+                    'options': [
+                        {'name': 'MD5', 'value': 'MD5'},
+                        {'name': 'SHA-256', 'value': 'SHA-256'},
+                    ]
                 }
             }, {
                 "templateOptions": {
@@ -220,7 +219,7 @@ def installProfileTransferProject(sa):
             "archival_type": "document",
             "archival_location": "sweden-stockholm-nacka",
             "archive_policy": "archive policy 1",
-            "container_format":	"tar",
+            "container_format": "tar",
             "checksum_algorithm": "MD5",
         },
     }
@@ -587,56 +586,56 @@ def installProfileSIP(sa):
                     "label": "Content Type",
                     "options": [
                         {
-                          "name": "Electronic Record Management System",
-                          "value": "ERMS"
+                            "name": "Electronic Record Management System",
+                            "value": "ERMS"
                         },
                         {
-                          "name": "Personnel system",
-                          "value": "Personnel"
+                            "name": "Personnel system",
+                            "value": "Personnel"
                         },
                         {
-                          "name": "Medical record(s)",
-                          "value": "Medical record"
+                            "name": "Medical record(s)",
+                            "value": "Medical record"
                         },
                         {
-                          "name": "Economics",
-                          "value": "Economics systems"
+                            "name": "Economics",
+                            "value": "Economics systems"
                         },
                         {
-                          "name": "Databases",
-                          "value": "Databases"
+                            "name": "Databases",
+                            "value": "Databases"
                         },
                         {
-                          "name": "Webpages",
-                          "value": "Webpages"
+                            "name": "Webpages",
+                            "value": "Webpages"
                         },
                         {
-                          "name": "Geografical Information Systems",
-                          "value": "GIS"
+                            "name": "Geografical Information Systems",
+                            "value": "GIS"
                         },
                         {
-                          "name": "No specification",
-                          "value": "No specification"
+                            "name": "No specification",
+                            "value": "No specification"
                         },
                         {
-                          "name": "Archival Information Collection",
-                          "value": "AIC"
+                            "name": "Archival Information Collection",
+                            "value": "AIC"
                         },
                         {
-                          "name": "Archival Information",
-                          "value": "Archival Information"
+                            "name": "Archival Information",
+                            "value": "Archival Information"
                         },
                         {
-                          "name": "Unstructured",
-                          "value": "Unstructured"
+                            "name": "Unstructured",
+                            "value": "Unstructured"
                         },
                         {
-                          "name": "Single records",
-                          "value": "Single records"
+                            "name": "Single records",
+                            "value": "Single records"
                         },
                         {
-                          "name": "Publication",
-                          "value": "Publication"
+                            "name": "Publication",
+                            "value": "Publication"
                         },
                     ]
                 },
@@ -648,28 +647,28 @@ def installProfileSIP(sa):
                     "label": "Record Status",
                     "options": [
                         {
-                          "name": "SUPPLEMENT",
-                          "value": "SUPPLEMENT"
+                            "name": "SUPPLEMENT",
+                            "value": "SUPPLEMENT"
                         },
                         {
-                          "name": "REPLACEMENT",
-                          "value": "REPLACEMENT"
+                            "name": "REPLACEMENT",
+                            "value": "REPLACEMENT"
                         },
                         {
                             "name": "NEW",
                             "value": "NEW"
                         },
                         {
-                          "name": "TEST",
-                          "value": "TEST"
+                            "name": "TEST",
+                            "value": "TEST"
                         },
                         {
-                          "name": "VERSION",
-                          "value": "VERSION"
+                            "name": "VERSION",
+                            "value": "VERSION"
                         },
                         {
-                          "name": "OTHER",
-                          "value": "OTHER"
+                            "name": "OTHER",
+                            "value": "OTHER"
                         },
                     ]
                 },
@@ -858,56 +857,56 @@ def installProfileSIP(sa):
                     "label": "Content Type",
                     "options": [
                         {
-                          "name": "Electronic Record Management System",
-                          "value": "ERMS"
+                            "name": "Electronic Record Management System",
+                            "value": "ERMS"
                         },
                         {
-                          "name": "Personnel system",
-                          "value": "Personnel"
+                            "name": "Personnel system",
+                            "value": "Personnel"
                         },
                         {
-                          "name": "Medical record(s)",
-                          "value": "Medical record"
+                            "name": "Medical record(s)",
+                            "value": "Medical record"
                         },
                         {
-                          "name": "Economics",
-                          "value": "Economics systems"
+                            "name": "Economics",
+                            "value": "Economics systems"
                         },
                         {
-                          "name": "Databases",
-                          "value": "Databases"
+                            "name": "Databases",
+                            "value": "Databases"
                         },
                         {
-                          "name": "Webpages",
-                          "value": "Webpages"
+                            "name": "Webpages",
+                            "value": "Webpages"
                         },
                         {
-                          "name": "Geografical Information Systems",
-                          "value": "GIS"
+                            "name": "Geografical Information Systems",
+                            "value": "GIS"
                         },
                         {
-                          "name": "No specification",
-                          "value": "No specification"
+                            "name": "No specification",
+                            "value": "No specification"
                         },
                         {
-                          "name": "Archival Information Collection",
-                          "value": "AIC"
+                            "name": "Archival Information Collection",
+                            "value": "AIC"
                         },
                         {
-                          "name": "Archival Information",
-                          "value": "Archival Information"
+                            "name": "Archival Information",
+                            "value": "Archival Information"
                         },
                         {
-                          "name": "Unstructured",
-                          "value": "Unstructured"
+                            "name": "Unstructured",
+                            "value": "Unstructured"
                         },
                         {
-                          "name": "Single records",
-                          "value": "Single records"
+                            "name": "Single records",
+                            "value": "Single records"
                         },
                         {
-                          "name": "Publication",
-                          "value": "Publication"
+                            "name": "Publication",
+                            "value": "Publication"
                         },
                     ]
                 },
@@ -919,28 +918,28 @@ def installProfileSIP(sa):
                     "label": "Record Status",
                     "options": [
                         {
-                          "name": "SUPPLEMENT",
-                          "value": "SUPPLEMENT"
+                            "name": "SUPPLEMENT",
+                            "value": "SUPPLEMENT"
                         },
                         {
-                          "name": "REPLACEMENT",
-                          "value": "REPLACEMENT"
+                            "name": "REPLACEMENT",
+                            "value": "REPLACEMENT"
                         },
                         {
                             "name": "NEW",
                             "value": "NEW"
                         },
                         {
-                          "name": "TEST",
-                          "value": "TEST"
+                            "name": "TEST",
+                            "value": "TEST"
                         },
                         {
-                          "name": "VERSION",
-                          "value": "VERSION"
+                            "name": "VERSION",
+                            "value": "VERSION"
                         },
                         {
-                          "name": "OTHER",
-                          "value": "OTHER"
+                            "name": "OTHER",
+                            "value": "OTHER"
                         },
                     ]
                 },

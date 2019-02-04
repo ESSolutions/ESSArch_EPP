@@ -7,12 +7,22 @@ branches:
 
 matrix:
   include:
+    - env: FLAKE8
+      language: python
+      python: "3.6"
+      cache: pip
+      before_install: ''
+      install: pip install flake8==3.7.1
+      before_script: ''
+      script: flake8
+    
     - env: PRETTIER
       node_js: "10"
       before_install: cd ESSArch_PP/frontend/static/frontend
       install: yarn
       before_script:
       script: yarn prettier --check **/*.js **/*.scss **/*.html
+
 
 node_js:
   - 8

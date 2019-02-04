@@ -39,7 +39,10 @@ from ESSArch_Core.essxml.ProfileMaker.views import calculateChildrenBefore, gene
 from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA
 from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileSASerializer, \
     SubmissionAgreementSerializer
-from ESSArch_Core.profiles.views import ProfileViewSet as ProfileViewSetCore, SubmissionAgreementViewSet as SAViewSetCore
+from ESSArch_Core.profiles.views import (
+    ProfileViewSet as ProfileViewSetCore,
+    SubmissionAgreementViewSet as SAViewSetCore,
+)
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
 
 
@@ -232,8 +235,8 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         # the same name
 
         try:
-            l = [c['name'] for c in existingElements[parent]['children']]
-            index = len(l) - list(reversed(l)).index(new_name)
+            child_list = [c['name'] for c in existingElements[parent]['children']]
+            index = len(child_list) - list(reversed(child_list)).index(new_name)
         except ValueError:
             index = 0
 
@@ -308,7 +311,7 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         data = request.data['data']
 
         try:
-            el = obj.existingElements[el_uuid]
+            obj.existingElements[el_uuid]
         except KeyError:
             raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
 
@@ -335,7 +338,7 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         val = request.data['contains_files']
 
         try:
-            el = obj.existingElements[el_uuid]
+            obj.existingElements[el_uuid]
         except KeyError:
             raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
 
@@ -364,7 +367,7 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         data = request.data['data']
 
         try:
-            el = obj.existingElements[el_uuid]
+            obj.existingElements[el_uuid]
         except KeyError:
             raise exceptions.ValidationError({'uuid': 'Invalid uuid "%s" - element does not exist' % el_uuid})
 
@@ -403,7 +406,6 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
         serializer = SimpleProfileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-
 
         obj = self.get_object()
         existingElements = obj.existingElements
@@ -451,11 +453,13 @@ class ProfileMakerTemplateViewSet(viewsets.ModelViewSet):
 
         jsonString['-attr'].append(schemaLocation)
 
-        profile = Profile.objects.create(profile_type=validated_data['profile_type'],
-                    name=validated_data['name'], type=validated_data['type'],
-                    status=validated_data['status'], label=validated_data['label'],
-                    template=forms, specification=jsonString, specification_data=data,
-                    structure=obj.structure)
+        profile = Profile.objects.create(
+            profile_type=validated_data['profile_type'],
+            name=validated_data['name'], type=validated_data['type'],
+            status=validated_data['status'], label=validated_data['label'],
+            template=forms, specification=jsonString, specification_data=data,
+            structure=obj.structure
+        )
 
         profile_data = ProfileSerializer(profile, context={'request': request}).data
 

@@ -30,12 +30,10 @@ import os
 import shutil
 import tarfile
 import tempfile
-import unittest
 import zipfile
 
 from django.contrib.auth.models import User
 from django.test import tag, TransactionTestCase, override_settings
-from django.utils.timezone import localtime
 
 from unittest import mock
 
@@ -44,17 +42,13 @@ from ESSArch_Core.configuration.models import (
 )
 
 from ESSArch_Core.ip.models import (
-    ArchivalInstitution,
     ArchivistOrganization,
-    ArchivalLocation,
-    ArchivalType,
     InformationPackage,
     Order,
     Workarea,
 )
 
 from ESSArch_Core.storage.exceptions import (
-    RobotMountException,
     TapeMountedError,
     TapeMountedAndLockedByOtherError,
 )
@@ -75,12 +69,6 @@ from ESSArch_Core.storage.models import (
     StorageObject,
     StorageTarget,
     StorageMethodTargetRelation,
-)
-
-from ESSArch_Core.storage.tape import (
-    mount_tape,
-    rewind_tape,
-    unmount_tape,
 )
 
 from ESSArch_Core.WorkflowEngine.models import (
@@ -137,7 +125,7 @@ class ReceiveSIPTestCase(TransactionTestCase):
     def tearDown(self):
         try:
             shutil.rmtree(self.root)
-        except:
+        except BaseException:
             pass
 
     def test_receive_sip(self):
@@ -469,7 +457,7 @@ class CacheAIPTestCase(TransactionTestCase):
         for path in [self.ingest, self.cache]:
             try:
                 shutil.rmtree(path.value)
-            except:
+            except BaseException:
                 pass
 
     def test_cache_aip(self):
@@ -607,12 +595,12 @@ class StoreAIPTestCase(TransactionTestCase):
     def tearDown(self):
         try:
             shutil.rmtree(self.datadir)
-        except:
+        except BaseException:
             pass
 
         try:
             shutil.rmtree(self.storagedir)
-        except:
+        except BaseException:
             pass
 
     def test_store_aip_no_policy(self):
@@ -819,7 +807,7 @@ class AccessAIPTestCase(TransactionTestCase):
 
     def test_no_storage_objects(self):
         ip = InformationPackage.objects.create()
-        user = User.objects.create()
+        User.objects.create()
 
         task = ProcessTask.objects.create(
             name='workflow.tasks.AccessAIP',
@@ -859,7 +847,7 @@ class AccessAIPTestCase(TransactionTestCase):
             agent=user,
         )
 
-        obj = StorageObject.objects.create(
+        StorageObject.objects.create(
             storage_medium=medium, ip=ip,
             content_location_type=DISK,
         )
@@ -1018,12 +1006,14 @@ class AccessAIPTestCase(TransactionTestCase):
         new_ip = InformationPackage.objects.exclude(pk=ip.pk).first()
 
         self.assertTrue(IOQueue.objects.filter(
-            ip=ip, storage_object=obj, req_type=25,
-            status=0, object_path=os.path.join(self.access.value, str(user.pk), new_ip.object_identifier_value + '.tar'),
+            ip=ip, storage_object=obj, req_type=25, status=0,
+            object_path=os.path.join(self.access.value, str(user.pk), new_ip.object_identifier_value + '.tar'),
         ).exists())
 
         self.assertFalse(Workarea.objects.filter(ip=ip).exists())
-        self.assertTrue(Workarea.objects.filter(ip__generation=1, user=user, type=Workarea.ACCESS, read_only=False).exists())
+        self.assertTrue(Workarea.objects.filter(
+            ip__generation=1, user=user, type=Workarea.ACCESS, read_only=False
+        ).exists())
 
     @mock.patch('ESSArch_Core.tasks.CopyFile.run', side_effect=lambda *args, **kwargs: None)
     @mock.patch('workflow.tasks.os.mkdir', side_effect=lambda *args, **kwargs: None)
@@ -1052,7 +1042,7 @@ class AccessAIPTestCase(TransactionTestCase):
             agent=user,
         )
 
-        obj = StorageObject.objects.create(
+        StorageObject.objects.create(
             storage_medium=medium, ip=ip,
             content_location_type=DISK,
         )
@@ -1105,7 +1095,7 @@ class AccessAIPTestCase(TransactionTestCase):
             agent=user,
         )
 
-        obj = StorageObject.objects.create(
+        StorageObject.objects.create(
             storage_medium=medium, ip=ip,
             content_location_type=DISK,
         )
@@ -1154,7 +1144,9 @@ class PrepareDIPTestCase(TransactionTestCase):
         ).run().get()
 
         mock_mkdir.assert_called_once()
-        self.assertTrue(InformationPackage.objects.filter(package_type=InformationPackage.DIP, object_identifier_value='myobjid').exists())
+        self.assertTrue(InformationPackage.objects.filter(
+            package_type=InformationPackage.DIP, object_identifier_value='myobjid'
+        ).exists())
 
     @mock.patch('workflow.tasks.os.mkdir')
     def test_with_orders(self, mock_mkdir):
@@ -1183,7 +1175,10 @@ class CreateDIPTestCase(TransactionTestCase):
     def setUp(self):
         self.orders = Path.objects.create(entity='orders', value='orders').value
         self.task = "workflow.tasks.CreateDIP"
-        self.ip = InformationPackage.objects.create(state='initial', object_path='workarea', package_type=InformationPackage.DIP)
+        self.ip = InformationPackage.objects.create(
+            state='initial', object_path='workarea',
+            package_type=InformationPackage.DIP
+        )
         self.user = User.objects.create(username="admin")
 
     @mock.patch('workflow.tasks.shutil.copytree')
@@ -1207,7 +1202,10 @@ class CreateDIPTestCase(TransactionTestCase):
             args=[str(self.ip.pk)],
         ).run().get()
 
-        mock_copy.assert_called_once_with(self.ip.object_path, os.path.join(self.orders, str(order.pk), self.ip.object_identifier_value))
+        mock_copy.assert_called_once_with(
+            self.ip.object_path,
+            os.path.join(self.orders, str(order.pk), self.ip.object_identifier_value)
+        )
         self.ip.refresh_from_db()
         self.assertEqual(self.ip.state, 'Created')
 
@@ -1285,7 +1283,7 @@ class PollRobotQueueTestCase(TransactionTestCase):
     def tearDown(self):
         try:
             shutil.rmtree(self.datadir)
-        except:
+        except BaseException:
             pass
 
     def test_no_entry(self):
@@ -1974,7 +1972,10 @@ class PollIOQueueReadTapeTestCase(TransactionTestCase):
 
         mock_set_file_number.assert_called_once_with(medium=medium.pk, num=1)
         mock_read.assert_called_once_with(medium=medium.pk, path=self.cache.value)
-        mock_copy.assert_called_once_with(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=self.datadir)
+        mock_copy.assert_called_once_with(
+            src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar',
+            dst=self.datadir
+        )
 
         io_queue.refresh_from_db()
 
@@ -2217,4 +2218,7 @@ class PollIOQueueReadDiskTestCase(TransactionTestCase):
         self.assertTrue(StorageObject.objects.filter(storage_medium=medium, ip=ip).exists())
 
         mock_copy.assert_any_call(src=obj.content_location_value, dst=self.cache.value)
-        mock_copy.assert_any_call(src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar', dst=ip.object_path)
+        mock_copy.assert_any_call(
+            src=os.path.join(self.cache.value, ip.object_identifier_value) + '.tar',
+            dst=ip.object_path
+        )

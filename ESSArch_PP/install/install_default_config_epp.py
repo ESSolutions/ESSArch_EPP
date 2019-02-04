@@ -26,25 +26,26 @@
 import django
 django.setup()
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
-from groups_manager.models import GroupType
-from elasticsearch_dsl.connections import get_connection
-from elasticsearch.client.ingest import IngestClient
+from django.contrib.auth import get_user_model  # noqa
+from django.contrib.auth.models import Permission  # noqa
+from groups_manager.models import GroupType  # noqa
+from elasticsearch_dsl.connections import get_connection  # noqa
+from elasticsearch.client.ingest import IngestClient  # noqa
 
-from ESSArch_Core.auth.models import Group, GroupMemberRole
-from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
-from ESSArch_Core.search import alias_migration
-from ESSArch_Core.storage.models import (
+from ESSArch_Core.auth.models import Group, GroupMemberRole  # noqa
+from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path  # noqa
+from ESSArch_Core.search import alias_migration  # noqa
+from ESSArch_Core.storage.models import (  # noqa
     DISK,
 
     StorageMethod,
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Archive, Component, Directory, File, InformationPackage
+from ESSArch_Core.tags.documents import Archive, Component, Directory, File, InformationPackage  # noqa
 
 User = get_user_model()
+
 
 def installDefaultConfiguration():
     print("\nInstalling parameters...")
@@ -101,148 +102,165 @@ def installDefaultUsers():
 
     role_user, _ = GroupMemberRole.objects.get_or_create(codename='user')
     permission_list_user = [
-        ## ---- app: ip ---- model: informationpackage
-        ['view_informationpackage','ip','informationpackage'],       # Can view information packages
-        ['can_upload','ip','informationpackage'],                    # Can upload files to IP (Ingest)
-        ['delete_informationpackage','ip','informationpackage'], # Can delete Information Package (Ingest)
-        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
-        ['preserve','ip','informationpackage'],                        # Can preserve IP (Ingest)
-        ['preserve_dip','ip','informationpackage'],                 # Can preserve DIP (Access)
-        ['get_from_storage','ip','informationpackage'],         # Can get extracted IP from storage (Access)
-        ['get_tar_from_storage','ip','informationpackage'],   # Can get packaged IP from storage (Access)
-        ['add_to_ingest_workarea','ip','informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
-        ['diff-check','ip','informationpackage'],                      # Can diff-check IP (?)
-        ['receive','ip','informationpackage'],                          # Can receive IP (Ingest)
-        ## ---- app: ip ---- model: workarea
-        ['move_from_ingest_workarea','ip','workarea'],        # Can move IP from ingest workarea (Ingest)
-        ['move_from_access_workarea','ip','workarea'],       # Can move IP from access workarea (Access)
-        ['preserve_from_ingest_workarea','ip','workarea'],   # Can preserve IP from ingest workarea (Ingest)
-        ['preserve_from_access_workarea','ip','workarea'],  # Can preserve IP from access workarea (Access)
-        ## ---- app: ip ---- model: order
-        ['prepare_order','ip','order'],                                        # Can prepare order (Access)
-        ## ---- app: WorkflowEngine ---- model: processtask
-        #['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
-        #['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
-        ## ---- app: tags ---- model: Tag
-        ['search','tags','tag'],   # Can search
+        # ---- app: ip ---- model: informationpackage
+        ['view_informationpackage', 'ip', 'informationpackage'],       # Can view information packages
+        ['can_upload', 'ip', 'informationpackage'],                    # Can upload files to IP (Ingest)
+        ['delete_informationpackage', 'ip', 'informationpackage'],  # Can delete Information Package (Ingest)
+        ['receive', 'ip', 'informationpackage'],                          # Can receive IP (Ingest)
+        ['preserve', 'ip', 'informationpackage'],                        # Can preserve IP (Ingest)
+        ['preserve_dip', 'ip', 'informationpackage'],                 # Can preserve DIP (Access)
+        ['get_from_storage', 'ip', 'informationpackage'],         # Can get extracted IP from storage (Access)
+        ['get_tar_from_storage', 'ip', 'informationpackage'],   # Can get packaged IP from storage (Access)
+        ['add_to_ingest_workarea', 'ip', 'informationpackage'],    # Can add IP to ingest workarea "readonly" (Ingest)
+        ['diff-check', 'ip', 'informationpackage'],                      # Can diff-check IP (?)
+        ['receive', 'ip', 'informationpackage'],                          # Can receive IP (Ingest)
+        # ---- app: ip ---- model: workarea
+        ['move_from_ingest_workarea', 'ip', 'workarea'],        # Can move IP from ingest workarea (Ingest)
+        ['move_from_access_workarea', 'ip', 'workarea'],       # Can move IP from access workarea (Access)
+        ['preserve_from_ingest_workarea', 'ip', 'workarea'],   # Can preserve IP from ingest workarea (Ingest)
+        ['preserve_from_access_workarea', 'ip', 'workarea'],  # Can preserve IP from access workarea (Access)
+        # ---- app: ip ---- model: order
+        ['prepare_order', 'ip', 'order'],                                        # Can prepare order (Access)
+        # ---- app: WorkflowEngine ---- model: processtask
+        # ['can_undo','WorkflowEngine','processtask'],             # Can undo tasks (other)
+        # ['can_retry','WorkflowEngine','processtask'],             # Can retry tasks (other)
+        # ---- app: tags ---- model: Tag
+        ['search', 'tags', 'tag'],   # Can search
     ]
 
     for p in permission_list_user:
         p_obj = Permission.objects.get(
-                                          codename=p[0], content_type__app_label=p[1],
-                                          content_type__model=p[2],
-                                          )
+            codename=p[0], content_type__app_label=p[1],
+            content_type__model=p[2],
+        )
         role_user.permissions.add(p_obj)
 
     role_admin, _ = GroupMemberRole.objects.get_or_create(codename='admin')
     permission_list_admin = [
-        ## ---- app: ip ---- model: informationpackage
-        ['get_from_storage_as_new','ip','informationpackage'], # Can get IP "as new" from storage (Access)
-        ['add_to_ingest_workarea_as_new','ip','informationpackage'],   # Can add IP as new generation to ingest workarea (Ingest)
-        ## ---- app: ip ---- model: order
-        ['prepare_order','ip','order'],                                        # Can prepare order (Access)
-        ## ---- app: profiles ---- model: profile
-        ['add_profile','profiles','profile'],                                  # Can add Profile (Administration)
-        ## ---- app: profiles ---- model: submissionagreement
-        ['add_submissionagreement','profiles','submissionagreement'], # Can add Submission Agreement (Administration)
-        ['change_submissionagreement','profiles','submissionagreement'], # Can change Submission Agreement
-        ## ---- app: profiles ---- model: profile
-        ['add_profile','profiles','profile'], # Can add Profile (Administration)
-        ['change_profile','profiles','profile'], # Can change Profile
-        ## ---- app: storage ---- model: storageobject
-        ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
-        ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
-        ['storage_management','storage','storageobject'],   # Storage management (Administration)
-        ## ---- app: maintenance ---- model: AppraisalRule
-        ['add_appraisalrule','maintenance','appraisalrule'],   # Can add appraisal rule (Administration)
-        ## ---- app: maintenance ---- model: ConversionRule
-        ['add_conversionrule','maintenance','conversionrule'],   # Can add conversion rule (Administration)
-        ## ---- app: tags ---- model: Tag
-        ['create_archive','tags','tag'],   # Can create archives
+        # ---- app: ip ---- model: informationpackage
+        [
+            'get_from_storage_as_new', 'ip',
+            'informationpackage'
+        ],  # Can get IP "as new" from storage (Access)
+        [
+            'add_to_ingest_workarea_as_new', 'ip',
+            'informationpackage'
+        ],  # Can add IP as new generation to ingest workarea (Ingest)
+        # ---- app: ip ---- model: order
+        ['prepare_order', 'ip', 'order'],                                        # Can prepare order (Access)
+        # ---- app: profiles ---- model: profile
+        ['add_profile', 'profiles', 'profile'],                                  # Can add Profile (Administration)
+        # ---- app: profiles ---- model: submissionagreement
+        ['add_submissionagreement', 'profiles', 'submissionagreement'],  # Can add Submission Agreement
+        ['change_submissionagreement', 'profiles', 'submissionagreement'],  # Can change Submission Agreement
+        # ---- app: profiles ---- model: profile
+        ['add_profile', 'profiles', 'profile'],  # Can add Profile (Administration)
+        ['change_profile', 'profiles', 'profile'],  # Can change Profile
+        # ---- app: storage ---- model: storageobject
+        ['storage_migration', 'storage', 'storageobject'],          # Storage migration (Administration)
+        ['storage_maintenance', 'storage', 'storageobject'],    # Storage maintenance (Administration)
+        ['storage_management', 'storage', 'storageobject'],   # Storage management (Administration)
+        # ---- app: maintenance ---- model: AppraisalRule
+        ['add_appraisalrule', 'maintenance', 'appraisalrule'],   # Can add appraisal rule (Administration)
+        # ---- app: maintenance ---- model: ConversionRule
+        ['add_conversionrule', 'maintenance', 'conversionrule'],   # Can add conversion rule (Administration)
+        # ---- app: tags ---- model: Tag
+        ['create_archive', 'tags', 'tag'],   # Can create archives
     ]
 
     for p in permission_list_admin:
         p_obj = Permission.objects.get(
-                                          codename=p[0], content_type__app_label=p[1],
-                                          content_type__model=p[2],
-                                          )
+            codename=p[0], content_type__app_label=p[1],
+            content_type__model=p[2],
+        )
         role_admin.permissions.add(p_obj)
 
     role_sysadmin, _ = GroupMemberRole.objects.get_or_create(codename='sysadmin')
     permission_list_sysadmin = [
-        ## ---- app: auth ---- model: group
-        ['add_group','auth','group'],                    # Can add group
-        ['change_group','auth','group'],                    # Can change group
-        ['delete_group','auth','group'],                    # Can delete group
-        ## ---- app: auth ---- model: user
-        ['add_user','auth','user'],                    # Can add user
-        ['change_user','auth','user'],                    # Can change user
-        ['delete_user','auth','user'],                    # Can delete user
-        ## ---- app: configuration ---- model: parameter
-        ['add_parameter','configuration','parameter'],                    # Can add parameter
-        ['change_parameter','configuration','parameter'],                    # Can change parameter
-        ['delete_parameter','configuration','parameter'],                    # Can delete parameter
-        ## ---- app: configuration ---- model: archivepolicy
-        ['add_archivepolicy','configuration','archivepolicy'],                    # Can add archivepolicy
-        ['change_archivepolicy','configuration','archivepolicy'],                    # Can change archivepolicy
-        ['delete_archivepolicy','configuration','archivepolicy'],                    # Can delete archivepolicy
-        ## ---- app: configuration ---- model: path
-        ['add_path','configuration','path'],                    # Can add path
-        ['change_path','configuration','path'],                    # Can change path
-        ['delete_path','configuration','path'],                    # Can delete path
-        ## ---- app: configuration ---- model: eventtype
-        ['add_eventtype','configuration','eventtype'],                    # Can add eventtype
-        ['change_eventtype','configuration','eventtype'],                    # Can change eventtype
-        ['delete_eventtype','configuration','eventtype'],                    # Can delete eventtype
-        ## ---- app: profiles ---- model: profile
-        ['add_profile','profiles','profile'],                    # Can add profile
-        ['change_profile','profiles','profile'],                    # Can change profile
-        ['delete_profile','profiles','profile'],                    # Can delete profile
-        ## ---- app: profiles ---- model: submissionagreement
-        ['add_submissionagreement','profiles','submissionagreement'],                    # Can add submissionagreement
-        ['change_submissionagreement','profiles','submissionagreement'],                    # Can change submissionagreement
-        ['delete_submissionagreement','profiles','submissionagreement'],                    # Can delete submissionagreement
-        ## ---- app: storage ---- model: storagemethod
-        ['add_storagemethod','storage','storagemethod'],                    # Can add storagemethod
-        ['change_storagemethod','storage','storagemethod'],                    # Can change storagemethod
-        ['delete_storagemethod','storage','storagemethod'],                    # Can delete storagemethod
-        ## ---- app: storage ---- model: storagetarget
-        ['add_storagetarget','storage','storagetarget'],                    # Can add storagetarget
-        ['change_storagetarget','storage','storagetarget'],                    # Can change storagetarget
-        ['delete_storagetarget','storage','storagetarget'],                    # Can delete storagetarget
-        ## ---- app: storage ---- model: storagemethodtargetrelation
-        ['add_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can add storagemethodtargetrelation
-        ['change_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can change storagemethodtargetrelation
-        ['delete_storagemethodtargetrelation','storage','storagemethodtargetrelation'],                    # Can delete storagemethodtargetrelation
-        ## ---- app: storage ---- model: storageobject
-        ['storage_migration','storage','storageobject'],          # Storage migration (Administration)
-        ['storage_maintenance','storage','storageobject'],    # Storage maintenance (Administration)
-        ['storage_management','storage','storageobject'],   # Storage management (Administration)
-        ## ---- app: storage ---- model: ioqueue
-        ['change_ioqueue','storage','ioqueue'],          # Can change ioqueue
-        ['delete_ioqueue','storage','ioqueue'],    # Can delete ioqueue
-        ## ---- app: storage ---- model: robot
-        ['add_robot','storage','robot'],          # Can add robot
-        ['change_robot','storage','robot'],          # Can change robot
-        ['delete_robot','storage','robot'],    # Can delete robot
-        ## ---- app: storage ---- model: robotqueue
-        ['change_robotqueue','storage','robotqueue'],          # Can change robotqueue
-        ['delete_robotqueue','storage','robotqueue'],    # Can delete robotqueue
-        ## ---- app: storage ---- model: tapedrive
-        ['add_tapedrive','storage','tapedrive'],          # Can add tapedrive
-        ['change_tapedrive','storage','tapedrive'],          # Can change tapedrive
-        ['delete_tapedrive','storage','tapedrive'],    # Can delete tapedrive
-        ## ---- app: groups_manager ---- model: grouptype
-        ['add_grouptype','groups_manager','grouptype'],                    # Can add grouptype
-        ['change_grouptype','groups_manager','grouptype'],                    # Can change grouptype
-        ['delete_grouptype','groups_manager','grouptype'],                    # Can delete grouptype
+        # ---- app: auth ---- model: group
+        ['add_group', 'auth', 'group'],                    # Can add group
+        ['change_group', 'auth', 'group'],                    # Can change group
+        ['delete_group', 'auth', 'group'],                    # Can delete group
+        # ---- app: auth ---- model: user
+        ['add_user', 'auth', 'user'],                    # Can add user
+        ['change_user', 'auth', 'user'],                    # Can change user
+        ['delete_user', 'auth', 'user'],                    # Can delete user
+        # ---- app: configuration ---- model: parameter
+        ['add_parameter', 'configuration', 'parameter'],                    # Can add parameter
+        ['change_parameter', 'configuration', 'parameter'],                    # Can change parameter
+        ['delete_parameter', 'configuration', 'parameter'],                    # Can delete parameter
+        # ---- app: configuration ---- model: archivepolicy
+        ['add_archivepolicy', 'configuration', 'archivepolicy'],                    # Can add archivepolicy
+        ['change_archivepolicy', 'configuration', 'archivepolicy'],                    # Can change archivepolicy
+        ['delete_archivepolicy', 'configuration', 'archivepolicy'],                    # Can delete archivepolicy
+        # ---- app: configuration ---- model: path
+        ['add_path', 'configuration', 'path'],                    # Can add path
+        ['change_path', 'configuration', 'path'],                    # Can change path
+        ['delete_path', 'configuration', 'path'],                    # Can delete path
+        # ---- app: configuration ---- model: eventtype
+        ['add_eventtype', 'configuration', 'eventtype'],                    # Can add eventtype
+        ['change_eventtype', 'configuration', 'eventtype'],                    # Can change eventtype
+        ['delete_eventtype', 'configuration', 'eventtype'],                    # Can delete eventtype
+        # ---- app: profiles ---- model: profile
+        ['add_profile', 'profiles', 'profile'],                    # Can add profile
+        ['change_profile', 'profiles', 'profile'],                    # Can change profile
+        ['delete_profile', 'profiles', 'profile'],                    # Can delete profile
+        # ---- app: profiles ---- model: submissionagreement
+        ['add_submissionagreement', 'profiles', 'submissionagreement'],  # Can add submissionagreement
+        ['change_submissionagreement', 'profiles', 'submissionagreement'],  # Can change submissionagreement
+        ['delete_submissionagreement', 'profiles', 'submissionagreement'],  # Can delete submissionagreement
+        # ---- app: storage ---- model: storagemethod
+        ['add_storagemethod', 'storage', 'storagemethod'],                    # Can add storagemethod
+        ['change_storagemethod', 'storage', 'storagemethod'],                    # Can change storagemethod
+        ['delete_storagemethod', 'storage', 'storagemethod'],                    # Can delete storagemethod
+        # ---- app: storage ---- model: storagetarget
+        ['add_storagetarget', 'storage', 'storagetarget'],                    # Can add storagetarget
+        ['change_storagetarget', 'storage', 'storagetarget'],                    # Can change storagetarget
+        ['delete_storagetarget', 'storage', 'storagetarget'],                    # Can delete storagetarget
+        # ---- app: storage ---- model: storagemethodtargetrelation
+        [
+            'add_storagemethodtargetrelation', 'storage',
+            'storagemethodtargetrelation'
+        ],  # Can add storagemethodtargetrelation
+        [
+            'change_storagemethodtargetrelation', 'storage',
+            'storagemethodtargetrelation'
+        ],  # Can change storagemethodtargetrelation
+
+        [
+            'delete_storagemethodtargetrelation', 'storage',
+            'storagemethodtargetrelation'
+        ],  # Can delete storagemethodtargetrelation
+
+        # ---- app: storage ---- model: storageobject
+        ['storage_migration', 'storage', 'storageobject'],          # Storage migration (Administration)
+        ['storage_maintenance', 'storage', 'storageobject'],    # Storage maintenance (Administration)
+        ['storage_management', 'storage', 'storageobject'],   # Storage management (Administration)
+        # ---- app: storage ---- model: ioqueue
+        ['change_ioqueue', 'storage', 'ioqueue'],          # Can change ioqueue
+        ['delete_ioqueue', 'storage', 'ioqueue'],    # Can delete ioqueue
+        # ---- app: storage ---- model: robot
+        ['add_robot', 'storage', 'robot'],          # Can add robot
+        ['change_robot', 'storage', 'robot'],          # Can change robot
+        ['delete_robot', 'storage', 'robot'],    # Can delete robot
+        # ---- app: storage ---- model: robotqueue
+        ['change_robotqueue', 'storage', 'robotqueue'],          # Can change robotqueue
+        ['delete_robotqueue', 'storage', 'robotqueue'],    # Can delete robotqueue
+        # ---- app: storage ---- model: tapedrive
+        ['add_tapedrive', 'storage', 'tapedrive'],          # Can add tapedrive
+        ['change_tapedrive', 'storage', 'tapedrive'],          # Can change tapedrive
+        ['delete_tapedrive', 'storage', 'tapedrive'],    # Can delete tapedrive
+        # ---- app: groups_manager ---- model: grouptype
+        ['add_grouptype', 'groups_manager', 'grouptype'],                    # Can add grouptype
+        ['change_grouptype', 'groups_manager', 'grouptype'],                    # Can change grouptype
+        ['delete_grouptype', 'groups_manager', 'grouptype'],                    # Can delete grouptype
     ]
 
     for p in permission_list_sysadmin:
         p_obj = Permission.objects.get(
-                                          codename=p[0], content_type__app_label=p[1],
-                                          content_type__model=p[2],
-                                          )
+            codename=p[0], content_type__app_label=p[1],
+            content_type__model=p[2],
+        )
         role_sysadmin.permissions.add(p_obj)
 
     #####################################
@@ -253,8 +271,8 @@ def installDefaultUsers():
     )
     if created:
         user_superuser.set_password('superuser')
-        user_superuser.is_staff=True
-        user_superuser.is_superuser=True
+        user_superuser.is_staff = True
+        user_superuser.is_superuser = True
         user_superuser.save()
 
     user_user, created = User.objects.get_or_create(
@@ -272,7 +290,7 @@ def installDefaultUsers():
     )
     if created:
         user_admin.set_password('admin')
-        user_admin.is_staff=True
+        user_admin.is_staff = True
         user_admin.save()
         default_org.add_member(user_admin.essauth_member, roles=[role_user, role_admin])
 
@@ -282,7 +300,7 @@ def installDefaultUsers():
     )
     if created:
         user_sysadmin.set_password('sysadmin')
-        user_sysadmin.is_staff=True
+        user_sysadmin.is_staff = True
         user_sysadmin.save()
         default_org.add_member(user_sysadmin.essauth_member, roles=[role_sysadmin])
 
@@ -431,6 +449,7 @@ def installSearchIndices():
         alias_migration.setup_index(doctype)
 
     print('done')
+
 
 if __name__ == '__main__':
     installDefaultConfiguration()

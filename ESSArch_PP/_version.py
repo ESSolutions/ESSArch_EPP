@@ -43,6 +43,7 @@ versionfile_source = "ESSArch_PP/_version.py"
 
 import os, sys, re, subprocess, errno
 
+
 def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False):
     assert isinstance(commands, list)
     p = None
@@ -86,6 +87,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose=False):
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
 
+
 def git_get_keywords(versionfile_abs):
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
@@ -93,7 +95,7 @@ def git_get_keywords(versionfile_abs):
     # _version.py.
     keywords = {}
     try:
-        f = open(versionfile_abs,"r")
+        f = open(versionfile_abs, "r")
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)
@@ -107,6 +109,7 @@ def git_get_keywords(versionfile_abs):
     except EnvironmentError:
         pass
     return keywords
+
 
 def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
     if not keywords:
@@ -131,7 +134,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
         # "stabilization", as well as "HEAD" and "master".
         tags = set([r for r in refs if re.search(r'\d', r)])
         if verbose:
-            print("discarding '%s', no digits" % ",".join(refs-tags))
+            print("discarding '%s', no digits" % ",".join(refs - tags))
     if verbose:
         print("likely tags: %s" % ",".join(sorted(tags)))
     for ref in sorted(tags):
@@ -140,13 +143,13 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose=False):
             r = ref[len(tag_prefix):]
             if verbose:
                 print("picking %s" % r)
-            return { "version": r,
-                     "full": keywords["full"].strip() }
+            return {"version": r,
+                     "full": keywords["full"].strip()}
     # no suitable tags, so we use the full revision id
     if verbose:
         print("no suitable tags, using full revision id")
-    return { "version": keywords["full"].strip(),
-             "full": keywords["full"].strip() }
+    return {"version": keywords["full"].strip(),
+             "full": keywords["full"].strip()}
 
 
 def git_versions_from_vcs(tag_prefix, root, verbose=False):
@@ -187,7 +190,7 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     # py2exe/bbfreeze/non-CPython implementations don't do __file__, in which
     # case we can only use expanded keywords.
 
-    keywords = { "refnames": git_refnames, "full": git_full }
+    keywords = {"refnames": git_refnames, "full": git_full}
     ver = git_versions_from_keywords(keywords, tag_prefix, verbose)
     if ver:
         return ver

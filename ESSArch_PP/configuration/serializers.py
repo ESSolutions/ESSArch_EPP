@@ -9,6 +9,7 @@ from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 
 from ESSArch_Core.storage.models import StorageMethod, StorageTarget, StorageMethodTargetRelation
 
+
 class ArchivePolicyNestedSerializer(CoreArchivePolicySerializer):
     class Meta:
         model = ArchivePolicy
@@ -71,7 +72,10 @@ class StorageMethodTargetRelationSerializer(serializers.HyperlinkedModelSerializ
 
 class StorageMethodSerializer(DynamicHyperlinkedModelSerializer):
     archive_policy = ArchivePolicyNestedSerializer()
-    targets = serializers.PrimaryKeyRelatedField(pk_field=serializers.UUIDField(format='hex_verbose'), many=True, read_only=True)
+    targets = serializers.PrimaryKeyRelatedField(
+        pk_field=serializers.UUIDField(format='hex_verbose'),
+        many=True, read_only=True
+    )
     storage_method_target_relations = StorageMethodTargetRelationSerializer(validators=[], many=True)
 
     class Meta:

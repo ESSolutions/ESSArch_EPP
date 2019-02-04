@@ -31,12 +31,11 @@ import os
 import django
 django.setup()
 
-from django.conf import settings
+from django.conf import settings  # noqa
 
-from ESSArch_Core.profiles.models import (
+from ESSArch_Core.profiles.models import (  # noqa
     SubmissionAgreement,
     Profile,
-    ProfileSA,
 )
 
 
@@ -193,11 +192,11 @@ def installProfileTransferProject(sa):
                 'type': 'select',
                 'defaultValue': 'tar',
                 'templateOptions': {
-                  'label': 'Container format',
-                  'options': [
-                    {'name': 'TAR', 'value': 'tar'},
-                    {'name': 'ZIP', 'value': 'zip'},
-                  ]
+                    'label': 'Container format',
+                    'options': [
+                        {'name': 'TAR', 'value': 'tar'},
+                        {'name': 'ZIP', 'value': 'zip'},
+                    ]
                 }
             }, {
                 "key": "container_format_compression",
@@ -221,11 +220,11 @@ def installProfileTransferProject(sa):
                 'type': 'select',
                 'defaultValue': 'MD5',
                 'templateOptions': {
-                  'label': 'Checksum algorithm',
-                  'options': [
-                    {'name': 'MD5', 'value': 'MD5'},
-                    {'name': 'SHA-256', 'value': 'SHA-256'},
-                  ]
+                    'label': 'Checksum algorithm',
+                    'options': [
+                        {'name': 'MD5', 'value': 'MD5'},
+                        {'name': 'SHA-256', 'value': 'SHA-256'},
+                    ]
                 }
             }, {
                 "templateOptions": {
@@ -460,56 +459,56 @@ def installProfileSIP(sa):
                     "label": "Content Type",
                     "options": [
                         {
-                          "name": "Electronic Record Management System",
-                          "value": "ERMS"
+                            "name": "Electronic Record Management System",
+                            "value": "ERMS"
                         },
                         {
-                          "name": "Personnel system",
-                          "value": "Personnel"
+                            "name": "Personnel system",
+                            "value": "Personnel"
                         },
                         {
-                          "name": "Medical record(s)",
-                          "value": "Medical record"
+                            "name": "Medical record(s)",
+                            "value": "Medical record"
                         },
                         {
-                          "name": "Economics",
-                          "value": "Economics systems"
+                            "name": "Economics",
+                            "value": "Economics systems"
                         },
                         {
-                          "name": "Databases",
-                          "value": "Databases"
+                            "name": "Databases",
+                            "value": "Databases"
                         },
                         {
-                          "name": "Webpages",
-                          "value": "Webpages"
+                            "name": "Webpages",
+                            "value": "Webpages"
                         },
                         {
-                          "name": "Geografical Information Systems",
-                          "value": "GIS"
+                            "name": "Geografical Information Systems",
+                            "value": "GIS"
                         },
                         {
-                          "name": "No specification",
-                          "value": "No specification"
+                            "name": "No specification",
+                            "value": "No specification"
                         },
                         {
-                          "name": "Archival Information Collection",
-                          "value": "AIC"
+                            "name": "Archival Information Collection",
+                            "value": "AIC"
                         },
                         {
-                          "name": "Archival Information",
-                          "value": "Archival Information"
+                            "name": "Archival Information",
+                            "value": "Archival Information"
                         },
                         {
-                          "name": "Unstructured",
-                          "value": "Unstructured"
+                            "name": "Unstructured",
+                            "value": "Unstructured"
                         },
                         {
-                          "name": "Single records",
-                          "value": "Single records"
+                            "name": "Single records",
+                            "value": "Single records"
                         },
                         {
-                          "name": "Publication",
-                          "value": "Publication"
+                            "name": "Publication",
+                            "value": "Publication"
                         },
                     ]
                 },
@@ -522,28 +521,28 @@ def installProfileSIP(sa):
                     "label": "Record Status",
                     "options": [
                         {
-                          "name": "SUPPLEMENT",
-                          "value": "SUPPLEMENT"
+                            "name": "SUPPLEMENT",
+                            "value": "SUPPLEMENT"
                         },
                         {
-                          "name": "REPLACEMENT",
-                          "value": "REPLACEMENT"
+                            "name": "REPLACEMENT",
+                            "value": "REPLACEMENT"
                         },
                         {
                             "name": "NEW",
                             "value": "NEW"
                         },
                         {
-                          "name": "TEST",
-                          "value": "TEST"
+                            "name": "TEST",
+                            "value": "TEST"
                         },
                         {
-                          "name": "VERSION",
-                          "value": "VERSION"
+                            "name": "VERSION",
+                            "value": "VERSION"
                         },
                         {
-                          "name": "OTHER",
-                          "value": "OTHER"
+                            "name": "OTHER",
+                            "value": "OTHER"
                         },
                     ]
                 },
@@ -617,7 +616,9 @@ def installProfileSIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_SIP_VERSION11.json')).read()),
+        'specification': json.loads(open(
+            os.path.join(settings.BASE_DIR, 'templates/se/SE_SIP_VERSION11.json')
+        ).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -647,7 +648,9 @@ def installProfileAICDescription(sa):
         'submission_schedule': 'Once',
         'submission_data_inventory': 'According to submit description',
         'template': [],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIC_DESCRIPTION_VERSION11.json')).read()),
+        'specification': json.loads(open(
+            os.path.join(settings.BASE_DIR, 'templates/se/SE_AIC_DESCRIPTION_VERSION11.json')
+        ).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -754,56 +757,56 @@ def installProfileAIP(sa):
                     "label": "Content Type",
                     "options": [
                         {
-                          "name": "Electronic Record Management System",
-                          "value": "ERMS"
+                            "name": "Electronic Record Management System",
+                            "value": "ERMS"
                         },
                         {
-                          "name": "Personnel system",
-                          "value": "Personnel"
+                            "name": "Personnel system",
+                            "value": "Personnel"
                         },
                         {
-                          "name": "Medical record(s)",
-                          "value": "Medical record"
+                            "name": "Medical record(s)",
+                            "value": "Medical record"
                         },
                         {
-                          "name": "Economics",
-                          "value": "Economics systems"
+                            "name": "Economics",
+                            "value": "Economics systems"
                         },
                         {
-                          "name": "Databases",
-                          "value": "Databases"
+                            "name": "Databases",
+                            "value": "Databases"
                         },
                         {
-                          "name": "Webpages",
-                          "value": "Webpages"
+                            "name": "Webpages",
+                            "value": "Webpages"
                         },
                         {
-                          "name": "Geografical Information Systems",
-                          "value": "GIS"
+                            "name": "Geografical Information Systems",
+                            "value": "GIS"
                         },
                         {
-                          "name": "No specification",
-                          "value": "No specification"
+                            "name": "No specification",
+                            "value": "No specification"
                         },
                         {
-                          "name": "Archival Information Collection",
-                          "value": "AIC"
+                            "name": "Archival Information Collection",
+                            "value": "AIC"
                         },
                         {
-                          "name": "Archival Information",
-                          "value": "Archival Information"
+                            "name": "Archival Information",
+                            "value": "Archival Information"
                         },
                         {
-                          "name": "Unstructured",
-                          "value": "Unstructured"
+                            "name": "Unstructured",
+                            "value": "Unstructured"
                         },
                         {
-                          "name": "Single records",
-                          "value": "Single records"
+                            "name": "Single records",
+                            "value": "Single records"
                         },
                         {
-                          "name": "Publication",
-                          "value": "Publication"
+                            "name": "Publication",
+                            "value": "Publication"
                         },
                     ]
                 },
@@ -815,28 +818,28 @@ def installProfileAIP(sa):
                     "label": "Record Status",
                     "options": [
                         {
-                          "name": "SUPPLEMENT",
-                          "value": "SUPPLEMENT"
+                            "name": "SUPPLEMENT",
+                            "value": "SUPPLEMENT"
                         },
                         {
-                          "name": "REPLACEMENT",
-                          "value": "REPLACEMENT"
+                            "name": "REPLACEMENT",
+                            "value": "REPLACEMENT"
                         },
                         {
                             "name": "NEW",
                             "value": "NEW"
                         },
                         {
-                          "name": "TEST",
-                          "value": "TEST"
+                            "name": "TEST",
+                            "value": "TEST"
                         },
                         {
-                          "name": "VERSION",
-                          "value": "VERSION"
+                            "name": "VERSION",
+                            "value": "VERSION"
                         },
                         {
-                          "name": "OTHER",
-                          "value": "OTHER"
+                            "name": "OTHER",
+                            "value": "OTHER"
                         },
                     ]
                 },
@@ -991,7 +994,9 @@ def installProfileAIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_VERSION11.json')).read()),
+        'specification': json.loads(open(
+            os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_VERSION11.json')
+        ).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1143,7 +1148,9 @@ def installProfileAIPDescription(sa):
                 "key": "preservation_software_note"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_DESCRIPTION_VERSION11.json')).read()),
+        'specification': json.loads(open(
+            os.path.join(settings.BASE_DIR, 'templates/se/SE_AIP_DESCRIPTION_VERSION11.json')
+        ).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1182,56 +1189,56 @@ def installProfileDIP(sa):
                     "label": "Content Type",
                     "options": [
                         {
-                          "name": "Electronic Record Management System",
-                          "value": "ERMS"
+                            "name": "Electronic Record Management System",
+                            "value": "ERMS"
                         },
                         {
-                          "name": "Personnel system",
-                          "value": "Personnel"
+                            "name": "Personnel system",
+                            "value": "Personnel"
                         },
                         {
-                          "name": "Medical record(s)",
-                          "value": "Medical record"
+                            "name": "Medical record(s)",
+                            "value": "Medical record"
                         },
                         {
-                          "name": "Economics",
-                          "value": "Economics systems"
+                            "name": "Economics",
+                            "value": "Economics systems"
                         },
                         {
-                          "name": "Databases",
-                          "value": "Databases"
+                            "name": "Databases",
+                            "value": "Databases"
                         },
                         {
-                          "name": "Webpages",
-                          "value": "Webpages"
+                            "name": "Webpages",
+                            "value": "Webpages"
                         },
                         {
-                          "name": "Geografical Information Systems",
-                          "value": "GIS"
+                            "name": "Geografical Information Systems",
+                            "value": "GIS"
                         },
                         {
-                          "name": "No specification",
-                          "value": "No specification"
+                            "name": "No specification",
+                            "value": "No specification"
                         },
                         {
-                          "name": "Archival Information Collection",
-                          "value": "AIC"
+                            "name": "Archival Information Collection",
+                            "value": "AIC"
                         },
                         {
-                          "name": "Archival Information",
-                          "value": "Archival Information"
+                            "name": "Archival Information",
+                            "value": "Archival Information"
                         },
                         {
-                          "name": "Unstructured",
-                          "value": "Unstructured"
+                            "name": "Unstructured",
+                            "value": "Unstructured"
                         },
                         {
-                          "name": "Single records",
-                          "value": "Single records"
+                            "name": "Single records",
+                            "value": "Single records"
                         },
                         {
-                          "name": "Publication",
-                          "value": "Publication"
+                            "name": "Publication",
+                            "value": "Publication"
                         },
                     ]
                 },
@@ -1243,28 +1250,28 @@ def installProfileDIP(sa):
                     "label": "Record Status",
                     "options": [
                         {
-                          "name": "SUPPLEMENT",
-                          "value": "SUPPLEMENT"
+                            "name": "SUPPLEMENT",
+                            "value": "SUPPLEMENT"
                         },
                         {
-                          "name": "REPLACEMENT",
-                          "value": "REPLACEMENT"
+                            "name": "REPLACEMENT",
+                            "value": "REPLACEMENT"
                         },
                         {
                             "name": "NEW",
                             "value": "NEW"
                         },
                         {
-                          "name": "TEST",
-                          "value": "TEST"
+                            "name": "TEST",
+                            "value": "TEST"
                         },
                         {
-                          "name": "VERSION",
-                          "value": "VERSION"
+                            "name": "VERSION",
+                            "value": "VERSION"
                         },
                         {
-                          "name": "OTHER",
-                          "value": "OTHER"
+                            "name": "OTHER",
+                            "value": "OTHER"
                         },
                     ]
                 },
@@ -1335,7 +1342,9 @@ def installProfileDIP(sa):
                 "key": "allow_unknown_file_types"
             },
         ],
-        'specification': json.loads(open(os.path.join(settings.BASE_DIR, 'templates/se/SE_DIP_VERSION11.json')).read()),
+        'specification': json.loads(open(
+            os.path.join(settings.BASE_DIR, 'templates/se/SE_DIP_VERSION11.json')
+        ).read()),
     }
 
     profile, _ = Profile.objects.update_or_create(name=dct['name'], defaults=dct)
@@ -1345,6 +1354,7 @@ def installProfileDIP(sa):
     print('Installed profile DIP')
 
     return 0
+
 
 def installProfilePreservationMetadata(sa):
 
@@ -1433,6 +1443,7 @@ def installProfileWorkflow(sa):
     print('Installed profile Workflow')
 
     return 0
+
 
 if __name__ == '__main__':
     installProfiles()

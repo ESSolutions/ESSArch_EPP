@@ -22,15 +22,24 @@
     Email - essarch@essolutions.se
 """
 
-from ESSArch_Core.storage.models import IOQueue, StorageMedium, StorageObject,  TapeDrive, Robot, StorageMethod, StorageTarget, StorageMethodTargetRelation
+from ESSArch_Core.storage.models import (
+    IOQueue,
+    Robot,
+    StorageMedium,
+    StorageMethod,
+    StorageMethodTargetRelation,
+    StorageObject,
+    StorageTarget,
+    TapeDrive,
+)
 from django.contrib import admin
-from nested_inline.admin import NestedStackedInline, NestedModelAdmin
+from nested_inline.admin import NestedStackedInline
 
 
 class StorageTargetInline(NestedStackedInline):
     """
     StorageTarget configuration
-    """        
+    """
     model = StorageMethodTargetRelation
     fk_name = 'storage_method'
     extra = 0
@@ -38,9 +47,10 @@ class StorageTargetInline(NestedStackedInline):
         'name',
         'status',
         'storage_target',
-        )
+    )
     verbose_name = 'target relation'
     verbose_name_plural = ''
+
     def get_formset(self, request, obj=None, **kwargs):
         formset = super(StorageTargetInline, self).get_formset(request, obj, **kwargs)
         form = formset.form
@@ -52,30 +62,31 @@ class StorageTargetInline(NestedStackedInline):
 class StorageMethodInline(NestedStackedInline):
     """
     StorageMethod configuration
-    """            
+    """
     model = StorageMethod
     fk_name = 'archive_policy'
     extra = 0
     fieldsets = (
-        (None,{
+        (None, {
             'fields': (
                 'name',
                 'status',
                 'type',
                 'containers',
-                )}),
+            )
+        }),
     )
     inlines = [StorageTargetInline]
 
 
-class StorageTargetsAdmin( admin.ModelAdmin ):
+class StorageTargetsAdmin(admin.ModelAdmin):
     """
     StorageTargets configuration
-    """    
-    list_display = ( 'name', 'target' )
+    """
+    list_display = ('name', 'target')
     sortable_field_name = "name"
     fieldsets = (
-        (None,{
+        (None, {
             'fields': (
                 'name',
                 'status',
@@ -83,12 +94,13 @@ class StorageTargetsAdmin( admin.ModelAdmin ):
                 'default_block_size',
                 'default_format',
                 'min_chunk_size',
-                'min_capacity_warning',                
+                'min_capacity_warning',
                 'max_capacity',
                 'remote_server',
                 'master_server',
                 'target',
-                )}),
+            )
+        }),
     )
 
 
