@@ -22,30 +22,30 @@ Web - http://www.essolutions.se
 Email - essarch@essolutions.se
 */
 
-angular.module('essarch.services').factory('Requests', function(Notifications, IPReception, IP, $http, appConfig, $translate) {
+angular
+  .module('essarch.services')
+  .factory('Requests', function(Notifications, IPReception, IP, $http, appConfig, $translate) {
     function preserve(ip, request) {
-        return IP.preserve(
-            angular.extend(request, { id: ip.id })
-        ).$promise.then(function (response) {
-            Notifications.add(response.detail, "success", 3000);
-            return response;
-        });
+      return IP.preserve(angular.extend(request, {id: ip.id})).$promise.then(function(response) {
+        Notifications.add(response.detail, 'success', 3000);
+        return response;
+      });
     }
     function access(ip, data) {
-        return IP.access(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            Notifications.add(response.detail, "success", 3000);
-            return response;
-        });
+      return IP.access(angular.extend(data, {id: ip.id})).$promise.then(function(response) {
+        Notifications.add(response.detail, 'success', 3000);
+        return response;
+      });
     }
     function moveToApproval(ip, data) {
-        return IP.moveToApproval(angular.extend(data, { id: ip.id })).$promise.then(function(response) {
-            Notifications.add(response.detail, "success", 3000);
-            return response;
-        });
+      return IP.moveToApproval(angular.extend(data, {id: ip.id})).$promise.then(function(response) {
+        Notifications.add(response.detail, 'success', 3000);
+        return response;
+      });
     }
     return {
-        preserve: preserve,
-        access: access,
-        moveToApproval: moveToApproval,
+      preserve: preserve,
+      access: access,
+      moveToApproval: moveToApproval,
     };
-});
+  });

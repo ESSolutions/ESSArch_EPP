@@ -9,9 +9,10 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 end_of_line = lf
 charset = utf-8
-
-[*.py]
 max_line_length = 119
+
+[*.{js,html,scss,css}]
+indent_size = 2
 
 [ESSArch_PP/docs/**.rst]
 max_line_length = 79

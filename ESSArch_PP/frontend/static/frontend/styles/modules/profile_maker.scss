@@ -1,33 +1,33 @@
 .profile-maker {
-    @include container(10px);
-    display: inline-block;
-    width: 100%;
-    box-shadow: none;
-    margin-top: 5px;
+  @include container(10px);
+  display: inline-block;
+  width: 100%;
+  box-shadow: none;
+  margin-top: 5px;
 
   .template-select {
-      width: 33%;
+    width: 33%;
   }
   .floatingForm {
-      position: absolute;
-      width: 300px;
-      /*height: 100%;*/
-      background-color: white;
-      z-index: 2;
-      border: solid black 1px;
+    position: absolute;
+    width: 300px;
+    /*height: 100%;*/
+    background-color: white;
+    z-index: 2;
+    border: solid black 1px;
   }
 
   .red {
-      color: red;
+    color: red;
   }
 
   .true {
-      color: lightgrey;
+    color: lightgrey;
   }
 
   .children {
-      width: 400px;
-      height: 40px;
+    width: 400px;
+    height: 40px;
     p {
       float: left;
       font-size: 1.5em;
@@ -41,12 +41,13 @@
     display: flex;
     flex-direction: row;
     * {
-        margin-right: 3px;
+      margin-right: 3px;
     }
   }
 
-  .formly-field-input, .formly-field-select{
-      width: 200px;
+  .formly-field-input,
+  .formly-field-select {
+    width: 200px;
   }
 
   .fa-plus {
@@ -80,16 +81,16 @@
     flex: 6;
   }
 
-  [class*="flex-"] {
+  [class*='flex-'] {
     padding-left: 10px;
     padding-right: 10px;
   }
 
-  [class*="flex-"]:first-child {
+  [class*='flex-']:first-child {
     padding-left: 0;
   }
 
-  [class*="flex-"]:nth-last-child(2) {
+  [class*='flex-']:nth-last-child(2) {
     padding-right: 0;
   }
 
@@ -115,7 +116,6 @@
   /*.tree p {
     margin-left: 100px;
   }*/
-
 }
 .attribute-form {
   .flex-wrap {
@@ -128,7 +128,6 @@
       }
     }
     .attribute-tree {
-
     }
   }
 }

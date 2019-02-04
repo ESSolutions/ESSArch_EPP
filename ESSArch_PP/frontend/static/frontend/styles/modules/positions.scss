@@ -1,23 +1,23 @@
 .position- {
+  &relative {
+    position: relative;
+  }
+  &absolute {
+    position: absolute;
+  }
+  &lg- {
     &relative {
-        position: relative;
+      @include large-screen-up {
+        position: relative !important;
+      }
     }
-    &absolute {
-        position: absolute;
-    }
-    &lg- {
-        &relative {
-            @include large-screen-up {
-                position: relative !important;
-            }
-        }
-    }
+  }
 }
 
 .float-right {
-    float: right;
+  float: right;
 }
 
 .float-left {
-    float: left;
+  float: left;
 }

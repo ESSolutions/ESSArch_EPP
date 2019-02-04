@@ -1,4 +1,6 @@
-angular.module('essarch.controllers').controller('MoveToApprovalModalInstanceCtrl', function ($uibModalInstance, data, $scope, Requests, $q) {
+angular
+  .module('essarch.controllers')
+  .controller('MoveToApprovalModalInstanceCtrl', function($uibModalInstance, data, $scope, Requests, $q) {
     var $ctrl = this;
     $ctrl.angular = angular;
     $ctrl.data = data;
@@ -7,29 +9,28 @@ angular.module('essarch.controllers').controller('MoveToApprovalModalInstanceCtr
     $ctrl.moving = false;
 
     $ctrl.$onInit = function() {
-        if($ctrl.data.ips == null) {
-            $ctrl.data.ips = [$ctrl.data.ip];
-        }
-    }
+      if ($ctrl.data.ips == null) {
+        $ctrl.data.ips = [$ctrl.data.ip];
+      }
+    };
     $ctrl.ok = function() {
-        $uibModalInstance.close();
-    }
-    $ctrl.cancel = function () {
-        $uibModalInstance.dismiss('cancel');
+      $uibModalInstance.close();
+    };
+    $ctrl.cancel = function() {
+      $uibModalInstance.dismiss('cancel');
     };
 
     // Preserve IP
     $ctrl.moveToApproval = function() {
-        $ctrl.moving = true;
-        var data = { purpose: $ctrl.data.request.purpose };
-        var promises = [];
-        $ctrl.data.ips.forEach(function(ip) {
-            promises.push(Requests.moveToApproval(ip, data).then(function(response) {
-            }));
-        });
-        $q.all(promises).then(function(data) {
-            $uibModalInstance.close(data);
-            $ctrl.moving = false;
-        });
-    }
-});
+      $ctrl.moving = true;
+      var data = {purpose: $ctrl.data.request.purpose};
+      var promises = [];
+      $ctrl.data.ips.forEach(function(ip) {
+        promises.push(Requests.moveToApproval(ip, data).then(function(response) {}));
+      });
+      $q.all(promises).then(function(data) {
+        $uibModalInstance.close(data);
+        $ctrl.moving = false;
+      });
+    };
+  });

@@ -22,178 +22,215 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('AngularTreeCtrl', function AngularTreeCtrl(Tag, $scope, $http, $rootScope, appConfig, $translate, $uibModal, $log, $state) {
+angular
+  .module('essarch.controllers')
+  .controller('AngularTreeCtrl', function AngularTreeCtrl(
+    Tag,
+    $scope,
+    $http,
+    $rootScope,
+    appConfig,
+    $translate,
+    $uibModal,
+    $log,
+    $state
+  ) {
     $scope.treeOptions = {
-        nodeChildren: "children",
-        dirSelectable: true,
-        injectClasses: {
-            ul: "a1",
-            li: "a2",
-            liSelected: "a7",
-            iExpanded: "a3",
-            iCollapsed: "a4",
-            iLeaf: "a5",
-            label: "a6",
-            labelSelected: "a8"
-        }
-    }
+      nodeChildren: 'children',
+      dirSelectable: true,
+      injectClasses: {
+        ul: 'a1',
+        li: 'a2',
+        liSelected: 'a7',
+        iExpanded: 'a3',
+        iCollapsed: 'a4',
+        iLeaf: 'a5',
+        label: 'a6',
+        labelSelected: 'a8',
+      },
+    };
     //TAGS
     $scope.tags = [];
     $rootScope.loadTags = function() {
-        Tag.query({
-            only_roots: true
-        }).$promise.then(function(data) {
-            data.forEach(function(tag, index, array) {
-                $scope.expandedNodes.forEach(function(node) {
-                    if(tag.id == node.id) {
-                        $scope.onNodeToggle(tag);
-                    }
-                });
-            });
-            $scope.tags = data;
+      Tag.query({
+        only_roots: true,
+      }).$promise.then(function(data) {
+        data.forEach(function(tag, index, array) {
+          $scope.expandedNodes.forEach(function(node) {
+            if (tag.id == node.id) {
+              $scope.onNodeToggle(tag);
+            }
+          });
         });
-    }
+        $scope.tags = data;
+      });
+    };
     $rootScope.loadTags();
     $scope.$on('load_tags', function() {
-        $rootScope.loadTags();
+      $rootScope.loadTags();
     });
     $scope.onNodeToggle = function(node) {
-        node.children.forEach(function(child, index, array) {
-            child.$get().then(function(data) {
-                array[index] = data;
-            });
+      node.children.forEach(function(child, index, array) {
+        child.$get().then(function(data) {
+          array[index] = data;
         });
-    }
+      });
+    };
     $rootScope.selectedTag = null;
     $scope.showSelectedNode = function(node) {
-        if($rootScope.selectedTag && $rootScope.selectedTag.id === node.id) {
-            $rootScope.selectedTag = null;
-        } else {
-            $rootScope.selectedTag = node;
-        }
+      if ($rootScope.selectedTag && $rootScope.selectedTag.id === node.id) {
+        $rootScope.selectedTag = null;
+      } else {
+        $rootScope.selectedTag = node;
+      }
     };
     // Remove given node
     $scope.removeNode = function(node) {
-        if(node.parentNode == null){
-            $scope.tags.forEach(function(element) {
-                if(element.name == node.node.name) {
-                    element.$delete().then (function(response){
-                        $rootScope.loadTags();
-                    });
-                }
+      if (node.parentNode == null) {
+        $scope.tags.forEach(function(element) {
+          if (element.name == node.node.name) {
+            element.$delete().then(function(response) {
+              $rootScope.loadTags();
             });
-        } else {
-            node.parentNode.children.forEach(function(element) {
-                if(element.name == node.node.name) {
-                    element.$delete().then (function(response){
-                        $rootScope.loadTags();
-                    });
-                }
+          }
+        });
+      } else {
+        node.parentNode.children.forEach(function(element) {
+          if (element.name == node.node.name) {
+            element.$delete().then(function(response) {
+              $rootScope.loadTags();
             });
-        }
+          }
+        });
+      }
     };
     //Update current node variable with selected node in map structure tree view
     $scope.updateCurrentNode = function(node, selected, parentNode) {
-        if(selected) {
-            $scope.currentNode = {"node": node, "parentNode": parentNode};
-        } else {
-            $scope.currentNode = null;
-        }
+      if (selected) {
+        $scope.currentNode = {node: node, parentNode: parentNode};
+      } else {
+        $scope.currentNode = null;
+      }
     };
     //context menu data
     $scope.navMenuOptions = function(item) {
-        return [
-            [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.addTagModal($itemScope.node, true);
-            }]
-        ];
+      return [
+        [
+          $translate.instant('ADD'),
+          function($itemScope, $event, modelValue, text, $li) {
+            $scope.addTagModal($itemScope.node, true);
+          },
+        ],
+      ];
     };
     //context menu data
     $scope.navMenuItemOptions = function(item) {
-        return [
-            [$translate.instant('ADD'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.addTagModal($itemScope.node, false);
-            }],
+      return [
+        [
+          $translate.instant('ADD'),
+          function($itemScope, $event, modelValue, text, $li) {
+            $scope.addTagModal($itemScope.node, false);
+          },
+        ],
 
-            [$translate.instant('REMOVE'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.updateCurrentNode($itemScope.node, true, $itemScope.$parentNode);
-                $scope.removeNode($scope.currentNode);
-                $scope.selectedNode = null;
-            }],
-            [$translate.instant('UPDATE'), function ($itemScope, $event, modelValue, text, $li) {
-                $scope.tagPropertiesModal($itemScope.node);
-            }],
-            [$translate.instant('APPRAISAL'), function ($itemScope, $event, modelValue, text, $li) {
-                $state.go("home.appraisal", {tag: $itemScope.node});
-            }]
-
-        ];
+        [
+          $translate.instant('REMOVE'),
+          function($itemScope, $event, modelValue, text, $li) {
+            $scope.updateCurrentNode($itemScope.node, true, $itemScope.$parentNode);
+            $scope.removeNode($scope.currentNode);
+            $scope.selectedNode = null;
+          },
+        ],
+        [
+          $translate.instant('UPDATE'),
+          function($itemScope, $event, modelValue, text, $li) {
+            $scope.tagPropertiesModal($itemScope.node);
+          },
+        ],
+        [
+          $translate.instant('APPRAISAL'),
+          function($itemScope, $event, modelValue, text, $li) {
+            $state.go('home.appraisal', {tag: $itemScope.node});
+          },
+        ],
+      ];
     };
     // open modal for add tag
-    $scope.addTagModal = function (tag, isRoot) {
-        if(isRoot) {
-            $scope.parentTag = null;
-        } else {
-            $scope.parentTag = tag;
+    $scope.addTagModal = function(tag, isRoot) {
+      if (isRoot) {
+        $scope.parentTag = null;
+      } else {
+        $scope.parentTag = tag;
+      }
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_tag_modal.html',
+        scope: $scope,
+        controller: 'ModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {},
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          $scope.addTag(tag, data, isRoot);
+          $scope.parentTag = null;
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
         }
-        var modalInstance = $uibModal.open({
-            animation: true,
-            ariaLabelledBy: 'modal-title',
-            ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/add_tag_modal.html',
-            scope: $scope,
-            controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl',
-            resolve: {
-                data: {}
-            }
-        })
-        modalInstance.result.then(function (data) {
-            $scope.addTag(tag, data, isRoot);
-            $scope.parentTag = null;
-        }, function () {
-            $log.info('modal-component dismissed at: ' + new Date());
-        });
-    }
+      );
+    };
     // Add new tag
     $scope.addTag = function(tag, data, isRoot) {
-        isRoot ? data.parent = null : data.parent = tag.url;;
-        data.information_packages = [];
-        if(isRoot){
-            Tag.save(data).$promise.then(function(response) {
-                $rootScope.loadTags();
-            });
-        } else {
-            Tag.save(data).$promise.then(function(response) {
-                $rootScope.loadTags();
-            });
+      isRoot ? (data.parent = null) : (data.parent = tag.url);
+      data.information_packages = [];
+      if (isRoot) {
+        Tag.save(data).$promise.then(function(response) {
+          $rootScope.loadTags();
+        });
+      } else {
+        Tag.save(data).$promise.then(function(response) {
+          $rootScope.loadTags();
+        });
+      }
+    };
+    $scope.tagPropertiesModal = function(tag) {
+      $scope.displayedTag = tag;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/tag_properties_modal.html',
+        scope: $scope,
+        controller: 'ModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {},
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          $scope.updateTag(tag, data);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
         }
+      );
     };
-    $scope.tagPropertiesModal = function (tag) {
-        $scope.displayedTag = tag;
-        var modalInstance = $uibModal.open({
-            animation: true,
-            ariaLabelledBy: 'modal-title',
-            ariaDescribedBy: 'modal-body',
-            templateUrl: 'static/frontend/views/tag_properties_modal.html',
-            scope: $scope,
-            controller: 'ModalInstanceCtrl',
-            controllerAs: '$ctrl',
-            resolve: {
-                data: {}
-            }
-        })
-        modalInstance.result.then(function (data) {
-            $scope.updateTag(tag, data);
-        }, function () {
-            $log.info('modal-component dismissed at: ' + new Date());
-        });
-    }
     $scope.updateTag = function(tag, data) {
-        Tag.update(angular.extend({
-            id: tag.id
-        }, data)).$promise.then(function(response) {
-            $rootScope.loadTags();
-        });
+      Tag.update(
+        angular.extend(
+          {
+            id: tag.id,
+          },
+          data
+        )
+      ).$promise.then(function(response) {
+        $rootScope.loadTags();
+      });
     };
-});
+  });

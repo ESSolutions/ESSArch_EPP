@@ -24,17 +24,14 @@
 
 //jshint strict: false
 exports.config = {
-
   allScriptsTimeout: 11000,
 
-  specs: [
-    '*.js'
-  ],
+  specs: ['*.js'],
 
   multiCapabilities: [
     {
-      'browserName': 'chrome'
-    }
+      browserName: 'chrome',
+    },
   ],
 
   baseUrl: 'http://localhost:8000/',
@@ -42,7 +39,6 @@ exports.config = {
   framework: 'jasmine',
 
   jasmineNodeOpts: {
-    defaultTimeoutInterval: 30000
-  }
-
+    defaultTimeoutInterval: 30000,
+  },
 };

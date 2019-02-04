@@ -27,24 +27,21 @@
 
 module.exports = function(config) {
   config.set({
-
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '.',
-
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine'],
 
-
     // list of files / patterns to load in the browser
     files: [
-        'scripts/polyfills.min.js',
-        'scripts/vendors.min.js',
-        'scripts/scripts.min.js',
+      'scripts/polyfills.min.js',
+      'scripts/vendors.min.js',
+      'scripts/scripts.min.js',
 
-        'tests/core/*.js',
-        'tests/*.js',
+      'tests/core/*.js',
+      'tests/*.js',
     ],
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -59,7 +56,7 @@ module.exports = function(config) {
 
     junitReporter: {
       outputFile: 'test_out/unit.xml',
-      suite: 'unit'
-    }
-  })
-}
+      suite: 'unit',
+    },
+  });
+};

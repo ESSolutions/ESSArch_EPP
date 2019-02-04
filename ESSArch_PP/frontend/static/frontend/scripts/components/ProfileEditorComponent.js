@@ -5,6 +5,6 @@ angular.module('essarch.components').component('profileEditor', {
   bindings: {
     ip: '<',
     sa: '<',
-    shareData: '&'
-  }
+    shareData: '&',
+  },
 });

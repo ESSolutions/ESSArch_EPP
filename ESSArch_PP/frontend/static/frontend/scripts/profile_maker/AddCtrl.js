@@ -1,14 +1,14 @@
-angular.module('essarch.controllers').controller('AddCtrl', function (ProfileMakerTemplate, $http, $scope, appConfig) {
+angular.module('essarch.controllers').controller('AddCtrl', function(ProfileMakerTemplate, $http, $scope, appConfig) {
   var vm = this;
   vm.options = {};
 
   vm.addTemplate = function(model) {
     if (model) {
-      return ProfileMakerTemplate.add(model).$promise.then(function (response) {
+      return ProfileMakerTemplate.add(model).$promise.then(function(response) {
         return response;
       });
     }
-  }
+  };
 
   vm.addModel = {};
   vm.addFields = [
@@ -19,8 +19,8 @@ angular.module('essarch.controllers').controller('AddCtrl', function (ProfileMak
         type: 'text',
         label: 'Name',
         placeholder: '',
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'prefix',
@@ -29,8 +29,8 @@ angular.module('essarch.controllers').controller('AddCtrl', function (ProfileMak
         type: 'text',
         label: 'prefix',
         placeholder: '',
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'root_element',
@@ -39,23 +39,22 @@ angular.module('essarch.controllers').controller('AddCtrl', function (ProfileMak
         type: 'text',
         label: 'Root Element',
         placeholder: '',
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'schemaURL',
       type: 'input',
       templateOptions: {
-        type: "url",
-        label: 'Schema URL'
-      }
+        type: 'url',
+        label: 'Schema URL',
+      },
     },
   ];
   vm.originalFields = angular.copy(vm.fields);
   $scope.formData = null;
   // recieve data from element
-  var unlisten = $scope.$on('fileToUpload', function (event, arg) {
+  var unlisten = $scope.$on('fileToUpload', function(event, arg) {
     $scope.formData = arg;
   });
-
 });

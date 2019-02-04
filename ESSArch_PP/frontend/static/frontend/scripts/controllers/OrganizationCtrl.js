@@ -22,38 +22,40 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('OrganizationCtrl', function($scope, $rootScope, $cookies, Organization) {
-
+angular
+  .module('essarch.controllers')
+  .controller('OrganizationCtrl', function($scope, $rootScope, $cookies, Organization) {
     $scope.changeOrganization = function() {
-        var org = $scope.currentOrganization;
-        Organization.setOrganization(org);
-    }
+      var org = $scope.currentOrganization;
+      Organization.setOrganization(org);
+    };
     $scope.getCurrentOrganization = function() {
-        $scope.currentOrganization = Organization.getOrganization();
-    }
+      $scope.currentOrganization = Organization.getOrganization();
+    };
 
     $scope.loadOrganizations = function() {
-        $scope.availableOrganizations = Organization.availableOrganizations();
-    }
+      $scope.availableOrganizations = Organization.availableOrganizations();
+    };
 
     $scope.loadOrganizations();
     $scope.getCurrentOrganization();
-}).factory('Organization', function($rootScope, $cookies, $http, $state, appConfig, myService){
+  })
+  .factory('Organization', function($rootScope, $cookies, $http, $state, appConfig, myService) {
     var service = {
-        availableOrganizations: function() {
-            return $rootScope.auth.organizations;
-        },
-        setOrganization: function(org) {
-            $http.patch(appConfig.djangoUrl + 'me/', {current_organization: org.id}).then(function(response){
-                $rootScope.auth = response.data;
-                $rootScope.auth.current_organization = org;
-                myService.getPermissions(response.data.permissions);
-                $state.reload();
-            });
-        },
-        getOrganization: function() {
-            return $rootScope.auth.current_organization;
-        }
+      availableOrganizations: function() {
+        return $rootScope.auth.organizations;
+      },
+      setOrganization: function(org) {
+        $http.patch(appConfig.djangoUrl + 'me/', {current_organization: org.id}).then(function(response) {
+          $rootScope.auth = response.data;
+          $rootScope.auth.current_organization = org;
+          myService.getPermissions(response.data.permissions);
+          $state.reload();
+        });
+      },
+      getOrganization: function() {
+        return $rootScope.auth.current_organization;
+      },
     };
     return service;
-});
+  });

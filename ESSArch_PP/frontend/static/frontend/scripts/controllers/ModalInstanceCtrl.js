@@ -22,16 +22,28 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('ModalInstanceCtrl', function ($uibModalInstance, djangoAuth, data, $http, Notifications, IP, appConfig, listViewService, $translate) {
+angular
+  .module('essarch.controllers')
+  .controller('ModalInstanceCtrl', function(
+    $uibModalInstance,
+    djangoAuth,
+    data,
+    $http,
+    Notifications,
+    IP,
+    appConfig,
+    listViewService,
+    $translate
+  ) {
     var $ctrl = this;
-    if(data) {
-        $ctrl.data = data;
+    if (data) {
+      $ctrl.data = data;
     }
-    if(data && data.ip) {
-        $ctrl.ip = data.ip;
+    if (data && data.ip) {
+      $ctrl.ip = data.ip;
     }
-    if(data && data.field) {
-        $ctrl.field = data.field;
+    if (data && data.field) {
+      $ctrl.field = data.field;
     }
     $ctrl.editMode = false;
     $ctrl.error_messages_old = [];
@@ -39,125 +51,135 @@ angular.module('essarch.controllers').controller('ModalInstanceCtrl', function (
     $ctrl.error_messages_pw2 = [];
     $ctrl.tracebackCopied = false;
     $ctrl.copied = function() {
-        $ctrl.tracebackCopied = true;
-    }
+      $ctrl.tracebackCopied = true;
+    };
     $ctrl.idCopied = false;
     $ctrl.idCopyDone = function() {
-        $ctrl.idCopied = true;
-    }
-    $ctrl.objectIdentifierValue = "";
+      $ctrl.idCopied = true;
+    };
+    $ctrl.objectIdentifierValue = '';
     $ctrl.orders = [];
-    $ctrl.label = "";
-    $ctrl.dir_name = "";
+    $ctrl.label = '';
+    $ctrl.dir_name = '';
     $ctrl.email = {
-        subject: "",
-        body: ""
+      subject: '',
+      body: '',
     };
     $ctrl.updateField = function() {
-        $uibModalInstance.close($ctrl.field);
-    }
-    $ctrl.save = function () {
-        $ctrl.data = {
-            name: $ctrl.profileName
-        };
-        $uibModalInstance.close($ctrl.data);
+      $uibModalInstance.close($ctrl.field);
     };
-    $ctrl.saveDir = function () {
-        $ctrl.data = {
-            dir_name: $ctrl.dir_name
-        };
-        $uibModalInstance.close($ctrl.data);
+    $ctrl.save = function() {
+      $ctrl.data = {
+        name: $ctrl.profileName,
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.saveDir = function() {
+      $ctrl.data = {
+        dir_name: $ctrl.dir_name,
+      };
+      $uibModalInstance.close($ctrl.data);
     };
     $ctrl.saveTag = function() {
-        $ctrl.data = {
-            name: $ctrl.name,
-            desc: $ctrl.desc
-        }
-        $uibModalInstance.close($ctrl.data);
-    }
-    $ctrl.prepare = function (label, objectIdentifierValue, orders) {
-        $ctrl.preparing = true;
-        listViewService.prepareDip(label, objectIdentifierValue, orders).then(function(response) {
-            $ctrl.preparing = false;
-            $uibModalInstance.close();
-        }).catch(function(response) {
-            $ctrl.preparing = false;
+      $ctrl.data = {
+        name: $ctrl.name,
+        desc: $ctrl.desc,
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.prepare = function(label, objectIdentifierValue, orders) {
+      $ctrl.preparing = true;
+      listViewService
+        .prepareDip(label, objectIdentifierValue, orders)
+        .then(function(response) {
+          $ctrl.preparing = false;
+          $uibModalInstance.close();
         })
-    };
-
-    $ctrl.addTag = function () {
-        $ctrl.data = {
-            name: $ctrl.name,
-            desc: $ctrl.desc
-        };
-        $uibModalInstance.close($ctrl.data);
-    };
-    $ctrl.lock = function () {
-        $ctrl.data = {
-            status: "locked"
-        }
-        $uibModalInstance.close($ctrl.data);
-    };
-    $ctrl.lockSa = function() {
-        $ctrl.data = {
-            status: "locked"
-        }
-        $uibModalInstance.close($ctrl.data);
-    };
-    $ctrl.remove = function (ipObject) {
-        $ctrl.removing = true;
-        if(data.workarea) {
-            if(ipObject.package_type == 1) {
-                ipObject.information_packages.forEach(function(ip) {
-                    $ctrl.remove(ip, true);
-                });
-            } else {
-                $http.delete(appConfig.djangoUrl + "workarea-entries/" + ipObject.workarea[0].id + "/")
-                    .then(function (response) {
-                        $ctrl.removing = false;
-                        $uibModalInstance.close();
-                    }).catch(function (response) {
-                        $ctrl.removing = false;
-                    })
-            }
-        } else {
-            IP.delete({
-                id: ipObject.id
-            }).$promise.then(function() {
-                $ctrl.removing = false;
-                Notifications.add($translate.instant('IP_REMOVED', {label: ipObject.label}), 'success');
-                $uibModalInstance.close();
-            }).catch(function (response) {
-                $ctrl.removing = false;
-            })
-        }
-    };
-    $ctrl.submit = function () {
-        $ctrl.data = {
-            email: $ctrl.email,
-            status: "submitting"
-        }
-        $uibModalInstance.close($ctrl.data);
-    };
-    $ctrl.overwrite = function () {
-        $ctrl.data = {
-            status: "overwritten"
-        }
-        $uibModalInstance.close($ctrl.data);
-    };
-    $ctrl.changePassword = function () {
-        djangoAuth.changePassword($ctrl.pw1, $ctrl.pw2, $ctrl.oldPw).then(function(response) {
-            $uibModalInstance.close($ctrl.data);
-        }, function(error) {
-            $ctrl.error_messages_old = error.old_password || [];
-            $ctrl.error_messages_pw1 = error.new_password1 || [];
-            $ctrl.error_messages_pw2 = error.new_password2 || [];
+        .catch(function(response) {
+          $ctrl.preparing = false;
         });
     };
-    $ctrl.ok = function() {
-        $uibModalInstance.close();
-    }
-    $ctrl.cancel = function () {
-        $uibModalInstance.dismiss('cancel');
+
+    $ctrl.addTag = function() {
+      $ctrl.data = {
+        name: $ctrl.name,
+        desc: $ctrl.desc,
+      };
+      $uibModalInstance.close($ctrl.data);
     };
-});
+    $ctrl.lock = function() {
+      $ctrl.data = {
+        status: 'locked',
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.lockSa = function() {
+      $ctrl.data = {
+        status: 'locked',
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.remove = function(ipObject) {
+      $ctrl.removing = true;
+      if (data.workarea) {
+        if (ipObject.package_type == 1) {
+          ipObject.information_packages.forEach(function(ip) {
+            $ctrl.remove(ip, true);
+          });
+        } else {
+          $http
+            .delete(appConfig.djangoUrl + 'workarea-entries/' + ipObject.workarea[0].id + '/')
+            .then(function(response) {
+              $ctrl.removing = false;
+              $uibModalInstance.close();
+            })
+            .catch(function(response) {
+              $ctrl.removing = false;
+            });
+        }
+      } else {
+        IP.delete({
+          id: ipObject.id,
+        })
+          .$promise.then(function() {
+            $ctrl.removing = false;
+            Notifications.add($translate.instant('IP_REMOVED', {label: ipObject.label}), 'success');
+            $uibModalInstance.close();
+          })
+          .catch(function(response) {
+            $ctrl.removing = false;
+          });
+      }
+    };
+    $ctrl.submit = function() {
+      $ctrl.data = {
+        email: $ctrl.email,
+        status: 'submitting',
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.overwrite = function() {
+      $ctrl.data = {
+        status: 'overwritten',
+      };
+      $uibModalInstance.close($ctrl.data);
+    };
+    $ctrl.changePassword = function() {
+      djangoAuth.changePassword($ctrl.pw1, $ctrl.pw2, $ctrl.oldPw).then(
+        function(response) {
+          $uibModalInstance.close($ctrl.data);
+        },
+        function(error) {
+          $ctrl.error_messages_old = error.old_password || [];
+          $ctrl.error_messages_pw1 = error.new_password1 || [];
+          $ctrl.error_messages_pw2 = error.new_password2 || [];
+        }
+      );
+    };
+    $ctrl.ok = function() {
+      $uibModalInstance.close();
+    };
+    $ctrl.cancel = function() {
+      $uibModalInstance.dismiss('cancel');
+    };
+  });

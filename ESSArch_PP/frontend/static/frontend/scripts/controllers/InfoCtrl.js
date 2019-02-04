@@ -22,10 +22,10 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('InfoCtrl', function ($scope, myService){
-    var vm = this;
-    // List view
-    $scope.changePath= function(path) {
-        myService.changePath(path);
-    };
+angular.module('essarch.controllers').controller('InfoCtrl', function($scope, myService) {
+  var vm = this;
+  // List view
+  $scope.changePath = function(path) {
+    myService.changePath(path);
+  };
 });
