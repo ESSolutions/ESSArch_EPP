@@ -40,8 +40,14 @@ from ESSArch_Core.routers import ESSArchRouter
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
-from profiles.views import (ProfileViewSet, ProfileSAViewSet, ProfileMakerExtensionViewSet, ProfileMakerTemplateViewSet,
-                            SubmissionAgreementViewSet, SubmissionAgreementTemplateView)
+from profiles.views import (
+    ProfileViewSet,
+    ProfileSAViewSet,
+    ProfileMakerExtensionViewSet,
+    ProfileMakerTemplateViewSet,
+    SubmissionAgreementViewSet,
+    SubmissionAgreementTemplateView
+)
 from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, RobotQueueViewSet, StorageObjectViewSet,
                            StorageMediumViewSet, StorageMethodViewSet, StorageMethodTargetRelationViewSet,
                            StorageTargetViewSet, TapeDriveViewSet, TapeSlotViewSet)

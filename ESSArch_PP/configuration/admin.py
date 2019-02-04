@@ -24,7 +24,7 @@
 
 from django.contrib import admin
 
-from nested_inline.admin import NestedStackedInline, NestedModelAdmin
+from nested_inline.admin import NestedModelAdmin
 
 from ESSArch_Core.configuration.models import ArchivePolicy
 
@@ -34,37 +34,39 @@ from storage.admin import StorageMethodInline
 class ArchivePolicyAdmin(NestedModelAdmin):
     """
     ArchivePolicy
-    """    
+    """
     model = ArchivePolicy
-    list_display = ( 'policy_name', 'policy_id', 'policy_stat', 'ais_project_name', 'ais_project_id', 'mode' )
+    list_display = ('policy_name', 'policy_id', 'policy_stat', 'ais_project_name', 'ais_project_id', 'mode')
     fieldsets = (
-                (None,{
-                   'fields': (
-                              'policy_stat',
-                              'policy_name',
-                              'policy_id',
-                              'ais_project_name',
-                              'ais_project_id',
-                              'mode',
-                              'checksum_algorithm',
-                              'ip_type',
-                              'preingest_metadata',
-                              'ingest_metadata',
-                              'information_class',
-                              'ingest_path',
-                              'cache_storage',
-                              'wait_for_approval',
-                              'validate_checksum',
-                              'validate_xml',
-                              'ingest_delete',
-                              'index',
-                              'receive_extract_sip',
-                              'cache_extracted_size',
-                              'cache_package_size',
-                              'cache_extracted_age',
-                              'cache_package_age',
-                              )}),
-                )
+        (None, {
+            'fields': (
+                'policy_stat',
+                'policy_name',
+                'policy_id',
+                'ais_project_name',
+                'ais_project_id',
+                'mode',
+                'checksum_algorithm',
+                'ip_type',
+                'preingest_metadata',
+                'ingest_metadata',
+                'information_class',
+                'ingest_path',
+                'cache_storage',
+                'wait_for_approval',
+                'validate_checksum',
+                'validate_xml',
+                'ingest_delete',
+                'index',
+                'receive_extract_sip',
+                'cache_extracted_size',
+                'cache_package_size',
+                'cache_extracted_age',
+                'cache_package_age',
+            )
+        }),
+    )
     inlines = [StorageMethodInline]
+
 
 admin.site.register(ArchivePolicy, ArchivePolicyAdmin)

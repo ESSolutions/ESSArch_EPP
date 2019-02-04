@@ -1,6 +1,5 @@
 import errno
 
-from guardian.shortcuts import get_perms
 from rest_framework import filters, serializers
 
 from ESSArch_Core.auth.serializers import UserSerializer
@@ -57,7 +56,6 @@ class InformationPackageSerializer(CoreInformationPackageSerializer):
 
         return WorkareaSerializer(workareas, many=True, context=self.context).data
 
-
     class Meta(CoreInformationPackageSerializer.Meta):
         fields = CoreInformationPackageSerializer.Meta.fields + (
             'workarea', 'first_generation', 'last_generation',
@@ -108,7 +106,11 @@ class NestedInformationPackageSerializer(DynamicHyperlinkedModelSerializer):
 
     def get_information_packages(self, obj):
         request = self.context['request']
-        return InformationPackageSerializer(obj.related_ips(), many=True, context={'request': request, 'perm_checker': self.context.get('perm_checker')}).data
+        return InformationPackageSerializer(
+            obj.related_ips(),
+            many=True,
+            context={'request': request, 'perm_checker': self.context.get('perm_checker')}
+        ).data
 
     def get_workarea(self, obj):
         try:

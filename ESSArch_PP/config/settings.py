@@ -22,6 +22,12 @@
     Email - essarch@essolutions.se
 """
 
+import os
+from datetime import timedelta
+from urllib.parse import urlparse
+
+import dj_database_url
+
 """
 Django settings for EPP project.
 
@@ -34,12 +40,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
-from datetime import timedelta
-from urllib.parse import urlparse
-
-import dj_database_url
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,8 +51,8 @@ PROJECT_NAME = 'ESSArch Preservation Platform'
 
 try:
     from local_epp_settings import REDIS_URL
-except ImportError as exp:
-    REDIS_URL = os.environ.get('REDIS_URL_EPP','redis://localhost/3')
+except ImportError:
+    REDIS_URL = os.environ.get('REDIS_URL_EPP', 'redis://localhost/3')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'x3lzf9b+nq_0nnu(&q3ukdo^97gpp2(x4yonr+5x@m9m9d8ftg'
@@ -76,11 +76,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'proxy_pagination.ProxyPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-      'ESSArch_Core.auth.SessionAuthentication',
-      'rest_framework.authentication.BasicAuthentication',
+        'ESSArch_Core.auth.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-      'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
@@ -205,8 +205,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 try:
     from local_epp_settings import DATABASE_URL
-except ImportError as exp:
-    DATABASE_URL = os.environ.get('DATABASE_URL_EPP','sqlite:///db.sqlite')
+except ImportError:
+    DATABASE_URL = os.environ.get('DATABASE_URL_EPP', 'sqlite:///db.sqlite')
 DATABASES = {'default': dj_database_url.parse(url=DATABASE_URL)}
 
 # Cache
@@ -223,7 +223,7 @@ CACHES = {
 
 try:
     from local_epp_settings import ELASTICSEARCH_URL
-except ImportError as exp:
+except ImportError:
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL_EPP', 'http://localhost:9200')
 elasticsearch_url = urlparse(ELASTICSEARCH_URL)
 ELASTICSEARCH_CONNECTIONS = {
@@ -255,17 +255,17 @@ LOGGING = {
         'file_epp': {
             'level': 'DEBUG',
             'formatter': 'verbose',
-            'class' : 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/ESSArch/log/epp.log',
-            'maxBytes': 1024*1024*100, # 100MB
+            'maxBytes': 1024 * 1024 * 100,  # 100MB
             'backupCount': 5,
         },
         'log_file_auth': {
             'level': 'DEBUG',
-            'class' : 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'verbose',
             'filename': '/ESSArch/log/auth_epp.log',
-            'maxBytes': 1024*1024*100, # 100MB
+            'maxBytes': 1024 * 1024 * 100,  # 100MB
             'backupCount': 5,
         },
     },
@@ -342,7 +342,7 @@ DOCS_ROOT = os.path.join(BASE_DIR, 'docs/_build/{lang}/html')
 # Celery settings
 try:
     from local_epp_settings import RABBITMQ_URL
-except ImportError as exp:
+except ImportError:
     RABBITMQ_URL = os.environ.get('RABBITMQ_URL_EPP', 'amqp://guest:guest@localhost:5672/epp')
 CELERY_BROKER_URL = RABBITMQ_URL
 CELERY_IMPORTS = ("ESSArch_Core.ip.tasks", "workflow.tasks", "ESSArch_Core.WorkflowEngine.tests.tasks",)
@@ -354,7 +354,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'ESSArch_Core.tasks.RunWorkflowProfiles',
         'schedule': timedelta(seconds=10),
     },
-   'PollAccessQueue-every-10-seconds': {
+    'PollAccessQueue-every-10-seconds': {
         'task': 'workflow.tasks.PollAccessQueue',
         'schedule': timedelta(seconds=10),
     },
@@ -408,6 +408,6 @@ CELERY_BEAT_SCHEDULE = {
 OLD_PASSWORD_FIELD_ENABLED = True
 
 try:
-    from local_epp_settings import *
-except ImportError as exp:
+    from local_epp_settings import *  # noqa
+except ImportError:
     pass

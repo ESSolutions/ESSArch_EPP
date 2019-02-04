@@ -30,7 +30,6 @@ import errno
 import logging
 import os
 import shutil
-import smtplib
 import tarfile
 import tempfile
 import uuid
@@ -40,11 +39,10 @@ from urllib.parse import urljoin
 import requests
 from celery import states as celery_states
 from celery.exceptions import Ignore
-from celery.result import AsyncResult, allow_join_result
+from celery.result import allow_join_result
 from crontab import CronTab
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F
@@ -54,11 +52,11 @@ from guardian.shortcuts import assign_perm
 from os import walk
 
 # noinspection PyUnresolvedReferences
-from ESSArch_Core import tasks
+from ESSArch_Core import tasks  # noqa
 from ESSArch_Core.WorkflowEngine.dbtask import DBTask
 from ESSArch_Core.WorkflowEngine.models import ProcessStep, ProcessTask
 from ESSArch_Core.auth.models import Member, Notification
-from ESSArch_Core.configuration.models import ArchivePolicy, Parameter, Path
+from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.essxml.Generator.xmlGenerator import parseContent, XMLGenerator
 from ESSArch_Core.fixity.checksum import calculate_checksum
 from ESSArch_Core.ip.models import EventIP, InformationPackage, Workarea, MESSAGE_DIGEST_ALGORITHM_CHOICES_DICT
@@ -76,7 +74,7 @@ from ESSArch_Core.storage.models import (DISK, TAPE, AccessQueue, IOQueue,
                                          Robot, RobotQueue, StorageMedium,
                                          StorageMethod,
                                          StorageMethodTargetRelation,
-                                         StorageObject, TapeDrive, TapeSlot)
+                                         StorageObject, TapeDrive)
 from ESSArch_Core.tags.models import Tag, TagStructure, TagVersion
 from ESSArch_Core.util import (creation_date, find_destination, get_tree_size_and_count,
                                timestamp_to_datetime)
@@ -84,6 +82,7 @@ from storage.serializers import IOQueueSerializer
 
 User = get_user_model()
 logger = logging.getLogger('essarch')
+
 
 class ReceiveSIP(DBTask):
     logger = logging.getLogger('essarch.epp.workflow.tasks.ReceiveSIP')
@@ -236,8 +235,8 @@ class CacheAIP(DBTask):
                 tag = Tag.objects.create()
                 tag_structure = TagStructure.objects.create(tag=tag, parent=aip_obj.tag,
                                                             structure=aip_obj.tag.structure)
-                tag_version = TagVersion.objects.create(tag=tag, name=objid, type='Information Package',
-                                                        elastic_index='component')
+                TagVersion.objects.create(tag=tag, name=objid, type='Information Package',
+                                          elastic_index='component')
 
         with tarfile.open(dsttar, 'w') as tar:
             for root, dirs, files in walk(srcdir):
@@ -275,7 +274,10 @@ class CacheAIP(DBTask):
         algorithm = policy.get_checksum_algorithm_display().upper()
         checksum = calculate_checksum(dsttar, algorithm=algorithm)
 
-        info = fill_specification_data(aip_obj.get_profile_data('aip_description'), ip=aip_obj, sa=aip_obj.submission_agreement)
+        info = fill_specification_data(
+            aip_obj.get_profile_data('aip_description'),
+            ip=aip_obj, sa=aip_obj.submission_agreement
+        )
         info["_IP_CREATEDATE"] = timestamp_to_datetime(creation_date(dsttar)).isoformat()
 
         aip_desc_profile = aip_obj.get_profile('aip_description')
@@ -363,7 +365,9 @@ class StoreAIP(DBTask):
     hidden = True
 
     def run(self):
-        objid, aic, size = InformationPackage.objects.values_list('object_identifier_value', 'aic_id', 'object_size').get(pk=self.ip)
+        objid, aic, size = InformationPackage.objects.values_list(
+            'object_identifier_value', 'aic_id', 'object_size'
+        ).get(pk=self.ip)
         policy = InformationPackage.objects.prefetch_related('policy__storage_methods__targets').get(pk=self.ip).policy
 
         if not policy:
@@ -395,7 +399,10 @@ class StoreAIP(DBTask):
                     entry, created = IOQueue.objects.get_or_create(
                         storage_method_target=method_target, req_type=req_type,
                         ip_id=self.ip, status__in=[0, 2, 5],
-                        defaults={'user_id': self.responsible, 'status': 0, 'write_size': size+xml_size+aic_xml_size}
+                        defaults={
+                            'user_id': self.responsible, 'status': 0,
+                            'write_size': size + xml_size + aic_xml_size
+                        }
                     )
 
                     if created:
@@ -409,7 +416,8 @@ class StoreAIP(DBTask):
 
 
 class AccessAIP(DBTask):
-    def run(self, aip, tar=True, extracted=False, new=False, package_xml=False, aic_xml=False, object_identifier_value=""):
+    def run(self, aip, tar=True, extracted=False, new=False, package_xml=False,
+            aic_xml=False, object_identifier_value=""):
         aip = InformationPackage.objects.get(pk=aip)
 
         # if it is a received IP, i.e. from ingest and not from storage,
@@ -435,8 +443,13 @@ class AccessAIP(DBTask):
 
             shutil.copytree(aip.object_path, dst_dir)
 
-            workarea_obj = Workarea.objects.create(ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new)
-            Notification.objects.create(message="%s is now in workarea" % new_aip.object_identifier_value, level=logging.INFO, user_id=self.responsible, refresh=True)
+            workarea_obj = Workarea.objects.create(
+                ip=new_aip, user_id=self.responsible, type=Workarea.INGEST, read_only=not new
+            )
+            Notification.objects.create(
+                message="%s is now in workarea" % new_aip.object_identifier_value,
+                level=logging.INFO, user_id=self.responsible, refresh=True
+            )
 
             if new:
                 new_aip.object_path = dst_dir
@@ -454,7 +467,6 @@ class AccessAIP(DBTask):
                       'package_xml': package_xml, 'aic_xml': aic_xml}
         )
         return
-
 
     def undo(self, aip):
         pass
@@ -536,7 +548,7 @@ class CreateDIP(DBTask):
             dst = os.path.join(order_path, str(order.pk), ip.object_identifier_value)
             shutil.copytree(src, dst)
 
-            self.set_progress(idx+1, order_count)
+            self.set_progress(idx + 1, order_count)
 
         ip.state = 'Created'
         ip.save(update_fields=['state'])
@@ -550,7 +562,7 @@ class CreateDIP(DBTask):
 
 class PollAccessQueue(DBTask):
     def copy_from_cache(self, entry):
-        step = ProcessStep.objects.create(
+        ProcessStep.objects.create(
             name='Copy from cache',
             parent_step_id=self.step,
         )
@@ -561,7 +573,7 @@ class PollAccessQueue(DBTask):
 
         if not in_cache:
             # not in cache
-            entry.status=100
+            entry.status = 100
             entry.save(update_fields=['status'])
             raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), cache_tar_obj)
         else:
@@ -589,7 +601,10 @@ class PollAccessQueue(DBTask):
             copy_file(cache_obj + '.xml', dst_dir + '.xml')
 
         if entry.aic_xml:
-            copy_file(os.path.join(cache_dir, str(entry.ip.aic.pk) + '.xml'), os.path.join(access_user, str(entry.ip.aic.pk) + '.xml'))
+            copy_file(
+                os.path.join(cache_dir, str(entry.ip.aic.pk) + '.xml'),
+                os.path.join(access_user, str(entry.ip.aic.pk) + '.xml')
+            )
 
         if entry.extracted:
             # Since the IP is packaged with the name of the first IP generation it will be extracted under that name.
@@ -610,7 +625,10 @@ class PollAccessQueue(DBTask):
             os.remove(dst_tar)
 
         Workarea.objects.create(ip=entry.new_ip, user=entry.user, type=Workarea.ACCESS, read_only=not entry.new)
-        Notification.objects.create(message="%s is now in workarea" % entry.new_ip.object_identifier_value, level=logging.INFO, user=entry.user, refresh=True)
+        Notification.objects.create(
+            message="%s is now in workarea" % entry.new_ip.object_identifier_value,
+            level=logging.INFO, user=entry.user, refresh=True
+        )
 
         if entry.new:
             entry.new_ip.object_path = dst_dir
@@ -633,7 +651,6 @@ class PollAccessQueue(DBTask):
 
         return storage_objects
 
-
     def run(self):
         # Completed IOQueue entries are in the cache,
         # continue entry by copying from there
@@ -645,7 +662,7 @@ class PollAccessQueue(DBTask):
         for entry in entries:
             try:
                 self.copy_from_cache(entry)
-            except:
+            except BaseException:
                 entry.status = 100
                 entry.save(update_fields=['status'])
                 raise
@@ -665,7 +682,6 @@ class PollAccessQueue(DBTask):
             entry.save(update_fields=['status'])
             IOQueue.objects.filter(access_queue=entry).update(access_queue=None)
 
-
         entries = AccessQueue.objects.filter(
             status__in=[0, 2]
         ).order_by('posted')[:5]
@@ -679,9 +695,7 @@ class PollAccessQueue(DBTask):
 
             if entry.new:
                 # Create new generation of the IP
-                old_aip = entry.ip.pk
                 new_aip = entry.ip.create_new_generation('Access Workarea', entry.user, entry.object_identifier_value)
-                aip = InformationPackage.objects.get(pk=old_aip)
             else:
                 new_aip = entry.ip
 
@@ -700,7 +714,7 @@ class PollAccessQueue(DBTask):
                     entry.status = 20
                     entry.save(update_fields=['status'])
                     return
-                except:
+                except BaseException:
                     # failed to copy from cache, get from storage instead
                     entry.status = 2
                     entry.save(update_fields=['status'])
@@ -779,7 +793,6 @@ class PollAccessQueue(DBTask):
         pass
 
 
-
 class PollIOQueue(DBTask):
     track = False
 
@@ -821,10 +834,16 @@ class PollIOQueue(DBTask):
             # if we preserved directly from workarea then we need to delete that workarea object
             ip.workareas.all().delete()
 
-            msg = '%s preserved to %s' % (ip.object_identifier_value, ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True)))
+            msg = '%s preserved to %s' % (
+                ip.object_identifier_value,
+                ', '.join(ip.storage.all().values_list('storage_medium__medium_id', flat=True))
+            )
             extra = {'event_type': 30300, 'object': ip.pk, 'agent': user.username, 'outcome': EventIP.SUCCESS}
             logger.info(msg, extra=extra)
-            Notification.objects.create(message="%s is now preserved" % ip.object_identifier_value, level=logging.INFO, user=user, refresh=True)
+            Notification.objects.create(
+                message="%s is now preserved" % ip.object_identifier_value,
+                level=logging.INFO, user=user, refresh=True
+            )
 
             if user.email:
                 subject = 'Preserved "%s"' % ip.object_identifier_value
@@ -882,9 +901,6 @@ class PollIOQueue(DBTask):
                     entry.save(update_fields=['status'])
                     raise ValueError("Storage Object needed to read from storage")
 
-                storage_object = entry.storage_object
-
-
                 if self.is_cached(entry):
                     try:
                         if entry.remote_io:
@@ -898,7 +914,7 @@ class PollIOQueue(DBTask):
                             entry.sync_with_master(data)
 
                         return
-                    except:
+                    except BaseException:
                         # failed to copy from cache, get from storage instead
                         pass
 
@@ -940,7 +956,7 @@ class PollIOQueue(DBTask):
                 try:
                     response = session.post(dst, json=data)
                     response.raise_for_status()
-                except:
+                except BaseException:
                     entry.status = 100
                     raise
                 else:
@@ -958,7 +974,12 @@ class PollIOQueue(DBTask):
 
                         t = ProcessTask.objects.create(
                             name='ESSArch_Core.tasks.CopyFile',
-                            args=[os.path.join(entry.ip.policy.cache_storage.value, entry.ip.object_identifier_value) + '.tar', dst],
+                            args=[
+                                os.path.join(
+                                    entry.ip.policy.cache_storage.value,
+                                    entry.ip.object_identifier_value
+                                ) + '.tar', dst
+                            ],
                             params={'requests_session': session},
                             information_package=entry.ip,
                             eager=False,
@@ -972,7 +993,7 @@ class PollIOQueue(DBTask):
                         dst = urljoin(host, 'api/io-queue/%s/all-files-done/' % entry.pk)
                         response = session.post(dst)
                         response.raise_for_status()
-                    except:
+                    except BaseException:
                         entry.status = 100
                         entry.remote_status = 100
                         entry.save(update_fields=['status', 'remote_status'])
@@ -996,7 +1017,8 @@ class PollIOQueue(DBTask):
                     entry.sync_with_master(data)
                 raise
 
-            if storage_method.type == TAPE and storage_medium.tape_drive is None:  # Tape not mounted, queue to mount it
+            if storage_method.type == TAPE and storage_medium.tape_drive is None:
+                # Tape not mounted, queue to mount it
                 RobotQueue.objects.get_or_create(
                     storage_medium=storage_medium, req_type=10,
                     status__in=[0, 2, 5], defaults={
@@ -1055,23 +1077,30 @@ class PollIOQueue(DBTask):
     def event_outcome_success(self):
         pass
 
+
 class IO(DBTask):
     abstract = True
 
-    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
+    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+              storage_medium, storage_method, storage_target):
         medium_obj = StorageMedium.objects.get(pk=storage_medium)
         storage_backend = storage_target.get_storage_backend()
-        storage_object = storage_backend.write([cache_obj, cache_obj_xml, cache_obj_aic_xml], entry.ip, storage_method, medium_obj)
+        storage_object = storage_backend.write(
+            [cache_obj, cache_obj_xml, cache_obj_aic_xml],
+            entry.ip, storage_method, medium_obj
+        )
         entry.storage_object = storage_object
         entry.save(update_fields=['storage_object'])
         StorageMedium.objects.filter(pk=storage_medium).update(used_capacity=F('used_capacity') + entry.write_size)
         return storage_object
 
-    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
+    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+             storage_medium, storage_method, storage_target):
         storage_backend = storage_target.get_storage_backend()
         return storage_backend.read(entry.storage_object, cache)
 
-    def io_success(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
+    def io_success(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+                   storage_medium, storage_method, storage_target):
         pass
 
     def run(self, io_queue_entry, storage_medium):
@@ -1089,9 +1118,15 @@ class IO(DBTask):
 
         try:
             if entry.req_type in self.write_types:
-                self.write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+                self.write(
+                    entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+                    storage_medium, storage_method, storage_target
+                )
             elif entry.req_type in self.read_types:
-                self.read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+                self.read(
+                    entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+                    storage_medium, storage_method, storage_target
+                )
 
                 with tarfile.open(cache_obj) as tar:
                     tar.extractall(cache.encode('utf-8'))
@@ -1115,7 +1150,7 @@ class IO(DBTask):
                     response.raise_for_status()
             else:
                 raise ValueError('Invalid request type')
-        except:
+        except BaseException:
             entry.status = 100
             raise
         else:
@@ -1127,7 +1162,10 @@ class IO(DBTask):
                 data = IOQueueSerializer(entry, context={'request': None}).data
                 entry.sync_with_master(data)
 
-            self.io_success(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+            self.io_success(
+                entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+                storage_medium, storage_method, storage_target
+            )
 
     def undo(self):
         pass
@@ -1142,23 +1180,38 @@ class IOTape(IO):
     write_types = (10,)
     read_types = (20,)
 
-    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(self.__class__, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+              storage_medium, storage_method, storage_target):
+        super(self.__class__, self).write(
+            entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+            storage_medium, storage_method, storage_target
+        )
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         agent = entry.user.username
-        extra = {'event_type': 40700, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {
+            'event_type': 40700, 'object': entry.ip.pk, 'agent': agent,
+            'task': self.task_id, 'outcome': EventIP.SUCCESS
+        }
         logger.info(msg, extra=extra)
 
-    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(self.__class__, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+             storage_medium, storage_method, storage_target):
+        super(self.__class__, self).read(
+            entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+            storage_medium, storage_method, storage_target
+        )
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
-        extra = {'event_type': 40710, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {
+            'event_type': 40710, 'object': entry.ip.pk, 'agent': agent,
+            'task': self.task_id, 'outcome': EventIP.SUCCESS
+        }
         logger.info(msg, extra=extra)
 
-    def io_success(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
+    def io_success(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+                   storage_medium, storage_method, storage_target):
         drive = StorageMedium.objects.get(pk=storage_medium).tape_drive
         drive.io_queue_entry = None
         drive.save(update_fields=['io_queue_entry'])
@@ -1170,25 +1223,40 @@ class IODisk(IO):
     write_types = (15,)
     read_types = (25,)
 
-    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(self.__class__, self).write(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+    def write(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+              storage_medium, storage_method, storage_target):
+        super(self.__class__, self).write(
+            entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+            storage_medium, storage_method, storage_target
+        )
 
         msg = 'IP written to %s' % entry.storage_medium.medium_id
         agent = entry.user.username
-        extra = {'event_type': 40600, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {
+            'event_type': 40600, 'object': entry.ip.pk, 'agent': agent,
+            'task': self.task_id, 'outcome': EventIP.SUCCESS
+        }
         logger.info(msg, extra=extra)
 
-    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target):
-        super(self.__class__, self).read(entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml, storage_medium, storage_method, storage_target)
+    def read(self, entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+             storage_medium, storage_method, storage_target):
+        super(self.__class__, self).read(
+            entry, cache, cache_obj, cache_obj_xml, cache_obj_aic_xml,
+            storage_medium, storage_method, storage_target
+        )
 
         msg = 'IP read from %s' % entry.storage_medium.medium_id
         agent = entry.user.username
-        extra = {'event_type': 40610, 'object': entry.ip.pk, 'agent': agent, 'task': self.task_id, 'outcome': EventIP.SUCCESS}
+        extra = {
+            'event_type': 40610, 'object': entry.ip.pk, 'agent': agent,
+            'task': self.task_id, 'outcome': EventIP.SUCCESS
+        }
         logger.info(msg, extra=extra)
 
 
 class PollRobotQueue(DBTask):
     track = False
+
     def run(self):
         force_entries = RobotQueue.objects.filter(
             req_type=30, status__in=[0, 2]
@@ -1213,7 +1281,9 @@ class PollRobotQueue(DBTask):
                 if medium.tape_drive is not None:  # already mounted
                     if hasattr(entry, 'io_queue_entry'):  # mounting for read or write
                         if medium.tape_drive.io_queue_entry != entry.io_queue_entry:
-                            raise TapeMountedAndLockedByOtherError("Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry)
+                            raise TapeMountedAndLockedByOtherError(
+                                "Tape already mounted and locked by '%s'" % medium.tape_drive.io_queue_entry
+                            )
 
                         entry.delete()
 
@@ -1253,7 +1323,7 @@ class PollRobotQueue(DBTask):
                     except TapeMountedError:
                         entry.delete()
                         raise
-                    except:
+                    except BaseException:
                         entry.status = 100
                         raise
                     else:
@@ -1293,7 +1363,7 @@ class PollRobotQueue(DBTask):
                     except TapeUnmountedError:
                         entry.delete()
                         raise
-                    except:
+                    except BaseException:
                         entry.status = 100
                         raise
                     else:
@@ -1304,7 +1374,6 @@ class PollRobotQueue(DBTask):
                         entry.robot = None
                         entry.save(update_fields=['robot', 'status'])
 
-
     def undo(self):
         pass
 
@@ -1314,10 +1383,11 @@ class PollRobotQueue(DBTask):
 
 class UnmountIdleDrives(DBTask):
     track = False
+
     def run(self):
         idle_drives = TapeDrive.objects.filter(
             status=20, storage_medium__isnull=False,
-            last_change__lte=timezone.now()-F('idle_time'),
+            last_change__lte=timezone.now() - F('idle_time'),
             locked=False,
         )
 
@@ -1325,7 +1395,10 @@ class UnmountIdleDrives(DBTask):
             raise Ignore()
 
         for drive in idle_drives.iterator():
-            if not RobotQueue.objects.filter(storage_medium=drive.storage_medium, req_type=20, status__in=[0, 2]).exists():
+            robot_queue_entry_exists = RobotQueue.objects.filter(
+                storage_medium=drive.storage_medium, req_type=20, status__in=[0, 2]
+            ).exists()
+            if not robot_queue_entry_exists:
                 RobotQueue.objects.create(
                     user=User.objects.get(username='system'),
                     storage_medium=drive.storage_medium,
@@ -1365,7 +1438,6 @@ class ScheduleAppraisalJobs(DBTask):
 
             next_date = last + datetime.timedelta(seconds=delay)
             AppraisalJob.objects.create(rule=rule, start_date=next_date)
-
 
     def undo(self):
         pass
@@ -1416,7 +1488,6 @@ class ScheduleConversionJobs(DBTask):
 
             next_date = last + datetime.timedelta(seconds=delay)
             ConversionJob.objects.create(rule=rule, start_date=next_date)
-
 
     def undo(self):
         pass

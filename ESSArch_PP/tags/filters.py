@@ -13,7 +13,7 @@ class TagFilter(filters.FilterSet):
 
     def filter_leaves(self, queryset, name, value):
         if not value:
-            return queryset.exclude(lft=F('rght')-1)
+            return queryset.exclude(lft=F('rght') - 1)
 
         return queryset
 
