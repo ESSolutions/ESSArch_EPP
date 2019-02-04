@@ -1,2 +1,1 @@
-angular.module('essarch.controllers').controller('AdministrationCtrl', function($state, myService) {
-});
+angular.module('essarch.controllers').controller('AdministrationCtrl', function($state, myService) {});

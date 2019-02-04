@@ -1,6 +1,10 @@
 <div ng-if="!subrow">
-    <div class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row', row)">{{row.responsible.username}}</div>
+  <div class="clickable" ng-click="ipTableClick(row, $event)" context-menu="menuOptions('row', row)">
+    {{row.responsible.username}}
+  </div>
 </div>
 <div ng-if="subrow">
-    <div class="clickable" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow', subrow)">{{subrow.responsible.username}}</div>
+  <div class="clickable" ng-click="ipTableClick(subrow, $event)" context-menu="menuOptions('subrow', subrow)">
+    {{subrow.responsible.username}}
+  </div>
 </div>

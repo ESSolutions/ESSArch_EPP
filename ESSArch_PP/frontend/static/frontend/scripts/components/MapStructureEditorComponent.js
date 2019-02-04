@@ -4,11 +4,11 @@
  */
 
 angular.module('essarch.components').component('mapStructureEditor', {
-    templateUrl: 'static/frontend/views/map_structure_tree.html',
-    controller: 'MapStructureEditorCtrl',
-    controllerAs: 'vm',
-    bindings: {
-      profile: '<',
-      save: '<'
-    }
-  });
+  templateUrl: 'static/frontend/views/map_structure_tree.html',
+  controller: 'MapStructureEditorCtrl',
+  controllerAs: 'vm',
+  bindings: {
+    profile: '<',
+    save: '<',
+  },
+});

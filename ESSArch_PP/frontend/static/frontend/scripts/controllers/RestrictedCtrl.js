@@ -22,9 +22,8 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers')
-.controller('RestrictedCtrl', function ($scope, $location) {
-    $scope.$on('djangoAuth.logged_in', function() {
-        $state.go('home');
-    });
+angular.module('essarch.controllers').controller('RestrictedCtrl', function($scope, $location) {
+  $scope.$on('djangoAuth.logged_in', function() {
+    $state.go('home');
+  });
 });

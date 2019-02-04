@@ -22,11 +22,6 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers')
-.controller('AuthrequiredCtrl', function ($scope) {
-    $scope.awesomeThings = [
-        'HTML5 Boilerplate',
-        'AngularJS',
-        'Karma'
-    ];
+angular.module('essarch.controllers').controller('AuthrequiredCtrl', function($scope) {
+  $scope.awesomeThings = ['HTML5 Boilerplate', 'AngularJS', 'Karma'];
 });

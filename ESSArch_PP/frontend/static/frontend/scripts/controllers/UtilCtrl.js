@@ -22,92 +22,114 @@
     Email - essarch@essolutions.se
 */
 
-angular.module('essarch.controllers').controller('UtilCtrl', function(Notifications, $scope, $state, $location, $window, $rootScope, $timeout, $http, appConfig, myService, permissionConfig, $anchorScroll) {
+angular
+  .module('essarch.controllers')
+  .controller('UtilCtrl', function(
+    Notifications,
+    $scope,
+    $state,
+    $location,
+    $window,
+    $rootScope,
+    $timeout,
+    $http,
+    appConfig,
+    myService,
+    permissionConfig,
+    $anchorScroll
+  ) {
     $scope.$state = $state;
-    $scope.reloadPage = function (){
-        $state.reload();
-    }
+    $scope.reloadPage = function() {
+      $state.reload();
+    };
     $scope.infoPage = function() {
-        $state.go('home.info');
-    }
+      $state.go('home.info');
+    };
     $scope.checkPermissions = function(page) {
-        // Check if there is a sub state that does not require permissions
-        if(nestedEmptyPermissions(Object.resolve(page, permissionConfig))) {
-            return true;
-        }
-        var permissions = nestedPermissions(Object.resolve(page, permissionConfig));
-        return myService.checkPermissions(permissions);
-    }
+      // Check if there is a sub state that does not require permissions
+      if (nestedEmptyPermissions(Object.resolve(page, permissionConfig))) {
+        return true;
+      }
+      var permissions = nestedPermissions(Object.resolve(page, permissionConfig));
+      return myService.checkPermissions(permissions);
+    };
     $scope.showAlert = function() {
-        Notifications.toggle();
-    }
+      Notifications.toggle();
+    };
 
     $scope.navigateToState = function(state) {
-        $state.go(state);
-    }
+      $state.go(state);
+    };
 
     var enter = 13;
     var space = 32;
 
     var stateChangeListeners = [];
     function resetStateListeners() {
-        stateChangeListeners.forEach(function(listener) {
-            listener();
-        });
-        stateChangeListeners = [];
+      stateChangeListeners.forEach(function(listener) {
+        listener();
+      });
+      stateChangeListeners = [];
     }
     /**
      * Handle keydown events navigation
      * @param {Event} e
      */
-    $scope.navKeydownListener = function (e, state) {
-        switch (e.keyCode) {
-            case space:
-            case enter:
-                e.preventDefault();
-                stateChangeListeners.push($scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
-                    event.preventDefault();
-                    if(state == "home.ingest" || state == "home.access" || state == "home.administration" || state == "home.archiveMaintenance") {
-                        $scope.focusSubmenu();
-                    } else if(state == "home.administration.profileManager") {
-                        $scope.focusProfileManagerSubmenu();
-                    } else if (state.match(/home\.administration\.profileManager/)) {
-                        $scope.focusProfileManagerRouterView();
-                    } else {
-                        $scope.focusRouterView();
-                    }
-                    resetStateListeners();
-                }));
-                $state.go(state);
-                break;
-        }
-    }
+    $scope.navKeydownListener = function(e, state) {
+      switch (e.keyCode) {
+        case space:
+        case enter:
+          e.preventDefault();
+          stateChangeListeners.push(
+            $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
+              event.preventDefault();
+              if (
+                state == 'home.ingest' ||
+                state == 'home.access' ||
+                state == 'home.administration' ||
+                state == 'home.archiveMaintenance'
+              ) {
+                $scope.focusSubmenu();
+              } else if (state == 'home.administration.profileManager') {
+                $scope.focusProfileManagerSubmenu();
+              } else if (state.match(/home\.administration\.profileManager/)) {
+                $scope.focusProfileManagerRouterView();
+              } else {
+                $scope.focusRouterView();
+              }
+              resetStateListeners();
+            })
+          );
+          $state.go(state);
+          break;
+      }
+    };
     $scope.focusRouterView = function() {
-        $timeout(function() {
-            var elm = document.getElementsByClassName('dynamic-part')[0];
-            elm.focus();
-            $anchorScroll();
-        })
-    }
+      $timeout(function() {
+        var elm = document.getElementsByClassName('dynamic-part')[0];
+        elm.focus();
+        $anchorScroll();
+      });
+    };
     $scope.focusSubmenu = function() {
-        $timeout(function() {
-            var elm = document.getElementsByClassName('sub-menu')[0];
-            angular.element(elm)[0].children[0].focus();
-            $anchorScroll();
-        })
-    }
+      $timeout(function() {
+        var elm = document.getElementsByClassName('sub-menu')[0];
+        angular.element(elm)[0].children[0].focus();
+        $anchorScroll();
+      });
+    };
     $scope.focusProfileManagerSubmenu = function() {
-        $timeout(function() {
-            var elm = document.getElementsByClassName('profile-manager-sub-menu')[0];
-            angular.element(elm)[0].children[0].focus();
-            $anchorScroll();
-        })
-    }
+      $timeout(function() {
+        var elm = document.getElementsByClassName('profile-manager-sub-menu')[0];
+        angular.element(elm)[0].children[0].focus();
+        $anchorScroll();
+      });
+    };
     $scope.focusProfileManagerRouterView = function() {
-        $timeout(function() {
-            var elm = document.getElementsByClassName('profile-manager-route')[0];
-            angular.element(elm)[0].focus();
-            $anchorScroll();
-        })
-    }
-});
+      $timeout(function() {
+        var elm = document.getElementsByClassName('profile-manager-route')[0];
+        angular.element(elm)[0].focus();
+        $anchorScroll();
+      });
+    };
+  });
