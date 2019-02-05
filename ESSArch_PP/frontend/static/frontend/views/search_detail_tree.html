@@ -47,7 +47,7 @@
         close-on-select="true"
         append-to-body="false"
       >
-        <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.ARCHIVE') | translate}}"
+        <ui-select-match ng-attr-placeholder="{{'ACCESS.ARCHIVE' | translate}}"
           >{{vm.tags.archive.value.name}}</ui-select-match
         >
         <ui-select-choices
@@ -80,7 +80,7 @@
           close-on-select="true"
           append-to-body="false"
         >
-          <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.CLASSIFICATION_STRUCTURE') | translate}}"
+          <ui-select-match ng-attr-placeholder="{{'ACCESS.CLASSIFICATION_STRUCTURE' | translate}}"
             >{{vm.tags.structure.value.name}}</ui-select-match
           >
           <ui-select-choices
@@ -113,7 +113,7 @@
           close-on-select="true"
           append-to-body="false"
         >
-          <ui-select-match ng-attr-placeholder="{{tagsPlaceholder('ACCESS.STRUCTURE_UNIT') | translate}}"
+          <ui-select-match ng-attr-placeholder="{{'ACCESS.STRUCTURE_UNIT' | translate}}"
             >{{vm.tags.descendants.value.name}}</ui-select-match
           >
           <ui-select-choices
