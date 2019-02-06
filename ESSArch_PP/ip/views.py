@@ -74,7 +74,6 @@ from ESSArch_Core.util import (
     in_directory,
     list_files,
     merge_file_chunks,
-    mkdir_p,
     normalize_path,
     parse_content_range_header,
     remove_prefix,
@@ -1644,7 +1643,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
             chunk_path = "%s_%s" % (path, chunk_nr)
             chunk = request.FILES['file']
-            mkdir_p(os.path.dirname(chunk_path))
+            os.makedirs(os.path.dirname(chunk_path), exist_ok=True)
 
             with open(chunk_path, 'wb+') as dst:
                 for c in chunk.chunks():
