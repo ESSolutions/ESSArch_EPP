@@ -103,6 +103,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.sites',
     'django_filters',
+    'countries_plus',
+    'languages_plus',
     'groups_manager',
     'nested_inline',
     'rest_auth',
