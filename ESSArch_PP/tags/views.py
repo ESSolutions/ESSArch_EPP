@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
@@ -9,7 +9,26 @@ from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
-from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagVersion
+from ESSArch_Core.tags.models import (
+    Agent,
+    AgentIdentifier,
+    AgentIdentifierType,
+    AgentName,
+    AgentNameType,
+    AgentNote,
+    AgentNoteType,
+    AgentPlace,
+    AgentPlaceType,
+    AgentType,
+    MainAgentType,
+    RefCode,
+    SourcesOfAuthority,
+    Structure,
+    StructureUnit,
+    Tag,
+    TagStructure,
+    TagVersion,
+)
 from ESSArch_Core.tags.serializers import (
     TagSerializer,
     TagVersionNestedSerializer,
@@ -18,6 +37,22 @@ from ESSArch_Core.tags.serializers import (
 )
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
+from tags.serializers import (
+    AgentSerializer,
+)
+
+
+class AgentViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Agent.objects.select_related(
+        'type__main_type', 'ref_code', 'language',
+    ).prefetch_related(
+        Prefetch('names', AgentName.objects.prefetch_related('type')),
+        Prefetch('identifiers', AgentIdentifier.objects.prefetch_related('type')),
+        Prefetch('agentplace_set', AgentPlace.objects.prefetch_related('topography', 'type',)),
+        Prefetch('notes', AgentNote.objects.prefetch_related('type')),
+        Prefetch('mandates', SourcesOfAuthority.objects.prefetch_related('type')),
+    )
+    serializer_class = AgentSerializer
 
 
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):

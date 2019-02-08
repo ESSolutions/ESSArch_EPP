@@ -32,7 +32,7 @@ from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, Permissi
                                      UserViewSet)
 from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SysInfoView
 from ESSArch_Core.fixity.views import ValidationViewSet
-from ESSArch_Core.ip.views import AgentViewSet, EventIPViewSet, WorkareaEntryViewSet
+from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
 from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
                                             ConversionJobViewSet)
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
@@ -52,7 +52,13 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
                            StorageMediumViewSet, StorageMethodViewSet, StorageMethodTargetRelationViewSet,
                            StorageTargetViewSet, TapeDriveViewSet, TapeSlotViewSet)
 from tags.search import ComponentSearchViewSet
-from tags.views import StructureViewSet, StructureUnitViewSet, TagViewSet, TagInformationPackagesViewSet
+from tags.views import (
+    AgentViewSet,
+    StructureViewSet,
+    StructureUnitViewSet,
+    TagViewSet,
+    TagInformationPackagesViewSet,
+)
 
 router = ESSArchRouter()
 
