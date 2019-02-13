@@ -1,6 +1,6 @@
 angular
   .module('essarch.controllers')
-  .controller('ArchiveCreatorCtrl', function($timeout, $q, $uibModal, $log, $scope, $http, appConfig, IPTable) {
+  .controller('ArchiveCreatorCtrl', function($timeout, $q, $uibModal, $log, $scope, $http, appConfig) {
     var vm = this;
     vm.creatorsLoading = false;
     vm.creators = [];
