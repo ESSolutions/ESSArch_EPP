@@ -70,10 +70,10 @@
             <th st-sort="cpf">
               {{'ACCESS.CPF' | translate}}
             </th>
-            <th>
+            <th st-sort="start_date">
               {{'START_DATE' | translate}}
             </th>
-            <th>
+            <th st-sort="end_date">
               {{'END_DATE' | translate}}
             </th>
           </tr>
@@ -292,8 +292,7 @@
                   >
                 </b>
               </div>
-              <div class="pt-base">
-                {{x.text}}
+              <div class="pt-base" ng-bind-html="x.text">
               </div>
             </div>
           </div>
@@ -334,8 +333,7 @@
                   >
                 </b>
               </div>
-              <div class="pt-base">
-                {{x.text}}
+              <div class="pt-base" ng-bind-html="x.text">
               </div>
             </div>
           </div>
