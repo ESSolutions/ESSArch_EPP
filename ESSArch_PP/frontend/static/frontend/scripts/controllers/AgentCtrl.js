@@ -1,10 +1,10 @@
 angular
   .module('essarch.controllers')
-  .controller('ArchiveCreatorCtrl', function($timeout, $q, $uibModal, $log, $scope, $http, appConfig) {
+  .controller('AgentCtrl', function($timeout, $q, $uibModal, $log, $scope, $http, appConfig) {
     var vm = this;
-    vm.creatorsLoading = false;
-    vm.creators = [];
-    vm.creator = null;
+    vm.agentsLoading = false;
+    vm.agents = [];
+    vm.agent = null;
 
     vm.accordion = {
       basic: {
@@ -46,19 +46,19 @@ angular
       });
     };
 
-    vm.creatorClick = function(creator) {
-      if (vm.creator === null || (vm.creator !== null && creator.id !== vm.creator.id)) {
+    vm.agentClick = function(agent) {
+      if (vm.agent === null || (vm.agent !== null && agent.id !== vm.agent.id)) {
         vm.initAccordion();
-        vm.sortNotes(creator);
-        vm.creator = creator;
-      } else if (vm.creator !== null && vm.creator.id === creator.id) {
-        vm.creator = null;
+        vm.sortNotes(agent);
+        vm.agent = agent;
+      } else if (vm.agent !== null && vm.agent.id === agent.id) {
+        vm.agent = null;
       }
     };
 
-    vm.creatorPipe = function(tableState) {
-      vm.creatorsLoading = true;
-      if (vm.creators.length == 0) {
+    vm.agentPipe = function(tableState) {
+      vm.agentsLoading = true;
+      if (vm.agents.length == 0) {
         $scope.initLoad = true;
       }
       if (!angular.isUndefined(tableState)) {
@@ -86,9 +86,9 @@ angular
         }).then(function(response) {
           tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
           $scope.initLoad = false;
-          vm.creatorsLoading = false;
-          vm.parseCreators(response.data);
-          vm.creators = response.data;
+          vm.agentsLoading = false;
+          vm.parseAgents(response.data);
+          vm.agents = response.data;
         });
       }
     };
@@ -103,30 +103,30 @@ angular
       });
     };
 
-    vm.parseCreators = function(list) {
-      list.forEach(function(creator) {
-        creator.auth_name = vm.getAuthorizedName(creator);
+    vm.parseAgents = function(list) {
+      list.forEach(function(agent) {
+        agent.auth_name = vm.getAuthorizedName(agent);
       });
     };
 
-    vm.sortNotes = function(creator) {
+    vm.sortNotes = function(agent) {
       var obj = {
         history: [],
         remarks: [],
       };
-      creator.notes.forEach(function(note) {
+      agent.notes.forEach(function(note) {
         if (note.type === 'historik') {
           obj.history.push(note);
         } else {
           obj.remarks.push(note);
         }
       });
-      angular.extend(creator, obj);
+      angular.extend(agent, obj);
     };
 
-    vm.getAuthorizedName = function(creator) {
+    vm.getAuthorizedName = function(agent) {
       var name;
-      creator.names.forEach(function(x) {
+      agent.names.forEach(function(x) {
         if (x.type === 'auktoriserad') {
           x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
           name = x;
@@ -140,8 +140,8 @@ angular
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/new_archive_creator_modal.html',
-        controller: 'ArchiveCreatorModalInstanceCtrl',
+        templateUrl: 'static/frontend/views/new_agent_modal.html',
+        controller: 'AgentModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
@@ -152,7 +152,6 @@ angular
       });
       modalInstance.result.then(
         function(data) {
-          list.push(data);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
@@ -165,8 +164,8 @@ angular
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/edit_archive_creator_modal.html',
-        controller: 'ArchiveCreatorModalInstanceCtrl',
+        templateUrl: 'static/frontend/views/edit_agent_modal.html',
+        controller: 'AgentModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
@@ -179,7 +178,6 @@ angular
       });
       modalInstance.result.then(
         function(data) {
-          vm.creator = data;
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

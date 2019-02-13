@@ -1,13 +1,13 @@
 <div class="modal-heading">
-  <h3 class="modal-title" id="modal-title">{{'Redigera arkivbildare'}}</h3>
+  <h3 class="modal-title" id="modal-title">{{'ACCESS.CREATE_AUTHORITY_RECORD' | translate}}</h3>
 </div>
-<form ng-submit="$ctrl.save()">
+<form ng-submit="$ctrl.create()">
   <div class="modal-body" id="modal-body">
-    <div ng-include="'static/frontend/views/edit_creator.html'"></div>
+    <div ng-include="'static/frontend/views/edit_agent.html'"></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.preparing">
-      {{'SAVE' | translate}} <i ng-if="$ctrl.preparing" class="fas fa-spinner fa-spin" />
+      {{'CREATE' | translate}} <i ng-if="$ctrl.preparing" class="fas fa-spinner fa-spin" />
     </button>
     <button class="btn btn-default" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creating">
       {{'CANCEL' | translate}}

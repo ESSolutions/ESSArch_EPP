@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('ArchiveCreatorModalInstanceCtrl', function($uibModalInstance, data) {
+angular.module('essarch.controllers').controller('AgentModalInstanceCtrl', function($uibModalInstance, data) {
   var $ctrl = this;
   $ctrl.options = {
     type: [
@@ -9,14 +9,14 @@ angular.module('essarch.controllers').controller('ArchiveCreatorModalInstanceCtr
     ],
   };
   $ctrl.$onInit = function() {
-    if (!angular.isUndefined(data.creator) && data.creator !== null) {
-      $ctrl.creator = angular.copy(data.creator);
+    if (!angular.isUndefined(data.agent) && data.agent !== null) {
+      $ctrl.agent = angular.copy(data.agent);
     } else {
-      $ctrl.creator = {
+      $ctrl.agent = {
         name: null,
         type: null,
-        startDate: null,
-        endDate: null,
+        start_date: null,
+        end_date: null,
         notes: null,
       };
     }
@@ -25,10 +25,9 @@ angular.module('essarch.controllers').controller('ArchiveCreatorModalInstanceCtr
     $uibModalInstance.dismiss('cancel');
   };
   $ctrl.create = function() {
-    // Create archive creator
-    $uibModalInstance.close(angular.extend($ctrl.creator, {id: Math.floor(Math.random() * Math.floor(20))}));
+    $uibModalInstance.close(angular.extend($ctrl.agent, {id: Math.floor(Math.random() * Math.floor(20))}));
   };
   $ctrl.save = function() {
-    $uibModalInstance.close($ctrl.creator);
+    $uibModalInstance.close($ctrl.agent);
   };
 });

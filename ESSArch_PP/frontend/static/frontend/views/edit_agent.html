@@ -1,8 +1,8 @@
-<div class="edit-creator">
+<div class="edit-agent">
   <label for="name">
     {{'NAME' | translate}}
   </label>
-  <input class="form-control" required name="name" ng-model="$ctrl.creator.name" />
+  <input class="form-control" required name="name" ng-model="$ctrl.agent.name" />
   <label for="type">
     {{'TYPE' | translate}}
   </label>
@@ -17,48 +17,48 @@
     {{'Verksamhetstid'}}
   </label>
   <div class="d-flex align-items-center">
-    <div class="dropdown" uib-dropdown is-open="dropdown_status.startDate">
-      <a class="dropdown-toggle" id="dropdown-startDate" role="button" uib-dropdown-toggle>
+    <div class="dropdown" uib-dropdown is-open="dropdown_status.start_date">
+      <a class="dropdown-toggle" id="dropdown-start_date" role="button" uib-dropdown-toggle>
         <div class="input-group">
           <input
             type="text"
             data-date-time-input="YYYY-MM-DD"
             class="form-control"
-            data-ng-model="$ctrl.creator.startDate"
+            data-ng-model="$ctrl.creator.start_date"
           /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
         </div>
       </a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
         <datetimepicker
-          data-ng-model="$ctrl.creator.startDate"
-          ng-change="dropdown_status.startDate = false"
+          data-ng-model="$ctrl.agent.start_date"
+          ng-change="dropdown_status.start_date = false"
           data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
         />
       </ul>
     </div>
     &nbsp;-&nbsp;
-    <div class="dropdown" uib-dropdown is-open="dropdown_status.endDate">
+    <div class="dropdown" uib-dropdown is-open="dropdown_status.end_date">
       <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
         <div class="input-group">
           <input
             type="text"
             data-date-time-input="YYYY-MM-DD"
             class="form-control"
-            data-ng-model="$ctrl.creator.endDate"
+            data-ng-model="$ctrl.agent.end_date"
           /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
         </div>
       </a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
         <datetimepicker
-          data-ng-model="$ctrl.creator.endDate"
-          ng-change="dropdown_status.endDate = false"
+          data-ng-model="$ctrl.agent.end_date"
+          ng-change="dropdown_status.end_date = false"
           data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
         />
       </ul>
     </div>
   </div>
   <label for="notes">
-    {{'Arkivbildarens historik'}}
+    {{'ACCESS.HISTORY' | translate}}
   </label>
-  <textarea class="form-control" name="notes" ng-model="$ctrl.creator.notes[0]" maxlength="255" rows="6"></textarea>
+  <textarea class="form-control" name="notes" ng-model="$ctrl.agent.notes[0]" maxlength="255" rows="6"></textarea>
 </div>
