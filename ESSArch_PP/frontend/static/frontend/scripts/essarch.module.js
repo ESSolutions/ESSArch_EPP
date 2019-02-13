@@ -547,24 +547,6 @@ angular
           },
         },
       })
-      .state('home.administration.searchAdmin.classificationStructures', {
-        url: '/classification-structures',
-        template: '<classification-structure-editor></classification-structure-editor>',
-        resolve: {
-          authenticated: [
-            'djangoAuth',
-            function(djangoAuth) {
-              return djangoAuth.authenticationStatus();
-            },
-          ],
-        },
-        data: {
-          permissions: {
-            only: nestedPermissions(Object.resolve('home.access.search', permissionConfig)),
-            redirectTo: 'home.restricted',
-          },
-        },
-      })
       .state('home.administration.searchAdmin.archiveManager', {
         url: '/archive-manager',
         template: '<archive-manager></archive-manager>',
@@ -578,7 +560,43 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.access.search', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
+      .state('home.administration.searchAdmin.classificationStructures', {
+        url: '/classification-structures',
+        template: '<classification-structure-editor></classification-structure-editor>',
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
+      .state('home.administration.searchAdmin.archiveCreator', {
+        url: '/archive-creator',
+        template: '<archive-creator></archive-creator>',
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },

@@ -1,0 +1,64 @@
+<div class="edit-creator">
+  <label for="name">
+    {{'NAME' | translate}}
+  </label>
+  <input class="form-control" required name="name" ng-model="$ctrl.creator.name" />
+  <label for="type">
+    {{'TYPE' | translate}}
+  </label>
+  <select
+    class="form-control"
+    required
+    name="type"
+    ng-model="$ctrl.creator.type"
+    ng-options="x as x.main_type for x in $ctrl.options.type"
+  ></select>
+  <label>
+    {{'Verksamhetstid'}}
+  </label>
+  <div class="d-flex align-items-center">
+    <div class="dropdown" uib-dropdown is-open="dropdown_status.startDate">
+      <a class="dropdown-toggle" id="dropdown-startDate" role="button" uib-dropdown-toggle>
+        <div class="input-group">
+          <input
+            type="text"
+            data-date-time-input="YYYY-MM-DD"
+            class="form-control"
+            data-ng-model="$ctrl.creator.startDate"
+          /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+        </div>
+      </a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+        <datetimepicker
+          data-ng-model="$ctrl.creator.startDate"
+          ng-change="dropdown_status.startDate = false"
+          data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
+        />
+      </ul>
+    </div>
+    &nbsp;-&nbsp;
+    <div class="dropdown" uib-dropdown is-open="dropdown_status.endDate">
+      <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
+        <div class="input-group">
+          <input
+            type="text"
+            data-date-time-input="YYYY-MM-DD"
+            class="form-control"
+            data-ng-model="$ctrl.creator.endDate"
+          /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+        </div>
+      </a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+        <datetimepicker
+          data-ng-model="$ctrl.creator.endDate"
+          ng-change="dropdown_status.endDate = false"
+          data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
+        />
+      </ul>
+    </div>
+  </div>
+  <label for="notes">
+    {{'Arkivbildarens historik'}}
+  </label>
+  <textarea class="form-control" name="notes" ng-model="$ctrl.creator.notes[0]" maxlength="255" rows="6"></textarea>
+</div>

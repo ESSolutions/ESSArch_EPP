@@ -66,8 +66,8 @@
   <div tabindex="-1" ng-if="'home.administration' | includedByState" class="sub-menu">
     <a
       tabindex="0"
-      ng-keydown="navKeydownListener($event, 'home.administration.searchAdmin')"
-      ui-sref="home.administration.searchAdmin"
+      ng-keydown="navKeydownListener($event, 'home.administration.searchAdmin.archiveManager')"
+      ui-sref="home.administration.searchAdmin.archiveManager"
       ng-class="{chosen: $state.includes('home.administration.searchAdmin')}"
       class="nav-item sliding-middle-out"
       ng-if="checkPermissions('home.administration.searchAdmin')"

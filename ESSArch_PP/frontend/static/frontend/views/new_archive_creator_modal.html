@@ -1,0 +1,16 @@
+<div class="modal-heading">
+  <h3 class="modal-title" id="modal-title">{{'Skapa arkivbildare'}}</h3>
+</div>
+<form ng-submit="$ctrl.create()">
+  <div class="modal-body" id="modal-body">
+    <div ng-include="'static/frontend/views/edit_creator.html'"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.preparing">
+      {{'CREATE' | translate}} <i ng-if="$ctrl.preparing" class="fas fa-spinner fa-spin" />
+    </button>
+    <button class="btn btn-default" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creating">
+      {{'CANCEL' | translate}}
+    </button>
+  </div>
+</form>
