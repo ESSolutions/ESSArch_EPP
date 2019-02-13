@@ -53,6 +53,9 @@ class AgentViewSet(viewsets.ReadOnlyModelViewSet):
         Prefetch('mandates', SourcesOfAuthority.objects.prefetch_related('type')),
     )
     serializer_class = AgentSerializer
+    filter_backends = (OrderingFilter, SearchFilter,)
+    ordering_fields = ('names__part', 'names__main',)
+    search_fields = ('names__part', 'names__main',)
 
 
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
