@@ -583,9 +583,9 @@ angular
           },
         },
       })
-      .state('home.administration.searchAdmin.archiveCreator', {
-        url: '/archive-creator',
-        template: '<archive-creator></archive-creator>',
+      .state('home.administration.searchAdmin.authorityRecords', {
+        url: '/authority-records',
+        template: '<agents></agents>',
         resolve: {
           authenticated: [
             'djangoAuth',
