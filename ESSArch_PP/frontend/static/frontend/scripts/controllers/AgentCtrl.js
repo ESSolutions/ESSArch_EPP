@@ -17,6 +17,9 @@ angular
         names: {
           open: true,
         },
+        mandates: {
+          open: true
+        },
         authority: {
           open: true,
         },
@@ -70,7 +73,7 @@ angular
         var sorting = tableState.sort;
         var pagination = tableState.pagination;
         var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
-        var number = pagination.number || vm.structuresPerPage; // Number of entries showed per page.
+        var number = pagination.number || vm.agentsPerPage; // Number of entries showed per page.
         var pageNumber = start / number + 1;
 
         var sortString = sorting.predicate;
@@ -151,8 +154,7 @@ angular
         },
       });
       modalInstance.result.then(
-        function(data) {
-        },
+        function(data) {},
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
         }
@@ -177,8 +179,7 @@ angular
         },
       });
       modalInstance.result.then(
-        function(data) {
-        },
+        function(data) {},
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
         }

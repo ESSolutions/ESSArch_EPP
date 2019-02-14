@@ -110,7 +110,7 @@
         </tbody>
       </table>
     </div>
-    <td ng-show="!initLoad" colspan="2">
+    <td ng-show="!initLoad" colspan="5">
       <div
         class="text-center"
         st-template="static/frontend/views/pagination.html"
@@ -152,7 +152,12 @@
     <uib-tabset active="vm.activePill" ng-init="vm.activePill = 1" type="pills">
       <uib-tab heading="{{'ACCESS.BASIC_DATA' | translate}}" index="1">
         <uib-accordion close-others="false" class="p-base">
-          <div uib-accordion-group class="panel-default" is-open="vm.accordion.basic.basic.open" heading="{{'ACCESS.BASIC_DATA' | translate}}">
+          <div
+            uib-accordion-group
+            class="panel-default"
+            is-open="vm.accordion.basic.basic.open"
+            heading="{{'ACCESS.BASIC_DATA' | translate}}"
+          >
             <uib-accordion-heading>
               {{'ACCESS.BASIC_DATA' | translate}}
               <i
@@ -176,6 +181,7 @@
             </div>
           </div>
           <div
+            ng-if="vm.agent.names.length > 0"
             uib-accordion-group
             class="panel-default"
             is-open="vm.accordion.basic.names.open"
@@ -237,7 +243,69 @@
               </table>
             </div>
           </div>
-          <div uib-accordion-group class="panel-default" is-open="vm.accordion.basic.authority.open">
+          <div
+            ng-if="vm.agent.mandates.length > 0"
+            uib-accordion-group
+            class="panel-default"
+            is-open="vm.accordion.basic.mandates.open"
+            heading="{{'ACCESS.MANDATES' | translate}}"
+          >
+            <uib-accordion-heading>
+              {{'ACCESS.MANDATES' | translate}}
+              <i
+                class="fas rotate-icon float-right"
+                ng-class="{'fa-angle-down': vm.accordion.basic.mandates.open, 'fa-angle-right': !vm.accordion.basic.mandates.open}"
+              ></i>
+            </uib-accordion-heading>
+            <div class="table-container table-x-overflow">
+              <table class="table fat-cells">
+                <thead>
+                  <tr>
+                    <th>
+                      {{'NAME' | translate}}
+                    </th>
+                    <th>
+                      {{'TYPE' | translate}}
+                    </th>
+                    <th>
+                      {{'DESCRIPTION' | translate}}
+                    </th>
+                    <th>
+                      {{'START_DATE' | translate}}
+                    </th>
+                    <th>
+                      {{'END_DATE' | translate}}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="x in vm.agent.mandates">
+                    <td>
+                      {{x.name}}
+                    </td>
+                    <td>
+                      {{x.type}}
+                    </td>
+                    <td>
+                      {{x.description}}
+                    </td>
+                    <td>
+                      {{x.start_date | date:"yyyy-MM-dd"}}
+                    </td>
+                    <td>
+                      {{x.end_date | date:"yyyy-MM-dd"}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            ng-if="vm.agent.related_agents.length > 0"
+            uib-accordion-group
+            class="panel-default"
+            is-open="vm.accordion.basic.authority.open"
+          >
             <uib-accordion-heading>
               {{'ACCESS.RELATED_AUTHORITY_RECORDS' | translate}}
               <i
@@ -245,6 +313,48 @@
                 ng-class="{'fa-angle-down': vm.accordion.basic.authority.open, 'fa-angle-right': !vm.accordion.basic.authority.open}"
               ></i>
             </uib-accordion-heading>
+            <div class="table-container table-x-overflow">
+              <table class="table fat-cells">
+                <thead>
+                  <tr>
+                    <th>
+                      {{'TYPE' | translate}}
+                    </th>
+                    <th>
+                      {{'NAME' | translate}}
+                    </th>
+                    <th>
+                      {{'DESCRIPTION' | translate}}
+                    </th>
+                    <th>
+                      {{'START_DATE' | translate}}
+                    </th>
+                    <th>
+                      {{'END_DATE' | translate}}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="x in vm.agent.related_agents">
+                    <td>
+                      {{x.type}}
+                    </td>
+                    <td>
+                      {{vm.getAuthorizedName(x.agent).full_name}}
+                    </td>
+                    <td>
+                      {{x.description}}
+                    </td>
+                    <td>
+                      {{x.start_date | date:"yyyy-MM-dd"}}
+                    </td>
+                    <td>
+                      {{x.end_date | date:"yyyy-MM-dd"}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div uib-accordion-group class="panel-default" is-open="vm.accordion.basic.resources.open">
             <uib-accordion-heading>
@@ -292,8 +402,7 @@
                   >
                 </b>
               </div>
-              <div class="pt-base" ng-bind-html="x.text">
-              </div>
+              <div class="pt-base" ng-bind-html="x.text"></div>
             </div>
           </div>
         </uib-accordion>
@@ -333,8 +442,7 @@
                   >
                 </b>
               </div>
-              <div class="pt-base" ng-bind-html="x.text">
-              </div>
+              <div class="pt-base" ng-bind-html="x.text"></div>
             </div>
           </div>
         </uib-accordion>
