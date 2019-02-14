@@ -16,7 +16,7 @@
     stronglabel="true"
     data="vm.record._source.reference_code"
   ></result-field>
-  <result-field label="Type" stronglabel="true" data="vm.record._source.type"></result-field>
+  <result-field label="{{'TYPE' | translate}}" stronglabel="true" data="vm.record._source.type"></result-field>
   <div
     ng-if="vm.record._source.create_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date"
   >
