@@ -25,7 +25,7 @@
     "development": {
         "appConfig": {
             "name": "developement",
-            "djangoUrl": "/api/",
+            "djangoUrl": "http://192.168.6.105:8002/api/",
             "ipInterval": 10000,
             "recordInterval": 10000,
             "ipIdleInterval": 60000,
