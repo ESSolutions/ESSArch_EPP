@@ -584,7 +584,7 @@ angular
         },
       })
       .state('home.administration.searchAdmin.authorityRecords', {
-        url: '/authority-records',
+        url: '/authority-records/:id',
         template: '<agents></agents>',
         resolve: {
           authenticated: [

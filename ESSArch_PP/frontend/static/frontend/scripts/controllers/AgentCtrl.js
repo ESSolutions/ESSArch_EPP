@@ -1,6 +1,6 @@
 angular
   .module('essarch.controllers')
-  .controller('AgentCtrl', function($timeout, $q, $uibModal, $log, $scope, $http, appConfig) {
+  .controller('AgentCtrl', function($uibModal, $log, $scope, $http, appConfig, $state, $stateParams) {
     var vm = this;
     vm.agentsLoading = false;
     vm.agents = [];
@@ -18,7 +18,7 @@ angular
           open: true,
         },
         mandates: {
-          open: true
+          open: true,
         },
         authority: {
           open: true,
@@ -43,6 +43,20 @@ angular
       },
     };
 
+    vm.$onInit = function() {
+      if ($stateParams.id) {
+        $http.get(appConfig.djangoUrl + 'agents/' + $stateParams.id + '/').then(function(response) {
+          vm.initAccordion();
+          vm.sortNotes(response.data);
+          response.data.auth_name = vm.getAuthorizedName(response.data);
+
+          vm.agent = response.data;
+        });
+      } else {
+        vm.agent = null;
+      }
+    };
+
     vm.initAccordion = function() {
       angular.forEach(vm.accordion, function(value) {
         value.open = true;
@@ -54,9 +68,16 @@ angular
         vm.initAccordion();
         vm.sortNotes(agent);
         vm.agent = agent;
+        vm.agentArchivePipe($scope.archiveTableState);
+        $state.go($state.current.name, vm.agent, {notify: false});
       } else if (vm.agent !== null && vm.agent.id === agent.id) {
         vm.agent = null;
+        $state.go($state.current.name, {id: null}, {notify: false});
       }
+    };
+
+    vm.archiveClick = function(agentArchive) {
+      $state.go('home.access.search.archive', {id: agentArchive.archive._id});
     };
 
     vm.agentPipe = function(tableState) {
@@ -109,6 +130,52 @@ angular
     vm.parseAgents = function(list) {
       list.forEach(function(agent) {
         agent.auth_name = vm.getAuthorizedName(agent);
+      });
+    };
+
+    vm.agentArchivePipe = function(tableState) {
+      vm.archivesLoading = true;
+      if (angular.isUndefined(vm.agent.archives) || vm.agent.archives.length == 0) {
+        $scope.initLoad = true;
+      }
+      if (!angular.isUndefined(tableState)) {
+        $scope.archiveTableState = tableState;
+        var search = '';
+        if (tableState.search.predicateObject) {
+          var search = tableState.search.predicateObject['$'];
+        }
+        var sorting = tableState.sort;
+        var pagination = tableState.pagination;
+        var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+        var number = pagination.number || vm.agentsPerPage; // Number of entries showed per page.
+        var pageNumber = start / number + 1;
+
+        var sortString = sorting.predicate;
+        if (sorting.reverse) {
+          sortString = '-' + sortString;
+        }
+
+        vm.getAgentArchives(vm.agent, {
+          page: pageNumber,
+          page_size: number,
+          ordering: sortString,
+          search: search,
+        }).then(function(response) {
+          tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
+          $scope.initLoad = false;
+          vm.archivesLoading = false;
+          vm.agent.archives = response.data;
+        });
+      }
+    };
+
+    vm.getAgentArchives = function(agent, params) {
+      return $http({
+        url: appConfig.djangoUrl + 'agents/' + agent.id + '/archives/',
+        method: 'GET',
+        params: params,
+      }).then(function(response) {
+        return response;
       });
     };
 

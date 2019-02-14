@@ -70,6 +70,8 @@ angular.module('essarch.language').config(function($translateProvider) {
       NODE_REMOVED_FROM_STRUCTURE: 'Nod borttagen från klassificeringsstruktur',
       NO_ARCHIVES: 'Det finns inga arkiv ...',
       NO_CLASSIFICATION_STRUCTURES: 'Det finns inga klassificeringsstrukturer ...',
+      NO_HISTORY: 'Ingen historik tillgänglig',
+      NO_REMARKS: 'Ingen anmärkning tillgänglig',
       NO_STRUCTURE_UNITS: 'Det finns inga strukturenheter ...',
       OF: 'av',
       PERSONAL_IDENTIFICATION_NUMBER: 'Personnummer',

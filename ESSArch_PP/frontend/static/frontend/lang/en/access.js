@@ -71,6 +71,8 @@ angular.module('essarch.language').config(function($translateProvider) {
       NODE_REMOVED_FROM_STRUCTURE: 'Node removed from classification structure',
       NO_ARCHIVES: 'There are no archives ...',
       NO_CLASSIFICATION_STRUCTURES: 'There are no classification structures ...',
+      NO_HISTORY: 'No history available',
+      NO_REMARKS: 'No remarks available',
       NO_STRUCTURE_UNITS: 'There are no structure units ...',
       OF: 'of',
       PERSONAL_IDENTIFICATION_NUMBER: 'Personal identification number',
