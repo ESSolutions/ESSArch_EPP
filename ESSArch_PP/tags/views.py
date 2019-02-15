@@ -19,6 +19,8 @@ from ESSArch_Core.tags.models import (
     AgentNoteType,
     AgentPlace,
     AgentPlaceType,
+    AgentRelation,
+    AgentTagLink,
     AgentType,
     MainAgentType,
     RefCode,
@@ -39,6 +41,7 @@ from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 from tags.serializers import (
     AgentSerializer,
+    AgentArchiveLinkSerializer,
 )
 
 
@@ -51,11 +54,22 @@ class AgentViewSet(viewsets.ReadOnlyModelViewSet):
         Prefetch('agentplace_set', AgentPlace.objects.prefetch_related('topography', 'type',)),
         Prefetch('notes', AgentNote.objects.prefetch_related('type')),
         Prefetch('mandates', SourcesOfAuthority.objects.prefetch_related('type')),
+        Prefetch('agent_relations_a', AgentRelation.objects.prefetch_related('agent_b')),
     )
     serializer_class = AgentSerializer
     filter_backends = (OrderingFilter, SearchFilter,)
     ordering_fields = ('names__part', 'names__main',)
     search_fields = ('names__part', 'names__main',)
+
+
+class ArchiveViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
+    queryset = AgentTagLink.objects.filter(
+        tag__elastic_index='archive'
+    )
+    serializer_class = AgentArchiveLinkSerializer
+    filter_backends = (OrderingFilter, SearchFilter,)
+    search_fields = ('tag__name',)
+    ordering_fields = ('tag__name',)
 
 
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):

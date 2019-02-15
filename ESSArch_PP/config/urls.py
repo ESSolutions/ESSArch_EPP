@@ -54,6 +54,7 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
 from tags.search import ComponentSearchViewSet
 from tags.views import (
     AgentViewSet,
+    ArchiveViewSet,
     StructureViewSet,
     StructureUnitViewSet,
     TagViewSet,
@@ -66,7 +67,12 @@ admin.site.site_header = 'ESSArch Preservation Platform Administration'
 admin.site.site_title = 'ESSArch Preservation Platform Administration'
 
 router.register(r'access-queue', AccessQueueViewSet)
-router.register(r'agents', AgentViewSet)
+router.register(r'agents', AgentViewSet).register(
+    r'archives',
+    ArchiveViewSet,
+    base_name='agent-archives',
+    parents_query_lookups=['agent']
+)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'classification-structures', StructureViewSet).register(
     r'units',

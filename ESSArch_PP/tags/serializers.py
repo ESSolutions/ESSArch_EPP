@@ -7,11 +7,16 @@ from ESSArch_Core.tags.models import (
     AgentName,
     AgentNote,
     AgentPlace,
+    AgentRelation,
+    AgentTagLink,
     AgentType,
     MainAgentType,
     Structure,
+    SourcesOfAuthority,
     Topography,
 )
+
+from ESSArch_Core.tags.serializers import TagVersionNestedSerializer
 
 
 class AgentIdentifierSerializer(serializers.ModelSerializer):
@@ -27,7 +32,7 @@ class AgentNameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AgentName
-        fields = ('id', 'main', 'part', 'description', 'type', 'start_date', 'end_date', 'certainty',)
+        fields = ('main', 'part', 'description', 'type', 'start_date', 'end_date', 'certainty',)
 
 
 class AgentNoteSerializer(serializers.ModelSerializer):
@@ -35,7 +40,15 @@ class AgentNoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AgentNote
-        fields = ('id', 'text', 'type', 'create_date', 'revise_date',)
+        fields = ('text', 'type', 'create_date', 'revise_date',)
+
+
+class SourcesOfAuthoritySerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='type.name')
+
+    class Meta:
+        model = SourcesOfAuthority
+        fields = ('id', 'name', 'type', 'href', 'start_date', 'end_date',)
 
 
 class TopographySerializer(serializers.ModelSerializer):
@@ -79,12 +92,41 @@ class AgentTypeSerializer(serializers.ModelSerializer):
         fields = ('id', 'main_type', 'sub_type', 'cpf',)
 
 
+class RelatedAgentSerializer(serializers.ModelSerializer):
+    names = AgentNameSerializer(many=True)
+    type = AgentTypeSerializer()
+
+    class Meta:
+        model = Agent
+        fields = ('id', 'names', 'type',)
+
+
+class AgentRelationSerializer(serializers.ModelSerializer):
+    agent = RelatedAgentSerializer(source='agent_b')
+    type = serializers.CharField(source='type.name')
+
+    class Meta:
+        model = AgentRelation
+        fields = ('type', 'description', 'start_date', 'end_date', 'agent',)
+
+
+class AgentArchiveLinkSerializer(serializers.ModelSerializer):
+    archive = TagVersionNestedSerializer(source='tag')
+    type = serializers.CharField(source='type.name')
+
+    class Meta:
+        model = AgentTagLink
+        fields = ('archive', 'type', 'description', 'start_date', 'end_date',)
+
+
 class AgentSerializer(serializers.ModelSerializer):
     identifiers = AgentIdentifierSerializer(many=True)
     names = AgentNameSerializer(many=True)
     notes = AgentNoteSerializer(many=True)
     places = AgentPlaceSerializer(source='agentplace_set', many=True)
     type = AgentTypeSerializer()
+    mandates = SourcesOfAuthoritySerializer(many=True)
+    related_agents = AgentRelationSerializer(source='agent_relations_a', many=True)
 
     class Meta:
         model = Agent
@@ -95,11 +137,13 @@ class AgentSerializer(serializers.ModelSerializer):
             'type',
             'identifiers',
             'places',
+            'mandates',
             'level_of_detail',
             'record_status',
             'script',
             'language',
             'mandates',
+            'related_agents',
             'create_date',
             'revise_date',
             'start_date',
