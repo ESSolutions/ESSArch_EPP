@@ -22,7 +22,8 @@ angular
     $uibModal,
     $sce,
     $window,
-    ContextMenuBase
+    ContextMenuBase,
+    SelectedIPUpdater
   ) {
     $controller('BaseCtrl', {$scope: $scope, vm: vm, ipSortString: ipSortString});
 
@@ -88,6 +89,7 @@ angular
             $scope.ipLoading = false;
             $scope.initLoad = false;
             ipExists();
+            SelectedIPUpdater.update(vm.displayedIps, $scope.ips, $scope.ip);
           })
           .catch(function(response) {
             if (response.status == 404) {

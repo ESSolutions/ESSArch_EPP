@@ -28,32 +28,19 @@ angular
     Notifications,
     IPReception,
     IP,
-    Tag,
     ArchivePolicy,
     $log,
     $uibModal,
-    $timeout,
     $scope,
-    $window,
-    $location,
-    $sce,
-    $http,
-    myService,
     appConfig,
     $state,
-    $stateParams,
     $rootScope,
     listViewService,
-    $interval,
     Resource,
     $translate,
-    $cookies,
-    $filter,
-    $anchorScroll,
-    PermPermissionStore,
-    $q,
     $controller,
-    ContextMenuBase
+    ContextMenuBase,
+    SelectedIPUpdater
   ) {
     var vm = this;
     var ipSortString = [];
@@ -154,6 +141,7 @@ angular
             tableState.pagination.numberOfPages = result.numberOfPages; //set the number of pages so the pagination can update
             $scope.ipLoading = false;
             $scope.initLoad = false;
+            SelectedIPUpdater.update(vm.displayedIps, $scope.ips, $scope.ip);
           })
           .catch(function(response) {
             if (response.status == 404) {
@@ -432,6 +420,7 @@ angular
                     }
                   },
                   function() {
+                    $scope.getListViewData();
                     $log.info('modal-component dismissed at: ' + new Date());
                   }
                 );
@@ -486,6 +475,7 @@ angular
                 }
               },
               function() {
+                $scope.getListViewData();
                 $log.info('modal-component dismissed at: ' + new Date());
               }
             );
@@ -539,6 +529,7 @@ angular
               }
             },
             function() {
+              $scope.getListViewData();
               $log.info('modal-component dismissed at: ' + new Date());
             }
           );
