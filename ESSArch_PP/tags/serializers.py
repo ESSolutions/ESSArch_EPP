@@ -48,7 +48,7 @@ class SourcesOfAuthoritySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SourcesOfAuthority
-        fields = ('id', 'name', 'type', 'href', 'start_date', 'end_date',)
+        fields = ('id', 'name', 'description', 'type', 'href', 'start_date', 'end_date',)
 
 
 class TopographySerializer(serializers.ModelSerializer):
