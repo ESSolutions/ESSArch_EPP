@@ -1,5 +1,17 @@
 <div class="classification-structure-editor margin-top-5">
   <div class="table-container" st-table="vm.structures" st-pipe="vm.getStructures">
+    <div class="title-action-button-row">
+      <div class="title">
+        <h4>
+          {{'ACCESS.CLASSIFICATION_STRUCTURES' | translate}}
+        </h4>
+      </div>
+      <div class="action-button">
+        <button class="btn btn-primary" ng-click="vm.newStructureModal()">
+          {{'ACCESS.NEW_CLASSIFICATION_STRUCTURE' | translate}}
+        </button>
+      </div>
+    </div>
     <div class="search-prepare-wrapper">
       <label for items-per-page></label>
       <select
@@ -12,17 +24,27 @@
         tooltip-placement="auto top"
         tooltip-append-to-body="true"
       ></select>
-      <input
-        st-search=""
-        class="form-control global-search"
-        ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}"
-        type="text"
-        uib-tooltip="{{'GLOBALSEARCHDESC_STRUCTURES' | translate}}"
+      <div class="global-search">
+        <input
+          st-search=""
+          class="form-control"
+          ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}"
+          type="text"
+          uib-tooltip="{{'GLOBALSEARCHDESC_STRUCTURES' | translate}}"
+          tooltip-placement="auto top"
+          tooltip-append-to-body="true"
+        />
+      </div>
+      <button
+        type="button"
+        ng-click="vm.getStructures()"
+        class="btn btn-primary btn-small"
+        style="margin-left: 5px;"
+        uib-tooltip="{{'SEARCH' | translate}}"
         tooltip-placement="auto top"
         tooltip-append-to-body="true"
-      />
-      <button class="btn btn-primary" ng-click="vm.newStructureModal()">
-        {{'ACCESS.NEW_CLASSIFICATION_STRUCTURE' | translate}}
+      >
+        {{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i>
       </button>
       <div class="refresh-icon">
         <span
