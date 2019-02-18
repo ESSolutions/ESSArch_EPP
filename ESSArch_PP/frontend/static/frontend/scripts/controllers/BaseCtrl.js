@@ -54,7 +54,8 @@ angular
     $q,
     Requests,
     Notifications,
-    ContentTabs
+    ContentTabs,
+    SelectedIPUpdater
   ) {
     // Initialize variables
 
@@ -253,6 +254,7 @@ angular
             $scope.ipLoading = false;
             $scope.initLoad = false;
             ipExists();
+            SelectedIPUpdater.update(vm.displayedIps, $scope.ips, $scope.ip);
           })
           .catch(function(response) {
             if (response.status == 404) {

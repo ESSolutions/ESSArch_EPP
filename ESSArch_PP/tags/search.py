@@ -107,7 +107,7 @@ class ComponentSearch(FacetedSearch):
             if self.start_date > self.end_date:
                 raise exceptions.ParseError('start_date cannot be set to date after end_date')
 
-        super(ComponentSearch, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def search(self):
         """
@@ -121,7 +121,7 @@ class ComponentSearch(FacetedSearch):
         organization_archives = get_objects_for_user(self.user, TagVersion.objects.filter(elastic_index='archive'), [])
         organization_archives = list(organization_archives.values_list('pk', flat=True))
 
-        s = super(ComponentSearch, self).search()
+        s = super().search()
         s = s.source(exclude=["attachment.content"])
         s = s.filter('term', current_version=True)
 
@@ -196,7 +196,7 @@ class ComponentSearch(FacetedSearch):
         search = search.highlight_options(
             number_of_fragments=0, pre_tags=pre_tags, post_tags=post_tags, require_field_match=True
         )
-        return super(ComponentSearch, self).highlight(search)
+        return super().highlight(search)
 
 
 def get_archive(id):
@@ -231,7 +231,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def __init__(self, *args, **kwargs):
         self.client = get_connection()
-        super(ComponentSearchViewSet, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_view_name(self):
         return u'Search {}'.format(getattr(self, 'suffix', None))
@@ -334,7 +334,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         if pager == 'none':
             return None
 
-        return super(ComponentSearchViewSet, self).paginator
+        return super().paginator
 
     def list(self, request):
         params = {key: value[0] for (key, value) in dict(request.query_params).items()}

@@ -15,7 +15,8 @@ angular
     $uibModal,
     listViewService,
     $q,
-    $log
+    $log,
+    SelectedIPUpdater
   ) {
     var vm = this;
     $controller('BaseCtrl', {$scope: $scope, vm: vm, ipSortString: ''});
@@ -47,6 +48,7 @@ angular
           vm.displayedIps = result.data;
           tableState.pagination.numberOfPages = result.numberOfPages; //set the number of pages so the pagination can update
           $scope.ipLoading = false;
+          SelectedIPUpdater.update(vm.displayedIps, $scope.ips, $scope.ip);
         });
       }
     };

@@ -748,7 +748,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return InformationPackageDetailSerializer
 
     def get_serializer_context(self):
-        context = super(InformationPackageViewSet, self).get_serializer_context()
+        context = super().get_serializer_context()
         context['view'] = self
 
         checker = ObjectPermissionChecker(self.request.user)
@@ -836,7 +836,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
                 step.run()
 
-        return super(InformationPackageViewSet, self).destroy(request, pk=pk)
+        return super().destroy(request, pk=pk)
 
     @detail_route(methods=['post'])
     def receive(self, request, pk=None):
