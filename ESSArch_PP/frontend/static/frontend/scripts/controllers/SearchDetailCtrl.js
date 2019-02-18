@@ -49,10 +49,10 @@ angular
       var nodeId = $stateParams.id;
 
       if (isStructureUnit) {
-        console.log("Getting data for initial node, structure unit -", nodeId);
+        console.log('Getting data for initial node, structure unit -', nodeId);
         var nodePromise = vm.getStructureUnit(nodeId);
       } else {
-        console.log("Getting data for initial node, tag -", nodeId);
+        console.log('Getting data for initial node, tag -', nodeId);
         var nodePromise = vm.getNode(nodeId);
       }
 
@@ -95,7 +95,7 @@ angular
             vm.recordTreeConfig.version++;
           });
         } else {
-          console.log("Initial node is not its own archive, getting archive:", archiveId);
+          console.log('Initial node is not its own archive, getting archive:', archiveId);
           vm.getNode(archiveId).then(function(archive) {
             delete archive.parent;
             vm.archive = archive;
@@ -159,7 +159,7 @@ angular
     };
 
     vm.getParent = function(childNode) {
-      console.log("Getting parent of", childNode);
+      console.log('Getting parent of', childNode);
       if (childNode.structure_unit) {
         return vm.getStructureUnit(childNode.structure_unit.id);
       } else if (childNode.parent) {
@@ -186,7 +186,7 @@ angular
         url = vm.url + 'search/' + node._id + '/children/';
       }
 
-      console.log("Getting children to", node, "in archive", archive._id);
+      console.log('Getting children to', node, 'in archive', archive._id);
       return $http
         .get(url, {params: {page_size: PAGE_SIZE, page: page, archive: archive._id, structure: vm.structure}})
         .then(function(response) {
@@ -200,7 +200,7 @@ angular
           });
 
           var count = response.headers('Count');
-          console.log("Found", count, "children to", node, "in archive", archive._id);
+          console.log('Found', count, 'children to', node, 'in archive', archive._id);
           return {
             data: data,
             count: count,
@@ -243,7 +243,7 @@ angular
     };
 
     vm.buildTree = function(start, archive) {
-      console.log("Building tree of", start, "with archive", archive._id);
+      console.log('Building tree of', start, 'with archive', archive._id);
       return vm.getChildren(start, archive).then(function(children) {
         var existingChild =
           start.children && start.children.length > 0 && start.children[0].placeholder !== true
