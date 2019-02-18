@@ -34,7 +34,8 @@ angular
     Resource,
     $interval,
     $anchorScroll,
-    $timeout
+    $timeout,
+    SelectedIPUpdater
   ) {
     var vm = this;
     var watchers = [];
@@ -127,6 +128,7 @@ angular
             tableState.pagination.numberOfPages = result.numberOfPages; //set the number of pages so the pagination can update
             $scope.ipLoading = false;
             $scope.initLoad = false;
+            SelectedIPUpdater.update(vm.displayedMediums, [], $scope.storageMedium);
           })
           .catch(function(response) {
             if (response.status == 404) {
