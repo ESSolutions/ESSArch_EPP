@@ -240,7 +240,7 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
 
     def save(self, **kwargs):
         kwargs["responsible"] = self.fields["responsible"].get_default()
-        return super(OrderSerializer, self).save(**kwargs)
+        return super().save(**kwargs)
 
     class Meta:
         model = Order

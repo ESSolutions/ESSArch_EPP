@@ -60,7 +60,7 @@ class SubmissionAgreementViewSet(SAViewSetCore):
             detail = 'Method "{method}" is not allowed on published SAs'.format(method=request.method)
             raise exceptions.MethodNotAllowed(method=request.method, detail=detail)
 
-        return super(SubmissionAgreementViewSet, self).update(request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
 
     @detail_route(methods=['post'])
     def publish(self, request, pk=None):
