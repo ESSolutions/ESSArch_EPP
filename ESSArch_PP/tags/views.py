@@ -58,7 +58,7 @@ class AgentViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = AgentSerializer
     filter_backends = (OrderingFilter, SearchFilter,)
-    ordering_fields = ('names__part', 'names__main',)
+    ordering_fields = ('names__part', 'names__main', 'start_date', 'end_date',)
     search_fields = ('names__part', 'names__main',)
 
 
