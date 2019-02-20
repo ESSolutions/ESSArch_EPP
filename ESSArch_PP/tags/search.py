@@ -20,7 +20,7 @@ from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
 from rest_framework import exceptions, serializers, status
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -522,7 +522,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         email.send()
         return Response(u'Email sent to {}'.format(user.email))
 
-    @detail_route(methods=['post'], url_path='send-as-email')
+    @action(detail=True, methods=['post'], url_path='send-as-email')
     def send_as_email(self, request, pk=None):
         tag = self.get_tag_object()
         user = self.request.user
@@ -548,7 +548,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         email.send()
         return Response(u'Email sent to {}'.format(user.email))
 
-    @list_route(methods=['post'], url_path='mass-email')
+    @action(detail=False, methods=['post'], url_path='mass-email')
     def mass_email(self, request):
         try:
             ids = request.data['ids']
@@ -561,7 +561,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return self.send_mass_email(ids, user)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def children(self, request, pk=None):
         parent = self.get_tag_object()
         structure = self.request.query_params.get('structure')
@@ -576,7 +576,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
 
-    @detail_route(methods=['get'], url_path='child-by-value')
+    @action(detail=True, methods=['get'], url_path='child-by-value')
     def child_by_value(self, request, pk=None):
         class ByValueSerializer(serializers.Serializer):
             field = serializers.CharField(required=True)
@@ -606,13 +606,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         except IndexError:
             raise exceptions.NotFound()
 
-    @detail_route(methods=['post'], url_path='new-version')
+    @action(detail=True, methods=['post'], url_path='new-version')
     def new_version(self, request, pk=None):
         tag = self.get_tag_object()
         tag.create_new()
         return Response()
 
-    @detail_route(methods=['post'], url_path='new-structure')
+    @action(detail=True, methods=['post'], url_path='new-structure')
     def new_structure(self, request, pk=None):
         try:
             name = request.data['name']
@@ -626,13 +626,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response()
 
-    @detail_route(methods=['patch'], url_path='set-as-current-version')
+    @action(detail=True, methods=['patch'], url_path='set-as-current-version')
     def set_as_current_version(self, request, pk=None):
         tag = self.get_tag_object()
         tag.set_as_current_version()
         return Response()
 
-    @detail_route(methods=['post'], url_path='change-organization')
+    @action(detail=True, methods=['post'], url_path='change-organization')
     def change_organization(self, request, pk=None):
         tag = self.get_tag_object(qs=TagVersion.objects.filter(elastic_index='archive'))
 
@@ -801,7 +801,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         script = self._get_delete_field_script(field)
         self.client.update(index=index, doc_type='doc', id=tag.pk, body={"script": script})
 
-    @detail_route(methods=['post'], url_path='update-descendants')
+    @action(detail=True, methods=['post'], url_path='update-descendants')
     def update_descendants(self, request, pk=None):
         tag = self.get_tag_object()
         include_self = request.query_params.get('include_self', False)
@@ -815,7 +815,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response()
 
-    @list_route(methods=['post'], url_path='mass-update')
+    @action(detail=False, methods=['post'], url_path='mass-update')
     def mass_update(self, request):
         try:
             ids = request.query_params['ids'].split(',')
@@ -835,7 +835,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         return Response()
 
-    @detail_route(methods=['post'], url_path='delete-field')
+    @action(detail=True, methods=['post'], url_path='delete-field')
     def delete_field(self, request, pk=None):
         tag = self.get_tag_object()
         try:
@@ -846,7 +846,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         self._delete_field(tag, field)
         return Response(tag.from_search())
 
-    @detail_route(methods=['post'], url_path='remove-from-structure')
+    @action(detail=True, methods=['post'], url_path='remove-from-structure')
     def remove_from_structure(self, request, pk=None):
         obj = self.get_tag_object()
 
