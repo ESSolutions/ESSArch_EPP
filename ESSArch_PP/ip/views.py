@@ -46,7 +46,7 @@ from guardian.core import ObjectPermissionChecker
 from guardian.shortcuts import assign_perm
 from lxml import etree
 from rest_framework import exceptions, permissions, status, viewsets
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
@@ -202,7 +202,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         return Response(parse_submit_description(fullpath, srcdir=path))
 
     @transaction.atomic
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def prepare(self, request, pk=None):
         logger = logging.getLogger('essarch.epp.ingest')
         perms = copy.deepcopy(getattr(settings, 'IP_CREATION_PERMS_MAP', {}))
@@ -308,7 +308,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
     @transaction.atomic
     @permission_required_or_403(['ip.receive'])
-    @detail_route(methods=['post'], url_path='receive')
+    @action(detail=True, methods=['post'], url_path='receive')
     def receive(self, request, pk=None):
         try:
             ip = get_object_or_404(self.get_queryset(), id=pk)
@@ -501,7 +501,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         logger.info('Started receiving {objid} from reception'.format(objid=objid), extra={'user': request.user.pk})
         return Response({'detail': 'Receiving %s...' % objid})
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def files(self, request, pk=None):
         reception = Path.objects.get(entity="reception").value
         xml = os.path.join(reception, "%s.xml" % pk)
@@ -534,7 +534,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         }
         return Response([entry, xmlentry])
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post'])
     def upload(self, request):
         if not request.user.has_perm('ip.can_receive_remote_files'):
             raise exceptions.PermissionDenied
@@ -561,7 +561,7 @@ class InformationPackageReceptionViewSet(viewsets.ViewSet, PaginatedViewMixin):
         upload_id = request.data.get('upload_id', uuid.uuid4().hex)
         return Response({'upload_id': upload_id})
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post'])
     def upload_complete(self, request):
         if not request.user.has_perm('ip.can_receive_remote_files'):
             raise exceptions.PermissionDenied
@@ -838,7 +838,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return super().destroy(request, pk=pk)
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def receive(self, request, pk=None):
         ip = self.get_object()
         workarea = ip.workareas.filter(read_only=False).first()
@@ -866,7 +866,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return Response({'detail': 'Receiving %s' % str(ip.pk)}, status=status.HTTP_202_ACCEPTED)
 
     @transaction.atomic
-    @detail_route(methods=['post'], url_path='preserve')
+    @action(detail=True, methods=['post'], url_path='preserve')
     def preserve(self, request, pk=None):
         ip = self.get_object()
 
@@ -919,7 +919,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return Response({'detail': 'Preserving %s...' % ip.object_identifier_value})
 
     @transaction.atomic
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def access(self, request, pk=None):
         aip = self.get_object()
 
@@ -993,7 +993,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return Response({'detail': 'Accessing AIP %s...' % pk})
 
     @transaction.atomic
-    @detail_route(methods=['post'], url_path='create-dip')
+    @action(detail=True, methods=['post'], url_path='create-dip')
     def create_dip(self, request, pk=None):
         dip = InformationPackage.objects.get(pk=pk)
 
@@ -1025,7 +1025,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         return Response()
 
     @transaction.atomic
-    @list_route(methods=['post'], url_path='prepare-dip')
+    @action(detail=False, methods=['post'], url_path='prepare-dip')
     def prepare_dip(self, request):
         try:
             label = request.data['label']
@@ -1063,7 +1063,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return Response(dip, status.HTTP_201_CREATED)
 
-    @detail_route(methods=['delete', 'get', 'post'], permission_classes=[IsResponsibleOrCanSeeAllFiles])
+    @action(detail=True, methods=['delete', 'get', 'post'], permission_classes=[IsResponsibleOrCanSeeAllFiles])
     def files(self, request, pk=None):
         ip = self.get_object()
         download = request.query_params.get('download', False)
@@ -1221,7 +1221,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
         return ip.get_path_response(path, request, force_download=download, paginator=self.paginator)
 
-    @detail_route(methods=['post'], url_path='unlock-profile', permission_classes=[CanUnlockProfile])
+    @action(detail=True, methods=['post'], url_path='unlock-profile', permission_classes=[CanUnlockProfile])
     def unlock_profile(self, request, pk=None):
         ip = self.get_object()
 
@@ -1241,7 +1241,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
             )
         })
 
-    @detail_route(methods=['post'], url_path='add-appraisal-rule')
+    @action(detail=True, methods=['post'], url_path='add-appraisal-rule')
     def add_appraisal_rule(self, request, pk=None):
         ip = self.get_object()
 
@@ -1261,7 +1261,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         rule.information_packages.add(ip)
         return Response()
 
-    @detail_route(methods=['post'], url_path='remove-appraisal-rule')
+    @action(detail=True, methods=['post'], url_path='remove-appraisal-rule')
     def remove_appraisal_rule(self, request, pk=None):
         ip = self.get_object()
 
@@ -1278,7 +1278,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         rule.information_packages.remove(ip)
         return Response()
 
-    @detail_route(methods=['post'], url_path='add-conversion-rule')
+    @action(detail=True, methods=['post'], url_path='add-conversion-rule')
     def add_conversion_rule(self, request, pk=None):
         ip = self.get_object()
 
@@ -1298,7 +1298,7 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
         rule.information_packages.add(ip)
         return Response()
 
-    @detail_route(methods=['post'], url_path='remove-conversion-rule')
+    @action(detail=True, methods=['post'], url_path='remove-conversion-rule')
     def remove_conversion_rule(self, request, pk=None):
         ip = self.get_object()
 
@@ -1510,7 +1510,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return list_files(fullpath, force_download, paginator=self.paginator, request=request)
 
-    @list_route(methods=['post'], url_path='add-directory')
+    @action(detail=False, methods=['post'], url_path='add-directory')
     def add_directory(self, request):
         try:
             workarea = self.request.data['type'].lower()
@@ -1544,7 +1544,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return Response(status=status.HTTP_201_CREATED)
 
-    @list_route(methods=['delete'], url_path='')
+    @action(detail=False, methods=['delete'], url_path='')
     def delete(self, request):
         try:
             workarea = self.request.data['type'].lower()
@@ -1580,7 +1580,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @list_route(methods=['get', 'post'], url_path='upload')
+    @action(detail=False, methods=['get', 'post'], url_path='upload')
     def upload(self, request):
         try:
             workarea = self.request.query_params['type'].lower()
@@ -1651,7 +1651,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
             return Response(status=status.HTTP_201_CREATED)
 
-    @list_route(methods=['post'], url_path='merge-uploaded-chunks')
+    @action(detail=False, methods=['post'], url_path='merge-uploaded-chunks')
     def merge_uploaded_chunks(self, request):
         try:
             workarea = self.request.query_params['type'].lower()
@@ -1688,7 +1688,7 @@ class WorkareaFilesViewSet(viewsets.ViewSet, PaginatedViewMixin):
 
         return Response({'detail': 'Merged chunks'})
 
-    @list_route(methods=['post'], url_path='add-to-dip')
+    @action(detail=False, methods=['post'], url_path='add-to-dip')
     def add_to_dip(self, request):
         try:
             workarea = self.request.data['type'].lower()

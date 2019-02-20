@@ -2,7 +2,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
@@ -28,7 +28,7 @@ class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     ordering_fields = ('name', 'create_date', 'version',)
     search_fields = ('name',)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def tree(self, request, pk=None):
         obj = self.get_object()
 
@@ -63,7 +63,7 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
             raise exceptions.ValidationError('Parent must be from the same classification structure')
         serializer.save(structure_id=structure)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def nodes(self, request, pk=None, parent_lookup_structure=None):
         archive_id = request.query_params.get('archive')
         unit = self.get_object()
@@ -84,7 +84,7 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
         return Response(TagVersionNestedSerializer(children, many=True, context=context).data)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def children(self, request, pk=None, parent_lookup_structure=None):
         unit = self.get_object()
         if unit.is_leaf_node():
