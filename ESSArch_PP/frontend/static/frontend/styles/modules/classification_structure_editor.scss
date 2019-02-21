@@ -22,6 +22,10 @@
         max-width: 150px;
       }
     }
+    .jstree-anchor {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .structure-tree {
       @include large-screen-up {
         width: 300px;

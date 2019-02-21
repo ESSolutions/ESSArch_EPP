@@ -28,7 +28,7 @@ import uuid
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, filters, permissions, status, viewsets
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
@@ -66,7 +66,7 @@ class IOQueueViewSet(viewsets.ModelViewSet):
 
         return IOQueueWriteSerializer
 
-    @list_route(methods=['post'], url_path='from-master')
+    @action(detail=False, methods=['post'], url_path='from-master')
     def from_master(self, request, pk=None):
         try:
             entry_data = request.data.pop('entry')
@@ -178,7 +178,7 @@ class IOQueueViewSet(viewsets.ModelViewSet):
 
         return Response(io_obj.id, status=status.HTTP_201_CREATED)
 
-    @detail_route(methods=['post'], url_path='add-file')
+    @action(detail=True, methods=['post'], url_path='add-file')
     def add_file(self, request, pk=None):
         entry = self.get_object()
 
@@ -207,7 +207,7 @@ class IOQueueViewSet(viewsets.ModelViewSet):
         upload_id = request.data.get('upload_id', uuid.uuid4().hex)
         return Response({'upload_id': upload_id})
 
-    @detail_route(methods=['post'], url_path='add-file_complete')
+    @action(detail=True, methods=['post'], url_path='add-file_complete')
     def add_file_complete(self, request, pk=None):
         entry = self.get_object()
 
@@ -232,7 +232,7 @@ class IOQueueViewSet(viewsets.ModelViewSet):
 
         return Response('Upload of %s complete' % filepath)
 
-    @detail_route(methods=['post'], url_path='all-files-done')
+    @action(detail=True, methods=['post'], url_path='all-files-done')
     def all_files_done(self, request, pk=None):
         entry = self.get_object()
         entry.status = 0
@@ -262,7 +262,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
         'id', 'medium_id', 'status', 'location', 'location_status', 'used_capacity', 'create_date',
     )
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def mount(self, request, pk=None):
         medium = self.get_object()
 
@@ -280,7 +280,7 @@ class StorageMediumViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def unmount(self, request, pk=None):
         medium = self.get_object()
 
@@ -359,7 +359,7 @@ class RobotViewSet(viewsets.ModelViewSet):
         'id', 'label', 'device', 'online',
     )
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def inventory(self, request, pk=None):
         robot = self.get_object()
 
@@ -421,7 +421,7 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
         'id', 'device', 'num_of_mounts', 'idle_time',
     )
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def mount(self, request, pk=None):
         drive = self.get_object()
 
@@ -444,7 +444,7 @@ class TapeDriveViewSet(viewsets.ModelViewSet):
 
         return Response()
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def unmount(self, request, pk=None):
         drive = self.get_object()
         force = request.data.get('force', False)

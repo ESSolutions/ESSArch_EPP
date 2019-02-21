@@ -15,13 +15,13 @@ matrix:
       install: pip install flake8==3.7.1
       before_script: ''
       script: flake8
-    
+
     - env: PRETTIER
       node_js: "10"
       before_install: cd ESSArch_PP/frontend/static/frontend
       install: yarn
       before_script:
-      script: yarn prettier --check **/*.js **/*.scss **/*.html
+      script: yarn prettier --check "**/*.{js,scss,html}"
 
 
 node_js:
