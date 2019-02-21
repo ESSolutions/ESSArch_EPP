@@ -1,30 +1,13 @@
 <div ng-if="!subrow">
-  <div
-    ng-if="row.state !== 'At reception'"
-    class="clickable"
-    style="white-space: nowrap;"
-    ng-click="ipTableClick(row, $event)"
-    context-menu="menuOptions('row', row)"
-  >
+  <div ng-if="row.state !== 'At reception'" class="white-space-nowrap">
     {{row.create_date | date:"yyyy-MM-dd HH:mm:ss"}}
   </div>
-  <div
-    ng-if="row.state === 'At reception'"
-    class="clickable"
-    style="white-space: nowrap;"
-    ng-click="ipTableClick(row, $event)"
-    context-menu="menuOptions('row', row)"
-  >
+  <div ng-if="row.state === 'At reception'" class="white-space-nowrap">
     {{""}}
   </div>
 </div>
 <div ng-if="subrow">
-  <div
-    class="clickable"
-    style="white-space: nowrap;"
-    ng-click="ipTableClick(subrow, $event)"
-    context-menu="menuOptions('subrow', subrow)"
-  >
+  <div class="white-space-nowrap">
     {{subrow.create_date | date:"yyyy-MM-dd HH:mm:ss"}}
   </div>
 </div>

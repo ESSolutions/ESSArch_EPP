@@ -71,23 +71,23 @@
             ng-class="{'selected': ip.id == row.id}"
             ng-repeat="row in vm.displayedIps"
             ng-attr-context-menu="menuOptions"
-            class="table-item"
+            class="table-item selectable"
+            ng-click="ipTableClick(row, $event)"
           >
             <td
               class="clickable"
-              ng-click="ipTableClick(row, $event)"
               uib-tooltip="{{'LABELDESC' | translate}}: {{row.label}}"
               tooltip-placement="auto top"
               tooltip-append-to-body="true"
             >
               {{row.label}}
             </td>
-            <td class="clickable" ng-click="ipTableClick(row, $event)">{{row.responsible.username}}</td>
-            <td ng-click="ipRowClick(row)">
+            <td class="clickable">{{row.responsible.username}}</td>
+            <td>
               <button
                 type="button"
                 ng-if="row.responsible.id == auth.id || checkPermission('ip.delete_informationpackage')"
-                ng-click="removeOrderModal(row)"
+                ng-click="removeOrderModal(row); $event.stopPropagation();"
                 class="fas fa-trash-alt btn btn-default btn-sm"
                 uib-tooltip="{{'REMOVEIP' | translate}}: {{row.label}}"
                 tooltip-placement="auto top"
@@ -143,7 +143,7 @@
               <tr
                 ng-repeat="x in vm.ips"
                 ng-click="vm.openFilebrowser(x);"
-                class="clickable"
+                class="selectable"
                 ng-class="{'selected': vm.ip.id == x.id}"
               >
                 <td>{{x.object_identifier_value}}</td>
