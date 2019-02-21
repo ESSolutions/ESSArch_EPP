@@ -2,6 +2,7 @@ angular
   .module('essarch.controllers')
   .controller('AgentCtrl', function($uibModal, $log, $scope, $http, appConfig, $state, $stateParams) {
     var vm = this;
+    $scope.$state = $state;
     vm.agentsLoading = false;
     vm.agents = [];
     vm.agent = null;

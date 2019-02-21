@@ -81,7 +81,7 @@
         <tbody>
           <tr
             ng-repeat="x in vm.agents"
-            class="clickable"
+            class="selectable"
             ng-class="{'selected': vm.agent.id === x.id}"
             ng-click="vm.agentClick(x)"
           >
@@ -194,7 +194,7 @@
               ></i>
             </uib-accordion-heading>
             <div class="table-container table-x-overflow">
-              <table class="table fat-cells">
+              <table class="table">
                 <thead>
                   <tr>
                     <th>
@@ -259,7 +259,7 @@
               ></i>
             </uib-accordion-heading>
             <div class="table-container table-x-overflow">
-              <table class="table fat-cells">
+              <table class="table">
                 <thead>
                   <tr>
                     <th>
@@ -313,7 +313,7 @@
               ></i>
             </uib-accordion-heading>
             <div class="table-container table-x-overflow">
-              <table class="table fat-cells">
+              <table class="table">
                 <thead>
                   <tr>
                     <th>
@@ -334,7 +334,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="x in vm.agent.related_agents">
+                  <tr
+                    ng-repeat="x in vm.agent.related_agents"
+                    ui-sref="{{$state.current.name}}({id: x.agent.id})"
+                    class="selectable"
+                  >
                     <td>
                       {{vm.getAuthorizedName(x.agent).full_name}}
                     </td>
@@ -436,7 +440,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="x in vm.agent.archives" class="clickable" ng-click="vm.archiveClick(x)">
+                    <tr ng-repeat="x in vm.agent.archives" class="selectable" ng-click="vm.archiveClick(x)">
                       <td>
                         {{x.archive.name}}
                       </td>
