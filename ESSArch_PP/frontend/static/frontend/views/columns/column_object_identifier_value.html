@@ -1,10 +1,5 @@
 <div ng-if="!subrow">
-  <div
-    style="white-space: nowrap;text-overflow: ellipsis;"
-    class="clickable"
-    ng-click="ipTableClick(row, $event)"
-    context-menu="menuOptions('row', row)"
-  >
+  <div class="text-oneline-ellipsis">
     <div class="object-identifier-value">{{row.object_identifier_value}}</div>
     <div
       ng-if="row.package_type != 1 && row.package_type != 4 && row.state !== 'At reception'"
@@ -37,13 +32,7 @@
   </div>
 </div>
 <div ng-if="subrow">
-  <div
-    style="white-space: nowrap;text-overflow: ellipsis;"
-    class="clickable"
-    ng-click="ipTableClick(subrow, $event)"
-    style="padding-left: 30px;"
-    context-menu="menuOptions('subrow', subrow)"
-  >
+  <div class="text-oneline-ellipsis" style="padding-left: 30px;">
     <div style="display: inline-block" class="object-identifier-value">{{subrow.object_identifier_value}}</div>
     <div
       class="generation-indicator"

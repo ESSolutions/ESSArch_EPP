@@ -47,7 +47,7 @@
             ng-class="{'selected': vm.selectedRobot.id == row.id}"
             ng-repeat="row in vm.robots"
             ng-attr-context-menu="menuOptions"
-            class="table-item"
+            class="table-item selectable"
           >
             <td class="clickable" ng-click="robotClick(row)">{{row.label}}</td>
             <td class="clickable" ng-click="robotClick(row)">{{row.device}}</td>
@@ -205,7 +205,7 @@
                 ng-repeat="row in vm.tapeSlots"
                 ng-click="vm.tapeSlotClick(row)"
                 ng-attr-context-menu="menuOptions"
-                class="table-item clickable"
+                class="table-item selectable"
               >
                 <td>{{row.slot_id}}</td>
                 <td>{{row.medium_id}}</td>
@@ -286,7 +286,7 @@
                 class="clickable"
                 ng-repeat="row in vm.tapeDrives"
                 ng-attr-context-menu="menuOptions"
-                class="table-item"
+                class="table-item selectable"
               >
                 <td>{{row.id}}</td>
                 <td>{{row.device}}</td>

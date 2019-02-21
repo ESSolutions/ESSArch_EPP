@@ -64,7 +64,7 @@
             ng-class="{'selected': storageMedium.id == row.id}"
             ng-repeat="row in vm.displayedMediums"
             ng-attr-context-menu="menuOptions"
-            class="table-item"
+            class="table-item selectable"
           >
             <td class="clickable" style="white-space: nowrap;" ng-click="storageMediumTableClick(row)">
               {{row.medium_id}}
@@ -206,7 +206,7 @@
                 ng-class="{'selected': ip.id == row.id}"
                 ng-repeat="row in vm.storageObjects"
                 ng-attr-context-menu="menuOptions"
-                class="table-item"
+                class="table-item selectable"
               >
                 <td>{{row.ip.object_identifier_value}}</td>
                 <td>{{row.content_location_value}}</td>
