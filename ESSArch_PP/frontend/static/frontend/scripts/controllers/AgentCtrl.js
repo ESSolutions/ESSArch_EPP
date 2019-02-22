@@ -49,6 +49,7 @@ angular
         $http.get(appConfig.djangoUrl + 'agents/' + $stateParams.id + '/').then(function(response) {
           vm.initAccordion();
           vm.sortNotes(response.data);
+          vm.sortNames(response.data);
           response.data.auth_name = vm.getAuthorizedName(response.data);
 
           vm.agent = response.data;
@@ -70,12 +71,24 @@ angular
         vm.sortNotes(agent);
         vm.agent = agent;
         vm.agentArchivePipe($scope.archiveTableState);
+        vm.sortNames(vm.agent);
         $state.go($state.current.name, vm.agent, {notify: false});
       } else if (vm.agent !== null && vm.agent.id === agent.id) {
         vm.agent = null;
         $state.go($state.current.name, {id: null}, {notify: false});
       }
     };
+
+  vm.sortNames = function(agent) {
+    agent.names.sort(function(a, b) { return new Date(b.start_date) - new Date(a.start_date)});
+    agent.names.forEach(function(x, index) {
+      if(x.type.toLowerCase() === 'auktoriserad') {
+        var name = x;
+        agent.names.splice(index, 1);
+        agent.names.unshift(name);
+      }
+    })
+  }
 
     vm.archiveClick = function(agentArchive) {
       $state.go('home.access.search.archive', {id: agentArchive.archive._id});
@@ -198,8 +211,8 @@ angular
     vm.getAuthorizedName = function(agent) {
       var name;
       agent.names.forEach(function(x) {
+        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
         if (x.type === 'auktoriserad') {
-          x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
           name = x;
         }
       });

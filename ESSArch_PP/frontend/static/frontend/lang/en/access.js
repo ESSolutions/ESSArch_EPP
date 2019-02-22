@@ -84,7 +84,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       REMARKS: 'Remarks',
       REMOVE_FROM_CLASSIFICATION_STRUCTURE: 'Remove from classification structure',
       REMOVE_NODE: 'Remove node',
-      REVISE_DATE: 'Revise date',
+      REVISE_DATE: 'Last changed',
       RULES: 'Rules',
       SEE_MORE: 'See more',
       SEND_AS_EMAIL: 'Send as email',

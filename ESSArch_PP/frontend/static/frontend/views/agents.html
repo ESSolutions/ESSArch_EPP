@@ -170,6 +170,8 @@
             <result-field label="{{'ACCESS.CPF' | translate}}" data="vm.agent.type.cpf"></result-field>
             <result-field label="{{'START_DATE' | translate}}" data="vm.agent.start_date"></result-field>
             <result-field label="{{'END_DATE' | translate}}" data="vm.agent.end_date"></result-field>
+            <result-field label="{{'CREATE_DATE' | translate}}" data="vm.agent.create_date" type="date"></result-field>
+            <result-field
             <hr ng-if="vm.agent.identifiers.length > 0" class="small" />
             <div ng-if="vm.agent.identifiers.length > 0">
               <label>
@@ -194,22 +196,23 @@
               ></i>
             </uib-accordion-heading>
             <div class="table-container table-x-overflow">
+            <div st-table="vm.agent.names" class="table-container table-x-overflow">
               <table class="table">
                 <thead>
                   <tr>
-                    <th>
+                    <th st-sort="name">
                       {{'NAME' | translate}}
                     </th>
-                    <th>
                       {{'DESCRIPTION' | translate}}
                     </th>
-                    <th>
+                    <th st-sort="type">
                       {{'TYPE' | translate}}
                     </th>
-                    <th>
+                    </th>
+                    <th st-sort="start_date">
                       {{'START_DATE' | translate}}
                     </th>
-                    <th>
+                    <th st-sort="end_date">
                       {{'END_DATE' | translate}}
                     </th>
                     <th>
@@ -220,13 +223,13 @@
                 <tbody>
                   <tr ng-repeat="x in vm.agent.names">
                     <td>
-                      {{(x.part !== null && x.part !== ''? x.part + ', ':'') + x.main}}
-                    </td>
-                    <td>
-                      {{x.description}}
+                      {{x.full_name}}
                     </td>
                     <td>
                       {{x.type}}
+                    </td>
+                    <td>
+                      {{x.description}}
                     </td>
                     <td>
                       {{x.start_date | date:"yyyy-MM-dd"}}
@@ -492,7 +495,7 @@
               <hr ng-if="$index !== 0" class="small" />
               <div class="flex-row">
                 <b
-                  >{{x.type}}&nbsp;<span
+                  ><span
                     uib-tooltip="{{ 'CREATE_DATE' | translate }}"
                     tooltip-placement="auto top"
                     tooltip-append-to-body="true"
@@ -535,7 +538,7 @@
               <hr ng-if="$index !== 0" class="small" />
               <div class="flex-row">
                 <b
-                  >{{x.type}}&nbsp;<span
+                  ><span
                     uib-tooltip="{{ 'CREATE_DATE' | translate }}"
                     tooltip-placement="auto top"
                     tooltip-append-to-body="true"
