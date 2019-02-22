@@ -12,10 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          ng-repeat="ip in $ctrl.data.ips"
-          ng-class="{'selected': $ctrl.ip.object_identifier_value == ip.object_identifier_value}"
-        >
+        <tr ng-repeat="ip in $ctrl.data.ips">
           <td>{{ip.object_identifier_value}}</td>
           <td>{{ip.label}}</td>
         </tr>

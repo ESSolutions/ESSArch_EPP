@@ -1,10 +1,10 @@
 <div ng-if="!subrow">
-  <div ng-click="ipRowClick(row)" context-menu="menuOptions('row', row)">
+  <div>
     <button
       tabindex="-1"
       type="button"
       ng-if="vm.canDeleteIP(row)"
-      ng-click="removeIpModal(row)"
+      ng-click="removeIpModal(row); $event.stopPropagation();"
       class="fas fa-trash-alt btn btn-default btn-sm"
       uib-tooltip="{{'REMOVEIP' | translate}}: {{row.label}}"
       tooltip-placement="auto top"
@@ -13,12 +13,12 @@
   </div>
 </div>
 <div ng-if="subrow">
-  <div ng-click="ipRowClick(subrow)" context-menu="menuOptions('subrow', subrow)">
+  <div>
     <button
       tabindex="-1"
       type="button"
       ng-if="vm.canDeleteIP(subrow)"
-      ng-click="removeIpModal(subrow)"
+      ng-click="removeIpModal(subrow); $event.stopPropagation();"
       class="fas fa-trash-alt btn btn-default btn-sm"
       uib-tooltip="{{'REMOVEIP' | translate}}: {{subrow.label}}"
       tooltip-placement="auto top"

@@ -78,7 +78,7 @@
         <tbody>
           <tr
             ng-repeat="x in vm.structures"
-            class="clickable"
+            class="selectable"
             ng-class="{'selected': vm.structure.id === x.id}"
             ng-click="vm.structureClick(x)"
           >

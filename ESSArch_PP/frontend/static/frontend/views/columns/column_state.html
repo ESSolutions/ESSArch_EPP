@@ -1,11 +1,9 @@
 <div ng-if="!subrow">
   <div
     class="white-space-nowrap"
-    ng-click="ipTableClick(row, $event)"
     uib-tooltip="{{'IPSTATEDESC' | translate}}: {{row.label}}"
     tooltip-placement="auto top"
     tooltip-append-to-body="true"
-    context-menu="menuOptions('row', row)"
   >
     <span>{{row.state}}</span>
   </div>
@@ -13,11 +11,9 @@
 <div ng-if="subrow">
   <div
     class="white-space-nowrap"
-    ng-click="ipTableClick(subrow, $event)"
     uib-tooltip="{{'IPSTATEDESC' | translate}}: {{subrow.label}}"
     tooltip-placement="auto top"
     tooltip-append-to-body="true"
-    context-menu="menuOptions('subrow', subrow)"
   >
     <span>{{subrow.state}}</span>
   </div>

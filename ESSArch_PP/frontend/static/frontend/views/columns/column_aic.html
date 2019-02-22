@@ -1,20 +1,10 @@
 <div ng-if="!subrow">
-  <div
-    class="clickable"
-    style="white-space: nowrap;"
-    ng-click="ipTableClick(row, $event)"
-    context-menu="menuOptions('row', row)"
-  >
+  <div class="white-space-nowrap">
     {{row.aic}}
   </div>
 </div>
 <div ng-if="subrow">
-  <div
-    class="clickable"
-    style="white-space: nowrap;"
-    ng-click="ipTableClick(subrow, $event)"
-    context-menu="menuOptions('subrow', subrow)"
-  >
+  <div class="white-space-nowrap">
     {{subrow.aic}}
   </div>
 </div>

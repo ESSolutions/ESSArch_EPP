@@ -1,5 +1,5 @@
 <div ng-if="!subrow && row.package_type != 1">
-  <div context-menu="menuOptions('row', row)" class="clickable" ng-click="ipTableClick(row, $event)">
+  <div class="white-space-nowrap">
     <uib-progressbar
       class="progress"
       ng-class="{'active progress-striped': row.step_state == 'STARTED'}"
@@ -15,7 +15,7 @@
   </div>
 </div>
 <div ng-if="subrow">
-  <div context-menu="menuOptions('subrow', subrow)" class="clickable" ng-click="ipTableClick(subrow, $event)">
+  <div class="white-space-nowrap">
     <uib-progressbar
       class="progress"
       ng-class="{'active progress-striped': subrow.step_state == 'STARTED'}"

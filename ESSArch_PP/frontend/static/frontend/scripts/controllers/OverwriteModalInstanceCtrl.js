@@ -21,7 +21,7 @@ angular
     }
     $ctrl.overwriteProfile = function() {
       return Profile.update($ctrl.profile).$promise.then(function(resource) {
-        Notifications.add($translate.instant('PROFILE_IMPORTED', resource), 'success', 5000, {isHtml: true});
+        Notifications.add($translate.instant('IMPORT.PROFILE_IMPORTED', resource), 'success', 5000, {isHtml: true});
         $ctrl.data = {
           status: 'overwritten',
         };
@@ -32,7 +32,7 @@ angular
     $ctrl.overwriteSa = function() {
       return SA.update($ctrl.profile)
         .$promise.then(function(resource) {
-          Notifications.add($translate.instant('SA_IMPORTED', resource), 'success', 5000, {isHtml: true});
+          Notifications.add($translate.instant('IMPORT.SA_IMPORTED', resource), 'success', 5000, {isHtml: true});
           $ctrl.data = {
             status: 'overwritten',
           };

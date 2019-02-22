@@ -17,7 +17,7 @@
         <tr
           ng-repeat-start="ip in $ctrl.data.ips"
           ng-click="$ctrl.expandIp(ip)"
-          class="clickable"
+          class="selectable"
           ng-class="{'selected': $ctrl.ip.object_identifier_value == ip.object_identifier_value}"
         >
           <td ng-if="ip.expanded"><i class="fas fa-minus"></i>&nbsp;{{ip.object_identifier_value}}</td>
