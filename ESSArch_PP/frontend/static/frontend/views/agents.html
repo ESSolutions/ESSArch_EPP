@@ -199,7 +199,6 @@
                 ng-class="{'fa-angle-down': vm.accordion.basic.names.open, 'fa-angle-right': !vm.accordion.basic.names.open}"
               ></i>
             </uib-accordion-heading>
-            <div class="table-container table-x-overflow">
             <div st-table="vm.agent.names" class="table-container table-x-overflow">
               <table class="table">
                 <thead>
@@ -207,11 +206,11 @@
                     <th st-sort="name">
                       {{'NAME' | translate}}
                     </th>
-                      {{'DESCRIPTION' | translate}}
-                    </th>
                     <th st-sort="type">
                       {{'TYPE' | translate}}
                     </th>
+                    <th st-sort="description">
+                      {{'DESCRIPTION' | translate}}
                     </th>
                     <th st-sort="start_date">
                       {{'START_DATE' | translate}}
