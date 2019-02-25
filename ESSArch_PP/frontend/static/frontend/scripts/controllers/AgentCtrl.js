@@ -67,12 +67,15 @@ angular
 
     vm.agentClick = function(agent) {
       if (vm.agent === null || (vm.agent !== null && agent.id !== vm.agent.id)) {
-        vm.initAccordion();
-        vm.sortNotes(agent);
-        vm.agent = agent;
-        vm.agentArchivePipe($scope.archiveTableState);
-        vm.sortNames(vm.agent);
-        $state.go($state.current.name, vm.agent, {notify: false});
+        $http.get(appConfig.djangoUrl + 'agents/' + agent.id + '/').then(function(response) {
+          vm.agent = response.data;
+          vm.initAccordion();
+          vm.sortNotes(agent);
+          vm.agent = agent;
+          vm.agentArchivePipe($scope.archiveTableState);
+          vm.sortNames(vm.agent);
+          $state.go($state.current.name, vm.agent, {notify: false});
+        });
       } else if (vm.agent !== null && vm.agent.id === agent.id) {
         vm.agent = null;
         $state.go($state.current.name, {id: null}, {notify: false});
