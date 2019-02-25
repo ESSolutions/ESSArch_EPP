@@ -172,6 +172,10 @@
             <result-field label="{{'END_DATE' | translate}}" data="vm.agent.end_date"></result-field>
             <result-field label="{{'CREATE_DATE' | translate}}" data="vm.agent.create_date" type="date"></result-field>
             <result-field
+              label="{{'ACCESS.REVISE_DATE' | translate}}"
+              data="vm.agent.revise_date"
+              type="date"
+            ></result-field>
             <hr ng-if="vm.agent.identifiers.length > 0" class="small" />
             <div ng-if="vm.agent.identifiers.length > 0">
               <label>
