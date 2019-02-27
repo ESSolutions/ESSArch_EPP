@@ -583,8 +583,8 @@ angular
           },
         },
       })
-      .state('home.administration.searchAdmin.authorityRecords', {
-        url: '/authority-records/:id',
+      .state('home.administration.searchAdmin.archiveCreators', {
+        url: '/archive-creators/:id',
         template: '<agents></agents>',
         resolve: {
           authenticated: [

@@ -3,12 +3,12 @@
     <div class="title-action-button-row">
       <div class="title">
         <h4>
-          {{'AUTHORITYRECORDS' | translate}}
+          {{'ARCHIVECREATORS' | translate}}
         </h4>
       </div>
       <div class="action-button">
         <button class="btn btn-primary" ng-click="vm.createModal()">
-          {{'ACCESS.CREATE_AUTHORITY_RECORD' | translate}}
+          {{'ACCESS.CREATE_ARCHIVE_CREATOR' | translate}}
         </button>
       </div>
     </div>
@@ -30,7 +30,7 @@
           class="form-control"
           ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}"
           type="text"
-          uib-tooltip="{{'GLOBALSEARCHDESC_AUTHORITY_RECORDS' | translate}}"
+          uib-tooltip="{{'GLOBALSEARCHDESC_ARCHIVE_CREATORS' | translate}}"
           tooltip-placement="auto top"
           tooltip-append-to-body="true"
         />
@@ -146,9 +146,6 @@
         )
       </span>
     </h4>
-    <button class="btn btn-default  float-right" ng-click="vm.editModal(vm.agent)">
-      {{'EDIT' | translate}}
-    </button>
     <uib-tabset active="vm.activePill" ng-init="vm.activePill = 1" type="pills">
       <uib-tab heading="{{'ACCESS.BASIC_DATA' | translate}}" index="1">
         <uib-accordion close-others="false" class="p-base">
@@ -213,10 +210,10 @@
                       {{'DESCRIPTION' | translate}}
                     </th>
                     <th st-sort="start_date">
-                      {{'START_DATE' | translate}}
+                      {{'ACCESS.VALID_DATE_START' | translate}}
                     </th>
                     <th st-sort="end_date">
-                      {{'END_DATE' | translate}}
+                      {{'ACCESS.VALID_DATE_END' | translate}}
                     </th>
                     <th>
                       {{'ACCESS.CERTAINTY' | translate}}
@@ -257,8 +254,13 @@
             is-open="vm.accordion.basic.mandates.open"
             heading="{{'ACCESS.MANDATES' | translate}}"
           >
-            <uib-accordion-heading>
-              {{'ACCESS.MANDATES' | translate}}
+            <uib-accordion-heading class="position-relative">
+              <span
+                uib-tooltip="{{'ACCESS.MANDATES_DESC' | translate}}"
+                tooltip-position="auto top"
+                tooltip-append-to-body="true"
+                >{{'ACCESS.MANDATES' | translate}}</span
+              >
               <i
                 class="fas rotate-icon float-right"
                 ng-class="{'fa-angle-down': vm.accordion.basic.mandates.open, 'fa-angle-right': !vm.accordion.basic.mandates.open}"
@@ -278,10 +280,10 @@
                       {{'DESCRIPTION' | translate}}
                     </th>
                     <th>
-                      {{'START_DATE' | translate}}
+                      {{'ACCESS.VALID_DATE_START' | translate}}
                     </th>
                     <th>
-                      {{'END_DATE' | translate}}
+                      {{'ACCESS.VALID_DATE_END' | translate}}
                     </th>
                   </tr>
                 </thead>
@@ -293,7 +295,7 @@
                     <td>
                       {{x.type}}
                     </td>
-                    <td>
+                    <td class="oneline-ellipsis">
                       {{x.description}}
                     </td>
                     <td>
@@ -312,7 +314,7 @@
           </div>
           <div uib-accordion-group class="panel-default" is-open="vm.accordion.basic.authority.open">
             <uib-accordion-heading>
-              {{'ACCESS.RELATED_AUTHORITY_RECORDS' | translate}}
+              {{'ACCESS.RELATED_ARCHIVE_CREATORS' | translate}}
               <i
                 class="fas rotate-icon float-right"
                 ng-class="{'fa-angle-down': vm.accordion.basic.authority.open, 'fa-angle-right': !vm.accordion.basic.authority.open}"
@@ -332,10 +334,7 @@
                       {{'DESCRIPTION' | translate}}
                     </th>
                     <th>
-                      {{'START_DATE' | translate}}
-                    </th>
-                    <th>
-                      {{'END_DATE' | translate}}
+                      {{'ACCESS.DECISION_DATE' | translate}}
                     </th>
                   </tr>
                 </thead>
@@ -351,7 +350,7 @@
                     <td>
                       {{x.type}}
                     </td>
-                    <td>
+                    <td class="oneline-ellipsis">
                       {{x.description}}
                     </td>
                     <td>
@@ -438,10 +437,10 @@
                         {{'NAME' | translate}}
                       </th>
                       <th st-sort="start_date">
-                        {{'START_DATE' | translate}}
+                        {{'ACCESS.TIME_RANGE_START' | translate}}
                       </th>
                       <th st-sort="end_date">
-                        {{'END_DATE' | translate}}
+                        {{'ACCESS.TIME_RANGE_END' | translate}}
                       </th>
                     </tr>
                   </thead>

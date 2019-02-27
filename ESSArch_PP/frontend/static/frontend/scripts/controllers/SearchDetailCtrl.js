@@ -58,6 +58,7 @@ angular
 
       nodePromise.then(function(data) {
         data.state = {selected: true, opened: true};
+        vm.sortNotes(data);
         vm.record = data;
         var startNode = data;
         var archiveId = null;
@@ -785,6 +786,38 @@ angular
         $state.reload();
       });
     };
+
+    vm.getArchiveCreator = function(node) {
+      var creator = null;
+      node.agents.forEach(function(agent) {
+        if (agent.type === 'creator') {
+          agent.agent.names.forEach(function(x) {
+            x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
+            if (x.type === 'auktoriserad') {
+              agent.agent.auth_name = x.full_name;
+            }
+          });
+          creator = agent.agent;
+        }
+      });
+      return creator;
+    };
+
+    vm.sortNotes = function(record) {
+      var obj = {
+        history: [],
+        remarks: [],
+      };
+      record.notes.forEach(function(note) {
+        if (note.type.toLowerCase() === 'historik') {
+          obj.history.push(note);
+        } else {
+          obj.remarks.push(note);
+        }
+      });
+      angular.extend(record, obj);
+    };
+
     vm.editField = function(key, value) {
       var modalInstance = $uibModal.open({
         animation: true,
