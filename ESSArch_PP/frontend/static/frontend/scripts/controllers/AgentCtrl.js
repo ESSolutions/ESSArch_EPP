@@ -222,6 +222,25 @@ angular
       return name;
     };
 
+    vm.edit = function(row) {
+      if (angular.isUndefined(row.edit)) {
+        row.edit = angular.copy(row);
+      }
+    };
+
+    vm.save = function(row) {
+      var rowWithoutEdit = angular.copy(row);
+      delete rowWithoutEdit.edit;
+      var diff = {};
+      angular.forEach(rowWithoutEdit, function(value, key) {
+        if (!angular.equals(value, row.edit[key])) {
+          diff[key] = row.edit[key];
+        }
+      })
+      console.log(diff);
+      delete row.edit;
+    }
+
     vm.createModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,

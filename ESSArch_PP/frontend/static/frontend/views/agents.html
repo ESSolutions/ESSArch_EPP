@@ -218,27 +218,80 @@
                     <th>
                       {{'ACCESS.CERTAINTY' | translate}}
                     </th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="x in vm.agent.names">
+                  <tr
+                    ng-repeat="x in vm.agent.names"
+                    ng-mouseover="x.editVisible = true;"
+                    ng-mouseleave="x.editVisible = false;"
+                  >
                     <td>
-                      {{x.full_name}}
+                      <editable-field
+                        text="x.full_name"
+                        text-class="white-space-nowrap"
+                        value="x.edit.part"
+                        value2="x.edit.main"
+                        edit="x.edit"
+                        placeholder="'part'"
+                        placeholder2="'main'"
+                        tooltip="Den mindre viktiga delen av namnet, om person motsvarar det förnamn"
+                        tooltip2="Huvuddelen av namnet, om person motsvarar det efternamnet"
+                      ></editable-field>
                     </td>
                     <td>
-                      {{x.type}}
+                      <editable-field text="x.type" value="x.edit.type" edit="x.edit"></editable-field>
+                    </td>
+                    <td class="oneline-ellipsis">
+                      <editable-field text="x.description" value="x.edit.description" edit="x.edit"></editable-field>
                     </td>
                     <td>
-                      {{x.description}}
+                      <editable-field
+                        text="x.start_date"
+                        value="x.edit.start_date"
+                        type="'date'"
+                        edit="x.edit"
+                      ></editable-field>
                     </td>
                     <td>
-                      {{x.start_date | date:"yyyy-MM-dd"}}
+                      <editable-field
+                        text="x.end_date"
+                        value="x.edit.end_date"
+                        type="'date'"
+                        edit="x.edit"
+                      ></editable-field>
                     </td>
                     <td>
-                      {{x.end_date | date:"yyyy-MM-dd"}}
+                      <editable-field
+                        text="x.certainty"
+                        value="x.edit.certainty"
+                        type="'number'"
+                        edit="x.edit"
+                      ></editable-field>
                     </td>
-                    <td>
-                      {{x.certainty}}
+                    <td class="position-relative">
+                      <button
+                        class="btn btn-edit-field"
+                        style="padding: 0 12px; margin: 0;"
+                        ng-if="x.editVisible && !x.edit"
+                        ng-click="vm.edit(x, 'type')"
+                        uib-tooltip="{{'EDIT' | translate}}"
+                        tooltip-placement="auto top"
+                        tooltip-append-to-body="true"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button
+                        class="btn btn-edit-field position-relative float-right"
+                        ng-if="x.edit"
+                        ng-click="vm.save(x, 'type')"
+                        uib-tooltip="{{'SAVE' | translate}}"
+                        tooltip-placement="auto top"
+                        tooltip-append-to-body="true"
+                      >
+                        <i class="fas fa-save"></i>
+                      </button>
                     </td>
                   </tr>
                   <tr ng-if="vm.agent.names.length <= 0" class="empty-table-indicator">
