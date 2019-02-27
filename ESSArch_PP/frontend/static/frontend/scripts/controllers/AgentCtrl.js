@@ -202,7 +202,7 @@ angular
         remarks: [],
       };
       agent.notes.forEach(function(note) {
-        if (note.type === 'historik') {
+        if (note.type.toLowerCase() === 'historik') {
           obj.history.push(note);
         } else {
           obj.remarks.push(note);
