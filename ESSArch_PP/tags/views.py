@@ -32,6 +32,8 @@ from ESSArch_Core.tags.models import (
     TagVersion,
 )
 from ESSArch_Core.tags.serializers import (
+    AgentSerializer,
+    AgentArchiveLinkSerializer,
     TagSerializer,
     TagVersionNestedSerializer,
     StructureSerializer,
@@ -39,10 +41,6 @@ from ESSArch_Core.tags.serializers import (
 )
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
-from tags.serializers import (
-    AgentSerializer,
-    AgentArchiveLinkSerializer,
-)
 
 
 class AgentViewSet(viewsets.ReadOnlyModelViewSet):
