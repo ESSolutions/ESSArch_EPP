@@ -76,48 +76,43 @@ angular
         }
 
         if (vm.record._id === archiveId) {
-          var archive = angular.copy(vm.record);
-          delete archive.parent;
-          vm.archive = angular.copy(vm.record);
-          vm.archiveStructures = angular.copy(archive.structures);
-
-          if (!vm.structure && vm.record.structures.length > 0) {
-            vm.structure = vm.record.structures[vm.record.structures.length - 1].id;
-          }
-
-          vm.buildTree(startNode, archive).then(function(children) {
-            archive.children = children.data;
-            var tree = [archive];
-
-            vm.ignoreRecordChanges = true;
-            if (!angular.equals(tree, vm.recordTreeData)) {
-              angular.copy(tree, vm.recordTreeData);
-            }
-            vm.recordTreeConfig.version++;
-          });
+          vm.createArchiveNode(startNode, vm.record);
         } else {
           console.log('Initial node is not its own archive, getting archive:', archiveId);
           vm.getNode(archiveId).then(function(archive) {
-            delete archive.parent;
-            vm.archive = archive;
-            vm.archiveStructures = angular.copy(archive.structures);
-
-            if (!vm.structure && vm.record.structures.length > 0) {
-              vm.structure = vm.record.structures[vm.record.structures.length - 1].id;
-            }
-
-            vm.buildTree(startNode, archive).then(function(children) {
-              archive.children = children.data;
-              var tree = [archive];
-
-              vm.ignoreRecordChanges = true;
-              if (!angular.equals(tree, vm.recordTreeData)) {
-                angular.copy(tree, vm.recordTreeData);
-              }
-              vm.recordTreeConfig.version++;
-            });
+            vm.createArchiveNode(startNode, archive);
           });
         }
+      });
+    };
+
+    vm.createArchiveNode = function(startNode, archive) {
+      delete archive.parent;
+      vm.archive = archive;
+      vm.archiveStructures = angular.copy(archive.structures);
+
+      if (!vm.structure && vm.record.structures.length > 0) {
+        vm.structure = vm.record.structures[vm.record.structures.length - 1].id;
+      }
+
+      vm.buildTree(startNode, archive).then(function(children) {
+        archive.children = children.data;
+        var creator = vm.getArchiveCreator(archive);
+
+        if (creator !== null) {
+          creator._id = creator.id;
+          creator = vm.createNode(creator);
+          creator.children = [angular.copy(archive)];
+          var tree = [creator];
+        } else {
+          var tree = [archive];
+        }
+
+        vm.ignoreRecordChanges = true;
+        if (!angular.equals(tree, vm.recordTreeData)) {
+          angular.copy(tree, vm.recordTreeData);
+        }
+        vm.recordTreeConfig.version++;
       });
     };
 
@@ -336,15 +331,23 @@ angular
             vm.recordTreeInstance.jstree(true).create_node(parent.id, seeMore);
           }
         });
-      }
-      if (e.node.original._id !== vm.record._id) {
-        vm.goToNode(e.node.id);
+      } else if (e.node.original.type === 'agent') {
+        $state.go('home.administration.searchAdmin.archiveCreators', {id: e.node.original.id});
+      } else {
+        if (e.node.original._id !== vm.record._id) {
+          vm.goToNode(e.node.id);
+        }
       }
     };
 
     vm.goToNode = function(id) {
       var tree = vm.recordTreeInstance.jstree(true);
       var node = tree.get_node(id);
+
+      if (node.original.type === 'agent') {
+        $state.go('home.administration.searchAdmin.archiveCreators', {id: node.original.id});
+        return;
+      }
 
       if (node.original._is_structure_unit != vm.record._is_structure_unit) {
         vm.goToNodePage(id, node.original._is_structure_unit);
@@ -474,6 +477,9 @@ angular
         },
         plus: {
           icon: 'fas fa-plus',
+        },
+        agent: {
+          icon: 'fas fa-user',
         },
       },
       dnd: {
@@ -668,6 +674,9 @@ angular
         })[0].children;
         var page = Math.ceil(childrenNodes.length / PAGE_SIZE);
 
+        if (e.node.original.type === 'agent') {
+          return null;
+        }
         return vm.getChildren(e.node.original, vm.archive, page).then(function(children) {
           var count = children.count;
           var selectedElement = null;
@@ -803,6 +812,8 @@ angular
             }
           });
           creator = agent.agent;
+          creator.name = agent.agent.auth_name;
+          creator.type = 'agent';
         }
       });
       return creator;
