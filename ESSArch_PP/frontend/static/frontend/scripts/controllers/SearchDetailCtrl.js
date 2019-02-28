@@ -335,7 +335,9 @@ angular
           }
         });
       }
-      vm.goToNode(e.node.id);
+      if (e.node.original._id !== vm.record._id) {
+        vm.goToNode(e.node.id);
+      }
     };
 
     vm.goToNode = function(id) {
