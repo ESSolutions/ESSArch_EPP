@@ -82,16 +82,18 @@ angular
       }
     };
 
-  vm.sortNames = function(agent) {
-    agent.names.sort(function(a, b) { return new Date(b.start_date) - new Date(a.start_date)});
-    agent.names.forEach(function(x, index) {
-      if(x.type.toLowerCase() === 'auktoriserad') {
-        var name = x;
-        agent.names.splice(index, 1);
-        agent.names.unshift(name);
-      }
-    })
-  }
+    vm.sortNames = function(agent) {
+      agent.names.sort(function(a, b) {
+        return new Date(b.start_date) - new Date(a.start_date);
+      });
+      agent.names.forEach(function(x, index) {
+        if (x.type.toLowerCase() === 'auktoriserad') {
+          var name = x;
+          agent.names.splice(index, 1);
+          agent.names.unshift(name);
+        }
+      });
+    };
 
     vm.archiveClick = function(agentArchive) {
       $state.go('home.access.search.archive', {id: agentArchive.archive._id});
@@ -236,10 +238,10 @@ angular
         if (!angular.equals(value, row.edit[key])) {
           diff[key] = row.edit[key];
         }
-      })
+      });
       console.log(diff);
       delete row.edit;
-    }
+    };
 
     vm.createModal = function() {
       var modalInstance = $uibModal.open({
