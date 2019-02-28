@@ -2,18 +2,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from ESSArch_Core.tags.models import (
-    Agent,
-    AgentIdentifier,
-    AgentName,
-    AgentNote,
-    AgentPlace,
-    AgentRelation,
-    AgentTagLink,
-    AgentType,
-    MainAgentType,
     Structure,
-    SourcesOfAuthority,
-    Topography,
 )
 
 

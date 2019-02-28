@@ -12,23 +12,15 @@ from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
 from ESSArch_Core.tags.models import (
     Agent,
     AgentIdentifier,
-    AgentIdentifierType,
     AgentName,
-    AgentNameType,
     AgentNote,
-    AgentNoteType,
     AgentPlace,
-    AgentPlaceType,
     AgentRelation,
     AgentTagLink,
-    AgentType,
-    MainAgentType,
-    RefCode,
     SourcesOfAuthority,
     Structure,
     StructureUnit,
     Tag,
-    TagStructure,
     TagVersion,
 )
 from ESSArch_Core.tags.serializers import (
