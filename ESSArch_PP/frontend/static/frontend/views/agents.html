@@ -351,12 +351,9 @@
                     <td>
                       {{x.start_date | date:"yyyy-MM-dd"}}
                     </td>
-                    <td>
-                      {{x.end_date | date:"yyyy-MM-dd"}}
-                    </td>
                   </tr>
                   <tr ng-if="vm.agent.mandates.length <= 0" class="empty-table-indicator">
-                    <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    <td colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
                   </tr>
                 </tbody>
               </table>
