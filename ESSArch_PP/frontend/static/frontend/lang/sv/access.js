@@ -80,6 +80,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       PLACES: 'Platser',
       RECORD: 'Postvisning',
       REFERENCE_CODE: 'Referenskod',
+      RELATED: 'Relaterat',
       RELATED_ARCHIVE_CREATORS: 'Relaterade arkivbildare',
       RELATED_RESOURCES: 'Relaterade resurser',
       REMARKS: 'Anmärkningar',

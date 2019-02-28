@@ -80,6 +80,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       PLACES: 'Places',
       RECORD: 'Record',
       REFERENCE_CODE: 'Reference code',
+      RELATED: 'Related',
       RELATED_ARCHIVE_CREATORS: 'Related archive creators',
       RELATED_RESOURCES: 'Related resources',
       REMARKS: 'Remarks',

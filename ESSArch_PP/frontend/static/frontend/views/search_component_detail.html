@@ -25,6 +25,14 @@
       {{x.type + ': ' + x.identifier}}
     </div>
   </div>
+  <div ng-if="vm.record.related_tags.length > 0" class="py-base">
+    <label>
+      {{'ACCESS.RELATED' | translate}}
+    </label>
+    <div ng-repeat="x in vm.record.related_tags">
+      <a ng-click="vm.goToNodePage(x.tag_version.id, false)">{{x.tag_version.name}}</a>
+    </div>
+  </div>
   <div ng-if="vm.record.history.length > 0">
     <hr class="small mx-0" />
     <h4>
