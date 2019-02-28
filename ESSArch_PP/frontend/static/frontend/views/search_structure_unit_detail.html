@@ -22,6 +22,14 @@
     <div class="type-specific-results" ng-switch="vm.record._index">
       <h3>{{vm.record.reference_code}} {{vm.record.name}}</h3>
       <p>{{vm.record.description}}</p>
+      <div ng-if="vm.record.identifiers.length > 0" class="pb-base">
+        <label>
+          {{'ACCESS.IDENTIFIERS' | translate}}
+        </label>
+        <div ng-repeat="x in vm.record.identifiers">
+          {{x.type + ': ' + x.identifier}}
+        </div>
+      </div>
       <div ng-include src="'static/frontend/views/search_detail_contents.html'"></div>
     </div>
   </div>
