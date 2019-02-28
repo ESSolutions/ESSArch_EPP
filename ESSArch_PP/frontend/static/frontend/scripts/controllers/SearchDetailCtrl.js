@@ -210,7 +210,7 @@ angular
 
     vm.getClassificationStructureChildren = function(id) {
       var url = vm.url + 'classification-structures/' + id + '/units/';
-      return $http.get(url, {params: {has_parent: false, pager: 'none'}}).then(function(response) {
+      return $http.get(url, {params: {archive: vm.archive._id, has_parent: false, pager: 'none'}}).then(function(response) {
         var data = response.data.map(function(unit) {
           unit._id = unit.id;
           unit._is_structure_unit = true;

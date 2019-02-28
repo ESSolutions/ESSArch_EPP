@@ -50,7 +50,7 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['archive'] = self.request.data.get('archive')
+        context['archive'] = self.request.query_params.get('archive')
         return context
 
     def perform_create(self, serializer):
