@@ -355,6 +355,7 @@ angular
       tree.deselect_node(vm.record.id);
       tree.select_node(node);
       nodePromise.then(function(node) {
+        vm.sortNotes(node);
         vm.record = node;
         vm.getChildren(vm.record, vm.archive).then(function(children) {
           vm.record.children = children.data;
