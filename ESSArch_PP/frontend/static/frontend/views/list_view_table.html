@@ -143,7 +143,7 @@
           ng-repeat-start="row in vm.displayedIps"
           ng-class="{'selected': ip.object_identifier_value == row.object_identifier_value || selectedAmongOthers(row.id)}"
           class="table-item selectable"
-          ng-click="ipTableClick(row, $event)"
+          ng-click="row.package_type !== 1 ? ipTableClick(row, $event) : expandAic(row)"
           context-menu="menuOptions('row', row)"
         >
           <td ng-if="'home.ingest.reception' | isState" context-menu="menuOptions('row', row)"></td>
