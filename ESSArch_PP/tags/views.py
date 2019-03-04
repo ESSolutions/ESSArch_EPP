@@ -25,6 +25,7 @@ from ESSArch_Core.tags.models import (
 )
 from ESSArch_Core.tags.serializers import (
     AgentSerializer,
+    AgentWriteSerializer,
     AgentArchiveLinkSerializer,
     TagSerializer,
     TagVersionNestedSerializer,
@@ -50,6 +51,12 @@ class AgentViewSet(viewsets.ModelViewSet):
     filter_backends = (OrderingFilter, SearchFilter,)
     ordering_fields = ('names__part', 'names__main', 'start_date', 'end_date',)
     search_fields = ('names__part', 'names__main',)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'metadata']:
+            return AgentWriteSerializer
+
+        return self.serializer_class
 
 
 class ArchiveViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
