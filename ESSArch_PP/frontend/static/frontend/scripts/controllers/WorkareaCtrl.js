@@ -170,6 +170,17 @@ angular
     //            Upload
     // **********************************
 
+    vm.getUploadWorkareaType = function() {
+      var type = null;
+      for (var i = 0; i < $scope.ip.workarea.length; i++) {
+        if (!$scope.ip.workarea[i].readOnly) {
+          type = $scope.ip.workarea[i].type_name;
+          break;
+        }
+      }
+      return type;
+    };
+
     $scope.updateGridArray = function(ip) {
       $scope.$broadcast('UPDATE_FILEBROWSER', {});
     };
@@ -185,7 +196,7 @@ angular
     $scope.showFileUpload = true;
     $scope.currentFlowObject = null;
     $scope.getFlowTarget = function() {
-      return appConfig.djangoUrl + 'workarea-files/upload/?type=' + vm.workarea + '/';
+      return appConfig.djangoUrl + 'workarea-files/upload/?type=' + vm.getUploadWorkareaType() + '/';
     };
     $scope.getQuery = function(FlowFile, FlowChunk, isTest) {
       return {destination: vm.browserstate.path};
@@ -196,7 +207,7 @@ angular
 
       WorkareaFiles.mergeChunks(
         {
-          type: vm.workarea,
+          type: vm.getUploadWorkareaType(),
         },
         {path: path}
       );
@@ -252,7 +263,7 @@ angular
 
     $scope.createNewFlow = function(ip) {
       var flowObj = new Flow({
-        target: appConfig.djangoUrl + 'workarea-files/upload/?type=' + vm.workarea,
+        target: appConfig.djangoUrl + 'workarea-files/upload/?type=' + vm.getUploadWorkareaType(),
         simultaneousUploads: 15,
         maxChunkRetries: 5,
         chunkRetryInterval: 1000,
