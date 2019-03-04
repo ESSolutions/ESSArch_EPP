@@ -35,7 +35,7 @@ from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 
 
-class AgentViewSet(viewsets.ReadOnlyModelViewSet):
+class AgentViewSet(viewsets.ModelViewSet):
     queryset = Agent.objects.select_related(
         'type__main_type', 'ref_code', 'language',
     ).prefetch_related(
