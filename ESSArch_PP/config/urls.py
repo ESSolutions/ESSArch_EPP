@@ -37,6 +37,7 @@ from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobVi
                                             ConversionJobViewSet)
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 from ESSArch_Core.routers import ESSArchRouter
+from ESSArch_Core.tags.views import AgentViewSet
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
@@ -53,7 +54,6 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
                            StorageTargetViewSet, TapeDriveViewSet, TapeSlotViewSet)
 from tags.search import ComponentSearchViewSet
 from tags.views import (
-    AgentViewSet,
     ArchiveViewSet,
     StructureViewSet,
     StructureUnitViewSet,

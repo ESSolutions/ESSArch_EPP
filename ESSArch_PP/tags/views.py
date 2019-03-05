@@ -1,4 +1,4 @@
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from mptt.templatetags.mptt_tags import cache_tree_children
 from rest_framework import exceptions, viewsets
@@ -10,22 +10,13 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
 from ESSArch_Core.tags.models import (
-    Agent,
-    AgentIdentifier,
-    AgentName,
-    AgentNote,
-    AgentPlace,
-    AgentRelation,
     AgentTagLink,
-    SourcesOfAuthority,
     Structure,
     StructureUnit,
     Tag,
     TagVersion,
 )
 from ESSArch_Core.tags.serializers import (
-    AgentSerializer,
-    AgentWriteSerializer,
     AgentArchiveLinkSerializer,
     TagSerializer,
     TagVersionNestedSerializer,
@@ -34,29 +25,6 @@ from ESSArch_Core.tags.serializers import (
 )
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
-
-
-class AgentViewSet(viewsets.ModelViewSet):
-    queryset = Agent.objects.select_related(
-        'type__main_type', 'ref_code', 'language',
-    ).prefetch_related(
-        Prefetch('names', AgentName.objects.prefetch_related('type')),
-        Prefetch('identifiers', AgentIdentifier.objects.prefetch_related('type')),
-        Prefetch('agentplace_set', AgentPlace.objects.prefetch_related('topography', 'type',)),
-        Prefetch('notes', AgentNote.objects.prefetch_related('type')),
-        Prefetch('mandates', SourcesOfAuthority.objects.prefetch_related('type')),
-        Prefetch('agent_relations_a', AgentRelation.objects.prefetch_related('agent_b')),
-    )
-    serializer_class = AgentSerializer
-    filter_backends = (OrderingFilter, SearchFilter,)
-    ordering_fields = ('names__part', 'names__main', 'start_date', 'end_date',)
-    search_fields = ('names__part', 'names__main',)
-
-    def get_serializer_class(self):
-        if self.action in ['create', 'update', 'partial_update', 'metadata']:
-            return AgentWriteSerializer
-
-        return self.serializer_class
 
 
 class ArchiveViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
