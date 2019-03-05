@@ -28,6 +28,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
+from ESSArch_Core.agents.views import AgentViewSet
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
                                      UserViewSet)
 from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SysInfoView
@@ -37,7 +38,6 @@ from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobVi
                                             ConversionJobViewSet)
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 from ESSArch_Core.routers import ESSArchRouter
-from ESSArch_Core.tags.views import AgentViewSet
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)

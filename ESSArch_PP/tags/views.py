@@ -8,9 +8,9 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
+from ESSArch_Core.agents.models import AgentTagLink
 from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
 from ESSArch_Core.tags.models import (
-    AgentTagLink,
     Structure,
     StructureUnit,
     Tag,
