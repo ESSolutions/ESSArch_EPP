@@ -53,7 +53,7 @@ class AgentViewSet(viewsets.ModelViewSet):
     search_fields = ('names__part', 'names__main',)
 
     def get_serializer_class(self):
-        if self.action in ['create', 'metadata']:
+        if self.action in ['create', 'update', 'partial_update', 'metadata']:
             return AgentWriteSerializer
 
         return self.serializer_class
