@@ -95,6 +95,8 @@ angular
         var message = $translate.instant('UNSAVED_DATA_WARNING');
         if (!confirm(message)) {
           event.preventDefault();
+        } else {
+          EditMode.disable();
         }
       }
     });
