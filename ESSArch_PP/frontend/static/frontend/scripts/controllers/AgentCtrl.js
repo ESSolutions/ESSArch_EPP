@@ -1,12 +1,11 @@
 angular
   .module('essarch.controllers')
-  .controller('AgentCtrl', function($uibModal, $log, $scope, $http, appConfig, $state, $stateParams) {
+  .controller('AgentCtrl', function($uibModal, $log, $scope, $http, appConfig, $state, $stateParams, EditMode) {
     var vm = this;
     $scope.$state = $state;
     vm.agentsLoading = false;
     vm.agents = [];
     vm.agent = null;
-
     vm.accordion = {
       basic: {
         basic: {
@@ -44,16 +43,19 @@ angular
       },
     };
 
+    vm.getAgent = function(agent) {
+      $http.get(appConfig.djangoUrl + 'agents/' + agent.id + '/').then(function(response) {
+        vm.initAccordion();
+        vm.sortNotes(response.data);
+        vm.sortNames(response.data);
+        response.data.auth_name = vm.getAuthorizedName(response.data);
+        vm.agent = response.data;
+      });
+    };
+
     vm.$onInit = function() {
       if ($stateParams.id) {
-        $http.get(appConfig.djangoUrl + 'agents/' + $stateParams.id + '/').then(function(response) {
-          vm.initAccordion();
-          vm.sortNotes(response.data);
-          vm.sortNames(response.data);
-          response.data.auth_name = vm.getAuthorizedName(response.data);
-
-          vm.agent = response.data;
-        });
+        vm.getAgent($stateParams);
       } else {
         vm.agent = null;
       }
@@ -87,7 +89,7 @@ angular
         return new Date(b.start_date) - new Date(a.start_date);
       });
       agent.names.forEach(function(x, index) {
-        if (x.type.toLowerCase() === 'auktoriserad') {
+        if (x.type.name.toLowerCase() === 'auktoriserad') {
           var name = x;
           agent.names.splice(index, 1);
           agent.names.unshift(name);
@@ -204,7 +206,7 @@ angular
         remarks: [],
       };
       agent.notes.forEach(function(note) {
-        if (note.type.toLowerCase() === 'historik') {
+        if (note.type.name.toLowerCase() === 'historik') {
           obj.history.push(note);
         } else {
           obj.remarks.push(note);
@@ -217,30 +219,11 @@ angular
       var name;
       agent.names.forEach(function(x) {
         x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        if (x.type === 'auktoriserad') {
+        if (x.type.name.toLowerCase() === 'auktoriserad') {
           name = x;
         }
       });
       return name;
-    };
-
-    vm.edit = function(row) {
-      if (angular.isUndefined(row.edit)) {
-        row.edit = angular.copy(row);
-      }
-    };
-
-    vm.save = function(row) {
-      var rowWithoutEdit = angular.copy(row);
-      delete rowWithoutEdit.edit;
-      var diff = {};
-      angular.forEach(rowWithoutEdit, function(value, key) {
-        if (!angular.equals(value, row.edit[key])) {
-          diff[key] = row.edit[key];
-        }
-      });
-      console.log(diff);
-      delete row.edit;
     };
 
     vm.createModal = function() {
@@ -285,6 +268,116 @@ angular
       });
       modalInstance.result.then(
         function(data) {},
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNoteModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_agent_note_modal.html',
+        controller: 'AgentNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editNoteModal = function(note) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_agent_note_modal.html',
+        controller: 'AgentNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              note: note,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNameModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_agent_name_modal.html',
+        controller: 'AgentNameModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editNameModal = function(name) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_agent_name_modal.html',
+        controller: 'AgentNameModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              name: name,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
         }

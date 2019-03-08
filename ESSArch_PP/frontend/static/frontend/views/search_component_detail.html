@@ -91,6 +91,7 @@
     </div>
     <hr class="small mx-0" />
   </div>
+  <result-field stronglabel="true" label="{{'MEDIUM' | translate}}" data="vm.record.medium_type.name"></result-field>
   <div
     ng-if="vm.record.create_date || vm.record.revise_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date || vm.record.end_date"
   >
@@ -102,6 +103,7 @@
     <result-field label="Beslutat" data="vm.record._source.decision_date" type="date"></result-field>
     <result-field label="Upprättad" data="vm.record._source.preparation_date" type="date"></result-field>
     <result-field label="Avslutat" data="vm.record._source.ended_date" type="date"></result-field>
+    <result-field label="{{'START_DATE' | translate}}" data="vm.record.start_date" type="date"></result-field>
     <result-field label="{{'END_DATE' | translate}}" data="vm.record.end_date" type="date"></result-field>
     <br />
   </div>

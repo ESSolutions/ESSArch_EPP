@@ -807,7 +807,7 @@ angular
         if (agent.type === 'creator') {
           agent.agent.names.forEach(function(x) {
             x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-            if (x.type === 'auktoriserad') {
+            if (x.type.name.toLowerCase() === 'auktoriserad') {
               agent.agent.auth_name = x.full_name;
             }
           });

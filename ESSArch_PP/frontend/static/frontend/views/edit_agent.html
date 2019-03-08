@@ -1,64 +1,227 @@
 <div class="edit-agent">
-  <label for="name">
-    {{'NAME' | translate}}
-  </label>
-  <input class="form-control" required name="name" ng-model="$ctrl.agent.name" />
-  <label for="type">
-    {{'TYPE' | translate}}
-  </label>
-  <select
-    class="form-control"
-    required
-    name="type"
-    ng-model="$ctrl.creator.type"
-    ng-options="x as x.main_type for x in $ctrl.options.type"
-  ></select>
-  <label>
-    {{'Verksamhetstid'}}
-  </label>
-  <div class="d-flex align-items-center">
-    <div class="dropdown" uib-dropdown is-open="dropdown_status.start_date">
-      <a class="dropdown-toggle" id="dropdown-start_date" role="button" uib-dropdown-toggle>
+  <div class="pb-base">
+    <h4>
+      {{'ACCESS.AUTHORIZED_NAME' | translate}}
+    </h4>
+    <div class="flex-100-grow">
+      <div>
+        <label>
+          {{'ACCESS.PART' | translate}}
+        </label>
+        <input class="form-control" required ng-model="$ctrl.authName.part" />
+      </div>
+      <div class="ml-base">
+        <label>
+          {{'ACCESS.MAIN' | translate}}
+        </label>
+        <input class="form-control" required ng-model="$ctrl.authName.main" />
+      </div>
+    </div>
+    <div class="flex-100-grow align-items-center pt-base">
+      <div>
+        <label>
+          {{'ACCESS.VALID_DATE_START' | translate}}
+        </label>
+        <div class="dropdown" uib-dropdown is-open="dropdown_status.authName.start_date">
+          <a class="dropdown-toggle" id="dropdown-start_date" role="button" uib-dropdown-toggle>
+            <div class="input-group">
+              <input
+                type="text"
+                data-date-time-input="YYYY-MM-DD"
+                class="form-control"
+                data-ng-model="$ctrl.authName.start_date"
+              /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+            </div>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+            <datetimepicker
+              data-ng-model="$ctrl.authName.start_date"
+              ng-change="dropdown_status.authName.start_date = false"
+              data-datetimepicker-config="{ dropdownSelector: '#dropdown-startlDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
+            />
+          </ul>
+        </div>
+      </div>
+      <div class="ml-base">
+        <label>
+          {{'ACCESS.VALID_DATE_END' | translate}}
+        </label>
+        <div class="dropdown" uib-dropdown is-open="dropdown_status.authName.end_date">
+          <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
+            <div class="input-group">
+              <input
+                type="text"
+                data-date-time-input="YYYY-MM-DD"
+                class="form-control"
+                data-ng-model="$ctrl.authName.end_date"
+              /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+            </div>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+            <datetimepicker
+              data-ng-model="$ctrl.authName.end_date"
+              ng-change="dropdown_status.authName.end_date = false"
+              data-datetimepicker-config="{ dropdownSelector: '#dropdown-endDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
+            />
+          </ul>
+        </div>
+      </div>
+    </div>
+    <label>
+      {{'ACCESS.CERTAINTY' | translate}}
+    </label>
+    <select class="form-control" ng-model="$ctrl.name.certainty">
+        <option value="{{null}}"></option>
+        <option value="{{true}}">Säker</option>
+        <option value="{{false}}">Osäker</option>
+      </select>
+    <label>
+      {{'DESCRIPTION' | translate}}
+    </label>
+    <textarea
+      class="form-control"
+      name="description"
+      ng-model="$ctrl.authName.description"
+      maxlength="255"
+      rows="3"
+    ></textarea>
+  </div>
+  <hr />
+  <div>
+    <h4>
+      {{'ACCESS.BASIC_DATA' | translate}}
+    </h4>
+    <label for="type">
+      {{'TYPE' | translate}}
+    </label>
+    <select
+      class="form-control"
+      required
+      name="type"
+      ng-model="$ctrl.agent.type"
+      ng-options="x.value as x.display_name for x in $ctrl.options.type.choices"
+    ></select>
+    <label>
+      {{'CREATE_DATE' | translate}}
+    </label>
+    <div class="dropdown" uib-dropdown is-open="dropdown_status.create_date">
+      <a class="dropdown-toggle" id="dropdown-create_date" role="button" uib-dropdown-toggle>
         <div class="input-group">
           <input
             type="text"
-            data-date-time-input="YYYY-MM-DD"
+            data-date-time-input="YYYY-MM-DD HH:mm"
             class="form-control"
-            data-ng-model="$ctrl.creator.start_date"
+            data-ng-model="$ctrl.agent.create_date"
           /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
         </div>
       </a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
         <datetimepicker
-          data-ng-model="$ctrl.agent.start_date"
-          ng-change="dropdown_status.start_date = false"
-          data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
+          data-ng-model="$ctrl.agent.create_date"
+          ng-change="dropdown_status.create_date = false"
+          data-datetimepicker-config="{ dropdownSelector: '#dropdown-createDate', minView: 'minute', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
         />
       </ul>
     </div>
-    &nbsp;-&nbsp;
-    <div class="dropdown" uib-dropdown is-open="dropdown_status.end_date">
-      <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
-        <div class="input-group">
-          <input
-            type="text"
-            data-date-time-input="YYYY-MM-DD"
-            class="form-control"
-            data-ng-model="$ctrl.agent.end_date"
-          /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+    <div class="flex-100-grow align-items-center pt-base">
+      <div>
+        <label>
+          {{'START_DATE' | translate}}
+        </label>
+        <div class="dropdown" uib-dropdown is-open="dropdown_status.start_date">
+          <a class="dropdown-toggle" id="dropdown-start_date" role="button" uib-dropdown-toggle>
+            <div class="input-group">
+              <input
+                type="text"
+                data-date-time-input="YYYY-MM-DD"
+                class="form-control"
+                data-ng-model="$ctrl.agent.start_date"
+              /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+            </div>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+            <datetimepicker
+              data-ng-model="$ctrl.agent.start_date"
+              ng-change="dropdown_status.start_date = false"
+              data-datetimepicker-config="{ dropdownSelector: '#dropdown-startlDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
+            />
+          </ul>
         </div>
-      </a>
-      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
-        <datetimepicker
-          data-ng-model="$ctrl.agent.end_date"
-          ng-change="dropdown_status.end_date = false"
-          data-datetimepicker-config="{ dropdownSelector: '#dropdown-appraisalDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DDTHH:mm:ssZ'}"
-        />
-      </ul>
+      </div>
+      <div class="ml-base">
+        <label>
+          {{'END_DATE' | translate}}
+        </label>
+        <div class="dropdown" uib-dropdown is-open="dropdown_status.end_date">
+          <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
+            <div class="input-group">
+              <input
+                type="text"
+                data-date-time-input="YYYY-MM-DD"
+                class="form-control"
+                data-ng-model="$ctrl.agent.end_date"
+              /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+            </div>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
+            <datetimepicker
+              data-ng-model="$ctrl.agent.end_date"
+              ng-change="dropdown_status.end_date = false"
+              data-datetimepicker-config="{ dropdownSelector: '#dropdown-endDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
+            />
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="pb-base">
+      <label>
+        {{'ACCESS.LEVEL_OF_DETAIL' | translate}}
+      </label>
+      <select
+        class="form-control"
+        ng-model="$ctrl.agent.level_of_detail"
+        ng-options="x.value as x.display_name for x in $ctrl.options.level_of_detail.choices"
+      ></select>
+    </div>
+    <div class="pb-base">
+      <label>
+        {{'ACCESS.SCRIPT' | translate}}
+      </label>
+      <select
+        class="form-control"
+        ng-model="$ctrl.agent.script"
+        ng-options="x.value as x.display_name for x in $ctrl.options.script.choices"
+      ></select>
+    </div>
+    <div class="pb-base">
+      <label>
+        {{'ACCESS.LANGUAGE' | translate}}
+      </label>
+      <select
+        class="form-control"
+        ng-model="$ctrl.agent.language"
+        ng-options="x.value as x.display_name for x in $ctrl.options.language.choices"
+      ></select>
+    </div>
+    <div class="pb-base">
+      <label>
+        {{'ACCESS.RECORD_STATUS' | translate}}
+      </label>
+      <select
+        class="form-control"
+        ng-model="$ctrl.agent.record_status"
+        ng-options="x.value as x.display_name for x in $ctrl.options.record_status.choices"
+      ></select>
+    </div>
+    <div class="pb-base">
+      <label>
+        {{'ACCESS.REFERENCE_CODE' | translate}}
+      </label>
+      <select
+        class="form-control"
+        ng-model="$ctrl.agent.ref_code"
+        ng-options="x.value as x.display_name for x in $ctrl.options.ref_code.choices"
+      ></select>
     </div>
   </div>
-  <label for="notes">
-    {{'ACCESS.HISTORY' | translate}}
-  </label>
-  <textarea class="form-control" name="notes" ng-model="$ctrl.agent.notes[0]" maxlength="255" rows="6"></textarea>
 </div>

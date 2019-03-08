@@ -67,9 +67,6 @@
             <th st-sort="type">
               {{'TYPE' | translate}}
             </th>
-            <th st-sort="cpf">
-              {{'ACCESS.CPF' | translate}}
-            </th>
             <th st-sort="start_date">
               {{'START_DATE' | translate}}
             </th>
@@ -92,9 +89,6 @@
               {{x.type.main_type.name}}
             </td>
             <td>
-              {{x.type.cpf}}
-            </td>
-            <td>
               {{x.start_date | date:"yyyy-MM-dd"}}
             </td>
             <td>
@@ -102,10 +96,10 @@
             </td>
           </tr>
           <tr ng-if="!vm.agents.length && !vm.agentsLoading" class="empty-table-indicator">
-            <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+            <td colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
           </tr>
           <tr ng-if="!vm.agents.length && vm.agentsLoading" class="empty-table-indicator">
-            <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
+            <td class="loading-column" colspan="4">{{'LOADING' | translate}}</td>
           </tr>
         </tbody>
       </table>
@@ -179,7 +173,7 @@
                 {{'ACCESS.IDENTIFIERS' | translate}}
               </label>
               <div ng-repeat="x in vm.agent.identifiers">
-                {{x.type + ': ' + x.identifier}}
+                {{x.type.name + ': ' + x.identifier}}
               </div>
             </div>
           </div>
@@ -196,6 +190,11 @@
                 ng-class="{'fa-angle-down': vm.accordion.basic.names.open, 'fa-angle-right': !vm.accordion.basic.names.open}"
               ></i>
             </uib-accordion-heading>
+            <div class="d-flex justify-content-end pb-base">
+                <button class="btn btn-primary" ng-click="vm.addNameModal()">
+                  {{'ADD' | translate}}
+                </button>
+              </div>
             <div st-table="vm.agent.names" class="table-container table-x-overflow">
               <table class="table">
                 <thead>
@@ -215,9 +214,6 @@
                     <th st-sort="end_date">
                       {{'ACCESS.VALID_DATE_END' | translate}}
                     </th>
-                    <th>
-                      {{'ACCESS.CERTAINTY' | translate}}
-                    </th>
                     <th></th>
                   </tr>
                 </thead>
@@ -227,70 +223,32 @@
                     ng-mouseover="x.editVisible = true;"
                     ng-mouseleave="x.editVisible = false;"
                   >
-                    <td>
-                      <editable-field
-                        text="x.full_name"
-                        text-class="white-space-nowrap"
-                        value="x.edit.part"
-                        value2="x.edit.main"
-                        edit="x.edit"
-                        placeholder="'part'"
-                        placeholder2="'main'"
-                        tooltip="Den mindre viktiga delen av namnet, om person motsvarar det förnamn"
-                        tooltip2="Huvuddelen av namnet, om person motsvarar det efternamnet"
-                      ></editable-field>
+                    <td class="white-space-nowrap">
+                      {{x.full_name}}
                     </td>
-                    <td>
-                      <editable-field text="x.type" value="x.edit.type" edit="x.edit"></editable-field>
+                    <td class="white-space-nowrap">
+                      {{x.type.name}}
                     </td>
                     <td class="oneline-ellipsis">
-                      <editable-field text="x.description" value="x.edit.description" edit="x.edit"></editable-field>
+                      {{x.description}}
                     </td>
-                    <td>
-                      <editable-field
-                        text="x.start_date"
-                        value="x.edit.start_date"
-                        type="'date'"
-                        edit="x.edit"
-                      ></editable-field>
+                    <td class="white-space-nowrap">
+                      {{x.start_date | date:"yyyy-MM-dd"}}
                     </td>
-                    <td>
-                      <editable-field
-                        text="x.end_date"
-                        value="x.edit.end_date"
-                        type="'date'"
-                        edit="x.edit"
-                      ></editable-field>
-                    </td>
-                    <td>
-                      <editable-field
-                        text="x.certainty"
-                        value="x.edit.certainty"
-                        type="'number'"
-                        edit="x.edit"
-                      ></editable-field>
+                    <td class="white-space-nowrap">
+                      {{x.end_date | date:"yyyy-MM-dd"}}
                     </td>
                     <td class="position-relative">
                       <button
                         class="btn btn-edit-field"
                         style="padding: 0 12px; margin: 0;"
                         ng-if="x.editVisible && !x.edit"
-                        ng-click="vm.edit(x, 'type')"
+                        ng-click="vm.editNameModal(x)"
                         uib-tooltip="{{'EDIT' | translate}}"
                         tooltip-placement="auto top"
                         tooltip-append-to-body="true"
                       >
                         <i class="fas fa-edit"></i>
-                      </button>
-                      <button
-                        class="btn btn-edit-field position-relative float-right"
-                        ng-if="x.edit"
-                        ng-click="vm.save(x, 'type')"
-                        uib-tooltip="{{'SAVE' | translate}}"
-                        tooltip-placement="auto top"
-                        tooltip-append-to-body="true"
-                      >
-                        <i class="fas fa-save"></i>
                       </button>
                     </td>
                   </tr>
@@ -343,7 +301,7 @@
                       {{x.name}}
                     </td>
                     <td>
-                      {{x.type}}
+                      {{x.type.name}}
                     </td>
                     <td class="oneline-ellipsis">
                       {{x.description}}
@@ -543,8 +501,29 @@
                 ng-class="{'fa-angle-down': vm.accordion.history.open, 'fa-angle-right': !vm.accordion.history.open}"
               ></i>
             </uib-accordion-heading>
-            <div ng-if="vm.agent.history.length > 0" ng-repeat="x in vm.agent.history">
-              <hr ng-if="$index !== 0" class="small" />
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-primary" ng-click="vm.addNoteModal()">
+                {{'ADD' | translate}}
+              </button>
+            </div>
+            <div
+              class="position-relative"
+              ng-if="vm.agent.history.length > 0"
+              ng-repeat="x in vm.agent.history"
+              ng-mouseover="x.editVisible = true;"
+              ng-mouseleave="x.editVisible = false;"
+            >
+              <hr class="small" />
+              <button
+                class="btn btn-edit-field position-realtive float-right"
+                ng-if="x.editVisible"
+                ng-click="vm.editNoteModal(x)"
+                uib-tooltip="{{'EDIT' | translate}}"
+                tooltip-placement="auto top"
+                tooltip-append-to-body="true"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
               <div class="flex-row">
                 <b
                   ><span
@@ -575,7 +554,7 @@
         <uib-accordion close-others="false" class="p-base">
           <div
             uib-accordion-group
-            class="panel-default"
+            class="panel-default position-relative"
             is-open="vm.accordion.remarks.notes.open"
             heading="{{'ACCESS.REMARKS' | translate}}"
           >
@@ -586,8 +565,29 @@
                 ng-class="{'fa-angle-down': vm.accordion.remarks.notes.open, 'fa-angle-right': !vm.accordion.remarks.notes.open}"
               ></i>
             </uib-accordion-heading>
-            <div ng-if="vm.agent.remarks.length > 0" ng-repeat="x in vm.agent.remarks">
-              <hr ng-if="$index !== 0" class="small" />
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-primary" ng-click="vm.addNoteModal()">
+                {{'ADD' | translate}}
+              </button>
+            </div>
+            <div
+              class="position-relative"
+              ng-if="vm.agent.remarks.length > 0"
+              ng-repeat="x in vm.agent.remarks"
+              ng-mouseover="x.editVisible = true;"
+              ng-mouseleave="x.editVisible = false;"
+            >
+              <hr class="small" />
+              <button
+                class="btn btn-edit-field position-realtive float-right"
+                ng-if="x.editVisible"
+                ng-click="vm.editNoteModal(x)"
+                uib-tooltip="{{'EDIT' | translate}}"
+                tooltip-placement="auto top"
+                tooltip-append-to-body="true"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
               <div class="flex-row">
                 <b
                   ><span
@@ -632,7 +632,7 @@
             <div ng-if="vm.agent.places.length > 0" ng-repeat="x in vm.agent.places">
               <hr ng-if="$index !== 0" class="small" />
               <result-field label="{{'NAME' | translate}}" data="x.topography.name"></result-field>
-              <result-field label="{{'TYPE' | translate}}" data="x.type"></result-field>
+              <result-field label="{{'TYPE' | translate}}" data="x.type.name"></result-field>
               <result-field label="{{'DESCRIPTION' | translate}}" data="x.description"></result-field>
               <result-field label="{{'CREATE_DATE' | translate}}" data="x.create_date" type="date"></result-field>
               <result-field
