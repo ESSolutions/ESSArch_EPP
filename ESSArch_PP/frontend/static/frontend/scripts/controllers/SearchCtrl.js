@@ -280,12 +280,6 @@ angular
 
     vm.loadTags = function(aggregations) {
       var typeChildren = vm.getAggregationChildren(aggregations, 'type');
-      var archiveChildren = vm.getAggregationChildren(aggregations, 'archive');
-      var institutionChildren = vm.getAggregationChildren(aggregations, 'institution');
-      var organizationChildren = vm.getAggregationChildren(aggregations, 'organization');
-      var informationPackageChildren = vm.getAggregationChildren(aggregations, 'information_package');
-      var archiveCreatorChildren = vm.getAggregationChildren(aggregations, 'archive_creator');
-      var archiveResponsibleChildren = vm.getAggregationChildren(aggregations, 'archive_responsible');
       var filters = [
         {
           text: $translate.instant('TYPE'),
@@ -296,60 +290,6 @@ angular
           type: 'series',
           children: typeChildren,
           branch: 'type',
-        },
-        {
-          text: $translate.instant('ACCESS.ARCHIVE'),
-          a_attr: {
-            title: $translate.instant('ACCESS.ARCHIVE'),
-          },
-          state: {opened: true, disabled: true},
-          children: archiveChildren,
-          branch: 'archive',
-        },
-        {
-          text: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-          a_attr: {
-            title: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-          },
-          state: {opened: true, disabled: true},
-          children: archiveCreatorChildren,
-          branch: 'archive_creator',
-        },
-        {
-          text: $translate.instant('ACCESS.ARCHIVE_RESPONSIBLE'),
-          a_attr: {
-            title: $translate.instant('ACCESS.ARCHIVE_RESPONSIBLE'),
-          },
-          state: {opened: true, disabled: true},
-          children: archiveResponsibleChildren,
-          branch: 'archive_responsible',
-        },
-        {
-          text: $translate.instant('ARCHIVALINSTITUTION'),
-          a_attr: {
-            title: $translate.instant('ARCHIVALINSTITUTION'),
-          },
-          state: {opened: true, disabled: true},
-          children: institutionChildren,
-          branch: 'institution',
-        },
-        {
-          text: $translate.instant('ARCHIVISTORGANIZATION'),
-          a_attr: {
-            title: $translate.instant('ARCHIVISTORGANIZATION'),
-          },
-          state: {opened: true, disabled: true},
-          children: organizationChildren,
-          branch: 'organization',
-        },
-        {
-          text: $translate.instant('STORAGE_UNIT'),
-          a_attr: {
-            title: $translate.instant('STORAGE_UNIT'),
-          },
-          state: {opened: true, disabled: true},
-          children: informationPackageChildren,
-          branch: 'information_package',
         },
       ];
       vm.recreateFilterTree(filters);

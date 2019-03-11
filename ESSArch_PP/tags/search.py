@@ -9,7 +9,7 @@ import tempfile
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import Prefetch
@@ -30,8 +30,6 @@ from weasyprint import HTML
 from ESSArch_Core.auth.models import GroupGenericObjects
 from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user
-from ESSArch_Core.ip.models import Agent
-from ESSArch_Core.ip.utils import get_cached_objid
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
 from ESSArch_Core.tags.documents import Archive, VersionedDocType
@@ -60,16 +58,16 @@ class ComponentSearch(FacetedSearch):
 
     facets = {
         # use bucket aggregations to define facets
-        'index': TermsFacet(field='_index', min_doc_count=0),
-        'parents': TermsFacet(field='parents', min_doc_count=0),
-        'type': TermsFacet(field='type', min_doc_count=0),
-        'archive': TermsFacet(field='archive', min_doc_count=0),
-        'information_package': TermsFacet(field='ip', min_doc_count=0),
-        'archive_creator': TermsFacet(field='archive_creator', min_doc_count=0),
-        'archive_responsible': TermsFacet(field='archive_responsible', min_doc_count=0),
-        'institution': TermsFacet(field='institution', min_doc_count=0),
-        'organization': TermsFacet(field='organization', min_doc_count=0),
-        'extension': TermsFacet(field='extension', min_doc_count=0),
+        'extension': TermsFacet(field='extension', min_doc_count=0, size=100),
+        'type': TermsFacet(field='type', min_doc_count=0, size=100),
+    }
+
+    filters = {
+        'agents': {'many': True},
+        'archives': {'many': True},
+        'extensions': {'many': True},
+        'date': {'many': False},
+        'type': {'many': True},
     }
 
     def __init__(self, *args, **kwargs):
@@ -154,37 +152,15 @@ class ComponentSearch(FacetedSearch):
             })))
 
         for filter_k, filter_v in self.query_params_filter.items():
-            if filter_v not in EMPTY_VALUES:
-                s = s.query('match', **{filter_k: filter_v})
+            if filter_k in self.filters and filter_v not in EMPTY_VALUES:
+                if self.filters[filter_k].get('many', False):
+                    filter_v = filter_v.split(',')
+                    s = s.query('terms', **{filter_k: filter_v})
+
+                else:
+                    s = s.query('match', **{filter_k: filter_v})
 
         return s
-
-    def aggregate(self, search):
-        """
-        Add aggregations representing the facets selected, including potential
-        filters.
-
-        We override this to also aggregate on fields in `facets`
-        """
-        for f, facet in self.facets.items():
-            agg = facet.get_aggregation()
-            agg_filter = Q('match_all')
-            for field, filter in self._filters.items():
-                agg_filter &= filter
-            search.aggs.bucket(
-                '_filter_' + f,
-                'filter',
-                filter=agg_filter
-            ).bucket(f, agg)
-
-        search.aggs.bucket('_filter_archive', 'filter', filter=agg_filter).bucket(
-            'archive', 'terms',
-            script=(
-                "doc['_index'].value != 'information_package'"
-                " ? (doc.containsKey('archive')"
-                " ? doc['archive'].value : doc['_id'].value) : null"
-            )
-        )
 
     def highlight(self, search):
         """
@@ -210,17 +186,6 @@ def get_archive(id):
     archive_data = archive.to_dict()
     cache.set(cache_key, archive_data)
     return archive_data
-
-
-def get_information_package(id):
-    return {'object_identifier_value': get_cached_objid(id)}
-
-
-def get_organization(id):
-    org = Agent.objects.get(pk=id)
-    return {
-        'name': org.name,
-    }
 
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
@@ -348,11 +313,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         filters = {
             'extension': params.pop('extension', None),
             'type': params.pop('type', None),
-            'information_package': params.pop('information_package', None),
-            'archive_creator': params.pop('archive_creator', None),
-            'archive_responsible': params.pop('archive_responsible', None),
-            'institution': params.pop('institution', None),
-            'organization': params.pop('organization', None),
         }
 
         for k, v in filters.items():
@@ -399,27 +359,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 raise exceptions.NotFound('Invalid page.')
 
         results_dict = results.to_dict()
-
-        for archive in results_dict['aggregations']['_filter_archive']['archive']['buckets']:
-            try:
-                archive_data = get_archive(archive['key'])
-                archive['name'] = archive_data['name']
-            except NotFoundError:
-                logger.warn('Archive "%s" not found in search index, it might be queued for indexing' % archive['key'])
-
-        for ip in results_dict['aggregations']['_filter_information_package']['information_package']['buckets']:
-            try:
-                ip_data = get_information_package(ip['key'])
-                ip['name'] = ip_data['object_identifier_value']
-            except ObjectDoesNotExist:
-                logger.warn('Information package "%s" not found' % ip['key'])
-
-        for organization in results_dict['aggregations']['_filter_organization']['organization']['buckets']:
-            try:
-                organization_data = get_organization(organization['key'])
-                organization['name'] = organization_data['name']
-            except ObjectDoesNotExist:
-                logger.error('Archivist organization "%s" not found' % organization['key'])
 
         if len(results_dict['_shards'].get('failures', [])):
             return Response(results_dict['_shards']['failures'], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -704,10 +643,6 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     org.add_object(tag_version)
 
                     search_data = {}
-                    if data.get('archive_creator'):
-                        search_data['archive_creator'] = data.get('archive_creator')
-                    if data.get('archive_responsible'):
-                        search_data['archive_responsible'] = data.get('archive_responsible')
 
                     if search_data:
                         self._update_tag_metadata(tag_version, search_data)
