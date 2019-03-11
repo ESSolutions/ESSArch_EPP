@@ -120,7 +120,7 @@ class ComponentSearch(FacetedSearch):
         organization_archives = list(organization_archives.values_list('pk', flat=True))
 
         s = super().search()
-        s = s.source(exclude=["attachment.content"])
+        s = s.source(excludes=["attachment.content"])
         s = s.filter('term', current_version=True)
 
         s = s.query(Q('bool', should=[
