@@ -64,7 +64,6 @@ class ComponentSearch(FacetedSearch):
 
     filters = {
         'agents': {'many': True},
-        'archives': {'many': True},
         'extensions': {'many': True},
         'date': {'many': False},
         'type': {'many': True},
@@ -74,7 +73,7 @@ class ComponentSearch(FacetedSearch):
         self.query_params_filter = kwargs.pop('filter_values', {})
         self.start_date = self.query_params_filter.pop('start_date', None)
         self.end_date = self.query_params_filter.pop('end_date', None)
-        self.archive = self.query_params_filter.pop('archive', None)
+        self.archives = self.query_params_filter.pop('archives', None)
         self.personal_identification_number = self.query_params_filter.pop('personal_identification_number', None)
         self.user = kwargs.pop('user')
         self.filter_values = {
@@ -117,7 +116,7 @@ class ComponentSearch(FacetedSearch):
         """
 
         organization_archives = get_objects_for_user(self.user, TagVersion.objects.filter(elastic_index='archive'), [])
-        organization_archives = list(organization_archives.values_list('pk', flat=True))
+        organization_archives = [str(x) for x in list(organization_archives.values_list('pk', flat=True))]
 
         s = super().search()
         s = s.source(excludes=["attachment.content"])
@@ -142,14 +141,14 @@ class ComponentSearch(FacetedSearch):
         if self.end_date not in EMPTY_VALUES:
             s = s.filter('range', start_date={'lte': self.end_date})
 
-        if self.archive is not None:
-            s = s.query(Q('bool', must=Q('script', script={
+        if self.archives is not None:
+            s = s.filter(Q('bool', should=[Q('script', script={
                 'source': (
                     "(doc.containsKey('archive') && doc['archive'].value==params.archive)"
                     "|| doc['_id'].value==params.archive"
                 ),
-                'params': {'archive': self.archive},
-            })))
+                'params': {'archive': archive},
+            }) for archive in self.archives.split(',')]))
 
         for filter_k, filter_v in self.query_params_filter.items():
             if filter_k in self.filters and filter_v not in EMPTY_VALUES:
