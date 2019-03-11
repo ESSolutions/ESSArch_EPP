@@ -22,6 +22,7 @@ from ESSArch_Core.tags.serializers import (
     TagVersionNestedSerializer,
     StructureSerializer,
     StructureUnitSerializer,
+    StructureUnitWriteSerializer,
 )
 from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
@@ -64,6 +65,12 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (DjangoModelPermissions,)
     filter_backends = (DjangoFilterBackend,)
     filter_class = StructureUnitFilter
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update', 'metadata']:
+            return StructureUnitWriteSerializer
+
+        return self.serializer_class
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
