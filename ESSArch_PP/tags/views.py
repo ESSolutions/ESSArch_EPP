@@ -63,8 +63,9 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = StructureUnit.objects.select_related('structure')
     serializer_class = StructureUnitSerializer
     permission_classes = (DjangoModelPermissions,)
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
     filter_class = StructureUnitFilter
+    search_fields = ('name',)
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'metadata']:
