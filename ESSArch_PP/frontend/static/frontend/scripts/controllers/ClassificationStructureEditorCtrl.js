@@ -196,6 +196,13 @@ angular
               vm.addNodeModal(node.original, vm.structure);
             },
           };
+          var addRelation = {
+            label: $translate.instant('ACCESS.ADD_RELATION'),
+            _disabled: node.original.root,
+            action: function() {
+              vm.addNodeRelationModal(node)
+            }
+          };
           var remove = {
             label: $translate.instant('REMOVE'),
             _disabled: node.original.root,
@@ -206,6 +213,7 @@ angular
           var actions = {
             update: update,
             add: add,
+            addRelation: addRelation,
             remove: remove,
           };
           callback(actions);
@@ -424,6 +432,31 @@ angular
         controllerAs: '$ctrl',
         resolve: {
           data: {},
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.updateStructures();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNodeRelationModal = function(node) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_structure_unit_relation_modal.html',
+        size: 'lg',
+        controller: 'StructureUnitRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {
+            node: node
+          },
         },
       });
       modalInstance.result.then(
