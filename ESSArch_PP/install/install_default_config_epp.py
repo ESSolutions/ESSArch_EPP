@@ -42,7 +42,7 @@ from ESSArch_Core.storage.models import (  # noqa
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Archive, Component, Directory, File, InformationPackage  # noqa
+from ESSArch_Core.tags.documents import Agent, Archive, Component, Directory, File, InformationPackage  # noqa
 
 User = get_user_model()
 
@@ -445,7 +445,7 @@ def installPipelines():
 
 
 def installSearchIndices():
-    for doctype in [Archive, Component, Directory, File, InformationPackage]:
+    for doctype in [Agent, Archive, Component, Directory, File, InformationPackage]:
         alias_migration.setup_index(doctype)
 
     print('done')
