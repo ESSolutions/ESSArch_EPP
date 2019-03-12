@@ -14,10 +14,10 @@ from ESSArch_Core.tags.models import (
     Structure,
     StructureUnit,
     Tag,
-    TagVersion,
 )
 from ESSArch_Core.tags.serializers import (
     AgentArchiveLinkSerializer,
+    AgentArchiveLinkWriteSerializer,
     TagSerializer,
     TagVersionNestedSerializer,
     StructureSerializer,
@@ -28,7 +28,7 @@ from ESSArch_Core.util import mptt_to_dict
 from ip.views import InformationPackageViewSet
 
 
-class ArchiveViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
+class ArchiveViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     queryset = AgentTagLink.objects.filter(
         tag__elastic_index='archive'
     )
@@ -36,6 +36,24 @@ class ArchiveViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
     filter_backends = (OrderingFilter, SearchFilter,)
     search_fields = ('tag__name',)
     ordering_fields = ('tag__name',)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update', 'metadata']:
+            return AgentArchiveLinkWriteSerializer
+
+        return self.serializer_class
+
+    def create(self, request, *args, **kwargs):
+        parents_query_dict = self.get_parents_query_dict()
+        if parents_query_dict:
+            request.data.update(parents_query_dict)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        parents_query_dict = self.get_parents_query_dict()
+        if parents_query_dict:
+            request.data.update(parents_query_dict)
+        return super().update(request, *args, **kwargs)
 
 
 class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
