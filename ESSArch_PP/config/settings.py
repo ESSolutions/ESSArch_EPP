@@ -246,8 +246,8 @@ ELASTICSEARCH_INDEXES = {
         'component': 'ESSArch_Core.tags.documents.Component',
         'directory': 'ESSArch_Core.tags.documents.Directory',
         'document': 'ESSArch_Core.tags.documents.File',
-        'information-package': 'ESSArch_Core.tags.documents.InformationPackageDocument',
-        'structure-unit': 'ESSArch_Core.tags.documents.StructureUnitDocument',
+        'information_package': 'ESSArch_Core.tags.documents.InformationPackageDocument',
+        'structure_unit': 'ESSArch_Core.tags.documents.StructureUnitDocument',
     }
 }
 

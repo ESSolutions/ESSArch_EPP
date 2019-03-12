@@ -71,7 +71,7 @@ angular
 
           archiveId = data.root;
         } else {
-          archiveId = $stateParams.archive;
+          archiveId = vm.record.archive;
           vm.structure = vm.record.structure;
         }
 
@@ -184,7 +184,7 @@ angular
 
       console.log('Getting children to', node, 'in archive', archive._id);
       return $http
-        .get(url, {params: {page_size: PAGE_SIZE, page: page, archive: archive._id, structure: vm.structure}})
+        .get(url, {params: {page_size: PAGE_SIZE, page: page, structure: vm.structure}})
         .then(function(response) {
           var data = response.data.map(function(child) {
             child._is_structure_unit = node._is_structure_unit && !node.is_unit_leaf_node;
@@ -207,7 +207,7 @@ angular
     vm.getClassificationStructureChildren = function(id) {
       var url = vm.url + 'classification-structures/' + id + '/units/';
       return $http
-        .get(url, {params: {archive: vm.archive._id, has_parent: false, pager: 'none'}})
+        .get(url, {params: {has_parent: false, pager: 'none'}})
         .then(function(response) {
           var data = response.data.map(function(unit) {
             unit._id = unit.id;

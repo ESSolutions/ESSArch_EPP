@@ -73,11 +73,6 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['archive'] = self.request.query_params.get('archive')
-        return context
-
     def perform_create(self, serializer):
         try:
             structure = self.get_parents_query_dict()['structure']
@@ -90,14 +85,10 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def nodes(self, request, pk=None, parent_lookup_structure=None):
-        archive_id = request.query_params.get('archive')
         unit = self.get_object()
 
         structure = unit.structure
-        try:
-            nodes = TagVersion.objects.get(pk=archive_id).get_descendants(structure)
-        except TagVersion.DoesNotExist:
-            raise exceptions.ParseError('Invalid archive {}'.format(archive_id))
+        nodes = structure.tagstructure_set.first().get_root().tag.current_version.get_descendants(structure)
         children = nodes.filter(tag__structures__structure_unit=unit)
 
         context = {'structure': structure, 'user': request.user}
@@ -119,7 +110,6 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer_class()
         context = {
             'user': request.user,
-            'archive': request.query_params.get('archive'),
             'structure': request.query_params.get('structure')
         }
         if self.paginator is not None:

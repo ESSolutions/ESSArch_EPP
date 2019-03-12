@@ -50,7 +50,7 @@ SORTABLE_FIELDS = (
 
 
 class ComponentSearch(FacetedSearch):
-    index = ['component', 'archive', 'document', 'information-package', 'structure-unit']
+    index = ['component', 'archive', 'document', 'information_package', 'structure_unit']
     fields = [
         'reference_code.keyword^5', 'reference_code^3', 'name^2', 'desc', 'attachment.content',
         'attachment.keywords',
