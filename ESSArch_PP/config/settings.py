@@ -239,6 +239,20 @@ ELASTICSEARCH_CONNECTIONS = {
     }
 }
 
+ELASTICSEARCH_INDEXES = {
+    'default': {
+        'agent': 'ESSArch_Core.agents.documents.AgentDocument',
+        'archive': 'ESSArch_Core.tags.documents.Archive',
+        'component': 'ESSArch_Core.tags.documents.Component',
+        'directory': 'ESSArch_Core.tags.documents.Directory',
+        'document': 'ESSArch_Core.tags.documents.File',
+        'information-package': 'ESSArch_Core.tags.documents.InformationPackageDocument',
+        'structure-unit': 'ESSArch_Core.tags.documents.StructureUnitDocument',
+    }
+}
+
+ELASTICSEARCH_BATCH_SIZE = 1000
+
 # Logging
 LOGGING = {
     'version': 1,

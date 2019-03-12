@@ -23,9 +23,12 @@
     Email - essarch@essolutions.se
 """
 
+from pydoc import locate
+
 import django
 django.setup()
 
+from django.conf import settings
 from django.contrib.auth import get_user_model  # noqa
 from django.contrib.auth.models import Permission  # noqa
 from groups_manager.models import GroupType  # noqa
@@ -42,7 +45,6 @@ from ESSArch_Core.storage.models import (  # noqa
     StorageMethodTargetRelation,
     StorageTarget,
 )
-from ESSArch_Core.tags.documents import Agent, Archive, Component, Directory, File, InformationPackage  # noqa
 
 User = get_user_model()
 
@@ -445,7 +447,8 @@ def installPipelines():
 
 
 def installSearchIndices():
-    for doctype in [Agent, Archive, Component, Directory, File, InformationPackage]:
+    for index_name, index_class in settings.ELASTICSEARCH_INDEXES['default'].items():
+        doctype = locate(index_class)
         alias_migration.setup_index(doctype)
 
     print('done')

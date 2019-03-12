@@ -40,6 +40,11 @@ if __name__ == '__main__':
         author='Henrik Ek',
         author_email='henrik@essolutions.se',
         url='http://www.essolutions.se',
+        entry_points={
+            'console_scripts': [
+                'epp = ESSArch_Core.cli.main:cli',
+            ],
+        },
         project_urls={
             'Documentation': 'http://docs.essarch.org/',
             'Source Code': 'https://github.com/ESSolutions/ESSArch_EPP/tree/%s' % versioneer.get_versions()['full'],

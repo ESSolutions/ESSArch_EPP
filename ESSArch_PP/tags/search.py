@@ -50,7 +50,7 @@ SORTABLE_FIELDS = (
 
 
 class ComponentSearch(FacetedSearch):
-    index = ['component', 'archive', 'document', 'information_package']
+    index = ['component', 'archive', 'document', 'information-package', 'structure-unit']
     fields = [
         'reference_code.keyword^5', 'reference_code^3', 'name^2', 'desc', 'attachment.content',
         'attachment.keywords',
@@ -65,7 +65,8 @@ class ComponentSearch(FacetedSearch):
     filters = {
         'agents': {'many': True},
         'extensions': {'many': True},
-        'date': {'many': False},
+        'start_date': {},
+        'end_date': {},
         'type': {'many': True},
     }
 
@@ -120,7 +121,15 @@ class ComponentSearch(FacetedSearch):
 
         s = super().search()
         s = s.source(excludes=["attachment.content"])
-        s = s.filter('term', current_version=True)
+
+        # only get current version of "TagVersion" documents
+        s = s.query('bool', minimum_should_match=1, should=[
+            Q('term', current_version=True),
+            Q('bool', must_not=Q('terms', index=[
+                'archive-*',
+                'component-*'
+            ])),
+        ])
 
         s = s.query(Q('bool', should=[
             # no archive
