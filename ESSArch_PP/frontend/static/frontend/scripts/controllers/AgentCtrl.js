@@ -249,7 +249,7 @@ angular
       );
     };
 
-    vm.editModal = function(creator) {
+    vm.editModal = function(agent) {
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
@@ -261,7 +261,7 @@ angular
         resolve: {
           data: function() {
             return {
-              creator: creator,
+              agent: agent,
             };
           },
         },

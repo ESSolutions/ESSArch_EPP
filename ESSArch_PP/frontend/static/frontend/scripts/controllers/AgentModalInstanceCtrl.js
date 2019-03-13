@@ -77,8 +77,35 @@ angular
     };
 
     $ctrl.$onInit = function() {
-      if (!angular.isUndefined(data.agent) && data.agent !== null) {
-        $ctrl.agent = angular.copy(data.agent);
+      if (data.agent) {
+        return $http({
+          url: appConfig.djangoUrl + 'agents/',
+          method: 'OPTIONS',
+        }).then(function(response) {
+          $ctrl.agent = angular.copy(data.agent);
+          $ctrl.agent.type = data.agent.type.id;
+          $ctrl.agent.ref_code = data.agent.ref_code.id;
+          angular.forEach(response.data.actions.POST, function(value, key) {
+            if (!angular.isUndefined(value.choices) && value.choices.length > 0) {
+              $ctrl.options[key] = value;
+              if (key === 'language') {
+                $ctrl.sortLanguages();
+              }
+            }
+            if (!angular.isUndefined(value.child) && !angular.isUndefined(value.child.children)) {
+              angular.forEach(value.child.children, function(nestedVal, nestedKey) {
+                if (!angular.isUndefined(nestedVal.choices)) {
+                  $ctrl.options[key] = {
+                    child: {
+                      children: {},
+                    },
+                  };
+                  $ctrl.options[key].child.children[nestedKey] = nestedVal;
+                }
+              });
+            }
+          });
+        });
       } else {
         $ctrl.buildAgentModel().then(function(model) {
           $ctrl.agent = model;
@@ -109,7 +136,25 @@ angular
         });
     };
     $ctrl.save = function() {
-      $uibModalInstance.close($ctrl.agent);
+      angular.forEach($ctrl.agent, function(value, key) {
+        if(angular.isArray(value)) {
+          delete $ctrl.agent[key];
+        }
+      })
+      $ctrl.saving = true;
+      $http({
+        url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
+        method: 'PATCH',
+        data: $ctrl.agent,
+      })
+        .then(function(response) {
+          $ctrl.saving = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.saving = false;
+        });
     };
     $scope.$on('modal.closing', function(event, reason, closed) {
       if (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press') {
