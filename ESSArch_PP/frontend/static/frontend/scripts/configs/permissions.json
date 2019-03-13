@@ -20,6 +20,21 @@
                 "search": {
                     "_permissions": ["tags.search"]
                 },
+                "archiveCreators": {
+                    "_permissions": [
+                        "tags.search"
+                    ]
+                },
+                "archiveManager": {
+                    "_permissions": [
+                        "tags.search"
+                    ]
+                },
+                "classificationStructures": {
+                    "_permissions": [
+                        "tags.search"
+                    ]
+                },
                 "accessIp": {
                     "_permissions": [
                         "ip.get_from_storage",
@@ -64,18 +79,6 @@
                 }
             },
             "administration": {
-                "searchAdmin": {
-                    "archiveManager": {
-                        "_permissions": [
-                            "tags.search"
-                        ]
-                    },
-                    "classificationStructures": {
-                        "_permissions": [
-                            "tags.search"
-                        ]
-                    }
-                },
                 "mediaInformation": {
                     "_permissions": [
                         "storage.storage_management"

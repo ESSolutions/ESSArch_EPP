@@ -50,6 +50,7 @@ angular.module('essarch.language').config(function($translateProvider) {
     GET_AS_CONTAINER: 'Hämta som container',
     GET_AS_NEW_GENERATION: 'Hämta som ny generation',
     GLOBALSEARCHDESC_ARCHIVE_CREATORS: 'Lista alla arkivbildare som associeras med söktermen',
+    GLOBALSEARCHDESC_ARCHIVES: 'Lista alla arkiv som associeras med söktermen',
     GLOBALSEARCHDESC_MEDIUM: 'Lista alla lagringsmedium som associeras med söktermen',
     GLOBALSEARCHDESC_MEDIUM_CONTENT: 'Lista allt innehåll i lagringsmedium som associeras med söktermen',
     GLOBALSEARCHDESC_MIGRATION: 'Lista alla migreringar som associeras med söktermen',

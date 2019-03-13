@@ -547,7 +547,7 @@ angular
           },
         },
       })
-      .state('home.administration.searchAdmin.archiveManager', {
+      .state('home.access.archiveManager', {
         url: '/archive-manager',
         template: '<archive-manager></archive-manager>',
         resolve: {
@@ -560,12 +560,12 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.access', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },
       })
-      .state('home.administration.searchAdmin.classificationStructures', {
+      .state('home.access.classificationStructures', {
         url: '/classification-structures',
         template: '<classification-structure-editor></classification-structure-editor>',
         resolve: {
@@ -578,12 +578,12 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.access', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },
       })
-      .state('home.administration.searchAdmin.archiveCreators', {
+      .state('home.access.archiveCreators', {
         url: '/archive-creators/:id',
         template: '<agents></agents>',
         resolve: {
@@ -596,7 +596,7 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.administration.searchAdmin', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.access', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },

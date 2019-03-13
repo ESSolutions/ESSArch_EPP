@@ -332,7 +332,7 @@ angular
           }
         });
       } else if (e.node.original.type === 'agent') {
-        $state.go('home.administration.searchAdmin.archiveCreators', {id: e.node.original.id});
+        $state.go('home.access.archiveCreators', {id: e.node.original.id});
       } else {
         if (e.node.original._id !== vm.record._id) {
           vm.goToNode(e.node.id);
@@ -345,7 +345,7 @@ angular
       var node = tree.get_node(id);
 
       if (node.original.type === 'agent') {
-        $state.go('home.administration.searchAdmin.archiveCreators', {id: node.original.id});
+        $state.go('home.access.archiveCreators', {id: node.original.id});
         return;
       }
 

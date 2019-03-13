@@ -50,6 +50,7 @@ angular.module('essarch.language').config(function($translateProvider) {
     GET_AS_CONTAINER: 'Get as container',
     GET_AS_NEW_GENERATION: 'Get as new generation',
     GLOBALSEARCHDESC_ARCHIVE_CREATORS: 'List all archive creators associated to the search term',
+    GLOBALSEARCHDESC_ARCHIVES: 'List all archives associated to the search term',
     GLOBALSEARCHDESC_MEDIUM: 'List all storage mediums associated to the search term',
     GLOBALSEARCHDESC_MEDIUM_CONTENT: 'List all medium content associated to the search term',
     GLOBALSEARCHDESC_MIGRATION: 'List all migrations associated to the search term',
