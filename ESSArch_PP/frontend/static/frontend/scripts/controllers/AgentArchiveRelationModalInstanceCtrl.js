@@ -11,7 +11,7 @@
     var $ctrl = this;
     $ctrl.relationTemplate = {
       type: 1,
-      description: null,
+      description: '',
       start_date: null,
       end_date: null,
       archive: null,
