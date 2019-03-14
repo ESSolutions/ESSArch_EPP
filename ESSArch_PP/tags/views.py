@@ -98,15 +98,17 @@ class StructureUnitViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def perform_create(self, serializer):
-        try:
-            structure = self.get_parents_query_dict()['structure']
-        except KeyError:
-            structure = self.get_parents_query_dict()['parent__structure']
-        parent = serializer.validated_data.get('parent')
-        if parent is not None and str(parent.structure.pk) != structure:
-            raise exceptions.ValidationError('Parent must be from the same classification structure')
-        serializer.save(structure_id=structure)
+    def create(self, request, *args, **kwargs):
+        parents_query_dict = self.get_parents_query_dict()
+        if parents_query_dict:
+            request.data.update(parents_query_dict)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        parents_query_dict = self.get_parents_query_dict()
+        if parents_query_dict:
+            request.data.update(parents_query_dict)
+        return super().update(request, *args, **kwargs)
 
     @action(detail=True, methods=['get'])
     def nodes(self, request, pk=None, parent_lookup_structure=None):
