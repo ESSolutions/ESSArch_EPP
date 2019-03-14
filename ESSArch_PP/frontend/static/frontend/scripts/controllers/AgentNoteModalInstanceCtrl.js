@@ -13,7 +13,7 @@ angular
     $ctrl.note;
     $ctrl.noteTemplate = {
       create_date: null,
-      href: null,
+      href: '',
       revise_date: null,
       text: null,
       type: null,

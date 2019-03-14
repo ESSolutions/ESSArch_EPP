@@ -14,7 +14,7 @@ angular
     $ctrl.nameTemplate = {
       part: null,
       main: null,
-      description: null,
+      description: '',
       start_date: null,
       end_date: null,
       type: null,

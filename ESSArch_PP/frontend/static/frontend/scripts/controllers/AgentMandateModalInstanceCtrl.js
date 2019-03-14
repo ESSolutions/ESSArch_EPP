@@ -14,11 +14,11 @@ angular
     $ctrl.mandateTemplate = {
       part: null,
       main: null,
-      description: null,
+      description: '',
       start_date: null,
       end_date: null,
       type: 1,
-      certainty: null,
+      href: '',
     };
     $ctrl.resetMandate = function() {
       $ctrl.mandate = angular.copy($ctrl.mandateTemplate);
