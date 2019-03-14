@@ -1,0 +1,46 @@
+<div class="search-filter">
+  <label ng-if="vm.label">
+    {{vm.label}}
+  </label>
+  <div class="filter-input-wrapper">
+    <div>
+      <ul class="list-unstyled filter-selected-options" ng-if="vm.selected.length > 0">
+        <li ng-repeat="x in vm.selected" ng-click="vm.deselect(x)" class="selectable"
+        ng-mouseover="showDelete = true"
+        ng-mouseout="showDelete = false"
+        >
+          {{x[vm.labelProp]}}
+        </li>
+        <li ng-if="vm.selected.length === 0">
+          {{'EMPTY' | translate}}
+        </li>
+      </ul>
+    </div>
+    <input
+      id="search-filter-{{$id}}"
+      placeholder="{{'SEARCH' | translate}} ..."
+      class="form-control filter-input"
+      ng-model="vm.q"
+      ng-change="vm.search()"
+      ng-model-options="{debounce: 300}"
+      ng-focus="vm.openOptions($event)"
+    />
+    <div class="position-relative">
+      <ul ng-if="vm.resultListVisible" class="list-unstyled filter-options" id="filter-options-{{$id}}"
+      >
+        <li
+          ng-repeat="x in vm.options track by $index"
+          ng-click="vm.select(x)"
+          class="selectable filter-options-item"
+          ng-if="vm.notSelected(x)"
+        >
+          {{x[vm.labelProp]}}
+        </li>
+        <li ng-if="vm.optionsEmpty()">
+          {{'NO_RESULTS_FOUND' | translate}}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>

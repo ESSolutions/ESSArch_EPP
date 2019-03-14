@@ -30,6 +30,13 @@ angular
     vm.numberOfResults = 0;
     vm.resultsPerPage = 25;
     vm.resultViewType = 'list';
+    vm.options = {
+      archives: [],
+      agents: [],
+      types: []
+    };
+    vm.archiveFilter = [];
+    vm.agentFilter = [];
 
     // Change tab from outside this scope, used in search detail
     $scope.$on('CHANGE_TAB', function(event, data) {
@@ -71,9 +78,6 @@ angular
         vm.activeTab = 0;
         vm.showResults = true;
       }
-      angular.forEach($stateParams.query, function(value, key) {
-        vm.filterObject[key] = value;
-      });
       $http.get(appConfig.djangoUrl + 'search/', {params: vm.filterObject}).then(function(response) {
         vm.loadTags(response.data.aggregations);
         vm.fileExtensions = response.data.aggregations._filter_extension.extension.buckets;
@@ -183,6 +187,50 @@ angular
       vm.activeTab = 0;
     };
 
+    vm.getAuthorizedName = function(agent) {
+      var name;
+      agent.names.forEach(function(x) {
+        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
+        if (x.type.name.toLowerCase() === 'auktoriserad') {
+          name = x;
+          agent.full_name = x.full_name;
+        }
+      });
+      return name;
+    };
+
+    vm.getArchives = function(search) {
+      return $http({
+        url: appConfig.djangoUrl + 'tags/',
+        mathod: 'GET',
+        params: {page: 1, page_size: 10, index: 'archive', search: search},
+      }).then(function(response) {
+        vm.options.archives = response.data.map(function(x){return x.current_version});
+        return vm.options.archives;
+      });
+    };
+
+    vm.getAgents = function(search) {
+      return $http({
+        url: appConfig.djangoUrl + 'agents/',
+        mathod: 'GET',
+        params: {page: 1, page_size: 10, search: search},
+      }).then(function(response) {
+        response.data.forEach(function(agent) {
+          agent.auth_name = vm.getAuthorizedName(agent);
+        });
+        vm.options.agents = response.data;
+        return vm.options.agents;
+      });
+    };
+
+    vm.filterNodeTypes = function(search) {
+      var types = vm.options.originalTypes.filter(function(x) {
+        return x.key.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+      })
+      vm.options.types = types;
+    }
+
     vm.formatFilters = function() {
       var includedTypes = [];
       for (var key in vm.includedTypes) {
@@ -197,7 +245,11 @@ angular
           includedExtension.push(key);
         }
       }
-      vm.filterObject.extension = includedExtension.join(',');
+      if (vm.filterObject.extension == '' || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
+        delete vm.filterObject.extension;
+      } else {
+        vm.filterObject.extension = includedExtension.join(',');
+      }
     };
 
     /**
@@ -212,9 +264,6 @@ angular
         var number = pagination.number; // Number of entries showed per page.
         var pageNumber = isNaN(start / number) ? 1 : start / number + 1; // Prevents initial 404 response where pagenumber os NaN in request
         vm.formatFilters();
-        if (vm.filterObject.extension == '' || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
-          delete vm.filterObject.extension;
-        }
         var ordering = tableState.sort.predicate;
         if (tableState.sort.reverse) {
           ordering = '-' + ordering;
@@ -280,6 +329,8 @@ angular
 
     vm.loadTags = function(aggregations) {
       var typeChildren = vm.getAggregationChildren(aggregations, 'type');
+      vm.options.originalTypes = aggregations._filter_type.type.buckets;
+      vm.options.types = angular.copy(vm.options.originalTypes);
       var filters = [
         {
           text: $translate.instant('TYPE'),

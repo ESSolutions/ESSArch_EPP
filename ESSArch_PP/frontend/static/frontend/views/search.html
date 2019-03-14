@@ -124,13 +124,39 @@
               {{'ACCESS.NARROW_RESULTS' | translate}}
             </b>
           </div>
-          <div
-            js-tree="vm.treeConfig"
-            should-apply="vm.applyModelChanges()"
-            ng-model="vm.tags"
-            tree="vm.treeInstance"
-            tree-events="changed:vm.selectFilter"
-          ></div>
+          <hr class="small" />
+          <div class="px-base">
+              <search-filter
+              label=" {{'TYPE' | translate}}"
+              options="vm.options.types"
+              label-prop="key"
+              value-prop="key"
+              update="vm.filterNodeTypes(search)"
+              ng-model="vm.filterObject.type"
+              ng-change="vm.searchSubmit()"
+            >
+            </search-filter>
+            <search-filter
+              label="{{'ACCESS.ARCHIVES' | translate}}"
+              options="vm.options.archives"
+              label-prop="name"
+              value-prop="id"
+              update="vm.getArchives(search)"
+              ng-model="vm.filterObject.archives"
+              ng-change="vm.searchSubmit()"
+            >
+            </search-filter>
+            <search-filter
+              label=" {{'ARCHIVECREATORS' | translate}}"
+              options="vm.options.agents"
+              label-prop="full_name"
+              value-prop="id"
+              update="vm.getAgents(search)"
+              ng-model="vm.filterObject.agents"
+              ng-change="vm.searchSubmit()"
+            >
+            </search-filter>
+          </div>
         </div>
         <div
           ng-if="vm.showResults"
