@@ -13,24 +13,26 @@
         </label>
         <label class="margin-top-5">
           {{'ACCESS.CLASSIFICATION_STRUCTURE' | translate}}
-          <select
-            class="form-control"
-            required
-            ng-options="x as x.name for x in vm.structures"
-            ng-model="vm.structure"
-          >
-            <option></option>
-          </select>
         </label>
+        <ui-select allow-clear ng-model="vm.structure" theme="bootstrap" sortable="true" append-to-body="false">
+          <ui-select-match ng-attr-placeholder="{{'ACCESS.CLASSIFICATION_STRUCTURES' | translate}}"
+            >{{$select.selected.name}}</ui-select-match
+          >
+          <ui-select-choices
+            ng-hide="!$select.open"
+            refresh-delay="300"
+            refresh="vm.getStructures($select.search)"
+            repeat="x.id as x in vm.options.structures | propsFilter: {name: $select.search}"
+          >
+            <div ng-bind-html="x.name| highlight: $select.search"></div>
+          </ui-select-choices>
+          <ui-select-no-choice>
+            <div class="text-center">{{'NO_RESULTS_FOUND' | translate}}</div>
+          </ui-select-no-choice>
+        </ui-select>
         <label class="margin-top-5">
           {{'ACCESS.ARCHIVE_CREATOR' | translate}}
-          <ui-select
-            allow-clear
-            ng-model="vm.archiveCreator"
-            theme="bootstrap"
-            sortable="true"
-            append-to-body="false"
-          >
+          <ui-select allow-clear ng-model="vm.archiveCreator" theme="bootstrap" sortable="true" append-to-body="false">
             <ui-select-match ng-attr-placeholder="{{'ARCHIVECREATORS' | translate}}"
               >{{$select.selected.auth_name.full_name}}</ui-select-match
             >

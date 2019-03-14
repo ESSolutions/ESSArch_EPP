@@ -3,16 +3,11 @@ angular
   .controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
     var vm = this;
     vm.structure = null;
-    vm.structures = [];
-    vm.options = {agents: []};
     vm.$onInit = function() {
-      $http({
-        method: 'GET',
-        url: appConfig.djangoUrl + 'classification-structures/',
-      }).then(function(response) {
-        vm.structures = response.data;
-        if (vm.structures.length > 0) {
-          vm.structure = vm.structures[0];
+      vm.options = {agents: [], structures: []};
+      vm.getStructures().then(function(structures) {
+        if (structures.length > 0) {
+          vm.structure = structures[0];
         }
       });
     };
@@ -39,6 +34,17 @@ angular
         });
         vm.options.agents = response.data;
         return vm.options.agents;
+      });
+    };
+
+    vm.getStructures = function(search) {
+      return $http({
+        url: appConfig.djangoUrl + 'classification-structures/',
+        mathod: 'GET',
+        params: {page: 1, page_size: 10, search: search},
+      }).then(function(response) {
+        vm.options.structures = response.data;
+        return vm.options.structures;
       });
     };
 
