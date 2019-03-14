@@ -21,6 +21,7 @@ from ESSArch_Core.tags.serializers import (
     TagSerializer,
     TagVersionNestedSerializer,
     StructureSerializer,
+    StructureWriteSerializer,
     StructureUnitSerializer,
     StructureUnitWriteSerializer,
 )
@@ -63,6 +64,12 @@ class StructureViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     filter_backends = (OrderingFilter, SearchFilter,)
     ordering_fields = ('name', 'create_date', 'version',)
     search_fields = ('name',)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update', 'metadata']:
+            return StructureWriteSerializer
+
+        return self.serializer_class
 
     @action(detail=True, methods=['get'])
     def tree(self, request, pk=None):
