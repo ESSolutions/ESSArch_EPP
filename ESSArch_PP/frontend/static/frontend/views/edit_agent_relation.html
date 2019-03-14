@@ -4,15 +4,15 @@
   </label>
   <ui-select allow-clear ng-model="$ctrl.relation.agent" theme="bootstrap" sortable="true" append-to-body="false">
     <ui-select-match ng-attr-placeholder="{{'ACCESS.ARCHIVE_CREATOR' | translate}}"
-      >{{$select.selected.auth_name.full_name}}</ui-select-match
+      >{{$select.selected.full_name}}</ui-select-match
     >
     <ui-select-choices
       ng-hide="!$select.open"
       refresh-delay="300"
       refresh="$ctrl.getAgents($select.search)"
-      repeat="x.id as x in $ctrl.options.agents | propsFilter: {auth_name: $select.search}"
+      repeat="x.id as x in $ctrl.options.agents | propsFilter: {full_name: $select.search}"
     >
-      <div ng-bind-html="x.auth_name.full_name | highlight: $select.search"></div>
+      <div ng-bind-html="x.full_name | highlight: $select.search"></div>
     </ui-select-choices>
     <ui-select-no-choice>
       <div class="text-center">{{'NO_RESULTS_FOUND' | translate}}</div>

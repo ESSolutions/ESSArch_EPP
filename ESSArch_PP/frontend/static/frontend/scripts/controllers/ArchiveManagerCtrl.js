@@ -18,6 +18,7 @@ angular
         x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
         if (x.type.name.toLowerCase() === 'auktoriserad') {
           name = x;
+          agent.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
         }
       });
       return name;
