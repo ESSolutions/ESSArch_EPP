@@ -51,6 +51,10 @@ angular
             type: 'text',
             options: [
               {
+                name: 'Serie',
+                value: 'Serie',
+              },
+              {
                 name: 'Verksamhetsområde',
                 value: 'Verksamhetsområde',
               },
