@@ -69,7 +69,7 @@ angular
         },
         {
           templateOptions: {
-            label: $translate.instant('ACCESS.DESCRIPTION'),
+            label: $translate.instant('DESCRIPTION'),
             type: 'text',
             rows: 3,
           },
