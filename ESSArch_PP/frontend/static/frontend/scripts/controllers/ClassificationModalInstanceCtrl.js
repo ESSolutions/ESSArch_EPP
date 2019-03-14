@@ -102,7 +102,7 @@ angular
       return !angular.equals($ctrl.newNode, {});
     };
 
-    $ctrl.remove = function() {
+    $ctrl.removeUnit = function() {
       $http
         .delete(appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id)
         .then(function(response) {
