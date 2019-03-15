@@ -1,6 +1,14 @@
 angular
   .module('essarch.controllers')
-  .controller('AgentRelationModalInstanceCtrl', function($uibModalInstance, appConfig, data, $http, EditMode, $scope) {
+  .controller('AgentRelationModalInstanceCtrl', function(
+    $uibModalInstance,
+    appConfig,
+    data,
+    $http,
+    EditMode,
+    $scope,
+    $translate
+  ) {
     var $ctrl = this;
     $ctrl.relationTemplate = {
       type: 1,
@@ -38,6 +46,7 @@ angular
         return $ctrl.options.agents;
       });
     };
+    $ctrl.data = data;
     $ctrl.$onInit = function() {
       if (data.agent) {
         $ctrl.agent = angular.copy(data.agent);
@@ -61,11 +70,20 @@ angular
 
     $ctrl.add = function() {
       $ctrl.adding = true;
+      var related_agents = angular.copy($ctrl.agent.related_agents);
+      related_agents.forEach(function(x, idx, array) {
+        if (typeof x.type === 'object') {
+          x.type = x.type.id;
+        }
+        if (typeof x.agent === 'object') {
+          x.agent = x.agent.id;
+        }
+      });
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
         method: 'PATCH',
         data: {
-          related_agents: angular.copy($ctrl.agent).related_agents.concat([$ctrl.relation]),
+          related_agents: related_agents.concat([$ctrl.relation]),
         },
       })
         .then(function(response) {
@@ -83,6 +101,12 @@ angular
       $ctrl.saving = true;
       var related_agents = angular.copy($ctrl.agent.related_agents);
       related_agents.forEach(function(x, idx, array) {
+        if (typeof x.type === 'object') {
+          x.type = x.type.id;
+        }
+        if (typeof x.agent === 'object') {
+          x.agent = x.agent.id;
+        }
         if (x.id === $ctrl.relation.id) {
           array[idx] = $ctrl.relation;
         }
@@ -105,12 +129,48 @@ angular
         });
     };
 
+    $ctrl.remove = function() {
+      $ctrl.removing = true;
+      var related_agents = angular.copy($ctrl.agent.related_agents);
+      related_agents.forEach(function(x, idx, array) {
+        if (typeof x.type === 'object') {
+          x.type = x.type.id;
+        }
+        if (typeof x.agent === 'object') {
+          x.agent = x.agent.id;
+        }
+        if (x.id === $ctrl.relation.id) {
+          array.splice(idx, 1);
+        }
+      });
+      $http({
+        url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
+        method: 'PATCH',
+        data: {
+          related_agents: related_agents,
+        },
+      })
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.removing = false;
+          EditMode.disable();
+        });
+    };
+
     $ctrl.cancel = function() {
       EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
+
     $scope.$on('modal.closing', function(event, reason, closed) {
-      if (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press') {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
         var message = $translate.instant('UNSAVED_DATA_WARNING');
         if (!confirm(message)) {
           event.preventDefault();

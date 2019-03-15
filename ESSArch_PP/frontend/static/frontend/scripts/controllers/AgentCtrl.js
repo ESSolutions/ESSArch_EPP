@@ -274,6 +274,35 @@ angular
       );
     };
 
+    vm.removeAgentModal = function(agent) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_modal.html',
+        controller: 'AgentModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: agent,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.agent = null;
+          $state.go($state.current.name, {id: null}, {notify: false});
+          vm.agentPipe($scope.tableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
     vm.addNoteModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,
@@ -321,6 +350,36 @@ angular
       });
       modalInstance.result.then(
         function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeNoteModal = function(note) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_note_modal.html',
+        controller: 'AgentNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              note: note,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.agentPipe($scope.tableState);
           vm.getAgent(vm.agent);
         },
         function() {
@@ -384,6 +443,36 @@ angular
       );
     };
 
+    vm.removeNameModal = function(name) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_name_modal.html',
+        controller: 'AgentNameModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              name: name,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.agentPipe($scope.tableState);
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
     vm.addMandateModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,
@@ -439,6 +528,36 @@ angular
       );
     };
 
+    vm.removeMandateModal = function(mandate) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_mandate_modal.html',
+        controller: 'AgentMandateModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              mandate: mandate,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.agentPipe($scope.tableState);
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
     vm.addAgentRelationModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,
@@ -458,6 +577,7 @@ angular
       });
       modalInstance.result.then(
         function(data) {
+          vm.agentPipe($scope.tableState);
           vm.getAgent(vm.agent);
         },
         function() {
@@ -486,6 +606,37 @@ angular
       });
       modalInstance.result.then(
         function(data) {
+          vm.agentPipe($scope.tableState);
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeAgentRelationModal = function(relation) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_relation_modal.html',
+        controller: 'AgentRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              relation: relation,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.agentPipe($scope.tableState);
           vm.getAgent(vm.agent);
         },
         function() {
@@ -521,6 +672,7 @@ angular
         }
       );
     };
+
     vm.editArchiveRelationModal = function(relation) {
       var modalInstance = $uibModal.open({
         animation: true,
@@ -534,7 +686,37 @@ angular
           data: function() {
             return {
               agent: vm.agent,
-              relation: relation
+              relation: relation,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+          vm.agentArchivePipe($scope.archiveTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeArchiveRelationModal = function(relation) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_archive_relation_modal.html',
+        controller: 'AgentArchiveRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              relation: relation,
+              allow_close: true,
             };
           },
         },

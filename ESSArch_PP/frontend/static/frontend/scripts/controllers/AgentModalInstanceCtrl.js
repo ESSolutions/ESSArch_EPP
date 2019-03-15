@@ -137,10 +137,10 @@ angular
     };
     $ctrl.save = function() {
       angular.forEach($ctrl.agent, function(value, key) {
-        if(angular.isArray(value)) {
+        if (angular.isArray(value)) {
           delete $ctrl.agent[key];
         }
-      })
+      });
       $ctrl.saving = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
@@ -156,8 +156,23 @@ angular
           $ctrl.saving = false;
         });
     };
+
+    $ctrl.remove = function() {
+      $ctrl.removing = true;
+      $http.delete(appConfig.djangoUrl + 'agents/' + $ctrl.agent.id).then(function(response) {
+        $ctrl.removing = false;
+        EditMode.disable();
+        $uibModalInstance.close('removed');
+      }).catch(function() {
+        $ctrl.removing = false;
+      })
+    };
+
     $scope.$on('modal.closing', function(event, reason, closed) {
-      if (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press') {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
         var message = $translate.instant('UNSAVED_DATA_WARNING');
         if (!confirm(message)) {
           event.preventDefault();

@@ -100,18 +100,29 @@
                   {{x.end_date |date:"yyyy-MM-dd"}}
                 </td>
                 <td class="position-relative">
+                  <div class="edit-btn-wrapper">
                     <button
                       class="btn btn-edit-field"
-                      style="padding: 0 12px; margin: 0;"
                       ng-if="x.editVisible && !x.edit"
-                      ng-click="vm.editModal(x)"
+                      ng-click="vm.editModal(x); $event.stopPropagation();"
                       uib-tooltip="{{'EDIT' | translate}}"
                       tooltip-placement="auto top"
                       tooltip-append-to-body="true"
                     >
                       <i class="fas fa-edit"></i>
                     </button>
-                  </td>
+                    <button
+                      class="btn btn-edit-field-delete"
+                      ng-if="x.editVisible && !x.edit"
+                      ng-click="vm.removeAgentModal(x); $event.stopPropagation();"
+                      uib-tooltip="{{'REMOVE' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
               </tr>
               <tr ng-if="!vm.agents.length && !vm.agentsLoading" class="empty-table-indicator">
                 <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
@@ -261,17 +272,28 @@
                           {{x.end_date | date:"yyyy-MM-dd"}}
                         </td>
                         <td class="position-relative">
-                          <button
-                            class="btn btn-edit-field"
-                            style="padding: 0 12px; margin: 0;"
-                            ng-if="x.editVisible && !x.edit"
-                            ng-click="vm.editNameModal(x)"
-                            uib-tooltip="{{'EDIT' | translate}}"
-                            tooltip-placement="auto top"
-                            tooltip-append-to-body="true"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </button>
+                          <div class="edit-btn-wrapper">
+                            <button
+                              class="btn btn-edit-field"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.editNameModal(x)"
+                              uib-tooltip="{{'EDIT' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button
+                              class="btn btn-edit-field-delete"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.removeNameModal(x)"
+                              uib-tooltip="{{'REMOVE' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.names.length <= 0" class="empty-table-indicator">
@@ -342,17 +364,28 @@
                           {{x.start_date | date:"yyyy-MM-dd"}}
                         </td>
                         <td class="position-relative">
-                          <button
-                            class="btn btn-edit-field"
-                            style="padding: 0 12px; margin: 0;"
-                            ng-if="x.editVisible && !x.edit"
-                            ng-click="vm.editMandateModal(x)"
-                            uib-tooltip="{{'EDIT' | translate}}"
-                            tooltip-placement="auto top"
-                            tooltip-append-to-body="true"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </button>
+                          <div class="edit-btn-wrapper">
+                            <button
+                              class="btn btn-edit-field"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.editMandateModal(x)"
+                              uib-tooltip="{{'EDIT' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button
+                              class="btn btn-edit-field-delete"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.removeMandateModal(x)"
+                              uib-tooltip="{{'REMOVE' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.mandates.length <= 0" class="empty-table-indicator">
@@ -421,17 +454,28 @@
                           {{x.end_date | date:"yyyy-MM-dd"}}
                         </td>
                         <td class="position-relative">
-                          <button
-                            class="btn btn-edit-field"
-                            style="padding: 0 12px; margin: 0;"
-                            ng-if="x.editVisible && !x.edit"
-                            ng-click="vm.editAgentRelationModal(x)"
-                            uib-tooltip="{{'EDIT' | translate}}"
-                            tooltip-placement="auto top"
-                            tooltip-append-to-body="true"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </button>
+                          <div class="edit-btn-wrapper">
+                            <button
+                              class="btn btn-edit-field"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.editAgentRelationModal(x); $event.stopPropagation();"
+                              uib-tooltip="{{'EDIT' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button
+                              class="btn btn-edit-field-delete"
+                              ng-if="x.editVisible && !x.edit"
+                              ng-click="vm.removeAgentRelationModal(x); $event.stopPropagation();"
+                              uib-tooltip="{{'REMOVE' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.related_agents.length <= 0" class="empty-table-indicator">
@@ -542,17 +586,28 @@
                             {{x.end_date |date:"yyyy-MM-dd"}}
                           </td>
                           <td class="position-relative">
-                            <button
-                              class="btn btn-edit-field"
-                              style="padding: 0 12px; margin: 0;"
-                              ng-if="x.editVisible && !x.edit"
-                              ng-click="vm.editArchiveRelationModal(x); $event.stopPropagation();"
-                              uib-tooltip="{{'EDIT' | translate}}"
-                              tooltip-placement="auto top"
-                              tooltip-append-to-body="true"
-                            >
-                              <i class="fas fa-edit"></i>
-                            </button>
+                            <div class="edit-btn-wrapper">
+                              <button
+                                class="btn btn-edit-field"
+                                ng-if="x.editVisible && !x.edit"
+                                ng-click="vm.editArchiveRelationModal(x); $event.stopPropagation();"
+                                uib-tooltip="{{'EDIT' | translate}}"
+                                tooltip-placement="auto top"
+                                tooltip-append-to-body="true"
+                              >
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button
+                                class="btn btn-edit-field-delete"
+                                ng-if="x.editVisible && !x.edit"
+                                ng-click="vm.removeArchiveRelationModal(x); $event.stopPropagation();"
+                                uib-tooltip="{{'REMOVE' | translate}}"
+                                tooltip-placement="auto top"
+                                tooltip-append-to-body="true"
+                              >
+                                <i class="fas fa-trash-alt"></i>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                         <tr ng-if="!vm.agent.archives.length && !vm.archivesLoading" class="empty-table-indicator">
@@ -605,16 +660,28 @@
                   ng-mouseleave="x.editVisible = false;"
                 >
                   <hr class="small" />
-                  <button
-                    class="btn btn-edit-field position-realtive float-right"
-                    ng-if="x.editVisible"
-                    ng-click="vm.editNoteModal(x)"
-                    uib-tooltip="{{'EDIT' | translate}}"
-                    tooltip-placement="auto top"
-                    tooltip-append-to-body="true"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
+                  <div class="edit-btn-wrapper position-realtive float-right pt-base">
+                    <button
+                      class="btn btn-edit-field"
+                      ng-if="x.editVisible"
+                      ng-click="vm.editNoteModal(x)"
+                      uib-tooltip="{{'EDIT' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-edit-field-delete"
+                      ng-if="x.editVisible && !x.edit"
+                      ng-click="vm.removeNoteModal(x)"
+                      uib-tooltip="{{'REMOVE' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
                   <div class="flex-row">
                     <b
                       ><span
@@ -669,16 +736,28 @@
                   ng-mouseleave="x.editVisible = false;"
                 >
                   <hr class="small" />
-                  <button
-                    class="btn btn-edit-field position-realtive float-right"
-                    ng-if="x.editVisible"
-                    ng-click="vm.editNoteModal(x)"
-                    uib-tooltip="{{'EDIT' | translate}}"
-                    tooltip-placement="auto top"
-                    tooltip-append-to-body="true"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
+                  <div class="edit-btn-wrapper position-realtive float-right">
+                    <button
+                      class="btn btn-edit-field"
+                      ng-if="x.editVisible"
+                      ng-click="vm.editNoteModal(x)"
+                      uib-tooltip="{{'EDIT' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-edit-field-delete"
+                      ng-if="x.editVisible && !x.edit"
+                      ng-click="vm.removeNoteModal(x)"
+                      uib-tooltip="{{'REMOVE' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
                   <div class="flex-row">
                     <b
                       ><span

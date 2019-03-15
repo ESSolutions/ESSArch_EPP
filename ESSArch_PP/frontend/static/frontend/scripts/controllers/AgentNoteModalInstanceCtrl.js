@@ -85,13 +85,42 @@ angular
         });
     };
 
+    $ctrl.remove = function() {
+      $ctrl.removing = true;
+      var notes = angular.copy(data.agent.notes);
+      notes.forEach(function(x, idx, array) {
+        if (typeof x.type === 'object') {
+          x.type = x.type.id;
+        }
+        if (x.id === $ctrl.note.id) {
+          array.splice(idx, 1);
+        }
+      });
+      $http({
+        url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
+        method: 'PATCH',
+        data: {notes: notes},
+      })
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function(response) {
+          $ctrl.removing = false;
+        });
+    }
+
     $ctrl.cancel = function() {
       EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
 
     $scope.$on('modal.closing', function(event, reason, closed) {
-      if (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press') {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
         var message = $translate.instant('UNSAVED_DATA_WARNING');
         if (!confirm(message)) {
           event.preventDefault();
