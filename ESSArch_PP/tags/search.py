@@ -19,6 +19,7 @@ from django_filters.constants import EMPTY_VALUES
 from elasticsearch.exceptions import NotFoundError, TransportError
 from elasticsearch_dsl import Q, FacetedSearch, TermsFacet
 from elasticsearch_dsl.connections import get_connection
+from natsort import natsorted
 from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -412,6 +413,42 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         f.seek(0)
         name = 'search_results_{time}_{user}.{format}'.format(time=timezone.localtime(), user=user.username,
                                                               format=format)
+        return generate_file_response(f, content_type=ctype, name=name)
+
+    @action(detail=True, url_path='export')
+    def archive_report(self, request, pk=None):
+        archive = TagVersion.objects.get(pk=pk)
+        series = archive.get_active_structure().structure.units.prefetch_related(
+            Prefetch(
+                'tagstructure_set',
+                queryset=TagStructure.objects.select_related(
+                    'tag__current_version'
+                ),
+                to_attr='volumes',
+            ),
+        ).all()
+
+        series_list = []
+
+        for serie in series:
+            series_list.append({
+                'name': serie.name,
+                'reference_code': serie.reference_code,
+                'volumes': natsorted(
+                    [vol.tag.current_version for vol in serie.volumes],
+                    key=lambda x: x.reference_code,
+                ),
+            })
+
+        template = 'tags/archive.html'.format()
+        f = tempfile.TemporaryFile()
+
+        ctype = 'application/pdf'
+        render = render_to_string(template, {'archive_name': archive.name, 'series': series_list})
+        HTML(string=render).write_pdf(f)
+
+        f.seek(0)
+        name = 'archive_{}.pdf'.format(pk)
         return generate_file_response(f, content_type=ctype, name=name)
 
     def serialize(self, obj):
