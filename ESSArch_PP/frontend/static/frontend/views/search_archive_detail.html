@@ -1,9 +1,14 @@
 <div class="archive-result">
-  <h3 title="Namn">
-    <strong title="Namn" ng-if="vm.record._source.name">
-      {{vm.record._source.name}}
-    </strong>
-  </h3>
+  <div class="d-flex justify-content-between align-items-center w-100">
+    <h3 title="Namn">
+      <strong title="Namn" ng-if="vm.record._source.name">
+        {{vm.record._source.name}}
+      </strong>
+    </h3>
+    <button class="btn btn-primary" ng-click="vm.exportArchive(vm.record)">
+      {{'EXPORT' | translate}}
+    </button>
+  </div>
   <h4 title="Informationsobjekt">{{vm.record._source.type}}</h4>
   <div ng-if="vm.getArchiveCreator(vm.record) !== null">
     <label for="creator">{{'ACCESS.ARCHIVE_CREATOR' | translate}}:&nbsp;</label>

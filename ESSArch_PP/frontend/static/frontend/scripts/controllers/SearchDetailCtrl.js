@@ -834,6 +834,12 @@ angular
       angular.extend(record, obj);
     };
 
+    vm.exportArchive = function(node) {
+      var showFile = $sce.trustAsResourceUrl(
+        appConfig.djangoUrl + 'search/' + node._source.id + '/export/');
+      $window.open(showFile, '_blank');
+    }
+
     vm.editField = function(key, value) {
       var modalInstance = $uibModal.open({
         animation: true,
