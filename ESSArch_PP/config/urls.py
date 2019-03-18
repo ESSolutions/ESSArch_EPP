@@ -55,6 +55,7 @@ from storage.views import (AccessQueueViewSet, IOQueueViewSet, RobotViewSet, Rob
 from tags.search import ComponentSearchViewSet
 from tags.views import (
     ArchiveViewSet,
+    StoredSearchViewSet,
     StructureViewSet,
     StructureUnitViewSet,
     TagViewSet,
@@ -73,6 +74,7 @@ router.register(r'agents', AgentViewSet).register(
     base_name='agent-archives',
     parents_query_lookups=['agent']
 )
+router.register(r'me/searches', StoredSearchViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'classification-structures', StructureViewSet).register(
     r'units',

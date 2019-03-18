@@ -1,9 +1,8 @@
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
-from ESSArch_Core.tags.models import (
-    Structure,
-)
+from ESSArch_Core.auth.fields import CurrentUsernameDefault
+from ESSArch_Core.tags.models import Search, Structure
 
 
 class SearchSerializer(serializers.Serializer):
@@ -30,3 +29,17 @@ class SearchSerializer(serializers.Serializer):
                 raise serializers.ValidationError({'archive': [_('This field is required.')]})
 
         return data
+
+
+class StoredSearchSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(read_only=True, default=CurrentUsernameDefault())
+    query = serializers.JSONField()
+
+    def create(self, validated_data):
+        if 'user' not in validated_data:
+            validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+    class Meta:
+        model = Search
+        fields = ('id', 'name', 'user', 'query',)

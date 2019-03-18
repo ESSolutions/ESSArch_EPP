@@ -11,9 +11,11 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from ESSArch_Core.agents.models import AgentTagLink
 from ESSArch_Core.tags.filters import StructureUnitFilter, TagFilter
 from ESSArch_Core.tags.models import (
+    Search,
     Structure,
     StructureUnit,
     Tag,
+    TagVersion
 )
 from ESSArch_Core.tags.serializers import (
     AgentArchiveLinkSerializer,
@@ -26,7 +28,9 @@ from ESSArch_Core.tags.serializers import (
     StructureUnitWriteSerializer,
 )
 from ESSArch_Core.util import mptt_to_dict
+
 from ip.views import InformationPackageViewSet
+from tags.serializers import StoredSearchSerializer
 
 
 class ArchiveViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
@@ -179,3 +183,14 @@ class TagInformationPackagesViewSet(NestedViewSetMixin, InformationPackageViewSe
             Q(tags__in=leaves) | Q(information_packages__tags__in=leaves) |
             Q(aic__information_packages__tags__in=leaves)
         ).distinct()
+
+
+class StoredSearchViewSet(viewsets.ModelViewSet):
+    queryset = Search.objects.all()
+    serializer_class = StoredSearchSerializer
+
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    search_fields = ('name',)
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
