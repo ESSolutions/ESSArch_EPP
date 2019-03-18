@@ -37,7 +37,7 @@ from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobVi
                                             ConversionJobViewSet)
 from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
 from ESSArch_Core.routers import ESSArchRouter
-from ESSArch_Core.stats.views import StatsView
+from ESSArch_Core.stats.views import stats, export as export_stats
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
@@ -209,7 +209,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/', include(router.urls)),
-    url(r'^api/stats/', StatsView.as_view()),
+    url(r'^api/stats/$', stats),
+    url(r'^api/stats/export/$', export_stats),
     url(r'^api/sysinfo/', SysInfoView.as_view()),
     url(r'^api/me/$', MeView.as_view(), name='me'),
     url(r'^api/submission-agreement-template/$', SubmissionAgreementTemplateView.as_view()),
