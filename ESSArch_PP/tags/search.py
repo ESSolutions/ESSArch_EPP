@@ -439,6 +439,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(r, headers={'Count': results.hits.total})
 
     def generate_report(self, hits, format, user):
+        try:
+            tag_versions = [hit.get('_source').get('name') for hit in hits]
+        except Exception:
+            tag_versions = hits
+        logger.info(f"User '{user}' generating a {format} report, with tag versions: '{tag_versions}'")
         template = 'tags/search_results.html'.format()
 
         f = tempfile.TemporaryFile()
