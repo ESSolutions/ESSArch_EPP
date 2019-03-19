@@ -296,6 +296,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             if in_any_groups:
                 raise exceptions.NotFound
+
+        logger.info(f"User '{self.request.user}' accessing tag object '{obj}'")
         return obj
 
     def verify_sort_field(self, field, direction='asc'):
