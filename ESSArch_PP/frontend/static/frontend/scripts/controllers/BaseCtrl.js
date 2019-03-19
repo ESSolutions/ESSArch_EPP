@@ -97,11 +97,11 @@ angular
       workarea: 'access-workspace.html',
       createDip: 'dissemination.html',
       orders: 'index.html',
-    }
+    };
     vm.getStateDocPage = function() {
       var page = $state.current.name.split('.').pop();
       return docStateMap[page];
-    }
+    };
 
     //Request form data
     $scope.initRequestData = function() {
