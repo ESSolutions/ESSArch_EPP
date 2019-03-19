@@ -20,24 +20,74 @@
           </div>
         </div>
       </form>
+      <div class="flex-row mb-base mt-base">
+        <button class="btn btn-default" ng-click="vm.savedSearchVisible = !vm.savedSearchVisible;">
+          <i class="fas" ng-class="{'fa-plus': vm.savedSearchVisible, 'fa-minus': !vm.savedSearchVisible}"></i
+          >&nbsp;{{'ACCESS.SAVED_SEARCHES' | translate}}
+        </button>
+        <button
+          class="btn btn-default"
+          uib-tooltip="{{'ACCESS.SAVE_SEARCH' | translate}}"
+          tooltip-position="auto top"
+          ng-click="vm.saveSearchModal()"
+        >
+          {{'ACCESS.SAVE_SEARCH' | translate}}
+        </button>
+      </div>
+      <div class="mb-base" uib-collapse="vm.savedSearchVisible">
+        <div class="table-x-overflow table-container">
+          <table class="table table-striped m-0">
+            <thead>
+              <tr>
+                <th>
+                  {{'NAME' | translate}}
+                </th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                ng-repeat="x in vm.searchList"
+                ng-mouseover="x.removeVisible = true"
+                ng-mouseleave="x.removeVisible = false"
+                ui-sref="home.access.search({query: x.query})"
+                class="selectable"
+              >
+                <td>
+                  {{x.name}}
+                </td>
+                <td class="position-relative">
+                  <div class="edit-btn-wrapper">
+                    <button
+                      class="btn btn-edit-field-delete"
+                      ng-if="x.removeVisible"
+                      ng-click="vm.removeSearchModal(x); $event.stopPropagation();"
+                      uib-tooltip="{{'REMOVE' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr ng-if="!vm.searchList.length && !loadingSearches" class="empty-table-indicator">
+                <td colspan="2">{{'NO_RESULTS_FOUND' | translate}}</td>
+              </tr>
+              <tr ng-if="!vm.searchList.length && loadingSearches" class="empty-table-indicator">
+                <td class="loading-column" colspan="2">{{'LOADING' | translate}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <button ng-if="!vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = true">
         <i class="fas fa-plus"></i>&nbsp;{{'FILTERS' | translate}}
       </button>
       <button ng-if="vm.showFilters" class="btn btn-default" ng-click="vm.showFilters = false">
         <i class="fas fa-minus"></i>&nbsp;{{'FILTERS' | translate}}
       </button>
-      <div ng-if="vm.showFilters" class="filters">
-        <!--<label>
-                    {{'START_DATE' | translate}}
-                    <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.start_date">
-                </label>
-                <label>
-                    {{'END_DATE' | translate}}
-                    <input type="number" class="form-control" ng-enter="vm.searchSubmit(vm.searchString)" ng-model="vm.filterObject.end_date">
-                </label>
-                <br/>-->
-        <br />
-        <hr />
+      <div uib-collapse="!vm.showFilters" class="filters">
         <div ng-include src="'static/frontend/views/search_filters.html'"></div>
         <hr />
         <div>
@@ -126,7 +176,7 @@
           </div>
           <hr class="small" />
           <div class="px-base">
-              <search-filter
+            <search-filter
               label=" {{'TYPE' | translate}}"
               options="vm.options.types"
               label-prop="key"

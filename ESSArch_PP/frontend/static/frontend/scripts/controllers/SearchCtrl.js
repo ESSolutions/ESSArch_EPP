@@ -33,10 +33,29 @@ angular
     vm.options = {
       archives: [],
       agents: [],
-      types: []
+      types: [],
     };
     vm.archiveFilter = [];
     vm.agentFilter = [];
+
+    vm.filterObject = {
+      q: '',
+      type: null,
+      page: 1,
+      page_size: vm.resultsPerPage || 25,
+      ordering: '',
+    };
+
+    vm.extensionFilter = {};
+
+    vm.includedTypes = {
+      archive: true,
+      ip: true,
+      component: true,
+      file: true,
+    };
+    vm.savedSearchVisible = true;
+    vm.searchList = [];
 
     // Change tab from outside this scope, used in search detail
     $scope.$on('CHANGE_TAB', function(event, data) {
@@ -72,11 +91,12 @@ angular
       ) {
         vm.activeTab = 1;
         vm.showTree = true;
-      } else if ($state.is('home.access.search.classificationStructures')) {
-        vm.activeTab = 3;
       } else {
         vm.activeTab = 0;
         vm.showResults = true;
+      }
+      if ($stateParams.query !== null && !angular.isUndefined($stateParams.query)) {
+        vm.filterObject = $stateParams.query;
       }
       $http.get(appConfig.djangoUrl + 'search/', {params: vm.filterObject}).then(function(response) {
         vm.loadTags(response.data.aggregations);
@@ -96,22 +116,19 @@ angular
       }
     };
 
-    vm.filterObject = {
-      q: '',
-      type: null,
-      page: 1,
-      page_size: vm.resultsPerPage || 25,
-      ordering: '',
+    vm.getSavedSearches = function() {
+      vm.loadingSearches = true;
+      $http
+        .get(appConfig.djangoUrl + 'me/searches/', {pager: 'none'})
+        .then(function(response) {
+          vm.searchList = response.data;
+          vm.loadingSearches = false;
+        })
+        .catch(function() {
+          vm.loadingSearches = false;
+        });
     };
-
-    vm.extensionFilter = {};
-
-    vm.includedTypes = {
-      archive: true,
-      ip: true,
-      component: true,
-      file: true,
-    };
+    vm.getSavedSearches();
 
     vm.createArchive = function(archiveName, structureName, type, referenceCode) {
       Search.addNode({
@@ -205,7 +222,9 @@ angular
         mathod: 'GET',
         params: {page: 1, page_size: 10, index: 'archive', search: search},
       }).then(function(response) {
-        vm.options.archives = response.data.map(function(x){return x.current_version});
+        vm.options.archives = response.data.map(function(x) {
+          return x.current_version;
+        });
         return vm.options.archives;
       });
     };
@@ -227,29 +246,52 @@ angular
     vm.filterNodeTypes = function(search) {
       var types = vm.options.originalTypes.filter(function(x) {
         return x.key.toLowerCase().indexOf(search.toLowerCase()) !== -1;
-      })
+      });
       vm.options.types = types;
-    }
+    };
 
     vm.formatFilters = function() {
+      var filters = angular.copy(vm.filterObject);
       var includedTypes = [];
       for (var key in vm.includedTypes) {
         if (vm.includedTypes[key]) {
           includedTypes.push(key);
         }
       }
-      vm.filterObject.indices = includedTypes.join(',');
+      filters.indices = includedTypes.join(',');
       var includedExtension = [];
       for (var key in vm.extensionFilter) {
         if (vm.extensionFilter[key]) {
           includedExtension.push(key);
         }
       }
-      if (vm.filterObject.extension == '' || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
-        delete vm.filterObject.extension;
+      if (filters.extension == '' || filters.extension == null || filters.extension == {}) {
+        delete filters.extension;
       } else {
-        vm.filterObject.extension = includedExtension.join(',');
+        filters.extension = includedExtension.join(',');
       }
+      if (angular.isArray(filters.archives) && filters.archives !== null) {
+        filters.archives = filters.archives
+          .map(function(x) {
+            return x.id;
+          })
+          .join(',');
+      }
+      if (angular.isArray(filters.agents) && filters.agents !== null) {
+        filters.agents = filters.agents
+          .map(function(x) {
+            return x.id;
+          })
+          .join(',');
+      }
+      if (angular.isArray(filters.type) && filters.type !== null) {
+        filters.type = filters.type
+          .map(function(x) {
+            return x.key;
+          })
+          .join(',');
+      }
+      return filters;
     };
 
     /**
@@ -263,7 +305,6 @@ angular
         var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
         var number = pagination.number; // Number of entries showed per page.
         var pageNumber = isNaN(start / number) ? 1 : start / number + 1; // Prevents initial 404 response where pagenumber os NaN in request
-        vm.formatFilters();
         var ordering = tableState.sort.predicate;
         if (tableState.sort.reverse) {
           ordering = '-' + ordering;
@@ -271,7 +312,8 @@ angular
         vm.filterObject.page = pageNumber;
         vm.filterObject.page_size = number;
         vm.filterObject.ordering = ordering;
-        Search.query(vm.filterObject).then(function(response) {
+        var filters = vm.formatFilters();
+        Search.query(filters).then(function(response) {
           angular.copy(response.data, vm.searchResult);
           vm.numberOfResults = response.count;
           tableState.pagination.numberOfPages = response.numberOfPages; //set the number of pages so the pagination can update
@@ -433,9 +475,9 @@ angular
 
     vm.getExportResultUrl = function(tableState, format) {
       if (tableState) {
-        vm.formatFilters();
-        if (vm.filterObject.extension == '' || vm.filterObject.extension == null || vm.filterObject.extension == {}) {
-          delete vm.filterObject.extension;
+        var filters = vm.formatFilters();
+        if (filters.extension == '' || filters.extension == null || filters.extension == {}) {
+          delete filters.extension;
         }
         var ordering = tableState.sort.predicate;
         if (tableState.sort.reverse) {
@@ -446,7 +488,7 @@ angular
             {
               export: format,
             },
-            vm.filterObject
+            filters
           )
         );
         return appConfig.djangoUrl + 'search/?' + params;
@@ -475,6 +517,58 @@ angular
       });
       modalInstance.result
         .then(function(data) {})
+        .catch(function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        });
+    };
+
+    vm.saveSearchModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/save_search_modal.html',
+        controller: 'SavedSearchModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'md',
+        resolve: {
+          data: function() {
+            return {
+              filters: vm.filterObject,
+            };
+          },
+        },
+      });
+      modalInstance.result
+        .then(function(data) {
+          vm.getSavedSearches();
+        })
+        .catch(function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        });
+    };
+
+    vm.removeSearchModal = function(search) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_search_modal.html',
+        controller: 'SavedSearchModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'smd',
+        resolve: {
+          data: function() {
+            return {
+              search: search,
+            };
+          },
+        },
+      });
+      modalInstance.result
+        .then(function(data) {
+          vm.getSavedSearches();
+        })
         .catch(function() {
           $log.info('modal-component dismissed at: ' + new Date());
         });

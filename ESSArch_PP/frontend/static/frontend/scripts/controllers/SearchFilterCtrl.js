@@ -2,10 +2,10 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
   var vm = this;
   vm.q = '';
   vm.$onInit = function() {
-    if(vm.ngModel === '' || vm.ngModel === null) {
+    if (vm.ngModel === '' || vm.ngModel === null) {
       vm.selected = [];
     } else {
-      vm.selected = [];
+      vm.selected = vm.ngModel;
     }
     vm.update({
       search: vm.q,
@@ -44,11 +44,7 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
     if (vm.selected.length <= 0) {
       vm.ngModel = null;
     } else {
-      vm.ngModel = vm.selected
-        .map(function(x) {
-          return x[vm.valueProp];
-        })
-        .join(',');
+      vm.ngModel = vm.selected;
     }
   };
 
@@ -79,11 +75,11 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
     var list = angular.copy(vm.options);
     var toDelete = [];
     list.forEach(function(x, idx, array) {
-      if(!vm.notSelected(x)) {
+      if (!vm.notSelected(x)) {
         toDelete.push(idx);
       }
-    })
-    for(var i = toDelete.length; i > 0; i--) {
+    });
+    for (var i = toDelete.length; i > 0; i--) {
       list.splice(toDelete[i], 1);
     }
     return list.length <= 0;
@@ -100,7 +96,7 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
         elementClasses.contains('filter-input') ||
         elementClasses.contains('filter-options-item') ||
         clickedElement.parents('filter-input-wrapper').length ||
-        clickedElement.parents('filter-options').length
+        clickedElement.parents('filter-options').length;
 
       if (!clickedOnFilter) {
         vm.resultListVisible = false;
@@ -108,5 +104,5 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
         $scope.$apply();
       }
     };
-  }
+  };
 });
