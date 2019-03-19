@@ -270,6 +270,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             if in_any_groups:
                 raise exceptions.NotFound
+
+        logger.info(f"User '{self.request.user}' accessing tag object '{obj}'")
         return obj
 
     def verify_sort_field(self, field, direction='asc'):
@@ -315,6 +317,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         query = params.pop('q', '')
         export = params.pop('export', None)
         params.pop('pager', None)
+
+        logger.info(f"User '{request.user}' queried for '{query}'")
 
         if export is not None and export not in EXPORT_FORMATS:
             raise exceptions.ParseError('Invalid export format "{}"'.format(export))
@@ -383,6 +387,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response(r, headers={'Count': results.hits.total})
 
     def generate_report(self, hits, format, user):
+        try:
+            tag_versions = [hit.get('_source').get('name') for hit in hits]
+        except Exception:
+            tag_versions = hits
+        logger.info(f"User '{user}' generating a {format} report, with tag versions: '{tag_versions}'")
         template = 'tags/search_results.html'.format()
 
         f = tempfile.TemporaryFile()
