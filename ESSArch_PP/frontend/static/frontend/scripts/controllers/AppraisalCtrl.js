@@ -30,6 +30,8 @@ angular
     $scope.nextLoading = false;
     $scope.finishedLoading = false;
 
+    $scope.$translate = $translate;
+
     //Cancel update intervals on state change
     $scope.$on('$stateChangeStart', function() {
       $interval.cancel(appraisalInterval);
