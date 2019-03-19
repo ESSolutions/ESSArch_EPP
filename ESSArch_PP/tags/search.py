@@ -344,6 +344,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         export = params.pop('export', None)
         params.pop('pager', None)
 
+        logger.info(f"User '{request.user}' queried for '{query}'")
+
         if export is not None and export not in EXPORT_FORMATS:
             raise exceptions.ParseError('Invalid export format "{}"'.format(export))
 
