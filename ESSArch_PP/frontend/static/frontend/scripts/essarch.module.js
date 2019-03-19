@@ -771,6 +771,24 @@ angular
           },
         },
       })
+      .state('home.dashboard', {
+        url: 'dashboard',
+        template: '<dashboard-stats></dashboard-stats>',
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.dashboard', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
       .state('home.restricted', {
         url: 'restricted',
         templateUrl: '/static/frontend/views/restricted.html',

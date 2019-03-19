@@ -84,6 +84,15 @@
           ng-if="checkPermissions('home.administration')"
           >{{('ADMINISTRATION' | translate)}}</a
         >
+        <a
+          tabindex="0"
+          ng-keydown="navKeydownListener($event, 'home.dashboard')"
+          class="nav-item sliding-middle-out"
+          ng-class="{'chosen': $state.includes('home.dashboard')}"
+          ui-sref="home.dashboard"
+          ng-if="checkPermissions('home.dashboard')"
+          >{{('DASHBOARD' | translate)}}</a
+        >
       </nav>
       <div ng-controller="UtilCtrl" class="tasks-icons">
         <span
