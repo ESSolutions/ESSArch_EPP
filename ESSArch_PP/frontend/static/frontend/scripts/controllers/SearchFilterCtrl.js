@@ -3,7 +3,7 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
   var onclickSet = false;
   vm.q = '';
   vm.$onInit = function() {
-    if (vm.ngModel === '' || vm.ngModel === null) {
+    if (angular.isUndefined(vm.ngModel)) {
       vm.selected = [];
     } else {
       vm.selected = vm.ngModel;
