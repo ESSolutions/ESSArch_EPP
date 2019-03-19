@@ -81,12 +81,27 @@ angular
     vm.archived = false;
     vm.specificTabs = [];
 
+    $scope.$translate = $translate;
+
     $scope.ContentTabs = ContentTabs;
     // Can be overwritten in controllers to change title
     vm.listViewTitle = $translate.instant('INFORMATION_PACKAGES');
 
     var watchers = [];
     // Init request form
+
+    var docStateMap = {
+      reception: 'reception.html',
+      approval: 'approval.html',
+      accessIp: 'access-search.html',
+      workarea: 'access-workspace.html',
+      createDip: 'dissemination.html',
+      orders: 'index.html',
+    };
+    vm.getStateDocPage = function() {
+      var page = $state.current.name.split('.').pop();
+      return docStateMap[page];
+    };
 
     //Request form data
     $scope.initRequestData = function() {
