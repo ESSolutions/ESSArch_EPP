@@ -8,6 +8,8 @@
         <li ng-repeat="x in vm.selected" ng-click="vm.deselect(x)" class="selectable"
         ng-mouseover="showDelete = true"
         ng-mouseout="showDelete = false"
+        uib-tooltip="{{'ACCESS.DESELECT_FILTER' | translate}}"
+        tooltip-placement="top-left auto"
         >
           {{x[vm.labelProp]}}
         </li>
@@ -17,16 +19,15 @@
       </ul>
     </div>
     <input
-      id="search-filter-{{$id}}"
       placeholder="{{'SEARCH' | translate}} ..."
-      class="form-control filter-input"
+      class="form-control filter-input filter-{{$id}}"
       ng-model="vm.q"
       ng-change="vm.search()"
       ng-model-options="{debounce: 300}"
       ng-focus="vm.openOptions($event)"
     />
     <div class="position-relative">
-      <ul ng-if="vm.resultListVisible" class="list-unstyled filter-options" id="filter-options-{{$id}}"
+      <ul ng-if="vm.resultListVisible" class="list-unstyled filter-options"
       >
         <li
           ng-repeat="x in vm.options track by $index"

@@ -37,6 +37,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       DATES: 'Dates',
       DECISION_DATE: 'Decision date',
       DELETE_FIELD: 'Do you want to delete field: {{field}}?',
+      DESELECT_FILTER: 'Remove filter choice',
       DOCUMENT: 'Document',
       DO_YOU_WANT_TO_REMOVE_AGENT_NAME: 'Do you want to remove agent name?',
       DO_YOU_WANT_TO_REMOVE_ARCHIVE_CREATOR: 'Do you want to remove archive creator?',

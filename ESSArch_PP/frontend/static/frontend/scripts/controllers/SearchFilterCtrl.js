@@ -1,5 +1,6 @@
-angular.module('essarch.controllers').controller('SearchFilterCtrl', function($scope, $window) {
+angular.module('essarch.controllers').controller('SearchFilterCtrl', function($scope, $window, $rootScope) {
   var vm = this;
+  var onclickSet = false;
   vm.q = '';
   vm.$onInit = function() {
     if (vm.ngModel === '' || vm.ngModel === null) {
@@ -26,14 +27,12 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
     }
   );
 
-  $scope.$watch(
-    function() {
-      return $window.onclick;
-    },
-    function(oldval, newval) {
-      //vm.resultListVisible = false;
+  $rootScope.$on('CLOSE_FILTERS', function(e, data) {
+    if(data.except !== $scope.$id) {
+      vm.resultListVisible = false;
+      onclickSet = false;
     }
-  );
+  })
 
   vm.search = function() {
     vm.update({
@@ -86,21 +85,23 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
   };
   vm.openOptions = function(evt) {
     vm.resultListVisible = true;
+    if($window.onclick && !onclickSet) {
+      $rootScope.$broadcast('CLOSE_FILTERS', {except: $scope.$id});
+    }
+    onclickSet = true;
     $window.onclick = function(event) {
       var clickedElement = $(event.target);
       if (!clickedElement) return;
       var elementClasses = event.target.classList;
       var clickedOnFilter =
-        elementClasses.contains('filter-options') ||
-        elementClasses.contains('filter-input-wrapper') ||
-        elementClasses.contains('filter-input') ||
+        elementClasses.contains('filter-'+$scope.$id) ||
         elementClasses.contains('filter-options-item') ||
-        clickedElement.parents('filter-input-wrapper').length ||
         clickedElement.parents('filter-options').length;
 
       if (!clickedOnFilter) {
         vm.resultListVisible = false;
         $window.onclick = null;
+        onclickSet = false;
         $scope.$apply();
       }
     };
