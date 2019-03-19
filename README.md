@@ -12,7 +12,7 @@ To run the DB, redis, rabbitmq and Elastic-services in docker follow the below i
 
 Navigate to the folder where docker-compose.yml file is located:
 
-    cd docker/eta
+    cd docker/epp
 
 To start all services run:
 
