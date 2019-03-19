@@ -128,6 +128,7 @@ INSTALLED_APPS = [
     'ESSArch_Core.essxml.ProfileMaker',
     'ESSArch_Core.fixity',
     'ESSArch_Core.search',
+    'ESSArch_Core.stats',
     'ESSArch_Core.storage',
     'ESSArch_Core.tags',
     'ESSArch_Core.WorkflowEngine',
@@ -339,6 +340,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Media files
+MEDIA_URL = 'api/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
