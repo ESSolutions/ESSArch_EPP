@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: "mariadb:10.2.16"
+    image: "mariadb:$MARIADB_VERSION"
     ports:
       - 3003:3306
     environment:
@@ -12,7 +12,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
   rabbitmq:
-    image: "rabbitmq:latest"
+    image: "rabbitmq:$RABBITMQ_VERSION"
     ports:
       - 15003:5672
     environment:
@@ -20,7 +20,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=rabbitmq
 
   redis:
-    image: redis
+    image: "redis:$REDIS_VERSION"
     ports:
       - 6003:6379
 
