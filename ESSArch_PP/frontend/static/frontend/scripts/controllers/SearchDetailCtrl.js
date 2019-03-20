@@ -592,11 +592,11 @@ angular
             },
           };
           var actions = {
-            update: update,
-            add: add,
+            update: $scope.checkPermission('tags.change_classification')?update:undefined,
+            add: $scope.checkPermission('tags.change_classification')?add:undefined,
             email: email,
-            remove: remove,
-            removeFromStructure: removeFromStructure,
+            remove: $scope.checkPermission('tags.change_classification')?remove:undefined,
+            removeFromStructure: $scope.checkPermission('tags.change_classification')?removeFromStructure:undefined,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
           };
