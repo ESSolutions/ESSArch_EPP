@@ -26,11 +26,11 @@ services:
 
   elasticsearch:
     build:
-      context: elasticsearch/
+      context: docker/elasticsearch
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
-      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./docker/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ports:
       - "9203:9200"
       - "9303:9300"
@@ -41,12 +41,12 @@ services:
 
   logstash:
       build:
-          context: logstash/
+          context: docker/logstash
           args:
               ELK_VERSION: $ELK_VERSION
       volumes:
-          - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-          - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+          - ./docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+          - ./docker/logstash/pipeline:/usr/share/logstash/pipeline:ro
       ports:
           - "5003:5000"
           - "9603:9600"
@@ -59,11 +59,11 @@ services:
 
   kibana:
       build:
-          context: kibana/
+          context: docker/kibana
           args:
               ELK_VERSION: $ELK_VERSION
       volumes:
-          - ./kibana/config/:/usr/share/kibana/config:ro
+          - ./docker/kibana/config/:/usr/share/kibana/config:ro
       ports:
           - "5603:5601"
       networks:
