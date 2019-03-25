@@ -8,13 +8,7 @@ Instructions for preparing for, installing and setting up EPP (and ESSArch Core)
 
 # Running services in docker
 
-To run the DB, redis, rabbitmq and Elastic-services in docker follow the below instructions:
-
-Navigate to the folder where docker-compose.yml file is located:
-
-    cd docker/epp
-
-To start all services run:
+To run the DB, redis, rabbitmq and Elastic-services in docker run the following command in the root folder:
 
     docker-compose up -d
 
