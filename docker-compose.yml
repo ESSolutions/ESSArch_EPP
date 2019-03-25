@@ -39,10 +39,10 @@ services:
       - elk
 
   logstash:
-      build:
+    build:
       context: docker/logstash
       args:
-          ELK_VERSION: $ELK_VERSION
+        ELK_VERSION: $ELK_VERSION
     volumes:
       - ./docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./docker/logstash/pipeline:/usr/share/logstash/pipeline:ro
@@ -60,7 +60,7 @@ services:
     build:
       context: docker/kibana
       args:
-          ELK_VERSION: $ELK_VERSION
+        ELK_VERSION: $ELK_VERSION
     volumes:
       - ./docker/kibana/config/:/usr/share/kibana/config:ro
     ports:
