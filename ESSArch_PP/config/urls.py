@@ -221,8 +221,8 @@ router.register(r'search', ComponentSearchViewSet, base_name='search')
 
 urlpatterns = [
     url(r'^', include('ESSArch_Core.frontend.urls'), name='home'),
-    url(r'^accounts/changepassword', auth_views.password_change, {'post_change_redirect': '/'}),
-    url(r'^accounts/login/$', auth_views.login),
+    url(r'^accounts/changepassword', auth_views.PasswordChangeView.as_view(), {'post_change_redirect': '/'}),
+    url(r'^accounts/login/$', auth_views.LoginView.as_view()),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/', include(router.urls)),
