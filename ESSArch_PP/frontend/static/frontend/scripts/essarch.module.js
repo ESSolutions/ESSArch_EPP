@@ -566,7 +566,7 @@ angular
         },
       })
       .state('home.access.classificationStructures', {
-        url: '/classification-structures',
+        url: '/structures',
         template: '<classification-structure-editor></classification-structure-editor>',
         resolve: {
           authenticated: [

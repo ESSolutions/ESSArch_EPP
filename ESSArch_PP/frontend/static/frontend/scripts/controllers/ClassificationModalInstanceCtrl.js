@@ -108,7 +108,7 @@ angular
 
     $ctrl.removeUnit = function() {
       $http
-        .delete(appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id)
+        .delete(appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id)
         .then(function(response) {
           Notifications.add($translate.instant('ACCESS.NODE_REMOVED'), 'success');
           $uibModalInstance.close('added');
@@ -120,7 +120,7 @@ angular
         $ctrl.submitting = true;
         $http
           .post(
-            appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/',
+            appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/',
             angular.extend($ctrl.newNode, {
               parent: $ctrl.node.id,
             })
@@ -141,7 +141,7 @@ angular
     $ctrl.update = function() {
       $http({
         method: 'PATCH',
-        url: appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
+        url: appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
         data: {
           name: $ctrl.name,
         },

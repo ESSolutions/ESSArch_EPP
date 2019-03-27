@@ -43,6 +43,7 @@ from ESSArch_Core.stats.views import stats, export as export_stats
 from ESSArch_Core.tags.views import (
     ArchiveViewSet,
     StructureViewSet,
+    StructureTypeViewSet,
     StructureUnitViewSet,
     TagViewSet,
     TagVersionTypeViewSet,
@@ -81,13 +82,14 @@ router.register(r'agents', AgentViewSet).register(
 )
 router.register(r'me/searches', StoredSearchViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
-router.register(r'classification-structures', StructureViewSet).register(
+router.register(r'structures', StructureViewSet).register(
     r'units',
     StructureUnitViewSet,
     base_name='structure-units',
     parents_query_lookups=['structure']
 )
-router.register(r'classification-structure-units', StructureUnitViewSet)
+router.register(r'structure-units', StructureUnitViewSet)
+router.register(r'structure-types', StructureTypeViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)

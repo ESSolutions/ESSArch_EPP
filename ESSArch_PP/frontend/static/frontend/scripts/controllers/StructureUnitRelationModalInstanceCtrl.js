@@ -22,7 +22,7 @@ angular
     $ctrl.options = {};
     $ctrl.getStructures = function(search) {
       return $http({
-        url: appConfig.djangoUrl + 'classification-structures/',
+        url: appConfig.djangoUrl + 'structures/',
         method: 'GET',
         params: {search: search, page: 1, page_size: 10}
       }).then(function(response) {
@@ -33,7 +33,7 @@ angular
 
     $ctrl.getStructureUnits = function(structure, search) {
       return $http({
-        url: appConfig.djangoUrl + 'classification-structure-units/',
+        url: appConfig.djangoUrl + 'structure-units/',
         method: 'GET',
         params: {structure: structure, search: search, page: 1, page_size: 10},
       }).then(function(response) {
@@ -47,7 +47,7 @@ angular
         $ctrl.node = angular.copy(data.node);
       }
       return $http({
-        url: appConfig.djangoUrl + 'classification-structure-units/',
+        url: appConfig.djangoUrl + 'structure-units/',
         method: 'OPTIONS',
       }).then(function(response) {
         $ctrl.options.type = response.data.actions.POST.related_structure_units.child.children.type;
@@ -59,7 +59,7 @@ angular
     $ctrl.add = function() {
       $ctrl.adding = true;
       $http({
-        url: appConfig.djangoUrl + 'classification-structure-units/' + $ctrl.node.original.id + '/',
+        url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.original.id + '/',
         method: 'PATCH',
         data: {
           related_structure_units: angular.copy($ctrl.node).original.related_structure_units.concat([$ctrl.relation]),

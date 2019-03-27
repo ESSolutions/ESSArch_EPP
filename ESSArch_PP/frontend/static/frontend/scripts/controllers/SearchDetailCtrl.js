@@ -147,7 +147,7 @@ angular
     };
 
     vm.getStructureUnit = function(id) {
-      return $http.get(vm.url + 'classification-structure-units/' + id + '/').then(function(response) {
+      return $http.get(vm.url + 'structure-units/' + id + '/').then(function(response) {
         response.data._id = response.data.id;
         response.data._is_structure_unit = true;
         return vm.createNode(response.data);
@@ -175,7 +175,7 @@ angular
       page = page || 1;
 
       if (node._is_structure_unit === true) {
-        url = vm.url + 'classification-structure-units/' + node._id + '/children/';
+        url = vm.url + 'structure-units/' + node._id + '/children/';
       } else if (node._id === vm.archive._id) {
         return vm.getClassificationStructureChildren(vm.structure);
       } else {
@@ -205,7 +205,7 @@ angular
     };
 
     vm.getClassificationStructureChildren = function(id) {
-      var url = vm.url + 'classification-structures/' + id + '/units/';
+      var url = vm.url + 'structures/' + id + '/units/';
       return $http
         .get(url, {params: {has_parent: false, pager: 'none'}})
         .then(function(response) {

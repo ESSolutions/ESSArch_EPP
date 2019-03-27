@@ -88,7 +88,7 @@ angular
         type: 'archive',
       };
       return $http
-        .get(appConfig.djangoUrl + 'classification-structures/' + structure.id + '/tree/')
+        .get(appConfig.djangoUrl + 'structures/' + structure.id + '/tree/')
         .then(function(response) {
           var tree = response.data;
           if (tree.length <= 0) {
@@ -229,7 +229,7 @@ angular
       var parent = vm.structureTreeInstance.jstree(true).get_node(data.parent);
       $http({
         method: 'PATCH',
-        url: appConfig.djangoUrl + 'classification-structures/' + vm.structure.id + '/units/' + node.id + '/',
+        url: appConfig.djangoUrl + 'structures/' + vm.structure.id + '/units/' + node.id + '/',
         data: {
           parent: parent.original.id ? parent.original.id : '',
         },

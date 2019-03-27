@@ -112,7 +112,7 @@ angular
       $ctrl.saving = true;
       $http({
         method: 'PATCH',
-        url: appConfig.djangoUrl + 'classification-structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
+        url: appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
         data: $ctrl.editNode,
       })
         .then(function(response) {

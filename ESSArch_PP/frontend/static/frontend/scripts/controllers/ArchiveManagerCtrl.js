@@ -40,7 +40,7 @@ angular
 
     vm.getStructures = function(search) {
       return $http({
-        url: appConfig.djangoUrl + 'classification-structures/',
+        url: appConfig.djangoUrl + 'structures/',
         mathod: 'GET',
         params: {page: 1, page_size: 10, search: search},
       }).then(function(response) {
