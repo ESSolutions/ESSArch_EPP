@@ -16,6 +16,8 @@ class SearchSerializer(serializers.Serializer):
     structure_unit = serializers.CharField(required=False)
     archive_creator = serializers.CharField(required=False)
     archive_responsible = serializers.CharField(required=False)
+    start_date = serializers.DateTimeField(required=False)
+    end_date = serializers.DateTimeField(required=False)
 
     def validate(self, data):
         if data['index'] == 'archive':
@@ -36,6 +38,11 @@ class SearchSerializer(serializers.Serializer):
 
             if 'structure_unit' in data and 'archive' not in data:
                 raise serializers.ValidationError({'archive': [_('This field is required.')]})
+
+        if data.get('start_date') and data.get('end_date') and \
+           data.get('start_date') > data.get('end_date'):
+
+            raise serializers.ValidationError(_("end date must occur after start date"))
 
         return data
 
