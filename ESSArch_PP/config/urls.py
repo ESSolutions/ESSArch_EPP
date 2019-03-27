@@ -45,6 +45,7 @@ from ESSArch_Core.tags.views import (
     StructureViewSet,
     StructureUnitViewSet,
     TagViewSet,
+    TagVersionTypeViewSet,
 )
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
@@ -170,6 +171,7 @@ router.register(r'tags', TagViewSet, base_name='tags').register(
     parents_query_lookups=['tag']
 )
 
+router.register(r'tag-version-types', TagVersionTypeViewSet)
 router.register(r'tasks', ProcessTaskViewSet)
 router.register(r'tasks', ProcessTaskViewSet).register(
     r'validations',
