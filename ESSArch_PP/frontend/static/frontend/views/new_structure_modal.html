@@ -6,7 +6,7 @@
     <label for="name">{{'NAME' | translate}}</label>
     <input required focused="true" id="name" class="form-control" ng-model="$ctrl.name" />
     <div class="flex-row w-100 margin-top-5">
-      <div>
+      <div class="w-50">
         <div class="dropdown" uib-dropdown is-open="status.startDate">
           <label for="start-date">{{'START_DATE' | translate}}</label>
           <a class="dropdown-toggle" id="start-date" role="button" uib-dropdown-toggle>
@@ -28,7 +28,7 @@
           </ul>
         </div>
       </div>
-      <div>
+      <div class="w-50">
         <div class="dropdown" uib-dropdown is-open="status.endDate">
           <label for="end-date">{{'END_DATE' | translate}}</label>
           <a class="dropdown-toggle" id="end-date" role="button" uib-dropdown-toggle>
