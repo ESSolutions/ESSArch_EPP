@@ -27,7 +27,9 @@ class SearchSerializer(serializers.Serializer):
 
         if data['index'] != 'archive':
             if data['type'].archive_type:
-                raise serializers.ValidationError({'type': [_('Only non-archive types allowed for non-archives nodes')]})
+                raise serializers.ValidationError({
+                    'type': [_('Only non-archive types allowed for non-archives nodes')]
+                })
 
             if 'parent' not in data and 'structure_unit' not in data:
                 raise serializers.ValidationError('parent or structure_unit required')
