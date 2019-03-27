@@ -2,13 +2,13 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from ESSArch_Core.auth.fields import CurrentUsernameDefault
-from ESSArch_Core.tags.models import Search, Structure
+from ESSArch_Core.tags.models import Search, Structure, TagVersionType
 
 
 class SearchSerializer(serializers.Serializer):
     index = serializers.ChoiceField(choices=['archive', 'component'], default='component')
     name = serializers.CharField()
-    type = serializers.CharField()
+    type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.all())
     reference_code = serializers.CharField()
     structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.all())
     archive = serializers.CharField(required=False)
