@@ -185,22 +185,20 @@ input[type='checkbox'] {
     box-shadow: none;
   }
 }
-.control-label {
-  font-size: 10px;
+
+.reception {
+  .formly-field-group {
+    width: 100% !important;
+  }
+  .formly-field-group .formly-field {
+    width: 15%;
+  }
+  .formly-field {
+    width: 24%;
+    margin: 5px;
+  }
 }
 
-.formly-field-group {
-  width: 100% !important;
-}
-
-.formly-field-group .formly-field {
-  width: 15%;
-}
-
-.formly-field {
-  width: 24%;
-  margin: 5px;
-}
 .submit-button {
   margin-left: 5px;
 }
