@@ -18,10 +18,17 @@ class SearchSerializer(serializers.Serializer):
     archive_responsible = serializers.CharField(required=False)
 
     def validate(self, data):
+        if data['index'] == 'archive':
+            if not data['type'].archive_type:
+                raise serializers.ValidationError({'type': [_('Only archive types allowed for archives')]})
+
         if data['index'] == 'archive' and 'structure' not in data:
             raise serializers.ValidationError({'structure': [_('This field is required.')]})
 
         if data['index'] != 'archive':
+            if data['type'].archive_type:
+                raise serializers.ValidationError({'type': [_('Only non-archive types allowed for non-archives nodes')]})
+
             if 'parent' not in data and 'structure_unit' not in data:
                 raise serializers.ValidationError('parent or structure_unit required')
 
