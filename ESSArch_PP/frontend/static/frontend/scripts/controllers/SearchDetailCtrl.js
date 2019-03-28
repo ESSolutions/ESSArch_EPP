@@ -505,7 +505,7 @@ angular
         select_node: false,
         items: function(node, callback) {
           var update = {
-            label: $translate.instant('UPDATE'),
+            label: $translate.instant('EDIT'),
             _disabled: function() {
               return node.original._is_structure_unit;
             },
