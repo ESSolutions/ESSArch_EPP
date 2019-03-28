@@ -142,6 +142,15 @@ class ComponentSearch(FacetedSearch):
             Q('terms', _id=organization_archives)
         ]))
 
+        s = s.query('bool', minimum_should_match=1, should=[
+            Q('term', current_version=True),
+            Q('bool', must_not=Q('terms', index=[
+                'archive-*',
+                'component-*'
+            ])),
+        ])
+
+
         if self.personal_identification_number not in EMPTY_VALUES:
             s = s.filter('term', personal_identification_numbers=self.personal_identification_number)
 
