@@ -200,8 +200,10 @@ angular
       if (vm.tableState) {
         vm.tableState.pagination.start = 0;
       }
-      vm.search(vm.tableState);
-      vm.activeTab = 0;
+      $timeout(function() {
+        vm.search(vm.tableState);
+        vm.activeTab = 0;
+      });
     };
 
     vm.getAuthorizedName = function(agent) {
