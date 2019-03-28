@@ -774,7 +774,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         for f in db_fields:
             if f in data:
-                db_fields_request_data[f] = data.pop(f)
+                db_fields_request_data[f] = data.get(f)
 
         serializer = TagVersionWriteSerializer(tag_version, data=db_fields_request_data, partial=True)
         serializer.is_valid(raise_exception=True)
