@@ -222,6 +222,7 @@
                 <thead>
                   <tr>
                     <th>{{'TYPE' | translate}}</th>
+                    <th>{{'ACCESS.ARCHIVE' | translate}}</th>
                     <th st-sort="reference_code" class="clickable">{{'ACCESS.REFERENCE_CODE' | translate}}</th>
                     <th st-sort="name" class="clickable">{{'ACCESS.TITLE' |translate}}</th>
                     <th>{{'DATE' |translate}}</th>
@@ -237,6 +238,9 @@
                     <td>
                       {{x.type}}
                     </td>
+                    <td class="search-archive-column">
+                      {{x.archive.name}}
+                    </td>
                     <td class="search-td-nowrap d-flex">
                       <span ng-if="x.structure_units.length > 0">
                           {{x.structure_units[0].name}}:
@@ -248,10 +252,10 @@
                     <td ng-bind-html="x.desc"></td>
                   </tr>
                   <tr ng-if="!vm.searchResult.length && !ipLoading" class="empty-table-indicator">
-                    <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                    <td colspan="7">{{'NO_RESULTS_FOUND' | translate}}</td>
                   </tr>
                   <tr ng-if="!vm.searchResult.length && ipLoading" class="empty-table-indicator">
-                    <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
+                    <td class="loading-column" colspan="7">{{'LOADING' | translate}}</td>
                   </tr>
                 </tbody>
               </table>
