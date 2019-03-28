@@ -18,6 +18,7 @@ angular
       text: null,
       type: null,
     };
+    $ctrl.fields = [];
     $ctrl.resetNote = function() {
       $ctrl.note = angular.copy($ctrl.noteTemplate);
     };
@@ -35,14 +36,72 @@ angular
         } else {
           $ctrl.resetNote();
         }
+        $ctrl.loadForm();
       });
     };
 
+    $ctrl.loadForm = function() {
+      $ctrl.fields = [
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            label: $translate.instant('TYPE'),
+            options: $ctrl.typeOptions,
+            required: true,
+            labelProp: 'display_name',
+            valueProp: 'value',
+            defaultValue: $ctrl.typeOptions[0].value,
+            notNull: true,
+          },
+        },
+        {
+          key: 'text',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('ACCESS.TEXT'),
+            rows: 3,
+            required: true,
+          },
+        },
+        {
+          key: 'href',
+          type: 'input',
+          templateOptions: {
+            label: $translate.instant('ACCESS.HREF'),
+          },
+        },
+        {
+          type: 'datepicker',
+          key: 'create_date',
+          templateOptions: {
+            label: $translate.instant('CREATE_DATE'),
+            appendToBody: false,
+            required: true,
+          },
+        },
+        {
+          type: 'datepicker',
+          key: 'revise_date',
+          templateOptions: {
+            label: $translate.instant('ACCESS.REVISE_DATE'),
+            appendToBody: false,
+          },
+        },
+      ];
+    };
+
     $ctrl.add = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.adding = true;
       var notes = angular.copy(data.agent.notes);
       notes.forEach(function(x) {
-        x.type = x.type.id;
+        if (typeof x.type === 'object') {
+          x.type = x.type.id;
+        }
       });
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
@@ -60,6 +119,10 @@ angular
     };
 
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.saving = true;
       var notes = angular.copy(data.agent.notes);
       notes.forEach(function(x, idx, array) {
@@ -109,7 +172,7 @@ angular
         .catch(function(response) {
           $ctrl.removing = false;
         });
-    }
+    };
 
     $ctrl.cancel = function() {
       EditMode.disable();

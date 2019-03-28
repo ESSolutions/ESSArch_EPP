@@ -3,7 +3,7 @@
     {{'ACCESS.ADD_RELATED_ARCHIVE_CREATOR' | translate}}
   </h3>
 </div>
-<form ng-submit="$ctrl.add()">
+<form ng-submit="$ctrl.add()" novalidate name="$ctrl.form">
   <div class="modal-body" id="modal-body">
     <div ng-include src="'static/frontend/views/edit_agent_relation.html'"></div>
   </div>

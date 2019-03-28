@@ -20,6 +20,7 @@ angular
       type: null,
       certainty: null,
     };
+    $ctrl.fields = [];
     $ctrl.resetName = function() {
       $ctrl.name = angular.copy($ctrl.nameTemplate);
     };
@@ -37,9 +38,114 @@ angular
         } else {
           $ctrl.resetName();
         }
+        $ctrl.loadForm();
       });
     };
+
+    $ctrl.loadForm = function() {
+      $ctrl.fields = [
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            label: $translate.instant('TYPE'),
+            options: $ctrl.options.names.type.choices,
+            required: true,
+            labelProp: 'display_name',
+            valueProp: 'value',
+            defaultValue: $ctrl.options.names.type.choices[0].value,
+            notNull: true,
+          },
+        },
+      ];
+      if (data.agent.type && data.agent.type.cpf && data.agent.type.cpf !== 'corporatebody') {
+        $ctrl.fields.push({
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'input',
+              key: 'part',
+              templateOptions: {
+                label: $translate.instant('ACCESS.PART'),
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'input',
+              key: 'main',
+              templateOptions: {
+                label: $translate.instant('ACCESS.MAIN'),
+                required: true,
+              },
+            },
+          ],
+        });
+      } else {
+        $ctrl.fields.push({
+          type: 'input',
+          key: 'main',
+          templateOptions: {
+            label: $translate.instant('NAME'),
+            required: true,
+          },
+        });
+      }
+      $ctrl.fields = $ctrl.fields.concat([
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_START'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          type: 'select',
+          key: 'certainty',
+          templateOptions: {
+            options: [
+              {value: true, display_name: $translate.instant('ACCESS.SURE')},
+              {value: false, display_name: $translate.instant('ACCESS.UNSURE')},
+            ],
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.CERTAINTY'),
+          },
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          },
+        },
+      ]);
+    };
+
     $ctrl.add = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.adding = true;
       var names = angular.copy(data.agent.names);
       names.forEach(function(x) {
@@ -60,6 +166,10 @@ angular
         });
     };
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.saving = true;
       var names = angular.copy(data.agent.names);
       names.forEach(function(x, idx, array) {

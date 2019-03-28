@@ -242,7 +242,9 @@ angular
         },
       });
       modalInstance.result.then(
-        function(data) {},
+        function(data) {
+          $state.go($state.current.name, {id: data.id});
+        },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
         }
@@ -267,7 +269,12 @@ angular
         },
       });
       modalInstance.result.then(
-        function(data) {},
+        function(data) {
+          vm.agentPipe($scope.tableState);
+          if(vm.agent) {
+            vm.getAgent(vm.agent);
+          }
+        },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
         }

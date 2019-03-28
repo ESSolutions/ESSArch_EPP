@@ -20,7 +20,8 @@ angular
       type: 1,
       certainty: null,
     };
-
+    $ctrl.nameFields = [];
+    $ctrl.basicFields = [];
     $ctrl.sortLanguages = function() {
       var swe, eng;
       $ctrl.options.language.choices.forEach(function(choice, idx, array) {
@@ -83,7 +84,6 @@ angular
           method: 'OPTIONS',
         }).then(function(response) {
           $ctrl.agent = angular.copy(data.agent);
-          $ctrl.agent.type = data.agent.type.id;
           $ctrl.agent.ref_code = data.agent.ref_code.id;
           angular.forEach(response.data.actions.POST, function(value, key) {
             if (!angular.isUndefined(value.choices) && value.choices.length > 0) {
@@ -105,19 +105,256 @@ angular
               });
             }
           });
+          $ctrl.buildTypeField($ctrl.agent).then(function(typeField) {
+            $ctrl.loadBasicFields();
+            $ctrl.basicFields.unshift(typeField);
+          })
         });
       } else {
         $ctrl.buildAgentModel().then(function(model) {
           $ctrl.agent = model;
+          $ctrl.buildTypeField($ctrl.agent).then(function(typeField) {
+            typeField.templateOptions.onChange = function() {
+              $ctrl.loadForms();
+            };
+            $ctrl.typeField = [typeField];
+          })
         });
       }
       EditMode.enable();
     };
+
+    $ctrl.buildTypeField = function(agent) {
+      return $http.get(appConfig.djangoUrl + 'agent-types/', {pager: 'none'}).then(function(response) {
+        var options = angular.copy(response.data);
+        options.forEach(function(x) {
+          x.name = x.main_type.name;
+          if(x.id === agent.type.id) {
+            agent.type = x;
+          }
+        })
+        var type = {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            options: options,
+            ngOptions: 'x.name for x in to.options',
+            label: $translate.instant('TYPE'),
+            required: true,
+            notNull: true,
+          },
+        };
+        return type;
+      })
+    };
+
+    $ctrl.loadForms = function() {
+      $ctrl.nameFields = [];
+      $ctrl.basicFields = [];
+      $ctrl.loadNameForm();
+      $ctrl.loadBasicFields();
+    }
+
+    $ctrl.loadNameForm = function() {
+      $ctrl.nameFields = [];
+      if ($ctrl.agent.type && $ctrl.agent.type.cpf && $ctrl.agent.type.cpf !== 'corporatebody') {
+        $ctrl.nameFields.push({
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'input',
+              key: 'part',
+              templateOptions: {
+                label: $translate.instant('ACCESS.PART'),
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'input',
+              key: 'main',
+              templateOptions: {
+                label: $translate.instant('ACCESS.MAIN'),
+                required: true,
+              },
+            },
+          ],
+        });
+      } else {
+        $ctrl.nameFields.push({
+          type: 'input',
+          key: 'main',
+          templateOptions: {
+            label: $translate.instant('NAME'),
+            required: true,
+          },
+        });
+      }
+
+      $ctrl.nameFields = $ctrl.nameFields.concat([
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_START'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          type: 'select',
+          key: 'certainty',
+          templateOptions: {
+            options: [
+              {value: true, display_name: $translate.instant('ACCESS.SURE')},
+              {value: false, display_name: $translate.instant('ACCESS.UNSURE')},
+            ],
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.CERTAINTY'),
+          },
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          },
+        },
+      ]);
+    };
+
+    $ctrl.loadBasicFields = function() {
+      $ctrl.basicFields = [
+        {
+          type: 'datepicker',
+          key: 'create_date',
+          templateOptions: {
+            label: $translate.instant('CREATE_DATE'),
+            appendToBody: false,
+            required: true,
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('START_DATE'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('END_DATE'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          type: 'select',
+          key: 'level_of_detail',
+          templateOptions: {
+            options: $ctrl.options.level_of_detail.choices,
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.LEVEL_OF_DETAIL'),
+            defaultValue: $ctrl.options.level_of_detail.choices[0].value,
+            required: true,
+            notNull: true,
+          },
+        },
+        {
+          type: 'select',
+          key: 'script',
+          templateOptions: {
+            options: $ctrl.options.script.choices,
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.SCRIPT'),
+            defaultValue: $ctrl.options.script.choices[0].value,
+            required: true,
+            notNull: true,
+          },
+        },
+        {
+          type: 'select',
+          key: 'language',
+          templateOptions: {
+            options: $ctrl.options.language.choices,
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.LANGUAGE'),
+            defaultValue: $ctrl.options.language.choices[0].value,
+            required: true,
+            notNull: true,
+          },
+        },
+        {
+          type: 'select',
+          key: 'record_status',
+          templateOptions: {
+            options: $ctrl.options.record_status.choices,
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.RECORD_STATUS'),
+            defaultValue: $ctrl.options.record_status.choices[0].value,
+            required: true,
+            notNull: true,
+          },
+        },
+        {
+          type: 'select',
+          key: 'ref_code',
+          templateOptions: {
+            options: $ctrl.options.ref_code.choices,
+            valueProp: 'value',
+            labelProp: 'display_name',
+            label: $translate.instant('ACCESS.REFERENCE_CODE'),
+            defaultValue: $ctrl.options.ref_code.choices[0].value,
+            required: true,
+            notNull: true,
+          },
+        },
+      ];
+    };
+
     $ctrl.cancel = function() {
       EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
     $ctrl.create = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      $ctrl.agent.type = $ctrl.agent.type.id;
       $ctrl.creating = true;
       $ctrl.agent.names = [];
       $ctrl.agent.names.push($ctrl.authName);
@@ -136,6 +373,11 @@ angular
         });
     };
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      $ctrl.agent.type = $ctrl.agent.type.id;
       angular.forEach($ctrl.agent, function(value, key) {
         if (angular.isArray(value)) {
           delete $ctrl.agent[key];
@@ -159,13 +401,16 @@ angular
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
-      $http.delete(appConfig.djangoUrl + 'agents/' + $ctrl.agent.id).then(function(response) {
-        $ctrl.removing = false;
-        EditMode.disable();
-        $uibModalInstance.close('removed');
-      }).catch(function() {
-        $ctrl.removing = false;
-      })
+      $http
+        .delete(appConfig.djangoUrl + 'agents/' + $ctrl.agent.id)
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close('removed');
+        })
+        .catch(function() {
+          $ctrl.removing = false;
+        });
     };
 
     $scope.$on('modal.closing', function(event, reason, closed) {

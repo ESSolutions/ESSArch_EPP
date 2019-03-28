@@ -11,6 +11,7 @@ angular
   ) {
     var $ctrl = this;
     $ctrl.mandate;
+    $ctrl.fields = [];
     $ctrl.mandateTemplate = {
       part: '',
       main: '',
@@ -37,9 +38,81 @@ angular
         } else {
           $ctrl.resetMandate();
         }
+        $ctrl.loadForm();
       });
     };
+
+    $ctrl.loadForm = function() {
+      $ctrl.fields = [
+        {
+          type: 'input',
+          key: 'name',
+          templateOptions: {
+            label: $translate.instant('NAME'),
+            required: true,
+          },
+        },
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            label: $translate.instant('TYPE'),
+            options: $ctrl.options.mandates.type.choices,
+            required: true,
+            labelProp: 'display_name',
+            valueProp: 'value',
+            defaultValue: $ctrl.options.mandates.type.choices.length > 0 ? $ctrl.options.mandates.type.choices[0].value : null,
+            notNull: true,
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.DECISION_DATE'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          type: 'input',
+          key: 'href',
+          templateOptions: {
+            label: $translate.instant('ACCESS.HREF'),
+          },
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          },
+        },
+      ];
+    };
+
     $ctrl.add = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.adding = true;
       var mandates = angular.copy(data.agent.mandates);
       mandates.forEach(function(x) {
@@ -60,6 +133,10 @@ angular
         });
     };
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       $ctrl.saving = true;
       var mandates = angular.copy(data.agent.mandates);
       mandates.forEach(function(x, idx, array) {
@@ -74,13 +151,15 @@ angular
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
         data: {mandates: mandates},
-      }).then(function(response) {
-        $ctrl.saving = false;
-        EditMode.disable();
-        $uibModalInstance.close(response.data);
-      }).catch(function() {
-        $ctrl.saving = false;
       })
+        .then(function(response) {
+          $ctrl.saving = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.saving = false;
+        });
     };
 
     $ctrl.remove = function() {
@@ -98,14 +177,16 @@ angular
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
         data: {mandates: mandates},
-      }).then(function(response) {
-        $ctrl.removing = false;
-        EditMode.disable();
-        $uibModalInstance.close(response.data);
-      }).catch(function() {
-        $ctrl.removing = false;
       })
-    }
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.removing = false;
+        });
+    };
 
     $ctrl.cancel = function() {
       EditMode.disable();

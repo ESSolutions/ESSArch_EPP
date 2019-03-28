@@ -3,7 +3,7 @@
       {{'NAME' | translate}}
     </h3>
   </div>
-  <form ng-submit="$ctrl.save()">
+  <form ng-submit="$ctrl.save()" novalidate name="$ctrl.form">
     <div class="modal-body" id="modal-body">
       <div ng-include src="'static/frontend/views/edit_agent_name.html'"></div>
     </div>

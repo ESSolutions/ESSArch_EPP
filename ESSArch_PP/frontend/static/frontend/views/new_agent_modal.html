@@ -1,97 +1,17 @@
 <div class="modal-heading">
   <h3 class="modal-title" id="modal-title">{{'ACCESS.CREATE_ARCHIVE_CREATOR' | translate}}</h3>
 </div>
-<form ng-submit="$ctrl.create()">
+<form ng-submit="$ctrl.create()" novalidate name="$ctrl.form">
   <div class="modal-body" id="modal-body">
     <div class="pb-base">
-      <h4>
+      <formly-form model="$ctrl.agent" fields="$ctrl.typeField" options="{}"></formly-form>
+      <h4 ng-if="$ctrl.nameFields.length > 0">
         {{'ACCESS.AUTHORIZED_NAME' | translate}}
       </h4>
-      <div class="flex-100-grow">
-        <div>
-          <label>
-            {{'ACCESS.PART' | translate}}
-          </label>
-          <input class="form-control" ng-model="$ctrl.authName.part" />
-        </div>
-        <div class="ml-base">
-          <label>
-            {{'ACCESS.MAIN' | translate}}
-          </label>
-          <input class="form-control" required ng-model="$ctrl.authName.main" />
-        </div>
-      </div>
-      <div class="flex-100-grow align-items-center pt-base">
-        <div>
-          <label>
-            {{'ACCESS.VALID_DATE_START' | translate}}
-          </label>
-          <div class="dropdown" uib-dropdown is-open="dropdown_status.authName.start_date">
-            <a class="dropdown-toggle" id="dropdown-start_date" role="button" uib-dropdown-toggle>
-              <div class="input-group">
-                <input
-                  type="text"
-                  data-date-time-input="YYYY-MM-DD"
-                  class="form-control"
-                  data-ng-model="$ctrl.authName.start_date"
-                /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
-              </div>
-            </a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
-              <datetimepicker
-                data-ng-model="$ctrl.authName.start_date"
-                ng-change="dropdown_status.authName.start_date = false"
-                data-datetimepicker-config="{ dropdownSelector: '#dropdown-startlDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
-              />
-            </ul>
-          </div>
-        </div>
-        <div class="ml-base">
-          <label>
-            {{'ACCESS.VALID_DATE_END' | translate}}
-          </label>
-          <div class="dropdown" uib-dropdown is-open="dropdown_status.authName.end_date">
-            <a class="dropdown-toggle" id="dropdown-endlDate" role="button" uib-dropdown-toggle>
-              <div class="input-group">
-                <input
-                  type="text"
-                  data-date-time-input="YYYY-MM-DD"
-                  class="form-control"
-                  data-ng-model="$ctrl.authName.end_date"
-                /><span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
-              </div>
-            </a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" uib-dropdown-menu>
-              <datetimepicker
-                data-ng-model="$ctrl.authName.end_date"
-                ng-change="dropdown_status.authName.end_date = false"
-                data-datetimepicker-config="{ dropdownSelector: '#dropdown-endDate', minView: 'day', startView: 'year', modelType: 'YYYY-MM-DD'}"
-              />
-            </ul>
-          </div>
-        </div>
-      </div>
-      <label>
-        {{'ACCESS.CERTAINTY' | translate}}
-      </label>
-      <select class="form-control" ng-model="$ctrl.name.certainty">
-        <option value="{{null}}"></option>
-        <option value="{{true}}">Säker</option>
-        <option value="{{false}}">Osäker</option>
-      </select>
-      <label>
-        {{'DESCRIPTION' | translate}}
-      </label>
-      <textarea
-        class="form-control"
-        name="description"
-        ng-model="$ctrl.authName.description"
-        maxlength="255"
-        rows="3"
-      ></textarea>
+      <formly-form model="$ctrl.authName" fields="$ctrl.nameFields" options="{}"></formly-form>
+      <hr />
+      <div ng-if="$ctrl.basicFields.length > 0" ng-include="'static/frontend/views/edit_agent.html'"></div>
     </div>
-    <hr />
-    <div ng-include="'static/frontend/views/edit_agent.html'"></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.preparing">

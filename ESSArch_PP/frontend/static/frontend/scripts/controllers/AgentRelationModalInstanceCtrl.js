@@ -20,7 +20,7 @@ angular
       agent: null,
     };
     $ctrl.options = {};
-
+    $ctrl.fields = [];
     $ctrl.getAuthorizedName = function(agent) {
       var name;
       agent.names.forEach(function(x) {
@@ -63,12 +63,88 @@ angular
         method: 'OPTIONS',
       }).then(function(response) {
         $ctrl.options.type = response.data.actions.POST.related_agents.child.children.type;
+        $ctrl.loadForm();
         EditMode.enable();
         return response.data;
       });
     };
 
+    $ctrl.loadForm = function() {
+      $ctrl.fields = [
+        {
+          type: 'uiselect',
+          key: 'agent',
+          templateOptions: {
+            required: true,
+            options: function() {
+              return $ctrl.options.agents;
+            },
+            valueProp: 'id',
+            labelProp: 'full_name',
+            placeholder: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
+            label: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
+            appendToBody: false,
+            refresh: function(search) {
+              $ctrl.getAgents(search).then(function() {
+                this.options = $ctrl.options.agents;
+              });
+            },
+          },
+        },
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            label: $translate.instant('TYPE'),
+            options: $ctrl.options.type.choices,
+            required: true,
+            labelProp: 'display_name',
+            valueProp: 'value',
+            defaultValue: $ctrl.options.type.choices.length > 0 ? $ctrl.options.type.choices[0].value : null,
+            notNull: true,
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_START'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          }
+        }
+      ];
+    };
+
     $ctrl.add = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return
+      }
       $ctrl.adding = true;
       var related_agents = angular.copy($ctrl.agent.related_agents);
       related_agents.forEach(function(x, idx, array) {
@@ -98,6 +174,10 @@ angular
     };
 
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return
+      }
       $ctrl.saving = true;
       var related_agents = angular.copy($ctrl.agent.related_agents);
       related_agents.forEach(function(x, idx, array) {

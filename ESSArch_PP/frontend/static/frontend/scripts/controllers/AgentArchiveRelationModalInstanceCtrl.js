@@ -6,7 +6,8 @@
     data,
     $http,
     EditMode,
-    $scope
+    $scope,
+    $translate
   ) {
     var $ctrl = this;
     $ctrl.relationTemplate = {
@@ -18,6 +19,7 @@
     };
     $ctrl.options = {};
     $ctrl.data = data;
+    $ctrl.fields = [];
     $ctrl.$onInit = function() {
       if (data.agent) {
         $ctrl.agent = angular.copy(data.agent);
@@ -34,6 +36,7 @@
         method: 'OPTIONS',
       }).then(function(response) {
         $ctrl.options.type = response.data.actions.POST.type;
+        $ctrl.loadForm();
         EditMode.enable();
         return response.data;
       });
@@ -51,8 +54,85 @@
         return $ctrl.options.archives;
       });
     };
+    $ctrl.loadForm = function() {
+      $ctrl.fields = [
+        {
+          type: 'uiselect',
+          key: 'archive',
+          templateOptions: {
+            required: true,
+            options: function() {
+              return $ctrl.options.archives;
+            },
+            valueProp: 'id',
+            labelProp: 'name',
+            placeholder: $translate.instant('ACCESS.ARCHIVE'),
+            label: $translate.instant('ACCESS.ARCHIVE'),
+            appendToBody: false,
+            optionsFunction: function(search) {
+              return $ctrl.options.archives;
+            },
+            refresh: function(search) {
+              $ctrl.getArchives(search).then(function() {
+                this.options = $ctrl.options.archives;
+              });
+            },
+          },
+        },
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            label: $translate.instant('TYPE'),
+            options: $ctrl.options.type.choices,
+            required: true,
+            labelProp: 'display_name',
+            valueProp: 'value',
+            defaultValue: $ctrl.options.type.choices[0].value,
+            notNull: true,
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_START'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+                dateFormat: 'YYYY-MM-DD',
+              },
+            },
+          ],
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          }
+        }
+      ];
+    };
 
     $ctrl.add = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return
+      }
       $ctrl.adding = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/archives/',
@@ -71,6 +151,10 @@
     };
 
     $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return
+      }
       $ctrl.saving = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/archives/' + $ctrl.relation.id + '/',
@@ -103,7 +187,7 @@
           $ctrl.removing = false;
           EditMode.disable();
         });
-    }
+    };
 
     $ctrl.cancel = function() {
       EditMode.disable();
