@@ -132,14 +132,20 @@ class ComponentSearch(FacetedSearch):
             ])),
         ])
 
-        s = s.query(Q('bool', should=[
-            # no archive
-            Q('bool', must=[Q('bool', **{'must_not': {'exists': {'field': 'archive'}}}),
-                            Q('bool', **{'must_not': {'term': {'_index': 'archive-*'}}})]),
-            # in archive connected to organization
-            Q('terms', archive=organization_archives),
-            # is archive connected to organization
-            Q('terms', _id=organization_archives)
+        s = s.filter(Q('bool', minimum_should_match=1, should=[
+            Q('nested', path='archive', ignore_unmapped=True, query=Q('terms', archive__id=organization_archives)),
+            Q('bool', minimum_should_match=1, should=[
+                Q('bool', must=[
+                    Q('bool', must_not=Q('term', _index='archive-*')),
+                    Q('nested', path='archive', ignore_unmapped=True, query=Q(
+                        'bool', **{'must_not': {'exists': {'field': 'archive'}}}
+                    )),
+                ]),
+                Q('bool', must=[
+                    Q('term', _index='archive-*'),
+                    Q('terms', _id=organization_archives)
+                ])
+            ]),
         ]))
 
         s = s.query('bool', minimum_should_match=1, should=[
@@ -149,7 +155,6 @@ class ComponentSearch(FacetedSearch):
                 'component-*'
             ])),
         ])
-
 
         if self.personal_identification_number not in EMPTY_VALUES:
             s = s.filter('term', personal_identification_numbers=self.personal_identification_number)
@@ -162,7 +167,9 @@ class ComponentSearch(FacetedSearch):
 
         if self.archives is not None:
             s = s.filter(Q('bool', minimum_should_match=1, should=[
-                Q('nested', path='archive', ignore_unmapped=True, query=Q('terms', **{'archive.id': self.archives.split(',')})),
+                Q('nested', path='archive', ignore_unmapped=True, query=Q(
+                    'terms', archive__id=self.archives.split(',')
+                )),
                 Q('bool', must=[
                     Q('bool', must_not=Q('exists', field='archive')),
                     Q('terms', _id=self.archives.split(',')),
