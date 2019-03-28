@@ -33,7 +33,7 @@ from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
-from ESSArch_Core.tags.documents import Archive, VersionedDocType
+from ESSArch_Core.tags.documents import Archive, Component, VersionedDocType, StructureUnitDocument
 from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, \
     TagVersionSerializerWithVersions, \
@@ -700,13 +700,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     tag_structure.structure = structure
                 tag_structure.save()
 
+                # TODO: use serializer to create object
                 tag_version = TagVersion.objects.create(
                     tag=tag, elastic_index=data['index'], name=data['name'],
-                    type=data['type'], reference_code=data['reference_code'])
+                    type=data['type'], reference_code=data['reference_code'],
+                    start_date=data['start_date'], end_date=data['end_date'],
+                    description=data['description'],
+                )
                 tag.current_version = tag_version
                 tag.save()
-
-                self._update_tag_metadata(tag_version, data)
 
                 if tag_version.elastic_index == 'archive':
                     org = request.user.user_profile.current_organization
@@ -717,25 +719,35 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     if search_data:
                         self._update_tag_metadata(tag_version, search_data)
 
-                    # create descendants from structure
-                    for unit in tag_structure.structure.units.all():
-                        tag = Tag.objects.create()
-                        tv = TagVersion.objects.create(tag=tag, elastic_index='component', name=unit.name,
-                                                       reference_code=unit.reference_code, type=unit.type)
-                        tv.update_search({'archive': str(tag_version.pk), 'desc': unit.description})
-                        tag.save()
-                        ts = TagStructure(tag=tag, structure=structure)
-                        if unit.parent is not None:
-                            parent = unit.parent.reference_code
-                            ts.parent = TagStructure.objects.filter(tree_id=tag_structure.tree_id,
-                                                                    tag__versions__elastic_index='component')\
-                                                            .filter(tag__versions__reference_code=parent)\
-                                                            .distinct().get()
-                        else:
-                            ts.parent = tag_structure
-                        ts.save()
+                    # create structure from template
+                    # TODO: move this to Structure class
+                    # TODO: ensure only structure templates can be chosen for new archives
 
-                return Response(self.serialize(tag_version.to_search()), status=status.HTTP_201_CREATED)
+                    old_structure_pk = structure.pk
+                    new_structure = structure
+                    new_structure.pk = None
+                    new_structure.save()
+
+                    tag_structure.structure = new_structure
+                    tag_structure.save()
+
+                    # create descendants from structure
+                    for unit in StructureUnit.objects.filter(structure_id=old_structure_pk):
+                        old_parent_ref_code = getattr(unit.parent, 'reference_code', None)
+                        new_unit = unit
+                        new_unit.pk = None
+                        new_unit.parent = None
+                        new_unit.structure = new_structure
+
+                        if old_parent_ref_code is not None:
+                            parent = new_structure.units.get(reference_code=old_parent_ref_code)
+                            new_unit.parent = parent
+
+                        new_unit.save()
+                        StructureUnitDocument.from_obj(new_unit).save()
+
+                Component.from_obj(tag_version).save()
+                return Response(TagVersionNestedSerializer(instance=tag_version).data, status=status.HTTP_201_CREATED)
 
     def _update_tag_metadata(self, tag_version, data):
         if 'structure_unit' in data:

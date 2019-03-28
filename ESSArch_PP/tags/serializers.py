@@ -8,6 +8,7 @@ from ESSArch_Core.tags.models import Search, Structure, TagVersionType
 class SearchSerializer(serializers.Serializer):
     index = serializers.ChoiceField(choices=['archive', 'component'], default='component')
     name = serializers.CharField()
+    description = serializers.CharField(required=False)
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.all())
     reference_code = serializers.CharField()
     structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.all())
