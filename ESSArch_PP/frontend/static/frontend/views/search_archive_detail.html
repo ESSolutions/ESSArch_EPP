@@ -12,10 +12,7 @@
   <h4 title="Informationsobjekt">{{vm.record._source.type}}</h4>
   <div ng-if="vm.getArchiveCreator(vm.record) !== null">
     <label for="creator">{{'ACCESS.ARCHIVE_CREATOR' | translate}}:&nbsp;</label>
-    <a
-      id="creator"
-      ui-sref="home.access.archiveCreators({id: vm.getArchiveCreator(vm.record).id})"
-    >
+    <a id="creator" ui-sref="home.access.archiveCreators({id: vm.getArchiveCreator(vm.record).id})">
       {{vm.getArchiveCreator(vm.record).auth_name}}
     </a>
   </div>
@@ -114,9 +111,18 @@
   <div
     ng-if="vm.record.create_date || vm.record.revise_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date || vm.record.end_date"
   >
-    <strong>Datum:</strong>
-    <result-field label="Skapad" data="vm.record.create_date" type="date"></result-field>
+    <strong>{{'DATES' | translate}}:</strong>
+    <result-field
+      label="{{'CREATE_DATE'| translate}}"
+      data="vm.record.create_date ? vm.record.create_date : ('ACCESS.DATE_MISSING' | translate)"
+      type="date"
+    ></result-field>
     <result-field label="{{'ACCESS.REVISE_DATE' |translate}}" data="vm.record.revise_date" type="date"></result-field>
+    <result-field
+      label="{{'ACCESS.IMPORT_DATE' | translate}}"
+      data="vm.record.import_date ? vm.record.import_date : ('ACCESS.DATE_MISSING' | translate)"
+      type="date"
+    ></result-field>
     <result-field label="Inkommen" data="vm.record._source.arrival_date" type="date"></result-field>
     <result-field label="Expedierad" data="vm.record._source.dispatch_date" type="date"></result-field>
     <result-field label="Beslutat" data="vm.record._source.decision_date" type="date"></result-field>
