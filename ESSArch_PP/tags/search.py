@@ -726,6 +726,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                     old_structure_pk = structure.pk
                     new_structure = structure
                     new_structure.pk = None
+                    new_structure.template = False
                     new_structure.save()
 
                     tag_structure.structure = new_structure

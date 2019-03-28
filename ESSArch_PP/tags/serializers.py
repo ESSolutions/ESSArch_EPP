@@ -11,7 +11,7 @@ class SearchSerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.all())
     reference_code = serializers.CharField()
-    structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.all())
+    structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.filter(template=True))
     archive = serializers.CharField(required=False)
     parent = serializers.CharField(required=False)
     structure_unit = serializers.CharField(required=False)
