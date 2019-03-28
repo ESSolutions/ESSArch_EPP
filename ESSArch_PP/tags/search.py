@@ -152,13 +152,13 @@ class ComponentSearch(FacetedSearch):
             s = s.filter('range', start_date={'lte': self.end_date})
 
         if self.archives is not None:
-            s = s.filter(Q('bool', should=[Q('script', script={
-                'source': (
-                    "(doc.containsKey('archive') && doc['archive'].value==params.archive)"
-                    "|| doc['_id'].value==params.archive"
-                ),
-                'params': {'archive': archive},
-            }) for archive in self.archives.split(',')]))
+            s = s.filter(Q('bool', minimum_should_match=1, should=[
+                Q('nested', path='archive', ignore_unmapped=True, query=Q('terms', **{'archive.id': self.archives.split(',')})),
+                Q('bool', must=[
+                    Q('bool', must_not=Q('exists', field='archive')),
+                    Q('terms', _id=self.archives.split(',')),
+                ])
+            ]))
 
         for filter_k, filter_v in self.query_params_filter.items():
             if filter_k in self.filters and filter_v not in EMPTY_VALUES:
