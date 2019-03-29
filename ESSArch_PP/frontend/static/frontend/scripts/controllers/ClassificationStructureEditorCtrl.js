@@ -62,6 +62,7 @@ angular
           page_size: number,
           ordering: sortString,
           search: search,
+          template: true,
         }).$promise.then(function(resource) {
           vm.structures = resource;
           tableState.pagination.numberOfPages = Math.ceil(resource.$httpHeaders('Count') / number); //set the number of pages so the pagination can update
