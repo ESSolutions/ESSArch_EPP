@@ -14,6 +14,7 @@ angular
   ) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
+    $ctrl.nodeFields = [];
     $ctrl.newNode = {
       reference_code: (data.node.children.length + 1).toString(),
       index: 'component',
@@ -28,7 +29,13 @@ angular
           name: 'component',
         },
       ];
+      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false}}).then(function(response) {
+        $ctrl.typeOptions = response.data;
+        $ctrl.loadForm();
+      });
+    };
 
+    $ctrl.loadForm = function() {
       $ctrl.nodeFields = [
         {
           templateOptions: {
@@ -43,10 +50,13 @@ angular
         {
           templateOptions: {
             label: $translate.instant('TYPE'),
-            type: 'text',
             required: true,
+            options: $ctrl.typeOptions,
+            valueProp: 'pk',
+            labelProp: 'name',
           },
-          type: 'input',
+          defaultValue: $ctrl.typeOptions.length > 0 ? $ctrl.typeOptions[0].pk : null,
+          type: 'select',
           key: 'type',
         },
         {
