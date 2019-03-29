@@ -14,8 +14,10 @@ angular
     $ctrl.newNode = {};
     $ctrl.options = {};
     $ctrl.nodeFields = [];
+    $ctrl.structureFields = [];
     $ctrl.types = [];
     $ctrl.data = data;
+    $ctrl.newStructure = {};
     $ctrl.$onInit = function() {
       if (data.node) {
         $ctrl.node = data.node;
@@ -23,7 +25,64 @@ angular
       if (data.structure) {
         $ctrl.structure = data.structure;
       }
+      if(data.newStructure) {
+        $http.get(appConfig.djangoUrl + 'structure-types/').then(function(response) {
+          $ctrl.typeOptions = response.data;
+          $ctrl.buildStructureForm();
+        })
+      } else {
+        $ctrl.buildNodeForm();
+      }
+    };
 
+    $ctrl.buildStructureForm = function() {
+      $ctrl.structureFields = [
+        {
+          key: 'name',
+          type: 'input',
+          templateOptions: {
+            label: $translate.instant('NAME'),
+            required: true
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_START'),
+                appendToBody: false,
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('ACCESS.VALID_DATE_END'),
+                appendToBody: false,
+              },
+            },
+          ],
+        },
+        {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            options: $ctrl.typeOptions,
+            valueProp: 'id',
+            labelProp: 'name',
+            label: $translate.instant('TYPE'),
+            required: true
+          },
+        },
+      ];
+    }
+
+    $ctrl.buildNodeForm = function() {
       $ctrl.nodeFields = [
         {
           templateOptions: {
@@ -116,6 +175,10 @@ angular
     };
 
     $ctrl.submit = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       if ($ctrl.changed()) {
         $ctrl.submitting = true;
         $http
@@ -154,12 +217,11 @@ angular
      * Save new classification structure
      */
     $ctrl.save = function() {
-      Structure.new({
-        name: $ctrl.name,
-        start_date: $ctrl.startDate,
-        end_date: $ctrl.endDate,
-        level: $ctrl.level,
-      }).$promise.then(function(response) {
+      if($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      Structure.new($ctrl.newStructure).$promise.then(function(response) {
         $uibModalInstance.close(response.data);
         Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
       });

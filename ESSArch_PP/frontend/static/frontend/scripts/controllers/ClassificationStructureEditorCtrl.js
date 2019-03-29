@@ -431,7 +431,9 @@ angular
         controller: 'ClassificationModalInstanceCtrl',
         controllerAs: '$ctrl',
         resolve: {
-          data: {},
+          data: {
+            newStructure: true
+          },
         },
       });
       modalInstance.result.then(

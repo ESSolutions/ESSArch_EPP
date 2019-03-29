@@ -100,6 +100,12 @@
                   ></button>
                 </td>
               </tr>
+              <tr ng-if="!vm.structures.length && !vm.structuresLoading" class="empty-table-indicator">
+                <td colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
+              </tr>
+              <tr ng-if="!vm.structures.length && vm.structuresLoading" class="empty-table-indicator">
+                <td class="loading-column" colspan="4">{{'LOADING' | translate}}</td>
+              </tr>
             </tbody>
           </table>
         </div>

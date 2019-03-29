@@ -66,6 +66,10 @@ angular
     };
 
     $ctrl.submit = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
       if ($ctrl.changed()) {
         $ctrl.submitting = true;
         var params = angular.extend($ctrl.newNode, {archive: data.archive, structure: data.structure});
