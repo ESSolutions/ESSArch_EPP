@@ -704,8 +704,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 tag_version = TagVersion.objects.create(
                     tag=tag, elastic_index=data['index'], name=data['name'],
                     type=data['type'], reference_code=data['reference_code'],
-                    start_date=data['start_date'], end_date=data['end_date'],
-                    description=data['description'],
+                    start_date=data.get('start_date'), end_date=data.get('end_date'),
+                    description=data.get('description'),
                 )
                 tag.current_version = tag_version
                 tag.save()
