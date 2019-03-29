@@ -720,32 +720,10 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                         self._update_tag_metadata(tag_version, search_data)
 
                     # create structure from template
-                    # TODO: move this to Structure class
-                    # TODO: ensure only structure templates can be chosen for new archives
-
-                    old_structure_pk = structure.pk
-                    new_structure = structure
-                    new_structure.pk = None
-                    new_structure.template = False
-                    new_structure.save()
+                    new_structure = structure.create_template_instance()
 
                     tag_structure.structure = new_structure
                     tag_structure.save()
-
-                    # create descendants from structure
-                    for unit in StructureUnit.objects.filter(structure_id=old_structure_pk):
-                        old_parent_ref_code = getattr(unit.parent, 'reference_code', None)
-                        new_unit = unit
-                        new_unit.pk = None
-                        new_unit.parent = None
-                        new_unit.structure = new_structure
-
-                        if old_parent_ref_code is not None:
-                            parent = new_structure.units.get(reference_code=old_parent_ref_code)
-                            new_unit.parent = parent
-
-                        new_unit.save()
-                        StructureUnitDocument.from_obj(new_unit).save()
 
                 Component.from_obj(tag_version).save()
                 return Response(TagVersionNestedSerializer(instance=tag_version).data, status=status.HTTP_201_CREATED)
