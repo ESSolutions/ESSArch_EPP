@@ -33,6 +33,15 @@
       <a ng-click="vm.goToNodePage(x.tag_version.id, false)">{{x.tag_version.name}}</a>
     </div>
   </div>
+  <div ng-if="vm.record.agents.length > 0" class="py-base">
+    <label>
+      {{'Relaterade agenter' | translate}}:
+    </label>
+    <div ng-repeat="x in vm.record.agents" class="d-flex">
+      {{x.type}}:&nbsp;
+      <a ui-sref="home.access.archiveCreators({id: x.agent.id})">{{x.name}}</a>
+    </div>
+  </div>
   <div ng-if="vm.record.history.length > 0">
     <hr class="small mx-0" />
     <h4>

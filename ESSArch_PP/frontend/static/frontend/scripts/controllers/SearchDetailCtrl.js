@@ -60,6 +60,7 @@ angular
         data.state = {selected: true, opened: true};
         vm.sortNotes(data);
         vm.record = data;
+        vm.parseAgents(vm.record);
         var startNode = data;
         var archiveId = null;
 
@@ -97,6 +98,7 @@ angular
 
       vm.buildTree(startNode, archive).then(function(children) {
         archive.children = children.data;
+        vm.parseAgents(archive);
         var creator = vm.getArchiveCreator(archive);
 
         if (creator !== null) {
@@ -206,20 +208,18 @@ angular
 
     vm.getClassificationStructureChildren = function(id) {
       var url = vm.url + 'structures/' + id + '/units/';
-      return $http
-        .get(url, {params: {has_parent: false, pager: 'none'}})
-        .then(function(response) {
-          var data = response.data.map(function(unit) {
-            unit._id = unit.id;
-            unit._is_structure_unit = true;
-            delete unit.parent;
-            return vm.createNode(unit);
-          });
-          return {
-            data: data,
-            count: response.headers('Count'),
-          };
+      return $http.get(url, {params: {has_parent: false, pager: 'none'}}).then(function(response) {
+        var data = response.data.map(function(unit) {
+          unit._id = unit.id;
+          unit._is_structure_unit = true;
+          delete unit.parent;
+          return vm.createNode(unit);
         });
+        return {
+          data: data,
+          count: response.headers('Count'),
+        };
+      });
     };
 
     vm.createPlaceholderNode = function() {
@@ -592,11 +592,13 @@ angular
             },
           };
           var actions = {
-            update: $scope.checkPermission('tags.change_classification')?update:undefined,
-            add: $scope.checkPermission('tags.change_classification')?add:undefined,
+            update: $scope.checkPermission('tags.change_tagversion') ? update : undefined,
+            add: $scope.checkPermission('tags.add_tagversion') ? add : undefined,
             email: email,
-            remove: $scope.checkPermission('tags.change_classification')?remove:undefined,
-            removeFromStructure: $scope.checkPermission('tags.change_classification')?removeFromStructure:undefined,
+            remove: $scope.checkPermission('tags.delete_tagversion') ? remove : undefined,
+            removeFromStructure: $scope.checkPermission('tags.change_classification')
+              ? removeFromStructure
+              : undefined,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
           };
@@ -801,18 +803,24 @@ angular
       });
     };
 
+    vm.parseAgents = function(node) {
+      node.agents.forEach(function(agent) {
+        agent.agent.names.forEach(function(x) {
+          x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
+          if (x.type.name.toLowerCase() === 'auktoriserad') {
+            agent.agent.auth_name = x.full_name;
+          }
+          agent.name = x.full_name;
+        });
+      });
+    };
+
     vm.getArchiveCreator = function(node) {
       var creator = null;
       node.agents.forEach(function(agent) {
         if (agent.type === 'creator') {
-          agent.agent.names.forEach(function(x) {
-            x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-            if (x.type.name.toLowerCase() === 'auktoriserad') {
-              agent.agent.auth_name = x.full_name;
-            }
-          });
           creator = agent.agent;
-          creator.name = agent.agent.auth_name;
+          creator.name = agent.name;
           creator.type = 'agent';
         }
       });
@@ -835,10 +843,9 @@ angular
     };
 
     vm.exportArchive = function(node) {
-      var showFile = $sce.trustAsResourceUrl(
-        appConfig.djangoUrl + 'search/' + node._source.id + '/export/');
+      var showFile = $sce.trustAsResourceUrl(appConfig.djangoUrl + 'search/' + node._source.id + '/export/');
       $window.open(showFile, '_blank');
-    }
+    };
 
     vm.editField = function(key, value) {
       var modalInstance = $uibModal.open({
