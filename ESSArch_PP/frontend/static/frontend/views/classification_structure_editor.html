@@ -48,6 +48,14 @@
           >
             {{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i>
           </button>
+          <select
+            ng-model="vm.structureType"
+            ng-change="vm.updateStructures()"
+            class="form-control structure-type-select"
+            ng-options="x.id as x.name for x in vm.structureTypes"
+            placeholder="{{'ACCESS.STRUCTURE_TYPE' | translate}}"
+          >
+        </select>
           <div class="refresh-icon">
             <span
               ng-click="vm.updateStructures()"

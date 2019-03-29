@@ -15,6 +15,14 @@ angular
     vm.structures = [];
     vm.rules = {};
     $scope.angular = angular;
+    vm.structureTypes = [];
+    vm.structureType = null;
+    vm.$onInit = function() {
+      $http.get(appConfig.djangoUrl + 'structure-types/').then(function(response) {
+        vm.structureTypes = [{name: $translate.instant('ACCESS.SEE_ALL'), id: null}].concat(response.data);
+      });
+    };
+
     vm.structureClick = function(row) {
       if (vm.structure && vm.structure.id === row.id) {
         vm.structure = null;
@@ -63,6 +71,7 @@ angular
           ordering: sortString,
           search: search,
           template: true,
+          type: vm.structureType,
         }).$promise.then(function(resource) {
           vm.structures = resource;
           tableState.pagination.numberOfPages = Math.ceil(resource.$httpHeaders('Count') / number); //set the number of pages so the pagination can update
@@ -201,8 +210,8 @@ angular
             label: $translate.instant('ACCESS.ADD_RELATION'),
             _disabled: node.original.root,
             action: function() {
-              vm.addNodeRelationModal(node)
-            }
+              vm.addNodeRelationModal(node);
+            },
           };
           var remove = {
             label: $translate.instant('REMOVE'),
@@ -433,7 +442,7 @@ angular
         controllerAs: '$ctrl',
         resolve: {
           data: {
-            newStructure: true
+            newStructure: true,
           },
         },
       });
@@ -458,7 +467,7 @@ angular
         controllerAs: '$ctrl',
         resolve: {
           data: {
-            node: node
+            node: node,
           },
         },
       });
