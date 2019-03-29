@@ -31,7 +31,10 @@ angular
           $ctrl.buildStructureForm();
         })
       } else {
-        $ctrl.buildNodeForm();
+        $http.get(appConfig.djangoUrl + 'structure-unit-types/').then(function(response) {
+          $ctrl.structureUnitTypes = response.data;
+          $ctrl.buildNodeForm();
+        })
       }
     };
 
@@ -106,28 +109,13 @@ angular
         {
           templateOptions: {
             label: $translate.instant('TYPE'),
-            type: 'text',
-            options: [
-              {
-                name: 'Serie',
-                value: 'Serie',
-              },
-              {
-                name: 'Verksamhetsområde',
-                value: 'Verksamhetsområde',
-              },
-              {
-                name: 'Processgrupp',
-                value: 'Processgrupp',
-              },
-              {
-                name: 'Process',
-                value: 'Process',
-              },
-            ],
+            options: $ctrl.structureUnitTypes,
+            valueProp: 'id',
+            labelProp: 'name',
             required: true,
+            notNull: true,
           },
-          defaultValue: 'Serie',
+          defaultValue: $ctrl.structureUnitTypes.length > 0 ? $ctrl.structureUnitTypes[0].id : null,
           type: 'select',
           key: 'type',
         },
