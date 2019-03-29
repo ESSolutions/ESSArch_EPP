@@ -45,6 +45,7 @@ from ESSArch_Core.tags.views import (
     StructureViewSet,
     StructureTypeViewSet,
     StructureUnitViewSet,
+    StructureUnitTypeViewSet,
     TagViewSet,
     TagVersionTypeViewSet,
 )
@@ -91,6 +92,7 @@ router.register(r'structures', StructureViewSet).register(
 )
 router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'structure-types', StructureTypeViewSet)
+router.register(r'structure-unit-types', StructureUnitTypeViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
