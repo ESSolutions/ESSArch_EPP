@@ -151,6 +151,7 @@ angular
           type: 'input',
           templateOptions: {
             label: $translate.instant('ACCESS.REFERENCE_CODE'),
+            required: true,
           },
         },
         {
