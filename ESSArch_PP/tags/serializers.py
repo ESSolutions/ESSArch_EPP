@@ -24,7 +24,7 @@ class ComponentWriteSerializer(serializers.Serializer):
     )
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
-    extra_data = serializers.JSONField(required=False)
+    custom_fields = serializers.JSONField(required=False)
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -99,7 +99,7 @@ class ArchiveWriteSerializer(serializers.Serializer):
     reference_code = serializers.CharField()
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
-    extra_data = serializers.JSONField(required=False)
+    custom_fields = serializers.JSONField(required=False)
 
     def create(self, validated_data):
         with transaction.atomic():
