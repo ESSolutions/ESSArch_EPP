@@ -8,6 +8,10 @@ cache:
 
 language: python
 
+dist: trusty
+
+env: REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+
 branches:
   only:
   - master
@@ -26,31 +30,22 @@ matrix:
       after_script: skip
 
     - python: 3.6
-      services:
-        - redis-server
 
     - python: 3.6
-      services:
-        - mariadb
-        - redis-server
+      services: mariadb
       env: *mariadb
 
     - python: 3.6
-      services:
-        - mysql
-        - redis-server
+      services: mysql
       env: *mysql
 
     - python: 3.6
-      services:
-        - postgresql
-        - redis-server
+      services: postgresql
       env: *postgres
 
     - os: windows
       language: sh
       python: 3.6
-      services: redis-server
       before_install:
         - mkdir -p /c/ESSArch/log/
         - wget https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2018-10-03/gtk3-runtime-3.24.1-2018-10-03-ts-win64.exe

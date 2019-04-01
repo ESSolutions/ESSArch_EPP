@@ -211,6 +211,8 @@ except ImportError:
 DATABASES = {'default': dj_database_url.parse(url=DATABASE_URL)}
 
 # Cache
+REDIS_CLIENT_CLASS = os.environ.get('REDIS_CLIENT_CLASS', 'django_redis.client.DefaultClient')
+
 CACHES = {
     'default': {
         'TIMEOUT': None,
