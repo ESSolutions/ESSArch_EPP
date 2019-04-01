@@ -24,6 +24,7 @@ class ComponentWriteSerializer(serializers.Serializer):
     )
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
+    extra_data = serializers.JSONField(required=False)
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -68,8 +69,17 @@ class ComponentWriteSerializer(serializers.Serializer):
 
         return tag
 
+    def update(self, instance, validated_data):
+        TagVersion.objects.filter(pk=instance.pk).update(**validated_data)
+        instance.refresh_from_db()
+
+        doc = Component.from_obj(instance)
+        doc.save()
+
+        return instance
+
     def validate(self, data):
-        if 'parent' not in data and 'structure_unit' not in data:
+        if not self.instance and 'parent' not in data and 'structure_unit' not in data:
             raise serializers.ValidationError('parent or structure_unit required')
 
         if data.get('start_date') and data.get('end_date') and \
@@ -89,6 +99,7 @@ class ArchiveWriteSerializer(serializers.Serializer):
     reference_code = serializers.CharField()
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
+    extra_data = serializers.JSONField(required=False)
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -115,6 +126,15 @@ class ArchiveWriteSerializer(serializers.Serializer):
         doc.save()
 
         return tag
+
+    def update(self, instance, validated_data):
+        TagVersion.objects.filter(pk=instance.pk).update(**validated_data)
+        instance.refresh_from_db()
+
+        doc = Archive.from_obj(instance)
+        doc.save()
+
+        return instance
 
     def validate(self, data):
         if data.get('start_date') and data.get('end_date') and \

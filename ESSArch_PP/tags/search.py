@@ -718,7 +718,17 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
     def partial_update(self, request, pk=None):
         tag = self.get_tag_object()
-        return Response(self._update_tag_metadata(tag, request.data))
+        index = tag.elastic_index
+
+        if index == 'archive':
+            serializer = ArchiveWriteSerializer(tag, data=request.data, context={'request': request}, partial=True)
+        elif index == 'component':
+            serializer = ComponentWriteSerializer(tag, data=request.data, partial=True)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response()
 
     def _get_delete_field_script(self, field):
         field_path = '.'.join(field.split('.')[:-1])
