@@ -23,7 +23,7 @@ matrix:
       python: "3.6"
       install: pip install flake8==3.7.1
       script: flake8
-      after_success: skip
+      after_script: skip
 
     - python: 3.6
 
@@ -62,7 +62,7 @@ matrix:
         - cd ESSArch_PP/frontend/static/frontend
         - yarn
       script: yarn test
-      after_success: skip
+      after_script: skip
 
     - node_js: "10"
       language: node_js
@@ -72,7 +72,7 @@ matrix:
         - cd ESSArch_PP/frontend/static/frontend
         - yarn
       script: yarn test
-      after_success: skip
+      after_script: skip
 
     - env: PRETTIER
       language: node_js
@@ -80,7 +80,7 @@ matrix:
       before_install: cd ESSArch_PP/frontend/static/frontend
       install: yarn
       script: yarn prettier --check "**/*.{js,scss,html}"
-      after_success: skip
+      after_script: skip
 
   allow_failures: # Temporary allow failure of django tests, until they are fixed
     - script: coverage run ESSArch_PP/manage.py test -v2
@@ -96,4 +96,4 @@ install:
 
 script: coverage run ESSArch_PP/manage.py test -v2
 
-after_success: bash <(curl -s https://codecov.io/bash) -c -F backend
+after_script: bash <(curl -s https://codecov.io/bash) -c -F backend
