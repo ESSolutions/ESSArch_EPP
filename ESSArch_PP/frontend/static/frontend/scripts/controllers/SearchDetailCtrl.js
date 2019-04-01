@@ -60,7 +60,9 @@ angular
         data.state = {selected: true, opened: true};
         vm.sortNotes(data);
         vm.record = data;
-        vm.parseAgents(vm.record);
+        if(!vm.record._is_structure_unit) {
+          vm.parseAgents(vm.record);
+        }
         var startNode = data;
         var archiveId = null;
 
@@ -362,7 +364,9 @@ angular
       nodePromise.then(function(node) {
         vm.sortNotes(node);
         vm.record = node;
-        vm.parseAgents(vm.record);
+        if(!vm.record._is_structure_unit) {
+          vm.parseAgents(vm.record);
+        }
         vm.getChildren(vm.record, vm.archive).then(function(children) {
           vm.record.children = children.data;
         });
