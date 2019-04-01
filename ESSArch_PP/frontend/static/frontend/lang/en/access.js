@@ -104,6 +104,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       RECORD_STATUS: 'Record status',
       REFERENCE_CODE: 'Reference code',
       RELATED: 'Related',
+      RELATED_AGENTS: 'Related agents',
       RELATED_ARCHIVE_CREATORS: 'Related archive creators',
       RELATED_RESOURCES: 'Related resources',
       RELATED_STRUCTURE_UNITS: 'Related structure units',
