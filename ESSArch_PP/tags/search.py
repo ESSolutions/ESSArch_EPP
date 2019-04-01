@@ -453,23 +453,11 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             ),
         ).all()
 
-        series_list = []
-
-        for serie in series:
-            series_list.append({
-                'name': serie.name,
-                'reference_code': serie.reference_code,
-                'volumes': natsorted(
-                    [vol.tag.current_version for vol in serie.volumes],
-                    key=lambda x: x.reference_code,
-                ),
-            })
-
         template = 'tags/archive.html'.format()
         f = tempfile.TemporaryFile()
 
         ctype = 'application/pdf'
-        render = render_to_string(template, {'archive_name': archive.name, 'series': series_list})
+        render = render_to_string(template, {'archive_name': archive.name, 'series': series})
         HTML(string=render).write_pdf(f)
 
         f.seek(0)
