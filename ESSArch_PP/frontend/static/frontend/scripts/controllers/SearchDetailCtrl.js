@@ -362,6 +362,7 @@ angular
       nodePromise.then(function(node) {
         vm.sortNotes(node);
         vm.record = node;
+        vm.parseAgents(vm.record);
         vm.getChildren(vm.record, vm.archive).then(function(children) {
           vm.record.children = children.data;
         });
