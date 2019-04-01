@@ -276,6 +276,7 @@ def installDefaultUsers():
         user_superuser.is_staff = True
         user_superuser.is_superuser = True
         user_superuser.save()
+        default_org.add_member(user_superuser.essauth_member)
 
     user_user, created = User.objects.get_or_create(
         first_name='user', last_name='Lastname',
