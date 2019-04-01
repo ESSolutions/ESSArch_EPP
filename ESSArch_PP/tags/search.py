@@ -40,7 +40,7 @@ from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, \
     TagVersionWriteSerializer
 from ESSArch_Core.util import generate_file_response, remove_prefix
 from tags.permissions import SearchPermissions
-from tags.serializers import SearchSerializer
+from tags.serializers import ArchiveWriteSerializer, ComponentWriteSerializer
 
 logger = logging.getLogger('essarch.epp.search')
 EXPORT_FORMATS = ('csv', 'pdf')
@@ -656,77 +656,24 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         return Response()
 
     def create(self, request):
-        serializer = SearchSerializer(data=request.data)
+        index = request.data.get('index')
         organization = request.user.user_profile.current_organization
 
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.validated_data
+        if index == 'archive':
+            if not request.user.has_perm('tags.create_archive'):
+                raise exceptions.PermissionDenied('You do not have permission to create new archives')
+            if organization is None:
+                raise exceptions.ParseError('You must be part of an organization to create a new archive')
 
-            if data.get('index') == 'archive':
-                if not request.user.has_perm('tags.create_archive'):
-                    raise exceptions.PermissionDenied('You do not have permission to create new archives')
-                if organization is None:
-                    raise exceptions.ParseError('You must be part of an organization to create a new archive')
-            else:
-                if not request.user.has_perm('tags.add_tag'):
-                    raise exceptions.PermissionDenied('You do not have permission to create nodes')
+            serializer = ArchiveWriteSerializer(data=request.data, context={'request': request})
+        elif index == 'component':
+            serializer = ComponentWriteSerializer(data=request.data)
+        else:
+            raise exceptions.ParseError('Invalid index')
 
-            with transaction.atomic():
-                tag = Tag.objects.create()
-                tag_structure = TagStructure(tag=tag)
-                structure = data.pop('structure')
-
-                if data.get('index') != 'archive':
-                    if 'structure_unit' in data:
-                        structure_unit = StructureUnit.objects.get(pk=data.pop('structure_unit'))
-                        tag_structure.structure_unit = structure_unit
-                        tag_structure.structure = structure_unit.structure
-
-                        archive_structure = TagStructure.objects.get(tag__versions=data.pop('archive'))
-                        tag_structure.parent = archive_structure
-
-                        tag_structure.save()
-
-                    elif 'parent' in data:
-                        parent_version = TagVersion.objects.select_for_update().get(pk=data.pop('parent'))
-                        if structure is None:
-                            parent_structure = parent_version.get_active_structure()
-                        else:
-                            parent_structure = parent_version.get_structures(structure).get()
-
-                        tag_structure.parent = parent_structure
-                        tag_structure.structure = parent_structure.structure
-                elif structure is not None:
-                    tag_structure.structure = structure
-                tag_structure.save()
-
-                # TODO: use serializer to create object
-                tag_version = TagVersion.objects.create(
-                    tag=tag, elastic_index=data['index'], name=data['name'],
-                    type=data['type'], reference_code=data['reference_code'],
-                    start_date=data.get('start_date'), end_date=data.get('end_date'),
-                    description=data.get('description', ''),
-                )
-                tag.current_version = tag_version
-                tag.save()
-
-                if tag_version.elastic_index == 'archive':
-                    org = request.user.user_profile.current_organization
-                    org.add_object(tag_version)
-
-                    search_data = {}
-
-                    if search_data:
-                        self._update_tag_metadata(tag_version, search_data)
-
-                    # create structure from template
-                    new_structure = structure.create_template_instance()
-
-                    tag_structure.structure = new_structure
-                    tag_structure.save()
-
-                Component.from_obj(tag_version).save()
-                return Response(TagVersionNestedSerializer(instance=tag_version).data, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        tag = serializer.save()
+        return Response(TagVersionNestedSerializer(instance=tag.current_version).data, status=status.HTTP_201_CREATED)
 
     def _update_tag_metadata(self, tag_version, data):
         if 'structure_unit' in data:
