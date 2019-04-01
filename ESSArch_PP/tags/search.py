@@ -747,12 +747,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         tag = self.get_tag_object()
         include_self = request.query_params.get('include_self', False)
         for descendant in tag.get_descendants(include_self=include_self):
-            self._update_tag_metadata(descendant, request.data)
-            try:
-                for field in request.query_params['deleted_fields'].split(','):
-                    self._delete_field(descendant, field)
-            except KeyError:
-                pass
+            if descendant.elastic_index == 'archive':
+                serializer = ArchiveWriteSerializer(
+                    descendant, data=request.data, context={'request': request}, partial=True
+                )
+            elif descendant.elastic_index == 'component':
+                serializer = ComponentWriteSerializer(descendant, data=request.data, partial=True)
+
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         return Response()
 
