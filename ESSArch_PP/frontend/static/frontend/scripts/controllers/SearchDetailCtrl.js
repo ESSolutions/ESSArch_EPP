@@ -978,7 +978,8 @@ angular
       });
       modalInstance.result.then(
         function(data, $ctrl) {
-          vm.loadRecordAndTree();
+          vm.goToNodePage(node._id, false);
+
         },
         function() {
           vm.loadRecordAndTree();
@@ -1005,7 +1006,7 @@ angular
       });
       modalInstance.result.then(
         function(data, $ctrl) {
-          vm.loadRecordAndTree();
+          vm.goToNodePage(data._id, false);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
