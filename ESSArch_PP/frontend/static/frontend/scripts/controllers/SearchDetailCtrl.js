@@ -60,7 +60,7 @@ angular
         data.state = {selected: true, opened: true};
         vm.sortNotes(data);
         vm.record = data;
-        if(!vm.record._is_structure_unit) {
+        if (!vm.record._is_structure_unit) {
           vm.parseAgents(vm.record);
         }
         var startNode = data;
@@ -364,7 +364,7 @@ angular
       nodePromise.then(function(node) {
         vm.sortNotes(node);
         vm.record = node;
-        if(!vm.record._is_structure_unit) {
+        if (!vm.record._is_structure_unit) {
           vm.parseAgents(vm.record);
         }
         vm.getChildren(vm.record, vm.archive).then(function(children) {
@@ -695,7 +695,11 @@ angular
           } else {
             selectedElement = childrenNodes.pop();
             vm.recordTreeInstance.jstree(true).delete_node(e.node.children[e.node.children.length - 1]);
-            seeMore = childrenNodes.pop();
+            if (childrenNodes.length > 0 && childrenNodes[childrenNodes.length - 1].see_more) {
+              seeMore = childrenNodes.pop();
+            } else {
+              seeMore = vm.createSeeMoreNode();
+            }
           }
           children.data.forEach(function(child) {
             if (selectedElement !== null && child._id === selectedElement._id) {
@@ -979,7 +983,6 @@ angular
       modalInstance.result.then(
         function(data, $ctrl) {
           vm.goToNodePage(node._id, false);
-
         },
         function() {
           vm.loadRecordAndTree();
