@@ -38,7 +38,7 @@ class ComponentWriteSerializer(serializers.Serializer):
                 tag_structure.structure_unit = structure_unit
                 tag_structure.structure = structure_unit.structure
 
-                archive_structure = TagStructure.objects.get(structure=structure_unit.structure).get_root()
+                archive_structure = TagStructure.objects.filter(structure=structure_unit.structure).first().get_root()
                 tag_structure.parent = archive_structure
 
                 tag_structure.save()
