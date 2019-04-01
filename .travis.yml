@@ -48,6 +48,10 @@ matrix:
         - choco install python3 --version 3.6.6
         - choco install imagemagick
         - export PATH="/c/Program Files/GTK3-Runtime Win64/bin:/c/Python36:/c/Python36/Scripts:$PATH"
+      install: # Workaround for windows since pip install -e in sh on windows doesn't seem to work.
+        - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
+        - python -m pip install --upgrade pip
+        - powershell 'pip install -e $HOME/core/["tests,s3$DB_PACKAGES"]'
 
     - node_js: "8"
       language: node_js
