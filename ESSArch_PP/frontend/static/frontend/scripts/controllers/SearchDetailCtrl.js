@@ -598,7 +598,7 @@ angular
           };
           var actions = {
             update: $scope.checkPermission('tags.change_tagversion') ? update : undefined,
-            add: $scope.checkPermission('tags.add_tagversion') ? add : undefined,
+            add: $scope.checkPermission('tags.add_tag') ? add : undefined,
             email: email,
             remove: $scope.checkPermission('tags.delete_tagversion') ? remove : undefined,
             removeFromStructure: $scope.checkPermission('tags.change_classification')
