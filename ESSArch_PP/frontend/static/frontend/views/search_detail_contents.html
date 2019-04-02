@@ -33,5 +33,12 @@
         </tr>
       </tbody>
     </table>
+    <div
+      ng-if="vm.record._index !== 'archive'"
+      class="float-right"
+      st-template="static/frontend/views/file_pagination.html"
+      st-pagination=""
+      st-displayed-pages="7"
+  ></div>
   </div>
 </div>
