@@ -31,7 +31,7 @@ angular
           $ctrl.buildStructureForm();
         })
       } else {
-        $http.get(appConfig.djangoUrl + 'structure-unit-types/').then(function(response) {
+        $http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: data.structure.type.id}}).then(function(response) {
           $ctrl.structureUnitTypes = response.data;
           $ctrl.buildNodeForm();
         })
