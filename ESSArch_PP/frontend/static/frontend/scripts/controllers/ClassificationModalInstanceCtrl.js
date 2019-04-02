@@ -153,7 +153,7 @@ angular
       return !angular.equals($ctrl.newNode, {});
     };
 
-    $ctrl.removeUnit = function() {
+    $ctrl.removeNode = function() {
       $http
         .delete(appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id)
         .then(function(response) {

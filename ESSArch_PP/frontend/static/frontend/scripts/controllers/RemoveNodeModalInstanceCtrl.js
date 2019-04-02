@@ -16,7 +16,7 @@ angular
     $ctrl.data = data;
     $ctrl.node = data.node.original;
 
-    $ctrl.remove = function() {
+    $ctrl.removeNode = function() {
       Search.removeNode($ctrl.node).then(function(response) {
         Notifications.add($translate.instant('ACCESS.NODE_REMOVED'), 'success');
         $uibModalInstance.close('added');
