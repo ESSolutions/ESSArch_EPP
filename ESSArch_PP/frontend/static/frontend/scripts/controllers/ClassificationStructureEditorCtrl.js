@@ -156,7 +156,7 @@ angular
       function runner(result, node) {
         if (result || !node) return result;
         return (
-          (node._id === id && node) || //is this the proper node?
+          (node.id === id && node) || //is this the proper node?
           runner(null, node.children) || //process this nodes children
           reduce.call(Object(node), runner, result)
         ); //maybe this is some ArrayLike Structure
@@ -363,6 +363,7 @@ angular
           data: {
             node: node,
             structure: structure,
+            children: getNodeById(vm.structureTreeData[0], node.id).children,
           },
         },
       });

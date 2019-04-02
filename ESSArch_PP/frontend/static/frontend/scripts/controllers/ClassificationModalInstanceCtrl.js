@@ -32,6 +32,9 @@ angular
         })
       } else {
         $http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: data.structure.type.id}}).then(function(response) {
+          if(data.children) {
+            $ctrl.newNode.reference_code = (data.children.length + 1).toString();
+          }
           $ctrl.structureUnitTypes = response.data;
           $ctrl.buildNodeForm();
         })
