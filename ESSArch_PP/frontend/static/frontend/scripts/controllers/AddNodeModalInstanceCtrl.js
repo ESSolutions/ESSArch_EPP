@@ -24,11 +24,6 @@ angular
     $ctrl.types = [];
 
     $ctrl.$onInit = function() {
-      $ctrl.indexes = [
-        {
-          name: 'component',
-        },
-      ];
       $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false}}).then(function(response) {
         $ctrl.typeOptions = response.data;
         $ctrl.loadForm();
@@ -67,6 +62,37 @@ angular
           },
           type: 'input',
           key: 'reference_code',
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
+          },
+        },
+        {
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'datepicker',
+              key: 'start_date',
+              templateOptions: {
+                label: $translate.instant('START_DATE'),
+                appendToBody: false,
+              },
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'datepicker',
+              key: 'end_date',
+              templateOptions: {
+                label: $translate.instant('END_DATE'),
+                appendToBody: false,
+              },
+            },
+          ],
         },
       ];
     };

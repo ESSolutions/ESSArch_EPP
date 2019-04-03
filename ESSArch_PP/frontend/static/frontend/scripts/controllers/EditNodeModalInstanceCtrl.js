@@ -126,14 +126,6 @@ angular
           },
         },
         {
-          key: 'description',
-          type: 'textarea',
-          templateOptions: {
-            label: $translate.instant('DESCRIPTION'),
-            rows: 3,
-          },
-        },
-        {
           key: 'type',
           type: 'select',
           templateOptions: {
@@ -152,6 +144,14 @@ angular
           templateOptions: {
             label: $translate.instant('ACCESS.REFERENCE_CODE'),
             required: true,
+          },
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+            rows: 3,
           },
         },
         {
