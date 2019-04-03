@@ -62,6 +62,7 @@ matrix:
       install: # Workaround for windows since pip install -e in sh on windows doesn't seem to work.
         - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
         - python -m pip install --upgrade pip
+        - python -m pip install coveralls
         - powershell 'pip install -e $HOME/core/["tests,s3$DB_PACKAGES"]'
 
     - node_js: "8"
@@ -102,6 +103,7 @@ before_install:
 install:
   - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
   - python -m pip install --upgrade pip
+  - pip install coveralls
   - pip install -e $HOME/core/["tests,s3$DB_PACKAGES"]
 
 script: coverage run ESSArch_PP/manage.py test -v2
