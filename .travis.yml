@@ -108,4 +108,6 @@ install:
 
 script: coverage run ESSArch_PP/manage.py test -v2
 
-after_script: bash <(curl -s https://codecov.io/bash) -c -F backend
+after_script:
+  - bash <(curl -s https://codecov.io/bash) -c -F backend
+  - coveralls
