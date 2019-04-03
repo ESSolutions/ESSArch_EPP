@@ -194,7 +194,7 @@ angular
       contextmenu: {
         items: function(node, callback) {
           var update = {
-            label: $translate.instant('UPDATE'),
+            label: $translate.instant('EDIT'),
             _disabled: node.original.root,
             action: function update() {
               vm.editNodeModal(node);
