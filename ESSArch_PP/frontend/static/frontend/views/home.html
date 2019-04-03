@@ -8,7 +8,7 @@
         <i class="fas fa-2x fa-bars" aria-hidden="true" ng-click="hamburgerActive = !hamburgerActive"></i>
       </div>
       <div class="logo" ng-controller="UtilCtrl">
-        <div ng-if="site !== null && site.logo !== null" class="custom-logo">
+        <div ng-if="!angular.isUndefined(site) && site !== null && site.logo !== null" class="custom-logo">
           <img src="{{site.logo}}" width="36" alt="logo" />
         </div>
         <h3 class="page-title" ng-click="infoPage()">ESSArch Preservation Platform</h3>
