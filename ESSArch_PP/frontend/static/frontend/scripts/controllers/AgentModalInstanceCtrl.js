@@ -114,7 +114,10 @@ angular
         $ctrl.buildAgentModel().then(function(model) {
           $ctrl.agent = model;
           $ctrl.buildTypeField($ctrl.agent).then(function(typeField) {
-            typeField.templateOptions.onChange = function() {
+            typeField.templateOptions.onChange = function($modelValue) {
+              if ($modelValue && $modelValue.cpf && $modelValue.cpf === 'corporatebody') {
+                $ctrl.authName.part = '';
+              }
               $ctrl.loadForms();
             };
             $ctrl.typeField = [typeField];
