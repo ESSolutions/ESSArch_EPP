@@ -28,7 +28,6 @@ import os
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response

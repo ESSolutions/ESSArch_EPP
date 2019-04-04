@@ -23,7 +23,6 @@
 """
 
 from django.contrib.auth.models import Permission, User
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
 
@@ -32,7 +31,7 @@ from rest_framework.test import APIClient
 
 from ESSArch_Core.ip.models import InformationPackage
 
-from ESSArch_Core.profiles.models import Profile, SubmissionAgreement
+from ESSArch_Core.profiles.models import SubmissionAgreement
 
 
 class SaveSubmissionAgreement(TestCase):
