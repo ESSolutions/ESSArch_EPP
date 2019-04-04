@@ -155,16 +155,9 @@
           <div class="structure-rules">
             <div class="rules-header">
               <h4 class="mb-0">{{'ACCESS.RULES' | translate}}</h4>
-              <button
-                class="btn btn-primary"
-                ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)"
-                ng-click="vm.saveRules(vm.rules, vm.structure)"
-              >
-                {{'SAVE' | translate}}&nbsp; <i ng-if="vm.savingRules" class="fas fa-spinner fa-spin" />
-              </button>
             </div>
             <br />
-            <div ng-if="!angular.equals(vm.rules, {})" class="table-x-overflow table-container">
+            <div class="table-x-overflow table-container">
               <table class="table">
                 <tr>
                   <th>
@@ -192,20 +185,36 @@
                     <button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="vm.removeRule(key)"></button>
                   </td>
                 </tr>
+                <tr ng-if="angular.equals(vm.rules, {}) && !vm.structuresLoading" class="empty-table-indicator">
+                  <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+                </tr>
+                <tr ng-if="angular.equals(vm.rules, {}) && vm.structuresLoading" class="empty-table-indicator">
+                  <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
+                </tr>
               </table>
             </div>
             <label for="rule-type">
               {{'ACCESS.NEW_TYPE' | translate}}
             </label>
             <div class="flex-row">
-              <input
+              <select
                 id="rule-type"
                 placeholder="{{'TYPE' | translate}} ..."
                 class="form-control rule-type-input"
                 ng-model="vm.newRule"
                 ng-enter="vm.addRule(vm.newRule)"
-              />
+                ng-options="x.name as x.name for x in vm.typeOptions"
+              ></select>
               <button class="btn btn-success btn-small" ng-click="vm.addRule(vm.newRule)">+</button>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button
+                class="btn btn-primary"
+                ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)"
+                ng-click="vm.saveRules(vm.rules, vm.structure)"
+                >
+                {{'SAVE' | translate}}&nbsp; <i ng-if="vm.savingRules" class="fas fa-spinner fa-spin" />
+              </button>
             </div>
           </div>
         </div>
