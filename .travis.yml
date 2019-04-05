@@ -92,9 +92,6 @@ matrix:
       script: yarn prettier --check "**/*.{js,scss,html}"
       after_script: skip
 
-  allow_failures: # Temporary allow failure of django tests, until they are fixed
-    - script: coverage run ESSArch_PP/manage.py test -v2
-
 before_install:
   - sudo mkdir -p /ESSArch/log/
   - sudo chmod 777 /ESSArch/log/
