@@ -1,40 +1,109 @@
+sudo: required
+
+cache:
+  yarn: True
+  pip: True
+  directories:
+    - .npm
+
+language: python
+
 dist: trusty
-language: node_js
 
 branches:
   only:
   - master
 
+templates:
+  mariadb: &mariadb DB_PACKAGES=",mysql" DATABASE_URL="mysql://root@localhost/essarch?isolation_level=read committed"
+  mysql: &mysql DB_PACKAGES=",mysql" DATABASE_URL="mysql://root@localhost/essarch?isolation_level=read committed"
+  postgres: &postgres DB_PACKAGES=",postgres" DATABASE_URL="postgres://postgres@localhost/essarch?isolation_level=read committed"
+
 matrix:
   include:
     - env: FLAKE8
-      language: python
       python: "3.6"
-      cache: pip
-      before_install: ''
       install: pip install flake8==3.7.1
-      before_script: ''
       script: flake8
+      after_script: skip
+
+    - python: 3.6
+      env: REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+
+    - python: 3.6
+      services: mariadb
+      env:
+        - *mariadb
+        - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+
+    - python: 3.6
+      services: mysql
+      env:
+        - *mysql
+        - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+
+    - python: 3.6
+      services: postgresql
+      env:
+        - *postgres
+        - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+
+    - os: windows
+      language: sh
+      python: 3.6
+      env: REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
+      before_install:
+        - mkdir -p /c/ESSArch/log/
+        - wget https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2018-10-03/gtk3-runtime-3.24.1-2018-10-03-ts-win64.exe
+        - powershell 'Start-Process -FilePath "gtk3-runtime-3.24.1-2018-10-03-ts-win64.exe" -Wait -PassThru -ArgumentList /S'
+        - choco install python3 --version 3.6.6
+        - choco install imagemagick
+        - export PATH="/c/Program Files/GTK3-Runtime Win64/bin:/c/Python36:/c/Python36/Scripts:$PATH"
+      install: # Workaround for windows since pip install -e in sh on windows doesn't seem to work.
+        - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
+        - python -m pip install --upgrade pip
+        - powershell 'pip install -e $HOME/core/["tests,s3$DB_PACKAGES"]'
+
+    - node_js: "8"
+      language: node_js
+      install:
+        - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
+        - export EC_FRONTEND="$HOME/core/ESSArch_Core/frontend"
+        - cd ESSArch_PP/frontend/static/frontend
+        - yarn
+      script: yarn test
+      after_script: skip
+
+    - node_js: "10"
+      language: node_js
+      install:
+        - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
+        - export EC_FRONTEND="$HOME/core/ESSArch_Core/frontend"
+        - cd ESSArch_PP/frontend/static/frontend
+        - yarn
+      script: yarn test
+      after_script: skip
 
     - env: PRETTIER
+      language: node_js
       node_js: "10"
       before_install: cd ESSArch_PP/frontend/static/frontend
       install: yarn
-      before_script:
       script: yarn prettier --check "**/*.{js,scss,html}"
+      after_script: skip
 
+  allow_failures: # Temporary allow failure of django tests, until they are fixed
+    - script: coverage run ESSArch_PP/manage.py test -v2
 
-node_js:
-  - 8
-  - 10
-cache:
-  yarn: true
-  directories:
-    - .npm
+before_install:
+  - sudo mkdir -p /ESSArch/log/
+  - sudo chmod 777 /ESSArch/log/
+
 install:
   - git clone https://github.com/ESSolutions/ESSArch_Core "$HOME/core"
-  - export EC_FRONTEND="$HOME/core/ESSArch_Core/frontend"
-  - cd ESSArch_PP/frontend/static/frontend
-  - yarn
-script:
-  - yarn test
+  - python -m pip install --upgrade pip
+  - pip install -e $HOME/core/["tests,s3$DB_PACKAGES"]
+
+script: coverage run ESSArch_PP/manage.py test -v2
+
+after_script: bash <(curl -s https://codecov.io/bash) -c -F backend

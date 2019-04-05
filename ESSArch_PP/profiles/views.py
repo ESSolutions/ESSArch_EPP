@@ -28,7 +28,6 @@ import os
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -40,7 +39,6 @@ from ESSArch_Core.profiles.models import SubmissionAgreement, Profile, ProfileSA
 from ESSArch_Core.profiles.serializers import ProfileSerializer, ProfileSASerializer, \
     SubmissionAgreementSerializer
 from ESSArch_Core.profiles.views import (
-    ProfileViewSet as ProfileViewSetCore,
     SubmissionAgreementViewSet as SAViewSetCore,
 )
 from profiles.serializers import ProfileMakerTemplateSerializer, ProfileMakerExtensionSerializer
@@ -148,36 +146,6 @@ class SubmissionAgreementTemplateView(APIView):
 class ProfileSAViewSet(viewsets.ModelViewSet):
     queryset = ProfileSA.objects.all()
     serializer_class = ProfileSASerializer
-
-
-class ProfileViewSet(ProfileViewSetCore):
-    @action(detail=True, methods=['post'])
-    def save(self, request, pk=None):
-        profile = Profile.objects.get(pk=pk)
-        new_data = request.data.get("specification_data", {})
-        new_structure = request.data.get("structure", {})
-
-        changed_data = (profile.specification_data.keys().sort() == new_data.keys().sort() and
-                        profile.specification_data != new_data)
-
-        changed_structure = profile.structure != new_structure
-
-        if (changed_data or changed_structure):
-            try:
-                new_profile = profile.copy(
-                    specification_data=new_data,
-                    new_name=request.data["new_name"],
-                    structure=new_structure,
-                )
-            except ValidationError as e:
-                raise exceptions.ParseError(e)
-
-            serializer = ProfileSerializer(
-                new_profile, context={'request': request}
-            )
-            return Response(serializer.data)
-
-        return Response({'status': 'no changes, not saving'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileMakerExtensionViewSet(viewsets.ModelViewSet):

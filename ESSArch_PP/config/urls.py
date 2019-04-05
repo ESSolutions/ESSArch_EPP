@@ -37,7 +37,7 @@ from ESSArch_Core.fixity.views import ValidationViewSet
 from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
 from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
                                             ConversionJobViewSet)
-from ESSArch_Core.profiles.views import ProfileIPViewSet, ProfileIPDataViewSet
+from ESSArch_Core.profiles.views import ProfileViewSet, ProfileIPViewSet, ProfileIPDataViewSet
 from ESSArch_Core.routers import ESSArchRouter
 from ESSArch_Core.stats.views import stats, export as export_stats
 from ESSArch_Core.tags.views import (
@@ -53,7 +53,6 @@ from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
 from profiles.views import (
-    ProfileViewSet,
     ProfileSAViewSet,
     ProfileMakerExtensionViewSet,
     ProfileMakerTemplateViewSet,

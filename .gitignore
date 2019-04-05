@@ -8,3 +8,10 @@ ESSArch_EPP.egg-info/
 MANIFEST
 .idea/
 .settings/
+
+# Python virtual environment
+/venv/
+
+# Coverage default folders
+.coverage
+htmlcov/
