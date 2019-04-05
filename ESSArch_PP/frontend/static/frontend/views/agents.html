@@ -146,28 +146,7 @@
       <div ng-if="vm.agent !== null">
         <hr />
         <h4 class="pb-base">
-          {{vm.agent.auth_name.full_name}}
-          <span ng-if="vm.agent.start_date !== null || vm.agent.end_date !== null">
-            (
-            <span
-              ng-if="vm.agent.start_date !== null"
-              uib-tooltip="{{ 'START_DATE' | translate }}"
-              tooltip-placement="auto top"
-              tooltip-append-to-body="true"
-            >
-              {{vm.agent.start_date | date:"yyyy"}}
-            </span>
-            -
-            <span
-              ng-if="vm.agent.end_date !== null"
-              uib-tooltip="{{ 'END_DATE' | translate }}"
-              tooltip-placement="auto top"
-              tooltip-append-to-body="true"
-            >
-              {{vm.agent.end_date | date:"yyyy"}}
-            </span>
-            )
-          </span>
+          {{AgentName.getAuthorizedName(vm.agent).full_name}}
         </h4>
         <uib-tabset active="vm.activePill" ng-init="vm.activePill = 1" type="pills">
           <uib-tab heading="{{'ACCESS.BASIC_DATA' | translate}}" index="1">
@@ -439,7 +418,7 @@
                         class="selectable"
                       >
                         <td>
-                          {{vm.getAuthorizedName(x.agent).full_name}}
+                          {{AgentName.getAuthorizedName(x.agent, {printDates: true}).full_name}}
                         </td>
                         <td>
                           {{x.type.name}}

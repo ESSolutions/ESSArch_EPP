@@ -7,9 +7,12 @@ angular
     $http,
     EditMode,
     $scope,
-    $translate
+    $translate,
+    $filter,
+    AgentName
   ) {
     var $ctrl = this;
+    $scope.AgentName = AgentName;
     $ctrl.relationTemplate = {
       type: 1,
       description: '',
@@ -21,17 +24,6 @@ angular
     };
     $ctrl.options = {};
     $ctrl.fields = [];
-    $ctrl.getAuthorizedName = function(agent) {
-      var name;
-      agent.names.forEach(function(x) {
-        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
-          name = x;
-          agent.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        }
-      });
-      return name;
-    };
 
     $ctrl.getAgents = function(search) {
       return $http({
@@ -40,7 +32,7 @@ angular
         params: {page: 1, page_size: 10, search: search},
       }).then(function(response) {
         response.data.forEach(function(agent) {
-          agent.auth_name = $ctrl.getAuthorizedName(agent);
+          AgentName.parseAgentNames(agent);
         });
         $ctrl.options.agents = response.data;
         return $ctrl.options.agents;
@@ -135,15 +127,15 @@ angular
           templateOptions: {
             label: $translate.instant('DESCRIPTION'),
             rows: 3,
-          }
-        }
+          },
+        },
       ];
     };
 
     $ctrl.add = function() {
       if ($ctrl.form.$invalid) {
         $ctrl.form.$setSubmitted();
-        return
+        return;
       }
       $ctrl.adding = true;
       var related_agents = angular.copy($ctrl.agent.related_agents);
@@ -176,7 +168,7 @@ angular
     $ctrl.save = function() {
       if ($ctrl.form.$invalid) {
         $ctrl.form.$setSubmitted();
-        return
+        return;
       }
       $ctrl.saving = true;
       var related_agents = angular.copy($ctrl.agent.related_agents);

@@ -982,7 +982,7 @@ angular
       });
       modalInstance.result.then(
         function(data, $ctrl) {
-          if(vm.record._id === node._id) {
+          if (vm.record._id === node._id) {
             vm.loadRecordAndTree();
           } else {
             vm.goToNodePage(node._id, false);

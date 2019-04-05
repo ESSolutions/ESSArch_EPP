@@ -18,7 +18,8 @@ angular
     $window,
     $state,
     $httpParamSerializer,
-    $stateParams
+    $stateParams,
+    AgentName
   ) {
     var vm = this;
     $scope.angular = angular;
@@ -206,18 +207,6 @@ angular
       });
     };
 
-    vm.getAuthorizedName = function(agent) {
-      var name;
-      agent.names.forEach(function(x) {
-        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
-          name = x;
-          agent.full_name = x.full_name;
-        }
-      });
-      return name;
-    };
-
     vm.getArchives = function(search) {
       return $http({
         url: appConfig.djangoUrl + 'tags/',
@@ -238,7 +227,7 @@ angular
         params: {page: 1, page_size: 10, search: search},
       }).then(function(response) {
         response.data.forEach(function(agent) {
-          agent.auth_name = vm.getAuthorizedName(agent);
+          agent.auth_name = AgentName.getAuthorizedName(agent);
         });
         vm.options.agents = response.data;
         return vm.options.agents;

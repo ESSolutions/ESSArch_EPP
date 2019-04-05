@@ -74,7 +74,7 @@ angular.module('essarch.services').factory('Search', function($http, $sce, appCo
         include_self: true,
         deleted_fields: deletedFields,
       },
-      data: data,
+      data: angular.extend({structure: node.structures[0].id}, data),
     }).then(function(response) {
       return response;
     });

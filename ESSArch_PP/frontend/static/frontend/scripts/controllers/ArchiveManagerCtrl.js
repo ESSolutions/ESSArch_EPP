@@ -1,182 +1,111 @@
 angular
   .module('essarch.controllers')
-  .controller('ArchiveManagerCtrl', function($scope, $http, appConfig, Search, Notifications, $translate) {
+  .controller('ArchiveManagerCtrl', function(
+    $scope,
+    $http,
+    appConfig,
+    $uibModal,
+    $log,
+    $state,
+    $stateParams
+  ) {
     var vm = this;
+    $scope.$stateParams = $stateParams;
     vm.structure = null;
-    vm.archive = {};
+    vm.record = null;
+    vm.archives = [];
     vm.fields = [];
-    vm.$onInit = function() {
-      vm.options = {agents: [], structures: [], type: []};
-      vm.getStructures().then(function(structures) {
-        if (structures.length > 0) {
-          vm.structure = structures[0];
+
+    vm.getArchives = function(tableState) {
+      vm.archivesLoading = true;
+      if (vm.archives.length == 0) {
+        $scope.initLoad = true;
+      }
+      if (!angular.isUndefined(tableState)) {
+        $scope.tableState = tableState;
+        var search = '';
+        if (tableState.search.predicateObject) {
+          var search = tableState.search.predicateObject['$'];
         }
-        vm.getTypes().then(function(types) {
-          vm.options.type = types;
-          vm.buildForm();
-        });
+        var sorting = tableState.sort;
+        var pagination = tableState.pagination;
+        var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+        var number = pagination.number || vm.archivesPerPage; // Number of entries showed per page.
+        var pageNumber = start / number + 1;
+
+        var sortString = sorting.predicate;
+        if (sorting.reverse) {
+          sortString = '-' + sortString;
+        }
+        $http
+          .get(appConfig.djangoUrl + 'tags/', {
+            params: {
+              index: 'archive',
+              page: pageNumber,
+              page_size: number,
+              ordering: sortString,
+              search: search,
+            },
+          })
+          .then(function(response) {
+            vm.archives = response.data;
+            tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
+            $scope.initLoad = false;
+            vm.archivesLoading = false;
+          });
+      }
+    };
+
+    vm.updateArchives = function() {
+      vm.getArchives($scope.tableState);
+    };
+
+    vm.archiveClick = function(archive) {
+      if (vm.record !== null && archive.current_version.id === vm.record._id) {
+        vm.record = null;
+        $state.go('home.access.archiveManager');
+      } else {
+        vm.archiveLoading = true;
+        vm.record = {_id: archive.current_version.id};
+        $state.go('home.access.archiveManager.detail', {id: vm.record._id});
+      }
+    };
+
+    vm.getArchive = function(id) {
+      return $http.get(appConfig.djangoUrl + 'search/' + id + '/').then(function(response) {
+        return response.data;
       });
     };
 
     vm.getTypes = function() {
-      return $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: true, pager: 'none'}}).then(function(response) {
-        return angular.copy(response.data);
-      });
-    };
-
-    vm.getAuthorizedName = function(agent) {
-      var name;
-      agent.names.forEach(function(x) {
-        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
-          name = x;
-          agent.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        }
-      });
-      return name;
-    };
-
-    vm.getAgents = function(search) {
-      return $http({
-        url: appConfig.djangoUrl + 'agents/',
-        mathod: 'GET',
-        params: {page: 1, page_size: 10, search: search},
-      }).then(function(response) {
-        response.data.forEach(function(agent) {
-          agent.auth_name = vm.getAuthorizedName(agent);
+      return $http
+        .get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: true, pager: 'none'}})
+        .then(function(response) {
+          return angular.copy(response.data);
         });
-        vm.options.agents = response.data;
-        return vm.options.agents;
-      });
     };
 
-    vm.getStructures = function(search) {
-      return $http({
-        url: appConfig.djangoUrl + 'structures/',
-        mathod: 'GET',
-        params: {page: 1, page_size: 10, search: search, template: true},
-      }).then(function(response) {
-        vm.options.structures = response.data;
-        return vm.options.structures;
+    vm.newArchiveModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/new_archive_modal.html',
+        controller: 'ArchiveModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {},
+        },
       });
-    };
-
-    vm.createArchive = function(archive) {
-      if (vm.form.$invalid) {
-        vm.form.$setSubmitted();
-        return;
-      }
-      Search.addNode(
-        angular.extend(archive, {
-          index: 'archive',
-        })
-      ).then(function(response) {
-        vm.archive = {};
-        Notifications.add($translate.instant('ACCESS.NEW_ARCHIVE_CREATED'), 'success');
-      });
-    };
-
-    vm.buildForm = function() {
-      vm.fields = [
-        {
-          type: 'input',
-          key: 'name',
-          templateOptions: {
-            label: $translate.instant('NAME'),
-            required: true,
-          },
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.updateArchives();
+          $state.go('home.access.archiveManager.detail', {id: data.archive._id});
         },
-        {
-          type: 'uiselect',
-          key: 'structure',
-          templateOptions: {
-            required: true,
-            options: function() {
-              return vm.options.structures;
-            },
-            valueProp: 'id',
-            labelProp: 'name',
-            placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-            label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-            appendToBody: false,
-            refresh: function(search) {
-              vm.getStructures(search).then(function() {
-                this.options = vm.options.structures;
-              });
-            },
-          },
-        },
-        {
-          type: 'uiselect',
-          key: 'archive_creator',
-          templateOptions: {
-            required: true,
-            options: function() {
-              return vm.options.agents;
-            },
-            valueProp: 'id',
-            labelProp: 'full_name',
-            placeholder: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-            label: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-            appendToBody: false,
-            refresh: function(search) {
-              vm.getAgents(search).then(function() {
-                this.options = vm.options.agents;
-              });
-            },
-          },
-        },
-        {
-          className: 'row m-0',
-          fieldGroup: [
-            {
-              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
-              type: 'datepicker',
-              key: 'start_date',
-              templateOptions: {
-                label: $translate.instant('START_DATE'),
-                appendToBody: true,
-              },
-            },
-            {
-              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
-              type: 'datepicker',
-              key: 'end_date',
-              templateOptions: {
-                label: $translate.instant('END_DATE'),
-                appendToBody: true,
-              },
-            },
-          ],
-        },
-        {
-          key: 'description',
-          type: 'textarea',
-          templateOptions: {
-            label: $translate.instant('DESCRIPTION'),
-            rows: 3,
-          },
-        },
-        {
-          key: 'type',
-          type: 'select',
-          templateOptions: {
-            options: vm.options.type,
-            valueProp: 'pk',
-            labelProp: 'name',
-            required: true,
-            label: $translate.instant('TYPE'),
-            notNull: true,
-          },
-        },
-        {
-          key: 'reference_code',
-          type: 'input',
-          templateOptions: {
-            required: true,
-            label: $translate.instant('ACCESS.REFERENCE_CODE'),
-          },
-        },
-      ];
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
     };
   });

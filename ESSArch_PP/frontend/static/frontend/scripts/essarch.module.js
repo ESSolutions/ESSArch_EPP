@@ -565,6 +565,25 @@ angular
           },
         },
       })
+      .state('home.access.archiveManager.detail', {
+        url: '/:id',
+        templateUrl: '/static/frontend/views/search_archive_detail.html',
+        controller: 'SearchDetailCtrl as vm',
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.access', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
       .state('home.access.classificationStructures', {
         url: '/structures',
         template: '<classification-structure-editor></classification-structure-editor>',

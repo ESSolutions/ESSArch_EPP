@@ -1,7 +1,18 @@
 angular
   .module('essarch.controllers')
-  .controller('AgentCtrl', function($uibModal, $log, $scope, $http, appConfig, $state, $stateParams, EditMode) {
+  .controller('AgentCtrl', function(
+    $uibModal,
+    $log,
+    $scope,
+    $http,
+    appConfig,
+    $state,
+    $stateParams,
+    EditMode,
+    AgentName
+  ) {
     var vm = this;
+    $scope.AgentName = AgentName;
     $scope.$state = $state;
     vm.agentsLoading = false;
     vm.agents = [];
@@ -48,7 +59,8 @@ angular
         vm.initAccordion();
         vm.sortNotes(response.data);
         vm.sortNames(response.data);
-        response.data.auth_name = vm.getAuthorizedName(response.data);
+        AgentName.parseAgentNames(response.data)
+        response.data.auth_name = AgentName.getAuthorizedName(response.data);
         vm.agent = response.data;
       });
     };
@@ -149,9 +161,10 @@ angular
     };
 
     vm.parseAgents = function(list) {
-      list.forEach(function(agent) {
-        agent.auth_name = vm.getAuthorizedName(agent);
-      });
+       list.forEach(function(agent) {
+         AgentName.parseAgentNames(agent);
+         agent.auth_name = AgentName.getAuthorizedName(agent, {includeDates: false});
+        });
     };
 
     vm.agentArchivePipe = function(tableState) {
@@ -215,17 +228,6 @@ angular
       angular.extend(agent, obj);
     };
 
-    vm.getAuthorizedName = function(agent) {
-      var name;
-      agent.names.forEach(function(x) {
-        x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
-          name = x;
-        }
-      });
-      return name;
-    };
-
     vm.createModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,
@@ -271,7 +273,7 @@ angular
       modalInstance.result.then(
         function(data) {
           vm.agentPipe($scope.tableState);
-          if(vm.agent) {
+          if (vm.agent) {
             vm.getAgent(vm.agent);
           }
         },
