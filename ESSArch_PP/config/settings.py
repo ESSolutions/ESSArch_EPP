@@ -214,7 +214,7 @@ except ImportError:
 DATABASES = {'default': dj_database_url.parse(url=DATABASE_URL)}
 
 # Cache
-REDIS_CLIENT_CLASS = os.environ.get('REDIS_CLIENT_CLASS', 'django_redis.client.DefaultClient')
+REDIS_CLIENT_CLASS = os.environ.get('REDIS_CLIENT_CLASS', 'redis.client.StrictRedis')
 
 CACHES = {
     'default': {
@@ -222,7 +222,8 @@ CACHES = {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': REDIS_URL,
         'OPTIONS': {
-            'CLIENT_CLASS': REDIS_CLIENT_CLASS,
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'REDIS_CLIENT_CLASS': REDIS_CLIENT_CLASS,
         }
     }
 }

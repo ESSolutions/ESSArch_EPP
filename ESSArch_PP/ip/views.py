@@ -587,19 +587,19 @@ class InformationPackageViewSet(InformationPackageViewSetCore):
 
     def first_generation_case(self, lower_higher):
         return Case(
-            When(aic__isnull=True, then=Value(1)),
+            When(aic__isnull=True, then=Value(True)),
             When(generation=Subquery(lower_higher.values('min_gen')[:1]),
-                 then=Value(1)),
-            default=Value(0),
+                 then=Value(True)),
+            default=Value(False),
             output_field=BooleanField(),
         )
 
     def last_generation_case(self, lower_higher):
         return Case(
-            When(aic__isnull=True, then=Value(1)),
+            When(aic__isnull=True, then=Value(True)),
             When(generation=Subquery(lower_higher.values('max_gen')[:1]),
-                 then=Value(1)),
-            default=Value(0),
+                 then=Value(True)),
+            default=Value(False),
             output_field=BooleanField(),
         )
 

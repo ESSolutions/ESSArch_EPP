@@ -15,9 +15,9 @@ branches:
   - master
 
 templates:
-  mariadb: &mariadb DB_PACKAGES=",mysql" DATABASE_URL="mysql://root@localhost/essarch?isolation_level=read committed"
-  mysql: &mysql DB_PACKAGES=",mysql" DATABASE_URL="mysql://root@localhost/essarch?isolation_level=read committed"
-  postgres: &postgres DB_PACKAGES=",postgres" DATABASE_URL="postgres://postgres@localhost/essarch?isolation_level=read committed"
+  mariadb: &mariadb DB_PACKAGES=",mysql" DATABASE_URL_EPP="mysql://root@localhost/essarch?isolation_level=read committed"
+  mysql: &mysql DB_PACKAGES=",mysql" DATABASE_URL_EPP="mysql://root@localhost/essarch?isolation_level=read committed"
+  postgres: &postgres DB_PACKAGES=",postgres" DATABASE_URL_EPP="postgres://postgres@localhost/essarch?isolation_level=read committed"
 
 matrix:
   include:
@@ -91,9 +91,6 @@ matrix:
       install: yarn
       script: yarn prettier --check "**/*.{js,scss,html}"
       after_script: skip
-
-  allow_failures: # Temporary allow failure of django tests, until they are fixed
-    - script: coverage run ESSArch_PP/manage.py test -v2
 
 before_install:
   - sudo mkdir -p /ESSArch/log/
