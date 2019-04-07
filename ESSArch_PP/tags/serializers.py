@@ -17,10 +17,10 @@ class ComponentWriteSerializer(serializers.Serializer):
         required=False,
         queryset=TagVersion.objects.filter(type__archive_type=False),
     )
-    structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.filter(template=False))
+    structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.filter(is_template=False))
     structure_unit = serializers.PrimaryKeyRelatedField(
         required=False,
-        queryset=StructureUnit.objects.filter(structure__template=False),
+        queryset=StructureUnit.objects.filter(structure__is_template=False),
     )
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
@@ -58,7 +58,7 @@ class ComponentWriteSerializer(serializers.Serializer):
             tag_version = TagVersion.objects.create(
                 tag=tag, elastic_index='component', **validated_data,
             )
-            tag.current_version=tag_version
+            tag.current_version = tag_version
             tag.save()
 
             for agent_link in AgentTagLink.objects.filter(tag=tag_version):
@@ -93,7 +93,7 @@ class ComponentWriteSerializer(serializers.Serializer):
 class ArchiveWriteSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.filter(archive_type=True))
-    structure = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(template=True))
+    structure = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True))
     archive_creator = serializers.PrimaryKeyRelatedField(queryset=Agent.objects.all())
     description = serializers.CharField(required=False)
     reference_code = serializers.CharField()
@@ -104,17 +104,16 @@ class ArchiveWriteSerializer(serializers.Serializer):
     def create(self, validated_data):
         with transaction.atomic():
             agent = validated_data.pop('archive_creator')
-
             structure = validated_data.pop('structure')
-            new_structure = structure.create_template_instance()
 
             tag = Tag.objects.create()
-            TagStructure.objects.create(tag=tag, structure=new_structure)
             tag_version = TagVersion.objects.create(
                 tag=tag, elastic_index='archive', **validated_data,
             )
-            tag.current_version=tag_version
+            tag.current_version = tag_version
             tag.save()
+
+            structure.create_template_instance(tag)
 
             org = self.context['request'].user.user_profile.current_organization
             org.add_object(tag_version)

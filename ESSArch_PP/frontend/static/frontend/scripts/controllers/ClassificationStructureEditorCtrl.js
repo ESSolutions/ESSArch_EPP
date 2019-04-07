@@ -86,7 +86,7 @@ angular
           page_size: number,
           ordering: sortString,
           search: search,
-          template: true,
+          is_template: true,
           type: vm.structureType,
         }).$promise.then(function(resource) {
           vm.structures = resource;

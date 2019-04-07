@@ -57,7 +57,7 @@ angular
       return $http({
         url: appConfig.djangoUrl + 'structures/',
         mathod: 'GET',
-        params: {page: 1, page_size: 10, search: search, template: true},
+        params: {page: 1, page_size: 10, search: search, is_template: true},
       }).then(function(response) {
         $ctrl.options.structures = response.data;
         return $ctrl.options.structures;
