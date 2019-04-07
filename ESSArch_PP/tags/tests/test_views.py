@@ -18,6 +18,7 @@ from ESSArch_Core.agents.models import (
 from ESSArch_Core.tags.models import (
     Tag,
     TagVersion,
+    TagVersionType,
 )
 
 User = get_user_model()
@@ -33,6 +34,8 @@ class AgentArchiveRelationTests(TestCase):
         self.member = self.user.essauth_member
 
         self.client.force_authenticate(user=self.user)
+
+        self.archive_type = TagVersionType.objects.create(name='archive', archive_type=True)
 
         self.main_agent_type = MainAgentType.objects.create()
         self.agent_type = AgentType.objects.create(main_type=self.main_agent_type)
@@ -60,6 +63,7 @@ class AgentArchiveRelationTests(TestCase):
         tag_version = TagVersion.objects.create(
             tag=tag,
             elastic_index='archive',
+            type=self.archive_type,
         )
         return tag_version
 
@@ -80,6 +84,31 @@ class AgentArchiveRelationTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AgentTagLink.objects.count(), 1)
         self.assertTrue(AgentTagLink.objects.filter(agent=agent, tag=archive, type=self.relation_type).exists())
+
+    def test_add_same_relation_twice(self):
+        agent = self.create_agent()
+        archive = self.create_archive()
+
+        url = reverse('agent-archives-list', args=[agent.pk])
+
+        response = self.client.post(
+            url,
+            data={
+                'archive': archive.pk,
+                'type': self.relation_type.pk,
+            }
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                'archive': archive.pk,
+                'type': self.relation_type.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(AgentTagLink.objects.count(), 1)
 
     def test_update_relation(self):
         agent = self.create_agent()
