@@ -93,7 +93,7 @@ class ComponentWriteSerializer(serializers.Serializer):
 class ArchiveWriteSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.filter(archive_type=True))
-    structure = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True))
+    structure = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True, published=True))
     archive_creator = serializers.PrimaryKeyRelatedField(queryset=Agent.objects.all())
     description = serializers.CharField(required=False)
     reference_code = serializers.CharField()
