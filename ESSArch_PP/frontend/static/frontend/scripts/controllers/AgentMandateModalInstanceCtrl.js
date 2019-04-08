@@ -18,7 +18,6 @@ angular
       description: '',
       start_date: null,
       end_date: null,
-      type: 1,
       href: '',
     };
     $ctrl.resetMandate = function() {

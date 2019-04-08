@@ -14,7 +14,6 @@ angular
     var $ctrl = this;
     $scope.AgentName = AgentName;
     $ctrl.relationTemplate = {
-      type: 1,
       description: '',
       start_date: null,
       end_date: null,
