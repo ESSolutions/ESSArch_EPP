@@ -3,7 +3,7 @@
   </div>
   <div class="modal-body" id="modal-body">
     <b>
-      {{'ACCESS.ARCHIVE_CREATOR' | translate}}: {{$ctrl.getAuthorizedName($ctrl.data.relation.agent).full_name}}
+      {{'ACCESS.ARCHIVE_CREATOR' | translate}}: {{AgentName.getAuthorizedName($ctrl.data.relation.agent).full_name}}
     </b>
   </div>
   <div class="modal-footer">
