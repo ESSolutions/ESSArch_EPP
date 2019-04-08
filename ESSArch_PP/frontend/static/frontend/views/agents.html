@@ -535,13 +535,16 @@
                     <table class="table table-striped">
                       <thead>
                         <tr>
-                          <th st-sort="name">
+                          <th class="cursor-pointer" st-sort="name">
                             {{'NAME' | translate}}
                           </th>
-                          <th st-sort="start_date">
+                          <th class="cursor-pointer" st-sort="type">
+                            {{'TYPE' | translate}}
+                          </th>
+                          <th class="cursor-pointer" st-sort="start_date">
                             {{'ACCESS.TIME_RANGE_START' | translate}}
                           </th>
-                          <th st-sort="end_date">
+                          <th class="cursor-pointer" st-sort="end_date">
                             {{'ACCESS.TIME_RANGE_END' | translate}}
                           </th>
                           <th></th>
@@ -557,6 +560,9 @@
                         >
                           <td>
                             {{x.archive.name}}
+                          </td>
+                          <td>
+                            {{x.type.name}}
                           </td>
                           <td>
                             {{x.start_date | date:"yyyy-MM-dd"}}
