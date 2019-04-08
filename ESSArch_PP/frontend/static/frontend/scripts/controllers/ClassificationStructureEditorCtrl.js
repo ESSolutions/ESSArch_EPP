@@ -19,7 +19,7 @@ angular
     vm.structureTypes = [];
     vm.structureType = null;
     vm.$onInit = function() {
-      $http.get(appConfig.djangoUrl + 'structure-types/').then(function(response) {
+      $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
         vm.structureTypes = [{name: $translate.instant('ACCESS.SEE_ALL'), id: null}].concat(response.data);
       });
     };
@@ -35,10 +35,10 @@ angular
           vm.oldStructure = angular.copy(resource);
           vm.rules = vm.structure.specification.rules ? angular.copy(vm.structure.specification.rules) : {};
           var typePromises = [];
-          typePromises.push($http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false}}).then(function(response) {
+          typePromises.push($http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}}).then(function(response) {
             return response.data;
           }));
-          typePromises.push($http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: vm.structure.type.id}}).then(function(response) {
+          typePromises.push($http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: vm.structure.type.id, pager: 'none'}}).then(function(response) {
             return response.data;
           }));
           $q.all(typePromises).then(function(data) {

@@ -24,7 +24,7 @@ angular
     $ctrl.types = [];
 
     $ctrl.$onInit = function() {
-      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false}}).then(function(response) {
+      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}}).then(function(response) {
         $ctrl.typeOptions = response.data;
         $ctrl.loadForm();
       });

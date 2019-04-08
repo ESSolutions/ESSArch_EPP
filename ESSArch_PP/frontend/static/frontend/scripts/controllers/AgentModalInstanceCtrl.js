@@ -128,7 +128,7 @@ angular
     };
 
     $ctrl.buildTypeField = function(agent) {
-      return $http.get(appConfig.djangoUrl + 'agent-types/', {pager: 'none'}).then(function(response) {
+      return $http.get(appConfig.djangoUrl + 'agent-types/', {params: {pager: 'none'}}).then(function(response) {
         var options = angular.copy(response.data);
         options.forEach(function(x) {
           x.name = x.main_type.name;

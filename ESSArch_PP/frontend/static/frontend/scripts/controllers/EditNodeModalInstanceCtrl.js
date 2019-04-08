@@ -25,7 +25,7 @@ angular
     $ctrl.options = {};
     $ctrl.customFields = [];
     $ctrl.$onInit = function() {
-      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false}}).then(function(response) {
+      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: data.node && data.node._index === 'archive', pager: 'none'}}).then(function(response) {
         $ctrl.options.type = response.data;
         $ctrl.node = angular.copy(data.node);
         $ctrl.node.type = data.node.type.pk;

@@ -26,12 +26,12 @@ angular
         $ctrl.structure = data.structure;
       }
       if(data.newStructure) {
-        $http.get(appConfig.djangoUrl + 'structure-types/').then(function(response) {
+        $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
           $ctrl.typeOptions = response.data;
           $ctrl.buildStructureForm();
         })
       } else {
-        $http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: data.structure.type.id}}).then(function(response) {
+        $http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: data.structure.type.id, pager: 'none'}}).then(function(response) {
           if(data.children) {
             $ctrl.newNode.reference_code = (data.children.length + 1).toString();
           }
