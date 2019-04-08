@@ -141,7 +141,10 @@ angular
           key: 'type',
           templateOptions: {
             options: options,
-            ngOptions: 'x.name for x in to.options',
+            getTypeName: function(type) {
+              return type.main_type.name + (type.sub_type !== null && type.sub_type !== '' ? ' (' + type.sub_type + ')' : '');
+            },
+            ngOptions: 'to.getTypeName(x) for x in to.options',
             label: $translate.instant('TYPE'),
             required: true,
             notNull: true,
