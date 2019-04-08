@@ -250,15 +250,6 @@ angular
     $ctrl.loadBasicFields = function() {
       $ctrl.basicFields = [
         {
-          type: 'datepicker',
-          key: 'create_date',
-          templateOptions: {
-            label: $translate.instant('CREATE_DATE'),
-            appendToBody: false,
-            required: true,
-          },
-        },
-        {
           className: 'row m-0',
           fieldGroup: [
             {
@@ -308,6 +299,7 @@ angular
             required: true,
             notNull: true,
           },
+          hideExpression: 'true',
         },
         {
           type: 'select',
@@ -321,6 +313,7 @@ angular
             required: true,
             notNull: true,
           },
+          hideExpression: 'true',
         },
         {
           type: 'select',
@@ -334,6 +327,7 @@ angular
             required: true,
             notNull: true,
           },
+          hideExpression: 'true',
         },
         {
           type: 'select',
@@ -346,6 +340,15 @@ angular
             defaultValue: $ctrl.options.ref_code.choices[0].value,
             required: true,
             notNull: true,
+          },
+        },
+        {
+          type: 'datepicker',
+          key: 'create_date',
+          templateOptions: {
+            label: $translate.instant('CREATE_DATE'),
+            appendToBody: false,
+            required: true,
           },
         },
       ];
