@@ -32,7 +32,7 @@ angular.module('essarch.services').factory('AgentName', function($filter) {
           name = angular.copy(x);
           name.full_name = getFullName(x);
           if (angular.isUndefined(options) || (!angular.isUndefined(options) && options.includeDates !== false)) {
-            if(options && options.printDates) {
+            if (options && options.printDates) {
             }
             name.full_name += getAgentNameDates(agent);
           }

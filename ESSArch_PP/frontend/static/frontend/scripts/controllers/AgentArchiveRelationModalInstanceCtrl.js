@@ -7,7 +7,8 @@
     $http,
     EditMode,
     $scope,
-    $translate
+    $translate,
+    $filter
   ) {
     var $ctrl = this;
     $ctrl.relationTemplate = {
@@ -48,6 +49,15 @@
         params: {page: 1, page_size: 10, index: 'archive', search: search},
       }).then(function(response) {
         $ctrl.options.archives = response.data.map(function(x) {
+          x.current_version.name_with_dates =
+            x.current_version.name +
+            (x.current_version.start_date !== null || x.current_version.end_date != null
+              ? ' (' +
+                (x.current_version.start_date !== null ? $filter('date')(x.current_version.start_date, 'yyyy') : '') +
+                ' - ' +
+                (x.current_version.end_date !== null ? $filter('date')(x.current_version.end_date, 'yyyy') : '') +
+                ')'
+              : '');
           return x.current_version;
         });
         return $ctrl.options.archives;
@@ -64,7 +74,7 @@
               return $ctrl.options.archives;
             },
             valueProp: 'id',
-            labelProp: 'name',
+            labelProp: 'name_with_dates',
             placeholder: $translate.instant('ACCESS.ARCHIVE'),
             label: $translate.instant('ACCESS.ARCHIVE'),
             appendToBody: false,
@@ -122,15 +132,15 @@
           templateOptions: {
             label: $translate.instant('DESCRIPTION'),
             rows: 3,
-          }
-        }
+          },
+        },
       ];
     };
 
     $ctrl.add = function() {
       if ($ctrl.form.$invalid) {
         $ctrl.form.$setSubmitted();
-        return
+        return;
       }
       $ctrl.adding = true;
       $http({
@@ -152,7 +162,7 @@
     $ctrl.save = function() {
       if ($ctrl.form.$invalid) {
         $ctrl.form.$setSubmitted();
-        return
+        return;
       }
       $ctrl.saving = true;
       $http({

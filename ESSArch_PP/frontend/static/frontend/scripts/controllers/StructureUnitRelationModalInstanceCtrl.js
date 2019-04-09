@@ -43,7 +43,7 @@ angular
         method: 'GET',
         params: {structure: structure, search: search, page: 1, page_size: 10},
       }).then(function(response) {
-        if(angular.isUndefined(structure) || structure === null) {
+        if (angular.isUndefined(structure) || structure === null) {
           $ctrl.unit.options = [];
         } else {
           $ctrl.unit.options = response.data;
@@ -114,7 +114,6 @@ angular
               });
             },
           },
-
         },
         {
           key: 'type',

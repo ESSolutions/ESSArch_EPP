@@ -1,14 +1,6 @@
 angular
   .module('essarch.controllers')
-  .controller('ArchiveManagerCtrl', function(
-    $scope,
-    $http,
-    appConfig,
-    $uibModal,
-    $log,
-    $state,
-    $stateParams
-  ) {
+  .controller('ArchiveManagerCtrl', function($scope, $http, appConfig, $uibModal, $log, $state, $stateParams) {
     var vm = this;
     $scope.$stateParams = $stateParams;
     vm.structure = null;

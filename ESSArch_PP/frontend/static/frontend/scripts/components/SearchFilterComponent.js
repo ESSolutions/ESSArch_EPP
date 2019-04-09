@@ -4,11 +4,11 @@ angular.module('essarch.components').component('searchFilter', {
   controllerAs: 'vm',
   bindings: {
     label: '@',
-    options: '=',// Required
+    options: '=', // Required
     update: '&', // Required
-    labelProp: '@',// Required
-    valueProp: '@',// Required
-    ngModel: '=',// Required
-    ngChange: '&'
+    labelProp: '@', // Required
+    valueProp: '@', // Required
+    ngModel: '=', // Required
+    ngChange: '&',
   },
 });

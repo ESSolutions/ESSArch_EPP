@@ -35,18 +35,28 @@ angular
           vm.oldStructure = angular.copy(resource);
           vm.rules = vm.structure.specification.rules ? angular.copy(vm.structure.specification.rules) : {};
           var typePromises = [];
-          typePromises.push($http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}}).then(function(response) {
-            return response.data;
-          }));
-          typePromises.push($http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: vm.structure.type.id, pager: 'none'}}).then(function(response) {
-            return response.data;
-          }));
+          typePromises.push(
+            $http
+              .get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}})
+              .then(function(response) {
+                return response.data;
+              })
+          );
+          typePromises.push(
+            $http
+              .get(appConfig.djangoUrl + 'structure-unit-types/', {
+                params: {structure_type: vm.structure.type.id, pager: 'none'},
+              })
+              .then(function(response) {
+                return response.data;
+              })
+          );
           $q.all(typePromises).then(function(data) {
             vm.typeOptions = [].concat.apply([], data);
-            if(vm.typeOptions.length > 0) {
+            if (vm.typeOptions.length > 0) {
               vm.newRule = vm.typeOptions[0].name;
             }
-          })
+          });
           vm.getTree(vm.structure).then(function(tree) {
             vm.recreateTree(tree);
           });
@@ -485,7 +495,7 @@ angular
         resolve: {
           data: {
             node: node,
-            structure: vm.structure
+            structure: vm.structure,
           },
         },
       });

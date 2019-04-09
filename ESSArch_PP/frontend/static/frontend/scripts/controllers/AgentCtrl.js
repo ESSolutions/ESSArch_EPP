@@ -59,7 +59,7 @@ angular
         vm.initAccordion();
         vm.sortNotes(response.data);
         vm.sortNames(response.data);
-        AgentName.parseAgentNames(response.data)
+        AgentName.parseAgentNames(response.data);
         response.data.auth_name = AgentName.getAuthorizedName(response.data);
         vm.agent = response.data;
       });
@@ -161,10 +161,10 @@ angular
     };
 
     vm.parseAgents = function(list) {
-       list.forEach(function(agent) {
-         AgentName.parseAgentNames(agent);
-         agent.auth_name = AgentName.getAuthorizedName(agent, {includeDates: false});
-        });
+      list.forEach(function(agent) {
+        AgentName.parseAgentNames(agent);
+        agent.auth_name = AgentName.getAuthorizedName(agent, {includeDates: false});
+      });
     };
 
     vm.agentArchivePipe = function(tableState) {

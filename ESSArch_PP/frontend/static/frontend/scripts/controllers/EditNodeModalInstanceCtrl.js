@@ -25,13 +25,17 @@ angular
     $ctrl.options = {};
     $ctrl.customFields = [];
     $ctrl.$onInit = function() {
-      $http.get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: data.node && data.node._index === 'archive', pager: 'none'}}).then(function(response) {
-        $ctrl.options.type = response.data;
-        $ctrl.node = angular.copy(data.node);
-        $ctrl.node.type = data.node.type.pk;
-        $ctrl.loadForm();
-        EditMode.enable();
-      });
+      $http
+        .get(appConfig.djangoUrl + 'tag-version-types/', {
+          params: {archive_type: data.node && data.node._index === 'archive', pager: 'none'},
+        })
+        .then(function(response) {
+          $ctrl.options.type = response.data;
+          $ctrl.node = angular.copy(data.node);
+          $ctrl.node.type = data.node.type.pk;
+          $ctrl.loadForm();
+          EditMode.enable();
+        });
     };
 
     function deleteField(field) {
@@ -122,7 +126,7 @@ angular
           type: 'input',
           templateOptions: {
             label: $translate.instant('NAME'),
-            required: true
+            required: true,
           },
         },
         {
@@ -198,8 +202,8 @@ angular
         .then(function(response) {
           $ctrl.submitting = false;
           Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
-            EditMode.disable();
-            $uibModalInstance.close('edited');
+          EditMode.disable();
+          $uibModalInstance.close('edited');
         })
         .catch(function(response) {
           $ctrl.submitting = false;

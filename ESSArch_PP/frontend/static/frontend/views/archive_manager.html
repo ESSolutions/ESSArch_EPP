@@ -47,7 +47,6 @@
         >
           {{'SEARCH' | translate}}&nbsp;<i class="fas fa-search"></i>
         </button>
-      </select>
         <div class="refresh-icon">
           <span
             ng-click="vm.updateArchives()"
@@ -94,10 +93,7 @@
                 {{x.current_version.end_date | date:"yyyy-MM-dd"}}
               </td>
               <td>
-                <button
-                  class="fas fa-trash-alt btn btn-default btn-sm"
-                  ng-click="vm.removeArchiveModal(x)"
-                ></button>
+                <button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="vm.removeArchiveModal(x)"></button>
               </td>
             </tr>
             <tr ng-if="!vm.archives.length && !vm.archivesLoading" class="empty-table-indicator">
@@ -121,7 +117,7 @@
     </div>
 
     <div>
-      <hr class="small"/>
+      <hr class="small" />
       <div ui-view></div>
     </div>
   </div>

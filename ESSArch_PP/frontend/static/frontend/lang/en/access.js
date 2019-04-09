@@ -46,8 +46,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       DO_YOU_WANT_TO_REMOVE_ARCHIVE_RELATION: 'Do you want to remove archive relation?',
       DO_YOU_WANT_TO_REMOVE_MANDATE: 'Do you want to remove mandate?',
       DO_YOU_WANT_TO_REMOVE_NODE: 'Do you want to remove node?',
-      DO_YOU_WANT_TO_REMOVE_NODE_FROM_CLASSIFICATION_STRUCTURE:
-      'Do you want to remove node from structure?',
+      DO_YOU_WANT_TO_REMOVE_NODE_FROM_CLASSIFICATION_STRUCTURE: 'Do you want to remove node from structure?',
       DO_YOU_WANT_TO_REMOVE_NOTE: 'Do you want to remove history/remark?',
       DO_YOU_WANT_TO_REMOVE_RELATION: 'Do you want to remove relation?',
       DO_YOU_WANT_TO_REMOVE_STRUCTURE: 'Do you want to delete structure?',

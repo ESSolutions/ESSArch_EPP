@@ -60,7 +60,8 @@ angular
             required: true,
             labelProp: 'display_name',
             valueProp: 'value',
-            defaultValue: $ctrl.options.mandates.type.choices.length > 0 ? $ctrl.options.mandates.type.choices[0].value : null,
+            defaultValue:
+              $ctrl.options.mandates.type.choices.length > 0 ? $ctrl.options.mandates.type.choices[0].value : null,
             notNull: true,
           },
         },

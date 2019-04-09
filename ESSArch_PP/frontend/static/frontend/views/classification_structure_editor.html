@@ -55,7 +55,7 @@
             ng-options="x.id as x.name for x in vm.structureTypes"
             placeholder="{{'ACCESS.STRUCTURE_TYPE' | translate}}"
           >
-        </select>
+          </select>
           <div class="refresh-icon">
             <span
               ng-click="vm.updateStructures()"
@@ -212,7 +212,7 @@
                 class="btn btn-primary"
                 ng-disabled="vm.savingRules || (angular.equals(vm.rules, {}) && angular.equals(vm.rules, vm.structure.specification.rules)) || angular.equals(vm.rules, vm.structure.specification.rules)"
                 ng-click="vm.saveRules(vm.rules, vm.structure)"
-                >
+              >
                 {{'SAVE' | translate}}&nbsp; <i ng-if="vm.savingRules" class="fas fa-spinner fa-spin" />
               </button>
             </div>

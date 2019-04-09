@@ -5,11 +5,14 @@
   <div class="filter-input-wrapper">
     <div>
       <ul class="list-unstyled filter-selected-options" ng-if="vm.selected.length > 0">
-        <li ng-repeat="x in vm.selected" ng-click="vm.deselect(x)" class="selectable"
-        ng-mouseover="showDelete = true"
-        ng-mouseout="showDelete = false"
-        uib-tooltip="{{'ACCESS.DESELECT_FILTER' | translate}}"
-        tooltip-placement="top-left auto"
+        <li
+          ng-repeat="x in vm.selected"
+          ng-click="vm.deselect(x)"
+          class="selectable"
+          ng-mouseover="showDelete = true"
+          ng-mouseout="showDelete = false"
+          uib-tooltip="{{'ACCESS.DESELECT_FILTER' | translate}}"
+          tooltip-placement="top-left auto"
         >
           {{x[vm.labelProp]}}
         </li>
@@ -27,8 +30,7 @@
       ng-focus="vm.openOptions($event)"
     />
     <div class="position-relative">
-      <ul ng-if="vm.resultListVisible" class="list-unstyled filter-options"
-      >
+      <ul ng-if="vm.resultListVisible" class="list-unstyled filter-options">
         <li
           ng-repeat="x in vm.options track by $index"
           ng-click="vm.select(x)"
@@ -43,5 +45,4 @@
       </ul>
     </div>
   </div>
-
 </div>

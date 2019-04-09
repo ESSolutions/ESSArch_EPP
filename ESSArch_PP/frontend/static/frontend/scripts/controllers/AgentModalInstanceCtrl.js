@@ -108,7 +108,7 @@ angular
           $ctrl.buildTypeField($ctrl.agent).then(function(typeField) {
             $ctrl.loadBasicFields();
             $ctrl.basicFields.unshift(typeField);
-          })
+          });
         });
       } else {
         $ctrl.buildAgentModel().then(function(model) {
@@ -121,7 +121,7 @@ angular
               $ctrl.loadForms();
             };
             $ctrl.typeField = [typeField];
-          })
+          });
         });
       }
       EditMode.enable();
@@ -132,17 +132,20 @@ angular
         var options = angular.copy(response.data);
         options.forEach(function(x) {
           x.name = x.main_type.name;
-          if(x.id === agent.type.id) {
+          if (x.id === agent.type.id) {
             agent.type = x;
           }
-        })
+        });
         var type = {
           type: 'select',
           key: 'type',
           templateOptions: {
             options: options,
             getTypeName: function(type) {
-              return type.main_type.name + (type.sub_type !== null && type.sub_type !== '' ? ' (' + type.sub_type + ')' : '');
+              return (
+                type.main_type.name +
+                (type.sub_type !== null && type.sub_type !== '' ? ' (' + type.sub_type + ')' : '')
+              );
             },
             ngOptions: 'to.getTypeName(x) for x in to.options',
             label: $translate.instant('TYPE'),
@@ -151,7 +154,7 @@ angular
           },
         };
         return type;
-      })
+      });
     };
 
     $ctrl.loadForms = function() {
@@ -159,7 +162,7 @@ angular
       $ctrl.basicFields = [];
       $ctrl.loadNameForm();
       $ctrl.loadBasicFields();
-    }
+    };
 
     $ctrl.loadNameForm = function() {
       $ctrl.nameFields = [];

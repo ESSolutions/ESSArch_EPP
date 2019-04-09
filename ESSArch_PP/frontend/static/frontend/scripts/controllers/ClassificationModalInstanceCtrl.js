@@ -25,19 +25,23 @@ angular
       if (data.structure) {
         $ctrl.structure = data.structure;
       }
-      if(data.newStructure) {
+      if (data.newStructure) {
         $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
           $ctrl.typeOptions = response.data;
           $ctrl.buildStructureForm();
-        })
+        });
       } else {
-        $http.get(appConfig.djangoUrl + 'structure-unit-types/', {params: {structure_type: data.structure.type.id, pager: 'none'}}).then(function(response) {
-          if(data.children) {
-            $ctrl.newNode.reference_code = (data.children.length + 1).toString();
-          }
-          $ctrl.structureUnitTypes = response.data;
-          $ctrl.buildNodeForm();
-        })
+        $http
+          .get(appConfig.djangoUrl + 'structure-unit-types/', {
+            params: {structure_type: data.structure.type.id, pager: 'none'},
+          })
+          .then(function(response) {
+            if (data.children) {
+              $ctrl.newNode.reference_code = (data.children.length + 1).toString();
+            }
+            $ctrl.structureUnitTypes = response.data;
+            $ctrl.buildNodeForm();
+          });
       }
     };
 
@@ -48,7 +52,7 @@ angular
           type: 'input',
           templateOptions: {
             label: $translate.instant('NAME'),
-            required: true
+            required: true,
           },
         },
         {
@@ -82,11 +86,11 @@ angular
             valueProp: 'id',
             labelProp: 'name',
             label: $translate.instant('TYPE'),
-            required: true
+            required: true,
           },
         },
       ];
-    }
+    };
 
     $ctrl.buildNodeForm = function() {
       $ctrl.nodeFields = [
@@ -208,7 +212,7 @@ angular
      * Save new classification structure
      */
     $ctrl.save = function() {
-      if($ctrl.form.$invalid) {
+      if ($ctrl.form.$invalid) {
         $ctrl.form.$setSubmitted();
         return;
       }
