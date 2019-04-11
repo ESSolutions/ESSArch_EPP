@@ -28,7 +28,7 @@ angular
       return $http({
         url: appConfig.djangoUrl + 'agents/',
         mathod: 'GET',
-        params: {page: 1, page_size: 10, search: search},
+        params: {page: 1, page_size: 10, search: search, excluded_ids: $ctrl.agent.id ? $ctrl.agent.id: ''},
       }).then(function(response) {
         response.data.forEach(function(agent) {
           AgentName.parseAgentNames(agent);
