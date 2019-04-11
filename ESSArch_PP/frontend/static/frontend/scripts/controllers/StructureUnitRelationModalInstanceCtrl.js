@@ -6,7 +6,8 @@ angular
     data,
     $http,
     EditMode,
-    $translate
+    $translate,
+    $scope
   ) {
     var $ctrl = this;
     $ctrl.relation = {
@@ -26,6 +27,9 @@ angular
       options: [],
     };
     $ctrl.options = {};
+    $ctrl.initStructureSearch = null;
+    $ctrl.initUnitSearch = null;
+
     $ctrl.getStructures = function(search) {
       return $http({
         url: appConfig.djangoUrl + 'structures/',
@@ -53,21 +57,31 @@ angular
     };
 
     $ctrl.$onInit = function() {
+      $ctrl.data = data;
       if (data.node) {
         $ctrl.node = angular.copy(data.node);
+      }
+      if (data.relation) {
+        $ctrl.relation = angular.copy(data.relation);
+        $ctrl.relation.type = angular.copy(data.relation.type.id);
+        $ctrl.relation.structure_unit = angular.copy(data.relation.structure_unit.id);
+        $ctrl.structure.value = angular.copy(data.relation.structure_unit.structure.id);
+        $ctrl.initStructureSearch = data.relation.structure_unit.structure.name;
+        $ctrl.initUnitSearch = data.relation.structure_unit.name;
       }
       return $http({
         url: appConfig.djangoUrl + 'structure-units/',
         method: 'OPTIONS',
       }).then(function(response) {
         $ctrl.options.type = response.data.actions.POST.related_structure_units.child.children.type;
+        $ctrl.buildStructureForm();
         $ctrl.buildForm();
         EditMode.enable();
         return response.data;
       });
     };
 
-    $ctrl.buildForm = function() {
+    $ctrl.buildStructureForm = function() {
       $ctrl.structureFields = [
         {
           type: 'uiselect',
@@ -84,6 +98,10 @@ angular
             clearEnabled: true,
             appendToBody: false,
             refresh: function(search) {
+              if ($ctrl.initStructureSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                search = angular.copy($ctrl.initStructureSearch);
+                $ctrl.initStructureSearch = null;
+              }
               $ctrl.getStructures(search).then(function() {
                 this.options = $ctrl.structure.options;
               });
@@ -91,7 +109,9 @@ angular
           },
         },
       ];
-      $ctrl.unitFields = [];
+    };
+
+    $ctrl.buildForm = function() {
       $ctrl.fields = [
         {
           type: 'uiselect',
@@ -109,6 +129,10 @@ angular
             appendToBody: false,
             clearEnabled: true,
             refresh: function(search) {
+              if ($ctrl.initUnitSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                search = angular.copy($ctrl.initUnitSearch);
+                $ctrl.initUnitSearch = null;
+              }
               $ctrl.getStructureUnits(search, $ctrl.structure.value).then(function() {
                 this.options = $ctrl.unit.options;
               });
@@ -169,13 +193,18 @@ angular
         $ctrl.form.$setSubmitted();
         return;
       }
+      var units = angular.copy($ctrl.node).related_structure_units.map(function(x) {
+        x.structure_unit = angular.copy(x.structure_unit.id);
+        x.type = angular.copy(x.type.id);
+        return x;
+      });
       $ctrl.adding = true;
       $http({
-        url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.original.id + '/',
+        url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
         data: {
           structure: data.structure.id,
-          related_structure_units: angular.copy($ctrl.node).original.related_structure_units.concat([$ctrl.relation]),
+          related_structure_units: units.concat([$ctrl.relation]),
         },
       })
         .then(function(response) {
@@ -188,8 +217,93 @@ angular
           EditMode.disable();
         });
     };
+
+    $ctrl.save = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      var units = angular.copy($ctrl.node).related_structure_units;
+      units.forEach(function(x, idx, array) {
+        x.structure_unit = angular.copy(x.structure_unit.id);
+        x.type = angular.copy(x.type.id);
+        if (x.id === $ctrl.relation.id) {
+          array[idx] = $ctrl.relation;
+        }
+      });
+      $ctrl.saving = true;
+      $http({
+        url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
+        method: 'PATCH',
+        data: {
+          structure: data.structure.id,
+          related_structure_units: units,
+        },
+      })
+        .then(function(response) {
+          $ctrl.saving = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.saving = false;
+          EditMode.disable();
+        });
+    };
+
+    $ctrl.remove = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      var toRemove = null;
+      var units = angular.copy($ctrl.node).related_structure_units;
+      units.forEach(function(x, idx) {
+        x.structure_unit = angular.copy(x.structure_unit.id);
+        x.type = angular.copy(x.type.id);
+        if (x.id === $ctrl.relation.id) {
+          toRemove = idx;
+        }
+      });
+      if (toRemove !== null) {
+        units.splice(toRemove, 1);
+      }
+      $ctrl.removing = true;
+      $http({
+        url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
+        method: 'PATCH',
+        data: {
+          structure: data.structure.id,
+          related_structure_units: units,
+        },
+      })
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function() {
+          $ctrl.removing = false;
+          EditMode.disable();
+        });
+    };
+
     $ctrl.cancel = function() {
       EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
+
+    $scope.$on('modal.closing', function(event, reason, closed) {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
+        var message = $translate.instant('UNSAVED_DATA_WARNING');
+        if (!confirm(message)) {
+          event.preventDefault();
+        } else {
+          EditMode.disable();
+        }
+      }
+    });
   });

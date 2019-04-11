@@ -33,8 +33,9 @@ angular
         $ctrl.options = {names: {type: response.data.actions.POST.names.child.children.type}};
         EditMode.enable();
         if (data.name) {
-          data.name.type = data.name.type.id;
-          $ctrl.name = angular.copy(data.name);
+          var name = angular.copy(data.name);
+          name.type = data.name.type.id;
+          $ctrl.name = angular.copy(name);
         } else {
           $ctrl.resetName();
         }
@@ -197,16 +198,19 @@ angular
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      var toRemove = null;
       var names = angular.copy(data.agent.names);
       names.forEach(function(x, idx, array) {
         if (typeof x.type === 'object') {
           x.type = x.type.id;
         }
         if (x.id === $ctrl.name.id) {
-          array[idx] = $ctrl.name;
-          array.splice(idx, 1);
+          toRemove = idx;
         }
       });
+      if (toRemove !== null) {
+        names.splice(toRemove, 1);
+      }
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',

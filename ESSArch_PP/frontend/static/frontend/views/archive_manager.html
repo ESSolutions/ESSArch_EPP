@@ -71,7 +71,7 @@
               <th st-sort="end_date">
                 {{'END_DATE' | translate}}
               </th>
-              <th>
+              <th class="white-space-nowrap shrink">
                 {{'REMOVE' | translate}}
               </th>
             </tr>
@@ -92,7 +92,7 @@
               <td>
                 {{x.current_version.end_date | date:"yyyy-MM-dd"}}
               </td>
-              <td>
+              <td class="text-center shrink">
                 <button class="fas fa-trash-alt btn btn-default btn-sm" ng-click="vm.removeArchiveModal(x)"></button>
               </td>
             </tr>
@@ -117,7 +117,6 @@
     </div>
 
     <div>
-      <hr class="small" />
       <div ui-view></div>
     </div>
   </div>

@@ -42,33 +42,29 @@
                 <th>
                   {{'NAME' | translate}}
                 </th>
-                <th></th>
+                <th class="white-space-nowrap shrink">
+                  {{'REMOVE' | translate}}
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr
                 ng-repeat="x in vm.searchList"
-                ng-mouseover="x.removeVisible = true"
-                ng-mouseleave="x.removeVisible = false"
                 ui-sref="home.access.search({query: x.query})"
                 class="selectable"
               >
                 <td>
                   {{x.name}}
                 </td>
-                <td class="position-relative">
-                  <div class="edit-btn-wrapper">
-                    <button
-                      class="btn btn-edit-field-delete"
-                      ng-if="x.removeVisible"
-                      ng-click="vm.removeSearchModal(x); $event.stopPropagation();"
-                      uib-tooltip="{{'REMOVE' | translate}}"
-                      tooltip-placement="auto top"
-                      tooltip-append-to-body="true"
-                    >
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
+                <td class="text-center shrink">
+                  <button
+                    class="btn btn-default btn-sm fas fa-trash-alt"
+                    ng-click="vm.removeSearchModal(x); $event.stopPropagation();"
+                    uib-tooltip="{{'REMOVE' | translate}}"
+                    tooltip-placement="auto top"
+                    tooltip-append-to-body="true"
+                  >
+                  </button>
                 </td>
               </tr>
               <tr ng-if="!vm.searchList.length && !loadingSearches" class="empty-table-indicator">

@@ -32,8 +32,9 @@ angular
         $ctrl.options = {mandates: {type: response.data.actions.POST.mandates.child.children.type}};
         EditMode.enable();
         if (data.mandate) {
-          data.mandate.type = data.mandate.type.id;
-          $ctrl.mandate = angular.copy(data.mandate);
+          var mandate = angular.copy(data.mandate);
+          mandate.type = data.mandate.type.id;
+          $ctrl.mandate = angular.copy(mandate);
         } else {
           $ctrl.resetMandate();
         }
@@ -116,7 +117,9 @@ angular
       $ctrl.adding = true;
       var mandates = angular.copy(data.agent.mandates);
       mandates.forEach(function(x) {
-        x.type = x.type.id;
+        if (typeof x.type === 'object') {
+          x.type = angular.copy(x.type.id);
+        }
       });
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
@@ -141,7 +144,7 @@ angular
       var mandates = angular.copy(data.agent.mandates);
       mandates.forEach(function(x, idx, array) {
         if (typeof x.type === 'object') {
-          x.type = x.type.id;
+          x.type = angular.copy(x.type.id);
         }
         if (x.id === $ctrl.mandate.id) {
           array[idx] = $ctrl.mandate;
@@ -164,15 +167,19 @@ angular
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      var toRemove = null;
       var mandates = angular.copy(data.agent.mandates);
       mandates.forEach(function(x, idx, array) {
         if (typeof x.type === 'object') {
-          x.type = x.type.id;
+          x.type = angular.copy(x.type.id);
         }
         if (x.id === $ctrl.mandate.id) {
-          array.splice(idx, 1);
+          toRemove = idx;
         }
       });
+      if (toRemove !== null) {
+        mandates.splice(toRemove, 1);
+      }
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',

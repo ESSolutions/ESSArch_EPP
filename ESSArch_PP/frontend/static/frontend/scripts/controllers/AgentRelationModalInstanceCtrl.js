@@ -202,6 +202,7 @@ angular
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      var toRemove = null;
       var related_agents = angular.copy($ctrl.agent.related_agents);
       related_agents.forEach(function(x, idx, array) {
         if (typeof x.type === 'object') {
@@ -211,9 +212,12 @@ angular
           x.agent = x.agent.id;
         }
         if (x.id === $ctrl.relation.id) {
-          array.splice(idx, 1);
+          toRemove = idx;
         }
       });
+      if (toRemove !== null) {
+        related_agents.splice(toRemove, 1);
+      }
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
         method: 'PATCH',

@@ -7,7 +7,6 @@
     }
     .structure-rules {
       flex-grow: 1;
-      padding-left: 25px;
       @include medium-screen {
         width: 100%;
         margin-left: 0;
@@ -50,6 +49,11 @@
       justify-content: space-between;
       align-items: flex-end;
     }
+  }
+}
+.search-admin {
+  .success {
+    color: $step-success;
   }
 }
 

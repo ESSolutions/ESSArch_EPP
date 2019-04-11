@@ -7,7 +7,9 @@ angular
     Notifications,
     $uibModalInstance,
     $translate,
-    Structure
+    Structure,
+    EditMode,
+    $scope
   ) {
     var $ctrl = this;
     $ctrl.name = null;
@@ -22,8 +24,14 @@ angular
       if (data.node) {
         $ctrl.node = data.node;
       }
+      EditMode.enable();
       if (data.structure) {
-        $ctrl.structure = data.structure;
+        $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
+          $ctrl.typeOptions = response.data;
+          $ctrl.structure = angular.copy(data.structure);
+          $ctrl.structure.type = data.structure.structureType.id;
+          $ctrl.buildStructureForm();
+        });
       }
       if (data.newStructure) {
         $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
@@ -56,6 +64,18 @@ angular
           },
         },
         {
+          type: 'select',
+          key: 'type',
+          templateOptions: {
+            options: $ctrl.typeOptions,
+            valueProp: 'id',
+            labelProp: 'name',
+            label: $translate.instant('TYPE'),
+            required: true,
+          },
+          defaultValue: $ctrl.typeOptions.length > 0 ? $ctrl.typeOptions[0].id : null,
+        },
+        {
           className: 'row m-0',
           fieldGroup: [
             {
@@ -77,17 +97,6 @@ angular
               },
             },
           ],
-        },
-        {
-          type: 'select',
-          key: 'type',
-          templateOptions: {
-            options: $ctrl.typeOptions,
-            valueProp: 'id',
-            labelProp: 'name',
-            label: $translate.instant('TYPE'),
-            required: true,
-          },
         },
       ];
     };
@@ -165,6 +174,7 @@ angular
         .delete(appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id)
         .then(function(response) {
           Notifications.add($translate.instant('ACCESS.NODE_REMOVED'), 'success');
+          EditMode.disable();
           $uibModalInstance.close('added');
         });
     };
@@ -186,6 +196,7 @@ angular
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
+            EditMode.disable();
             $uibModalInstance.close(response.data);
           })
           .catch(function(response) {
@@ -205,6 +216,7 @@ angular
         },
       }).then(function(response) {
         $uibModalInstance.close(response.data);
+        EditMode.disable();
         Notifications.add($translate.instant('NODE_UPDATED'), 'success');
       });
     };
@@ -217,8 +229,24 @@ angular
         return;
       }
       Structure.new($ctrl.newStructure).$promise.then(function(response) {
+        EditMode.disable();
         $uibModalInstance.close(response.data);
         Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
+      });
+    };
+
+    $ctrl.saveEditedStructure = function() {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      $http({
+        url: appConfig.djangoUrl + 'structures/' + $ctrl.structure.id + '/',
+        method: 'PATCH',
+        data: $ctrl.structure,
+      }).then(function(response) {
+        EditMode.disable();
+        $uibModalInstance.close(response.data);
       });
     };
 
@@ -228,10 +256,26 @@ angular
       Structure.remove({id: structure.id}).$promise.then(function(response) {
         $ctrl.removing = false;
         Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_REMOVED'), 'success');
+        EditMode.disable();
         $uibModalInstance.close();
       });
     };
     $ctrl.cancel = function() {
+      EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
+
+    $scope.$on('modal.closing', function(event, reason, closed) {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
+        var message = $translate.instant('UNSAVED_DATA_WARNING');
+        if (!confirm(message)) {
+          event.preventDefault();
+        } else {
+          EditMode.disable();
+        }
+      }
+    });
   });

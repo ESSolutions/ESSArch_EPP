@@ -12,7 +12,7 @@ angular
     var $ctrl = this;
     $ctrl.note;
     $ctrl.noteTemplate = {
-      create_date: null,
+      create_date: new Date(),
       href: '',
       revise_date: null,
       text: null,
@@ -31,8 +31,9 @@ angular
         $ctrl.typeOptions = response.data.actions.POST.notes.child.children.type.choices;
         EditMode.enable();
         if (data.note) {
-          data.note.type = data.note.type.id;
-          $ctrl.note = angular.copy(data.note);
+          var note = angular.copy(data.note);
+          note.type = data.note.type.id;
+          $ctrl.note = angular.copy(note);
         } else {
           $ctrl.resetNote();
         }
@@ -150,15 +151,19 @@ angular
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      var toRemove = null;
       var notes = angular.copy(data.agent.notes);
       notes.forEach(function(x, idx, array) {
         if (typeof x.type === 'object') {
           x.type = x.type.id;
         }
         if (x.id === $ctrl.note.id) {
-          array.splice(idx, 1);
+          toRemove = idx;
         }
       });
+      if (toRemove !== null) {
+        notes.splice(toRemove, 1);
+      }
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',

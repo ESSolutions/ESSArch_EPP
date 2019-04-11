@@ -62,6 +62,7 @@ angular
         AgentName.parseAgentNames(response.data);
         response.data.auth_name = AgentName.getAuthorizedName(response.data);
         vm.agent = response.data;
+        vm.agentArchivePipe($scope.archiveTableState);
       });
     };
 
