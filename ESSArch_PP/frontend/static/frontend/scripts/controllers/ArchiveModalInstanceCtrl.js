@@ -8,13 +8,28 @@ angular
     $http,
     data,
     Notifications,
-    AgentName
+    AgentName,
+    EditMode,
+    $scope,
+    Utils
   ) {
     var $ctrl = this;
     $ctrl.options = {};
+    $ctrl.initStructureSearch = null;
+    $ctrl.initAgentSearch = null;
     $ctrl.$onInit = function() {
+      EditMode.enable();
       if (data.archive) {
-        $ctrl.archive = data.archive;
+        $ctrl.archive = angular.copy(data.archive);
+        $ctrl.archive.type = angular.copy(data.archive.type.pk);
+        $ctrl.initStructureSearch = angular.copy(data.archive.structures[0].name);
+        $ctrl.initAgentSearch = angular.copy(data.archive.agents[0].agent.names[0].main);
+        delete $ctrl.archive.identifiers;
+        delete $ctrl.archive.notes;
+        delete $ctrl.archive.structures;
+        delete $ctrl.archive._source;
+        console.log($ctrl.archive);
+        console.log($ctrl.initStructureSearch, $ctrl.initAgentSearch);
       } else {
         $ctrl.archive = {};
       }
@@ -74,46 +89,60 @@ angular
             required: true,
           },
         },
-        {
-          type: 'uiselect',
-          key: 'structure',
-          templateOptions: {
-            required: true,
-            options: function() {
-              return $ctrl.options.structures;
-            },
-            valueProp: 'id',
-            labelProp: 'name',
-            placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-            label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-            appendToBody: false,
-            refresh: function(search) {
-              $ctrl.getStructures(search).then(function() {
-                this.options = $ctrl.options.structures;
-              });
-            },
-          },
-        },
-        {
-          type: 'uiselect',
-          key: 'archive_creator',
-          templateOptions: {
-            required: true,
-            options: function() {
-              return $ctrl.options.agents;
-            },
-            valueProp: 'id',
-            labelProp: 'full_name',
-            placeholder: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-            label: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
-            appendToBody: false,
-            refresh: function(search) {
-              $ctrl.getAgents(search).then(function() {
-                this.options = $ctrl.options.agents;
-              });
+      ];
+      if (angular.isUndefined(data.archive) || data.archive === null) {
+        $ctrl.fields = $ctrl.fields.concat([
+          {
+            type: 'uiselect',
+            key: 'structure',
+            templateOptions: {
+              required: true,
+              options: function() {
+                return $ctrl.options.structures;
+              },
+              valueProp: 'id',
+              labelProp: 'name',
+              placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
+              label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
+              appendToBody: false,
+              refresh: function(search) {
+                if ($ctrl.initStructureSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                  search = angular.copy($ctrl.initStructureSearch);
+                  $ctrl.initStructureSearch = null;
+                }
+                $ctrl.getStructures(search).then(function() {
+                  this.options = $ctrl.options.structures;
+                });
+              },
             },
           },
-        },
+          {
+            type: 'uiselect',
+            key: 'archive_creator',
+            templateOptions: {
+              required: true,
+              options: function() {
+                return $ctrl.options.agents;
+              },
+              valueProp: 'id',
+              labelProp: 'full_name',
+              placeholder: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
+              label: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
+              appendToBody: false,
+              refresh: function(search) {
+                if ($ctrl.initAgentSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                  search = angular.copy($ctrl.initAgentSearch);
+                  $ctrl.initAgentSearch = null;
+                }
+                $ctrl.getAgents(search).then(function() {
+                  this.options = $ctrl.options.agents;
+                });
+              },
+            },
+          },
+        ]);
+      }
+      $ctrl.fields = $ctrl.fields.concat([
         {
           className: 'row m-0',
           fieldGroup: [
@@ -123,7 +152,7 @@ angular
               key: 'start_date',
               templateOptions: {
                 label: $translate.instant('START_DATE'),
-                appendToBody: true,
+                appendToBody: false,
               },
             },
             {
@@ -132,7 +161,7 @@ angular
               key: 'end_date',
               templateOptions: {
                 label: $translate.instant('END_DATE'),
-                appendToBody: true,
+                appendToBody: false,
               },
             },
           ],
@@ -166,7 +195,7 @@ angular
             label: $translate.instant('ACCESS.REFERENCE_CODE'),
           },
         },
-      ];
+      ]);
     };
 
     $ctrl.create = function(archive) {
@@ -183,13 +212,47 @@ angular
         .then(function(response) {
           $ctrl.creating = false;
           Notifications.add($translate.instant('ACCESS.NEW_ARCHIVE_CREATED'), 'success');
+          EditMode.disable();
           $uibModalInstance.close({archive: response.data});
         })
         .catch(function() {
           $ctrl.creating = false;
         });
     };
+
+    $ctrl.save = function(archive) {
+      if ($ctrl.form.$invalid) {
+        $ctrl.form.$setSubmitted();
+        return;
+      }
+      $ctrl.saving = true;
+      Search.updateNode({_id: data.archive._id}, Utils.getDiff(data.archive, $ctrl.archive))
+        .then(function(response) {
+          $ctrl.saving = false;
+          Notifications.add($translate.instant('ACCESS.ARCHIVE_SAVED'), 'success');
+          EditMode.disable();
+          $uibModalInstance.close({archive: response.data});
+        })
+        .catch(function() {
+          $ctrl.saving = false;
+        });
+    };
     $ctrl.cancel = function() {
+      EditMode.disable();
       $uibModalInstance.dismiss('cancel');
     };
+
+    $scope.$on('modal.closing', function(event, reason, closed) {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
+        var message = $translate.instant('UNSAVED_DATA_WARNING');
+        if (!confirm(message)) {
+          event.preventDefault();
+        } else {
+          EditMode.disable();
+        }
+      }
+    });
   });

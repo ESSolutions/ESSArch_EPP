@@ -515,7 +515,11 @@ angular
               return node.original._is_structure_unit;
             },
             action: function update() {
-              vm.editNodeModal(node.original);
+              if(node.original._index === 'archive') {
+                vm.editArchiveModal(node.original);
+              } else {
+                vm.editNodeModal(node.original);
+              }
             },
           };
           var add = {
@@ -1020,6 +1024,31 @@ angular
         }
       );
     };
+    vm.editArchiveModal = function(archive) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_archive_modal.html',
+        controller: 'ArchiveModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {
+            archive: archive,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
     vm.newVersionNodeModal = function(node) {
       var modalInstance = $uibModal.open({
         animation: true,
