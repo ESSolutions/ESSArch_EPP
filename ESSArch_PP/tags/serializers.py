@@ -93,7 +93,7 @@ class ComponentWriteSerializer(serializers.Serializer):
 class ArchiveWriteSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.filter(archive_type=True))
-    structure = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True, published=True))
+    structures = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True, published=True), many=True)
     archive_creator = serializers.PrimaryKeyRelatedField(queryset=Agent.objects.all())
     description = serializers.CharField(required=False)
     reference_code = serializers.CharField()
@@ -104,7 +104,7 @@ class ArchiveWriteSerializer(serializers.Serializer):
     def create(self, validated_data):
         with transaction.atomic():
             agent = validated_data.pop('archive_creator')
-            structure = validated_data.pop('structure')
+            structures = validated_data.pop('structures')
 
             tag = Tag.objects.create()
             tag_version = TagVersion.objects.create(
@@ -113,7 +113,8 @@ class ArchiveWriteSerializer(serializers.Serializer):
             tag.current_version = tag_version
             tag.save()
 
-            structure.create_template_instance(tag)
+            for structure in structures:
+                structure.create_template_instance(tag)
 
             org = self.context['request'].user.user_profile.current_organization
             org.add_object(tag_version)
@@ -134,6 +135,19 @@ class ArchiveWriteSerializer(serializers.Serializer):
         doc.save()
 
         return instance
+
+    def validate_structures(self, structures):
+        if not len(structures):
+            raise serializers.ValidationError(_("At least one structure is required"))
+
+        first_structure = structures[0]
+        for other_structure in structures[1:]:
+            try:
+                first_structure.is_compatible_with_other_structure(other_structure)
+            except AssertionError:
+                raise serializers.ValidationError(_(f"{first_structure} is incompatible with {other_structure}"))
+
+        return structures
 
     def validate(self, data):
         if data.get('start_date') and data.get('end_date') and \
