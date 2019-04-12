@@ -204,6 +204,7 @@ angular
         return;
       }
       $ctrl.creating = true;
+      archive.structures = [angular.copy(archive.structure)];
       Search.addNode(
         angular.extend(archive, {
           index: 'archive',
