@@ -185,12 +185,13 @@ angular
         return;
       }
       if ($ctrl.changed()) {
+        var parent = $ctrl.node.root ? null : $ctrl.node.id;
         $ctrl.submitting = true;
         $http
           .post(
             appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/',
             angular.extend($ctrl.newNode, {
-              parent: $ctrl.node.id,
+              parent: parent,
             })
           )
           .then(function(response) {

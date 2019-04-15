@@ -74,7 +74,7 @@
                 <th class="cursor-pointer" st-sort="name">
                   {{'NAME' | translate}}
                 </th>
-                <th class="cursor-pointer" st-sort="published_date">
+                <th class="cursor-pointer shrink" st-sort="published_date">
                   {{'ACCESS.PUBLISHED' | translate}}
                 </th>
                 <th class="cursor-pointer" st-sort="create_date">
@@ -104,7 +104,7 @@
                 <td class="text-center">
                   <i
                     ng-if="x.published"
-                    class="fas fa-check success"
+                    class="fas fa-check success shrink"
                     uib-tooltip="{{'ACCESS.PUBLISHED' | translate}} {{x.published_date | date:'yyyy-MM-dd HH:mm:ss'}}"
                   ></i>
                 </td>
@@ -177,12 +177,15 @@
                 ng-disabled="vm.node.published"
                 ng-click="vm.publishModal(vm.node)"
               >
-                {{'PUBLISH' | translate}}
+                {{(vm.node.published ? 'ACCESS.PUBLISHED' : 'PUBLISH') | translate}}
+                <span ng-if="vm.node.published">
+                  &nbsp;<i class="fas fa-check success m-0"></i>
+                </span>
               </button>
-              <button class="btn btn-default" ng-if="vm.node.root" ng-click="vm.editStructureModal(vm.node)">
+              <button class="btn btn-default" ng-if="vm.node.root && !vm.node.published" ng-click="vm.editStructureModal(vm.node)">
                 {{'EDIT' |translate}}
               </button>
-              <button class="btn btn-default" ng-if="!vm.node.root" ng-click="vm.editNodeModal(vm.node)">
+              <button class="btn btn-default" ng-if="!vm.node.root && !vm.structure.published" ng-click="vm.editNodeModal(vm.node)">
                 {{'EDIT' |translate}}
               </button>
             </div>

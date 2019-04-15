@@ -276,6 +276,11 @@ angular
           icon: 'fas fa-plus',
         },
       },
+      dnd: {
+        is_draggable: function(nodes) {
+          return !vm.structure.published;
+        },
+      },
       contextmenu: {
         items: function(node, callback) {
           var update = {
@@ -309,10 +314,10 @@ angular
             },
           };
           var actions = {
-            update: update,
-            add: add,
-            addRelation: addRelation,
-            remove: remove,
+            update: !vm.structure.published ? update : undefined,
+            add: !vm.structure.published ? add : undefined,
+            addRelation: !vm.structure.published ? addRelation : undefined,
+            remove: !vm.structure.published ? remove : undefined,
           };
           callback(actions);
           return actions;
@@ -329,7 +334,7 @@ angular
         method: 'PATCH',
         url: appConfig.djangoUrl + 'structures/' + vm.structure.id + '/units/' + node.id + '/',
         data: {
-          parent: parent.original.id ? parent.original.id : '',
+          parent: parent.original.root ? null : parent.original.id,
         },
       })
         .then(function(response) {})
