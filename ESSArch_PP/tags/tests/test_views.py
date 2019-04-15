@@ -110,28 +110,6 @@ class AgentArchiveRelationTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(AgentTagLink.objects.count(), 1)
 
-    def test_add_agent_end_date_before_archive_start_date(self):
-        agent = self.create_agent()
-        agent.end_date = "2019-01-01"
-        agent.save()
-
-        archive = self.create_archive()
-        archive.start_date = "2020-01-01"
-        archive.save()
-
-        url = reverse('agent-archives-list', args=[agent.pk])
-
-        response = self.client.post(
-            url,
-            data={
-                'archive': archive.pk,
-                'type': self.relation_type.pk,
-            }
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(AgentTagLink.objects.count(), 0)
-
     def test_update_relation(self):
         agent = self.create_agent()
         archive = self.create_archive()
