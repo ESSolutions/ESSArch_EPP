@@ -1,6 +1,7 @@
 import copy
 import csv
 import datetime
+import io
 import json
 import logging
 import math
@@ -410,28 +411,25 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         logger.info(f"User '{user}' generating a {format} report, with tag versions: '{tag_versions}'")
         template = 'tags/search_results.html'.format()
 
-        f = tempfile.TemporaryFile()
-        formatted_hits = []
-
-        for hit in hits:
-            hit = hit['_source']
-            try:
-                hit['archive'] = get_archive(hit['archive'])
-            except KeyError:
-                pass
-            formatted_hits.append(hit)
+        hits = [hit['_source'] for hit in hits]
+        f = tempfile.TemporaryFile(mode='w+b')
 
         if format == 'pdf':
             ctype = 'application/pdf'
-            render = render_to_string(template, {'hits': formatted_hits, 'user': user, 'timestamp': timezone.now()})
+            render = render_to_string(template, {'hits': hits, 'user': user, 'timestamp': timezone.now()})
             HTML(string=render).write_pdf(f)
         elif format == 'csv':
             ctype = 'text/csv'
-            writer = csv.writer(f)
-            for hit in formatted_hits:
+
+            text_file = io.TextIOWrapper(f, encoding='utf-8', newline='')
+            writer = csv.writer(text_file)
+
+            for hit in hits:
                 writer.writerow(
                     [hit.get('archive', {}).get('name'), hit.get('name'), hit.get('reference_code'), hit.get('name'),
                      hit.get('unit_dates', {}).get('date'), hit.get('desc')])
+
+            text_file.detach()
         else:
             raise ValueError('Unsupported format {}'.format(format))
 
