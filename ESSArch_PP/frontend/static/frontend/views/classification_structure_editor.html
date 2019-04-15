@@ -125,15 +125,15 @@
                 </td>
               </tr>
               <tr ng-if="!vm.structures.length && !vm.structuresLoading" class="empty-table-indicator">
-                <td colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
+                <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
               </tr>
               <tr ng-if="!vm.structures.length && vm.structuresLoading" class="empty-table-indicator">
-                <td class="loading-column" colspan="5">{{'LOADING' | translate}}</td>
+                <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <td ng-show="!initLoad" colspan="4">
+        <td ng-show="!initLoad" colspan="6">
           <div
             class="text-center"
             st-template="static/frontend/views/pagination.html"
