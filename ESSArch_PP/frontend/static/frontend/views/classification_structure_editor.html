@@ -185,6 +185,9 @@
               <button class="btn btn-default" ng-if="vm.node.root && !vm.node.published" ng-click="vm.editStructureModal(vm.node)">
                 {{'EDIT' |translate}}
               </button>
+              <button ng-if="vm.node.published" class="btn btn-default" ng-click="vm.newStructureVersionModal(vm.node)">
+                {{'ACCESS.CREATE_NEW_VERSION' | translate}}
+              </button>
               <button class="btn btn-default" ng-if="!vm.node.root && !vm.structure.published" ng-click="vm.editNodeModal(vm.node)">
                 {{'EDIT' |translate}}
               </button>

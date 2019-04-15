@@ -775,4 +775,31 @@ angular
         }
       );
     };
+    vm.newStructureVersionModal = function(structure) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/new_structure_version_modal.html',
+        size: 'lg',
+        controller: 'StructureVersionModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {
+            structure: structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(newVersion) {
+          vm.structure = null;
+          $timeout(function() {
+            vm.structureClick(newVersion);
+          });
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
   });
