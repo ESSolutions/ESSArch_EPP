@@ -10,5 +10,6 @@ angular.module('essarch.components').component('searchFilter', {
     valueProp: '@', // Required
     ngModel: '=', // Required
     ngChange: '&',
+    required: '<'
   },
 });
