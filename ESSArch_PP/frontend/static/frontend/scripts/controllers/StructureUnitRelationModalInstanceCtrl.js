@@ -203,7 +203,6 @@ angular
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
         data: {
-          structure: data.structure.id,
           related_structure_units: units.concat([$ctrl.relation]),
         },
       })
@@ -236,7 +235,6 @@ angular
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
         data: {
-          structure: data.structure.id,
           related_structure_units: units,
         },
       })
@@ -273,7 +271,6 @@ angular
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
         data: {
-          structure: data.structure.id,
           related_structure_units: units,
         },
       })
