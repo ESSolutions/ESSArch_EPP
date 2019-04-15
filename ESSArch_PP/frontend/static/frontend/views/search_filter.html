@@ -1,6 +1,6 @@
 <div class="search-filter">
-  <label ng-if="vm.label">
-    {{vm.label}}
+  <label class="control-label" ng-if="vm.label">
+    {{vm.label + (vm.required ? ' *' : '')}}
   </label>
   <div class="filter-input-wrapper">
     <div>

@@ -42,6 +42,7 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
   vm.select = function(item) {
     vm.selected.push(item);
     vm.updateModel();
+    vm.resultListVisible = false;
   };
 
   vm.deselect = function(item) {
