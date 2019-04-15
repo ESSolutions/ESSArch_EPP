@@ -181,7 +181,9 @@ angular
     vm.clearSearch = function() {
       vm.filterObject = {
         q: '',
-        type: null,
+        type: [],
+        archives: [],
+        agents: [],
         page: 1,
         page_size: vm.resultsPerPage || 25,
         ordering: '',

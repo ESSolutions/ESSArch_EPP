@@ -23,6 +23,14 @@ angular.module('essarch.controllers').controller('SearchFilterCtrl', function($s
     }
   });
 
+  $scope.$watch(function(){return vm.ngModel}, function(newval, oldval) {
+    if (newval === '' || newval === null || angular.isUndefined(newval)) {
+      vm.selected = [];
+    } else {
+      vm.selected = newval;
+    }
+  })
+
   vm.search = function() {
     vm.update({
       search: vm.q,
