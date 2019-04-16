@@ -41,7 +41,7 @@ angular
       } else {
         $http
           .get(appConfig.djangoUrl + 'structure-unit-types/', {
-            params: {structure_type: data.structure.type.id, pager: 'none'},
+            params: {structure_type: data.structure.structureType.id, pager: 'none'},
           })
           .then(function(response) {
             if (data.children) {
