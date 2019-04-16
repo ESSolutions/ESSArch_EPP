@@ -74,20 +74,21 @@ class ComponentWriteSerializer(serializers.Serializer):
         parent = validated_data.pop('parent', None)
         structure = validated_data.pop('structure', None)
 
-        tag = instance.tag
-        tag_structure = TagStructure.objects.get(tag=tag, structure=structure)
+        if structure is not None:
+            tag = instance.tag
+            tag_structure = TagStructure.objects.get(tag=tag, structure=structure)
 
-        if structure_unit is not None:
-            tag_structure.structure_unit = structure_unit
-            archive_structure = tag_structure.get_root()
-            tag_structure.parent = archive_structure
-            tag_structure.save()
+            if structure_unit is not None:
+                tag_structure.structure_unit = structure_unit
+                archive_structure = tag_structure.get_root()
+                tag_structure.parent = archive_structure
+                tag_structure.save()
 
-        if parent is not None:
-            parent_structure = parent.get_structures(structure).get()
-            tag_structure.parent = parent_structure
-            tag_structure.structure_unit = None
-            tag_structure.save()
+            if parent is not None:
+                parent_structure = parent.get_structures(structure).get()
+                tag_structure.parent = parent_structure
+                tag_structure.structure_unit = None
+                tag_structure.save()
 
         TagVersion.objects.filter(pk=instance.pk).update(**validated_data)
         instance.refresh_from_db()
