@@ -2,6 +2,7 @@ import errno
 
 from rest_framework import filters, serializers
 
+from ESSArch_Core.api.serializers import DynamicHyperlinkedModelSerializer
 from ESSArch_Core.auth.serializers import UserSerializer
 from ESSArch_Core.ip.models import InformationPackage, Order
 from ESSArch_Core.ip.serializers import (
@@ -9,7 +10,6 @@ from ESSArch_Core.ip.serializers import (
     WorkareaSerializer,
 )
 from ESSArch_Core.profiles.models import SubmissionAgreement
-from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
 from _version import get_versions
 from configuration.serializers import ArchivePolicySerializer
 
