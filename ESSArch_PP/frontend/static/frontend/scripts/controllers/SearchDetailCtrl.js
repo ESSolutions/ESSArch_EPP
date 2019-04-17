@@ -20,12 +20,14 @@ angular
     $window,
     $state,
     $interval,
-    $filter
+    $filter,
+    StructureName
   ) {
     var PAGE_SIZE = 10;
 
     var vm = this;
     $controller('TagsCtrl', {$scope: $scope, vm: vm});
+    $scope.StructureName = StructureName;
     $scope.angular = angular;
     vm.url = appConfig.djangoUrl;
     vm.unavailable = false;

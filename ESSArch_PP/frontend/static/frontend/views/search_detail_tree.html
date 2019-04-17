@@ -13,7 +13,7 @@
         value="{{classification.id}}"
         ng-disabled="!vm.existsForRecord(classification.id)"
       >
-        {{classification.name}}&nbsp;{{!vm.existsForRecord(classification.id) ? '('+('UNAVAILABLE' |
+        {{StructureName.getNameWithVersion(classification)}}&nbsp;{{!vm.existsForRecord(classification.id) ? '('+('UNAVAILABLE' |
         translate)+')':''}}
       </option>
     </select>

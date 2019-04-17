@@ -12,7 +12,8 @@ angular
     EditMode,
     $scope,
     $rootScope,
-    Utils
+    Utils,
+    StructureName
   ) {
     var $ctrl = this;
     $ctrl.options = {};
@@ -77,6 +78,7 @@ angular
         mathod: 'GET',
         params: {page: 1, page_size: 10, search: search, is_template: true, published: true},
       }).then(function(response) {
+        StructureName.parseStructureNames(response.data);
         $ctrl.options.structures = response.data;
         return $ctrl.options.structures;
       });
@@ -104,7 +106,7 @@ angular
                 return $ctrl.options.structures;
               },
               valueProp: 'id',
-              labelProp: 'name',
+              labelProp: 'name_with_version',
               placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
               label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
               appendToBody: false,
