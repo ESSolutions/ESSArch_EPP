@@ -94,6 +94,7 @@ PROXY_PAGINATION_MAPPING = {'none': 'ESSArch_Core.pagination.NoPagination'}
 INSTALLED_APPS = [
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'channels',
     'django.contrib.auth',
     'django.contrib.contenttypes',
