@@ -72,7 +72,7 @@ ESSARCH_WORKFLOW_POLLERS = {
 
 # Rest framework
 REST_FRAMEWORK = {
-    'DEFAULT_METADATA_CLASS': 'ESSArch_Core.metadata.CustomMetadata',
+    'DEFAULT_METADATA_CLASS': 'ESSArch_Core.api.metadata.CustomMetadata',
     'DEFAULT_PAGINATION_CLASS': 'proxy_pagination.ProxyPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -86,14 +86,15 @@ REST_FRAMEWORK = {
 }
 
 PROXY_PAGINATION_PARAM = 'pager'
-PROXY_PAGINATION_DEFAULT = 'ESSArch_Core.pagination.LinkHeaderPagination'
-PROXY_PAGINATION_MAPPING = {'none': 'ESSArch_Core.pagination.NoPagination'}
+PROXY_PAGINATION_DEFAULT = 'ESSArch_Core.api.pagination.LinkHeaderPagination'
+PROXY_PAGINATION_MAPPING = {'none': 'ESSArch_Core.api.pagination.NoPagination'}
 
 # Application definition
 
 INSTALLED_APPS = [
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'channels',
     'django.contrib.auth',
     'django.contrib.contenttypes',
