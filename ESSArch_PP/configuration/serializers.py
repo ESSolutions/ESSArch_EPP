@@ -2,11 +2,9 @@ import uuid
 
 from rest_framework import serializers
 
+from ESSArch_Core.api.serializers import DynamicHyperlinkedModelSerializer
 from ESSArch_Core.configuration.models import ArchivePolicy
 from ESSArch_Core.configuration.serializers import ArchivePolicySerializer as CoreArchivePolicySerializer
-
-from ESSArch_Core.serializers import DynamicHyperlinkedModelSerializer
-
 from ESSArch_Core.storage.models import StorageMethod, StorageTarget, StorageMethodTargetRelation
 
 
