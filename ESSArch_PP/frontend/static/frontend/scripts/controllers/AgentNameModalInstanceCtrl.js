@@ -7,7 +7,8 @@ angular
     $http,
     appConfig,
     data,
-    EditMode
+    EditMode,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.name;
@@ -152,6 +153,7 @@ angular
       names.forEach(function(x) {
         x.type = x.type.id;
       });
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
@@ -163,6 +165,14 @@ angular
           $uibModalInstance.close(response.data);
         })
         .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.names) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
+            } else {
+              $ctrl.nonFieldErrors = response.data.names;
+            }
+          }
           $ctrl.adding = false;
         });
     };
@@ -181,6 +191,7 @@ angular
           array[idx] = $ctrl.name;
         }
       });
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
@@ -191,7 +202,15 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.names) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
+            } else {
+              $ctrl.nonFieldErrors = response.data.names;
+            }
+          }
           $ctrl.saving = false;
         });
     };
@@ -211,6 +230,7 @@ angular
       if (toRemove !== null) {
         names.splice(toRemove, 1);
       }
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
@@ -221,7 +241,15 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.names) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
+            } else {
+              $ctrl.nonFieldErrors = response.data.names;
+            }
+          }
           $ctrl.removing = false;
         });
     };

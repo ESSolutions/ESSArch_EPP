@@ -20,5 +20,6 @@
     <button class="btn btn-default" type="button" ng-click="$ctrl.cancel()" ng-disabled="$ctrl.creating">
       {{'CANCEL' | translate}}
     </button>
+    <form-errors errors="$ctrl.nonFieldErrors"></form-errors>
   </div>
 </form>

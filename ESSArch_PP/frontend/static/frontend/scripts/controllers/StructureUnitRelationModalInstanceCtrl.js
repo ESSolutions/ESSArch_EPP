@@ -7,7 +7,8 @@ angular
     $http,
     EditMode,
     $translate,
-    $scope
+    $scope,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.relation = {
@@ -199,6 +200,7 @@ angular
         return x;
       });
       $ctrl.adding = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
@@ -211,7 +213,8 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.adding = false;
           EditMode.disable();
         });
@@ -231,6 +234,7 @@ angular
         }
       });
       $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
@@ -243,7 +247,8 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.saving = false;
           EditMode.disable();
         });
@@ -267,6 +272,7 @@ angular
         units.splice(toRemove, 1);
       }
       $ctrl.removing = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'structure-units/' + $ctrl.node.id + '/',
         method: 'PATCH',
@@ -279,7 +285,8 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.removing = false;
           EditMode.disable();
         });

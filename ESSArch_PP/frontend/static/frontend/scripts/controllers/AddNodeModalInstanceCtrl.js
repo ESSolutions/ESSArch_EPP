@@ -4,13 +4,12 @@ angular
     Search,
     $translate,
     $uibModalInstance,
-    djangoAuth,
     appConfig,
     $http,
     data,
     $scope,
     Notifications,
-    $timeout
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
@@ -116,13 +115,15 @@ angular
           params.parent = $ctrl.node._id;
         }
 
-        Search.addNode(params)
+      $rootScope.skipErrorNotification = true;
+      Search.addNode(params)
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
             $uibModalInstance.close(response.data);
           })
           .catch(function(response) {
+            $ctrl.nonFieldErrors = response.date.non_field_errors;
             $ctrl.submitting = false;
           });
       }

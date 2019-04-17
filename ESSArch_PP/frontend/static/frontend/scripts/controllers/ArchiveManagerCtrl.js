@@ -100,4 +100,58 @@ angular
         }
       );
     };
+    vm.editArchiveModal = function(archive) {
+      vm.getArchive(archive.current_version.id).then(function(result) {
+        archive = result;
+        var modalInstance = $uibModal.open({
+          animation: true,
+          ariaLabelledBy: 'modal-title',
+          ariaDescribedBy: 'modal-body',
+          templateUrl: 'static/frontend/views/edit_archive_modal.html',
+          controller: 'ArchiveModalInstanceCtrl',
+          controllerAs: '$ctrl',
+          size: 'lg',
+          resolve: {
+            data: {
+              archive: archive,
+            },
+          },
+        });
+        modalInstance.result.then(
+          function(data, $ctrl) {
+            vm.updateArchives();
+            $state.go('home.access.archiveManager.detail', {id: archive._id}, {reload: true});
+          },
+          function() {
+            $log.info('modal-component dismissed at: ' + new Date());
+          }
+        );
+      });
+    };
+    vm.removeArchiveModal = function(archive) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_archive_modal.html',
+        controller: 'ArchiveModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {
+            archive: archive,
+            remove: true,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.updateArchives();
+          $state.go('home.access.archiveManager');
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
   });

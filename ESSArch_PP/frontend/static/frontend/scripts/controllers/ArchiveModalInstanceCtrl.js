@@ -11,6 +11,7 @@ angular
     AgentName,
     EditMode,
     $scope,
+    $rootScope,
     Utils
   ) {
     var $ctrl = this;
@@ -19,30 +20,32 @@ angular
     $ctrl.initAgentSearch = null;
     $ctrl.$onInit = function() {
       EditMode.enable();
-      if (data.archive) {
+      if (data.archive && data.remove) {
         $ctrl.archive = angular.copy(data.archive);
-        $ctrl.archive.type = angular.copy(data.archive.type.pk);
-        $ctrl.initStructureSearch = angular.copy(data.archive.structures[0].name);
-        $ctrl.initAgentSearch = angular.copy(data.archive.agents[0].agent.names[0].main);
-        delete $ctrl.archive.identifiers;
-        delete $ctrl.archive.notes;
-        delete $ctrl.archive.structures;
-        delete $ctrl.archive._source;
-        console.log($ctrl.archive);
-        console.log($ctrl.initStructureSearch, $ctrl.initAgentSearch);
       } else {
-        $ctrl.archive = {};
-      }
-      $ctrl.options = {agents: [], structures: [], type: []};
-      $ctrl.getStructures().then(function(structures) {
-        if (structures.length > 0) {
-          $ctrl.structure = structures[0];
+        if (data.archive) {
+          $ctrl.archive = angular.copy(data.archive);
+          $ctrl.archive.type = angular.copy(data.archive.type.pk);
+          $ctrl.initStructureSearch = angular.copy(data.archive.structures[0].name);
+          $ctrl.initAgentSearch = angular.copy(data.archive.agents[0].agent.names[0].main);
+          delete $ctrl.archive.identifiers;
+          delete $ctrl.archive.notes;
+          delete $ctrl.archive.structures;
+          delete $ctrl.archive._source;
+        } else {
+          $ctrl.archive = {};
         }
-        $ctrl.getTypes().then(function(types) {
-          $ctrl.options.type = types;
-          $ctrl.buildForm();
+        $ctrl.options = {agents: [], structures: [], type: []};
+        $ctrl.getStructures().then(function(structures) {
+          if (structures.length > 0) {
+            $ctrl.structure = structures[0];
+          }
+          $ctrl.getTypes().then(function(types) {
+            $ctrl.options.type = types;
+            $ctrl.buildForm();
+          });
         });
-      });
+      }
     };
     $ctrl.creating = false;
 
@@ -205,6 +208,7 @@ angular
       }
       $ctrl.creating = true;
       archive.structures = [angular.copy(archive.structure)];
+      $rootScope.skipErrorNotification = true;
       Search.addNode(
         angular.extend(archive, {
           index: 'archive',
@@ -216,7 +220,8 @@ angular
           EditMode.disable();
           $uibModalInstance.close({archive: response.data});
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.creating = false;
         });
     };
@@ -234,10 +239,27 @@ angular
           EditMode.disable();
           $uibModalInstance.close({archive: response.data});
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.saving = false;
         });
     };
+
+    $ctrl.remove = function() {
+      $ctrl.removing = true;
+      $rootScope.skipErrorNotification = true;
+      Search.removeNode({_id: data.archive.id})
+        .then(function(response) {
+          $ctrl.removing = false;
+          EditMode.disable();
+          $uibModalInstance.close('removed');
+        })
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          $ctrl.removing = false;
+        });
+    };
+
     $ctrl.cancel = function() {
       EditMode.disable();
       $uibModalInstance.dismiss('cancel');

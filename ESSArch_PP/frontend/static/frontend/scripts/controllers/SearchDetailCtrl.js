@@ -1116,7 +1116,6 @@ angular
         function(data, $ctrl) {
           vm.recordTreeInstance.jstree(true).delete_node(node.id);
           vm.recordTreeInstance.jstree(true).select_node(node.parent);
-          vm.getChildrenTable(vm.recordTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

@@ -9,7 +9,8 @@ angular
     $http,
     data,
     Notifications,
-    EditMode
+    EditMode,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.node = data.node;
@@ -198,6 +199,7 @@ angular
     };
 
     $ctrl.updateSingleNode = function() {
+      $rootScope.skipErrorNotification = true;
       Search.updateNode($ctrl.node, getEditedFields($ctrl.node))
         .then(function(response) {
           $ctrl.submitting = false;
@@ -206,13 +208,15 @@ angular
           $uibModalInstance.close('edited');
         })
         .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.submitting = false;
         });
     };
 
     $ctrl.updateNodeAndDescendants = function() {
       if ($ctrl.changed()) {
-        Search.updateNodeAndDescendants($ctrl.node, getEditedFields($ctrl.node))
+      $rootScope.skipErrorNotification = true;
+      Search.updateNodeAndDescendants($ctrl.node, getEditedFields($ctrl.node))
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
@@ -220,14 +224,16 @@ angular
             $uibModalInstance.close('edited');
           })
           .catch(function(response) {
-            $ctrl.submitting = false;
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          $ctrl.submitting = false;
           });
       }
     };
 
     $ctrl.massUpdate = function() {
       if ($ctrl.changed()) {
-        Search.massUpdate($ctrl.nodeList, getEditedFields($ctrl.node))
+      $rootScope.skipErrorNotification = true;
+      Search.massUpdate($ctrl.nodeList, getEditedFields($ctrl.node))
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_EDITED'), 'success');
@@ -235,7 +241,8 @@ angular
             $uibModalInstance.close('edited');
           })
           .catch(function(response) {
-            $ctrl.submitting = false;
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          $ctrl.submitting = false;
           });
       }
     };

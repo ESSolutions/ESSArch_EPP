@@ -7,7 +7,8 @@ angular
     $http,
     $scope,
     EditMode,
-    $translate
+    $translate,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.options = {};
@@ -366,21 +367,31 @@ angular
         $ctrl.form.$setSubmitted();
         return;
       }
-      $ctrl.agent.type = $ctrl.agent.type.id;
       $ctrl.creating = true;
       $ctrl.agent.names = [];
       $ctrl.agent.names.push($ctrl.authName);
+      var agent = angular.copy($ctrl.agent);
+      agent.type = $ctrl.agent.type.id;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/',
         method: 'POST',
-        data: $ctrl.agent,
+        data: agent,
       })
         .then(function(response) {
           $ctrl.creating = false;
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.names) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
+            } else {
+              $ctrl.nonFieldErrors = response.data.names;
+            }
+          }
           $ctrl.creating = false;
         });
     };
@@ -389,17 +400,19 @@ angular
         $ctrl.form.$setSubmitted();
         return;
       }
-      $ctrl.agent.type = $ctrl.agent.type.id;
-      angular.forEach($ctrl.agent, function(value, key) {
+      var agent = angular.copy($ctrl.agent);
+      agent.type = $ctrl.agent.type.id;
+      angular.forEach(agent, function(value, key) {
         if (angular.isArray(value)) {
-          delete $ctrl.agent[key];
+          delete agent[key];
         }
       });
       $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/',
         method: 'PATCH',
-        data: $ctrl.agent,
+        data: agent,
       })
         .then(function(response) {
           $ctrl.saving = false;
@@ -407,12 +420,21 @@ angular
           $uibModalInstance.close(response.data);
         })
         .catch(function() {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.names) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
+            } else {
+              $ctrl.nonFieldErrors = response.data.names;
+            }
+          }
           $ctrl.saving = false;
         });
     };
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      $rootScope.skipErrorNotification = true;
       $http
         .delete(appConfig.djangoUrl + 'agents/' + $ctrl.agent.id)
         .then(function(response) {
@@ -421,6 +443,7 @@ angular
           $uibModalInstance.close('removed');
         })
         .catch(function() {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.removing = false;
         });
     };

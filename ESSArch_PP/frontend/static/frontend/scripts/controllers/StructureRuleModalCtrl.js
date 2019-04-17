@@ -31,7 +31,7 @@ angular
         typePromises.push(
           $http
             .get(appConfig.djangoUrl + 'structure-unit-types/', {
-              params: {structure_type: $ctrl.data.structure.type.id, pager: 'none'},
+              params: {structure_type: $ctrl.data.structure.structureType.id, pager: 'none'},
             })
             .then(function(response) {
               return response.data;

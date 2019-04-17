@@ -8,8 +8,8 @@ angular
     EditMode,
     $scope,
     $translate,
-    $filter,
-    AgentName
+    AgentName,
+    $rootScope
   ) {
     var $ctrl = this;
     $scope.AgentName = AgentName;
@@ -146,6 +146,7 @@ angular
           x.agent = x.agent.id;
         }
       });
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
         method: 'PATCH',
@@ -158,7 +159,15 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.related_agents) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.related_agents);
+            } else {
+              $ctrl.nonFieldErrors = response.data.related_agents;
+            }
+          }
           $ctrl.adding = false;
           EditMode.disable();
         });
@@ -182,6 +191,7 @@ angular
           array[idx] = $ctrl.relation;
         }
       });
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
         method: 'PATCH',
@@ -194,7 +204,15 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.related_agents) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.related_agents);
+            } else {
+              $ctrl.nonFieldErrors = response.data.related_agents;
+            }
+          }
           $ctrl.saving = false;
           EditMode.disable();
         });
@@ -218,6 +236,7 @@ angular
       if (toRemove !== null) {
         related_agents.splice(toRemove, 1);
       }
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/',
         method: 'PATCH',
@@ -230,7 +249,15 @@ angular
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          if(response.data.related_agents) {
+            if(angular.isArray($ctrl.nonFieldErrors)) {
+              $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.related_agents);
+            } else {
+              $ctrl.nonFieldErrors = response.data.related_agents;
+            }
+          }
           $ctrl.removing = false;
           EditMode.disable();
         });

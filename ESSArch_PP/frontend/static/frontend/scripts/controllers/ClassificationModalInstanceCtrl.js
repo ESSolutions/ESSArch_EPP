@@ -9,7 +9,8 @@ angular
     $translate,
     Structure,
     EditMode,
-    $scope
+    $scope,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.name = null;
@@ -187,6 +188,7 @@ angular
       if ($ctrl.changed()) {
         var parent = $ctrl.node.root ? null : $ctrl.node.id;
         $ctrl.submitting = true;
+        $rootScope.skipErrorNotification = true;
         $http
           .post(
             appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/',
@@ -201,6 +203,7 @@ angular
             $uibModalInstance.close(response.data);
           })
           .catch(function(response) {
+            $ctrl.nonFieldErrors = response.data.non_field_errors;
             $ctrl.submitting = false;
           });
       }
@@ -209,6 +212,8 @@ angular
      * update new classification structure
      */
     $ctrl.update = function() {
+      $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         method: 'PATCH',
         url: appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
@@ -216,9 +221,14 @@ angular
           name: $ctrl.name,
         },
       }).then(function(response) {
+        $ctrl.saving = false;
         $uibModalInstance.close(response.data);
         EditMode.disable();
         Notifications.add($translate.instant('NODE_UPDATED'), 'success');
+      })
+      .catch(function(response) {
+        $ctrl.nonFieldErrors = response.data.non_field_errors;
+        $ctrl.saving = false;
       });
     };
     /**
@@ -241,14 +251,20 @@ angular
         $ctrl.form.$setSubmitted();
         return;
       }
+      $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'structures/' + $ctrl.structure.id + '/',
         method: 'PATCH',
         data: $ctrl.structure,
       }).then(function(response) {
+        $ctrl.saving = false;
         EditMode.disable();
         $uibModalInstance.close(response.data);
-      });
+      }).catch(function(response) {
+        $ctrl.saving = false;
+        $ctrl.nonFieldErrors = response.data.non_field_errors;
+      })
     };
 
     $ctrl.removing = false;

@@ -12,7 +12,8 @@ angular
     Notifications,
     $timeout,
     $q,
-    EditMode
+    EditMode,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.editNode = {};
@@ -121,6 +122,7 @@ angular
         return;
       }
       $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         method: 'PATCH',
         url: appConfig.djangoUrl + 'structures/' + data.structure.id + '/units/' + $ctrl.node.id + '/',
@@ -133,6 +135,7 @@ angular
           $uibModalInstance.close(response.data);
         })
         .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.saving = false;
         });
     };

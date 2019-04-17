@@ -8,7 +8,8 @@
     EditMode,
     $scope,
     $translate,
-    $filter
+    $filter,
+    $rootScope
   ) {
     var $ctrl = this;
     $ctrl.relationTemplate = {
@@ -143,6 +144,7 @@
         return;
       }
       $ctrl.adding = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/archives/',
         method: 'POST',
@@ -153,7 +155,8 @@
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.adding = false;
           EditMode.disable();
         });
@@ -165,6 +168,7 @@
         return;
       }
       $ctrl.saving = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/archives/' + $ctrl.relation.id + '/',
         method: 'PATCH',
@@ -175,7 +179,8 @@
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.saving = false;
           EditMode.disable();
         });
@@ -183,6 +188,7 @@
 
     $ctrl.remove = function() {
       $ctrl.removing = true;
+      $rootScope.skipErrorNotification = true;
       $http({
         url: appConfig.djangoUrl + 'agents/' + $ctrl.agent.id + '/archives/' + $ctrl.relation.id + '/',
         method: 'DELETE',
@@ -192,7 +198,8 @@
           EditMode.disable();
           $uibModalInstance.close(response.data);
         })
-        .catch(function() {
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.removing = false;
           EditMode.disable();
         });

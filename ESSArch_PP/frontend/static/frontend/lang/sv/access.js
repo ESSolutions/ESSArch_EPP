@@ -118,6 +118,8 @@ angular.module('essarch.language').config(function($translateProvider) {
       RELATED_RESOURCES: 'Relaterade resurser',
       RELATED_STRUCTURE_UNITS: 'Relaterade strukturenheter',
       REMARKS: 'Anmärkningar',
+      REMOVE_ARCHIVE: 'Ta bort arkiv',
+      REMOVE_ARCHIVE_DESC: 'Vill du ta bort arkiv: {{name}}',
       REMOVE_FROM_CLASSIFICATION_STRUCTURE: 'Ta bort från struktur',
       REMOVE_NODE: 'Ta bort',
       REMOVE_RELATION_TO_STRUCTURE_UNIT: 'Ta bort relation till strukturenhet',

@@ -117,6 +117,8 @@ angular.module('essarch.language').config(function($translateProvider) {
       RELATED_RESOURCES: 'Related resources',
       RELATED_STRUCTURE_UNITS: 'Related structure units',
       REMARKS: 'Remarks',
+      REMOVE_ARCHIVE: 'Remove archive',
+      REMOVE_ARCHIVE_DESC: 'Do you want to remove archive: {{name}}',
       REMOVE_FROM_CLASSIFICATION_STRUCTURE: 'Remove from structure',
       REMOVE_NODE: 'Remove node',
       REMOVE_RELATION_TO_STRUCTURE_UNIT: 'Remove structure unit relation',
