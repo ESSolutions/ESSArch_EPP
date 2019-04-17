@@ -65,16 +65,32 @@ angular
           },
         },
         {
-          type: 'select',
-          key: 'type',
-          templateOptions: {
-            options: $ctrl.typeOptions,
-            valueProp: 'id',
-            labelProp: 'name',
-            label: $translate.instant('TYPE'),
-            required: true,
-          },
-          defaultValue: $ctrl.typeOptions.length > 0 ? $ctrl.typeOptions[0].id : null,
+          className: 'row m-0',
+          fieldGroup: [
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+              type: 'select',
+              key: 'type',
+              templateOptions: {
+                options: $ctrl.typeOptions,
+                valueProp: 'id',
+                labelProp: 'name',
+                label: $translate.instant('TYPE'),
+                required: true,
+              },
+              defaultValue: $ctrl.typeOptions.length > 0 ? $ctrl.typeOptions[0].id : null,
+            },
+            {
+              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+              type: 'input',
+              key: 'version',
+              templateOptions: {
+                label: $translate.instant('VERSION'),
+                required: true,
+              },
+              defaultValue: '1.0'
+            },
+          ],
         },
         {
           className: 'row m-0',
