@@ -255,10 +255,17 @@ angular
         $ctrl.form.$setSubmitted();
         return;
       }
+      $ctrl.creating = true;
+      $rootScope.skipErrorNotification = true;
       Structure.new($ctrl.newStructure).$promise.then(function(response) {
         EditMode.disable();
+        $ctrl.creating = false;
         $uibModalInstance.close(response.data);
         Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
+      })
+      .catch(function(response) {
+        $ctrl.nonFieldErrors = response.data.non_field_errors;
+        $ctrl.creating = false;
       });
     };
 
