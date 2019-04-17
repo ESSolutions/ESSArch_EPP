@@ -8,7 +8,9 @@ angular
     EditMode,
     $translate,
     $scope,
-    $rootScope
+    $rootScope,
+    $filter,
+    StructureName
   ) {
     var $ctrl = this;
     $ctrl.relation = {
@@ -37,6 +39,7 @@ angular
         method: 'GET',
         params: {search: search, page: 1, page_size: 10},
       }).then(function(response) {
+        StructureName.parseStructureNames(response.data);
         $ctrl.structure.options = response.data;
         return response.data;
       });
@@ -93,7 +96,7 @@ angular
               return $ctrl.structure.options;
             },
             valueProp: 'id',
-            labelProp: 'name',
+            labelProp: 'name_with_version',
             placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
             label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
             clearEnabled: true,
