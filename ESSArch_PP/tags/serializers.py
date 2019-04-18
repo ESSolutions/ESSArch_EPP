@@ -160,6 +160,13 @@ class ArchiveWriteSerializer(serializers.Serializer):
         if not len(structures):
             raise serializers.ValidationError(_("At least one structure is required"))
 
+        if self.instance:
+            existing_structures = Structure.objects.filter(tagstructure__tag=self.instance.tag)
+
+            for existing_structure in existing_structures:
+                if existing_structure.template not in structures:
+                    raise serializers.ValidationError(_("Structures cannot be deleted from archives"))
+
         return structures
 
     def validate(self, data):
