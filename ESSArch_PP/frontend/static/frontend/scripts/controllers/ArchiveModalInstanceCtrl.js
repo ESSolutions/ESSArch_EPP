@@ -31,15 +31,36 @@ angular
           $ctrl.initAgentSearch = angular.copy(data.archive.agents[0].agent.names[0].main);
           delete $ctrl.archive.identifiers;
           delete $ctrl.archive.notes;
-          delete $ctrl.archive.structures;
           delete $ctrl.archive._source;
         } else {
           $ctrl.archive = {};
         }
         $ctrl.options = {agents: [], structures: [], type: []};
         $ctrl.getStructures().then(function(structures) {
-          if (structures.length > 0) {
-            $ctrl.structure = structures[0];
+          if ($ctrl.archive.structures) {
+            var toAdd = [];
+            StructureName.parseStructureNames($ctrl.archive.structures);
+            $ctrl.archive.structures.forEach(function(b) {
+              var exists = false;
+              structures.forEach(function(a) {
+                if (a.id === b.id) {
+              a = angular.copy(b);
+                  a.disabled = true;
+                  exists = true;
+                }
+              });
+              if (!exists) {
+                toAdd.push(b);
+              }
+            });
+            toAdd.forEach(function(x) {
+              x.disabled = true;
+              structures.push(x);
+            })
+            $ctrl.options.structures = structures;
+            $ctrl.archive.structures = angular.copy($ctrl.archive.structures).map(function(x) {
+              return x.id;
+            });
           }
           $ctrl.getTypes().then(function(types) {
             $ctrl.options.type = types;
@@ -95,32 +116,35 @@ angular
           },
         },
       ];
-      if (angular.isUndefined(data.archive) || data.archive === null) {
-        $ctrl.fields = $ctrl.fields.concat([
-          {
-            type: 'uiselect',
-            key: 'structure',
-            templateOptions: {
-              required: true,
-              options: function() {
-                return $ctrl.options.structures;
-              },
-              valueProp: 'id',
-              labelProp: 'name_with_version',
-              placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-              label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURE'),
-              appendToBody: false,
-              refresh: function(search) {
-                if ($ctrl.initStructureSearch && (angular.isUndefined(search) || search === null || search === '')) {
-                  search = angular.copy($ctrl.initStructureSearch);
-                  $ctrl.initStructureSearch = null;
-                }
-                $ctrl.getStructures(search).then(function() {
-                  this.options = $ctrl.options.structures;
-                });
-              },
+      $ctrl.fields = $ctrl.fields.concat([
+        {
+          type: 'uiselect',
+          key: 'structures',
+          templateOptions: {
+            required: true,
+            options: function() {
+              return $ctrl.options.structures;
+            },
+            valueProp: 'id',
+            labelProp: 'name_with_version',
+            multiple: true,
+            placeholder: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURES'),
+            label: $translate.instant('ACCESS.CLASSIFICATION_STRUCTURES'),
+            appendToBody: false,
+            refresh: function(search) {
+              if ($ctrl.initStructureSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                search = angular.copy($ctrl.initStructureSearch);
+                $ctrl.initStructureSearch = null;
+              }
+              $ctrl.getStructures(search).then(function() {
+                this.options = $ctrl.options.structures;
+              });
             },
           },
+        },
+      ]);
+      if (angular.isUndefined(data.archive) || data.archive === null) {
+        $ctrl.fields = $ctrl.fields.concat([
           {
             type: 'uiselect',
             key: 'archive_creator',
@@ -131,6 +155,7 @@ angular
               },
               valueProp: 'id',
               labelProp: 'full_name',
+              multiple: false,
               placeholder: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
               label: $translate.instant('ACCESS.ARCHIVE_CREATOR'),
               appendToBody: false,
@@ -209,7 +234,6 @@ angular
         return;
       }
       $ctrl.creating = true;
-      archive.structures = [angular.copy(archive.structure)];
       $rootScope.skipErrorNotification = true;
       Search.addNode(
         angular.extend(archive, {
