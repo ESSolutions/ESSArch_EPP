@@ -160,13 +160,6 @@ class ArchiveWriteSerializer(serializers.Serializer):
         if not len(structures):
             raise serializers.ValidationError(_("At least one structure is required"))
 
-        first_structure = structures[0]
-        for other_structure in structures[1:]:
-            try:
-                first_structure.is_compatible_with_other_structure(other_structure)
-            except AssertionError:
-                raise serializers.ValidationError(_(f"{first_structure} is incompatible with {other_structure}"))
-
         return structures
 
     def validate(self, data):
