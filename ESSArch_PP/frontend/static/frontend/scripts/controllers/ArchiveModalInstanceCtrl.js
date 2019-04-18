@@ -258,7 +258,11 @@ angular
         return;
       }
       $ctrl.saving = true;
-      Search.updateNode({_id: data.archive._id}, Utils.getDiff(data.archive, $ctrl.archive))
+      var extraDiff = {}
+      if(data.archive && data.archive.structures && (data.archive.structures.length !== $ctrl.archive.structures.length)) {
+        extraDiff.structures = $ctrl.archive.structures;
+      }
+      Search.updateNode({_id: data.archive._id}, angular.extend(Utils.getDiff(data.archive, $ctrl.archive), extraDiff))
         .then(function(response) {
           $ctrl.saving = false;
           Notifications.add($translate.instant('ACCESS.ARCHIVE_SAVED'), 'success');
