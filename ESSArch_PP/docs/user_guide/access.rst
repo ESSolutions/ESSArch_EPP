@@ -1,6 +1,6 @@
-=============
-Åtkomst
-=============
+======
+Access
+======
 
 :Release: |version|
 :Date: |today|
@@ -10,6 +10,5 @@
 .. toctree::
     :maxdepth: 2
 
-    access-search
-    access-workspace
+    storage-units
     dissemination

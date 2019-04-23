@@ -1,0 +1,39 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, ES Solutions
+# This file is distributed under the same license as the ESSArch
+# Preservation Platform package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-19 19:31+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../user_guide/ingest.rst:3
+msgid "Ingest"
+msgstr "Mottagande"
+
+#: ../../user_guide/ingest.rst
+msgid "Release"
+msgstr ""
+
+#: ../../user_guide/ingest.rst:5
+msgid "|version|"
+msgstr ""
+
+#: ../../user_guide/ingest.rst
+msgid "Date"
+msgstr "Datum"
+
+#: ../../user_guide/ingest.rst:6
+msgid "|today|"
+msgstr ""

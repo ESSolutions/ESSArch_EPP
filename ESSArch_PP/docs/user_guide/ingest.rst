@@ -1,5 +1,5 @@
 =============
-Mottagande
+Ingest
 =============
 
 :Release: |version|
@@ -12,4 +12,3 @@ Mottagande
 
     reception
     approval
-    ingest-workspace

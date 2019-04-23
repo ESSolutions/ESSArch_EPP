@@ -11,5 +11,6 @@
     /core/user_guide/user-interface
     ingest
     access
+    workspace
     maintenance
     search
