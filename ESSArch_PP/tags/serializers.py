@@ -162,7 +162,7 @@ class ArchiveWriteSerializer(serializers.Serializer):
         return tag
 
     def update(self, instance, validated_data):
-        structures = validated_data.pop('structures')
+        structures = validated_data.pop('structures', [])
 
         with transaction.atomic():
             for structure in structures:
