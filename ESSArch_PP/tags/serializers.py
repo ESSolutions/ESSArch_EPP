@@ -64,6 +64,20 @@ class ComponentWriteSerializer(serializers.Serializer):
             for agent_link in AgentTagLink.objects.filter(tag=tag_version):
                 AgentTagLink.objects.create(tag=tag_version, agent=agent_link.agent, type=agent_link.type)
 
+            tag_structure.refresh_from_db()
+            structure_unit = tag_structure.get_ancestors(
+                include_self=True
+            ).filter(structure_unit__isnull=False).get().structure_unit
+            related_units = structure_unit.related_structure_units.filter(
+                structure__is_template=False
+            ).exclude(
+                structure=tag_structure.structure
+            )
+
+            for related in related_units:
+                new_unit = related if tag_structure.structure_unit is not None else None
+                tag_structure.copy_to_new_structure(related.structure, new_unit=new_unit)
+
         doc = Component.from_obj(tag_version)
         doc.save()
 
