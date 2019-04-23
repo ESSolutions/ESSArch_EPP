@@ -178,6 +178,7 @@ angular
 
     vm.getChildren = function(node, archive, page) {
       var url;
+      var params = {page_size: PAGE_SIZE, page: page};
       page = page || 1;
 
       if (node._is_structure_unit === true) {
@@ -186,11 +187,12 @@ angular
         return vm.getClassificationStructureChildren(vm.structure);
       } else {
         url = vm.url + 'search/' + node._id + '/children/';
+        params.structure = vm.structure;
       }
 
       console.log('Getting children to', node, 'in archive', archive._id);
       return $http
-        .get(url, {params: {page_size: PAGE_SIZE, page: page, structure: vm.structure}})
+        .get(url, {params: params})
         .then(function(response) {
           var data = response.data.map(function(child) {
             child._is_structure_unit = node._is_structure_unit && !node.is_unit_leaf_node;
