@@ -13,7 +13,8 @@ angular
     $scope,
     $rootScope,
     Utils,
-    StructureName
+    StructureName,
+    $q
   ) {
     var $ctrl = this;
     $ctrl.options = {};
@@ -38,13 +39,14 @@ angular
         $ctrl.options = {agents: [], structures: [], type: []};
         $ctrl.getStructures().then(function(structures) {
           if ($ctrl.archive.structures) {
+            $ctrl.archive.structures = angular.copy($ctrl.archive.structures).map(function(x) {
+              return x.template;
+            });
             var toAdd = [];
-            StructureName.parseStructureNames($ctrl.archive.structures);
             $ctrl.archive.structures.forEach(function(b) {
               var exists = false;
               structures.forEach(function(a) {
-                if (a.id === b.id) {
-              a = angular.copy(b);
+                if (a.id === b) {
                   a.disabled = true;
                   exists = true;
                 }
@@ -53,13 +55,20 @@ angular
                 toAdd.push(b);
               }
             });
+            var promises = [];
             toAdd.forEach(function(x) {
               x.disabled = true;
-              structures.push(x);
-            })
-            $ctrl.options.structures = structures;
-            $ctrl.archive.structures = angular.copy($ctrl.archive.structures).map(function(x) {
-              return x.id;
+              promises.push(
+                $http.get(appConfig.djangoUrl + 'structures/' + x + '/').then(function(response) {
+                  response.data.name_with_version = StructureName.getNameWithVersion(response.data);
+                  response.data.disabled = true;
+                  return response.data;
+                })
+              );
+            });
+            $q.all(promises).then(function(result) {
+              structures = structures.concat(result);
+              $ctrl.options.structures = structures;
             });
           }
           $ctrl.getTypes().then(function(types) {
@@ -258,11 +267,15 @@ angular
         return;
       }
       $ctrl.saving = true;
-      var extraDiff = {}
-      if(data.archive && data.archive.structures && (data.archive.structures.length !== $ctrl.archive.structures.length)) {
+      var extraDiff = {};
+      if (
+        data.archive &&
+        data.archive.structures &&
+        data.archive.structures.length !== $ctrl.archive.structures.length
+      ) {
         extraDiff.structures = $ctrl.archive.structures;
       }
-      Search.updateNode({_id: data.archive._id}, angular.extend(Utils.getDiff(data.archive, $ctrl.archive), extraDiff))
+      Search.updateNode({_id: data.archive._id}, angular.extend(Utils.getDiff(data.archive, $ctrl.archive, {map: {type: 'pk'}}), extraDiff))
         .then(function(response) {
           $ctrl.saving = false;
           Notifications.add($translate.instant('ACCESS.ARCHIVE_SAVED'), 'success');
