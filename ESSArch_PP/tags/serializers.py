@@ -148,8 +148,15 @@ class ArchiveWriteSerializer(serializers.Serializer):
         return tag
 
     def update(self, instance, validated_data):
-        TagVersion.objects.filter(pk=instance.pk).update(**validated_data)
-        instance.refresh_from_db()
+        structures = validated_data.pop('structures')
+
+        with transaction.atomic():
+            for structure in structures:
+                if not TagStructure.objects.filter(tag=instance.tag, structure__template=structure).exists():
+                    structure.create_template_instance(instance.tag)
+
+            TagVersion.objects.filter(pk=instance.pk).update(**validated_data)
+            instance.refresh_from_db()
 
         doc = Archive.from_obj(instance)
         doc.save()
