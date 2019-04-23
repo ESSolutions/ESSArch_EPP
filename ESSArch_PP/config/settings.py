@@ -117,6 +117,7 @@ INSTALLED_APPS = [
     'frontend',
     'ESSArch_Core.admin',
     'ESSArch_Core.agents',
+    'ESSArch_Core.api',
     'ESSArch_Core.auth',
     'ESSArch_Core.config',
     'ESSArch_Core.configuration',
