@@ -77,8 +77,8 @@ angular
           archiveId = data.root;
         } else {
           archiveId = vm.record.archive;
-          vm.structure = vm.record.structure;
         }
+        vm.structure = vm.record.structure;
 
         if (vm.record._id === archiveId) {
           vm.createArchiveNode(startNode, vm.record);
@@ -191,25 +191,23 @@ angular
       }
 
       console.log('Getting children to', node, 'in archive', archive._id);
-      return $http
-        .get(url, {params: params})
-        .then(function(response) {
-          var data = response.data.map(function(child) {
-            child._is_structure_unit = node._is_structure_unit && !node.is_unit_leaf_node;
-            if (angular.isUndefined(child._id)) {
-              child._id = child.id;
-            }
-            delete child.parent;
-            return vm.createNode(child);
-          });
-
-          var count = response.headers('Count');
-          console.log('Found', count, 'children to', node, 'in archive', archive._id);
-          return {
-            data: data,
-            count: count,
-          };
+      return $http.get(url, {params: params}).then(function(response) {
+        var data = response.data.map(function(child) {
+          child._is_structure_unit = node._is_structure_unit && !node.is_unit_leaf_node;
+          if (angular.isUndefined(child._id)) {
+            child._id = child.id;
+          }
+          delete child.parent;
+          return vm.createNode(child);
         });
+
+        var count = response.headers('Count');
+        console.log('Found', count, 'children to', node, 'in archive', archive._id);
+        return {
+          data: data,
+          count: count,
+        };
+      });
     };
 
     vm.getClassificationStructureChildren = function(id) {
@@ -494,7 +492,14 @@ angular
       dnd: {
         is_draggable: function(nodes) {
           var not_draggable = nodes.some(function(node) {
-            return node.original._is_structure_unit || node.original._index === 'archive';
+            return (
+              (node.original._is_structure_unit &&
+                !(
+                  $scope.checkPermission('tags.move_structure_unit_instances') &&
+                  vm.getStructureById(vm.archiveStructures, vm.structure).type.movable_instance_units
+                )) ||
+              node.original._index === 'archive'
+            );
           });
           if (not_draggable) {
             return false;
@@ -516,10 +521,20 @@ angular
           var update = {
             label: $translate.instant('EDIT'),
             _disabled: function() {
-              return node.original._is_structure_unit;
+              return (
+                node.original._is_structure_unit &&
+                !(
+                  $scope.checkPermission('tags.change_structure_unit_instance') &&
+                  vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
+                ) && !$scope.checkPermission('tags.change_tagversion')
+              );
             },
             action: function update() {
-              if(node.original._index === 'archive') {
+              if (node.original._is_structure_unit) {
+                var struct = vm.getStructureById(vm.archiveStructures, vm.structure);
+                struct.structureType = angular.copy(struct.type);
+                vm.editStructureUnitModal(node.original, struct);
+              } else if (node.original._index === 'archive') {
                 vm.editArchiveModal(node.original);
               } else {
                 vm.editNodeModal(node.original);
@@ -527,27 +542,54 @@ angular
             },
           };
           var add = {
-            label: $translate.instant('ADD'),
+            label: $translate.instant('ACCESS.ADD_NODE'),
             _disabled: function() {
-              return node.original._index === 'archive';
+              return node.original._index === 'archive' || !$scope.checkPermission('tags.add_tag');
             },
             action: function() {
               vm.addNodeModal(node, vm.structure);
             },
           };
+          var addStructureUnit = {
+            label: $translate.instant('ACCESS.ADD_STRUCTURE_UNIT'),
+            _disabled: function() {
+              return !(
+                $scope.checkPermission('tags.add_structure_unit_instance') &&
+                vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
+              );
+            },
+            action: function() {
+              var struct = vm.getStructureById(vm.archiveStructures, vm.structure);
+              struct.structureType = angular.copy(struct.type);
+              vm.addStructureUnitModal(node.original, struct);
+            },
+          };
           var remove = {
             label: $translate.instant('REMOVE'),
             _disabled: function() {
-              return node.original._is_structure_unit || node.original._index === 'archive';
+              return (
+                (node.original._is_structure_unit &&
+                  !(
+                    $scope.checkPermission('tags.delete_structure_unit_instance') &&
+                    vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
+                  )) ||
+                node.original._index === 'archive' || !$scope.checkPermission('tags.delete_tagversion')
+              );
             },
             action: function() {
-              vm.removeNodeModal(node);
+              if (node.original._is_structure_unit) {
+                var struct = vm.getStructureById(vm.archiveStructures, vm.structure);
+                struct.structureType = angular.copy(struct.type);
+                vm.removeStructureUnitModal(node, struct);
+              } else {
+                vm.removeNodeModal(node);
+              }
             },
           };
           var removeFromStructure = {
             label: $translate.instant('ACCESS.REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
             _disabled: function() {
-              return node.original._is_structure_unit || node.original._index === 'archive';
+              return node.original._is_structure_unit || node.original._index === 'archive' || !$scope.checkPermission('tags.change_classification');
             },
             action: function() {
               var struct;
@@ -605,13 +647,12 @@ angular
             },
           };
           var actions = {
-            update: $scope.checkPermission('tags.change_tagversion') ? update : undefined,
-            add: $scope.checkPermission('tags.add_tag') ? add : undefined,
+            update: update,
+            add: add,
+            addStructureUnit: node.original._is_structure_unit ? addStructureUnit : undefined,
             email: email,
-            remove: $scope.checkPermission('tags.delete_tagversion') ? remove : undefined,
-            removeFromStructure: $scope.checkPermission('tags.change_classification')
-              ? removeFromStructure
-              : undefined,
+            remove: remove,
+            removeFromStructure: removeFromStructure,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
           };
@@ -1169,6 +1210,166 @@ angular
       });
       modalInstance.result.then(
         function(data, $ctrl) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addStructureUnitModal = function(node, structure) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_structure_unit_modal.html',
+        controller: 'ClassificationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {
+            node: node,
+            structure: structure,
+            children: getNodeById(vm.recordTreeData[0], node.id).children,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.goToNodePage(data.id, true);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeStructureUnitModal = function(node, structure) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_structure_unit_modal.html',
+        controller: 'RemoveStructureUnitModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {
+            node: node.original,
+            structure: structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.recordTreeInstance.jstree(true).delete_node(node.id);
+          vm.recordTreeInstance.jstree(true).select_node(node.parent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editStructureUnitModal = function(node, structure) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_structure_unit_node_modal.html',
+        controller: 'EditStructureUnitModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: {
+            node: node,
+            structure: structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data, $ctrl) {
+          vm.goToNodePage(node.id, true);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNodeRelationModal = function(node) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_structure_unit_relation_modal.html',
+        size: 'lg',
+        controller: 'StructureUnitRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {
+            node: node,
+            structure: vm.structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editNodeRelationModal = function(relation, node) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_structure_unit_relation_modal.html',
+        size: 'lg',
+        controller: 'StructureUnitRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {
+            relation: relation,
+            node: node,
+            structure: vm.structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeNodeRelationModal = function(relation, node) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_structure_unit_relation_modal.html',
+        size: 'lg',
+        controller: 'StructureUnitRelationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: {
+            relation: relation,
+            node: node,
+            structure: vm.structure,
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
           vm.loadRecordAndTree();
         },
         function() {

@@ -478,7 +478,7 @@ angular
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/add_node_modal.html',
+        templateUrl: 'static/frontend/views/add_structure_unit_modal.html',
         controller: 'ClassificationModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
@@ -508,13 +508,13 @@ angular
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/remove_node_modal.html',
-        controller: 'ClassificationModalInstanceCtrl',
+        templateUrl: 'static/frontend/views/remove_structure_unit_modal.html',
+        controller: 'RemoveStructureUnitModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
           data: {
-            node: node,
+            node: node.original,
             structure: structure,
           },
         },
@@ -531,12 +531,13 @@ angular
     };
 
     vm.removeStructureModal = function(structure) {
+      structure.structureType = angular.copy(structure.type);
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
         templateUrl: 'static/frontend/views/remove_structure_modal.html',
-        controller: 'ClassificationModalInstanceCtrl',
+        controller: 'RemoveStructureModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
