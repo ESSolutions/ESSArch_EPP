@@ -526,7 +526,7 @@ angular
                 !(
                   $scope.checkPermission('tags.change_structure_unit_instance') &&
                   vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
-                ) && !$scope.checkPermission('tags.change_tagversion')
+                ) && !(!node.original._is_structure_unit && $scope.checkPermission('tags.change_tagversion'))
               );
             },
             action: function update() {
