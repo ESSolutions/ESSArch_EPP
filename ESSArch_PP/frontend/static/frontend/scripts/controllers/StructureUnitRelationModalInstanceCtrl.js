@@ -13,6 +13,19 @@ angular
     StructureName
   ) {
     var $ctrl = this;
+    $ctrl.data = data;
+    $ctrl.isTemplate = true;
+    $ctrl.isTemplateOptions = [
+      {
+        label: $translate.instant('ACCESS.TEMPLATE'),
+        value: true
+      },
+      {
+        label: $translate.instant('ACCESS.INSTANCE'),
+        value: false
+      }
+    ];
+
     $ctrl.relation = {
       description: '',
       start_date: null,
@@ -37,7 +50,7 @@ angular
       return $http({
         url: appConfig.djangoUrl + 'structures/',
         method: 'GET',
-        params: {search: search, page: 1, page_size: 10},
+        params: {search: search, page: 1, page_size: 10, is_template: $ctrl.isTemplate},
       }).then(function(response) {
         StructureName.parseStructureNames(response.data);
         $ctrl.structure.options = response.data;
@@ -72,6 +85,7 @@ angular
         $ctrl.structure.value = angular.copy(data.relation.structure_unit.structure.id);
         $ctrl.initStructureSearch = data.relation.structure_unit.structure.name;
         $ctrl.initUnitSearch = data.relation.structure_unit.name;
+        $ctrl.isTemplate = data.relation.structure_unit.structure.is_template;
       }
       return $http({
         url: appConfig.djangoUrl + 'structure-units/',

@@ -1310,6 +1310,7 @@ angular
         resolve: {
           data: {
             node: node,
+            isStructureTemplate: vm.getStructureById(vm.archiveStructures, vm.structure).is_template,
             structure: vm.structure,
           },
         },
@@ -1338,6 +1339,7 @@ angular
             relation: relation,
             node: node,
             structure: vm.structure,
+            isStructureTemplate: vm.getStructureById(vm.archiveStructures, vm.structure).is_template,
           },
         },
       });

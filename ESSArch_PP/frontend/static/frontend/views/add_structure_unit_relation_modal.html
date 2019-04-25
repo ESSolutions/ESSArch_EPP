@@ -5,6 +5,13 @@
 </div>
 <form ng-submit="$ctrl.add()" name="$ctrl.form" novalidate>
   <div class="modal-body" id="modal-body">
+    <div ng-if="$ctrl.data.isStructureTemplate == false" class="mb-15px">
+      <label>
+        {{'ACCESS.TEMPLATE_OR_INSTANCE' | translate}}
+      </label>
+      <select class="form-control" ng-model="$ctrl.isTemplate" ng-options="x.value as x.label for x in $ctrl.isTemplateOptions">
+      </select>
+    </div>
     <formly-form model="$ctrl.structure" fields="$ctrl.structureFields" options="{}"></formly-form>
     <formly-form model="$ctrl.relation" fields="$ctrl.fields" options="{}"></formly-form>
   </div>
