@@ -495,7 +495,7 @@ angular
             return (
               (node.original._is_structure_unit &&
                 !(
-                  $scope.checkPermission('tags.move_structure_unit_instances') &&
+                  $scope.checkPermission('tags.move_structureunit_instances') &&
                   vm.getStructureById(vm.archiveStructures, vm.structure).type.movable_instance_units
                 )) ||
               node.original._index === 'archive'
@@ -524,7 +524,7 @@ angular
               return (
                 node.original._is_structure_unit &&
                 !(
-                  $scope.checkPermission('tags.change_structure_unit_instance') &&
+                  $scope.checkPermission('tags.change_structureunit_instance') &&
                   vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
                 ) && !(!node.original._is_structure_unit && $scope.checkPermission('tags.change_tagversion'))
               );
@@ -554,7 +554,7 @@ angular
             label: $translate.instant('ACCESS.ADD_STRUCTURE_UNIT'),
             _disabled: function() {
               return !(
-                $scope.checkPermission('tags.add_structure_unit_instance') &&
+                $scope.checkPermission('tags.add_structureunit_instance') &&
                 vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
               );
             },
@@ -570,7 +570,7 @@ angular
               return (
                 (node.original._is_structure_unit &&
                   !(
-                    $scope.checkPermission('tags.delete_structure_unit_instance') &&
+                    $scope.checkPermission('tags.delete_structureunit_instance') &&
                     vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
                   )) ||
                 node.original._index === 'archive' || !$scope.checkPermission('tags.delete_tagversion')

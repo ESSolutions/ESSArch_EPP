@@ -40,7 +40,7 @@
           class="action-button"
           ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
           permission
-          permission-only="'tags.change_structure_unit_instance'"
+          permission-only="'tags.change_structureunit_instance'"
         >
           <button class="btn btn-primary" ng-click="vm.addNodeRelationModal(vm.record)">
             {{'ACCESS.ADD_RELATION' | translate}}
@@ -70,7 +70,7 @@
                 class="shrink"
                 ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 permission
-                permission-only="'tags.change_structure_unit_instance'"
+                permission-only="'tags.change_structureunit_instance'"
               >
                 {{'EDIT' | translate}}
               </th>
@@ -78,7 +78,7 @@
                 ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 class="white-space-nowrap shrink"
                 permission
-                permission-only="'tags.change_structure_unit_instance'"
+                permission-only="'tags.change_structureunit_instance'"
               >
                 {{'REMOVE' | translate}}
               </th>
@@ -108,7 +108,7 @@
                 ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 class="text-center shrink"
                 permission
-                permission-only="'tags.change_structure_unit_instance'"
+                permission-only="'tags.change_structureunit_instance'"
               >
                 <button
                   class="btn btn-default btn-sm fas fa-edit"
@@ -122,7 +122,7 @@
                 ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 class="text-center shrink"
                 permission
-                permission-only="'tags.change_structure_unit_instance'"
+                permission-only="'tags.change_structureunit_instance'"
               >
                 <button
                   class="btn btn-default btn-sm fas fa-trash-alt"
@@ -140,7 +140,7 @@
               <td
                 ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 permission
-                permission-only="'tags.change_structure_unit_instance'"
+                permission-only="'tags.change_structureunit_instance'"
                 colspan="7"
               >
                 {{'NO_RESULTS_FOUND' | translate}}
@@ -148,7 +148,7 @@
               <td
                 ng-if="!vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
                 permission
-                permission-except="'tags.change_structure_unit_instance'"
+                permission-except="'tags.change_structureunit_instance'"
                 colspan="5"
               >
                 {{'NO_RESULTS_FOUND' | translate}}
