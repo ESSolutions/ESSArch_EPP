@@ -653,6 +653,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             serializer = ArchiveWriteSerializer(data=request.data, context={'request': request})
         elif index == 'component':
+            if not request.user.has_perm('tags.add_tag'):
+                raise exceptions.PermissionDenied('You do not have permission to create nodes')
             serializer = ComponentWriteSerializer(data=request.data)
         else:
             raise exceptions.ParseError('Invalid index')
@@ -719,9 +721,15 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         index = tag.elastic_index
 
         if index == 'archive':
+            if not request.user.has_perm('tags.change_archive'):
+                raise exceptions.PermissionDenied('You do not have permission to change archives')
+
             serializer = ArchiveWriteSerializer(tag, data=request.data, context={'request': request}, partial=True)
         elif index == 'component':
             serializer = ComponentWriteSerializer(tag, data=request.data, partial=True)
+            if not request.user.has_perm('tags.change_tag'):
+                raise exceptions.PermissionDenied('You do not have permission to change nodes')
+
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
