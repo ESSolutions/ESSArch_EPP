@@ -1,29 +1,31 @@
 .. _dissemination:
 
 *************
-Utlämnande
+Dissemination
 *************
 
-Syftet med utlämnande-sidan är att skapa utlämnanden(disseminations eller DIP).
-Allt material som ligger under Åtkomst/arbetstya är tillgängligt
-för ett utlämnande.
+The purpose of the Dissemination page is creating disseminations(or DIP).
+The content of every IP in each users personal workspace
+with state **Access Workarea** is available in the dissemination page
+and can be used to create a dissemination.
+A dissemination package is an information package for providing archived
+material to a customer, also called dissemination information package (DIP).
 
-Första steget är att förbereda ett utlämnande.
-Klicka på **Förbered utlämnande**. Fyll i label och resterande
-fält om så önskas(ej obligatoriska). Man kan även koppla utlämnande
-till en beställning, då kan vi se utlämnandet och dess filer
-när vi klickar på en beställning. Klicka **ok** när
-utlämnande-paket är klart.
+First step is to prepare dissemination, so click **Prepare dissemination**.
+Enter the required field label, optionally enter a custom
+identification value and connect dissemination to an existing order.
+Then click **Prepare** and the dissemination package is prepared.
 
 .. image:: images/prepare_dip.png
 
-Klicka ett utlämnande för att få upp två filhanterare.
-den första innehåller all data från åtkomst/arbetsyta och den nedre
-är själva utlämnandet.
-Markera en fil eller mapp i den övre och klicka **lägg till**.
-En användare kan även ta bort filer från utlämnandet och skapa nya mappar.
+Click the DIP row in the list view and two filebrowsers will appear.
+The first represents data in the current users personal workspace which
+can be marked and added to the second filebrowser window by clicking **Add**.
+The user can also create new folders in the DIP and remove added files/folders.
 
-När man är klar med ett utlämnande klickar man i **Godkänd för att skapa**
-och klickar på **Skapa utlämnande**.
+With the right permissions a user can see content in other users workspaces by
+selecting user in the user dropdown in the toolbar of the first filebrowser.
+
+When satisfied with dissemination click the **Create dissemination** button.
 
 .. image:: images/create_dip.png
