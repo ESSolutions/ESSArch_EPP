@@ -2,9 +2,6 @@
 Ingest
 =============
 
-:Release: |version|
-:Date: |today|
-
 .. image:: images/menu_ingest.png
 
 .. toctree::

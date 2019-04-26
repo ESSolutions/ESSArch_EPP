@@ -2,9 +2,6 @@
 Access
 ======
 
-:Release: |version|
-:Date: |today|
-
 .. image:: images/menu_access.png
 
 .. toctree::
