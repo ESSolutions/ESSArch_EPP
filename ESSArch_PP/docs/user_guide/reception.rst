@@ -9,10 +9,16 @@ Reception
 Receive sip
 ===========
 
-To receive an IP, check the checkbox at the start of the table row of the
-IP to include it for receive. Many IPs can be selected at the same time.
+To receive an IP, first select one IP by clicking the IP row in the list, or
+mark multiple packages by either holding the **CTRL** key and selecting each
+IP or select the first IP, hold the **SHIFT** key and select another to select
+all IPs between including the two selected.
 
-.. image:: images/reception_checkbox.png
+.. image:: images/reception_select_ips.png
+
+To select all visible IPs use the **Select all** option.
+
+.. image:: images/reception_select_all.png
 
 When desired IPs are included click the **Receive**-button in the
 bottom right corner.
@@ -46,22 +52,25 @@ Click **edit** next to a profile to edit the data of the profile for the
 IP to be received.
 When satisfied with the edit click **Save**.
 
-.. image:: images/profile_editor_save.png
-
 When saving profile data, the previous versions are still available in the
 version dropdown. Choose between data versions and click save to apply.
 
-.. image:: images/profile_editor_version_select.png
+.. image:: images/profile_editor_save.png
 
 This can be done on each profile type, remember to save the data before
 closing the profile form.
 
 Receive
 -------
+To receive an IP it needs to be placed in an archive and a structure so that
+the IP and its content is indexed can be found on the search page.
+First select archive, then structure and last structure unit, which is
+where we will find the IP in the search result tree structure.
+
+.. image:: images/place_in_archive.png
 
 When satisfied with submission agreement and profiles,
-Enter a value in the **purpose** field, select an **Archive policy**,
-check the **Approved to receive**-checkbox and click **Receive SIP**.
+select an **Archive policy** and click **Receive**.
 The process of receiving the IP is started and if more IPs are included a
 receive window for the next IP will appear.
 An IP can be skipped by clicking the **Skip**-button,

@@ -24,8 +24,8 @@ Preserve
 
 Peserve AIP to archival storage according to information from profiles.
 
-Choose the option **Preserve**, enter a value in the **purpose** field
-and click **Submit** and the preservation process of the AIP has begun.
+Choose the option **Preserve**, and click **Submit** and the
+preservation process of the AIP has begun.
 The progress can be followed in the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
 
@@ -37,8 +37,8 @@ Get
 Get AIP to Ingest Workspace as `read only`.
 That means that the IP in workspace can not be changed, only "read".
 
-Choose the option **Get**, enter a value in the **purpose**
-field and click **Submit**. The AIP will appear in ingest workspace shortly.
+Choose the option **Get**, and click **Submit**.
+The AIP will appear in ingest workspace shortly.
 The progress can be followed in the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
 
@@ -51,10 +51,9 @@ Get IP to Ingest Workspace as a new generation of IP.
 The new IP is basically a whole new IP but it is still related to the
 family of IPs that are related to the same AIC.
 
-Choose the option **Get as new generation**, enter a value in the
-**purpose** field and click **Submit**. The AIP generation should
-appear in the ingest workspace shortly, the progress can be followed
-in the status bar of the IP and in the
+Choose the option **Get as new generation**, and click **Submit**.
+The AIP generation shouldappear in the ingest workspace shortly,
+the progress can be followedin the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
 
 .. image:: images/request_form_get_as_new.png

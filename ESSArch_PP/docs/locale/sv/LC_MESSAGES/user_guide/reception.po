@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-18 15:11+0200\n"
+"POT-Creation-Date: 2019-04-29 18:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,105 +28,124 @@ msgstr "Ta emot SIP"
 
 #: ../../user_guide/reception.rst:12
 msgid ""
-"To receive an IP, check the checkbox at the start of the table row of the"
-" IP to include it for receive. Many IPs can be selected at the same time."
+"To receive an IP, first select one IP by clicking the IP row in the list,"
+" or mark multiple packages by either holding the **CTRL** key and "
+"selecting each IP or select the first IP, hold the **SHIFT** key and "
+"select another to select all IPs between including the two selected."
 msgstr ""
-"För att ta emot ett IP, kryssa i kryssrutan för respektive IP som ska tas emot. "
-"Flera IP:n kan valjas samtidigt."
+"För att ta emot ett IP väljer man ett eller flera paket i listan. Ett IP "
+"kan väljas genom att klicka på dess rad i listan. flera kan väljas "
+"antingen genom att hålla in **CTRL**-tangenten och välja alla paket ett i"
+" taget eller genom att välja ett, hålla in **SHIFT**-tangenten och välja "
+"ett annat, så markeras alla paket mellan dessa inklusive de två valda."
 
-#: ../../user_guide/reception.rst:17
+#: ../../user_guide/reception.rst:19
+msgid "To select all visible IPs use the **Select all** option."
+msgstr ""
+"För att välja alla synliga informationspaket använd **Markera alla** "
+"alternativet."
+
+#: ../../user_guide/reception.rst:23
 msgid ""
 "When desired IPs are included click the **Receive**-button in the bottom "
 "right corner."
 msgstr ""
-"När IP:n har valts klicka på knappen **Ta emot** längst ner i högra hörnet."
+"När samtliga paket har valts klicka på knappen **Ta emot** längst ner i "
+"högra hörnet."
 
-#: ../../user_guide/reception.rst:22
+#: ../../user_guide/reception.rst:28
 msgid ""
 "Clicking the **Receive**-button will open a window to receive the first "
 "included IP."
 msgstr ""
-"När knappen väl klickats kommer ett nytt fönster att öppnas för att ta emot det "
-"första valda IP:t."
+"När knappen väl klickats kommer ett nytt fönster att öppnas för att ta "
+"emot det första valda IP:t."
 
-#: ../../user_guide/reception.rst:30
+#: ../../user_guide/reception.rst:36
 msgid "Profile Editor"
 msgstr "Profileditor"
 
-#: ../../user_guide/reception.rst:32
+#: ../../user_guide/reception.rst:38
 msgid ""
 "Use the select dropdown to choose what submission agreement to use, then "
 "click **Prepare**. If the dropdown is disabled, the IP already has a "
 "related Submission agreement."
 msgstr ""
-"Använd rullistan för att välja vilken leveransöverenskommelse som ska användas, "
-"klicka sedan på **Förbered**. "
-"Om rullistan är inaktiverad, har IPt redan en koppling till"
-"leveransöverenskommelsen."
+"Använd rullistan för att välja vilken leveransöverenskommelse som ska "
+"användas, klicka sedan på **Förbered**. Om rullistan är inaktiverad, har "
+"IPt redan en koppling tillleveransöverenskommelsen."
 
-#: ../../user_guide/reception.rst:38
+#: ../../user_guide/reception.rst:44
 msgid ""
 "The profile editor is where the user can edit data of a profile for a "
 "specific IP. The Submission agreements data fields can only be viewed by "
 "clicking the **view** button next to the SA dropdown."
 msgstr ""
-"I profileditorn kan en användare editera data i en profil för ett specifikt IP. "
-"Data-fälten för en leveransöverenskommelse kan bara läsas genom "
-"att klicka på **Visa**-knappen bredvid rullistan."
+"I profileditorn kan en användare redigera data i en profil för ett "
+"specifikt IP. Data-fälten för en leveransöverenskommelse kan bara läsas "
+"genom att klicka på **Visa**-knappen bredvid rullistan."
 
-#: ../../user_guide/reception.rst:44
+#: ../../user_guide/reception.rst:50
 msgid ""
 "Underneath the Submission agreement row, all relevant profiles are "
 "listed. Click **edit** next to a profile to edit the data of the profile "
 "for the IP to be received. When satisfied with the edit click **Save**."
 msgstr ""
-"Under raden för leveransöverenskommelse finns alla relevanta profiler listade. "
-"Klicka på **Redigera** för att redigera profil-data för paketet "
+"Under raden för leveransöverenskommelse finns alla relevanta profiler "
+"listade. Klicka på **Redigera** för att redigera profil-data för paketet "
 "som ska tas emot. Klicka sedan **Spara** när editeringen är färdig."
 
-#: ../../user_guide/reception.rst:51
+#: ../../user_guide/reception.rst:55
 msgid ""
 "When saving profile data, the previous versions are still available in "
 "the version dropdown. Choose between data versions and click save to "
 "apply."
 msgstr ""
-"När man sparar profil-data så sparas alla tidigare versioner av datat "
-"och kan väljas i version-rullistan. Välj mellan versioner och klicka "
+"När man sparar profil-data så sparas alla tidigare versioner av datat och"
+" kan väljas i version-rullistan. Välj mellan versioner och klicka "
 "**Spara** för att spara."
 
-#: ../../user_guide/reception.rst:56
+#: ../../user_guide/reception.rst:60
 msgid ""
 "This can be done on each profile type, remember to save the data before "
 "closing the profile form."
 msgstr ""
-"Detta kan göras på alla profiltyper. Kom ihåg att spara datat så "
-"det inte går förlorat."
+"Detta kan göras på alla profiltyper. Kom ihåg att spara datat så det inte"
+" går förlorat."
 
-#: ../../user_guide/reception.rst:60
+#: ../../user_guide/reception.rst:64
 msgid "Receive"
 msgstr "Ta emot"
 
-#: ../../user_guide/reception.rst:62
+#: ../../user_guide/reception.rst:65
 msgid ""
-"When satisfied with submission agreement and profiles, Enter a value in "
-"the **purpose** field, select an **Archive policy**, check the **Approved"
-" to receive**-checkbox and click **Receive SIP**. The process of "
-"receiving the IP is started and if more IPs are included a receive window"
-" for the next IP will appear. An IP can be skipped by clicking the "
-"**Skip**-button, then the receive window for the next included IP will "
-"appear, if there is one."
+"To receive an IP it needs to be placed in an archive and a structure so "
+"that the IP and its content is indexed can be found on the search page. "
+"First select archive, then structure and last structure unit, which is "
+"where we will find the IP in the search result tree structure."
 msgstr ""
-"När leveransöverenskommelse och profiler är klara. "
-"Fyll i alla obligatoriska fält, markera **Godkänd för att ta emot** och "
-"klicka **Ta emot SIP**. "
-"IP börjar tas emot och om fler IP valts kommer ett fönster för "
-"nästa IP att dyka upp. Man kan skippa att ta emot ett IP genom att "
-"klicka på **Hoppa över**."
+"För att ta emot ett IP behöver det bli placerat i ett arkiv och en struktur "
+"Så att paketet och dess innehåll blir indexerat och kan hittas på söksidan. "
+"Välj först arkiv, sedan struktur och sist strukturenhet. Strukturenheten "
+"är där vi kommer hitta paketet i arkivets hierarkiska struktur."
 
-#: ../../user_guide/reception.rst:73
+#: ../../user_guide/reception.rst:72
+msgid ""
+"When satisfied with submission agreement and profiles, select an "
+"**Archive policy** and click **Receive**. The process of receiving the IP"
+" is started and if more IPs are included a receive window for the next IP"
+" will appear. An IP can be skipped by clicking the **Skip**-button, then "
+"the receive window for the next included IP will appear, if there is one."
+msgstr ""
+"När användaren är nöjd med leveransöverenskommelse och profiler väljs en "
+"**Arkivpolicy** och man klickar på **Ta emot**. Därefter startas "
+"mottagande-processe och om flera paket valts öppnas en ny ruta med nästa "
+"IP. Det går att hoppa över ett IP genom att klicka på **Hoppa över**."
+
+#: ../../user_guide/reception.rst:82
 msgid ""
 "When IP is received it is no longer visible in the reception list view "
 "and can be found in the :ref:`Approval <ingest-ip-approval>` section"
 msgstr ""
-"När ett IP har tagits emot kan det inte längre hittas i receptionen, "
-"den ligger istället under :ref:`Godkännande <ingest-ip-approval>`."
+"När ett IP har tagits emot kan det inte längre hittas i receptionen, den "
+"ligger istället under :ref:`Godkännande <ingest-ip-approval>`."
