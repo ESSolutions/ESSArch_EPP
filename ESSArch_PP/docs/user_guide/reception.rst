@@ -10,7 +10,7 @@ Receive SIP
 ===========
 
 To receive an IP, first select one IP by clicking the IP row in the list, or
-mark multiple packages by either holding the **CTRL** key and selecting each
+mark multiple packages by either holding the :kbd:`CTRL` key and selecting each
 IP or select the first IP, hold the **SHIFT** key and select another to select
 all IPs between including the two selected.
 
