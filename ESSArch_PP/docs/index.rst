@@ -9,15 +9,7 @@ ESSArch Preservation Platform
 .. toctree::
    :maxdepth: 10
 
+   /core/authentication_authorization/index
+   archival_description/index
    restapi/index
-   source/modules
    user_guide/index
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
