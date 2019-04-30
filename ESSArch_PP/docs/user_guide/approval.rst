@@ -16,9 +16,6 @@ There are a couple of different types of request which are explained below
 
 .. _approval-requests:
 
-Requests
-========
-
 Preserve
 --------
 
