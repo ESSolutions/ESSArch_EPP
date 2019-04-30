@@ -11,7 +11,7 @@ Receive SIP
 
 To receive an IP, first select one IP by clicking the IP row in the list, or
 mark multiple packages by either holding the :kbd:`CTRL` key and selecting each
-IP or select the first IP, hold the **SHIFT** key and select another to select
+IP or select the first IP, hold the :kbd:`SHIFT` key and select another to select
 all IPs between including the two selected.
 
 .. image:: images/reception_select_ips.png
