@@ -17,14 +17,14 @@ Requests
 ========
 
 To make a request click the desired request type, fill in the
-required information and click the **Submit** button.
+required information and click the **Get** button.
 
 Get
 ---
 Access AIP in archival storage to the Workspace with
 content extracted as read only.
 
-Choose the option **Get** and click **Submit**. The AIP generation should
+Choose the option **Get** and click **Get**. The AIP generation should
 appear in the Access workspace shortly, the progress can be followed
 in the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
@@ -36,7 +36,7 @@ Get as container
 Access AIP in archival storage to the Workspace as
 a tar or zip file.
 
-Choose the option **Get as container** and click **Submit**. The AIP
+Choose the option **Get as container** and click **Get**. The AIP
 generation should appear in the workspace shortly,
 the progress can be followed in the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
@@ -50,7 +50,7 @@ new generation of the AIP.
 The new IP is basically a whole new IP but it is still related to the
 family of IPs that are related to the same AIC.
 
-Choose the option **Get as new generation** and click **Submit**. The AIP generation should
+Choose the option **Get as new generation** and click **Get**. The AIP generation should
 appear in the Access workspace shortly, the progress can be followed
 in the status bar of the IP and in the
 :ref:`State view <user-interface-state-view>` for more detailed information.
