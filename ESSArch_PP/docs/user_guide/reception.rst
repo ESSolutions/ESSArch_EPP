@@ -6,7 +6,7 @@ Reception
 
 .. _receive-sip:
 
-Receive sip
+Receive SIP
 ===========
 
 To receive an IP, first select one IP by clicking the IP row in the list, or
