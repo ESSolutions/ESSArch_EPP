@@ -27,7 +27,7 @@ msgid ""
 "Access/storage-units is where all **preserved** AIPs are listed. We can "
 "see information such as events and steps/tasks of the preserved AIP."
 msgstr ""
-"Access innehåller alla **arkiverade** AIPer. Vi även kan information som "
+"Åtkomst/förvaringsenheter innehåller alla **arkiverade** AIPer. Vi kan även se information som "
 "händelser och jobb som resterande vyer."
 
 #: ../../user_guide/storage-units.rst:9
