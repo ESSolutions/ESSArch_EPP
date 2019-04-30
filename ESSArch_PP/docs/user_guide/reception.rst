@@ -28,7 +28,7 @@ bottom right corner.
 Clicking the **Receive**-button will open a window to receive the first
 included IP.
 
-.. image:: images/receive_modal1.png
+.. image:: images/receive_modal.png
 
 
 
