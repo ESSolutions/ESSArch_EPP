@@ -12,7 +12,7 @@ The workspace page contains information packages from both ingest and acces.
 An IP from ingest has state **Ingest Workarea** and an IP from access has state
 **Access Workarea**.
 
-An IP with state **Access Workarea** can be used as/as part of a dissemination
+An IP with state **Access Workarea** can be used as part of a dissemination
 and its content is available in the filebrowser on the
 :ref:`dissemination page <dissemination>`.
 
