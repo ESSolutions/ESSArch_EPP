@@ -7,7 +7,7 @@ The format conversion pages main function is to allow the user to create
 converison jobs that run automatically or manually on selected content
 in the archive.
 
-Create rule
+Create conversion rule
 ===========
 
 To create a new rule click the **Create**-button over the appraisal rule list.

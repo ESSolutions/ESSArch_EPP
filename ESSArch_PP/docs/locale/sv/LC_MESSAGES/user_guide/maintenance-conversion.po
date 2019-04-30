@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-26 15:38+0200\n"
+"POT-Creation-Date: 2019-04-30 12:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,8 +32,8 @@ msgstr ""
 "automatiskt eller manuellt på utvalt arkiverat material. "
 
 #: ../../user_guide/maintenance-conversion.rst:11
-msgid "Create rule"
-msgstr "Skapa regel"
+msgid "Create conversion rule"
+msgstr "Skapa konverteringsregel"
 
 #: ../../user_guide/maintenance-conversion.rst:13
 msgid ""
