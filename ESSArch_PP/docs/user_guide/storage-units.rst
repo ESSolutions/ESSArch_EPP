@@ -11,14 +11,6 @@ a request form. The available requests in Access are explained below.
 
 .. image:: images/access_request_form.png
 
-.. _access-requests:
-
-Requests
-========
-
-To make a request click the desired request type, fill in the
-required information and click the **Get** button.
-
 Get
 ---
 Access AIP in archival storage to the Workspace with

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-30 10:35+0200\n"
+"POT-Creation-Date: 2019-05-01 21:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,8 +27,8 @@ msgid ""
 "Access/storage-units is where all **preserved** AIPs are listed. We can "
 "see information such as events and steps/tasks of the preserved AIP."
 msgstr ""
-"Åtkomst/förvaringsenheter innehåller alla **arkiverade** AIPer. Vi kan även se information som "
-"händelser och jobb som resterande vyer."
+"Åtkomst/förvaringsenheter innehåller alla **arkiverade** AIPer. Vi kan "
+"även se information som händelser och jobb som resterande vyer."
 
 #: ../../user_guide/storage-units.rst:9
 msgid ""
@@ -39,29 +39,17 @@ msgstr ""
 "När man klickar ett IP i denna vy så får man se ett request-formulär. "
 "Tillgängliga request förklaras nedan."
 
-#: ../../user_guide/storage-units.rst:17
-msgid "Requests"
-msgstr "Request"
-
-#: ../../user_guide/storage-units.rst:19
-msgid ""
-"To make a request click the desired request type, fill in the required "
-"information and click the **Get** button."
-msgstr ""
-"För att göra ett request/förfrågan välj vilken typ av förfrågan, fyll i "
-"nödvändig information och klicka **Skicka**."
-
-#: ../../user_guide/storage-units.rst:23
+#: ../../user_guide/storage-units.rst:15
 msgid "Get"
 msgstr "Hämta"
 
-#: ../../user_guide/storage-units.rst:24
+#: ../../user_guide/storage-units.rst:16
 msgid ""
 "Access AIP in archival storage to the Workspace with content extracted as"
 " read only."
 msgstr "Hämta AIP i extraherad form som read_only till Åtkomst/arbetsyta."
 
-#: ../../user_guide/storage-units.rst:27
+#: ../../user_guide/storage-units.rst:19
 msgid ""
 "Choose the option **Get** and click **Get**. The AIP generation should "
 "appear in the Access workspace shortly, the progress can be followed in "
@@ -73,15 +61,15 @@ msgstr ""
 "status-fältet för paketet eller i större detalj i :ref:`Tillståndsvyn "
 "<user-interface-state-view>` för mer information."
 
-#: ../../user_guide/storage-units.rst:35
+#: ../../user_guide/storage-units.rst:27
 msgid "Get as container"
 msgstr "Hämta som container"
 
-#: ../../user_guide/storage-units.rst:36
+#: ../../user_guide/storage-units.rst:28
 msgid "Access AIP in archival storage to the Workspace as a tar or zip file."
 msgstr "Hämta AIP som tar eller zip-fil till Åtkomst/arbetsyta"
 
-#: ../../user_guide/storage-units.rst:39
+#: ../../user_guide/storage-units.rst:31
 msgid ""
 "Choose the option **Get as container** and click **Get**. The AIP "
 "generation should appear in the workspace shortly, the progress can be "
@@ -92,11 +80,11 @@ msgstr ""
 "Progressen kan följas i status-fältet för paketet eller i större detalj i"
 " :ref:`Tillståndsvyn <user-interface-state-view>` för mer information."
 
-#: ../../user_guide/storage-units.rst:47
+#: ../../user_guide/storage-units.rst:39
 msgid "Get as new generation"
 msgstr "Hämta som ny generation"
 
-#: ../../user_guide/storage-units.rst:48
+#: ../../user_guide/storage-units.rst:40
 msgid ""
 "Access AIP in archival storage to the Workspace as a new generation of "
 "the AIP. The new IP is basically a whole new IP but it is still related "
@@ -106,14 +94,14 @@ msgstr ""
 "generationen är i princip ett helt eget IP, den är bara relaterad till "
 "sina tidigare och senare generationen genom samma AIC."
 
-#: ../../user_guide/storage-units.rst:53
+#: ../../user_guide/storage-units.rst:45
 msgid ""
 "Choose the option **Get as new generation** and click **Get**. The AIP "
 "generation should appear in the Access workspace shortly, the progress "
 "can be followed in the status bar of the IP and in the :ref:`State view "
 "<user-interface-state-view>` for more detailed information."
 msgstr ""
-"Välj alternativet **Hämta som ny generation** Fyll i önskad information, markera "
-"**Förfrågan godkänd** och klicka på **Hämta**. "
-"Progressen kan följas i status-fältet för paketet eller i större detalj i "
+"Välj alternativet **Hämta som ny generation** Fyll i önskad information, "
+"markera **Förfrågan godkänd** och klicka på **Hämta**. Progressen kan "
+"följas i status-fältet för paketet eller i större detalj i "
 ":ref:`Tillståndsvyn <user-interface-state-view>` för mer information."
