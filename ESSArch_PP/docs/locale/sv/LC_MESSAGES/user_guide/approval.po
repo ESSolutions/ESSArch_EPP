@@ -59,7 +59,7 @@ msgid ""
 msgstr ""
 "Välj **Arkivera**, fyll i önskad information och klicka på **Skicka**. "
 "Händelseförloppet kan följas i status-fältet för IPt eller i mer detalj om "
-"man klickar på **Tillstånd**-fältet. Se :ref:`State-vyn <user-interface-"
+"man klickar på **Tillstånd**-fältet. Se :ref:`Tillståndsvy <user-interface-"
 "state-view>` för mer information."
 
 #: ../../user_guide/approval.rst:32
@@ -83,7 +83,7 @@ msgid ""
 msgstr ""
 "Välj alternativet **Hämta** Fyll i önskad information och klicka på "
 "**Skicka**. Händelseförloppet kan följas i status-fältet för IPt eller i "
-"mer detalj om man klickar på **Tillstånd**-fältet. Se :ref:`State-vyn "
+"mer detalj om man klickar på **Tillstånd**-fältet. Se :ref:`Tillståndsvy "
 "<user-interface-state-view>` för mer information."
 
 #: ../../user_guide/approval.rst:45
@@ -111,5 +111,5 @@ msgstr ""
 "Välj alternativet **Hämta som ny generation** Fyll i önskad information "
 "och klicka på **Skicka**. Händelseförloppet kan följas i status-fältet för IPt "
 "eller i mer detalj om man klickar på **Tillstånd**-fältet. Se :ref"
-":`State-vyn <user-interface-state-view>` för mer information. "
+":`Tillståndsvy <user-interface-state-view>` för mer information. "
 
