@@ -4,7 +4,7 @@
 Dissemination
 *************
 
-The purpose of the Dissemination page is creating disseminations(or DIP).
+The purpose of the Dissemination page is creating disseminations (or DIP).
 The content of every IP in each users personal workspace
 with state **Access Workarea** is available in the dissemination page
 and can be used to create a dissemination.
