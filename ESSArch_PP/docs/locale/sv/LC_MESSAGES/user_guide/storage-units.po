@@ -57,9 +57,9 @@ msgid ""
 "state-view>` for more detailed information."
 msgstr ""
 "Välj alternativet **Hämta** Fyll i önskad information, markera "
-"**Förfrågan godkänd** och klicka på **Skicka**. Progressen kan följas i "
-"status-fältet för paketet eller i större detalj i :ref:`Tillståndsvyn "
-"<user-interface-state-view>` för mer information."
+"**Förfrågan godkänd** och klicka på **Skicka**. Händelseförloppet "
+"kan följas i status-fältet för paketet eller i större detalj i "
+" :ref:`Tillståndsvyn <user-interface-state-view>` för mer information."
 
 #: ../../user_guide/storage-units.rst:27
 msgid "Get as container"
