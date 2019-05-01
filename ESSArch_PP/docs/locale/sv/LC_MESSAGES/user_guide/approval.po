@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-30 16:07+0200\n"
+"POT-Creation-Date: 2019-05-01 21:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,34 +23,28 @@ msgid "Approval"
 msgstr "Godkännande"
 
 #: ../../user_guide/approval.rst:7
-msgid ""
-"IP Approval is the place of EPP where AIPs are before they are preserved."
-" The purpose of the Approval page is to check if the AIP is approved for "
-"preservation to the archive."
-msgstr ""
-"Godkännande är där AIPer hamnar innan dom ska arkiveras. Poängen med "
-"sidan är att kolla att en AIP uppfyller de krav en användare kan ha innan"
-" den arkiveras."
+msgid "Before an AIP can be preserved it has to be approved."
+msgstr "Innan ett IP kan arkiveras så måste det godkännas."
 
-#: ../../user_guide/approval.rst:11
+#: ../../user_guide/approval.rst:9
 msgid ""
-"When clicking a AIP in the Approval list view we see a request form, "
-"which simply is a form for different actions on a AIP. There are a couple"
-" of different types of request which are explained below"
+"When clicking on an AIP in the Approval list we see a request form for "
+"applying actions on an AIP. There are a couple of different types of "
+"request which are explained below"
 msgstr ""
-"När man klickar på ett IP i listvyn får vi fram ett \"request-formulär\" "
-"som är ett formulär där man kan välja att utföra vissa aktioner på en "
-"AIP. Typer på dessa request är beskrivna här nedan."
+"När man klickar på ett IP i listan får man fram ett formulär där man kan "
+"välja att utföra eventuella årgärder på en AIP. Dessa åtgärder beskrivs "
+"nedan."
 
-#: ../../user_guide/approval.rst:20
+#: ../../user_guide/approval.rst:18
 msgid "Preserve"
 msgstr "Arkivera"
 
-#: ../../user_guide/approval.rst:22
+#: ../../user_guide/approval.rst:20
 msgid "Preserve AIP to archival storage according to information from profiles."
 msgstr "Arkivera AIP till archival storage enligt information från profiler."
 
-#: ../../user_guide/approval.rst:24
+#: ../../user_guide/approval.rst:22
 msgid ""
 "Choose **Preserve**, and click **Submit** to start the preservation "
 "process. The progress can be followed in the status bar of the IP and in "
@@ -58,23 +52,23 @@ msgid ""
 "information."
 msgstr ""
 "Välj **Arkivera**, fyll i önskad information och klicka på **Skicka**. "
-"Händelseförloppet kan följas i status-fältet för IPt eller i mer detalj om "
-"man klickar på **Tillstånd**-fältet. Se :ref:`Tillståndsvy <user-interface-"
-"state-view>` för mer information."
+"Händelseförloppet kan följas i status-fältet för IP:t."
+"Se :ref:`Tillståndsvy <user-"
+"interface-state-view>` för mer information."
 
-#: ../../user_guide/approval.rst:32
+#: ../../user_guide/approval.rst:30
 msgid "Get"
 msgstr "Hämta"
 
-#: ../../user_guide/approval.rst:34
+#: ../../user_guide/approval.rst:32
 msgid ""
 "Get AIP to Ingest Workspace as `read only`. This means that the IP in the"
 " workspace can not be changed, only \"read\"."
 msgstr ""
-"Hämtar en AIP som `read only` vilket betyder att den inte kan ändras.IPt "
+"Hämtar en AIP som `read only` vilket betyder att den inte kan ändras. IP:t "
 "kommer då att dyka upp under mottagande/arbetsyta"
 
-#: ../../user_guide/approval.rst:37
+#: ../../user_guide/approval.rst:35
 msgid ""
 "Choose **Get**, and click **Submit**. The AIP will appear in the "
 "workspace shortly. The progress can be followed in the status bar of the "
@@ -82,25 +76,25 @@ msgid ""
 "detailed information."
 msgstr ""
 "Välj alternativet **Hämta** Fyll i önskad information och klicka på "
-"**Skicka**. Händelseförloppet kan följas i status-fältet för IPt eller i "
-"mer detalj om man klickar på **Tillstånd**-fältet. Se :ref:`Tillståndsvy "
+"**Skicka**. Händelseförloppet kan följas i status-fältet för IP:t. "
+"Se :ref:`Tillståndsvy "
 "<user-interface-state-view>` för mer information."
 
-#: ../../user_guide/approval.rst:45
+#: ../../user_guide/approval.rst:43
 msgid "Get as new generation"
 msgstr "Hämta som ny generation"
 
-#: ../../user_guide/approval.rst:47
+#: ../../user_guide/approval.rst:45
 msgid ""
 "Get IP to Ingest Workspace as a new generation of IP. The new IP is "
 "basically a whole new IP but it is still related to the family of IPs "
 "that are related to the same AIC."
 msgstr ""
-"Hämta ip till mottagande/arbetsyta som en ny generation. Den nya "
-"generationen är i princip ett helt eget IP, den ärbara relaterad till "
-"sina tidigare och senare generationen genom samma AIC."
+"Hämta IP till mottagande/arbetsyta som en ny generation. Den nya "
+"generationen är i princip ett helt eget IP men är relaterad till "
+"sina tidigare och senare generationer genom dess AIC."
 
-#: ../../user_guide/approval.rst:51
+#: ../../user_guide/approval.rst:49
 msgid ""
 "Choose the option **Get as new generation**, and click **Submit**. The "
 "AIP generation should appear in the ingest workspace shortly, the "
@@ -109,7 +103,7 @@ msgid ""
 "information."
 msgstr ""
 "Välj alternativet **Hämta som ny generation** Fyll i önskad information "
-"och klicka på **Skicka**. Händelseförloppet kan följas i status-fältet för IPt "
-"eller i mer detalj om man klickar på **Tillstånd**-fältet. Se :ref"
-":`Tillståndsvy <user-interface-state-view>` för mer information. "
+"och klicka på **Skicka**. Händelseförloppet kan följas i status-fältet "
+"för IP:t Se "
+":ref:`Tillståndsvy <user-interface-state-view>` för mer information. "
 

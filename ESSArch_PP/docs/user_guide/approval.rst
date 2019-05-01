@@ -4,12 +4,10 @@
 Approval
 *********
 
-IP Approval is the place of EPP where AIPs are before they are preserved.
-The purpose of the Approval page is to check if the AIP is approved for
-preservation to the archive.
+Before an AIP can be preserved it has to be approved.
 
-When clicking a AIP in the Approval list view we see
-a request form, which simply is a form for different actions on a AIP.
+When clicking on an AIP in the Approval list we see
+a request form for applying actions on an AIP.
 There are a couple of different types of request which are explained below
 
 .. image:: images/request_form_approval.png
