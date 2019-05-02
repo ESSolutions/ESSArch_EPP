@@ -6,64 +6,73 @@ Reception
 
 .. _receive-sip:
 
-Ta emot SIP
+Receive SIP
 ===========
-För att ta emot ett IP, kryssa i kryssrutan för respektive IP som ska tas emot.
-Flera IP:n kan valjas samtidigt.
 
-.. image:: images/reception_checkbox.png
-När IP:n har valts klicka på knappen **Ta emot** längst ner i högra hörnet.
+To receive an IP, first select one IP by clicking on it in the list. To select
+multiple IPs, either hold the :kbd:`CTRL` key and click each IP or click the
+first IP, hold the :kbd:`SHIFT` key and click another to select all IPs between
+including the two selected.
+
+.. image:: images/reception_select_ips.png
+
+To select all visible IPs use the **Select all** option.
+
+.. image:: images/reception_select_all.png
+
+When the desired IPs are selected, click the **Receive**-button in the
+bottom right corner.
 
 .. image:: images/reception_receive_button.png
 
-När knappen väl klickats kommer ett nytt fönster att öppnas för att ta emot det
-första valda IP:t.
+Clicking the **Receive**-button will open a window to receive the first
+included IP.
 
-.. image:: images/receive_modal1.png
+.. image:: images/receive_modal.png
 
 
-
-Profileditor
+Profile Editor
 --------------
-Använd rullistan för att välja vilken leveransöverenskommelse som ska användas,
-klicka sedan på **Förbered**.
-Om rullistan är inaktiverad, har IPt redan en koppling till
-leveransöverenskommelsen.
+
+Use the dropdown to select which submission agreement to use, then click
+**Prepare**.  If the dropdown is disabled, the IP already has a related
+submission agreement.
 
 .. image:: images/profile_editor_select_sa.png
 
-I profileditorn kan en användare editera data i en profil för ett specifikt IP.
-Data-fälten för en leveransöverenskommelse kan bara läsas genom
-att klicka på **Visa**-knappen bredvid rullistan.
+The profile editor is where the user can edit data of a profile for a specific
+IP. The submission agreement's data fields can be viewed by clicking the
+**view** button next to the dropdown.
 
 .. image:: images/profile_editor_view_sa.png
 
-Under raden för leveransöverenskommelse finns alla relevanta profiler listade.
-Klicka på **Redigera** för att redigera profil-data för IPt
-som ska tas emot. Klicka sedan **Spara** när editeringen är färdig.
+Underneath the submission agreement row, all related profiles are listed.
+Click **edit** next to a profile to edit the data of the profile for the IP to
+be received.  When satisfied with the edit, click **Save**.
+
+When saving profile data, the previous versions are still available in the
+version dropdown. Choose between data versions and click save to apply.
 
 .. image:: images/profile_editor_save.png
 
-När man sparar profil-data så sparas alla tidigare versioner av datat
-och kan väljas i version-rullistan. Völj mellan versioner och klicka
-**Spara** för att spara.
+This can be done on each profile type, remember to save the data before
+closing the profile form.
 
-.. image:: images/profile_editor_version_select.png
-
-Detta kan göras på alla profiltyper. Kom ihåg att spara datat så
-det inte går förlorat.
-
-Ta emot
+Receive
 -------
+To receive an IP it needs to be placed in an archive and a structure so that
+the IP and its content is indexed and can be found on the search page.
+First select archive, then structure and last structure unit, which is
+where we will find the IP in the search result tree structure.
 
-När leveransöverenskommelse och profiler är klara.
-Fyll i alla obligatoriska fält, markera **Godkänd för att ta emot** och
-klicka **Ta emot SIP**.
-IPt börjar tas emot och om fler IPn valts kommer ett fönster för
-nästa IP att dyka upp. Man kan skippa att ta emot ett IP genom att
-klicka på **Hoppa över**.
+.. image:: images/place_in_archive.png
+
+When satisfied with the submission agreement and the profiles, select an
+**Archive policy** and click **Receive**.  The process of receiving the IP is
+started and if more IPs are included a window for the next IP will appear.
+An IP can be skipped by clicking the **Skip**-button.
 
 .. image:: images/receive.png
 
-När ett IP har tagits emot kan det inte längre hittas i receptionen,
-den ligger istället under :ref:`Godkännande <ingest-ip-approval>`.
+When an IP is received it is no longer visible in the reception list and
+can be found in the :ref:`Approval <approval>` section

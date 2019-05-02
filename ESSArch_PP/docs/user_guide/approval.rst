@@ -1,62 +1,54 @@
 .. _approval:
 
-**********
-Godkännande
-**********
+*********
+Approval
+*********
 
-Godkännande är där AIPer hamnar innan dom ska arkiveras.
-poängen med sidan är att kolla att AIPn uppfyller de krav en användare kan ha
-innan den arkiveras.
+Before an AIP can be preserved it has to be approved.
 
-När man klickar på ett IP i listvyn får vi fram ett "request-formulär"
-som är ett formulär där man kan välja att utföra vissa aktioner på en AIP.
-Typer på dessa request är beskrivna här nedan.
+When clicking on an AIP in the Approval list we see
+a request form for applying actions on an AIP.
+There are a couple of different types of request which are explained below
 
 .. image:: images/request_form_approval.png
 
 .. _approval-requests:
 
-Request
-========
-
-Arkivera
+Preserve
 --------
 
-Arkivera AIP till archival storage enligt information från profiler.
+Preserve AIP to archival storage according to information from profiles.
 
-Välj alternativet **Arkivera** Fyll i önskad information, markera
-**Förfrågan godkänd** och klicka på **Skicka**.
-Progressen kan följas i status-fältet flr IPt eller i större detalj
-om man klickar på **Tillstånd**-fältet. Se
-:ref:`State-vyn <user-interface-state-view>` för mer information.
+Choose **Preserve**, and click **Submit** to start the
+preservation process.
+The progress can be followed in the status bar of the IP and in the
+:ref:`State view <user-interface-state-view>` for more detailed information.
 
 .. image:: images/request_form_preserve.png
 
-Hämta
------
+Get
+---
 
-Hämtar en AIP som `read only` vilket betyder att den inte kan ändras.
-IPt kommer då att dyka upp under mottagande/arbetsyta
+Get AIP to Ingest Workspace as `read only`.
+This means that the IP in the workspace can not be changed, only "read".
 
-Välj alternativet **Hämta** Fyll i önskad information, markera
-**Förfrågan godkänd** och klicka på **Skicka**.
-Progressen kan följas i status-fältet flr IPt eller i större detalj
-om man klickar på **Tillstånd**-fältet. Se
-:ref:`State-vyn <user-interface-state-view>` för mer information.
+Choose **Get**, and click **Submit**.
+The AIP will appear in the workspace shortly.
+The progress can be followed in the status bar of the IP and in the
+:ref:`State view <user-interface-state-view>` for more detailed information.
 
 .. image:: images/request_form_get.png
 
-Hämta som ny generation
------------------------
+Get as new generation
+---------------------
 
-Hämta ip till mottagande/arbetsyta som en ny generation.
-Den nya generationen är i princip ett helt eget IP, den är
-bara relaterad till sina tidigare och senare generationen genom samma AIC.
+Get IP to Ingest Workspace as a new generation of IP.
+The new IP is basically a whole new IP but it is still related to the
+family of IPs that are related to the same AIC.
 
-Välj alternativet **Hämta som ny generation** Fyll i önskad information, markera
-**Förfrågan godkänd** och klicka på **Skicka**.
-Progressen kan följas i status-fältet flr IPt eller i större detalj
-om man klickar på **Tillstånd**-fältet. Se
-:ref:`State-vyn <user-interface-state-view>` för mer information.
+Choose the option **Get as new generation**, and click **Submit**.
+The AIP generation should appear in the ingest workspace shortly,
+the progress can be followed in the status bar of the IP and in the
+:ref:`State view <user-interface-state-view>` for more detailed information.
 
 .. image:: images/request_form_get_as_new.png

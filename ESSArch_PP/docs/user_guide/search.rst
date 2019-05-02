@@ -1,16 +1,15 @@
 .. _search:
 
 ***************
-Sök
+Search
 ***************
 
-I sök kan man söka i arkivet i det som indexerats med EAD eller
-som arkiverats(IPn och filer).
-Man kan fritext-söka, välja filtrering i trädet till vänster och
-filtrera på filformat(expandera **filter**).
+The search page allows the user to search in the archive for IPs and files
+indexed from EAD or that has been archived.
+It has support for global text search and different filters such as file
+formats (expand **Filters**).
 
-När man klickar på ett resultat i listan får man upp en vy
-där man ser detaljer för resultatet samt ett träd som man kan klicka
-runt och se andra resultat.
+Clicking a search result item opens a detailed view with a tree structure
+to the left that helps the user to navigate to other units in the same archive.
 
-När man öppnar filer i resultatvyn finns en knapp för att öppna filen.
+In the detail view for files, the file itself can be opened by clicking a button.

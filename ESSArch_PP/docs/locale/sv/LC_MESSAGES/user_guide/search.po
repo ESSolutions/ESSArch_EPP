@@ -1,0 +1,52 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, ES Solutions
+# This file is distributed under the same license as the ESSArch
+# Preservation Platform package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-04-29 14:31+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../user_guide/search.rst:5
+msgid "Search"
+msgstr "Sök"
+
+#: ../../user_guide/search.rst:7
+msgid ""
+"The search page allows the user to search in the archive for IPs and "
+"files indexed from EAD or that has been archived. It has support for "
+"global text search and different filters such as file formats (expand "
+"**Filters**)."
+msgstr ""
+"I sök kan man söka i arkivet i det som indexerats med EAD eller som "
+"arkiverats(IPn och filer). Man kan fritext-söka, välja filtrering i "
+"trädet till vänster och filtrera på filformat(expandera **Filter**)."
+
+#: ../../user_guide/search.rst:12
+#, fuzzy
+msgid ""
+"Clicking a search result item opens a detailed view with a tree structure"
+" to the left that helps the user to navigate to other units in the same "
+"archive."
+msgstr ""
+"När man klickar på ett sökresultat får man upp en detaljvy för resultatet"
+" samt en trädstruktur som hjälper användaren att navigera vidare till "
+"andra enheter inom samma arkiv."
+
+#: ../../user_guide/search.rst:15
+msgid ""
+"In the detail view for files, the file itself can be opened by clicking a"
+" button."
+msgstr "När man öppnar filer i resultatvyn finns en knapp för att öppna filen."
+
