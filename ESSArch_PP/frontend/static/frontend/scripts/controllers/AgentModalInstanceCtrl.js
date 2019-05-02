@@ -442,7 +442,7 @@ angular
           EditMode.disable();
           $uibModalInstance.close('removed');
         })
-        .catch(function() {
+        .catch(function(response) {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
           $ctrl.removing = false;
         });
