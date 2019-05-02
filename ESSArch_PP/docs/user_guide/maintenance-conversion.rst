@@ -1,48 +1,55 @@
 .. _maintenance-conversion:
 *******
-Formatkonvertering
+Format conversion
 *******
 
-Under konverteringssidan skapar vi konverteringsregler som körs automatiskt eller
-manuellt på utvalt arkiverat material.
+The format conversion pages main function is to allow the user to create
+converison jobs that run automatically or manually on selected content
+in the archive.
 
-Skapa regel
+Create conversion rule
+===========
+
+To create a new rule click the **Create**-button over the appraisal rule list.
+
+Enter a name for the new conversion rule, select interval for automatic jobs
+or select the **Run manually** option if the rule should be triggered manually and
+what files should be converted in the connected AIPs.
+
+**Frequency** decides how often a rule should be executed and is specified
+with **cron** syntax. For example: ``0 15 * * 3`` means every wednesday at
+15 o' clock.
+
+To add a **Specification** type for example ****/*.docx** in the **Path**
+field, **pdf** in the **target** field and **Libreoffice** in the **Tool**
+field, then click the **+**-button.
+This rule will convert all .docx-files to .pdf using libreoffice.
+
+Connect rule to AIP
 =======
 
-För att skapa en ny regel klickar vi på *Skapa* ovanför listan med regler.
+Enter the **Access/Storage units** page, mark one or more AIP(s), right click
+one of them and select **Conversion** and a list of the selected AIPs appears.
+Every row can be expanded to see connected conversion rules for the
+specific AIP. We also get a button for adding new rules to AIPs.
 
-Vi får här skriva i vad regeln ska heta, hur ofta den ska köras och vilka filer
-som ska konverteras i alla kopplade AIP:er.
-
-**Frekvens** är vad som bestämmer hur ofta en regel ska exekveras och
-specificeras med en **cron**-syntax. T.ex. ``0 15 * * 3`` för varje onsdag
-klockan 15.
-
-För att lägga till en **specifikation** så skriver vi t.ex. namnet
-****/*.docx** i textfältet **sökväg**, **pdf** i mål och klickar på **+**. Med
-den regeln så kommer alla filer av typen **docx** att konverteras till **pdf**.
-
-Koppla regel
+Conversion job lists
 =======
 
-Om vi går till **Åtkomst/Sök**, markerar en eller flera AIP:er, högerklickar
-och väljer **Konvertering** så får vi upp en lista med AIP:erna vi valt som vi då
-kan expandera för att se kopplade regler.  Vi får även upp en knapp för att
-lägga till nya regler.
+Under the list of conversion rules there are three more list views containing
+conversion jobs filtered by states **Ongoing**, **Next** and **Finished**.
+The **Ongoing**  list shows jobs that are currently running, the **Next**
+list shows jobs that will be run automatically in execution order and the
+**Finished** list shows jobs that are finished.
 
-Jobblistor
-=======
+In the **Next** list the converison job can be previewed by clicking
+the **Preview** button.
 
-Under listan med regler så har vi tre listor med konverteringsjobb som är
-filtrerade utefter status på jobben. **Pågående** visar konverteringsjobb som körs
-just nu, **Nästa** är jobb som kommer att exekveras och **Avslutade** är jobb
-som är klara.
+When a rule is connected to at least on AIP, jobs will be created and visible
+in the **next** list. The job will be executed at the given **start** time,
+except if the user wants to start the job before the given time.
+A job in the **Next** list can be started manually by clicking **Preview**
+and then **Run**. The job will then be moved to the **Ongoing** list and finally to the **Finished** list.
 
-När en regel är kopplad till minst en AIP så kommer det skapas ett jobb under
-**Nästa**. Det jobbet kan vi antingen vänta på ska exekveras automatiskt vid
-tiden som står under **Start**. Alternativt kan vi klicka på
-**Förhandsgranska** och sedan **Kör** för att exekvera på en gång. Jobbet
-kommer då flyttas till **Pågående** och sist **Avslutade**. 
-
-När jobbet är klart och är under **Avslutade** så kan vi klicka på **Rapport**
-för att se rapporten för det jobbet.
+In the **Finished** a user can see the conversion report for the finished
+job by clicking  **report**.

@@ -1,15 +1,11 @@
-=============
-Åtkomst
-=============
-
-:Release: |version|
-:Date: |today|
+======
+Access
+======
 
 .. image:: images/menu_access.png
 
 .. toctree::
     :maxdepth: 2
 
-    access-search
-    access-workspace
+    storage-units
     dissemination
