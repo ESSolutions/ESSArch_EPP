@@ -9,7 +9,8 @@ angular
     $state,
     $stateParams,
     EditMode,
-    AgentName
+    AgentName,
+    myService
   ) {
     var vm = this;
     $scope.AgentName = AgentName;
@@ -52,6 +53,27 @@ angular
       topography: {
         open: true,
       },
+    };
+
+    vm.getAgentListColspan = function() {
+      if (myService.checkPermission('agents.change_agent') && myService.checkPermission('agents.delete_agent')) {
+        return 6;
+      } else if (
+        myService.checkPermission('agents.change_agent') ||
+        myService.checkPermission('agents.delete_agent')
+      ) {
+        return 5;
+      } else {
+        return 4;
+      }
+    };
+
+    vm.getRelatedArchiveColspan = function() {
+      if (myService.checkPermission('agents.change_agent')) {
+        return 6;
+      } else {
+        return 4;
+      }
     };
 
     vm.getAgent = function(agent) {
