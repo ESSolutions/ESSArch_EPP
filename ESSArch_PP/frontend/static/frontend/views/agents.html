@@ -9,7 +9,12 @@
             </h4>
           </div>
           <div class="action-button">
-            <button class="btn btn-primary" ng-click="vm.createModal()">
+            <button
+              permission
+              permission-only="'agents.add_agent'"
+              class="btn btn-primary"
+              ng-click="vm.createModal()"
+            >
               {{'ACCESS.CREATE_ARCHIVE_CREATOR' | translate}}
             </button>
           </div>
@@ -75,10 +80,10 @@
                 <th class="cursor-pointer" st-sort="end_date">
                   {{'END_DATE' | translate}}
                 </th>
-                <th class="shrink">
+                <th permission permission-only="'agents.change_agent'" class="shrink">
                   {{'EDIT' | translate}}
                 </th>
-                <th class="white-space-nowrap shrink">
+                <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
                   {{'REMOVE' | translate}}
                 </th>
               </tr>
@@ -102,7 +107,7 @@
                 <td>
                   {{x.end_date |date:"yyyy-MM-dd"}}
                 </td>
-                <td class="text-center shrink">
+                <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                   <button
                     class="btn btn-default fas fa-edit btn-sm"
                     ng-click="vm.editModal(x); $event.stopPropagation();"
@@ -111,7 +116,7 @@
                     tooltip-append-to-body="true"
                   ></button>
                 </td>
-                <td class="text-center shrink">
+                <td permission permission-only="'agents.delete_agent'" class="text-center shrink">
                   <button
                     class="btn btn-default fas fa-trash-alt btn-sm"
                     ng-click="vm.removeAgentModal(x); $event.stopPropagation();"
@@ -200,7 +205,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end pb-base">
-                  <button class="btn btn-primary" ng-click="vm.addNameModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addNameModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
@@ -223,10 +233,10 @@
                         <th st-sort="end_date">
                           {{'ACCESS.VALID_DATE_END' | translate}}
                         </th>
-                        <th class="shrink">
+                        <th permission permission-only="'agents.change_agent'" class="shrink">
                           {{'EDIT' | translate}}
                         </th>
-                        <th class="white-space-nowrap shrink">
+                        <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
                           {{'REMOVE' | translate}}
                         </th>
                       </tr>
@@ -248,7 +258,7 @@
                         <td class="white-space-nowrap">
                           {{x.end_date | date:"yyyy-MM-dd"}}
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-edit"
                             ng-click="vm.editNameModal(x)"
@@ -259,7 +269,7 @@
                             <i class=""></i>
                           </button>
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-trash-alt"
                             ng-click="vm.removeNameModal(x)"
@@ -295,7 +305,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end pb-base">
-                  <button class="btn btn-primary" ng-click="vm.addMandateModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addMandateModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
@@ -315,10 +330,10 @@
                         <th>
                           {{'ACCESS.DECISION_DATE' | translate}}
                         </th>
-                        <th class="shrink">
+                        <th permission permission-only="'agents.change_agent'" class="shrink">
                           {{'EDIT' | translate}}
                         </th>
-                        <th class="white-space-nowrap shrink">
+                        <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
                           {{'REMOVE' | translate}}
                         </th>
                       </tr>
@@ -337,7 +352,7 @@
                         <td>
                           {{x.start_date | date:"yyyy-MM-dd"}}
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-edit"
                             ng-click="vm.editMandateModal(x)"
@@ -346,7 +361,7 @@
                             tooltip-append-to-body="true"
                           ></button>
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-trash-alt"
                             ng-click="vm.removeMandateModal(x)"
@@ -372,7 +387,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end pb-base">
-                  <button class="btn btn-primary" ng-click="vm.addAgentRelationModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addAgentRelationModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
@@ -395,10 +415,10 @@
                         <th>
                           {{'ACCESS.VALID_DATE_END' | translate}}
                         </th>
-                        <th class="shrink">
+                        <th permission permission-only="'agents.change_agent'" class="shrink">
                           {{'EDIT' | translate}}
                         </th>
-                        <th class="white-space-nowrap shrink">
+                        <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
                           {{'REMOVE' | translate}}
                         </th>
                       </tr>
@@ -424,7 +444,7 @@
                         <td>
                           {{x.end_date | date:"yyyy-MM-dd"}}
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-edit"
                             ng-click="vm.editAgentRelationModal(x); $event.stopPropagation();"
@@ -433,7 +453,7 @@
                             tooltip-append-to-body="true"
                           ></button>
                         </td>
-                        <td class="text-center shrink">
+                        <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
                             class="btn btn-default btn-sm fas fa-trash-alt"
                             ng-click="vm.removeAgentRelationModal(x); $event.stopPropagation();"
@@ -467,7 +487,12 @@
                       </h4>
                     </div>
                     <div class="d-flex justify-content-end pb-base">
-                      <button class="btn btn-primary" ng-click="vm.addArchiveRelationModal()">
+                      <button
+                        permission
+                        permission-only="'agents.change_agent'"
+                        class="btn btn-primary"
+                        ng-click="vm.addArchiveRelationModal()"
+                      >
                         {{'ADD' | translate}}
                       </button>
                     </div>
@@ -533,10 +558,10 @@
                           <th class="cursor-pointer" st-sort="end_date">
                             {{'ACCESS.TIME_RANGE_END' | translate}}
                           </th>
-                          <th class="shrink">
+                          <th permission permission-only="'agents.change_agent'" class="shrink">
                             {{'EDIT' | translate}}
                           </th>
-                          <th class="white-space-nowrap shrink">
+                          <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
                             {{'REMOVE' | translate}}
                           </th>
                         </tr>
@@ -555,7 +580,7 @@
                           <td>
                             {{x.end_date |date:"yyyy-MM-dd"}}
                           </td>
-                          <td class="text-center shrink">
+                          <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                             <button
                               class="btn btn-default btn-sm fas fa-edit"
                               ng-click="vm.editArchiveRelationModal(x); $event.stopPropagation();"
@@ -564,7 +589,7 @@
                               tooltip-append-to-body="true"
                             ></button>
                           </td>
-                          <td class="text-center shrink">
+                          <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                             <button
                               class="btn btn-default btn-sm fas fa-trash-alt"
                               ng-click="vm.removeArchiveRelationModal(x); $event.stopPropagation();"
@@ -612,7 +637,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end">
-                  <button class="btn btn-primary" ng-click="vm.addNoteModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addNoteModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
@@ -620,6 +650,8 @@
                   <hr class="small" />
                   <div class="edit-btn-wrapper flex-row position-realtive float-right pt-base">
                     <button
+                      permission
+                      permission-only="'agents.change_agent'"
                       class="btn btn-default btn-sm fas fa-edit"
                       ng-click="vm.editNoteModal(x)"
                       uib-tooltip="{{'EDIT' | translate}}"
@@ -627,6 +659,8 @@
                       tooltip-append-to-body="true"
                     ></button>
                     <button
+                      permission
+                      permission-only="'agents.change_agent'"
                       class="btn btn-default btn-sm fas fa-trash-alt"
                       ng-click="vm.removeNoteModal(x)"
                       uib-tooltip="{{'REMOVE' | translate}}"
@@ -676,7 +710,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end">
-                  <button class="btn btn-primary" ng-click="vm.addNoteModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addNoteModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
@@ -690,6 +729,8 @@
                   <hr class="small" />
                   <div class="edit-btn-wrapper flex-row position-realtive float-right pt-base">
                     <button
+                      permission
+                      permission-only="'agents.change_agent'"
                       class="btn btn-default btn-sm fas fa-edit"
                       ng-click="vm.editNoteModal(x)"
                       uib-tooltip="{{'EDIT' | translate}}"
@@ -697,6 +738,8 @@
                       tooltip-append-to-body="true"
                     ></button>
                     <button
+                      permission
+                      permission-only="'agents.change_agent'"
                       class="btn btn-default btn-sm fas fa-trash-alt"
                       ng-click="vm.removeNoteModal(x)"
                       uib-tooltip="{{'REMOVE' | translate}}"
