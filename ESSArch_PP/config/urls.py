@@ -29,7 +29,16 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
-from ESSArch_Core.agents.views import AgentViewSet, AgentTypeViewSet
+from ESSArch_Core.agents.views import (
+    AgentNameTypeViewSet,
+    AgentNoteTypeViewSet,
+    AgentRelationTypeViewSet,
+    AgentTagLinkRelationTypeViewSet,
+    AgentTypeViewSet,
+    AgentViewSet,
+    AuthorityTypeViewSet,
+    RefCodeViewSet,
+)
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
                                      UserViewSet)
 from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SiteView, SysInfoView
@@ -81,6 +90,12 @@ router.register(r'agents', AgentViewSet).register(
     parents_query_lookups=['agent']
 )
 router.register(r'agent-types', AgentTypeViewSet)
+router.register(r'agent-name-types', AgentNameTypeViewSet)
+router.register(r'agent-note-types', AgentNoteTypeViewSet)
+router.register(r'agent-relation-types', AgentRelationTypeViewSet)
+router.register(r'agent-tag-relation-types', AgentTagLinkRelationTypeViewSet)
+router.register(r'authority-types', AuthorityTypeViewSet)
+router.register(r'ref-codes', RefCodeViewSet)
 router.register(r'me/searches', StoredSearchViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'structures', StructureViewSet).register(
