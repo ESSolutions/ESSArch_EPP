@@ -39,6 +39,7 @@ from ESSArch_Core.agents.views import (
     AuthorityTypeViewSet,
     RefCodeViewSet,
 )
+from ESSArch_Core.api.views import LanguageViewSet
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
                                      UserViewSet)
 from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SiteView, SysInfoView
@@ -96,6 +97,7 @@ router.register(r'agent-relation-types', AgentRelationTypeViewSet)
 router.register(r'agent-tag-relation-types', AgentTagLinkRelationTypeViewSet)
 router.register(r'authority-types', AuthorityTypeViewSet)
 router.register(r'ref-codes', RefCodeViewSet)
+router.register(r'languages', LanguageViewSet)
 router.register(r'me/searches', StoredSearchViewSet)
 router.register(r'archive_policies', ArchivePolicyViewSet)
 router.register(r'structures', StructureViewSet).register(
