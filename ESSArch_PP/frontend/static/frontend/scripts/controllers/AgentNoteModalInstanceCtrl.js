@@ -26,10 +26,11 @@ angular
 
     $ctrl.$onInit = function() {
       return $http({
-        url: appConfig.djangoUrl + 'agents/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'agent-note-types/',
+        params: {pager: 'none'},
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.typeOptions = response.data.actions.POST.notes.child.children.type.choices;
+        $ctrl.typeOptions = response.data;
         EditMode.enable();
         if (data.note) {
           var note = angular.copy(data.note);
@@ -51,9 +52,9 @@ angular
             label: $translate.instant('TYPE'),
             options: $ctrl.typeOptions,
             required: true,
-            labelProp: 'display_name',
-            valueProp: 'value',
-            defaultValue: $ctrl.typeOptions[0].value,
+            labelProp: 'name',
+            valueProp: 'id',
+            defaultValue: $ctrl.typeOptions[0].id,
             notNull: true,
           },
         },

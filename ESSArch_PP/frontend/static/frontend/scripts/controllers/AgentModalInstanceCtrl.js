@@ -8,7 +8,8 @@ angular
     $scope,
     EditMode,
     $translate,
-    $rootScope
+    $rootScope,
+    $q
   ) {
     var $ctrl = this;
     $ctrl.options = {};
@@ -23,21 +24,6 @@ angular
     };
     $ctrl.nameFields = [];
     $ctrl.basicFields = [];
-    $ctrl.sortLanguages = function() {
-      var swe, eng;
-      $ctrl.options.language.choices.forEach(function(choice, idx, array) {
-        if (choice.value === 'en') {
-          eng = angular.copy(choice);
-          array.splice(idx, 1);
-        }
-        if (choice.value === 'sv') {
-          swe = angular.copy(choice);
-          array.splice(idx, 1);
-        }
-      });
-      $ctrl.options.language.choices.unshift(eng);
-      $ctrl.options.language.choices.unshift(swe);
-    };
 
     $ctrl.buildAgentModel = function() {
       return $http({
@@ -55,9 +41,6 @@ angular
           }
           if (!angular.isUndefined(value.choices) && value.choices.length > 0) {
             $ctrl.options[key] = value;
-            if (key === 'language') {
-              $ctrl.sortLanguages();
-            }
             model[key] = value.choices[0].value;
           }
           if (!angular.isUndefined(value.child) && !angular.isUndefined(value.child.children)) {
@@ -74,11 +57,20 @@ angular
           }
         });
         delete model.id;
+        model.identifiers = [];
+        model.mandates = [];
+        model.related_agents = [];
+        model.notes = [];
+        model.places = [];
         return model;
       });
     };
 
     $ctrl.$onInit = function() {
+      if (data.remove && data.agent) {
+        $ctrl.agent = angular.copy(data.agent);
+        return;
+      }
       if (data.agent) {
         return $http({
           url: appConfig.djangoUrl + 'agents/',
@@ -89,9 +81,6 @@ angular
           angular.forEach(response.data.actions.POST, function(value, key) {
             if (!angular.isUndefined(value.choices) && value.choices.length > 0) {
               $ctrl.options[key] = value;
-              if (key === 'language') {
-                $ctrl.sortLanguages();
-              }
             }
             if (!angular.isUndefined(value.child) && !angular.isUndefined(value.child.children)) {
               angular.forEach(value.child.children, function(nestedVal, nestedKey) {
@@ -133,9 +122,6 @@ angular
         var options = angular.copy(response.data);
         options.forEach(function(x) {
           x.name = x.main_type.name;
-          if (x.id === agent.type.id) {
-            agent.type = x;
-          }
         });
         var type = {
           type: 'select',
@@ -252,110 +238,156 @@ angular
     };
 
     $ctrl.loadBasicFields = function() {
-      $ctrl.basicFields = [
-        {
-          className: 'row m-0',
-          fieldGroup: [
-            {
-              className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
-              type: 'datepicker',
-              key: 'start_date',
-              templateOptions: {
-                label: $translate.instant('START_DATE'),
-                appendToBody: false,
-                dateFormat: 'YYYY-MM-DD',
+      var promises = [];
+      promises.push(
+        $ctrl.getRefCodes().then(function(refCodes) {
+          if (refCodes.length > 0 && (angular.isUndefined($ctrl.agent.ref_code) || $ctrl.agent.ref_code === null)) {
+            $ctrl.agent.ref_code = refCodes[0].id;
+          }
+          return refCodes;
+        })
+      );
+      promises.push(
+        $ctrl.getLanguages().then(function(languages) {
+          if (angular.isUndefined($ctrl.agent.language) || $ctrl.agent.language === null) {
+            $ctrl.agent.language = 'sv';
+          }
+          return languages;
+        })
+      );
+      $q.all(promises).then(function(responses) {
+        $ctrl.basicFields = [
+          {
+            className: 'row m-0',
+            fieldGroup: [
+              {
+                className: 'col-xs-12 col-sm-6 px-0 pr-md-base',
+                type: 'datepicker',
+                key: 'start_date',
+                templateOptions: {
+                  label: $translate.instant('START_DATE'),
+                  appendToBody: false,
+                  dateFormat: 'YYYY-MM-DD',
+                },
               },
-            },
-            {
-              className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
-              type: 'datepicker',
-              key: 'end_date',
-              templateOptions: {
-                label: $translate.instant('END_DATE'),
-                appendToBody: false,
-                dateFormat: 'YYYY-MM-DD',
+              {
+                className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
+                type: 'datepicker',
+                key: 'end_date',
+                templateOptions: {
+                  label: $translate.instant('END_DATE'),
+                  appendToBody: false,
+                  dateFormat: 'YYYY-MM-DD',
+                },
               },
+            ],
+          },
+          {
+            type: 'select',
+            key: 'level_of_detail',
+            templateOptions: {
+              options: $ctrl.options.level_of_detail.choices,
+              valueProp: 'value',
+              labelProp: 'display_name',
+              label: $translate.instant('ACCESS.LEVEL_OF_DETAIL'),
+              defaultValue: $ctrl.options.level_of_detail.choices[0].value,
+              required: true,
+              notNull: true,
             },
-          ],
-        },
-        {
-          type: 'select',
-          key: 'level_of_detail',
-          templateOptions: {
-            options: $ctrl.options.level_of_detail.choices,
-            valueProp: 'value',
-            labelProp: 'display_name',
-            label: $translate.instant('ACCESS.LEVEL_OF_DETAIL'),
-            defaultValue: $ctrl.options.level_of_detail.choices[0].value,
-            required: true,
-            notNull: true,
           },
-        },
-        {
-          type: 'select',
-          key: 'script',
-          templateOptions: {
-            options: $ctrl.options.script.choices,
-            valueProp: 'value',
-            labelProp: 'display_name',
-            label: $translate.instant('ACCESS.SCRIPT'),
-            defaultValue: $ctrl.options.script.choices[0].value,
-            required: true,
-            notNull: true,
+          {
+            type: 'select',
+            key: 'script',
+            templateOptions: {
+              options: $ctrl.options.script.choices,
+              valueProp: 'value',
+              labelProp: 'display_name',
+              label: $translate.instant('ACCESS.SCRIPT'),
+              defaultValue: $ctrl.options.script.choices[0].value,
+              required: true,
+              notNull: true,
+            },
+            hideExpression: 'true',
           },
-          hideExpression: 'true',
-        },
-        {
-          type: 'select',
-          key: 'language',
-          templateOptions: {
-            options: $ctrl.options.language.choices,
-            valueProp: 'value',
-            labelProp: 'display_name',
-            label: $translate.instant('ACCESS.LANGUAGE'),
-            defaultValue: $ctrl.options.language.choices[0].value,
-            required: true,
-            notNull: true,
+          {
+            type: 'uiselect',
+            key: 'language',
+            templateOptions: {
+              options: function() {
+                return $ctrl.options.language.choices;
+              },
+              valueProp: 'id',
+              labelProp: 'name_en',
+              label: $translate.instant('ACCESS.LANGUAGE'),
+              appendToBody: false,
+              optionsFunction: function(search) {
+                return $ctrl.options.language.choices;
+              },
+              refresh: function(search) {
+                $ctrl.getLanguages(search).then(function() {
+                  this.options = $ctrl.options.language.choices;
+                });
+              },
+              defaultValue: $ctrl.options.language.choices.length > 0 ? $ctrl.options.language.choices[0].id : null,
+              required: true,
+            },
           },
-          hideExpression: 'true',
-        },
-        {
-          type: 'select',
-          key: 'record_status',
-          templateOptions: {
-            options: $ctrl.options.record_status.choices,
-            valueProp: 'value',
-            labelProp: 'display_name',
-            label: $translate.instant('ACCESS.RECORD_STATUS'),
-            defaultValue: $ctrl.options.record_status.choices[0].value,
-            required: true,
-            notNull: true,
+          {
+            type: 'select',
+            key: 'record_status',
+            templateOptions: {
+              options: $ctrl.options.record_status.choices,
+              valueProp: 'value',
+              labelProp: 'display_name',
+              label: $translate.instant('ACCESS.RECORD_STATUS'),
+              defaultValue: $ctrl.options.record_status.choices[0].value,
+              required: true,
+              notNull: true,
+            },
+            hideExpression: 'true',
           },
-          hideExpression: 'true',
-        },
-        {
-          type: 'select',
-          key: 'ref_code',
-          templateOptions: {
-            options: $ctrl.options.ref_code.choices,
-            valueProp: 'value',
-            labelProp: 'display_name',
-            label: $translate.instant('ACCESS.REFERENCE_CODE'),
-            defaultValue: $ctrl.options.ref_code.choices[0].value,
-            required: true,
-            notNull: true,
+          {
+            type: 'select',
+            key: 'ref_code',
+            templateOptions: {
+              options: $ctrl.options.ref_code.choices,
+              valueProp: 'id',
+              labelProp: 'formatted_name',
+              label: $translate.instant('ACCESS.REFERENCE_CODE'),
+              defaultValue: $ctrl.options.ref_code.choices.length > 0 ? $ctrl.options.ref_code.choices[0].id : null,
+              required: true,
+              notNull: true,
+            },
           },
-        },
-        {
-          type: 'datepicker',
-          key: 'create_date',
-          templateOptions: {
-            label: $translate.instant('CREATE_DATE'),
-            appendToBody: false,
-            required: true,
+          {
+            type: 'datepicker',
+            key: 'create_date',
+            templateOptions: {
+              label: $translate.instant('CREATE_DATE'),
+              appendToBody: false,
+              required: true,
+            },
           },
-        },
-      ];
+        ];
+      });
+    };
+
+    $ctrl.getLanguages = function(search) {
+      return $http
+        .get(appConfig.djangoUrl + 'languages/', {params: {search: search, pager: 'none'}})
+        .then(function(response) {
+          $ctrl.options.language = {choices: response.data};
+          return response.data;
+        });
+    };
+    $ctrl.getRefCodes = function() {
+      return $http.get(appConfig.djangoUrl + 'ref-codes/', {params: {pager: 'none'}}).then(function(response) {
+        response.data.forEach(function(x) {
+          x.formatted_name = x.country + '/' + x.repository_code;
+        });
+        $ctrl.options.ref_code = {choices: response.data};
+        return response.data;
+      });
     };
 
     $ctrl.cancel = function() {
@@ -385,8 +417,8 @@ angular
         })
         .catch(function(response) {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
-          if(response.data.names) {
-            if(angular.isArray($ctrl.nonFieldErrors)) {
+          if (response.data.names) {
+            if (angular.isArray($ctrl.nonFieldErrors)) {
               $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
             } else {
               $ctrl.nonFieldErrors = response.data.names;
@@ -421,8 +453,8 @@ angular
         })
         .catch(function() {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
-          if(response.data.names) {
-            if(angular.isArray($ctrl.nonFieldErrors)) {
+          if (response.data.names) {
+            if (angular.isArray($ctrl.nonFieldErrors)) {
               $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.names);
             } else {
               $ctrl.nonFieldErrors = response.data.names;

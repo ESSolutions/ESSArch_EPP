@@ -50,10 +50,11 @@ angular
         $ctrl.relation = $ctrl.relationTemplate;
       }
       return $http({
-        url: appConfig.djangoUrl + 'agents/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'agent-relation-types/',
+        params: {pager: 'none'},
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.options.type = response.data.actions.POST.related_agents.child.children.type;
+        $ctrl.options.type = response.data;
         $ctrl.loadForm();
         EditMode.enable();
         return response.data;
@@ -87,11 +88,11 @@ angular
           key: 'type',
           templateOptions: {
             label: $translate.instant('TYPE'),
-            options: $ctrl.options.type.choices,
+            options: $ctrl.options.type,
             required: true,
-            labelProp: 'display_name',
-            valueProp: 'value',
-            defaultValue: $ctrl.options.type.choices.length > 0 ? $ctrl.options.type.choices[0].value : null,
+            labelProp: 'name',
+            valueProp: 'id',
+            defaultValue: $ctrl.options.type.length > 0 ? $ctrl.options.type[0].value : null,
             notNull: true,
           },
         },

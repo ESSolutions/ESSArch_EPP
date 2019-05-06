@@ -27,10 +27,11 @@ angular
 
     $ctrl.$onInit = function() {
       return $http({
-        url: appConfig.djangoUrl + 'agents/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'authority-types/',
+        params: {pager: 'none'},
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.options = {mandates: {type: response.data.actions.POST.mandates.child.children.type}};
+        $ctrl.options = {mandate: response.data};
         EditMode.enable();
         if (data.mandate) {
           var mandate = angular.copy(data.mandate);
@@ -58,12 +59,12 @@ angular
           key: 'type',
           templateOptions: {
             label: $translate.instant('TYPE'),
-            options: $ctrl.options.mandates.type.choices,
+            options: $ctrl.options.mandate,
             required: true,
-            labelProp: 'display_name',
-            valueProp: 'value',
+            labelProp: 'name',
+            valueProp: 'id',
             defaultValue:
-              $ctrl.options.mandates.type.choices.length > 0 ? $ctrl.options.mandates.type.choices[0].value : null,
+              $ctrl.options.mandate.length > 0 ? $ctrl.options.mandate[0].id : null,
             notNull: true,
           },
         },

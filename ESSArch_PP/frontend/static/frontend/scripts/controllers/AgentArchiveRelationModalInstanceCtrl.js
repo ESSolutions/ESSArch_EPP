@@ -33,10 +33,11 @@
         $ctrl.relation = $ctrl.relationTemplate;
       }
       return $http({
-        url: appConfig.djangoUrl + 'agents/' + data.agent.id + '/archives/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'agent-tag-relation-types/',
+        params: {pager: 'none'},
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.options.type = response.data.actions.POST.type;
+        $ctrl.options.type = response.data;
         $ctrl.loadForm();
         EditMode.enable();
         return response.data;
@@ -94,11 +95,11 @@
           key: 'type',
           templateOptions: {
             label: $translate.instant('TYPE'),
-            options: $ctrl.options.type.choices,
+            options: $ctrl.options.type,
             required: true,
-            labelProp: 'display_name',
-            valueProp: 'value',
-            defaultValue: $ctrl.options.type.choices[0].value,
+            labelProp: 'name',
+            valueProp: 'id',
+            defaultValue: $ctrl.options.type.length > 0 ? $ctrl.options.type[0].id : null,
             notNull: true,
           },
         },

@@ -28,10 +28,11 @@ angular
 
     $ctrl.$onInit = function() {
       return $http({
-        url: appConfig.djangoUrl + 'agents/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'agent-name-types/',
+        params: {pager: 'none'},
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.options = {names: {type: response.data.actions.POST.names.child.children.type}};
+        $ctrl.options = {type: response.data};
         EditMode.enable();
         if (data.name) {
           var name = angular.copy(data.name);
@@ -51,11 +52,11 @@ angular
           key: 'type',
           templateOptions: {
             label: $translate.instant('TYPE'),
-            options: $ctrl.options.names.type.choices,
+            options: $ctrl.options.type,
             required: true,
-            labelProp: 'display_name',
-            valueProp: 'value',
-            defaultValue: $ctrl.options.names.type.choices[0].value,
+            labelProp: 'name',
+            valueProp: 'id',
+            defaultValue: $ctrl.options.type[0].id,
             notNull: true,
           },
         },

@@ -320,6 +320,7 @@ angular
             return {
               agent: agent,
               allow_close: true,
+              remove: true,
             };
           },
         },
