@@ -51,6 +51,11 @@
                     "_permissions": [
                         "ip.preserve_dip"
                     ]
+                },
+                "location": {
+                    "_permissions": [
+                        "tags.search"
+                    ]
                 }
             },
             "workarea": {

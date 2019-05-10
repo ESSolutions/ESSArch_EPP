@@ -25,6 +25,12 @@
       {{x.type + ': ' + x.identifier}}
     </div>
   </div>
+  <div ng-if="vm.record.location">
+    <b>
+      {{'ACCESS.LOCATION' | translate}}
+    </b>:&nbsp;
+      {{vm.record.location.name}} ({{vm.record.location.level_type.name}})
+  </div>
   <div ng-if="vm.record.related_tags.length > 0" class="py-base">
     <label>
       {{'ACCESS.RELATED' | translate}}

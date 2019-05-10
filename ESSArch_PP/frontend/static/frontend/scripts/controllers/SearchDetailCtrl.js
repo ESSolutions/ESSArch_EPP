@@ -586,6 +586,15 @@ angular
               }
             },
           };
+          var addLocation = {
+            label: $translate.instant('ACCESS.LINK_TO_LOCATION'),
+            _disabled: function() {
+              return !$scope.checkPermission('tags.add_tag');
+            },
+            action: function() {
+              vm.addNodeLocationModal(node.original);
+            },
+          };
           var removeFromStructure = {
             label: $translate.instant('ACCESS.REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
             _disabled: function() {
@@ -652,6 +661,7 @@ angular
             addStructureUnit: node.original._is_structure_unit ? addStructureUnit : undefined,
             email: email,
             remove: remove,
+            addLocation: !node.original._is_structure_unit ? addLocation : null,
             removeFromStructure: removeFromStructure,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
@@ -1368,6 +1378,35 @@ angular
             node: node,
             structure: vm.structure,
           },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNodeLocationModal = function(node) {
+      var data = {
+        node: node
+      };
+      if (node.location !== null) {
+        data.location = node.location;
+      }
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/tagversion_location_relation_modal.html',
+        size: 'lg',
+        controller: 'NodeLocationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data
         },
       });
       modalInstance.result.then(

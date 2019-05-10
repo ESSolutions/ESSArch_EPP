@@ -5,7 +5,7 @@ from rest_framework import serializers
 from ESSArch_Core.agents.models import Agent, AgentTagLink, AgentTagLinkRelationType
 from ESSArch_Core.auth.fields import CurrentUsernameDefault
 from ESSArch_Core.tags.documents import Archive, Component
-from ESSArch_Core.tags.models import Search, Structure, StructureUnit, Tag, TagStructure, TagVersion, TagVersionType
+from ESSArch_Core.tags.models import Search, Structure, StructureUnit, Tag, TagStructure, TagVersion, TagVersionType, Location
 
 
 class ComponentWriteSerializer(serializers.Serializer):
@@ -17,7 +17,9 @@ class ComponentWriteSerializer(serializers.Serializer):
         required=False,
         queryset=TagVersion.objects.filter(type__archive_type=False),
     )
-    structure = serializers.PrimaryKeyRelatedField(required=False, queryset=Structure.objects.filter(is_template=False))
+    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    structure = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=Structure.objects.filter(is_template=False))
     structure_unit = serializers.PrimaryKeyRelatedField(
         required=False,
         queryset=StructureUnit.objects.filter(structure__is_template=False),
@@ -127,7 +129,8 @@ class ComponentWriteSerializer(serializers.Serializer):
 class ArchiveWriteSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.PrimaryKeyRelatedField(queryset=TagVersionType.objects.filter(archive_type=True))
-    structures = serializers.PrimaryKeyRelatedField(queryset=Structure.objects.filter(is_template=True, published=True), many=True)
+    structures = serializers.PrimaryKeyRelatedField(
+        queryset=Structure.objects.filter(is_template=True, published=True), many=True)
     archive_creator = serializers.PrimaryKeyRelatedField(queryset=Agent.objects.all())
     description = serializers.CharField(required=False)
     reference_code = serializers.CharField()

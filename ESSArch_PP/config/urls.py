@@ -58,6 +58,11 @@ from ESSArch_Core.tags.views import (
     StructureUnitTypeViewSet,
     TagViewSet,
     TagVersionTypeViewSet,
+    TagVersionViewSet,
+    LocationViewSet,
+    MetricProfileViewSet,
+    LocationLevelTypeViewSet,
+    LocationFunctionTypeViewSet,
 )
 from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
@@ -108,7 +113,16 @@ router.register(r'structures', StructureViewSet).register(
 )
 router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'structure-types', StructureTypeViewSet)
-router.register(r'structure-unit-types', StructureUnitTypeViewSet)
+router.register(r'locations', LocationViewSet).register(
+    r'tags',
+    TagVersionViewSet,
+    base_name='location-tags',
+    parents_query_lookups=['location']
+)
+router.register(r'metric-profiles', MetricProfileViewSet)
+router.register(r'location-level-types', LocationLevelTypeViewSet)
+router.register(r'location-function-types', LocationFunctionTypeViewSet)
+router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
 router.register(r'groups', GroupViewSet)
