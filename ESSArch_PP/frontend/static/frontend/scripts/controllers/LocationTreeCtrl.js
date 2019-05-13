@@ -237,6 +237,17 @@ angular
         });
     };
 
+    $scope.$watch(
+      function() {
+        return vm.selected;
+      },
+      function() {
+        if (vm.selected === null) {
+          vm.treeInstance.jstree(true).deselect_all();
+        }
+      }
+    );
+
     vm.addNodeModal = function(node) {
       var modalInstance = $uibModal.open({
         animation: true,

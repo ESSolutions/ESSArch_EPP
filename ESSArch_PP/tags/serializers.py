@@ -17,7 +17,7 @@ class ComponentWriteSerializer(serializers.Serializer):
         required=False,
         queryset=TagVersion.objects.filter(type__archive_type=False),
     )
-    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), allow_null=True)
     structure = serializers.PrimaryKeyRelatedField(
         required=False, queryset=Structure.objects.filter(is_template=False))
     structure_unit = serializers.PrimaryKeyRelatedField(

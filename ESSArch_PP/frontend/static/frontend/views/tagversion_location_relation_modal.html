@@ -4,6 +4,9 @@
 <form ng-submit="$ctrl.save()" novalidate name="$ctrl.form">
   <div class="modal-body" id="modal-body">
     <location-tree read-only="true" selected="$ctrl.location"></location-tree>
+    <button type="button" class="btn btn-danger" ng-click="$ctrl.clearLocation()">
+      {{'CLEAR' | translate}}
+    </button>
   </div>
   <div class="modal-footer">
     <button class="btn btn-primary" type="submit" ng-disabled="$ctrl.saving">

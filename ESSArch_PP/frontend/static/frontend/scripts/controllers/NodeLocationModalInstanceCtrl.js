@@ -23,13 +23,13 @@ angular
       }
     };
 
+    $ctrl.clearLocation = function() {
+      $ctrl.location = null;
+    }
+
     $ctrl.save = function() {
-      if ($ctrl.location === null) {
-        $ctrl.nonFieldErrors = [$translate.instant('ACCESS.YOU_MUST_PICK_LOCATION')];
-        return;
-      }
       $ctrl.saving = true;
-      Search.updateNode(data.node, {location: $ctrl.location.id})
+      Search.updateNode(data.node, {location: $ctrl.location !== null ?$ctrl.location.id : null})
         .then(function(response) {
           $ctrl.saving = false;
           EditMode.disable();
