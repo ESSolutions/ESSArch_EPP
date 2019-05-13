@@ -113,6 +113,7 @@ router.register(r'structures', StructureViewSet).register(
 )
 router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'structure-types', StructureTypeViewSet)
+router.register(r'structure-unit-types', StructureUnitTypeViewSet)
 router.register(r'locations', LocationViewSet).register(
     r'tags',
     TagVersionViewSet,
