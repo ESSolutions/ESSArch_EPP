@@ -219,7 +219,7 @@
                   <tr>
                     <th>{{'TYPE' | translate}}</th>
                     <th>{{'ACCESS.ARCHIVE' | translate}}</th>
-                    <th st-sort="reference_code" class="clickable">{{'ACCESS.REFERENCE_CODE' | translate}}</th>
+                    <th st-sort="reference_code" class="clickable white-space-nowrap">{{'ACCESS.REFERENCE_CODE' | translate}}</th>
                     <th st-sort="name" class="clickable">{{'ACCESS.TITLE' |translate}}</th>
                     <th>{{'DATE' |translate}}</th>
                     <th>{{'DESCRIPTION' | translate}}</th>
@@ -237,11 +237,13 @@
                     <td class="search-archive-column">
                       {{x.archive.name}}
                     </td>
-                    <td class="search-td-nowrap d-flex">
-                      <span ng-if="x.structure_units.length > 0">
-                        {{x.structure_units[0].reference_code}}:
-                      </span>
-                      <div ng-bind-html="x.reference_code"></div>
+                    <td>
+                      <div class="white-space-nowrap d-flex">
+                        <span ng-if="x.structure_units.length > 0">
+                          {{x.structure_units[0].reference_code}}:
+                        </span>
+                        <div ng-bind-html="x.reference_code"></div>
+                      </div>
                     </td>
                     <td ng-bind-html="x.name" class="search-name-column"></td>
                     <td class="search-td-nowrap">{{x.unit_dates.date}}</td>
