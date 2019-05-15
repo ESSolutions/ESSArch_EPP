@@ -9,7 +9,8 @@ angular
     data,
     $scope,
     Notifications,
-    $rootScope
+    $rootScope,
+    EditMode
   ) {
     var $ctrl = this;
     $ctrl.node = data.node.original;
@@ -26,6 +27,7 @@ angular
       $http
         .get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}})
         .then(function(response) {
+          EditMode.enable();
           $ctrl.typeOptions = response.data;
           $ctrl.loadForm();
         });
@@ -109,7 +111,7 @@ angular
       }
       if ($ctrl.changed()) {
         $ctrl.submitting = true;
-        var params = angular.extend($ctrl.newNode, {archive: data.archive, structure: data.structure});
+        var params = angular.extend($ctrl.newNode, {archive: data.archive, structure: data.structure, location: null});
         if ($ctrl.node._is_structure_unit) params.structure_unit = $ctrl.node._id;
         else {
           params.parent = $ctrl.node._id;
@@ -120,6 +122,7 @@ angular
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
+            EditMode.disable();
             $uibModalInstance.close(response.data);
           })
           .catch(function(response) {
@@ -131,4 +134,17 @@ angular
     $ctrl.cancel = function() {
       $uibModalInstance.dismiss('cancel');
     };
+    $scope.$on('modal.closing', function(event, reason, closed) {
+      if (
+        (data.allow_close === null || angular.isUndefined(data.allow_close) || data.allow_close !== true) &&
+        (reason === 'cancel' || reason === 'backdrop click' || reason === 'escape key press')
+      ) {
+        var message = $translate.instant('UNSAVED_DATA_WARNING');
+        if (!confirm(message)) {
+          event.preventDefault();
+        } else {
+          EditMode.disable();
+        }
+      }
+    });
   });
