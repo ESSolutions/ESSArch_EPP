@@ -211,6 +211,7 @@ angular
     };
 
     vm.getClassificationStructureChildren = function(id) {
+      console.log('Getting children of structure with id "' + id + '"')
       var url = vm.url + 'structures/' + id + '/units/';
       return $http.get(url, {params: {has_parent: false, pager: 'none'}}).then(function(response) {
         var data = response.data.map(function(unit) {
@@ -526,7 +527,8 @@ angular
                 !(
                   $scope.checkPermission('tags.change_structureunit_instance') &&
                   vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
-                ) && !(!node.original._is_structure_unit && $scope.checkPermission('tags.change_tagversion'))
+                ) &&
+                !(!node.original._is_structure_unit && $scope.checkPermission('tags.change_tagversion'))
               );
             },
             action: function update() {
@@ -573,7 +575,8 @@ angular
                     $scope.checkPermission('tags.delete_structureunit_instance') &&
                     vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instances
                   )) ||
-                node.original._index === 'archive' || !$scope.checkPermission('tags.delete_tagversion')
+                node.original._index === 'archive' ||
+                !$scope.checkPermission('tags.delete_tagversion')
               );
             },
             action: function() {
@@ -598,7 +601,11 @@ angular
           var removeFromStructure = {
             label: $translate.instant('ACCESS.REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
             _disabled: function() {
-              return node.original._is_structure_unit || node.original._index === 'archive' || !$scope.checkPermission('tags.change_classification');
+              return (
+                node.original._is_structure_unit ||
+                node.original._index === 'archive' ||
+                !$scope.checkPermission('tags.change_classification')
+              );
             },
             action: function() {
               var struct;
@@ -655,13 +662,17 @@ angular
               }
             },
           };
+          var isUnit = node.original._is_structure_unit;
+          var isUnitLeaf = node.original.is_unit_leaf_node;
+          var isLeaf = node.original.is_leaf_node;
           var actions = {
             update: update,
-            add: add,
-            addStructureUnit: node.original._is_structure_unit ? addStructureUnit : undefined,
+            add: !isUnit || isUnitLeaf ? add : undefined,
+            addStructureUnit:
+              (isUnit && isUnitLeaf === isLeaf) || node.original._index === 'archive' ? addStructureUnit : undefined,
             email: email,
             remove: remove,
-            addLocation: !node.original._is_structure_unit ? addLocation : null,
+            addLocation: !isUnit && node.original._index !== 'archive' ? addLocation : null,
             removeFromStructure: removeFromStructure,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
@@ -1392,7 +1403,7 @@ angular
 
     vm.addNodeLocationModal = function(node) {
       var data = {
-        node: node
+        node: node,
       };
       if (node.location !== null) {
         data.location = node.location;
@@ -1406,7 +1417,7 @@ angular
         controller: 'NodeLocationModalInstanceCtrl',
         controllerAs: '$ctrl',
         resolve: {
-          data: data
+          data: data,
         },
       });
       modalInstance.result.then(
