@@ -10,7 +10,9 @@ angular
     $stateParams,
     EditMode,
     AgentName,
-    myService
+    myService,
+    $rootScope,
+    $translate
   ) {
     var vm = this;
     $scope.AgentName = AgentName;
@@ -77,7 +79,7 @@ angular
     };
 
     vm.getAgent = function(agent) {
-      $http.get(appConfig.djangoUrl + 'agents/' + agent.id + '/').then(function(response) {
+      return $http.get(appConfig.djangoUrl + 'agents/' + agent.id + '/').then(function(response) {
         vm.initAccordion();
         vm.sortNotes(response.data);
         vm.sortNames(response.data);
@@ -85,12 +87,15 @@ angular
         response.data.auth_name = AgentName.getAuthorizedName(response.data);
         vm.agent = response.data;
         vm.agentArchivePipe($scope.archiveTableState);
+        return response.data;
       });
     };
 
     vm.$onInit = function() {
       if ($stateParams.id) {
-        vm.getAgent($stateParams);
+        vm.getAgent($stateParams).then(function() {
+          $rootScope.$broadcast('UPDATE_TITLE', {title: vm.agent.auth_name.full_name});
+        })
       } else {
         vm.agent = null;
       }
@@ -112,10 +117,23 @@ angular
           vm.agentArchivePipe($scope.archiveTableState);
           vm.sortNames(vm.agent);
           $state.go($state.current.name, vm.agent, {notify: false});
+          $rootScope.$broadcast('UPDATE_TITLE', {title: vm.agent.auth_name.full_name});
         });
       } else if (vm.agent !== null && vm.agent.id === agent.id) {
         vm.agent = null;
         $state.go($state.current.name, {id: null}, {notify: false});
+        $translate.instant(
+          $state.current.name
+            .split('.')
+            .pop()
+            .toUpperCase()
+        )
+        $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
+          $state.current.name
+            .split('.')
+            .pop()
+            .toUpperCase()
+        )});
       }
     };
 
@@ -329,6 +347,12 @@ angular
         function(data) {
           vm.agent = null;
           $state.go($state.current.name, {id: null}, {notify: false});
+          $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
+            $state.current.name
+              .split('.')
+              .pop()
+              .toUpperCase()
+          )});
           vm.agentPipe($scope.tableState);
         },
         function() {

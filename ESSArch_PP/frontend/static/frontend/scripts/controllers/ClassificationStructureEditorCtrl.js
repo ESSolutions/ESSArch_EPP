@@ -12,7 +12,8 @@ angular
     $q,
     $timeout,
     $state,
-    $stateParams
+    $stateParams,
+    $rootScope
   ) {
     var vm = this;
     vm.structure = null;
@@ -35,12 +36,19 @@ angular
       if (vm.structure && vm.structure.id === row.id) {
         vm.structure = null;
         $state.go($state.current.name, {id: null}, {notify: false});
+        $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
+          $state.current.name
+            .split('.')
+            .pop()
+            .toUpperCase()
+        )});
       } else {
         vm.structuresLoading = true;
         Structure.get({id: row.id}).$promise.then(function(resource) {
           vm.structuresLoading = false;
           vm.structure = resource;
           $state.go($state.current.name, {id: vm.structure.id}, {notify: false});
+          $rootScope.$broadcast('UPDATE_TITLE', {title: vm.structure.name});
           vm.oldStructure = angular.copy(resource);
           vm.rules = vm.structure.specification.rules ? angular.copy(vm.structure.specification.rules) : {};
           var typePromises = [];
@@ -549,6 +557,12 @@ angular
       modalInstance.result.then(
         function(data, $ctrl) {
           vm.structure = null;
+          $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
+            $state.current.name
+              .split('.')
+              .pop()
+              .toUpperCase()
+          )});
           vm.updateStructures();
         },
         function() {
@@ -574,7 +588,9 @@ angular
       });
       modalInstance.result.then(
         function(data) {
-          vm.updateStructures();
+          vm.updateStructures().then(function() {
+            vm.structureClick(data);
+          })
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
