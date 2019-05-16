@@ -30,7 +30,7 @@ angular
         $http.get(appConfig.djangoUrl + 'structure-types/', {params: {pager: 'none'}}).then(function(response) {
           $ctrl.typeOptions = response.data;
           $ctrl.structure = angular.copy(data.structure);
-          $ctrl.structure.type = data.structure.structureType.id;
+          $ctrl.structure.type = angular.copy(data.structure.structureType.id);
           $ctrl.buildStructureForm();
         });
       }
@@ -257,10 +257,10 @@ angular
       }
       $ctrl.creating = true;
       $rootScope.skipErrorNotification = true;
-      Structure.new($ctrl.newStructure).$promise.then(function(response) {
+      Structure.new($ctrl.newStructure).$promise.then(function(resource) {
         EditMode.disable();
         $ctrl.creating = false;
-        $uibModalInstance.close(response.data);
+        $uibModalInstance.close(resource);
         Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
       })
       .catch(function(response) {

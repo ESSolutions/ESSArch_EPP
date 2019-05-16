@@ -133,7 +133,9 @@ angular
     vm.newNode = {};
 
     vm.getTree = function(structure) {
-      structure.structureType = angular.copy(structure.type);
+      if(!structure.structureType) {
+        structure.structureType = angular.copy(structure.type);
+      }
       var rootNode = angular.extend(structure, {
         text: structure.name,
         a_attr: {
@@ -304,7 +306,7 @@ angular
           var add = {
             label: $translate.instant('ADD'),
             action: function() {
-              vm.addNodeModal(node.original, vm.structure);
+              vm.addNodeModal(node.original);
             },
           };
           var addRelation = {
@@ -481,7 +483,7 @@ angular
         }
       );
     };
-    vm.addNodeModal = function(node, structure) {
+    vm.addNodeModal = function(node) {
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
@@ -493,7 +495,7 @@ angular
         resolve: {
           data: {
             node: node,
-            structure: structure,
+            structure: vm.structure,
             children: getNodeById(vm.structureTreeData[0], node.id).children,
           },
         },
@@ -539,7 +541,9 @@ angular
     };
 
     vm.removeStructureModal = function(structure) {
-      structure.structureType = angular.copy(structure.type);
+      if(!structure.structureType) {
+        structure.structureType = angular.copy(structure.type);
+      }
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
