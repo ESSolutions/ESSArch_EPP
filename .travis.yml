@@ -48,6 +48,24 @@ matrix:
         - *postgres
         - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
 
+    - name: "docker Fedora"
+      services: docker
+      before_install: skip
+      install: skip
+      before_script: skip
+      script:
+        - docker run --rm -e REDIS_CLIENT_CLASS="fakeredis.FakeRedis" -v $(pwd):/app:rw fedora:latest /bin/bash -c "/app/test_inside_docker.sh"
+      after_script: skip
+
+    - name: "docker CentOS"
+      services: docker
+      before_install: skip
+      install: skip
+      before_script: skip
+      script:
+        - docker run --rm -e REDIS_CLIENT_CLASS="fakeredis.FakeRedis" -v $(pwd):/app:rw centos:latest /bin/bash -c "/app/test_inside_docker.sh"
+      after_script: skip
+
     - os: windows
       language: sh
       python: 3.6
