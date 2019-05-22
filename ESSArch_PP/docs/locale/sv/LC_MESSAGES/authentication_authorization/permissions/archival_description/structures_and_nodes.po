@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ESSArch Preservation Platform 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-26 16:56+0200\n"
+"POT-Creation-Date: 2019-05-22 09:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,7 +115,7 @@ msgid "Publish structures"
 msgstr "Publicera strukturer"
 
 #: ../../authentication_authorization/permissions/archival_description/structures_and_nodes.rst:31
-msgid "``tags.create_new_structure_versions``"
+msgid "``tags.create_new_structure_version``"
 msgstr ""
 
 #: ../../authentication_authorization/permissions/archival_description/structures_and_nodes.rst:31
@@ -341,7 +341,3 @@ msgstr ""
 #: ../../authentication_authorization/permissions/archival_description/structures_and_nodes.rst:135
 msgid "Delete node types"
 msgstr "Radera nodtyper"
-
-#~ msgid "``tags.move_structureunit``"
-#~ msgstr ""
-

@@ -28,7 +28,7 @@ Structures
 +-------------------------------------------+--------------------------------+
 | ``tags.publish_structure``                | Publish structures             |
 +-------------------------------------------+--------------------------------+
-| ``tags.create_new_structure_versions``    | Create new structure versions  |
+| ``tags.create_new_structure_version``     | Create new structure versions  |
 +-------------------------------------------+--------------------------------+
 
 Structure Types
