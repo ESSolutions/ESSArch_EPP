@@ -5,7 +5,12 @@
     </h4>
   </div>
   <div class="action-button">
-    <button class="btn btn-primary" ng-click="vm.addNodeRelationModal(vm.node)">
+    <button
+      class="btn btn-primary"
+      permission
+      permission-only="'tags.add_structureunitrelation'"
+      ng-click="vm.addNodeRelationModal(vm.node)"
+    >
       {{'ACCESS.ADD_RELATION' | translate}}
     </button>
   </div>
@@ -28,10 +33,10 @@
       <th>
         {{'ACCESS.VALID_DATE_END' | translate}}
       </th>
-      <th class="shrink">
+      <th class="shrink" permission permission-only="'tags.change_structureunitrelation'">
         {{'EDIT' | translate}}
       </th>
-      <th class="white-space-nowrap shrink">
+      <th class="white-space-nowrap shrink" permission permission-only="'tags.delete_structureunitrelation'">
         {{'REMOVE' | translate}}
       </th>
     </tr>
@@ -53,7 +58,7 @@
       <td>
         {{x.end_date | date:"yyyy-MM-dd"}}
       </td>
-      <td class="text-center shrink">
+      <td class="text-center shrink" permission permission-only="'tags.change_structureunitrelation'">
         <button
           class="btn btn-default btn-sm fas fa-edit"
           ng-click="vm.editNodeRelationModal(x, vm.node); $event.stopPropagation();"
@@ -62,7 +67,7 @@
           tooltip-append-to-body="true"
         ></button>
       </td>
-      <td class="text-center shrink">
+      <td class="text-center shrink" permission permission-only="'tags.delete_structureunitrelation'">
         <button
           class="btn btn-default btn-sm fas fa-trash-alt"
           ng-click="vm.removeNodeRelationModal(x, vm.node); $event.stopPropagation();"
@@ -73,7 +78,7 @@
       </td>
     </tr>
     <tr ng-if="!vm.node.related_structure_units.length && !vm.relatedUnitsLoading" class="empty-table-indicator">
-      <td colspan="7">{{'NO_RESULTS_FOUND' | translate}}</td>
+      <td colspan="{{vm.getStructureUnitRelationColspan()}}">{{'NO_RESULTS_FOUND' | translate}}</td>
     </tr>
   </tbody>
 </table>

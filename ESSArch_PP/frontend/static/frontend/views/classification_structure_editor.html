@@ -9,7 +9,12 @@
             </h4>
           </div>
           <div class="action-button">
-            <button class="btn btn-primary" ng-click="vm.newStructureModal()">
+            <button
+              class="btn btn-primary"
+              permission
+              permission-only="'tags.add_structure'"
+              ng-click="vm.newStructureModal()"
+            >
               {{'ACCESS.NEW_CLASSIFICATION_STRUCTURE' | translate}}
             </button>
           </div>
@@ -86,7 +91,8 @@
                 <th>
                   {{'ACCESS.VERSION' | translate}}
                 </th>
-                <th class="white-space-nowrap shrink">
+                <th class="white-space-nowrap shrink"  permission
+                permission-only="'tags.delete_structure'">
                   {{'REMOVE' | translate}}
                 </th>
               </tr>
@@ -117,7 +123,7 @@
                 <td>
                   {{x.version}}
                 </td>
-                <td class="text-center shrink">
+                <td class="text-center shrink" permission permission-only="'tags.delete_Structure'">
                   <button
                     class="fas fa-trash-alt btn btn-default btn-sm"
                     ng-click="$event.stopPropagation(); vm.removeStructureModal(x)"
@@ -125,15 +131,15 @@
                 </td>
               </tr>
               <tr ng-if="!vm.structures.length && !vm.structuresLoading" class="empty-table-indicator">
-                <td colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                <td colspan="{{vm.getSTructureListColspan()}}">{{'NO_RESULTS_FOUND' | translate}}</td>
               </tr>
               <tr ng-if="!vm.structures.length && vm.structuresLoading" class="empty-table-indicator">
-                <td class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
+                <td class="loading-column" colspan="{{vm.getSTructureListColspan()}}">{{'LOADING' | translate}}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <td ng-show="!initLoad" colspan="6">
+        <td ng-show="!initLoad" colspan="{{vm.getSTructureListColspan()}}">
           <div
             class="text-center"
             st-template="static/frontend/views/pagination.html"
@@ -175,20 +181,38 @@
                 class="btn btn-primary"
                 ng-if="vm.node.root"
                 ng-disabled="vm.node.published"
+                permission
+                permission-only="'tags.publish_structure'"
                 ng-click="vm.publishModal(vm.node)"
               >
                 {{(vm.node.published ? 'ACCESS.PUBLISHED' : 'PUBLISH') | translate}}
-                <span ng-if="vm.node.published">
-                  &nbsp;<i class="fas fa-check success m-0"></i>
-                </span>
+                <span ng-if="vm.node.published"> &nbsp;<i class="fas fa-check success m-0"></i> </span>
               </button>
-              <button class="btn btn-default" ng-if="vm.node.root && !vm.node.published" ng-click="vm.editStructureModal(vm.node)">
+              <button
+                class="btn btn-default"
+                ng-if="vm.node.root && !vm.node.published"
+                permission
+                permission-only="'tags.change_structure'"
+                ng-click="vm.editStructureModal(vm.node)"
+              >
                 {{'EDIT' |translate}}
               </button>
-              <button ng-if="vm.node.published" class="btn btn-default" ng-click="vm.newStructureVersionModal(vm.node)">
+              <button
+                ng-if="vm.node.published"
+                class="btn btn-default"
+                permission
+                permission-only="'tags.create_new_structure_version'"
+                ng-click="vm.newStructureVersionModal(vm.node)"
+              >
                 {{'ACCESS.CREATE_NEW_VERSION' | translate}}
               </button>
-              <button class="btn btn-default" ng-if="!vm.node.root && !vm.structure.published" ng-click="vm.editNodeModal(vm.node)">
+              <button
+                class="btn btn-default"
+                ng-if="!vm.node.root && !vm.structure.published"
+                permission
+                permission-only="'tags.change_structureunit'"
+                ng-click="vm.editNodeModal(vm.node)"
+              >
                 {{'EDIT' |translate}}
               </button>
             </div>

@@ -88,10 +88,10 @@ angular
         $ctrl.isTemplate = data.relation.structure_unit.structure.is_template;
       }
       return $http({
-        url: appConfig.djangoUrl + 'structure-units/',
-        method: 'OPTIONS',
+        url: appConfig.djangoUrl + 'node-relation-types/',
+        method: 'GET',
       }).then(function(response) {
-        $ctrl.options.type = response.data.actions.POST.related_structure_units.child.children.type;
+        $ctrl.options.type = response.data;
         $ctrl.buildStructureForm();
         $ctrl.buildForm();
         EditMode.enable();
@@ -161,14 +161,14 @@ angular
           key: 'type',
           type: 'select',
           templateOptions: {
-            options: $ctrl.options.type.choices,
+            options: $ctrl.options.type,
             label: $translate.instant('TYPE'),
-            labelProp: 'display_name',
-            valueProp: 'value',
+            labelProp: 'name',
+            valueProp: 'id',
             notNull: true,
             required: true,
           },
-          defaultValue: $ctrl.options.type.choices.length > 0 ? $ctrl.options.type.choices[0].value : null,
+          defaultValue: $ctrl.options.type.length > 0 ? $ctrl.options.type[0].id : null,
         },
         {
           className: 'row m-0',

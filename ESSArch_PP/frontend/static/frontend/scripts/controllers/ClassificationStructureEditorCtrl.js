@@ -13,7 +13,8 @@ angular
     $timeout,
     $state,
     $stateParams,
-    $rootScope
+    $rootScope,
+    myService
   ) {
     var vm = this;
     vm.structure = null;
@@ -36,12 +37,14 @@ angular
       if (vm.structure && vm.structure.id === row.id) {
         vm.structure = null;
         $state.go($state.current.name, {id: null}, {notify: false});
-        $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
-          $state.current.name
-            .split('.')
-            .pop()
-            .toUpperCase()
-        )});
+        $rootScope.$broadcast('UPDATE_TITLE', {
+          title: $translate.instant(
+            $state.current.name
+              .split('.')
+              .pop()
+              .toUpperCase()
+          ),
+        });
       } else {
         vm.structuresLoading = true;
         Structure.get({id: row.id}).$promise.then(function(resource) {
@@ -78,6 +81,35 @@ angular
             vm.recreateTree(tree);
           });
         });
+      }
+    };
+
+    vm.getSTructureListColspan = function() {
+      if (myService.checkPermission('tags.delete_structure')) {
+        return 6;
+      } else {
+        return 5;
+      }
+    };
+
+    vm.getStructureUnitRelationColspan = function() {
+      if (myService.checkPermission('tags.change_structureunitrelation') && myService.checkPermission('tags.delete_structureunitrelation')) {
+        return 7;
+      } else if (
+        myService.checkPermission('tags.change_structureunitrelation') ||
+        myService.checkPermission('tags.delete_structureunitrelation')
+      ) {
+        return 6;
+      } else {
+        return 5;
+      }
+    }
+
+    vm.getRuleListColspan = function() {
+      if (myService.checkPermission('tags.change_structure') && vm.node.published == false) {
+        return 3;
+      } else {
+        return 2;
       }
     };
 
@@ -133,7 +165,7 @@ angular
     vm.newNode = {};
 
     vm.getTree = function(structure) {
-      if(!structure.structureType) {
+      if (!structure.structureType) {
         structure.structureType = angular.copy(structure.type);
       }
       var rootNode = angular.extend(structure, {
@@ -295,6 +327,9 @@ angular
         items: function(node, callback) {
           var update = {
             label: $translate.instant('EDIT'),
+            _disabled:
+              (node.original.root && !myService.checkPermission('tags.edit_structure')) ||
+              (!node.original.root && !myService.checkPermission('tags.change_structureunit')),
             action: function update() {
               if (node.original.root) {
                 vm.editStructureModal(node.original);
@@ -305,20 +340,21 @@ angular
           };
           var add = {
             label: $translate.instant('ADD'),
+            _disabled: !myService.checkPermission('tags.add_structureunit'),
             action: function() {
               vm.addNodeModal(node.original);
             },
           };
           var addRelation = {
             label: $translate.instant('ACCESS.ADD_RELATION'),
-            _disabled: node.original.root,
+            _disabled: node.original.root || !myService.checkPermission('tags.add_structureunitrelation'),
             action: function() {
               vm.addNodeRelationModal(node.original);
             },
           };
           var remove = {
             label: $translate.instant('REMOVE'),
-            _disabled: node.original.root,
+            _disabled: node.original.root || !myService.checkPermission('tags.delete_structureunit'),
             action: function() {
               vm.removeNodeModal(node, vm.structure);
             },
@@ -541,7 +577,7 @@ angular
     };
 
     vm.removeStructureModal = function(structure) {
-      if(!structure.structureType) {
+      if (!structure.structureType) {
         structure.structureType = angular.copy(structure.type);
       }
       var modalInstance = $uibModal.open({
@@ -561,12 +597,14 @@ angular
       modalInstance.result.then(
         function(data, $ctrl) {
           vm.structure = null;
-          $rootScope.$broadcast('UPDATE_TITLE', {title: $translate.instant(
-            $state.current.name
-              .split('.')
-              .pop()
-              .toUpperCase()
-          )});
+          $rootScope.$broadcast('UPDATE_TITLE', {
+            title: $translate.instant(
+              $state.current.name
+                .split('.')
+                .pop()
+                .toUpperCase()
+            ),
+          });
           vm.updateStructures();
         },
         function() {
@@ -594,7 +632,7 @@ angular
         function(data) {
           vm.updateStructures().then(function() {
             vm.structureClick(data);
-          })
+          });
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
