@@ -42,7 +42,7 @@ from ESSArch_Core.agents.views import (
 from ESSArch_Core.api.views import LanguageViewSet
 from ESSArch_Core.auth.views import (GroupViewSet, OrganizationViewSet, PermissionViewSet, MeView, NotificationViewSet,
                                      UserViewSet)
-from ESSArch_Core.configuration.views import ArchivePolicyViewSet, ParameterViewSet, PathViewSet, SiteView, SysInfoView
+from ESSArch_Core.configuration.views import ArchivePolicyViewSet, EventTypeViewSet, ParameterViewSet, PathViewSet, SiteView, SysInfoView
 from ESSArch_Core.fixity.views import ValidationViewSet
 from ESSArch_Core.ip.views import EventIPViewSet, WorkareaEntryViewSet
 from ESSArch_Core.maintenance.views import (AppraisalRuleViewSet, AppraisalJobViewSet, ConversionRuleViewSet,
@@ -64,7 +64,6 @@ from ESSArch_Core.tags.views import (
     LocationLevelTypeViewSet,
     LocationFunctionTypeViewSet,
 )
-from configuration.views import EventTypeViewSet
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
 from profiles.views import (
