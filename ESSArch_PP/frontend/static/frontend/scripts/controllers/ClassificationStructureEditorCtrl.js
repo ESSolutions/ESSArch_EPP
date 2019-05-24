@@ -84,7 +84,7 @@ angular
       }
     };
 
-    vm.getSTructureListColspan = function() {
+    vm.getStructureListColspan = function() {
       if (myService.checkPermission('tags.delete_structure')) {
         return 6;
       } else {

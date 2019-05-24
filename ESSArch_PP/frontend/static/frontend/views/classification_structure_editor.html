@@ -123,7 +123,7 @@
                 <td>
                   {{x.version}}
                 </td>
-                <td class="text-center shrink" permission permission-only="'tags.delete_Structure'">
+                <td class="text-center shrink" permission permission-only="'tags.delete_structure'">
                   <button
                     class="fas fa-trash-alt btn btn-default btn-sm"
                     ng-click="$event.stopPropagation(); vm.removeStructureModal(x)"
@@ -131,15 +131,15 @@
                 </td>
               </tr>
               <tr ng-if="!vm.structures.length && !vm.structuresLoading" class="empty-table-indicator">
-                <td colspan="{{vm.getSTructureListColspan()}}">{{'NO_RESULTS_FOUND' | translate}}</td>
+                <td colspan="{{vm.getStructureListColspan()}}">{{'NO_RESULTS_FOUND' | translate}}</td>
               </tr>
               <tr ng-if="!vm.structures.length && vm.structuresLoading" class="empty-table-indicator">
-                <td class="loading-column" colspan="{{vm.getSTructureListColspan()}}">{{'LOADING' | translate}}</td>
+                <td class="loading-column" colspan="{{vm.getStructureListColspan()}}">{{'LOADING' | translate}}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <td ng-show="!initLoad" colspan="{{vm.getSTructureListColspan()}}">
+        <td ng-show="!initLoad" colspan="{{vm.getStructureListColspan()}}">
           <div
             class="text-center"
             st-template="static/frontend/views/pagination.html"
