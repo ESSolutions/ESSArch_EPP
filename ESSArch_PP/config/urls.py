@@ -273,7 +273,12 @@ router.register(r'robots', RobotViewSet, base_name='robots').register(
     parents_query_lookups=['tape_drives']
 )
 
-router.register(r'search', ComponentSearchViewSet, base_name='search')
+router.register(r'search', ComponentSearchViewSet, base_name='search').register(
+    r'events',
+    EventIPViewSet,
+    base_name='tags-events',
+    parents_query_lookups=['tag_versions'],
+)
 
 urlpatterns = [
     url(r'^', include('ESSArch_Core.frontend.urls'), name='home'),
