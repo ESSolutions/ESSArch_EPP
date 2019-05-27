@@ -127,6 +127,18 @@ router.register(r'location-function-types', LocationFunctionTypeViewSet)
 router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
+router.register(r'events', EventIPViewSet).register(
+    r'structure-units',
+    StructureUnitViewSet,
+    base_name='event-structure-units',
+    parents_query_lookups=['events'],
+)
+router.register(r'events', EventIPViewSet).register(
+    r'tags',
+    TagVersionViewSet,
+    base_name='event-tags',
+    parents_query_lookups=['events'],
+)
 router.register(r'groups', GroupViewSet)
 router.register(r'organizations', OrganizationViewSet, base_name='organizations')
 router.register(r'appraisal-jobs', AppraisalJobViewSet)
