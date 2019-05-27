@@ -111,7 +111,12 @@ router.register(r'structures', StructureViewSet).register(
     base_name='structure-units',
     parents_query_lookups=['structure']
 )
-router.register(r'structure-units', StructureUnitViewSet)
+router.register(r'structure-units', StructureUnitViewSet).register(
+    r'events',
+    EventIPViewSet,
+    base_name='structure-unit-events',
+    parents_query_lookups=['structure_units'],
+)
 router.register(r'structure-types', StructureTypeViewSet)
 router.register(r'structure-unit-types', StructureUnitTypeViewSet)
 router.register(r'node-relation-types', NodeRelationTypeViewSet)
