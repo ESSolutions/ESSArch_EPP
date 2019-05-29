@@ -52,6 +52,7 @@ from ESSArch_Core.routers import ESSArchRouter
 from ESSArch_Core.stats.views import stats, export as export_stats
 from ESSArch_Core.tags.views import (
     ArchiveViewSet,
+    DeliveryViewSet,
     StructureViewSet,
     StructureTypeViewSet,
     StructureUnitViewSet,
@@ -60,6 +61,7 @@ from ESSArch_Core.tags.views import (
     TagViewSet,
     TagVersionTypeViewSet,
     TagVersionViewSet,
+    TransferViewSet,
     LocationViewSet,
     MetricProfileViewSet,
     LocationLevelTypeViewSet,
@@ -101,6 +103,30 @@ router.register(r'agent-note-types', AgentNoteTypeViewSet)
 router.register(r'agent-relation-types', AgentRelationTypeViewSet)
 router.register(r'agent-tag-relation-types', AgentTagLinkRelationTypeViewSet)
 router.register(r'authority-types', AuthorityTypeViewSet)
+router.register(r'deliveries', DeliveryViewSet).register(
+    r'transfers',
+    TransferViewSet,
+    base_name='transfers',
+    parents_query_lookups=['delivery']
+)
+router.register(r'transfers', TransferViewSet).register(
+    r'events',
+    EventIPViewSet,
+    base_name='transfer-events',
+    parents_query_lookups=['transfer'],
+)
+router.register(r'transfers', TransferViewSet).register(
+    r'structure-units',
+    StructureUnitViewSet,
+    base_name='transfer-structure-units',
+    parents_query_lookups=['transfers'],
+)
+router.register(r'transfers', TransferViewSet).register(
+    r'tags',
+    TagVersionViewSet,
+    base_name='transfer-tags',
+    parents_query_lookups=['transfers'],
+)
 router.register(r'ref-codes', RefCodeViewSet)
 router.register(r'languages', LanguageViewSet)
 router.register(r'me/searches', StoredSearchViewSet)
@@ -112,10 +138,16 @@ router.register(r'structures', StructureViewSet).register(
     parents_query_lookups=['structure']
 )
 router.register(r'structure-units', StructureUnitViewSet).register(
-    r'events',
-    EventIPViewSet,
-    base_name='structure-unit-events',
+    r'transfers',
+    TransferViewSet,
+    base_name='structure-unit-transfers',
     parents_query_lookups=['structure_units'],
+)
+router.register(r'structure-units', StructureUnitViewSet).register(
+    r'deliveries',
+    DeliveryViewSet,
+    base_name='structure-unit-deliveries',
+    parents_query_lookups=['structure_units__delivery'],
 )
 router.register(r'structure-types', StructureTypeViewSet)
 router.register(r'structure-unit-types', StructureUnitTypeViewSet)
@@ -132,18 +164,6 @@ router.register(r'location-function-types', LocationFunctionTypeViewSet)
 router.register(r'structure-units', StructureUnitViewSet)
 router.register(r'event-types', EventTypeViewSet)
 router.register(r'events', EventIPViewSet)
-router.register(r'events', EventIPViewSet).register(
-    r'structure-units',
-    StructureUnitViewSet,
-    base_name='event-structure-units',
-    parents_query_lookups=['events'],
-)
-router.register(r'events', EventIPViewSet).register(
-    r'tags',
-    TagVersionViewSet,
-    base_name='event-tags',
-    parents_query_lookups=['events'],
-)
 router.register(r'groups', GroupViewSet)
 router.register(r'organizations', OrganizationViewSet, base_name='organizations')
 router.register(r'appraisal-jobs', AppraisalJobViewSet)
@@ -274,9 +294,9 @@ router.register(r'robots', RobotViewSet, base_name='robots').register(
 )
 
 router.register(r'search', ComponentSearchViewSet, base_name='search').register(
-    r'events',
-    EventIPViewSet,
-    base_name='tags-events',
+    r'transfers',
+    TransferViewSet,
+    base_name='tags-transfers',
     parents_query_lookups=['tag_versions'],
 )
 
