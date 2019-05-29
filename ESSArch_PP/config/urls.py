@@ -53,6 +53,7 @@ from ESSArch_Core.stats.views import stats, export as export_stats
 from ESSArch_Core.tags.views import (
     ArchiveViewSet,
     DeliveryViewSet,
+    DeliveryTypeViewSet,
     StructureViewSet,
     StructureTypeViewSet,
     StructureUnitViewSet,
@@ -109,6 +110,7 @@ router.register(r'deliveries', DeliveryViewSet).register(
     base_name='transfers',
     parents_query_lookups=['delivery']
 )
+router.register(r'delivery-types', DeliveryTypeViewSet)
 router.register(r'transfers', TransferViewSet).register(
     r'events',
     EventIPViewSet,
