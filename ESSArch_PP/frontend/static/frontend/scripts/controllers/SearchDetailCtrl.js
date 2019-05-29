@@ -21,7 +21,8 @@ angular
     $state,
     $interval,
     $filter,
-    StructureName
+    StructureName,
+    AgentName
   ) {
     var PAGE_SIZE = 10;
 
@@ -884,22 +885,17 @@ angular
 
     vm.parseAgents = function(node) {
       node.agents.forEach(function(agent) {
-        agent.agent.names.forEach(function(x) {
-          x.full_name = (x.part !== null && x.part !== '' ? x.part + ', ' : '') + x.main;
-          if (x.type.name.toLowerCase() === 'auktoriserad') {
-            agent.agent.auth_name = x.full_name;
-          }
-          agent.name = x.full_name;
-        });
+        agent.name = AgentName.getAuthorizedName(agent.agent).full_name;
+        agent.agent.auth_name = agent.name
       });
     };
 
     vm.getArchiveCreator = function(node) {
       var creator = null;
       node.agents.forEach(function(agent) {
+        agent.name = AgentName.getAuthorizedName(agent.agent).full_name;
         if (agent.type === 'creator') {
           creator = agent.agent;
-          creator.name = agent.name;
           creator.type = 'agent';
         }
       });
