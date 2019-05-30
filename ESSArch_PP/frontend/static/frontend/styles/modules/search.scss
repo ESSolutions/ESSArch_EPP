@@ -327,3 +327,7 @@
   @include container(10px);
   margin-top: 10px;
 }
+
+.jstree-checkbox-disabled {
+  opacity: 0.4 !important;
+}

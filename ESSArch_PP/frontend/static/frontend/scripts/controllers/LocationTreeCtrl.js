@@ -26,6 +26,84 @@ angular
       }
     };
 
+    vm.selectedTags = [];
+    vm.tagsTableClick = function(row, event) {
+      if (angular.isUndefined(row.id) && row._id) {
+        row.id = row._id;
+      }
+      if (event && event.shiftKey) {
+        vm.shiftClickTag(row);
+      } else {
+        vm.selectSingleTag(row);
+      }
+    };
+
+    vm.shiftClickTag = function(row) {
+      var start = 0;
+      vm.tags.forEach(function(x, idx) {
+        if (x.id === vm.selectedTags[vm.selectedTags.length - 1]) {
+          start = idx;
+        }
+      });
+      if (vm.tags[start] === row.id) {
+        vm.deselectRow(row);
+      } else {
+        if (start <= vm.getTagObjectIndex(row)) {
+          for (var i = start; i < vm.tags.length; i++) {
+            if (!vm.selectedTags.includes(vm.tags[i].id)) {
+              vm.selectedTags.push(vm.tags[i].id);
+            }
+            if (vm.tags[i].id == row.id) {
+              break;
+            }
+          }
+        } else {
+          for (var i = start; i >= 0; i--) {
+            if (!vm.selectedTags.includes(vm.tags[i].id)) {
+              vm.selectedTags.push(vm.tags[i].id);
+            }
+            if (vm.tags[i].id == row.id) {
+              break;
+            }
+          }
+        }
+      }
+    };
+
+    vm.selectSingleTag = function(row) {
+      if (vm.selectedTags.includes(row.id)) {
+        vm.deselectRow(row);
+      } else {
+        vm.selectedTags.push(row.id);
+      }
+    };
+
+    vm.deselectRow = function(row) {
+      var index = vm.selectedTags.indexOf(row.id);
+      vm.selectedTags.splice(index, 1);
+    };
+
+    vm.getTagObjectIndex = function(tag) {
+      var index = 0;
+      vm.tags.forEach(function(x, idx) {
+        if (tag.id === x.id) {
+          index = idx;
+        }
+      });
+      return index;
+    };
+
+    vm.getTagListObjects = function() {
+      return vm.selectedTags.map(function(x) {
+        vm.tags.forEach(function(tag) {
+          if (tag.id === x) {
+            x = angular.copy(tag);
+          }
+        });
+        return x;
+      });
+    };
+
     function getBreadcrumbs(node) {
       var tree = vm.treeInstance.jstree(true);
       var start = tree.get_node(node.id);
@@ -224,6 +302,11 @@ angular
           tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
           $scope.initLoad = false;
           vm.tagsLoading = false;
+          response.data.forEach(function(x) {
+            if (angular.isUndefined(x.id) && x._id) {
+              x.id = x._id;
+            }
+          });
           vm.tags = response.data;
         });
       }
@@ -242,7 +325,7 @@ angular
         return vm.selected;
       },
       function() {
-        if (vm.selected === null) {
+        if (vm.selected === null && vm.treeInstance) {
           vm.treeInstance.jstree(true).deselect_all();
         }
       }
@@ -324,6 +407,76 @@ angular
             vm.selected = null;
           }
           vm.buildTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeLinkModal = function(node) {
+      var data;
+      if (angular.isArray(node)) {
+        data = {
+          nodes: vm.getTagListObjects(node),
+        }
+      } else {
+        data = {
+          node: node,
+        }
+      }
+      data.remove_link = true;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_node_location_modal.html',
+        size: 'lg',
+        controller: 'NodeLocationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data,
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.selectedTags = [];
+          vm.tagsPipe(vm.tagsTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addLinkModal = function(node) {
+      var data = {};
+      if (angular.isArray(node)) {
+        data = {
+          nodes: vm.getTagListObjects(node),
+        };
+      } else {
+        data = {
+          node: node,
+        };
+      }
+      data.location = vm.selected;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/tagversion_location_relation_modal.html',
+        size: 'lg',
+        controller: 'NodeLocationModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data,
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.selectedTags = [];
+          vm.tagsPipe(vm.tagsTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

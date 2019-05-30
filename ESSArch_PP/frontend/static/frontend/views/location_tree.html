@@ -8,7 +8,7 @@
     class="record-tree p-base"
   >
     <div ng-if="!vm.readOnly" class="pb-base">
-      <button class="btn btn-primary" ng-click="vm.addNodeModal()">
+      <button class="btn btn-primary" type="button" ng-click="vm.addNodeModal()">
         {{'ACCESS.ADD_LOCATION' | translate}}
       </button>
       <hr class="small my-base mx-0" />
@@ -28,7 +28,9 @@
       <div>
         <ul class="breadcrumb">
           <li ng-repeat="x in vm.selected.breadcrumbs">
-            <a ng-if="$index !== vm.selected.breadcrumbs.length-1" ng-click="vm.setSelected(x);vm.markTreeNode(x);">{{x.name}}</a>
+            <a ng-if="$index !== vm.selected.breadcrumbs.length-1" ng-click="vm.setSelected(x);vm.markTreeNode(x);"
+              >{{x.name}}</a
+            >
             {{$index === vm.selected.breadcrumbs.length-1?x.name:''}}
           </li>
         </ul>
@@ -87,13 +89,42 @@
     {{vm.selected.metric.capacity}} {{vm.selected.metric.metric.name}}
     <br />
     {{vm.selected.function.name}}
-    <div ng-if="vm.tags.length > 0 && !vm.readOnly" class="w-100" st-table="vm.tags" st-pipe="vm.tagsPipe">
+    <div
+      ng-if="vm.tags.length > 0 && !vm.readOnly && !vm.hideTags"
+      class="w-100"
+      st-table="vm.tags"
+      st-pipe="vm.tagsPipe"
+    >
       <div class="title-action-button-row">
         <div class="title">
           <h4>
             {{'ACCESS.TAGS_IN_LOCATION' | translate}}
           </h4>
         </div>
+        <div class="action-button">
+            <button
+              type="button"
+              ng-disabled="vm.selectedTags.length === 0"
+              ng-click="vm.removeLinkModal(vm.selectedTags)"
+              class="btn btn-danger"
+              uib-tooltip="{{'REMOVE' | translate}}"
+              tooltip-placement="auto top"
+              tooltip-append-to-body="true"
+            >
+              {{'REMOVE' | translate}}
+            </button>
+            <button
+            type="button"
+            ng-disabled="vm.selectedTags.length === 0"
+            ng-click="vm.addLinkModal(vm.selectedTags)"
+            class="btn btn-primary"
+            uib-tooltip="{{'ACCESS.REPLACE' | translate}}"
+            tooltip-placement="auto top"
+            tooltip-append-to-body="true"
+          >
+            {{'ACCESS.REPLACE' | translate}}
+          </button>
+          </div>
       </div>
       <div class="search-prepare-wrapper">
         <select
@@ -156,10 +187,18 @@
               <th>
                 {{'ACCESS.ARCHIVE' | translate}}
               </th>
+              <th permission permission-only="'tags.change_location'" class="white-space-nowrap shrink">
+                {{'ACCESS.REMOVE_LOCATION_LINK' | translate}}
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="x in vm.tags" class="selectable" ui-sref="{{'home.access.search.component'}}({id: x._id})">
+            <tr
+              ng-repeat="x in vm.tags"
+              ng-class="{'selected': vm.selectedTags.includes(x.id)}"
+              class="selectable"
+              ng-click="vm.tagsTableClick(x, $event)"
+            >
               <td>
                 {{x.name}}
               </td>
@@ -169,12 +208,21 @@
               <td>
                 {{x._source.archive.name}}
               </td>
+              <td permission permission-only="'tags.change_location'" class="text-center shrink">
+                <button
+                  class="btn btn-default fas fa-trash-alt btn-sm"
+                  ng-click="vm.removeLinkModal(x); $event.stopPropagation();"
+                  uib-tooltip="{{'ACCESS.REMOVE_LOCATION_LINK' | translate}}"
+                  tooltip-placement="auto top"
+                  tooltip-append-to-body="true"
+                ></button>
+              </td>
             </tr>
             <tr ng-if="!vm.tags.length && !vm.tagsLoading" class="empty-table-indicator">
-              <td colspan="3">{{'NO_RESULTS_FOUND' | translate}}</td>
+              <td colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
             </tr>
             <tr ng-if="!vm.tags.length && vm.tagsLoading" class="empty-table-indicator">
-              <td class="loading-column" colspan="3">{{'LOADING' | translate}}</td>
+              <td class="loading-column" colspan="4">{{'LOADING' | translate}}</td>
             </tr>
           </tbody>
         </table>
@@ -185,7 +233,7 @@
           st-template="static/frontend/views/pagination.html"
           st-pagination=""
           st-items-by-page="vm.itemsPerPage"
-          st-displayed-pages="3"
+          st-displayed-pages="4"
         ></div>
       </td>
     </div>

@@ -27,9 +27,8 @@
   </div>
   <div ng-if="vm.record.location">
     <b>
-      {{'ACCESS.LOCATION' | translate}}
-    </b>:&nbsp;
-      {{vm.record.location.name}} ({{vm.record.location.level_type.name}})
+      {{'ACCESS.LOCATION' | translate}} </b
+    >:&nbsp; {{vm.record.location.name}} ({{vm.record.location.level_type.name}})
   </div>
   <div ng-if="vm.record.related_tags.length > 0" class="py-base">
     <label>
@@ -106,6 +105,48 @@
     </div>
     <hr class="small mx-0" />
   </div>
+  <div ng-if="vm.transfers" class="table-container" st-table="vm.transfers" st-pipe="vm.getTransfers">
+    <div class="title-action-button-row">
+      <div class="title">
+        <h4>
+          {{'TRANSFERS' | translate}}
+        </h4>
+      </div>
+    </div>
+    <div class="list-view-table table-x-overflow">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th class="cursor-pointer" st-sort="name">{{ "NAME" | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            ng-repeat="x in vm.transfers"
+            class="selectable"
+            ng-class="{'selected': vm.selectedTransfer.id === x.id}"
+            ng-click="vm.transferClick(x)"
+          >
+            <td>
+              {{x.name}}
+            </td>
+          </tr>
+          <tr ng-if="vm.transfers.length === 0" class="empty-table-indicator">
+            <td colspan="1">{{'NO_RESULTS_FOUND' | translate}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <td ng-show="!initLoad" colspan="1">
+      <div
+        class="float-right"
+        st-template="static/frontend/views/file_pagination.html"
+        st-pagination=""
+        st-items-by-page="10"
+        st-displayed-pages="7"
+      ></div>
+    </td>
+  </div>
   <result-field stronglabel="true" label="{{'MEDIUM' | translate}}" data="vm.record.medium_type.name"></result-field>
   <div
     ng-if="vm.record.create_date || vm.record.revise_date || vm.record._source.arrival_date || vm.record._source.dispatch_date || vm.record._source.decision_date || vm.record._source.preparation_date || vm.record._source.ended_date || vm.record.end_date"
@@ -148,7 +189,6 @@
   <div class="metadata-tables-wrapper">
     <div class="table-x-overflow metadata-table">
       <div ng-if="vm.record._source.agents && vm.record._source.agents.length > 0">
-        <strong>Agents:</strong>
         <div ng-repeat="agent in vm.record._source.agents">
           <result-field label="Role" data="agent.role"></result-field>
           <result-field label="Name" data="agent.name"></result-field>

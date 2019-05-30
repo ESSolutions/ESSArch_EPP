@@ -8,7 +8,8 @@ angular
     $http,
     EditMode,
     Search,
-    $translate
+    $translate,
+    $q
   ) {
     var $ctrl = this;
     $ctrl.location = null;
@@ -17,28 +18,77 @@ angular
       EditMode.enable();
       if (!angular.isUndefined(data.node)) {
         $ctrl.node = angular.copy(data.node);
+        if(data.remove_link === true) {
+          $ctrl.node.location =  null;
+        }
       }
+      EditMode.enable();
       if (data.location !== null && !angular.isUndefined(data.location)) {
-        $ctrl.location = angular.copy(data.location)
+        $ctrl.location = angular.copy(data.location);
       }
+      if (data.nodes) {
+        $ctrl.nodes = $ctrl.filterNodes(angular.copy(data.nodes));
+      }
+    };
+
+    $ctrl.filterNodes = function(nodes) {
+      var filtered = [];
+      nodes.forEach(function(x) {
+        if (
+          !angular.isUndefined(x) &&
+          x._is_structure_unit !== true &&
+          x._index !== 'archive' &&
+          x.placeholder !== true &&
+          x.type !== 'agent'
+        ) {
+          filtered.push(x);
+        }
+      });
+      return filtered;
     };
 
     $ctrl.clearLocation = function() {
       $ctrl.location = null;
-    }
+    };
 
     $ctrl.save = function() {
       $ctrl.saving = true;
-      Search.updateNode(data.node, {location: $ctrl.location !== null ?$ctrl.location.id : null})
-        .then(function(response) {
-          $ctrl.saving = false;
-          EditMode.disable();
-          $uibModalInstance.close('edited');
-        })
-        .catch(function(response) {
-          $ctrl.nonFieldErrors = response.data.non_field_errors;
-          $ctrl.saving = false;
+      if (data.node) {
+        Search.updateNode(data.node, {location: $ctrl.location !== null ? $ctrl.location.id : null})
+          .then(function(response) {
+            $ctrl.saving = false;
+            EditMode.disable();
+            $uibModalInstance.close('edited');
+          })
+          .catch(function(response) {
+            $ctrl.nonFieldErrors = response.data.non_field_errors;
+            $ctrl.saving = false;
+          });
+      } else if (data.nodes) {
+        var promises = [];
+        $ctrl.nodes.forEach(function(node) {
+          promises.push(
+            Search.updateNode(node, {location: $ctrl.location !== null ? $ctrl.location.id : null}).then(function(
+              response
+            ) {
+              return response;
+            })
+          );
         });
+        $q.all(promises)
+          .then(function(responses) {
+            $ctrl.saving = false;
+            EditMode.disable();
+            $uibModalInstance.close('edited');
+          })
+          .catch(function(responses) {
+            responses.forEach(function(response) {
+              $ctrl.nonFieldErrors = response.data.non_field_errors;
+              $ctrl.saving = false;
+            });
+            $ctrl.saving = false;
+          });
+      }
     };
 
     $ctrl.cancel = function() {

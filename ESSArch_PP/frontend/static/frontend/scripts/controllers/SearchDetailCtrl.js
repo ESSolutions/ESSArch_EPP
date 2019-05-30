@@ -212,7 +212,7 @@ angular
     };
 
     vm.getClassificationStructureChildren = function(id) {
-      console.log('Getting children of structure with id "' + id + '"')
+      console.log('Getting children of structure with id "' + id + '"');
       var url = vm.url + 'structures/' + id + '/units/';
       return $http.get(url, {params: {has_parent: false, pager: 'none'}}).then(function(response) {
         var data = response.data.map(function(unit) {
@@ -241,6 +241,7 @@ angular
       return {
         text: $translate.instant('ACCESS.SEE_MORE'),
         see_more: true,
+        state: {checkbox_disabled: true},
         type: 'plus',
         _source: {},
       };
@@ -391,6 +392,7 @@ angular
         vm.record.breadcrumbs = getBreadcrumbs(vm.record);
 
         vm.getChildrenTable(vm.recordTableState);
+        vm.getTransfers({pager: 'none'});
       });
     };
 
@@ -423,6 +425,21 @@ angular
     vm.structureUnits = null;
     vm.archive = null;
     vm.rootNode = null;
+
+    vm.transfers = [];
+    vm.getTransfers = function(tableState) {
+      vm.transferTableState = tableState;
+      var url = 'search/';
+      if (vm.record._is_structure_unit) {
+        url = 'structure-units/';
+      }
+      return $http
+        .get(appConfig.djangoUrl + url + vm.record.id + '/transfers/', {params: {pager: 'none'}})
+        .then(function(response) {
+          vm.transfers = response.data;
+          return response.data;
+        });
+    };
 
     $scope.checkPermission = function(permissionName) {
       return !angular.isUndefined(PermPermissionStore.getPermissionDefinition(permissionName));
@@ -466,7 +483,6 @@ angular
      */
     vm.recordTreeConfig = {
       core: {
-        multiple: true,
         animation: 50,
         error: function(error) {
           $log.error('treeCtrl: error from js tree - ' + angular.toJson(error));
@@ -599,6 +615,15 @@ angular
               vm.addNodeLocationModal(node.original);
             },
           };
+          var addDelivery = {
+            label: $translate.instant('ACCESS.LINK_TO_TRANSFER'),
+            _disabled: function() {
+              return !$scope.checkPermission('tags.change_location');
+            },
+            action: function() {
+              vm.addNodeDeliveryModal(node.original);
+            },
+          };
           var removeFromStructure = {
             label: $translate.instant('ACCESS.REMOVE_FROM_CLASSIFICATION_STRUCTURE'),
             _disabled: function() {
@@ -674,6 +699,7 @@ angular
             email: email,
             remove: remove,
             addLocation: !isUnit && node.original._index !== 'archive' ? addLocation : null,
+            addDelivery: addDelivery,
             removeFromStructure: removeFromStructure,
             newVersion: newVersion,
             changeOrganization: changeOrganization,
@@ -682,9 +708,56 @@ angular
           return actions;
         },
       },
+      checkbox: {
+        whole_node: false,
+        tie_selection: false,
+        visible: true,
+        three_state: false,
+      },
       version: 1,
-      plugins: ['types', 'contextmenu', 'dnd'],
+      plugins: ['types', 'contextmenu', 'dnd', 'checkbox'],
     };
+
+    vm.getChecked = function() {
+      return vm.recordTreeInstance
+        .jstree(true)
+        .get_checked()
+        .map(function(x) {
+          return vm.recordTreeInstance.jstree(true).get_node(x).original;
+        });
+    };
+
+    vm.locationButtonDisabled = function() {
+      var checked = vm.getChecked();
+      var disabled = true;
+      checked.forEach(function(x) {
+        if (
+          !angular.isUndefined(x) &&
+          x._is_structure_unit !== true &&
+          x._index !== 'archive' &&
+          x.placeholder !== true &&
+          x.type !== 'agent'
+        ) {
+          disabled = false;
+        }
+      });
+      return disabled;
+    }
+
+    vm.deliveryButtonDisabled = function() {
+      var checked = vm.getChecked();
+      var disabled = true;
+      checked.forEach(function(x) {
+        if (
+          !angular.isUndefined(x) &&
+          x.placeholder !== true &&
+          x.type !== 'agent'
+        ) {
+          disabled = false;
+        }
+      });
+      return disabled;
+    }
 
     vm.gotoNode = function(node) {
       $state.go('home.access.search.' + node._index, {id: node._id});
@@ -1398,9 +1471,16 @@ angular
     };
 
     vm.addNodeLocationModal = function(node) {
-      var data = {
-        node: node,
-      };
+      var data = {};
+      if (angular.isArray(node)) {
+        data = {
+          nodes: node,
+        };
+      } else {
+        data = {
+          node: node,
+        };
+      }
       if (node.location !== null) {
         data.location = node.location;
       }
@@ -1419,6 +1499,41 @@ angular
       modalInstance.result.then(
         function(data) {
           vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.addNodeDeliveryModal = function(node) {
+      var data = {};
+      if (angular.isArray(node)) {
+        data = {
+          nodes: node,
+        };
+      } else {
+        data = {
+          node: node,
+        };
+      }
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/node_delivery_relation_modal.html',
+        size: 'lg',
+        controller: 'NodeDeliveryModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data,
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+          vm.getTransfers(vm.transferTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

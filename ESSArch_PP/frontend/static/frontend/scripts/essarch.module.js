@@ -445,6 +445,24 @@ angular
           },
         },
       })
+      .state('home.access.deliveries', {
+        url: '/deliveries',
+        template: '<delivery-page></delivery-page>',
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.orders', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
       .state('home.management', {
         url: 'management',
         templateUrl: '/static/frontend/views/management.html',

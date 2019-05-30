@@ -6,5 +6,6 @@ angular.module('essarch.components').component('locationTree', {
     selected: '=',
     onSelect: '&',
     readOnly: '<', // Disables context menu and hides related nodes
+    hideTags: '<', // Hides tag list
   },
 });
