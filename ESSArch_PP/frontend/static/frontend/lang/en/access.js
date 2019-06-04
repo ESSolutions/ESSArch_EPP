@@ -143,6 +143,8 @@ angular.module('essarch.language').config(function($translateProvider) {
       REMOVE_LOCATION_FOR_NODES: 'Remove location links for:',
       REMOVE_LOCATION_LINK: 'Remove location link',
       REMOVE_NODE: 'Remove node',
+      REMOVE_NODE_FROM_TRANSFER: 'Do you want to remove node: {{reference_code}} {{name}} from transfer?',
+      REMOVE_NODES_FROM_TRANSFER: 'Do you want to remove nodes from transfer?',
       REMOVE_RELATION_TO_STRUCTURE_UNIT: 'Remove structure unit relation',
       REMOVE_RELATION_TO_STRUCTURE_UNIT_DESC: 'Do you want to remove relation to {{name}}?',
       REMOVE_SAVED_SEARCH: 'Do you want to remove saved search?',

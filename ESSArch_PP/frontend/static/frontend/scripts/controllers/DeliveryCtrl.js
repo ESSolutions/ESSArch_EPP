@@ -600,5 +600,42 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
         }
       );
     };
+
+    vm.removeLinkModal = function(node) {
+      var data;
+      if (angular.isArray(node)) {
+        data = {
+          nodes: node,
+        }
+      } else {
+        data = {
+          node: node,
+        }
+      }
+      data.allow_close = true;
+      data.transfer = vm.selectedTransfer;
+      data.remove_link = true;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_node_transfer_link_modal.html',
+        size: 'lg',
+        controller: 'NodeTransferModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data,
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.tagsPipe(vm.tagsTableState);
+          vm.unitsPipe(vm.unitsTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
   },
 ]);
