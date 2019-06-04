@@ -18,7 +18,7 @@
         </div>
         <div class="action-button">
           <button class="btn btn-primary" ng-click="vm.createModal()" permission permission-only="'tags.add_delivery'">
-            {{'ACCESS.CREATE_DELIVERY' | translate}}
+            {{'ADD' | translate}}
           </button>
         </div>
       </div>
@@ -158,9 +158,9 @@
                 class="btn btn-primary"
                 ng-click="vm.createEventModal({delivery: vm.selected})"
                 permission
-                permission-only="'tags.add_eventip'"
+                permission-only="'ip.add_eventip'"
               >
-                {{'EVENT.CREATE_EVENT' | translate}}
+                {{'ADD' | translate}}
               </button>
             </div>
           </div>
@@ -225,6 +225,9 @@
                   <th st-sort="eventDateTime" class="cursor-pointer">
                     {{'EVENT.EVENTTIME' | translate}}
                   </th>
+                  <th st-sort="linkingAgentIdentifierValue" class="cursor-pointer">
+                    {{'RESPONSIBLE' | translate}}
+                  </th>
                   <th class="white-space-nowrap shrink" permission permission-only="'ip.change_eventip'">
                     {{'EDIT' | translate}}
                   </th>
@@ -243,6 +246,9 @@
                   </td>
                   <td>
                     {{x.eventDateTime | date:'yyyy-MM-dd HH:mm:ss'}}
+                  </td>
+                  <td>
+                    {{x.linkingAgentIdentifierValue}}
                   </td>
                   <td class="text-center shrink" permission permission-only="'ip.change_eventip'">
                     <button

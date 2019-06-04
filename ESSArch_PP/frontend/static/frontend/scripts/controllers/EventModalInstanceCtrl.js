@@ -42,7 +42,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           key: 'eventType',
           templateOptions: {
             required: true,
-            label: $translate.instant('TYPE'),
+            label: $translate.instant('EVENT.EVENT_LABEL'),
             labelProp: 'eventDetail',
             valueProp: 'eventType',
             options: $ctrl.eventTypes,
@@ -54,7 +54,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           type: 'datepicker',
           key: 'eventDateTime',
           templateOptions: {
-            label: $translate.instant('EVENT.EVENTTIME'),
+            label: $translate.instant('EVENT.REGISTERED'),
             appendToBody: false,
             required: true
           },
@@ -64,7 +64,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           key: 'eventOutcome',
           templateOptions: {
             required: true,
-            label: $translate.instant('TYPE'),
+            label: $translate.instant('RESULT'),
             labelProp: 'name',
             valueProp: 'id',
             options: [
@@ -85,8 +85,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           type: 'textarea',
           key: 'eventOutcomeDetailNote',
           templateOptions: {
-            required: true,
-            label: $translate.instant('COMMENT'),
+            label: $translate.instant('DESCRIPTION'),
             rows: 3,
           },
         },

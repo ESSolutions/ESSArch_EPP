@@ -360,14 +360,14 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
 
     vm.getEventColspan = function() {
       if (myService.checkPermission('ip.change_eventip') && myService.checkPermission('ip.delete_eventip')) {
-        return 5;
+        return 6;
       } else if (
         myService.checkPermission('ip.change_eventip') ||
         myService.checkPermission('ip.delete_eventip')
       ) {
-        return 4;
+        return 5;
       } else {
-        return 3;
+        return 4;
       }
     };
 
