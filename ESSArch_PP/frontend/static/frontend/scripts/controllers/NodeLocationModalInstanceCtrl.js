@@ -9,7 +9,8 @@ angular
     EditMode,
     Search,
     $translate,
-    $q
+    $q,
+    Notifications
   ) {
     var $ctrl = this;
     $ctrl.location = null;
@@ -58,6 +59,7 @@ angular
           .then(function(response) {
             $ctrl.saving = false;
             EditMode.disable();
+            Notifications.add($translate.instant('ACCESS.LOCATION_LINK_SUCCESS'), 'success');
             $uibModalInstance.close('edited');
           })
           .catch(function(response) {
@@ -79,6 +81,7 @@ angular
           .then(function(responses) {
             $ctrl.saving = false;
             EditMode.disable();
+            Notifications.add($translate.instant('ACCESS.LOCATION_LINK_SUCCESS'), 'success');
             $uibModalInstance.close('edited');
           })
           .catch(function(responses) {

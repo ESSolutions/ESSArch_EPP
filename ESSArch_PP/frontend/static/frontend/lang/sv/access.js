@@ -95,6 +95,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       LINK_TO_LOCATION: 'Placera',
       LOCATION: 'Placering',
       LOCATION_FUNCTION: 'Funktion',
+      LOCATION_LINK_SUCCESS: 'Placering uppdaterad',
       LONGITUDE: 'Longitud',
       MAIN: 'Efternamn',
       MAIN_CATEGORY: 'Huvudkategori',
