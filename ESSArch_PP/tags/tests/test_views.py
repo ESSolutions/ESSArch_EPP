@@ -1,5 +1,8 @@
+from unittest import mock
+
 from countries_plus.models import Country
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -15,10 +18,13 @@ from ESSArch_Core.agents.models import (
     MainAgentType,
     RefCode,
 )
+from ESSArch_Core.auth.models import GroupType, Group
 from ESSArch_Core.tags.models import (
     Tag,
     TagVersion,
     TagVersionType,
+    Structure,
+    StructureType,
 )
 
 User = get_user_model()
@@ -153,3 +159,83 @@ class AgentArchiveRelationTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(AgentTagLink.objects.count(), 0)
+
+
+class CreateArchiveTests(TestCase):
+    fixtures = ['countries_data', 'languages_data']
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.archive_type = TagVersionType.objects.create(name='archive', archive_type=True)
+        cls.url = reverse('search-list')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+        self.main_agent_type = MainAgentType.objects.create()
+        self.agent_type = AgentType.objects.create(main_type=self.main_agent_type)
+
+        self.relation_type = AgentTagLinkRelationType.objects.create(name='test')
+
+        self.ref_code = RefCode.objects.create(
+            country=Country.objects.get(iso='SE'),
+            repository_code='repo',
+        )
+
+    def create_agent(self):
+        return Agent.objects.create(
+            level_of_detail=Agent.MINIMAL,
+            script=Agent.LATIN,
+            language=Language.objects.get(iso_639_1='sv'),
+            record_status=Agent.DRAFT,
+            type=self.agent_type,
+            ref_code=self.ref_code,
+            create_date=timezone.now(),
+        )
+
+    def test_without_permission(self):
+        response = self.client.post(
+            self.url,
+            data={
+                'index': 'archive',
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @mock.patch('tags.search.TagVersionNestedSerializer')
+    @mock.patch('tags.search.ArchiveWriteSerializer')
+    def test_with_permission(self, mock_serializer_save, mock_tag_serializer):
+        self.user.user_permissions.add(Permission.objects.get(codename="create_archive"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        mock_tag_serializer().data = {}
+
+        agent = self.create_agent()
+        structure_type = StructureType.objects.create(name="test")
+        structure = Structure.objects.create(type=structure_type, is_template=True, published=True)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'index': 'archive',
+                'name': 'test archive',
+                'type': self.archive_type.pk,
+                'reference_code': '123',
+                'archive_creator': agent.pk,
+                'structures': [structure.pk],
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        mock_serializer_save.assert_called_once()

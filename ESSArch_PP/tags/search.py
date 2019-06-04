@@ -24,7 +24,7 @@ from natsort import natsorted
 from rest_framework import exceptions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from weasyprint import HTML
@@ -215,7 +215,6 @@ def get_archive(id):
 
 
 class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
-    permission_classes = (IsAuthenticated, SearchPermissions,)
     index = ComponentSearch.index
     lookup_field = 'pk'
     lookup_url_kwarg = None
@@ -223,6 +222,13 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
     def __init__(self, *args, **kwargs):
         self.client = get_connection()
         super().__init__(*args, **kwargs)
+
+    def get_permissions(self):
+        permissions = [IsAuthenticated]
+        if self.request.method in SAFE_METHODS:
+            permissions.append(SearchPermissions)
+
+        return [permission() for permission in permissions]
 
     def get_view_name(self):
         return u'Search {}'.format(getattr(self, 'suffix', None))
