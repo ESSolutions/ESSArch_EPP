@@ -154,6 +154,7 @@ class ArchiveWriteSerializer(serializers.Serializer):
                 structure.create_template_instance(tag)
 
             org = self.context['request'].user.user_profile.current_organization
+            org.add_object(tag)
             org.add_object(tag_version)
 
             tag_link_type, _ = AgentTagLinkRelationType.objects.get_or_create(name='creator')
