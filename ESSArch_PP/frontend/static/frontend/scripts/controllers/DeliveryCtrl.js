@@ -8,7 +8,8 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
   '$log',
   'listViewService',
   '$translate',
-  function($scope, appConfig, $http, $q, $timeout, $uibModal, $log, listViewService, $translate) {
+  'myService',
+  function($scope, appConfig, $http, $q, $timeout, $uibModal, $log, listViewService, $translate, myService) {
     var vm = this;
     $scope.$translate = $translate;
     vm.selected = null;
@@ -322,6 +323,55 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
           return response;
         });
     };
+
+    vm.getTransferColspan = function() {
+      if (myService.checkPermission('tags.change_transfer') && myService.checkPermission('tags.delete_transfer')) {
+        return 3;
+      } else if (
+        myService.checkPermission('tags.change_transfer') ||
+        myService.checkPermission('tags.delete_transfer')
+      ) {
+        return 2;
+      } else {
+        return 1;
+      }
+    };
+
+    vm.getNodeColspan = function() {
+      if (myService.checkPermission('tags.change_transfer')) {
+        return 4;
+      }  else {
+        return 3;
+      }
+    };
+
+    vm.getDeliveryColspan = function() {
+      if (myService.checkPermission('tags.change_delivery') && myService.checkPermission('tags.delete_delivery')) {
+        return 5;
+      } else if (
+        myService.checkPermission('tags.change_delivery') ||
+        myService.checkPermission('tags.delete_delivery')
+      ) {
+        return 4;
+      } else {
+        return 3;
+      }
+    };
+
+    vm.getEventColspan = function() {
+      if (myService.checkPermission('ip.change_eventip') && myService.checkPermission('ip.delete_eventip')) {
+        return 5;
+      } else if (
+        myService.checkPermission('ip.change_eventip') ||
+        myService.checkPermission('ip.delete_eventip')
+      ) {
+        return 4;
+      } else {
+        return 3;
+      }
+    };
+
+
 
     vm.createModal = function() {
       var modalInstance = $uibModal.open({

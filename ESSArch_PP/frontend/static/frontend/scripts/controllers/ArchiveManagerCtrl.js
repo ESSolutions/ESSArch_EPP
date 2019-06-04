@@ -1,6 +1,6 @@
 angular
   .module('essarch.controllers')
-  .controller('ArchiveManagerCtrl', function($scope, $http, appConfig, $uibModal, $log, $state, $stateParams) {
+  .controller('ArchiveManagerCtrl', function($scope, $http, appConfig, $uibModal, $log, $state, $stateParams, myService) {
     var vm = this;
     $scope.$stateParams = $stateParams;
     vm.structure = null;
@@ -50,6 +50,19 @@ angular
 
     vm.updateArchives = function() {
       vm.getArchives($scope.tableState);
+    };
+
+    vm.getArchiveColspan = function() {
+      if (myService.checkPermission('tags.change_archive') && myService.checkPermission('tags.delete_archive')) {
+        return 5;
+      } else if (
+        myService.checkPermission('tags.change_archive') ||
+        myService.checkPermission('tags.delete_archive')
+      ) {
+        return 4;
+      } else {
+        return 3;
+      }
     };
 
     vm.archiveClick = function(archive) {
