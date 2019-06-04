@@ -257,3 +257,70 @@ class CreateComponentTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         mock_write_serializer.assert_called_once()
+
+
+class DeleteTagTests(TestCase):
+    fixtures = ['countries_data', 'languages_data']
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_delete_archive_without_permission(self):
+        archive_tag = Tag.objects.create()
+        archive_type = TagVersionType.objects.create(name='archive', archive_type=True)
+        archive_tag_version = TagVersion.objects.create(tag=archive_tag, type=archive_type, elastic_index='archive')
+
+        url = reverse('search-detail', args=(archive_tag_version.pk,))
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_archive_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_archive"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        archive_tag = Tag.objects.create()
+        archive_type = TagVersionType.objects.create(name='archive', archive_type=True)
+        archive_tag_version = TagVersion.objects.create(tag=archive_tag, type=archive_type, elastic_index='archive')
+
+        url = reverse('search-detail', args=(archive_tag_version.pk,))
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_component_without_permission(self):
+        tag = Tag.objects.create()
+        tag_type = TagVersionType.objects.create(name='volume', archive_type=False)
+        tag_version = TagVersion.objects.create(tag=tag, type=tag_type, elastic_index='component')
+
+        url = reverse('search-detail', args=(tag_version.pk,))
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_component_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_tag"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        tag = Tag.objects.create()
+        tag_type = TagVersionType.objects.create(name='volume', archive_type=False)
+        tag_version = TagVersion.objects.create(tag=tag, type=tag_type, elastic_index='component')
+
+        url = reverse('search-detail', args=(tag_version.pk,))
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
