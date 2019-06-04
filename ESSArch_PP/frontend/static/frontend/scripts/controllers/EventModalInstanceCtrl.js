@@ -28,7 +28,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
 
     $ctrl.getEventTypes = function(search) {
       return $http
-        .get(appConfig.djangoUrl + 'event-types/', {params: {eventType__category: 0, search: search}})
+        .get(appConfig.djangoUrl + 'event-types/', {params: {category: 1, search: search}})
         .then(function(response) {
           $ctrl.eventTypes = response.data;
           return response.data;
