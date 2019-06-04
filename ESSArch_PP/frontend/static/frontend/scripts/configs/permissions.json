@@ -27,7 +27,8 @@
                 },
                 "archiveManager": {
                     "_permissions": [
-                        "tags.search"
+                        "tags.search",
+                        "tags.create_archive"
                     ]
                 },
                 "classificationStructures": {
