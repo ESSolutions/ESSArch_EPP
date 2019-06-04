@@ -40,9 +40,12 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     vm.deliveryClick = function(delivery) {
       if (vm.selected !== null && delivery.id === vm.selected.id) {
         vm.selected = null;
-      } else {
+        vm.selectedTransfer = null;
+        } else {
         vm.selected = null;
         $timeout(function() {
+          vm.activeTab = 'events';
+          vm.selectedTransfer = null;
           vm.selected = delivery;
           vm.tagsPipe(vm.tagsTableState);
           vm.unitsPipe(vm.unitsTableState);
