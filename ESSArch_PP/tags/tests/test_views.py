@@ -22,6 +22,9 @@ from ESSArch_Core.auth.models import GroupType, Group
 from ESSArch_Core.tags.models import (
     Delivery,
     DeliveryType,
+    Location,
+    LocationFunctionType,
+    LocationLevelType,
     Tag,
     TagVersion,
     TagVersionType,
@@ -720,6 +723,161 @@ class DeleteTransferTests(TestCase):
         delivery = self.create_delivery()
         transfer = self.create_transfer(delivery)
         url = reverse('transfer-detail', args=(transfer.pk,))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class CreateLocationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.location_function_type = LocationFunctionType.objects.create(name='test')
+        cls.location_level_type = LocationLevelType.objects.create(name='test')
+        cls.url = reverse('location-list')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_without_permission(self):
+        response = self.client.post(
+            self.url,
+            data={
+                'name': 'test',
+                'function': self.location_function_type.pk,
+                'level_type': self.location_level_type.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="add_location"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'name': 'test',
+                'function': self.location_function_type.pk,
+                'level_type': self.location_level_type.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.get(reverse('location-detail', args=(Location.objects.get().pk,)))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class ChangeLocationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.location_function_type = LocationFunctionType.objects.create(name='test')
+        cls.location_level_type = LocationLevelType.objects.create(name='test')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_location(self):
+        location = Location.objects.create(
+            name='test',
+            function=self.location_function_type,
+            level_type=self.location_level_type,
+        )
+
+        self.group.add_object(location)
+        return location
+
+    def test_without_permission(self):
+        location = self.create_location()
+        url = reverse('location-detail', args=(location.pk,))
+        response = self.client.patch(
+            url,
+            data={
+                'name': 'new name',
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="change_location"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        delivery = self.create_location()
+        url = reverse('location-detail', args=(delivery.pk,))
+        response = self.client.patch(
+            url,
+            data={
+                'name': 'new name',
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class DeleteLocationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.location_function_type = LocationFunctionType.objects.create(name='test')
+        cls.location_level_type = LocationLevelType.objects.create(name='test')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_location(self):
+        location = Location.objects.create(
+            name='test',
+            function=self.location_function_type,
+            level_type=self.location_level_type,
+        )
+
+        self.group.add_object(location)
+        return location
+
+    def test_without_permission(self):
+        delivery = self.create_location()
+        url = reverse('location-detail', args=(delivery.pk,))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_location"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        location = self.create_location()
+        url = reverse('location-detail', args=(location.pk,))
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
