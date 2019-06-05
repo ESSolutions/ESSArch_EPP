@@ -347,14 +347,14 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
 
     vm.getDeliveryColspan = function() {
       if (myService.checkPermission('tags.change_delivery') && myService.checkPermission('tags.delete_delivery')) {
-        return 5;
+        return 6;
       } else if (
         myService.checkPermission('tags.change_delivery') ||
         myService.checkPermission('tags.delete_delivery')
       ) {
-        return 4;
+        return 5;
       } else {
-        return 3;
+        return 4;
       }
     };
 

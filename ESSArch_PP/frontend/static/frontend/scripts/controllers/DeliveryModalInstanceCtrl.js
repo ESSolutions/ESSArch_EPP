@@ -63,7 +63,6 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
           type: 'textarea',
           key: 'description',
           templateOptions: {
-            required: true,
             label: $translate.instant('DESCRIPTION'),
             rows: 3,
           },

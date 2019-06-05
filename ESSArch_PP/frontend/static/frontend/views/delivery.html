@@ -40,7 +40,7 @@
             class="form-control"
             ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}"
             type="text"
-            uib-tooltip="{{'GLOBALSEARCHDESC_DELIVERIES' | translate}}"
+            uib-tooltip="{{'ACCESS.GLOBALSEARCHDESC_DELIVERIES' | translate}}"
             tooltip-placement="auto top"
             tooltip-append-to-body="true"
           />
@@ -71,6 +71,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
+              <th class="cursor-pointer shrink" st-sort="id">{{ 'ID' | translate }}</th>
               <th class="cursor-pointer" st-sort="name">{{ 'NAME' | translate }}</th>
               <th class="cursor-pointer" st-sort="type">{{ 'TYPE' | translate }}</th>
               <th class="cursor-pointer" st-sort="description">{{ 'DESCRIPTION' | translate }}</th>
@@ -89,6 +90,9 @@
               ng-class="{'selected': vm.selected.id === x.id}"
               ng-click="vm.deliveryClick(x)"
             >
+            <td class="text-center shrink">
+              {{x.id}}
+            </td>
               <td>
                 {{x.name}}
               </td>
@@ -184,7 +188,7 @@
                 class="form-control"
                 ng-attr-placeholder="{{'GLOBALSEARCH' | translate}}"
                 type="text"
-                uib-tooltip="{{'EVENT.GLOBALSEARCHDESC_EVENTS' | translate}}"
+                uib-tooltip="{{'EVENT.GLOBALSEARCHDESC_EVENT' | translate}}"
                 tooltip-placement="auto top"
                 tooltip-append-to-body="true"
               />

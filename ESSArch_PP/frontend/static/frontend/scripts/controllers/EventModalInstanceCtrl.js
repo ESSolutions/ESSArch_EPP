@@ -42,7 +42,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           key: 'eventType',
           templateOptions: {
             required: true,
-            label: $translate.instant('EVENT.EVENT_LABEL'),
+            label: $translate.instant('EVENT.EVENTTYPE'),
             labelProp: 'eventDetail',
             valueProp: 'eventType',
             options: $ctrl.eventTypes,
@@ -54,10 +54,13 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
           type: 'datepicker',
           key: 'eventDateTime',
           templateOptions: {
-            label: $translate.instant('EVENT.REGISTERED'),
+            label: $translate.instant('EVENT.EVENTTIME'),
             appendToBody: false,
-            required: true
+            required: true,
+            minView: 'minute',
+            dateFormat: 'YYYY-MM-DD HH:mm:ss',
           },
+          defaultValue: Date.now(),
         },
         {
           type: 'select',
@@ -70,11 +73,11 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
             options: [
               {
                 id: 0,
-                name: $translate.instant('SUCCESS')
+                name: $translate.instant('EVENT.EVENT_SUCCESS')
               },
               {
                 id: 1,
-                name: $translate.instant('FAILURE')
+                name: $translate.instant('EVENT.EVENT_FAILURE')
               }
             ],
             notNull: true,
