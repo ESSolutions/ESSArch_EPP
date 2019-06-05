@@ -735,7 +735,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
             serializer = ComponentWriteSerializer(tag, data=request.data, partial=True)
             if not request.user.has_perm('tags.change_tag'):
                 raise exceptions.PermissionDenied('You do not have permission to change nodes')
-
+        else:
+            raise exceptions.ParseError('Invalid index')
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -765,6 +766,8 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
                 )
             elif descendant.elastic_index == 'component':
                 serializer = ComponentWriteSerializer(descendant, data=request.data, partial=True)
+            else:
+                raise exceptions.ParseError('Invalid index')
 
             serializer.is_valid(raise_exception=True)
             serializer.save()
