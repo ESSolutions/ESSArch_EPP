@@ -440,13 +440,13 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.orders', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.access.location', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },
       })
       .state('home.access.deliveries', {
-        url: '/deliveries',
+        url: '/deliveries/:id',
         template: '<delivery-page></delivery-page>',
         resolve: {
           authenticated: [
@@ -458,7 +458,7 @@ angular
         },
         data: {
           permissions: {
-            only: nestedPermissions(Object.resolve('home.orders', permissionConfig)),
+            only: nestedPermissions(Object.resolve('home.access.deliveries', permissionConfig)),
             redirectTo: 'home.restricted',
           },
         },

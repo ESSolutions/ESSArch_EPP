@@ -9,7 +9,22 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
   'listViewService',
   '$translate',
   'myService',
-  function($scope, appConfig, $http, $q, $timeout, $uibModal, $log, listViewService, $translate, myService) {
+  '$state',
+  '$stateParams',
+  function(
+    $scope,
+    appConfig,
+    $http,
+    $q,
+    $timeout,
+    $uibModal,
+    $log,
+    listViewService,
+    $translate,
+    myService,
+    $state,
+    $stateParams
+  ) {
     var vm = this;
     $scope.$translate = $translate;
     vm.selected = null;
@@ -24,7 +39,18 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       vm.initLoad = true;
       listViewService.getEventlogData().then(function(types) {
         vm.types = types;
-        vm.initLoad = false;
+        if (!angular.isUndefined($stateParams.id) && $stateParams.id !== null && $stateParams.id !== '') {
+          $http.get(appConfig.djangoUrl + 'deliveries/' + $stateParams.id).then(function(response) {
+            vm.deliveryClick(response.data);
+            vm.initLoad = false;
+          }).catch(function(response) {
+            vm.selected = null;
+            $state.go($state.current.name, {id: null});
+            vm.selectedTransfer = null;
+          })
+        } else {
+          vm.initLoad = false;
+        }
       });
     };
 
@@ -41,16 +67,20 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     vm.deliveryClick = function(delivery) {
       if (vm.selected !== null && delivery.id === vm.selected.id) {
         vm.selected = null;
+        $state.go($state.current.name, {id: null}, {notify: false});
         vm.selectedTransfer = null;
-        } else {
+      } else {
         vm.selected = null;
         $timeout(function() {
           vm.activeTab = 'events';
           vm.selectedTransfer = null;
           vm.selected = delivery;
+          if ($stateParams.id !== delivery.id) {
+            $state.go($state.current.name, {id: delivery.id}, {notify: false});
+          }
           vm.tagsPipe(vm.tagsTableState);
           vm.unitsPipe(vm.unitsTableState);
-        })
+        });
       }
     };
 
@@ -340,7 +370,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     vm.getNodeColspan = function() {
       if (myService.checkPermission('tags.change_transfer')) {
         return 4;
-      }  else {
+      } else {
         return 3;
       }
     };
@@ -361,17 +391,12 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     vm.getEventColspan = function() {
       if (myService.checkPermission('ip.change_eventip') && myService.checkPermission('ip.delete_eventip')) {
         return 6;
-      } else if (
-        myService.checkPermission('ip.change_eventip') ||
-        myService.checkPermission('ip.delete_eventip')
-      ) {
+      } else if (myService.checkPermission('ip.change_eventip') || myService.checkPermission('ip.delete_eventip')) {
         return 5;
       } else {
         return 4;
       }
     };
-
-
 
     vm.createModal = function() {
       var modalInstance = $uibModal.open({
@@ -633,7 +658,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
         resolve: {
           data: function() {
             return {
-              event: event
+              event: event,
             };
           },
         },
@@ -659,11 +684,11 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       if (angular.isArray(node)) {
         data = {
           nodes: node,
-        }
+        };
       } else {
         data = {
           node: node,
-        }
+        };
       }
       data.allow_close = true;
       data.transfer = vm.selectedTransfer;
