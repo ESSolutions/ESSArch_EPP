@@ -25,6 +25,7 @@ from ESSArch_Core.tags.models import (
     Tag,
     TagVersion,
     TagVersionType,
+    Transfer,
 )
 
 User = get_user_model()
@@ -538,6 +539,187 @@ class DeleteDeliveryTests(TestCase):
 
         delivery = self.create_delivery()
         url = reverse('delivery-detail', args=(delivery.pk,))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class CreateTransferTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.delivery_type = DeliveryType.objects.create(name='test')
+        cls.url = reverse('transfer-list')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_delivery(self):
+        delivery = Delivery.objects.create(
+            name='test',
+            type=self.delivery_type,
+        )
+
+        self.group.add_object(delivery)
+        return delivery
+
+    def test_without_permission(self):
+        delivery = self.create_delivery()
+        response = self.client.post(
+            self.url,
+            data={
+                'name': 'test',
+                'delivery': delivery.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="add_transfer"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        delivery = self.create_delivery()
+        response = self.client.post(
+            self.url,
+            data={
+                'name': 'test',
+                'delivery': delivery.pk,
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.get(reverse('transfer-detail', args=(Transfer.objects.get().pk,)))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class ChangeTransferTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.delivery_type = DeliveryType.objects.create(name='test')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_delivery(self):
+        delivery = Delivery.objects.create(
+            name='test',
+            type=self.delivery_type,
+        )
+
+        self.group.add_object(delivery)
+        return delivery
+
+    def create_transfer(self, delivery):
+        transfer = Transfer.objects.create(
+            name='test',
+            delivery=delivery,
+        )
+
+        self.group.add_object(transfer)
+        return transfer
+
+    def test_without_permission(self):
+        delivery = self.create_delivery()
+        transfer = self.create_transfer(delivery)
+        url = reverse('transfer-detail', args=(transfer.pk,))
+        response = self.client.patch(
+            url,
+            data={
+                'name': 'new name',
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="change_transfer"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        delivery = self.create_delivery()
+        transfer = self.create_transfer(delivery)
+        url = reverse('transfer-detail', args=(transfer.pk,))
+        response = self.client.patch(
+            url,
+            data={
+                'name': 'new name',
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class DeleteTransferTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.delivery_type = DeliveryType.objects.create(name='test')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_delivery(self):
+        delivery = Delivery.objects.create(
+            name='test',
+            type=self.delivery_type,
+        )
+
+        self.group.add_object(delivery)
+        return delivery
+
+    def create_transfer(self, delivery):
+        transfer = Transfer.objects.create(
+            name='test',
+            delivery=delivery,
+        )
+
+        self.group.add_object(transfer)
+        return transfer
+
+    def test_without_permission(self):
+        delivery = self.create_delivery()
+        transfer = self.create_transfer(delivery)
+        url = reverse('transfer-detail', args=(transfer.pk,))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_transfer"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        delivery = self.create_delivery()
+        transfer = self.create_transfer(delivery)
+        url = reverse('transfer-detail', args=(transfer.pk,))
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
