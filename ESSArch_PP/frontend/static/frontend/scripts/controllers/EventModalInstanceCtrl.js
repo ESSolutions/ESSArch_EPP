@@ -60,7 +60,7 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
             minView: 'minute',
             dateFormat: 'YYYY-MM-DD HH:mm:ss',
           },
-          defaultValue: Date.now(),
+          defaultValue: new Date(),
         },
         {
           type: 'select',
