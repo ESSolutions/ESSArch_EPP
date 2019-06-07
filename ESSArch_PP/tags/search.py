@@ -734,7 +734,7 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
         elif index == 'component':
             data = request.data.copy()
             if 'location' in request.data:
-                if not request.user.has_perm('tags.place_tag'):
+                if not request.user.has_perm('tags.change_tag_location'):
                     raise exceptions.PermissionDenied('You do not have permission to place nodes')
 
                 data.pop('location')
