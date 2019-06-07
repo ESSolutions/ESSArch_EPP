@@ -865,8 +865,8 @@ class DeleteLocationTests(TestCase):
         return location
 
     def test_without_permission(self):
-        delivery = self.create_location()
-        url = reverse('location-detail', args=(delivery.pk,))
+        location = self.create_location()
+        url = reverse('location-detail', args=(location.pk,))
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -881,3 +881,58 @@ class DeleteLocationTests(TestCase):
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class AddNodeToLocationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.org_group_type = GroupType.objects.create(codename='organization')
+        cls.location_function_type = LocationFunctionType.objects.create(name='test')
+        cls.location_level_type = LocationLevelType.objects.create(name='test')
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create(username='user')
+        self.member = self.user.essauth_member
+
+        self.group = Group.objects.create(name='organization', group_type=self.org_group_type)
+        self.group.add_member(self.member)
+
+        self.client.force_authenticate(user=self.user)
+
+    def create_location(self):
+        location = Location.objects.create(
+            name='test',
+            function=self.location_function_type,
+            level_type=self.location_level_type,
+        )
+
+        self.group.add_object(location)
+        return location
+
+    def test_without_permission(self):
+        location = self.create_location()
+
+        tag = Tag.objects.create()
+        tag_type = TagVersionType.objects.create(name='volume', archive_type=False)
+        tag_version = TagVersion.objects.create(tag=tag, type=tag_type, elastic_index='component')
+
+        url = reverse('search-detail', args=(tag_version.pk,))
+        response = self.client.patch(url, {'location': location.pk})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_permission(self):
+        self.user.user_permissions.add(Permission.objects.get(codename="place_tag"))
+        self.user = User.objects.get(username="user")
+        self.client.force_authenticate(user=self.user)
+
+        tag = Tag.objects.create()
+        tag_type = TagVersionType.objects.create(name='volume', archive_type=False)
+        tag_version = TagVersion.objects.create(tag=tag, type=tag_type, elastic_index='component')
+
+        url = reverse('search-detail', args=(tag_version.pk,))
+        response = self.client.patch(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

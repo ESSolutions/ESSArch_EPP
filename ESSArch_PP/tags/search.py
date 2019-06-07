@@ -732,9 +732,18 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
             serializer = ArchiveWriteSerializer(tag, data=request.data, context={'request': request}, partial=True)
         elif index == 'component':
+            data = request.data.copy()
+            if 'location' in request.data:
+                if not request.user.has_perm('tags.place_tag'):
+                    raise exceptions.PermissionDenied('You do not have permission to place nodes')
+
+                data.pop('location')
+
+            if len(data):
+                if not request.user.has_perm('tags.change_tag'):
+                    raise exceptions.PermissionDenied('You do not have permission to change nodes')
+
             serializer = ComponentWriteSerializer(tag, data=request.data, partial=True)
-            if not request.user.has_perm('tags.change_tag'):
-                raise exceptions.PermissionDenied('You do not have permission to change nodes')
         else:
             raise exceptions.ParseError('Invalid index')
 
