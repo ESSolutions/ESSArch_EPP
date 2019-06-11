@@ -128,47 +128,6 @@ def installProfileTransferProject(sa):
         'label': 'Transfer Project Profile 1',
         'template': [
             {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival institution",
-                    "desc": "xxx",
-                },
-                "type": "input",
-                "key": "archival_institution"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "disabled": True,
-                    "label": "Archivist Organization"
-                },
-                "type": "input",
-                "key": "_IP_ARCHIVIST_ORGANIZATION"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival type",
-                    "desc": "xxx",
-                },
-                "type": "input",
-                "key": "archival_type"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival location",
-                    "desc": "xxx",
-                },
-                "type": "input",
-                "key": "archival_location"
-            }, {
-                "templateOptions": {
-                    "disabled": True,
-                    "type": "text",
-                    "label": "Archive Policy",
-                    "desc": "xxx",
-                },
-                "type": "input",
-                "key": "archive_policy"
-            }, {
                 'key': 'container_format',
                 'type': 'select',
                 'templateOptions': {
@@ -214,11 +173,6 @@ def installProfileTransferProject(sa):
             }
         ],
         'specification_data': {
-            "archivist_organization": "National Archive xx",
-            "archival_institution": "Riksarkivet",
-            "archival_type": "document",
-            "archival_location": "sweden-stockholm-nacka",
-            "archive_policy": "archive policy 1",
             "container_format": "tar",
             "checksum_algorithm": "MD5",
         },

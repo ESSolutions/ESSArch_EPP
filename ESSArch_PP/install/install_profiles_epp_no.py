@@ -125,56 +125,6 @@ def installProfileTransferProject(sa):
         'label': 'Transfer Project Profile 1',
         'template': [
             {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival institution",
-                },
-                "type": "input",
-                "defaultValue": "Arkivverket",
-                "key": "archival_institution"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "disabled": True,
-                    "label": "Archivist Organization"
-                },
-                "type": "input",
-                "key": "_IP_ARCHIVIST_ORGANIZATION"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival type",
-                },
-                "type": "input",
-                "defaultValue": "document",
-                "key": "archival_type"
-            }, {
-                "templateOptions": {
-                    "type": "text",
-                    "label": "Archival location",
-                },
-                "type": "input",
-                "defaultValue": "Oslo",
-                "key": "archival_location"
-            }, {
-                "templateOptions": {
-                    "disabled": True,
-                    "type": "text",
-                    "label": "Archive Policy ID",
-                },
-                "type": "input",
-                "defaultValue": "1",
-                "key": "archive_policy_id"
-            }, {
-                "templateOptions": {
-                    "disabled": True,
-                    "type": "text",
-                    "label": "Archive Policy Name",
-                },
-                "type": "input",
-                "defaultValue": "default",
-                "key": "archive_policy_name"
-            }, {
                 'key': 'container_format',
                 'type': 'select',
                 'defaultValue': 'tar',
