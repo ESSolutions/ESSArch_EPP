@@ -8,11 +8,11 @@ cache:
 
 language: python
 
-dist: trusty
+dist: xenial
 
 branches:
   only:
-  - master
+    - master
 
 templates:
   mariadb: &mariadb DB_PACKAGES=",mysql" DATABASE_URL_EPP="mysql://root@localhost/essarch?isolation_level=read committed"
@@ -27,28 +27,36 @@ matrix:
       script: flake8
       after_script: skip
 
-    - python: 3.6
+    - name: "Linux with SQLite"
+      python: 3.6
       env: REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
 
-    - python: 3.6
-      services: mariadb
+    - name: "Linux with MariaDB"
+      python: 3.6
+      addons:
+        mariadb: "10.3"
       env:
         - *mariadb
         - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
 
-    - python: 3.6
-      services: mysql
+    - name: "Linux with MySQL"
+      python: 3.6
+      services:
+        - mysql
       env:
         - *mysql
         - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
 
-    - python: 3.6
-      services: postgresql
+    - name: "Linux with PostgreSQL"
+      python: 3.6
+      services:
+        - postgresql
       env:
         - *postgres
         - REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
 
-    - os: windows
+    - name: "Windows with MSSQL"
+      os: windows
       language: sh
       python: 3.6
       env: REDIS_CLIENT_CLASS="fakeredis.FakeRedis"
