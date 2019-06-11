@@ -446,8 +446,36 @@ angular
         },
       })
       .state('home.access.deliveries', {
-        url: '/deliveries/:id',
+        url: '/deliveries/:delivery',
         template: '<delivery-page></delivery-page>',
+        params: {
+          transfer: null,
+          delivery: null,
+        },
+        resolve: {
+          authenticated: [
+            'djangoAuth',
+            function(djangoAuth) {
+              return djangoAuth.authenticationStatus();
+            },
+          ],
+        },
+        data: {
+          permissions: {
+            only: nestedPermissions(Object.resolve('home.access.deliveries', permissionConfig)),
+            redirectTo: 'home.restricted',
+          },
+        },
+      })
+      .state('home.access.deliveries.transfers', {
+        url: '/transfers/:transfer',
+        templateUrl: 'static/frontend/views/transfers.html',
+        controller: 'TransferCtrl',
+        controllerAs: 'vm',
+        params: {
+          transfer: null,
+          delivery: null,
+        },
         resolve: {
           authenticated: [
             'djangoAuth',

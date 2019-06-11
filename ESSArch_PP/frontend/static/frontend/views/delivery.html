@@ -142,7 +142,7 @@
     </div>
   </div>
   <uib-tabset ng-if="vm.selected !== null" active="vm.activeTab" class="tabs tabs-style-bar">
-    <uib-tab index="'events'" heading="{{'EVENT.EVENTS' | translate}}">
+    <uib-tab index="'events'" heading="{{'EVENT.EVENTS' | translate}}" ng-click="vm.tabClick('events')">
       <div ng-if="vm.activeTab === 'events'" class="delivery-events-wrapper">
         <!-- List with Events for transfer-->
         <div
@@ -241,7 +241,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="x in vm.deliveryEvents" class="selectable">
+                <tr ng-repeat="x in vm.deliveryEvents" ng-class="{selectable: x.transfer}" ng-click="vm.eventsClick(x)">
                   <td>
                     {{x.eventDetail}}
                   </td>
@@ -294,9 +294,9 @@
         </div>
       </div>
     </uib-tab>
-    <uib-tab index="'transfers'" heading="{{'ACCESS.TRANSFERS' | translate}}">
+    <uib-tab index="'transfers'" heading="{{'ACCESS.TRANSFERS' | translate}}" ng-click="vm.tabClick('transfers')">
       <div ng-if="vm.activeTab === 'transfers'" class="transfers-view-wrapper">
-        <div ng-include src="'static/frontend/views/transfers.html'"></div>
+        <div ui-view></div>
       </div>
     </uib-tab>
   </uib-tabset>

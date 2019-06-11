@@ -61,7 +61,12 @@
                 "deliveries": {
                     "_permissions": [
                         "tags.search"
-                    ]
+                    ],
+                    "transfers": {
+                        "_permissions": [
+                            "tags.search"
+                        ]
+                    }
                 }
             },
             "workarea": {

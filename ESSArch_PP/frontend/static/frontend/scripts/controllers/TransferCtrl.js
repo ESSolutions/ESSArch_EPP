@@ -1,4 +1,4 @@
-angular.module('essarch.controllers').controller('DeliveryCtrl', [
+angular.module('essarch.controllers').controller('TransferCtrl', [
   '$scope',
   'appConfig',
   '$http',
@@ -25,10 +25,10 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     $state,
     $stateParams
   ) {
+
     var vm = this;
     $scope.$translate = $translate;
-    vm.selected = null;
-    vm.deliveries = [];
+    vm.selectedTransfer = null;
     vm.transfers = [];
     vm.types = [];
     vm.tags = [];
@@ -36,91 +36,38 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
 
     vm.$onInit = function() {
       vm.initLoad = true;
-      listViewService.getEventlogData().then(function(types) {
-        vm.types = types;
-        if (
-          !angular.isUndefined($stateParams.delivery) &&
-          $stateParams.delivery !== null &&
-          $stateParams.delivery !== ''
-        ) {
-          $http
-            .get(appConfig.djangoUrl + 'deliveries/' + $stateParams.delivery)
-            .then(function(response) {
-              vm.deliveryClick(response.data);
-              vm.initLoad = false;
-              if (angular.copy($state.current.name.split('.')).pop() === 'transfers') {
-                $timeout(function() {
-                  vm.activeTab = 'transfers';
-                  $state.go('home.access.deliveries.transfers', {
-                    transfer: $stateParams.transfer,
-                    delivery: $stateParams.delivery,
-                  });
-                });
-              }
-            })
-            .catch(function(response) {
-              vm.selected = null;
-              $state.go($state.current.name, {delivery: null});
-            });
+        vm.delivery = $stateParams.delivery;
+        if (!angular.isUndefined($stateParams.transfer) && $stateParams.transfer !== null && $stateParams.transfer !== '') {
+          $http.get(appConfig.djangoUrl + 'transfers/' + $stateParams.transfer).then(function(response) {
+            vm.transferClick(response.data);
+            vm.initLoad = false;
+          }).catch(function(response) {
+            vm.selectedTransfer = null;
+            $state.go($state.current.name, {transfer: null, delivery: vm.delivery});
+          })
         } else {
           vm.initLoad = false;
         }
-      });
     };
 
-    vm.mapEventType = function(type) {
-      var mapped = type;
-      vm.types.forEach(function(x) {
-        if (x.eventType === type) {
-          mapped = x.eventDetail;
-        }
-      });
-      return mapped;
-    };
 
-    vm.eventsClick = function(event) {
-      if (event.transfer) {
-        vm.activeTab = 'transfers';
-        $timeout(function() {
-          $state.go('home.access.deliveries.transfers', {delivery: vm.selected.id, transfer: event.transfer});
-        });
-      }
-    };
-
-    vm.deliveryClick = function(delivery) {
-      if (vm.selected !== null && delivery.id === vm.selected.id) {
-        vm.selected = null;
-        $state.go('home.access.deliveries', {delivery: null}, {notify: false});
+    vm.transferClick = function(transfer) {
+      if (vm.selectedTransfer !== null && transfer.id === vm.selectedTransfer.id) {
+        vm.selectedTransfer = null;
+        $state.go($state.current.name, {transfer: null}, {notify: false});
       } else {
-        vm.selected = null;
-        $timeout(function() {
-          vm.activeTab = 'events';
-          vm.selectedTransfer = null;
-          vm.selected = delivery;
-          if ($stateParams.delivery !== delivery.id) {
-            $state.go('home.access.deliveries', {delivery: delivery.id}, {notify: false});
-          }
-        });
+        vm.selectedTransfer = transfer;
+        $state.go($state.current.name, {transfer: transfer.id}, {notify: false});
       }
     };
 
-    vm.tabClick = function(tab) {
-      $timeout(function() {
-        if (tab === 'transfers') {
-          $state.go('home.access.deliveries.transfers', {delivery: vm.selected.id});
-        } else {
-          $state.go('home.access.deliveries', {delivery: vm.selected.id, transfer: null}, {notify: false});
-        }
-      });
-    };
-
-    vm.deliveryPipe = function(tableState) {
-      if (vm.deliveries.length == 0) {
+    vm.transferPipe = function(tableState) {
+      if (vm.transfers.length == 0) {
         $scope.initLoad = true;
       }
-      vm.deliveriesLoading = true;
+      vm.transfersLoading = true;
       if (!angular.isUndefined(tableState)) {
-        vm.tableState = tableState;
+        vm.transferTableState = tableState;
         var search = '';
         if (tableState.search.predicateObject) {
           var search = tableState.search.predicateObject['$'];
@@ -136,7 +83,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
           sortString = '-' + sortString;
         }
 
-        vm.getDeliveries({
+        vm.getTransfers({
           page: pageNumber,
           page_size: number,
           ordering: sortString,
@@ -144,25 +91,27 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
         }).then(function(response) {
           tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
           $scope.initLoad = false;
-          vm.deliveriesLoading = false;
-          vm.deliveries = response.data;
+          vm.transfersLoading = false;
+          vm.transfers = response.data;
         });
       }
     };
 
-    vm.getDeliveries = function(params) {
-      return $http.get(appConfig.djangoUrl + 'deliveries/', {params: params}).then(function(response) {
-        return response;
-      });
+    vm.getTransfers = function(params) {
+      return $http
+        .get(appConfig.djangoUrl + 'deliveries/' + vm.delivery + '/transfers/', {params: params})
+        .then(function(response) {
+          return response;
+        });
     };
 
-    vm.deliveryEventsPipe = function(tableState) {
-      vm.deliveryEventsLoading = true;
-      if (angular.isUndefined(vm.deliveryEvents) || vm.deliveryEvents.length == 0) {
+    vm.tagsPipe = function(tableState) {
+      vm.tagsLoading = true;
+      if (angular.isUndefined(vm.tags) || vm.tags.length == 0) {
         $scope.initLoad = true;
       }
       if (!angular.isUndefined(tableState)) {
-        vm.deliveryEventsTableState = tableState;
+        vm.tagsTableState = tableState;
         var search = '';
         if (tableState.search.predicateObject) {
           var search = tableState.search.predicateObject['$'];
@@ -178,7 +127,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
           sortString = '-' + sortString;
         }
 
-        vm.getDeliveryEvents(vm.selected, {
+        vm.getTags(vm.selectedTransfer, {
           page: pageNumber,
           page_size: number,
           ordering: sortString,
@@ -186,30 +135,126 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
         }).then(function(response) {
           tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
           $scope.initLoad = false;
-          vm.deliveryEventsLoading = false;
-          vm.deliveryEvents = response.data;
+          vm.tagsLoading = false;
+          vm.tags = response.data;
         });
       }
     };
 
-    vm.getDeliveryEvents = function(delivery, params) {
+    vm.getTags = function(transfer, params) {
       return $http
-        .get(appConfig.djangoUrl + 'deliveries/' + delivery.id + '/events/', {params: params})
+        .get(appConfig.djangoUrl + 'transfers/' + transfer.id + '/tags/', {params: params})
         .then(function(response) {
           return response;
         });
     };
 
-    vm.getDeliveryColspan = function() {
-      if (myService.checkPermission('tags.change_delivery') && myService.checkPermission('tags.delete_delivery')) {
-        return 6;
+    vm.unitsPipe = function(tableState) {
+      vm.unitsLoading = true;
+      if (angular.isUndefined(vm.units) || vm.units.length == 0) {
+        $scope.initLoad = true;
+      }
+      if (!angular.isUndefined(tableState)) {
+        vm.unitsTableState = tableState;
+        var search = '';
+        if (tableState.search.predicateObject) {
+          var search = tableState.search.predicateObject['$'];
+        }
+        var sorting = tableState.sort;
+        var pagination = tableState.pagination;
+        var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+        var number = pagination.number || vm.itemsPerPage; // Number of entries showed per page.
+        var pageNumber = start / number + 1;
+
+        var sortString = sorting.predicate;
+        if (sorting.reverse) {
+          sortString = '-' + sortString;
+        }
+
+        vm.getUnits(vm.selectedTransfer, {
+          page: pageNumber,
+          page_size: number,
+          ordering: sortString,
+          search: search,
+        }).then(function(response) {
+          tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
+          $scope.initLoad = false;
+          vm.unitsLoading = false;
+          vm.units = response.data;
+        });
+      }
+    };
+
+    vm.getUnits = function(transfer, params) {
+      return $http
+        .get(appConfig.djangoUrl + 'transfers/' + transfer.id + '/structure-units/', {params: params})
+        .then(function(response) {
+          return response;
+        });
+    };
+
+    vm.transferEventsPipe = function(tableState) {
+      vm.transferEventsLoading = true;
+      if (angular.isUndefined(vm.transferEvents) || vm.transferEvents.length == 0) {
+        $scope.initLoad = true;
+      }
+      if (!angular.isUndefined(tableState)) {
+        vm.transferEventsTableState = tableState;
+        var search = '';
+        if (tableState.search.predicateObject) {
+          var search = tableState.search.predicateObject['$'];
+        }
+        var sorting = tableState.sort;
+        var pagination = tableState.pagination;
+        var start = pagination.start || 0; // This is NOT the page number, but the index of item in the list that you want to use to display the table.
+        var number = pagination.number || vm.itemsPerPage; // Number of entries showed per page.
+        var pageNumber = start / number + 1;
+
+        var sortString = sorting.predicate;
+        if (sorting.reverse) {
+          sortString = '-' + sortString;
+        }
+
+        vm.getTransferEvents(vm.selectedTransfer, {
+          page: pageNumber,
+          page_size: number,
+          ordering: sortString,
+          search: search,
+        }).then(function(response) {
+          tableState.pagination.numberOfPages = Math.ceil(response.headers('Count') / number); //set the number of pages so the pagination can update
+          $scope.initLoad = false;
+          vm.transferEventsLoading = false;
+          vm.transferEvents = response.data;
+        });
+      }
+    };
+
+    vm.getTransferEvents = function(transfer, params) {
+      return $http
+        .get(appConfig.djangoUrl + 'transfers/' + transfer.id + '/events/', {params: params})
+        .then(function(response) {
+          return response;
+        });
+    };
+
+    vm.getTransferColspan = function() {
+      if (myService.checkPermission('tags.change_transfer') && myService.checkPermission('tags.delete_transfer')) {
+        return 3;
       } else if (
-        myService.checkPermission('tags.change_delivery') ||
-        myService.checkPermission('tags.delete_delivery')
+        myService.checkPermission('tags.change_transfer') ||
+        myService.checkPermission('tags.delete_transfer')
       ) {
-        return 5;
+        return 2;
       } else {
+        return 1;
+      }
+    };
+
+    vm.getNodeColspan = function() {
+      if (myService.checkPermission('tags.change_transfer')) {
         return 4;
+      } else {
+        return 3;
       }
     };
 
@@ -223,52 +268,28 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       }
     };
 
-    vm.createModal = function() {
+    // Transfers
+    vm.createTransferModal = function() {
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/new_delivery_modal.html',
-        controller: 'DeliveryModalInstanceCtrl',
-        controllerAs: '$ctrl',
-        size: 'lg',
-        resolve: {
-          data: function() {
-            return {};
-          },
-        },
-      });
-      modalInstance.result.then(
-        function(data) {
-          vm.selected = data;
-          vm.deliveryPipe(vm.tableState);
-        },
-        function() {
-          $log.info('modal-component dismissed at: ' + new Date());
-        }
-      );
-    };
-
-    vm.editModal = function(delivery) {
-      var modalInstance = $uibModal.open({
-        animation: true,
-        ariaLabelledBy: 'modal-title',
-        ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/edit_delivery_modal.html',
-        controller: 'DeliveryModalInstanceCtrl',
+        templateUrl: 'static/frontend/views/new_transfer_modal.html',
+        controller: 'TransferModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
           data: function() {
             return {
-              delivery: delivery,
+              delivery: vm.selected,
             };
           },
         },
       });
       modalInstance.result.then(
         function(data) {
-          vm.deliveryPipe(vm.tableState);
+          vm.selectedTransfer = data;
+          vm.transferPipe(vm.transferTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
@@ -276,19 +297,46 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       );
     };
 
-    vm.removeModal = function(delivery) {
+    vm.editTransferModal = function(transfer) {
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
         ariaDescribedBy: 'modal-body',
-        templateUrl: 'static/frontend/views/remove_delivery_modal.html',
-        controller: 'DeliveryModalInstanceCtrl',
+        templateUrl: 'static/frontend/views/edit_transfer_modal.html',
+        controller: 'TransferModalInstanceCtrl',
         controllerAs: '$ctrl',
         size: 'lg',
         resolve: {
           data: function() {
             return {
-              delivery: delivery,
+              transfer: transfer,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.transferPipe(vm.transferTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeTransferModal = function(transfer) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_transfer_modal.html',
+        controller: 'TransferModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              transfer: transfer,
               allow_close: true,
               remove: true,
             };
@@ -297,8 +345,8 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       });
       modalInstance.result.then(
         function(data) {
-          vm.selected = null;
-          vm.deliveryPipe(vm.tableState);
+          vm.selectedTransfer = null;
+          vm.transferPipe(vm.transferTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
@@ -411,6 +459,43 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
             vm.transferPipe(vm.transferTableState);
             vm.transferEventsPipe(vm.transferEventsTableState);
           }
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeLinkModal = function(node) {
+      var data;
+      if (angular.isArray(node)) {
+        data = {
+          nodes: node,
+        };
+      } else {
+        data = {
+          node: node,
+        };
+      }
+      data.allow_close = true;
+      data.transfer = vm.selectedTransfer;
+      data.remove_link = true;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_node_transfer_link_modal.html',
+        size: 'lg',
+        controller: 'NodeTransferModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        resolve: {
+          data: data,
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.tagsPipe(vm.tagsTableState);
+          vm.unitsPipe(vm.unitsTableState);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
