@@ -45,9 +45,14 @@ angular
             params: {structure_type: data.structure.structureType.id, pager: 'none'},
           })
           .then(function(response) {
-            if (data.children) {
-              $ctrl.newNode.reference_code = (data.children.length + 1).toString();
-            }
+            var url = appConfig.djangoUrl + 'structure-units/';
+            $http.head(url + data.node.id + '/children/').then(function(childrenResponse) {
+              var count = parseInt(childrenResponse.headers('Count'));
+              if (!isNaN(count)) {
+                $ctrl.newNode.reference_code = (count + 1).toString();
+              }
+              EditMode.enable();
+            });
             $ctrl.structureUnitTypes = response.data;
             $ctrl.buildNodeForm();
           });
@@ -88,7 +93,7 @@ angular
                 label: $translate.instant('VERSION'),
                 required: true,
               },
-              defaultValue: '1.0'
+              defaultValue: '1.0',
             },
           ],
         },
@@ -236,16 +241,17 @@ angular
         data: {
           name: $ctrl.name,
         },
-      }).then(function(response) {
-        $ctrl.saving = false;
-        $uibModalInstance.close(response.data);
-        EditMode.disable();
-        Notifications.add($translate.instant('NODE_UPDATED'), 'success');
       })
-      .catch(function(response) {
-        $ctrl.nonFieldErrors = response.data.non_field_errors;
-        $ctrl.saving = false;
-      });
+        .then(function(response) {
+          $ctrl.saving = false;
+          $uibModalInstance.close(response.data);
+          EditMode.disable();
+          Notifications.add($translate.instant('NODE_UPDATED'), 'success');
+        })
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          $ctrl.saving = false;
+        });
     };
     /**
      * Save new classification structure
@@ -257,16 +263,17 @@ angular
       }
       $ctrl.creating = true;
       $rootScope.skipErrorNotification = true;
-      Structure.new($ctrl.newStructure).$promise.then(function(resource) {
-        EditMode.disable();
-        $ctrl.creating = false;
-        $uibModalInstance.close(resource);
-        Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
-      })
-      .catch(function(response) {
-        $ctrl.nonFieldErrors = response.data.non_field_errors;
-        $ctrl.creating = false;
-      });
+      Structure.new($ctrl.newStructure)
+        .$promise.then(function(resource) {
+          EditMode.disable();
+          $ctrl.creating = false;
+          $uibModalInstance.close(resource);
+          Notifications.add($translate.instant('ACCESS.CLASSIFICATION_STRUCTURE_CREATED'), 'success');
+        })
+        .catch(function(response) {
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+          $ctrl.creating = false;
+        });
     };
 
     $ctrl.saveEditedStructure = function() {
@@ -280,14 +287,16 @@ angular
         url: appConfig.djangoUrl + 'structures/' + $ctrl.structure.id + '/',
         method: 'PATCH',
         data: $ctrl.structure,
-      }).then(function(response) {
-        $ctrl.saving = false;
-        EditMode.disable();
-        $uibModalInstance.close(response.data);
-      }).catch(function(response) {
-        $ctrl.saving = false;
-        $ctrl.nonFieldErrors = response.data.non_field_errors;
       })
+        .then(function(response) {
+          $ctrl.saving = false;
+          EditMode.disable();
+          $uibModalInstance.close(response.data);
+        })
+        .catch(function(response) {
+          $ctrl.saving = false;
+          $ctrl.nonFieldErrors = response.data.non_field_errors;
+        });
     };
 
     $ctrl.removing = false;

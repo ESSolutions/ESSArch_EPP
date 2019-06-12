@@ -16,7 +16,6 @@ angular
     $ctrl.node = data.node.original;
     $ctrl.nodeFields = [];
     $ctrl.newNode = {
-      reference_code: (data.node.children.length + 1).toString(),
       index: 'component',
     };
     $ctrl.options = {};
@@ -27,9 +26,21 @@ angular
       $http
         .get(appConfig.djangoUrl + 'tag-version-types/', {params: {archive_type: false, pager: 'none'}})
         .then(function(response) {
-          EditMode.enable();
-          $ctrl.typeOptions = response.data;
-          $ctrl.loadForm();
+          var url = appConfig.djangoUrl;
+          if (data.node.original._is_structure_unit) {
+            url = angular.copy(url) + 'structure-units/';
+          } else {
+            url = angular.copy(url) + 'search/';
+          }
+          $http.head(url + data.node.original.id + '/children/').then(function(childrenResponse) {
+            var count = parseInt(childrenResponse.headers('Count'));
+            if (!isNaN(count)) {
+              $ctrl.newNode.reference_code = (count + 1).toString();
+            }
+            EditMode.enable();
+            $ctrl.typeOptions = response.data;
+            $ctrl.loadForm();
+          });
         });
     };
 
@@ -117,8 +128,8 @@ angular
           params.parent = $ctrl.node._id;
         }
 
-      $rootScope.skipErrorNotification = true;
-      Search.addNode(params)
+        $rootScope.skipErrorNotification = true;
+        Search.addNode(params)
           .then(function(response) {
             $ctrl.submitting = false;
             Notifications.add($translate.instant('ACCESS.NODE_ADDED'), 'success');
