@@ -143,9 +143,7 @@
                 {{'NO_RESULTS_FOUND' | translate}}
               </td>
               <td
-                ng-if="!vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations"
-                permission
-                permission-except="'tags.change_structureunit_instance'"
+                ng-if="vm.getStructureById(vm.archiveStructures, vm.structure).type.editable_instance_relations === false"
                 colspan="5"
               >
                 {{'NO_RESULTS_FOUND' | translate}}
