@@ -110,6 +110,12 @@ router.register(r'deliveries', DeliveryViewSet).register(
     base_name='transfers',
     parents_query_lookups=['delivery']
 )
+router.register(r'deliveries', DeliveryViewSet).register(
+    r'events',
+    EventIPViewSet,
+    base_name='delivery-events',
+    parents_query_lookups=['delivery'],
+)
 router.register(r'delivery-types', DeliveryTypeViewSet)
 router.register(r'transfers', TransferViewSet).register(
     r'events',
