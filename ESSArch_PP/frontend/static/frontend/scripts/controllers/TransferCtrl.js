@@ -25,7 +25,6 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
     $state,
     $stateParams
   ) {
-
     var vm = this;
     $scope.$translate = $translate;
     vm.selectedTransfer = null;
@@ -34,22 +33,35 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
     vm.tags = [];
     vm.units = [];
 
-    vm.$onInit = function() {
-      vm.initLoad = true;
-        vm.delivery = $stateParams.delivery;
-        if (!angular.isUndefined($stateParams.transfer) && $stateParams.transfer !== null && $stateParams.transfer !== '') {
-          $http.get(appConfig.djangoUrl + 'transfers/' + $stateParams.transfer).then(function(response) {
-            vm.transferClick(response.data);
-            vm.initLoad = false;
-          }).catch(function(response) {
-            vm.selectedTransfer = null;
-            $state.go($state.current.name, {transfer: null, delivery: vm.delivery});
-          })
-        } else {
-          vm.initLoad = false;
-        }
+    vm.accordion = {
+      basic: {open: false},
+      events: {open: true},
+      nodes: {open: true},
+      units: {open: true},
     };
 
+    vm.$onInit = function() {
+      vm.initLoad = true;
+      vm.delivery = $stateParams.delivery;
+      if (
+        !angular.isUndefined($stateParams.transfer) &&
+        $stateParams.transfer !== null &&
+        $stateParams.transfer !== ''
+      ) {
+        $http
+          .get(appConfig.djangoUrl + 'transfers/' + $stateParams.transfer + '/')
+          .then(function(response) {
+            vm.transferClick(response.data);
+            vm.initLoad = false;
+          })
+          .catch(function(response) {
+            vm.selectedTransfer = null;
+            $state.go($state.current.name, {transfer: null, delivery: vm.delivery});
+          });
+      } else {
+        vm.initLoad = false;
+      }
+    };
 
     vm.transferClick = function(transfer) {
       if (vm.selectedTransfer !== null && transfer.id === vm.selectedTransfer.id) {
@@ -58,6 +70,9 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
       } else {
         vm.selectedTransfer = transfer;
         $state.go($state.current.name, {transfer: transfer.id}, {notify: false});
+        vm.transferEventsPipe(vm.transferEventsTableState);
+        vm.tagsPipe(vm.tagsTableState);
+        vm.unitsPipe(vm.unitsTableState);
       }
     };
 
@@ -270,6 +285,10 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
 
     // Transfers
     vm.createTransferModal = function() {
+      var data = {};
+      if ($stateParams.delivery) {
+        data.delivery = $stateParams.delivery;
+      }
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
@@ -280,16 +299,14 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
         size: 'lg',
         resolve: {
           data: function() {
-            return {
-              delivery: vm.selected,
-            };
+            return data;
           },
         },
       });
       modalInstance.result.then(
         function(data) {
-          vm.selectedTransfer = data;
           vm.transferPipe(vm.transferTableState);
+          vm.transferClick(data);
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

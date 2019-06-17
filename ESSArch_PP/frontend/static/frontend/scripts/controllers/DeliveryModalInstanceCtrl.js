@@ -8,9 +8,11 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
   'EditMode',
   'Utils',
   '$rootScope',
-  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope) {
+  'AgentName',
+  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope, AgentName) {
     var $ctrl = this;
     $ctrl.delivery = {};
+    $ctrl.options = {agents: null};
     $ctrl.$onInit = function() {
       if (!data.remove) {
         if (data.delivery) {
@@ -18,8 +20,9 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
           $ctrl.delivery.type = angular.copy(data.delivery.type.id);
         }
         $ctrl.getDeliveryTypes().then(function(response) {
+          EditMode.enable();
           $ctrl.buildForm();
-        })
+        });
       } else {
         if (data.delivery) {
           $ctrl.delivery = angular.copy(data.delivery);
@@ -28,12 +31,35 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
     };
 
     $ctrl.getDeliveryTypes = function(search) {
-      return $http
-        .get(appConfig.djangoUrl + 'delivery-types/')
-        .then(function(response) {
-          $ctrl.deliveryTypes = response.data;
-          return response.data;
+      return $http.get(appConfig.djangoUrl + 'delivery-types/').then(function(response) {
+        $ctrl.deliveryTypes = response.data;
+        return response.data;
+      });
+    };
+
+    $ctrl.getAgents = function(search) {
+      return $http({
+        url: appConfig.djangoUrl + 'agents/',
+        mathod: 'GET',
+        params: {page: 1, page_size: 10, search: search},
+      }).then(function(response) {
+        response.data.forEach(function(agent) {
+          AgentName.parseAgentNames(agent);
         });
+        $ctrl.options.agents = response.data;
+        return $ctrl.options.agents;
+      });
+    };
+
+    $ctrl.getSas = function(search) {
+      return $http({
+        url: appConfig.djangoUrl + 'submission-agreements/',
+        mathod: 'GET',
+        params: {page: 1, page_size: 10, search: search, published: true},
+      }).then(function(response) {
+        $ctrl.options.sas = response.data;
+        return $ctrl.options.sas;
+      });
     };
 
     $ctrl.buildForm = function() {
@@ -65,6 +91,61 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
           templateOptions: {
             label: $translate.instant('DESCRIPTION'),
             rows: 3,
+          },
+        },
+        {
+          type: 'uiselect',
+          key: 'producer_organization',
+          templateOptions: {
+            options: function() {
+              return $ctrl.options.agents;
+            },
+            valueProp: 'id',
+            labelProp: 'full_name',
+            multiple: false,
+            placeholder: $translate.instant('ACCESS.PRODUCER_ORGANIZATION'),
+            label: $translate.instant('ACCESS.PRODUCER_ORGANIZATION'),
+            appendToBody: false,
+            refresh: function(search) {
+              if ($ctrl.initAgentSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                search = angular.copy($ctrl.initAgentSearch);
+                $ctrl.initAgentSearch = null;
+              }
+              $ctrl.getAgents(search).then(function() {
+                this.options = $ctrl.options.agents;
+              });
+            },
+          },
+        },
+        {
+          type: 'uiselect',
+          key: 'submission_agreement',
+          templateOptions: {
+            options: function() {
+              return $ctrl.options.sas;
+            },
+            valueProp: 'id',
+            labelProp: 'name',
+            multiple: false,
+            placeholder: $translate.instant('SUBMISSION_AGREEMENT'),
+            label: $translate.instant('SUBMISSION_AGREEMENT'),
+            appendToBody: false,
+            refresh: function(search) {
+              if ($ctrl.initSaSearch && (angular.isUndefined(search) || search === null || search === '')) {
+                search = angular.copy($ctrl.initSaSearch);
+                $ctrl.initSaSearch = null;
+              }
+              $ctrl.getSas(search).then(function() {
+                this.options = $ctrl.options.sas;
+              });
+            },
+          },
+        },
+        {
+          type: 'input',
+          key: 'reference_code',
+          templateOptions: {
+            label: $translate.instant('ACCESS.REFERENCE_CODE'),
           },
         },
       ];
