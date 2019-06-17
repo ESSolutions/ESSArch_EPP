@@ -12,12 +12,15 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
   function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope, AgentName) {
     var $ctrl = this;
     $ctrl.delivery = {};
-    $ctrl.options = {agents: null};
+    $ctrl.options = {};
     $ctrl.$onInit = function() {
       if (!data.remove) {
         if (data.delivery) {
           $ctrl.delivery = angular.copy(data.delivery);
           $ctrl.delivery.type = angular.copy(data.delivery.type.id);
+          if($ctrl.delivery.producer_organization) {
+            $ctrl.delivery.producer_organization.full_name = AgentName.getAuthorizedName(angular.copy($ctrl.delivery.producer_organization)).full_name;
+          }
         }
         $ctrl.getDeliveryTypes().then(function(response) {
           EditMode.enable();
