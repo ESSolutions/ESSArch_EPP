@@ -15,6 +15,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       ADD_STRUCTURE_RULE: 'Lägg till ny regel för struktur',
       ADD_STRUCTURE_UNIT: 'Lägg till strukturenhet',
       ADD_TO_STRUCTURE: 'Lägg till under strukturenhet',
+      ADDED_TO_TRANSFER: 'Tillagd(a) i överföring',
       ALT_NAME: 'Alternativt namn',
       ALT_NAMES: 'Namn',
       ARCHIVE: 'Arkiv',

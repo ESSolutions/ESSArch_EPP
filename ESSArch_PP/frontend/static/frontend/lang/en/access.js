@@ -14,6 +14,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       ADD_STRUCTURE_RULE: 'Add new structure rule',
       ADD_STRUCTURE_UNIT: 'Add structure unit',
       ADD_TO_STRUCTURE: 'Add to structure unit',
+      ADDED_TO_TRANSFER: 'Added to transfer',
       ALT_NAME: 'Alternate name',
       ALT_NAMES: 'Names',
       ARCHIVE: 'Archive',

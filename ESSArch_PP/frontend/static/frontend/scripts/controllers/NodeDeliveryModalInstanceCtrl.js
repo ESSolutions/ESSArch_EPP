@@ -9,7 +9,8 @@ angular.module('essarch.controllers').controller('NodeDeliveryModalInstanceCtrl'
   'Utils',
   '$rootScope',
   '$q',
-  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope, $q) {
+  'Notifications',
+  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope, $q, Notifications) {
     var $ctrl = this;
     $ctrl.model = {};
     $ctrl.$onInit = function() {
@@ -155,6 +156,7 @@ angular.module('essarch.controllers').controller('NodeDeliveryModalInstanceCtrl'
         },
       })
         .then(function(response) {
+          Notifications.add($translate.instant('ACCESS.ADDED_TO_TRANSFER'), 'success')
           $ctrl.saving = false;
           EditMode.disable();
           $uibModalInstance.close(response.data);
