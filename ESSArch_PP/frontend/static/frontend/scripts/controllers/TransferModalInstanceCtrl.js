@@ -24,7 +24,6 @@ angular.module('essarch.controllers').controller('TransferModalInstanceCtrl', [
       }
     };
 
-
     $ctrl.buildForm = function() {
       $ctrl.fields = [
         {
@@ -33,6 +32,41 @@ angular.module('essarch.controllers').controller('TransferModalInstanceCtrl', [
           templateOptions: {
             label: $translate.instant('NAME'),
             required: true,
+          },
+        },
+        {
+          type: 'input',
+          key: 'submitter_organization',
+          templateOptions: {
+            label: $translate.instant('ACCESS.SUBMITTER_ORGANIZATION'),
+          },
+        },
+        {
+          type: 'input',
+          key: 'submitter_organization_main_address',
+          templateOptions: {
+            label: $translate.instant('ACCESS.SUBMITTER_ORGANIZATION_MAIN_ADDRESS'),
+          },
+        },
+        {
+          type: 'input',
+          key: 'submitter_individual_name',
+          templateOptions: {
+            label: $translate.instant('ACCESS.SUBMITTER_INDIVIDUAL_NAME'),
+          },
+        },
+        {
+          type: 'input',
+          key: 'submitter_individual_phone',
+          templateOptions: {
+            label: $translate.instant('ACCESS.SUBMITTER_INDIVIDUAL_PHONE'),
+          },
+        },
+        {
+          type: 'input',
+          key: 'submitter_individual_email',
+          templateOptions: {
+            label: $translate.instant('ACCESS.SUBMITTER_INDIVIDUAL_EMAIL'),
           },
         },
       ];
@@ -47,7 +81,7 @@ angular.module('essarch.controllers').controller('TransferModalInstanceCtrl', [
         $ctrl.form.$setSubmitted();
         return;
       }
-      $ctrl.transfer.delivery = angular.copy(data.delivery.id);
+      $ctrl.transfer.delivery = angular.copy(data.delivery);
       $ctrl.creating = true;
       $rootScope.skipErrorNotification = true;
       $http({

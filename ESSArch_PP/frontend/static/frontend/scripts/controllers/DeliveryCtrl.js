@@ -11,6 +11,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
   'myService',
   '$state',
   '$stateParams',
+  'AgentName',
   function(
     $scope,
     appConfig,
@@ -23,9 +24,11 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
     $translate,
     myService,
     $state,
-    $stateParams
+    $stateParams,
+    AgentName
   ) {
     var vm = this;
+    $scope.AgentName = AgentName;
     $scope.$translate = $translate;
     vm.selected = null;
     vm.deliveries = [];
@@ -44,7 +47,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
           $stateParams.delivery !== ''
         ) {
           $http
-            .get(appConfig.djangoUrl + 'deliveries/' + $stateParams.delivery)
+            .get(appConfig.djangoUrl + 'deliveries/' + $stateParams.delivery + '/')
             .then(function(response) {
               vm.deliveryClick(response.data);
               vm.initLoad = false;
@@ -82,7 +85,7 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
       if (event.transfer) {
         vm.activeTab = 'transfers';
         $timeout(function() {
-          $state.go('home.access.deliveries.transfers', {delivery: vm.selected.id, transfer: event.transfer});
+          $state.go('home.access.deliveries.transfers', {delivery: vm.selected.id, transfer: event.transfer.id});
         });
       }
     };
@@ -202,24 +205,24 @@ angular.module('essarch.controllers').controller('DeliveryCtrl', [
 
     vm.getDeliveryColspan = function() {
       if (myService.checkPermission('tags.change_delivery') && myService.checkPermission('tags.delete_delivery')) {
-        return 6;
+        return 8;
       } else if (
         myService.checkPermission('tags.change_delivery') ||
         myService.checkPermission('tags.delete_delivery')
       ) {
-        return 5;
+        return 7;
       } else {
-        return 4;
+        return 6;
       }
     };
 
     vm.getEventColspan = function() {
       if (myService.checkPermission('ip.change_eventip') && myService.checkPermission('ip.delete_eventip')) {
-        return 6;
+        return 7;
       } else if (myService.checkPermission('ip.change_eventip') || myService.checkPermission('ip.delete_eventip')) {
-        return 5;
+        return 6;
       } else {
-        return 4;
+        return 5;
       }
     };
 

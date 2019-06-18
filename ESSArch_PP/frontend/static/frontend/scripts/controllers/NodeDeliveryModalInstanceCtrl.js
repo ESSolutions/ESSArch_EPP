@@ -8,7 +8,9 @@ angular.module('essarch.controllers').controller('NodeDeliveryModalInstanceCtrl'
   'EditMode',
   'Utils',
   '$rootScope',
-  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope) {
+  '$q',
+  'Notifications',
+  function(appConfig, $http, $translate, data, $uibModalInstance, $scope, EditMode, Utils, $rootScope, $q, Notifications) {
     var $ctrl = this;
     $ctrl.model = {};
     $ctrl.$onInit = function() {
@@ -20,17 +22,58 @@ angular.module('essarch.controllers').controller('NodeDeliveryModalInstanceCtrl'
       $ctrl.buildForm();
     };
 
-    $ctrl.getTransfers = function(search) {
+    $ctrl.getDeliveries = function(search) {
       return $http
-        .get(appConfig.djangoUrl + 'transfers/', {params: {search: search}})
+        .get(appConfig.djangoUrl + 'deliveries/', {params: {search: search}})
         .then(function(response) {
-          $ctrl.transfers = response.data;
+          $ctrl.deliveries = response.data;
           return response.data;
         });
     };
 
+    $ctrl.getTransfers = function(search) {
+      if ($ctrl.model.delivery === null || angular.isUndefined($ctrl.model.delivery)) {
+        var deferred = $q.defer();
+        deferred.resolve([]);
+        return deferred.promise;
+      } else {
+        return $http
+        .get(appConfig.djangoUrl + 'deliveries/' + $ctrl.model.delivery + '/transfers/', {params: {search: search}})
+        .then(function(response) {
+          $ctrl.transfers = response.data;
+          return response.data;
+        });
+      }
+    };
+
     $ctrl.buildForm = function() {
       $ctrl.fields = [
+        {
+          type: 'uiselect',
+          key: 'delivery',
+          templateOptions: {
+            required: true,
+            options: function() {
+              return $ctrl.deliveries;
+            },
+            valueProp: 'id',
+            labelProp: 'name',
+            placeholder: $translate.instant('ACCESS.DELIVERY'),
+            label: $translate.instant('ACCESS.DELIVERY'),
+            appendToBody: false,
+            onChange: function($modelValue) {
+              $ctrl.model.transfer = null;
+            },
+            optionsFunction: function(search) {
+              return $ctrl.deliveries;
+            },
+            refresh: function(search) {
+              $ctrl.getDeliveries(search).then(function() {
+                this.options = $ctrl.deliveries;
+              });
+            },
+          },
+        },
         {
           type: 'uiselect',
           key: 'transfer',
@@ -113,6 +156,7 @@ angular.module('essarch.controllers').controller('NodeDeliveryModalInstanceCtrl'
         },
       })
         .then(function(response) {
+          Notifications.add($translate.instant('ACCESS.ADDED_TO_TRANSFER'), 'success')
           $ctrl.saving = false;
           EditMode.disable();
           $uibModalInstance.close(response.data);

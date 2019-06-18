@@ -134,10 +134,14 @@ angular.module('essarch.controllers').controller('EventModalInstanceCtrl', [
       }
       $ctrl.saving = true;
       $rootScope.skipErrorNotification = true;
+      var saveData = Utils.getDiff(data.event, $ctrl.event, {map: {type: 'id'}});
+      if (!angular.isUndefined(saveData.eventOutcomeDetailNote) && saveData.eventOutcomeDetailNote === null) {
+        saveData.eventOutcomeDetailNote = '';
+      }
       $http({
         url: appConfig.djangoUrl + 'events/' + data.event.id + '/',
         method: 'PATCH',
-        data: Utils.getDiff(data.event, $ctrl.event, {map: {type: 'id'}}),
+        data: saveData,
       })
         .then(function(response) {
           $ctrl.saving = false;
