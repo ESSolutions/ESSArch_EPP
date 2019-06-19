@@ -271,6 +271,7 @@
                         </td>
                         <td permission permission-only="'agents.change_agent'" class="text-center shrink">
                           <button
+                            ng-hide="x.type.id === 1"
                             class="btn btn-default btn-sm fas fa-trash-alt"
                             ng-click="vm.removeNameModal(x)"
                             uib-tooltip="{{'REMOVE' | translate}}"

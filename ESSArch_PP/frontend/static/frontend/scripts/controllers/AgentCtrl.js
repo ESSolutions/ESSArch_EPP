@@ -141,13 +141,17 @@ angular
       agent.names.sort(function(a, b) {
         return new Date(b.start_date) - new Date(a.start_date);
       });
+      var authorized = [];
       agent.names.forEach(function(x, index) {
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
+        if (x.type.id === 1) {
           var name = x;
           agent.names.splice(index, 1);
-          agent.names.unshift(name);
+          authorized.unshift(name);
         }
       });
+      authorized.forEach(function(x) {
+        agent.names.unshift(x);
+      })
     };
 
     vm.archiveClick = function(agentArchive) {
@@ -473,6 +477,11 @@ angular
     };
 
     vm.editNameModal = function(name) {
+      var typeDisabled = !vm.agent.names.map(function(x) {
+        if (x.id !== name.id) {
+          return x.type.id;
+        }
+      }).includes(1);
       var modalInstance = $uibModal.open({
         animation: true,
         ariaLabelledBy: 'modal-title',
@@ -486,13 +495,17 @@ angular
             return {
               agent: vm.agent,
               name: name,
+              nameTypeDisabled: typeDisabled,
             };
           },
         },
       });
       modalInstance.result.then(
         function(data) {
-          vm.getAgent(vm.agent);
+          vm.agentPipe($scope.tableState);
+          if (vm.agent) {
+            vm.getAgent(vm.agent);
+          }
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());
@@ -522,7 +535,9 @@ angular
       modalInstance.result.then(
         function(data) {
           vm.agentPipe($scope.tableState);
-          vm.getAgent(vm.agent);
+          if (vm.agent) {
+            vm.getAgent(vm.agent);
+          }
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

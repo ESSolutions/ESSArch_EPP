@@ -38,6 +38,7 @@ angular
           var name = angular.copy(data.name);
           name.type = data.name.type.id;
           $ctrl.name = angular.copy(name);
+          $ctrl.typeDisabled = angular.copy(data.nameTypeDisabled);
         } else {
           $ctrl.resetName();
         }
@@ -54,6 +55,7 @@ angular
             label: $translate.instant('TYPE'),
             options: $ctrl.options.type,
             required: true,
+            disabled: $ctrl.typeDisabled,
             labelProp: 'name',
             valueProp: 'id',
             defaultValue: $ctrl.options.type[0].id,

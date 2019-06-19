@@ -26,9 +26,13 @@ angular.module('essarch.services').factory('AgentName', function($filter) {
      * @param {Object} agent
      */
     getAuthorizedName: function(agent, options) {
-      var name;
+      agent = angular.copy(agent);
+      agent.names.sort(function(a, b) {
+        return new Date(b.start_date) - new Date(a.start_date);
+      });
+      var name = null;
       agent.names.forEach(function(x) {
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
+        if (x.type.id === 1 && x.start_date !== null && x.end_date === null && name === null) {
           name = angular.copy(x);
           name.full_name = getFullName(x);
           if (angular.isUndefined(options) || (!angular.isUndefined(options) && options.includeDates !== false)) {
@@ -38,6 +42,19 @@ angular.module('essarch.services').factory('AgentName', function($filter) {
           }
         }
       });
+      if (name === null) {
+        agent.names.forEach(function(x) {
+          if (x.type.id === 1 && name === null) {
+            name = angular.copy(x);
+            name.full_name = getFullName(x);
+            if (angular.isUndefined(options) || (!angular.isUndefined(options) && options.includeDates !== false)) {
+              if (options && options.printDates) {
+              }
+              name.full_name += getAgentNameDates(agent);
+            }
+          }
+        });
+      }
       return name;
     },
 
@@ -48,7 +65,7 @@ angular.module('essarch.services').factory('AgentName', function($filter) {
     parseAgentNames: function(agent, options) {
       agent.names.forEach(function(x) {
         x.full_name = getFullName(x);
-        if (x.type.name.toLowerCase() === 'auktoriserad') {
+        if (x.type.id === 1) {
           agent.full_name = getFullName(x);
           if (angular.isUndefined(options) || (!angular.isUndefined(options) && options.includeDates !== false)) {
             agent.full_name += getAgentNameDates(agent);
