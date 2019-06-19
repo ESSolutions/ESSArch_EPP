@@ -119,6 +119,7 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
               });
             },
           },
+          defaultValue: null
         },
         {
           type: 'uiselect',
@@ -143,6 +144,7 @@ angular.module('essarch.controllers').controller('DeliveryModalInstanceCtrl', [
               });
             },
           },
+          defaultValue: null
         },
         {
           type: 'input',
