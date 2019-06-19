@@ -966,7 +966,7 @@ angular
     vm.getArchiveCreator = function(node) {
       var creator = null;
       node.agents.forEach(function(agent) {
-        agent.name = AgentName.getAuthorizedName(agent.agent).full_name;
+        agent.agent.name = AgentName.getAuthorizedName(agent.agent).full_name;
         if (agent.type === 'creator') {
           creator = agent.agent;
           creator.type = 'agent';
