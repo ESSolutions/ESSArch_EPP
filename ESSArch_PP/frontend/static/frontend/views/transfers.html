@@ -67,6 +67,9 @@
         <thead>
           <tr>
             <th class="cursor-pointer" st-sort="name">{{ "NAME" | translate }}</th>
+            <th class="shrink" permission permission-except="'tags.change_transfer'">
+              {{'VIEW' | translate}}
+            </th>
             <th class="shrink" permission permission-only="'tags.change_transfer'">
               {{'EDIT' | translate}}
             </th>
@@ -84,6 +87,15 @@
           >
             <td>
               {{x.name}}
+            </td>
+            <td class="text-center shrink" permission permission-except="'tags.change_transfer'">
+              <button
+                class="btn btn-default fas fa-eye btn-sm"
+                ng-click="vm.viewTransferModal(x); $event.stopPropagation();"
+                uib-tooltip="{{'view' | translate}}"
+                tooltip-placement="auto top"
+                tooltip-append-to-body="true"
+              ></button>
             </td>
             <td class="text-center shrink" permission permission-only="'tags.change_transfer'">
               <button

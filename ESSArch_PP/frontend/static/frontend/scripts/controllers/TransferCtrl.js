@@ -341,6 +341,33 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
       );
     };
 
+    vm.viewTransferModal = function(transfer) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/view_transfer_modal.html',
+        controller: 'TransferModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              transfer: transfer,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.transferPipe(vm.transferTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
     vm.removeTransferModal = function(transfer) {
       var modalInstance = $uibModal.open({
         animation: true,

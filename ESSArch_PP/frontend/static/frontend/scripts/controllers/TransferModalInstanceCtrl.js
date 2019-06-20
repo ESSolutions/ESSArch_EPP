@@ -36,6 +36,13 @@ angular.module('essarch.controllers').controller('TransferModalInstanceCtrl', [
         },
         {
           type: 'input',
+          key: 'description',
+          templateOptions: {
+            label: $translate.instant('DESCRIPTION'),
+          },
+        },
+        {
+          type: 'input',
           key: 'submitter_organization',
           templateOptions: {
             label: $translate.instant('ACCESS.SUBMITTER_ORGANIZATION'),
