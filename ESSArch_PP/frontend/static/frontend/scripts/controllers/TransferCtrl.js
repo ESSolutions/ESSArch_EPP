@@ -259,9 +259,13 @@ angular.module('essarch.controllers').controller('TransferCtrl', [
         myService.checkPermission('tags.change_transfer') ||
         myService.checkPermission('tags.delete_transfer')
       ) {
-        return 2;
+        if (!myService.checkPermission('tags.change_transfer')) {
+          return 2;
+        } else {
+          return 1
+        }
       } else {
-        return 1;
+        return 2;
       }
     };
 
