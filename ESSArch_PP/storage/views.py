@@ -35,6 +35,7 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from ESSArch_Core.WorkflowEngine.models import ProcessTask
 from ESSArch_Core.configuration.models import ArchivePolicy, Path
 from ESSArch_Core.exceptions import Conflict
+from ESSArch_Core.fixity.validation.backends.checksum import ChecksumValidator
 from ESSArch_Core.ip.models import InformationPackage
 from ESSArch_Core.storage.models import (AccessQueue, IOQueue, Robot,
                                          RobotQueue, StorageMedium,
@@ -220,15 +221,9 @@ class IOQueueViewSet(viewsets.ModelViewSet):
         filepath = request.data['path']
         filepath = os.path.join(path, filepath)
 
-        ProcessTask.objects.create(
-            name="ESSArch_Core.tasks.ValidateIntegrity",
-            params={
-                "filename": filepath,
-                "checksum": md5,
-                "algorithm": 'MD5'
-            },
-            responsible=self.request.user,
-        ).run().get()
+        options = {'expected': md5, 'algorithm': 'md5'}
+        validator = ChecksumValidator(context='checksum_str', options=options)
+        validator.validate(filepath)
 
         return Response('Upload of %s complete' % filepath)
 
