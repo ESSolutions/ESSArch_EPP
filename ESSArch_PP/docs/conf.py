@@ -41,7 +41,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
-import django
 import inspect
 import os
 import sys
@@ -52,8 +51,6 @@ proj_folder = os.path.realpath(
 sys.path.append(proj_folder)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
-django.setup()
 
 # Stop Django from executing DB queries
 from django.db.models.query import QuerySet  # noqa
