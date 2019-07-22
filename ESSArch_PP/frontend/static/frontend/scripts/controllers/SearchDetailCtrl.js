@@ -47,7 +47,7 @@ angular
       vm.loadRecordAndTree();
     };
 
-    vm.loadRecordAndTree = function() {
+    vm.loadRecordAndTree = function(structure) {
       var isStructureUnit = $state.current.name == 'home.access.search.structure_unit';
       var nodeId = $stateParams.id;
 
@@ -79,7 +79,11 @@ angular
         } else {
           archiveId = vm.record.archive;
         }
-        vm.structure = vm.record.structure;
+        if (structure) {
+          vm.structure = structure;
+        } else {
+          vm.structure = vm.record.structure;
+        }
 
         if (vm.record._id === archiveId) {
           vm.createArchiveNode(startNode, vm.record);
@@ -742,22 +746,18 @@ angular
         }
       });
       return disabled;
-    }
+    };
 
     vm.deliveryButtonDisabled = function() {
       var checked = vm.getChecked();
       var disabled = true;
       checked.forEach(function(x) {
-        if (
-          !angular.isUndefined(x) &&
-          x.placeholder !== true &&
-          x.type !== 'agent'
-        ) {
+        if (!angular.isUndefined(x) && x.placeholder !== true && x.type !== 'agent') {
           disabled = false;
         }
       });
       return disabled;
-    }
+    };
 
     vm.gotoNode = function(node) {
       $state.go('home.access.search.' + node._index, {id: node._id});
@@ -959,7 +959,7 @@ angular
     vm.parseAgents = function(node) {
       node.agents.forEach(function(agent) {
         agent.name = AgentName.getAuthorizedName(agent.agent).full_name;
-        agent.agent.auth_name = agent.name
+        agent.agent.auth_name = agent.name;
       });
     };
 
