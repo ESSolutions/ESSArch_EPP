@@ -296,20 +296,6 @@ angular
             },
           },
           {
-            type: 'select',
-            key: 'script',
-            templateOptions: {
-              options: $ctrl.options.script.choices,
-              valueProp: 'value',
-              labelProp: 'display_name',
-              label: $translate.instant('ACCESS.SCRIPT'),
-              defaultValue: $ctrl.options.script.choices[0].value,
-              required: true,
-              notNull: true,
-            },
-            hideExpression: 'true',
-          },
-          {
             type: 'uiselect',
             key: 'language',
             templateOptions: {
@@ -344,7 +330,6 @@ angular
               required: true,
               notNull: true,
             },
-            hideExpression: 'true',
           },
           {
             type: 'select',
