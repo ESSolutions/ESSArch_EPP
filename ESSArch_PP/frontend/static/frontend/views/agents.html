@@ -181,13 +181,73 @@
                   data="vm.agent.revise_date"
                   type="date"
                 ></result-field>
-                <hr ng-if="vm.agent.identifiers.length > 0" class="small" />
-                <div ng-if="vm.agent.identifiers.length > 0">
-                  <label>
-                    {{'ACCESS.IDENTIFIERS' | translate}}
-                  </label>
-                  <div ng-repeat="x in vm.agent.identifiers">
-                    {{x.type.name + ': ' + x.identifier}}
+                <hr class="small" />
+                <div>
+                  <div class="d-flex justify-content-between align-items-center pb-base">
+                    <label>
+                      {{'ACCESS.IDENTIFIERS' | translate}}
+                    </label>
+                    <button class="btn btn-primary" ng-click="vm.addIdentifierModal()">
+                      {{'ADD' | translate}}
+                    </button>
+                  </div>
+                  <div class="table-x-overflow table-container">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>
+                            {{'TYPE' | translate}}
+                          </th>
+                          <th>
+                            ID
+                          </th>
+                          <th permission permission-only="'agents.change_agent'" class="shrink">
+                            {{'EDIT' | translate}}
+                          </th>
+                          <th permission permission-only="'agents.change_agent'" class="white-space-nowrap shrink">
+                            {{'REMOVE' | translate}}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="x in vm.agent.identifiers">
+                          <td>
+                            {{x.type.name}}
+                          </td>
+                          <td>
+                            {{x.identifier}}
+                          </td>
+                          <td permission permission-only="'agents.change_agent'" class="text-center shrink">
+                            <button
+                              class="btn btn-default btn-sm fas fa-edit"
+                              ng-click="vm.editIdentifierModal(x)"
+                              uib-tooltip="{{'EDIT' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            >
+                              <i class=""></i>
+                            </button>
+                          </td>
+                          <td permission permission-only="'agents.change_agent'" class="text-center shrink">
+                            <button
+                              class="btn btn-default btn-sm fas fa-trash-alt"
+                              ng-click="vm.removeIdentifierModal(x)"
+                              uib-tooltip="{{'REMOVE' | translate}}"
+                              tooltip-placement="auto top"
+                              tooltip-append-to-body="true"
+                            ></button>
+                          </td>
+                        </tr>
+                        <tr ng-if="vm.agent.identifiers.length <= 0" class="empty-table-indicator">
+                          <td permission permission-except="'agents.change_agent'" colspan="2">
+                            {{'NO_RESULTS_FOUND' | translate}}
+                          </td>
+                          <td permission permission-only="'agents.change_agent'" colspan="4">
+                            {{'NO_RESULTS_FOUND' | translate}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -281,8 +341,12 @@
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.names.length <= 0" class="empty-table-indicator">
-                        <td permission permission-except="'agents.change_agent'" colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
-                        <td permission permission-only="'agents.change_agent'"colspan="7">{{'NO_RESULTS_FOUND' | translate}}</td>
+                        <td permission permission-except="'agents.change_agent'" colspan="5">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
+                        <td permission permission-only="'agents.change_agent'" colspan="7">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -374,8 +438,12 @@
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.mandates.length <= 0" class="empty-table-indicator">
-                        <td permission permission-except="'agents.change_agent'" colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
-                        <td permission permission-only="'agents.change_agent'" colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                        <td permission permission-except="'agents.change_agent'" colspan="4">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
+                        <td permission permission-only="'agents.change_agent'" colspan="6">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -467,8 +535,12 @@
                         </td>
                       </tr>
                       <tr ng-if="vm.agent.related_agents.length <= 0" class="empty-table-indicator">
-                        <td permission permission-except="'agents.change_agent'" colspan="5">{{'NO_RESULTS_FOUND' | translate}}</td>
-                        <td permission permission-only="'agents.change_agent'" colspan="7">{{'NO_RESULTS_FOUND' | translate}}</td>
+                        <td permission permission-except="'agents.change_agent'" colspan="5">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
+                        <td permission permission-only="'agents.change_agent'" colspan="7">
+                          {{'NO_RESULTS_FOUND' | translate}}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -604,12 +676,20 @@
                           </td>
                         </tr>
                         <tr ng-if="!vm.agent.archives.length && !vm.archivesLoading" class="empty-table-indicator">
-                        <td permission permission-except="'agents.change_agent'" colspan="4">{{'NO_RESULTS_FOUND' | translate}}</td>
-                        <td permission permission-only="'agents.change_agent'" colspan="6">{{'NO_RESULTS_FOUND' | translate}}</td>
+                          <td permission permission-except="'agents.change_agent'" colspan="4">
+                            {{'NO_RESULTS_FOUND' | translate}}
+                          </td>
+                          <td permission permission-only="'agents.change_agent'" colspan="6">
+                            {{'NO_RESULTS_FOUND' | translate}}
+                          </td>
                         </tr>
                         <tr ng-if="!vm.agent.archives.length && vm.archivesLoading" class="empty-table-indicator">
-                          <td permission permission-except="'agents.change_agent'" class="loading-column" colspan="4">{{'LOADING' | translate}}</td>
-                          <td permission permission-only="'agents.change_agent'" class="loading-column" colspan="6">{{'LOADING' | translate}}</td>
+                          <td permission permission-except="'agents.change_agent'" class="loading-column" colspan="4">
+                            {{'LOADING' | translate}}
+                          </td>
+                          <td permission permission-only="'agents.change_agent'" class="loading-column" colspan="6">
+                            {{'LOADING' | translate}}
+                          </td>
                         </tr>
                       </tbody>
                     </table>

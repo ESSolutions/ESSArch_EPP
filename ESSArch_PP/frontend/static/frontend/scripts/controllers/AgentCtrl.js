@@ -803,4 +803,90 @@ angular
         }
       );
     };
+
+    vm.addIdentifierModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_agent_identifier_modal.html',
+        controller: 'AgentIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editIdentifierModal = function(identifier) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_agent_identifier_modal.html',
+        controller: 'AgentIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              identifier: identifier,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeIdentifierModal = function(identifier) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_agent_identifier_modal.html',
+        controller: 'AgentIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              agent: vm.agent,
+              identifier: identifier,
+              remove: true,
+              allow_close: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.getAgent(vm.agent);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
   });

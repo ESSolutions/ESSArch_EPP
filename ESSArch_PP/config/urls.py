@@ -30,6 +30,7 @@ from django.contrib.auth import views as auth_views
 
 from ESSArch_Core.WorkflowEngine.views import ProcessViewSet, ProcessStepViewSet, ProcessTaskViewSet
 from ESSArch_Core.agents.views import (
+    AgentIdentifierTypeViewSet,
     AgentNameTypeViewSet,
     AgentNoteTypeViewSet,
     AgentRelationTypeViewSet,
@@ -99,6 +100,7 @@ router.register(r'agents', AgentViewSet).register(
     parents_query_lookups=['agent']
 )
 router.register(r'agent-types', AgentTypeViewSet)
+router.register(r'agent-identifier-types', AgentIdentifierTypeViewSet)
 router.register(r'agent-name-types', AgentNameTypeViewSet)
 router.register(r'agent-note-types', AgentNoteTypeViewSet)
 router.register(r'agent-relation-types', AgentRelationTypeViewSet)
