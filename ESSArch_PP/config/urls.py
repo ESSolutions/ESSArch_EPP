@@ -33,6 +33,7 @@ from ESSArch_Core.agents.views import (
     AgentIdentifierTypeViewSet,
     AgentNameTypeViewSet,
     AgentNoteTypeViewSet,
+    AgentPlaceTypeViewSet,
     AgentRelationTypeViewSet,
     AgentTagLinkRelationTypeViewSet,
     AgentTypeViewSet,
@@ -103,6 +104,8 @@ router.register(r'agent-types', AgentTypeViewSet)
 router.register(r'agent-identifier-types', AgentIdentifierTypeViewSet)
 router.register(r'agent-name-types', AgentNameTypeViewSet)
 router.register(r'agent-note-types', AgentNoteTypeViewSet)
+router.register(r'agent-place-types', AgentPlaceTypeViewSet)
+AgentPlaceTypeViewSet
 router.register(r'agent-relation-types', AgentRelationTypeViewSet)
 router.register(r'agent-tag-relation-types', AgentTagLinkRelationTypeViewSet)
 router.register(r'authority-types', AuthorityTypeViewSet)

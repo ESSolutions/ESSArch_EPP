@@ -874,8 +874,33 @@
                     ng-class="{'fa-angle-down': vm.accordion.topography.open, 'fa-angle-right': !vm.accordion.topography.open}"
                   ></i>
                 </uib-accordion-heading>
-                <div ng-if="vm.agent.places.length > 0" ng-repeat="x in vm.agent.places">
-                  <hr ng-if="$index !== 0" class="small" />
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-primary" ng-click="vm.addPlaceModal()">
+                    {{'ADD' | translate}}
+                  </button>
+                </div>
+                <div class="position-relative" ng-if="vm.agent.places.length > 0" ng-repeat="x in vm.agent.places">
+                  <hr class="small" />
+                  <div class="edit-btn-wrapper flex-row position-realtive float-right pt-base">
+                    <button
+                      permission
+                      permission-only="'agents.change_agent'"
+                      class="btn btn-default btn-sm fas fa-edit"
+                      ng-click="vm.editPlaceModal(x)"
+                      uib-tooltip="{{'EDIT' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    ></button>
+                    <button
+                      permission
+                      permission-only="'agents.change_agent'"
+                      class="btn btn-default btn-sm fas fa-trash-alt"
+                      ng-click="vm.removePlaceModal(x)"
+                      uib-tooltip="{{'REMOVE' | translate}}"
+                      tooltip-placement="auto top"
+                      tooltip-append-to-body="true"
+                    ></button>
+                  </div>
                   <result-field label="{{'NAME' | translate}}" data="x.topography.name"></result-field>
                   <result-field label="{{'TYPE' | translate}}" data="x.type.name"></result-field>
                   <result-field label="{{'DESCRIPTION' | translate}}" data="x.description"></result-field>
