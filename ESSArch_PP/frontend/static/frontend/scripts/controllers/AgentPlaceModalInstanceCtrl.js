@@ -116,6 +116,15 @@ angular
         {
           type: 'input',
           key: 'lng',
+          validators: {
+            coordinate: {
+              expression: function(viewValue, modelValue) {
+                var value = modelValue || viewValue;
+                return /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value);
+              },
+              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)'
+            }
+          },
           templateOptions: {
             type: 'number',
             label: $translate.instant('ACCESS.LONGITUDE')
@@ -124,6 +133,15 @@ angular
         {
           type: 'input',
           key: 'lat',
+          validators: {
+            coordinate: {
+              expression: function(viewValue, modelValue) {
+                var value = modelValue || viewValue;
+                return /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value);
+              },
+              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)'
+            }
+          },
           templateOptions: {
             type: 'number',
             label: $translate.instant('ACCESS.LATITUDE')
