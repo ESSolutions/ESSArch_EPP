@@ -200,6 +200,16 @@ angular
                 appendToBody: false,
                 dateFormat: 'YYYY-MM-DD',
               },
+              expressionProperties: {
+                'templateOptions.onChange': function($modelValue) {
+                  if (
+                    $modelValue &&
+                    ($ctrl.agent.start_date === null || angular.isUndefined($ctrl.agent.start_date))
+                  ) {
+                    $ctrl.agent.start_date = $modelValue;
+                  }
+                },
+              },
             },
             {
               className: 'col-xs-12 col-sm-6 px-0 pl-md-base',
@@ -209,6 +219,13 @@ angular
                 label: $translate.instant('ACCESS.VALID_DATE_END'),
                 appendToBody: false,
                 dateFormat: 'YYYY-MM-DD',
+              },
+              expressionProperties: {
+                'templateOptions.onChange': function($modelValue) {
+                  if ($modelValue && ($ctrl.agent.end_date === null || angular.isUndefined($ctrl.agent.end_date))) {
+                    $ctrl.agent.end_date = $modelValue;
+                  }
+                },
               },
             },
           ],
