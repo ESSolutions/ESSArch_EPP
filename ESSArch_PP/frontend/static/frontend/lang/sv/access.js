@@ -4,6 +4,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       ACCESS: 'Åtkomst',
       ADD_FIELD: 'Lägg till fält',
       ADD_FIRST_LEVEL_LOCATION: 'Lägg till placering på första nivån',
+      ADD_IDENTIFIER: 'Lägg till identifikator',
       ADD_LOCATION: 'Lägg till placering',
       ADD_NODE: 'Lägg till nod',
       ARCHIVE_SAVED: 'Arkiv sparat',

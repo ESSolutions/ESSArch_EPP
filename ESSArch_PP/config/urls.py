@@ -69,6 +69,8 @@ from ESSArch_Core.tags.views import (
     MetricProfileViewSet,
     LocationLevelTypeViewSet,
     LocationFunctionTypeViewSet,
+    NodeIdentifierTypeViewSet,
+    NodeNoteTypeViewSet,
 )
 from ip.views import (InformationPackageViewSet, InformationPackageReceptionViewSet, OrderViewSet, WorkareaViewSet,
                       WorkareaFilesViewSet)
@@ -165,6 +167,8 @@ router.register(r'structure-units', StructureUnitViewSet).register(
 router.register(r'structure-types', StructureTypeViewSet)
 router.register(r'structure-unit-types', StructureUnitTypeViewSet)
 router.register(r'node-relation-types', NodeRelationTypeViewSet)
+router.register(r'node-identifier-types', NodeIdentifierTypeViewSet)
+router.register(r'node-note-types', NodeNoteTypeViewSet)
 router.register(r'locations', LocationViewSet).register(
     r'tags',
     TagVersionViewSet,

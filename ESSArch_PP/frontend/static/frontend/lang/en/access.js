@@ -4,6 +4,7 @@ angular.module('essarch.language').config(function($translateProvider) {
       ACCESS: 'Access',
       ADD_FIELD: 'Add field',
       ADD_FIRST_LEVEL_LOCATION: 'Add first level location',
+      ADD_IDENTIFIER: 'Add identifier',
       ADD_LOCATION: 'Add location',
       ADD_NODE: 'Add node',
       ADD_RELATED_ARCHIVE: 'Add related archive',

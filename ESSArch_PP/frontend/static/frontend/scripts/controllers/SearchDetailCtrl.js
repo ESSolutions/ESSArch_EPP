@@ -981,7 +981,7 @@ angular
         remarks: [],
       };
       record.notes.forEach(function(note) {
-        if (note.type.toLowerCase() === 'historik') {
+        if (note.type.name.toLowerCase() === 'historik') {
           obj.history.push(note);
         } else {
           obj.remarks.push(note);
@@ -1534,6 +1534,174 @@ angular
         function(data) {
           vm.loadRecordAndTree();
           vm.getTransfers(vm.transferTableState);
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+    vm.addNoteModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_node_note_modal.html',
+        controller: 'NodeNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editNoteModal = function(note) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_node_note_modal.html',
+        controller: 'NodeNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+              note: note,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeNoteModal = function(note) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_node_note_modal.html',
+        controller: 'NodeNoteModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+              note: note,
+              allow_close: true,
+              remove: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+    vm.addIdentifierModal = function() {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/add_node_identifier_modal.html',
+        controller: 'NodeIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.editIdentifierModal = function(identifier) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/edit_node_identifier_modal.html',
+        controller: 'NodeIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+              identifier: identifier,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
+        },
+        function() {
+          $log.info('modal-component dismissed at: ' + new Date());
+        }
+      );
+    };
+
+    vm.removeIdentifierModal = function(identifier) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        ariaLabelledBy: 'modal-title',
+        ariaDescribedBy: 'modal-body',
+        templateUrl: 'static/frontend/views/remove_node_identifier_modal.html',
+        controller: 'NodeIdentifierModalInstanceCtrl',
+        controllerAs: '$ctrl',
+        size: 'lg',
+        resolve: {
+          data: function() {
+            return {
+              node: vm.record,
+              identifier: identifier,
+              allow_close: true,
+              remove: true,
+            };
+          },
+        },
+      });
+      modalInstance.result.then(
+        function(data) {
+          vm.loadRecordAndTree();
         },
         function() {
           $log.info('modal-component dismissed at: ' + new Date());

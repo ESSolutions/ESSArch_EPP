@@ -1,11 +1,29 @@
 from django.db import transaction
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 from rest_framework import serializers
 
 from ESSArch_Core.agents.models import Agent, AgentTagLink, AgentTagLinkRelationType
 from ESSArch_Core.auth.fields import CurrentUsernameDefault
 from ESSArch_Core.tags.documents import Archive, Component
-from ESSArch_Core.tags.models import Search, Structure, StructureUnit, Tag, TagStructure, TagVersion, TagVersionType, Location
+from ESSArch_Core.tags.models import (
+    Search,
+    Structure,
+    StructureUnit,
+    Tag,
+    TagStructure,
+    TagVersion,
+    TagVersionType,
+    Location,
+    NodeNote,
+    NodeIdentifier,
+)
+from ESSArch_Core.tags.serializers import (
+    NodeNoteSerializer,
+    NodeNoteWriteSerializer,
+    NodeIdentifierSerializer,
+    NodeIdentifierWriteSerializer,
+)
 
 
 class ComponentWriteSerializer(serializers.Serializer):
@@ -27,12 +45,30 @@ class ComponentWriteSerializer(serializers.Serializer):
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
     custom_fields = serializers.JSONField(required=False)
+    notes = NodeNoteWriteSerializer(many=True, required=False)
+    identifiers = NodeIdentifierWriteSerializer(many=True, required=False)
+
+    @staticmethod
+    def create_notes(tag_version, notes_data):
+        NodeNote.objects.bulk_create([
+            NodeNote(tag_version=tag_version, **note)
+            for note in notes_data
+        ])
+
+    @staticmethod
+    def create_identifiers(tag_version, identifiers_data):
+        NodeIdentifier.objects.bulk_create([
+            NodeIdentifier(tag_version=tag_version, **identifier)
+            for identifier in identifiers_data
+        ])
 
     def create(self, validated_data):
         with transaction.atomic():
             structure_unit = validated_data.pop('structure_unit', None)
             parent = validated_data.pop('parent', None)
             structure = validated_data.pop('structure', None)
+            notes_data = validated_data.pop('notes', None)
+            identifiers_data = validated_data.pop('identifiers', [])
 
             tag = Tag.objects.create()
             tag_structure = TagStructure(tag=tag)
@@ -80,6 +116,9 @@ class ComponentWriteSerializer(serializers.Serializer):
                 new_unit = related if tag_structure.structure_unit is not None else None
                 tag_structure.copy_to_new_structure(related.structure, new_unit=new_unit)
 
+            self.create_identifiers(self, identifiers_data)
+            self.create_notes(self, notes_data)
+
         doc = Component.from_obj(tag_version)
         doc.save()
 
@@ -89,6 +128,19 @@ class ComponentWriteSerializer(serializers.Serializer):
         structure_unit = validated_data.pop('structure_unit', None)
         parent = validated_data.pop('parent', None)
         structure = validated_data.pop('structure', None)
+        notes_data = validated_data.pop('notes', None)
+        identifiers_data = validated_data.pop('identifiers', [])
+
+        if identifiers_data is not None:
+            NodeIdentifier.objects.filter(tag_version=instance).delete()
+            self.create_identifiers(instance, identifiers_data)
+
+
+        if notes_data is not None:
+            NodeNote.objects.filter(tag_version=instance).delete()
+            for note in notes_data:
+                note.setdefault('create_date', timezone.now())
+            self.create_notes(instance, notes_data)
 
         if structure is not None:
             tag = instance.tag
@@ -137,11 +189,29 @@ class ArchiveWriteSerializer(serializers.Serializer):
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
     custom_fields = serializers.JSONField(required=False)
+    notes = NodeNoteWriteSerializer(many=True, required=False)
+    identifiers = NodeIdentifierWriteSerializer(many=True, required=False)
+
+    @staticmethod
+    def create_notes(tag_version, notes_data):
+        NodeNote.objects.bulk_create([
+            NodeNote(tag_version=tag_version, **note)
+            for note in notes_data
+        ])
+
+    @staticmethod
+    def create_identifiers(tag_version, identifiers_data):
+        NodeIdentifier.objects.bulk_create([
+            NodeIdentifier(tag_version=tag_version, **identifier)
+            for identifier in identifiers_data
+        ])
 
     def create(self, validated_data):
         with transaction.atomic():
             agent = validated_data.pop('archive_creator')
             structures = validated_data.pop('structures')
+            notes_data = validated_data.pop('notes', None)
+            identifiers_data = validated_data.pop('identifiers', [])
 
             tag = Tag.objects.create()
             tag_version = TagVersion.objects.create(
@@ -159,6 +229,8 @@ class ArchiveWriteSerializer(serializers.Serializer):
 
             tag_link_type, _ = AgentTagLinkRelationType.objects.get_or_create(name='creator')
             AgentTagLink.objects.create(agent=agent, tag=tag_version, type=tag_link_type)
+            self.create_identifiers(self, identifiers_data)
+            self.create_notes(self, notes_data)
 
         doc = Archive.from_obj(tag_version)
         doc.save()
@@ -167,6 +239,19 @@ class ArchiveWriteSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         structures = validated_data.pop('structures', [])
+        notes_data = validated_data.pop('notes', None)
+        identifiers_data = validated_data.pop('identifiers', [])
+
+        if identifiers_data is not None:
+            NodeIdentifier.objects.filter(tag_version=instance).delete()
+            self.create_identifiers(instance, identifiers_data)
+
+
+        if notes_data is not None:
+            NodeNote.objects.filter(tag_version=instance).delete()
+            for note in notes_data:
+                note.setdefault('create_date', timezone.now())
+            self.create_notes(instance, notes_data)
 
         with transaction.atomic():
             for structure in structures:
