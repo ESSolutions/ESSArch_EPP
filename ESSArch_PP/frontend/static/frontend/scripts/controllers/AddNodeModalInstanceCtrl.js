@@ -17,6 +17,8 @@ angular
     $ctrl.nodeFields = [];
     $ctrl.newNode = {
       index: 'component',
+      notes: [],
+      identifiers: [],
     };
     $ctrl.options = {};
     $ctrl.nodeFields = [];
