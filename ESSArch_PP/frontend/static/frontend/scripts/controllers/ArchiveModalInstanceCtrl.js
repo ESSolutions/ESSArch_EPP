@@ -30,11 +30,12 @@ angular
           $ctrl.archive.type = angular.copy(data.archive.type.pk);
           $ctrl.initStructureSearch = angular.copy(data.archive.structures[0].name);
           $ctrl.initAgentSearch = angular.copy(data.archive.agents[0].agent.names[0].main);
-          delete $ctrl.archive.identifiers;
-          delete $ctrl.archive.notes;
           delete $ctrl.archive._source;
         } else {
-          $ctrl.archive = {};
+          $ctrl.archive = {
+            notes: [],
+            identifiers: []
+          };
         }
         $ctrl.options = {agents: [], structures: [], type: []};
         $ctrl.getStructures().then(function(structures) {
