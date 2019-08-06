@@ -875,7 +875,12 @@
                   ></i>
                 </uib-accordion-heading>
                 <div class="d-flex justify-content-end">
-                  <button class="btn btn-primary" ng-click="vm.addPlaceModal()">
+                  <button
+                    permission
+                    permission-only="'agents.change_agent'"
+                    class="btn btn-primary"
+                    ng-click="vm.addPlaceModal()"
+                  >
                     {{'ADD' | translate}}
                   </button>
                 </div>
