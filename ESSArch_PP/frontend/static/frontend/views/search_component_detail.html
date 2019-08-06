@@ -26,8 +26,8 @@
   ></result-field>
   <result-field label="{{'TYPE' | translate}}" stronglabel="true" data="vm.record._source.type"></result-field>
   <div ng-if="vm.record.location">
-    <b> {{'ACCESS.LOCATION' | translate}} </b>:&nbsp; {{vm.record.location.name}}
-    ({{vm.record.location.level_type.name}})
+    <b> {{'ACCESS.LOCATION' | translate}} </b>:&nbsp; <a ui-sref="home.access.location({id: vm.record.location.id})">{{vm.record.location.name}}
+    ({{vm.record.location.level_type.name}})</a>
   </div>
   <div ng-if="vm.record.related_tags.length > 0" class="py-base">
     <label>
