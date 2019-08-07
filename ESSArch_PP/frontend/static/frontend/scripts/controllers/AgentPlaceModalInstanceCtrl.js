@@ -41,8 +41,6 @@ angular
     };
 
     $ctrl.loadForm = function() {
-      // TODO
-      // Lägg in de fält som behövs
       $ctrl.topographyFields = [
         {
           type: 'input',
@@ -50,15 +48,15 @@ angular
           templateOptions: {
             label: $translate.instant('NAME'),
             required: true,
-          }
+          },
         },
         {
           type: 'textarea',
           key: 'alt_name',
           templateOptions: {
             label: $translate.instant('ACCESS.ALT_NAME'),
-            rows: 2
-          }
+            rows: 2,
+          },
         },
         {
           type: 'input',
@@ -66,15 +64,15 @@ angular
           templateOptions: {
             label: $translate.instant('TYPE'),
             required: true,
-          }
+          },
         },
         {
           type: 'textarea',
           key: 'main_category',
           templateOptions: {
             label: $translate.instant('ACCESS.MAIN_CATEGORY'),
-            rows: 2
-          }
+            rows: 2,
+          },
         },
         {
           type: 'textarea',
@@ -82,7 +80,7 @@ angular
           templateOptions: {
             label: $translate.instant('ACCESS.SUB_CATEGORY'),
             rows: 2,
-          }
+          },
         },
         {
           type: 'textarea',
@@ -91,7 +89,7 @@ angular
             label: $translate.instant('ACCESS.REFERENCE_CODE'),
             required: true,
             rows: 2,
-          }
+          },
         },
         {
           type: 'datepicker',
@@ -120,15 +118,20 @@ angular
             coordinate: {
               expression: function(viewValue, modelValue) {
                 var value = modelValue || viewValue;
-                return /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value);
+                return (
+                  /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value) ||
+                  value === '' ||
+                  angular.isUndefined(value) ||
+                  value === null
+                );
               },
-              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)'
-            }
+              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)',
+            },
           },
           templateOptions: {
             type: 'number',
-            label: $translate.instant('ACCESS.LONGITUDE')
-          }
+            label: $translate.instant('ACCESS.LONGITUDE'),
+          },
         },
         {
           type: 'input',
@@ -137,15 +140,20 @@ angular
             coordinate: {
               expression: function(viewValue, modelValue) {
                 var value = modelValue || viewValue;
-                return /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value);
+                return (
+                  /^-?[0-9]{1,3}[.][0-9]{1,6}$/.test(value) ||
+                  value === '' ||
+                  angular.isUndefined(value) ||
+                  value === null
+                );
               },
-              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)'
-            }
+              message: '("ENTER_VALID_COORDINATE_VALUE" | translate)',
+            },
           },
           templateOptions: {
             type: 'number',
-            label: $translate.instant('ACCESS.LATITUDE')
-          }
+            label: $translate.instant('ACCESS.LATITUDE'),
+          },
         },
       ];
       $ctrl.fields = [
@@ -222,8 +230,8 @@ angular
         })
         .catch(function(response) {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
-          if(response.data.places) {
-            if(angular.isArray($ctrl.nonFieldErrors)) {
+          if (response.data.places) {
+            if (angular.isArray($ctrl.nonFieldErrors)) {
               $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.places);
             } else {
               $ctrl.nonFieldErrors = response.data.places;
@@ -261,8 +269,8 @@ angular
         })
         .catch(function(response) {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
-          if(response.data.places) {
-            if(angular.isArray($ctrl.nonFieldErrors)) {
+          if (response.data.places) {
+            if (angular.isArray($ctrl.nonFieldErrors)) {
               $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.places);
             } else {
               $ctrl.nonFieldErrors = response.data.places;
@@ -300,8 +308,8 @@ angular
         })
         .catch(function(response) {
           $ctrl.nonFieldErrors = response.data.non_field_errors;
-          if(response.data.places) {
-            if(angular.isArray($ctrl.nonFieldErrors)) {
+          if (response.data.places) {
+            if (angular.isArray($ctrl.nonFieldErrors)) {
               $ctrl.nonFieldErrors = $ctrl.nonFieldErrors.concat(response.data.places);
             } else {
               $ctrl.nonFieldErrors = response.data.places;
