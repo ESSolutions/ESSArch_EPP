@@ -34,6 +34,7 @@ from ESSArch_Core.auth.serializers import ChangeOrganizationSerializer
 from ESSArch_Core.auth.util import get_objects_for_user
 from ESSArch_Core.mixins import PaginatedViewMixin
 from ESSArch_Core.search import DEFAULT_MAX_RESULT_WINDOW
+from ESSArch_Core.agents.models import Agent, AgentTagLink
 from ESSArch_Core.tags.documents import Archive, Component, VersionedDocType, StructureUnitDocument
 from ESSArch_Core.tags.models import Structure, StructureUnit, Tag, TagStructure, TagVersion
 from ESSArch_Core.tags.serializers import TagVersionNestedSerializer, \
@@ -466,6 +467,34 @@ class ComponentSearchViewSet(ViewSet, PaginatedViewMixin):
 
         f.seek(0)
         name = 'archive_{}.pdf'.format(pk)
+        return generate_file_response(f, content_type=ctype, name=name)
+
+
+    @action(detail=True, url_path='label')
+    def label_report(self, request, pk=None):
+        archive = TagVersion.objects.get(pk=pk)
+
+        agents = AgentTagLink.objects.filter(tag_id=pk).all()
+        series = archive.get_active_structure().structure.units.prefetch_related(
+            Prefetch(
+                'tagstructure_set',
+                queryset=TagStructure.objects.select_related(
+                    'tag__current_version'
+                ),
+                to_attr='volumes',
+            ),
+        ).all()
+
+
+        template = 'tags/labels.html'.format()
+        f = tempfile.TemporaryFile()
+
+        ctype = 'application/pdf'
+        render = render_to_string(template, {'archive_name': archive.name, 'series': series, 'agents':agents })
+        HTML(string=render).write_pdf(f)
+
+        f.seek(0)
+        name = 'labels_{}.pdf'.format(pk)
         return generate_file_response(f, content_type=ctype, name=name)
 
     def serialize(self, obj):
