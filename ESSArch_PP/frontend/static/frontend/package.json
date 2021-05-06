@@ -77,7 +77,7 @@
     "string.prototype.endswith": "^0.2.0",
     "string.prototype.includes": "^1.0.0",
     "string.prototype.startswith": "^0.2.0",
-    "ua-parser-js": "^0.7.18",
+    "ua-parser-js": "^0.7.24",
     "ui-select": "~0.19.6",
     "uri-util": "^1.1.0"
   },
