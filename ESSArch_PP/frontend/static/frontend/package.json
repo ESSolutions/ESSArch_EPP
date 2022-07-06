@@ -73,7 +73,7 @@
     "moment": "^2.22.2",
     "ng-js-tree": "^0.0.10",
     "prettycron": "^0.10.0",
-    "select2": "~4.0.5",
+    "select2": "~4.0.6",
     "string.prototype.endswith": "^0.2.0",
     "string.prototype.includes": "^1.0.0",
     "string.prototype.startswith": "^0.2.0",
