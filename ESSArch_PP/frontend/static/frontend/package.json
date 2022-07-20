@@ -31,7 +31,7 @@
   "dependencies": {
     "@flowjs/ng-flow": "~2.7.8",
     "@fortawesome/fontawesome-free": "~5.8.1",
-    "angular": "~1.7",
+    "angular": "~1.8",
     "angular-animate": "~1.7",
     "angular-bootstrap-contextmenu": "~1.1.0",
     "angular-bootstrap-grid-tree": "~0.4.0",
